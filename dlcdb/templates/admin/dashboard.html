@@ -1,0 +1,91 @@
+{% extends "admin/base_site.html" %}
+
+{% load static %}
+
+{% block bodyclass %} dashboard-index {% endblock %}
+
+{% block title %}
+    Dashboard | {{ site_title|default:_('Django site admin') }}
+{% endblock %}
+
+{% block content_title %}
+    Dashboard
+{% endblock %}
+
+
+{% block content %}
+    <h1>Device Life Cycle Database</h1>
+
+    <hr>
+    <div class="row">
+        <div class="col-12">
+            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
+                Verleihen
+            </a>
+
+            {% if perms.core.change_inventory %}
+                <a role="button" class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">
+                    Inventarisieren
+                </a>
+            {% endif %}
+
+            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_device_changelist' %}">
+                Devices
+            </a>
+            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_licencerecord_changelist' %}">
+                Lizenzen
+            </a>
+        </div>
+    </div>
+    
+    <br class="clear">
+    
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ device_count }} Geräte</h1>
+            <h1>Aktuelle Inventurrunde: {{ current_inventory|default:'Keine Inventurrunde angelegt.' }}</h1>
+        </div>
+        <div class="col-md-6">
+            <h2>Geräte nach Verbleib</h2>
+            <div style="padding:22px; background:#fbfbfb;">
+                <canvas id="device-location-chart" width="400px" height="400px"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h2>Geräte nach Typ</h2>
+            <div style="padding:22px; background:#fbfbfb;">
+                <canvas id="device-type-chart" width="400px" height="400px"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+{% block footer %}
+    {{ block.super }}
+    <script src="{% static 'dlcdb/chart/Chart.bundle.min.js' %}"></script>
+    <script>
+        (function() {
+            var data = {{ record_fraction_data|safe }}
+            var device_type_data = {{ device_type_data|safe }}
+
+            var deviceLocationChart = new Chart($('#device-location-chart'), {
+                type: 'bar',
+                data: data,
+                options: {responsive: true}
+            });
+
+             var deviceTypeChart = new Chart($('#device-type-chart'), {
+                type: 'horizontalBar',
+                data: device_type_data,
+                options: {responsive: true,
+                legend: {
+                display: true
+             }}
+            });
+        })()
+    </script>
+{% endblock footer %}

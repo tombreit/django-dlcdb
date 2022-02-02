@@ -1,0 +1,1 @@
+{{ subject_prefix }} Overdue lendings: {{ records_count }} device{{ records_count|pluralize:"s" }}

@@ -1,0 +1,75 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Inventur | DLCDB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="{% static 'inventory/css/inventory2.css' %}">
+</head>
+
+<body>
+
+    <div class="container">
+    
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{% url 'inventory:inventorize-room-list' %}" title="To room list">
+                <img src="{% static 'inventory/img/dlcdb-inventory-logo.svg' %}" alt="DLCDB Inventory room list">
+            </a>
+
+            <span class="badge badge-primary">
+                <img src="{% static 'admin/img/icon-yes.svg' %}" alt="">
+                {{ current_inventory.name }}
+            </span>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inventory:inventorize-room-list' %}">Rooms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Backend</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarReportDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
+                          Misc
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarReportDropdown">
+                          <a 
+                            class="dropdown-item" 
+                            href="{% url 'inventory:inventory-lending-report' %}"
+                            title="Liste im Besitz von Mitarbeitern befindliche Vermögensgegenstände"
+                          >
+                            VG bei MAs
+                          </a>
+                        </div>
+                      </li>
+                </ul>
+            </div>
+        </nav>
+
+        <hr>
+
+
+        {% if not current_inventory %}
+        <div class="alert alert-danger">
+            <h2>Keine aktive Inventur vorhanden</h2>
+            Bitte legen Sie eine Inventur an.
+        </div>
+        <hr>
+        {% endif %}
+
+
+        {% block body %}{% endblock body %}
+
+    </div>
+    <script src="{% static 'inventory/js/app.js' %}"></script>
+    {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

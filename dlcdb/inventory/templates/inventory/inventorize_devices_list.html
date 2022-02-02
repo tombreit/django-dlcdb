@@ -1,0 +1,56 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% load crispy_forms_tags %}
+
+
+{% block body %}
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <h3>
+                Devices 
+                <span class="badge badge-secondary">
+                    {{ qs|length }}
+                </span>
+            </h3>
+        </div>
+        <div class="col-12 col-md-6">
+            {# crispy filter.form #}
+        </div>
+
+    </div>
+
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Note</th>
+                <th>Devices</th>
+                {# <th>QRs</th> #}
+            </tr>
+        </thead>
+        <tbody>
+        {% for device in object_list %}
+        <tr id="tr_uuid_{{ room.uuid }}">
+            <td>
+                <a 
+                    class="btn btn-outline-primary" 
+                    href="{# url 'inventory:inventorize-room' room.pk #}"
+                >
+                    {{ device }}
+                </a>
+            </td>
+            <td>
+            </td>
+            <td>
+            </td>
+
+        </tr>
+        {% empty %}
+            <tr><td>No devices found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock body %}

@@ -1,0 +1,268 @@
+{% extends "inventory/base_inventory.html" %}
+
+{% block body %}
+
+<div class="d-flex">
+    <div class="w-100">
+        <h6>
+            Devices in <strong>{{ room }}</strong>
+            {% include 'inventory/includes/inventory_status_badge.html' with style="badge" %}
+        </h6>
+
+        {% comment %}
+        <div class="border rounded p-1">
+            <span class="text-secondary">
+                Exp.: <span class="badge badge-pill badge-secondary">{{ devices.count }}</span>
+            </span> 
+            <span class="pl-2 text-success">
+                Found 
+                (initial): <span class="badge badge-pill badge-primary">{{ room.room_inventorized_devices_count }}</span> 
+                (new): <span class="badge badge-pill badge-primary" id="found_devices_count">0</span> 
+            </span>
+        </div>
+        {% endcomment %}
+    </div>
+    <div class="flex-shrink-1">
+
+        {% include 'inventory/includes/note.html' with note_obj=room note_objstr='room' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
+
+    </div>
+</div>
+
+{% if room.is_external %}
+<div class="my-1 alert alert-warning">
+    <strong>Raumtyp "extern"</strong>
+    <p>
+        Verliehene Geräte in diesem Raum werden beim Klick auf "Ist nicht da" 
+        als "Nicht auffindbar" deklariert ein aktuell definierter Verleih wird 
+        damit abgebrochen!
+        <br>
+        Verliehen Geräte immer erst auf "Ist nicht da" setzen, wenn bei 
+        Ausleiher*in nachgefragt wurde, ob sich das Gerät noch in Ihrem Besitz
+        befindet.
+        <br>
+        Rücklaufmeldungen derartiger Nachfragen als "Inventurnotiz" abspeichern,
+        z.B.: <i>Besitz bestätigt von Ausleiher*in via Email vom 06.12.2021</i>
+    </p>
+</div>
+{% endif %}
+
+<hr>
+
+<div class="row">
+    {% comment %}
+    <div class="col-12 col-md-4 text-center">
+        <span id="cam-has-camera" style="display: none;"></span>
+        <video muted playsinline id="qr-video" style="max-height: 200px; max-width: 200px;" class="rounded"></video>
+    </div>
+    {% endcomment %}
+
+    <div class="col-12 col-md-12">
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group input-group-sm mb-3 small">
+                {{ device_add_form.device }}
+                <div class="input-group-append">
+                    <button class="btn-sm btn btn-outline-primary" type="button" id="add-device-button">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<form method="post" class="small">
+    {% csrf_token %}
+
+    <div class="table-responsive">
+    <table id="devices-table" class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Description</th>
+                {# <th>UUID</th> #}
+                <th>State</th>
+                <th>Record</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody id="devices-table-tbody">
+        {% for device in devices %}
+            <tr 
+                id="tr-uuid-{{ device.uuid }}"
+                class="
+                    inventory_row 
+                    {% if device.active_record.inventory.is_active %}
+                        {{ dev_state_found }}
+                        table-success
+                    {% else %}
+                        {{ dev_state_unknown }}
+                        table-default
+                    {% endif %}
+                "
+            >
+                <td>
+                    <strong>
+                    <a class="d-block rounded bg-light p-1" href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
+                        {% if device.edv_id %}
+                            <div class="">
+                                <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
+                            </div>
+                        {% endif %}
+                        {% if device.sap_id %}
+                            <div class="">
+                                <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
+                            </div>
+                        {% endif %}
+                    </a>
+                    </strong>
+                </td>
+                <td>
+                    <span class="badge badge-info small">
+                        {{ device.device_type.name }}
+                    </span>
+                    <br>
+                    <span class="badge badge-success small text-left text-wrap {# text-break #}">
+                        {% if device.active_record.is_type_lent %}
+                            {{ device.active_record.get_record_type_display }} an 
+                            <br>
+                            {{ device.active_record.person }}
+                        {% else %}
+                            {{ device.active_record.get_record_type_display }}
+                        {% endif %}
+                    </span>
+
+                    <br>
+                    {% if device.manufacturer or device.series %}
+                    {{ device.manufacturer|default:'' }} {{ device.series|default:'' }}
+                    <br>
+                    {% endif %}
+                </td>
+                {% comment %}
+                <td>
+                    <span id="uuid_{{ device.uuid }}">
+                        {{ device.uuid }}
+                    </span>
+                </td>
+                {% endcomment %}
+                <td>
+                    <button 
+                        type="button"
+                        class="state-trigger btn btn-outline-secondary" 
+                        id="state-btn-{{ device.uuid }}"
+                    >
+                        <i class="
+                            {% if device.active_record.inventory.is_active %}
+                                fas fa-check-square
+                            {% else %}
+                                fas fa-question-circle
+                            {% endif %}
+                        "></i>
+                    </button>
+                </td>
+                <td>
+                    <small>
+                        {% if device.active_record.inventory %}
+                            <span class="badge badge-success">
+                                {{ device.active_record.inventory.name }}
+                            </span>
+                            <br>
+                        {% endif %}
+
+                        <span title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}">
+                            {{ device.active_record.created_at|date:"Y-m-d" }}
+                            {# <br> vor {{ device.active_record.created_at|timesince }} #}
+                        </span>
+                    </small>
+                </td>
+                <td>
+
+                    {% include 'inventory/includes/note.html' with note_obj=device note_objstr='device' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block">
+        Save inventory for room {{ room }}
+    </button>
+
+    <hr>
+    {{ form.as_p }}
+    <hr>
+</form>
+
+{% endblock body %}
+
+{% block extra_js %}
+
+{# the following js are only needed for this weird admin popup for room and device notes #}
+<script src="/admin/jsi18n/"></script>
+<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script src="/static/admin/js/jquery.init.js"></script>
+<script src="/static/admin/js/core.js"></script>
+<script src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+<script src="/static/admin/js/actions.js"></script>
+<script src="/static/admin/js/SelectBox.js"></script>
+<script src="/static/admin/js/SelectFilter2.js"></script>
+
+
+
+
+<script type="module">
+    $('#id_uuids').attr('readonly', true);
+
+    {% include 'inventory/includes/qrscanner.js' with scan_target='device' %}
+
+    $('#id_device').select2({
+        theme: 'bootstrap4',
+    });
+
+
+    (function($){
+
+        $.fn.tableSearch = function(options){
+            if(!$(this).is('table')){
+                return;
+            }
+            var tableObj = $(this),
+                searchText = (options.searchText)?options.searchText:'Search: ',
+                searchPlaceholder = (options.searchPlaceholder)?options.searchPlaceholder:'',
+                divObj = $('<div class="input-group input-group-sm mb-3"></div>'),
+                inputObj = $('<input type="search" class="form-control" placeholder="'+searchPlaceholder+'" ><div class="input-group-append"><button class="btn-sm btn btn-outline-primary" type="button" id="add-device-button"><i class="fas fa-search"></i></button></div>'),
+                caseSensitive = (options.caseSensitive===true)?true:false,
+                searchFieldVal = '',
+                pattern = '';
+            inputObj.off('keyup').on('keyup', function(){
+                searchFieldVal = $(this).val();
+                pattern = (caseSensitive)?RegExp(searchFieldVal):RegExp(searchFieldVal, 'i');
+                tableObj.find('tbody tr').hide().each(function(){
+                    var currentRow = $(this);
+                    currentRow.find('td').each(function(){
+                        if(pattern.test($(this).html())){
+                            currentRow.show();
+                            return false;
+                        }
+                    });
+                });
+            });
+            tableObj.before(divObj.append(inputObj));
+            return tableObj;
+        }
+
+        $('table#devices-table').tableSearch({
+            searchText:'',
+            searchPlaceholder:'Search device table'
+        });
+
+    }(jQuery));
+
+</script>
+{% endblock extra_js %}

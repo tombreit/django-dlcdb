@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+
+{% load static %}
+
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'dist/css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'dlcdb/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.min.css' %}">
+{% endblock %}
+
+
+{% block title %}
+    {% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}
+{% endblock %}
+
+
+{% block branding %}
+    {% comment %}
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
+    </h1>
+    {% endcomment %}
+{% endblock %}
+
+
+{% block usertools %}
+    {# block.super #}
+{% endblock %}
+
+
+{% block nav-global %}
+    {% if not is_popup %}
+        {% if user.is_staff and user.is_authenticated %}
+            {% include 'admin/navbar.html' %}
+        {% endif %}
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+
+
+{% block footer %}
+    {{ block.super }}
+    {# django will return the minified jquery version in <head> if DEBUG=True #}
+    <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'admin/js/vendor/select2/select2.full.min.js' %}"></script>
+    <script src="{% static 'dist/js/app.js' %}"></script>
+    {# TODO: delete? <script src="{% static 'admin/js/SelectBox.js' %}"></script> #}
+    <script>
+        $('.list-filters select').select2()
+        // init bootstrap tooltips and popovers
+        $(function () {
+          $('[data-toggle="popover"]').popover()
+        })
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+{% endblock footer %}

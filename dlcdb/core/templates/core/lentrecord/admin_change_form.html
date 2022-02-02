@@ -1,0 +1,36 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+
+{% block after_related_objects %}
+    {{ block.super }}
+
+    <div class="m-4">
+        {% if original.record_type == 'LENT' %}
+        <a 
+            class="btn btn-success btn-block" 
+            target="_blank"
+            href="{% url 'core_print_lent_sheet' original.pk %}"
+        >
+            <i class="fa fa-print"></i> Ausleihzettel drucken
+        </a>
+        {% else %}
+        <span 
+            class="btn btn-outline-secondary btn-block" 
+        >
+            <i class="fa fa-print"></i> Ausleihzettel kann erst nach dem Speichern gedruckt werden
+        </span>
+        {% endif %}
+    </div>
+{% endblock %}
+
+
+{% comment %}
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+
+    <div class="submit-row">
+        <a class="btn btn-primary" href="{% url 'admin:core_lentrecord_changelist' %}">Zurück zum Verleih</a>
+    </div>
+{% endblock %}
+{% endcomment %}

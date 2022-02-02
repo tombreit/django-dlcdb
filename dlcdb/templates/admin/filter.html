@@ -1,0 +1,25 @@
+{% load i18n %}
+
+<div style="padding-bottom:10px; border-bottom:1px solid #ddd; margin-bottom:10px; " class="list-filters">
+    {% if choices|length > 3 %}
+        <h3 style="margin-bottom:5px;">{% blocktrans with title|escape as filter_title %} By {{ filter_title }} {% endblocktrans %}</h3>
+        <form style="padding: 0px 12px;">
+            <select style="width:100%;" id="filter-{{ title|escape }}" onchange="window.location=this.value" class="select2">
+                {% for choice in choices %}
+                    <option{% if choice.selected %} selected="selected"{% endif %}
+                                                    value="{{ choice.query_string|iriencode }}">
+                        {{ choice.display|escape }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    {% else %}
+        <h3>{% blocktrans with title as filter_title %} By {{ filter_title }} {% endblocktrans %}</h3>
+        <ul>
+            {% for choice in choices %}
+                <li{% if choice.selected %} class="selected"{% endif %}>
+                    <a href="{{ choice.query_string|iriencode }}">{{ choice.display }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

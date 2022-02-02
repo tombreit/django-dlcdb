@@ -1,0 +1,94 @@
+{% load i18n admin_urls %}
+
+{% with active_record=obj.active_record %}
+    <div class="btn-group btn-group-sm" role="group">
+
+        {% comment %}
+        <button type="button" class="btn  {% if active_record %}btn-info{% else %}btn-success{% endif %} dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-plus"></i>
+        </button>
+        {% endcomment %}
+
+        {% if active_record %}
+
+            {% if active_record.room %}
+                {# always output a room, no matter what record type #}
+                <a class="btn btn-info" role="button" href="{% url 'admin:core_device_changelist' %}?active_record__room__id__exact={{ active_record.room.id }}">
+                    {{ active_record.room.number }}
+                </a>
+            {% endif %}
+
+            {% if active_record.record_type == 'INROOM' %}
+                <a class="btn btn-info" href="{% url 'core_devices_relocate' %}?ids={{ obj.pk }}">
+                   {{ active_record.get_record_type_display }}
+                </a>
+
+            {% elif active_record.record_type == 'LENT' %}
+               <a class="btn btn-info" href="{% url "admin:core_lentrecord_change" obj.pk %}">
+                    an {{ active_record.person }}
+                </a>
+
+            {% elif active_record.record_type == 'ORDERED' %}
+               <a class="btn btn-info" href="{% url "admin:core_record_change" active_record.pk %}">
+                    {{ active_record.get_record_type_display }}
+               </a>
+
+            {% elif active_record.record_type == 'REMOVED' %}
+               <a class="btn btn-warning" href="{% url "admin:core_record_change" active_record.pk %}">
+                    {{ active_record.get_record_type_display }}
+                </a>
+
+            {% elif active_record.record_type == 'LOST' %}
+                <a class="btn btn-warning" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ obj.pk }}" %}">
+                    {{ active_record.get_record_type_display }}
+                </a>
+
+            {% else %}
+                <a class="btn btn-warning" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ obj.pk }}" %}">
+                    Unbekannter Record!
+                </a>
+            {% endif %}
+
+        {% else %}
+            <span class="btn btn-warning">No current record</span>
+        {% endif %}
+
+        <div class="btn-group btn-group-sm" role="group">
+            <button id="newRecord" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-plus"></i>
+            </button>
+            <div class="dropdown-menu" aria-labelledby="newRecord">
+            {% for add_link in add_links %}
+                {% if add_link.db_value == 'ORDERED' %}
+                    {# skip this record type #}
+                {% elif add_link.db_value == 'LENT' and obj.active_record.pk %}
+                    <a class="dropdown-item" href="{% url 'admin:core_lentrecord_change' obj.active_record.pk %}">
+                        Verleih
+                    </a>
+                {% else %}
+                <a class="dropdown-item" href="{{ add_link.url }}?device={{ obj.id }}">
+                    {{ add_link.label|title }}
+                </a>
+                {% endif %}
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+    {% if active_record %}
+        <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ obj.id }}">
+            <i class="fa fa-search"></i> Alle Records anzeigen
+        </a>
+    {% endif %}
+
+
+    {% if is_device_detail_page %}
+        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+        <a class="small ml-4" href="{% add_preserved_filters history_url %}" class="historylink">
+            <i class="fa fa-history"></i> {% trans "History" %}
+        </a>
+    {% endif %}
+
+
+{% endwith %}

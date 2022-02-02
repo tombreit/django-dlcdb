@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1>Neues Gerät erfassen</h1>
+
+    <div class="bt">
+        <a class="btn btn-default" href="{% url "admin:core_orderedrecord_changelist" %}">
+            <i class="fa fa-angle-right"></i> Zurück zur Übersicht
+        </a>
+        <br/><br/>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button class="btn btn-primary" type="sbmit">
+                Neues Gerät anlegen
+            </button>
+        </form>
+    </div>
+{% endblock %}

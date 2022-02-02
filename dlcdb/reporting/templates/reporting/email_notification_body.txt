@@ -1,0 +1,22 @@
+-------------------------------------------------------------------------------
+Notification:     {{ notification }}
+Affected Records: {{ record_collection.records.count }}
+Listing:          <{{ changelist_url }}>
+Created:          {{ record_collection.created_at }}
+Last run:         {{ record_collection.last_run }}
+-------------------------------------------------------------------------------
+{% if msg %}
+{{ msg }}
+{% endif %}
+
+{% if record_collection.records %}
+--- START LISTING -------------------------------------------------------------
+{% for record in record_collection.text_repr %}
+{{ forloop.counter }}: {{ record|safe }}
+{% endfor %}
+--- END LISTING ---------------------------------------------------------------
+{% endif %}
+
+===============================================================================
+Es grüßt freundlichst,
+deine DLCDB

@@ -1,0 +1,17 @@
+Dear {{ person.first_name }} {{ person.last_name }},
+
+The following {{ records_count }} device{{ records_count|pluralize:"s" }} {{ records_count|pluralize:"is,are" }} overdue for return:
+
+{% if records %}
+-------------------------------------------------------------------------------
+{% for record in records %}
+{{ forloop.counter }}: {{ record.device.device_type.name }} {% if record.device.edv_id %}EDV-ID: {{ record.device.edv_id }}{% endif %} {% if record.device.sap_id %}SAP-ID: {{ record.device.sap_id }}{% endif %}
+   {{ record.device.manufacturer|default:"" }} {{ record.device.series|default:"" }}
+   Agreed lending period: {{ record.lent_start_date }} - {{ record.lent_desired_end_date }}
+{% endfor %}
+-------------------------------------------------------------------------------
+{% endif %}
+
+
+Best, 
+"Your IT department" <{{ contact_email }}>

@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n %}
+
+
+{% block content %}
+
+    <h1>Relocate the following devices to a new room?</h1>
+
+    {% if form.initial.devices|length_is:"1" %}
+
+        <table class="table" style="width: auto;">
+            {% with device=form.initial.devices.first %}
+            <tbody>
+                <tr>
+                    <th>Device</th>
+                    <td>{{ device }}</td>
+                </tr>
+                <tr>
+                    <th>Manufacturer</th>
+                    <td>{{ device.manufacturer }}</td>
+                </tr>
+                <tr>
+                    <th>Series</th>
+                    <td>{{ device.series }}</td>
+                </tr>
+                <tr>
+                    <th>Current room</th>
+                    <td>{{ device.active_record.room }}</td>
+                </tr>
+                <tr>
+                    <th>Current record</th>
+                    <td>
+                        <span class="badge {% if device.active_record.record_type == 'REMOVED' %} badge-danger {% else %} badge-info {% endif %}">
+                            {{ device.active_record.record_type }}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+            {% endwith %}
+        </table>
+
+    {% else %}
+
+        <table class="table" style="width: auto;">
+            <thead>
+                <tr>
+                    <th>Device</th>
+                    <th>Current room</th>
+                    <th>Current record</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for device in form.initial.devices %}
+            <tr>
+                <td>{{ device }}</td>
+                <td>{{ device.active_record.room }}</td>
+                <td>
+                    <span class="badge {% if device.active_record.record_type == 'REMOVED' %} badge-danger {% else %} badge-info {% endif %}">
+                        {{ device.active_record.record_type }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    {% endif %}
+
+    <div class="alert alert-warning" role="alert">
+
+        <form method="post"> 
+            {% csrf_token %} 
+            {{ form.as_p }} 
+            <input class="btn btn-warning" type="submit" value="Relocate devices"> 
+            <a href="{% url 'admin:core_device_changelist' %}" class="btn btn-light">{% trans "No, take me back" %}</a>
+        </form> 
+
+    </div>
+{% endblock content %}
+
+
+{% block footer %}
+    {{ block.super }}
+    <script>
+        $('#id_new_room').select2()
+    </script>
+{% endblock footer %}

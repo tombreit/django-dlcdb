@@ -1,0 +1,31 @@
+*.py[cod]
+__pycache__/
+*~
+
+# Virtual envs
+/.venv
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.tox
+nosetests.xml
+htmlcov/
+
+# Translations
+*.mo
+
+# Dependency directories
+node_modules/
+
+# Sphinx documentation
+/docs/_build/
+
+# Project directories
+/run/*
+/dlcdb/static/dist/
+/context.json
+/context_*.json
+/temp

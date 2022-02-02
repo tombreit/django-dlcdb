@@ -1,0 +1,24 @@
+# requirements.in
+# requirements for production environment
+
+Django==4.0.2
+django-auth-ldap
+django-select2
+pymemcache  # needed by django-select2
+django-crispy-forms
+Sphinx
+sphinx_rtd_theme
+flake8
+python-magic
+huey
+openpyxl
+sphinxcontrib-mermaid
+
+# for qr code generation
+segno
+
+# drf 
+djangorestframework
+django-filter
+
+# pyyaml  # needs os libyaml

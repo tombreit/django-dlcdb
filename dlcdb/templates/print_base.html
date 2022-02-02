@@ -1,0 +1,51 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <title>Geräte Verleih | MPI-CSL</title>
+    <link rel="stylesheet" href="{% static 'dist/css/print.css' %}" />
+</head>
+<body>
+
+<header>
+    <img src="{% static 'dlcdb/wortbildmarke_csl_en_black.svg' %}" alt="MPI-CSL">
+</header>
+
+
+<main>
+{% block main %}
+
+{% endblock %}
+</main>
+
+<footer>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    MPI-CSL<br>
+                    IT-Support
+                </td>
+                <td>
+                    Günterstalstraße 73<br>
+                    D-79100 Freiburg i.Br.
+                </td>
+                <td>
+                    Tel.: +49 (0)761-7081-444
+                </td>
+                <td>
+                    <a href="mailto:it-support@csl.mpg.de">it-support@csl.mpg.de</a><br>
+                    <a href="https://csl.mpg.de">https://csl.mpg.de</a>
+                </td>
+                <td>
+                    <img src="{% static 'dlcdb/minerva.svg' %}" alt="MPG Logo">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</footer>
+
+</body>
+</html>

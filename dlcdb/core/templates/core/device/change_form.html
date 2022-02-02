@@ -1,0 +1,36 @@
+{% extends "admin/change_form.html" %}
+
+
+{% block content %}
+
+    {% if original %}
+        {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
+    {% endif %}
+
+
+    {{ block.super }}
+
+
+    {% if not original %}
+    <script>
+        // TODO: Do we want this pre-setting of prefixes?
+        // apply automatic setting of the edv id prefix based on chosen type
+        // (function() {
+        //     let mapping = {{ device_type_mapping_json|safe }}
+
+        //     let type_field = $('#id_type')
+        //     let edv_id_field = $('#id_edv_id')
+
+        //     $('#id_type').change(function() {
+        //         var edv_id = edv_id_field.val()
+        //         var type_val = type_field.val()
+        //         var prefix = mapping[type_val]
+        //         if (prefix && edv_id == '') {
+        //             edv_id_field.val(prefix  + edv_id)
+        //         }
+        //     })
+        // })()
+    </script>
+    {% endif %}
+
+{% endblock %}

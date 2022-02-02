@@ -1,0 +1,1 @@
+{{ subject_prefix }} Bestätigung der von Ihnen ausgeliehenen Geräte: {{ devices|length }} Gerät{{ devices|length|pluralize:"e" }} // Confirmation of IT equipment on loan: {{ devices|length }} device{{ devices|length|pluralize:"s" }}

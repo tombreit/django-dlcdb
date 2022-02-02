@@ -1,0 +1,25 @@
+{% extends 'admin/base_site.html' %}
+
+
+{% block content %}
+
+    <h1>Raum-Abgleich mit {{ reconcile_file }}</h1>
+
+    <table class="table table-sm" style="width: auto;">
+        <thead>
+            <tr>
+                <th>DLCDB</th>
+                <th>CSV</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in room_reconciliation %}
+            <tr class="{{ row.css_classes }}">
+                <td>{{ row.dlcdb_room }}</td>
+                <td>{{ row.csv_room }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

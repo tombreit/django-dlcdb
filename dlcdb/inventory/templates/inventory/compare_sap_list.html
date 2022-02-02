@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+    <div class="bt">
+        <h1>Abgleich für {{ sap_list.file }} ({{ sap_list.created_at }})</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="bt">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-angle-right"></i> Abgleich starten
+                </button>
+            </div>
+        </form>
+        <br/>
+        <table class="table table-striped">
+            <thead>
+            <th>Name</th>
+            <th>Date</th>
+            </thead>
+
+            {% for result in sap_list.saplistcomparisonresult_set.all %}
+                {% if result.get_url %}
+                    <tr>
+                        <td>
+                            <a href="{{ result.get_url }}"><i class="fa fa-file-o"></i> {{ result.file_name }}</a>
+                        </td>
+                        <td>
+                            {{ result.created_at }} (vor {{ result.created_at|timesince }})
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+
+        </table>
+    </div>
+
+    <script>
+        $('form').submit(function () {
+            var $i = $(this).find('button i')
+            $i.removeClass('fa-angle-right')
+            $i.addClass('fa-refresh fa-spin')
+        })
+    </script>
+
+{% endblock %}

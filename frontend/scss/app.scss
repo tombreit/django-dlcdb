@@ -1,0 +1,131 @@
+$mpicsl-color-primary: rgb(0, 68, 95);
+
+$web-font-path: "";
+$font-family-sans-serif: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+
+/*
+   Django admin uses 14px as body font-size, which can't be used with
+   Bootstrap 4, which expects a rem unit:
+*/
+$font-size-base: 0.875rem;
+$code-font-size: 1rem;
+$code-color: gray;
+
+
+@import "bootstrap/scss/bootstrap";
+
+
+
+/* DjangoAdmin Bootstrap resets and fixes: */
+caption {
+    caption-side: top;
+}
+
+#header {
+    background-color: $mpicsl-color-primary;
+}
+
+#content h1 {
+    @extend .h3;
+}
+
+#changelist-filter h3 {
+    font-size: 1em;
+}
+
+.object-tools a.addlink {
+    @extend .btn;
+    @extend .btn-primary;
+    padding-right: 28px;
+}
+
+.submit-row {
+    .closelink,
+    .deletelink {
+        box-sizing: content-box;
+    }
+}
+
+input.btn, 
+a.btn {
+    @extend .btn;
+}
+input.btn-primary,
+a.btn-primary {
+    @extend .btn-primary;
+}
+input.btn-secondary,
+a.btn-secondary {
+    @extend .btn-secondary;
+}
+input.btn-info,
+a.btn-info {
+    @extend .btn-info;
+}
+input.btn-warning,
+a.btn-warning {
+    @extend .btn-warning;
+}
+input.btn-success,
+a.btn-success {
+    @extend .btn-success;
+}
+input.btn-light,
+a.btn-light {
+    @extend .btn-light;
+}
+
+fieldset.collapse:not(.show), 
+fieldset.collapsed:not(.show) {
+    display: block;
+}
+
+#header {
+    overflow: visible;
+
+    .navbar-brand img {
+        max-height: 40px;
+    }
+
+    .nav-item {
+        list-style: none;
+    }
+
+    .dropdown-menu {
+        a {
+            color: $dropdown-link-color;
+        }
+    }
+}
+
+// Remove django admin branding from most pages, as we use 
+// the bootstrap branding...
+#branding { display: none; }
+
+// ...but re-enable django admin branding for login and logout pages
+body.login #branding, 
+body[class=""] #branding { 
+    display: block; 
+}
+
+
+.alert-90-danger,
+tr.lent-state-10-unknown {
+    @extend .bg-danger;
+}
+
+.alert-80-warning,
+tr.lent-state-20-overdue {
+    @extend .bg-warning;
+}
+
+tr.licence-state-30-available,
+tr.lent-state-30-available {
+    @extend .bg-white;
+}
+
+tr.licence-state-40-lent,
+tr.lent-state-40-lent {
+    @extend .text-muted;
+    @extend .bg-light;
+}

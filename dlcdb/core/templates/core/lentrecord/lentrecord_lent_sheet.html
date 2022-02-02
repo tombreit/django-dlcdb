@@ -1,0 +1,136 @@
+{% extends "print_base.html" %}
+
+{% block main %}
+
+    <h2>Geräte Verleih</h2>
+    <p>Antrag auf Ausleihe eines EDV-Geräts</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">I. Ausleiher</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>
+                    Name:
+                    <br>
+                    <i>(Name, Vorname)</i>
+                </th>
+                <td>{{ record.person }}</td>
+            </tr>
+            <tr>
+                <th>Forschungsgruppe/Abteilung:</th>
+                <td>{{ record.person.get_department_display }}</td>
+            </tr>
+            <tr>
+                <th>Ausleihgrund:</th>
+                <td>{{ record.reason }}</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th colspan="2">II. EDV Gerät</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Gerät</th>
+                <td>
+                    <strong>
+                        {{ record.device }}, Inventar Nr.: {{ record.device.sap_id|default:'n/a' }}
+                        {% if record.device.manufacturer or record.device.series %}
+                            <br>
+                            {{ record.device.manufacturer }} {{ record.device.series }}
+                        {% endif %}
+                    </strong>
+                    <br>
+                    <i style="font-size: smaller;">OU: {{ record.device.tenant }}</i>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Sonstiges:
+                    <br>
+                    <i>(Zubehör, Mängel, Zusätze)</i>
+                </th>
+                <td>{{ record.lent_accessories|linebreaks }}</td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th colspan="2">III. Ausleihe</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Vereinbarte Ausleihfrist</th>
+                <td>Vom {{ record.lent_start_date }} {% if record.lent_desired_end_date %}bis {{ record.lent_desired_end_date }}{% endif %}</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <p>
+                        Ich bestätige, dass ich das Gerät in einwandfreiem Zustand am {{ record.lent_start_date }} erhalten habe. Ich werde das Gerät pfleglich und mit Sorgfalt behandeln. Ich bin darauf hingewiesen worden, dass ich bei Verlust oder Beschädigung regresspflichtig gemacht werden kann.
+                    </p>
+                    <p class="small">
+                        (Diebstahl aus nicht gesicherten Bereichen, sowie Verletzungen der Sorgfaltspflicht bei Transport gelten als grob fahrlässig.)
+                        <!--Die Ausführung in <b>Anlage 1</b> zum Geräteverleih habe ich zur Kenntnis genommen. -->
+                    </p>
+                    <div class="confirmation">
+                        <p>Freiburg, den {% now "SHORT_DATE_FORMAT" %}</p>
+                        <p class="signature">Unterschrift des/der Ausleiher/in</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th colspan="2">IV. Verleih-Bearbeitung <span>(EDV-Abteilung)</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Bearbeitet:</th>
+                <td>
+
+                    <table>
+                        <tr>
+                            <td>Name:</td>
+                            <td></td>
+                            <td>Datum: {% now "SHORT_DATE_FORMAT" %}</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+        <thead>
+            <tr>
+                <th colspan="2">V. Rückgabe-Bearbeitung <span>(EDV-Abteilung)</span></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <tr>
+                <th>Zurückerhalten:</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td>Name:</td>
+                            <td></td>
+                            <td>Datum: {# now "SHORT_DATE_FORMAT" #}</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th>Zustand:</th>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+{% endblock %}

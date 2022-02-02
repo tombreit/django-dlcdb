@@ -1,0 +1,24 @@
+{# <abbr title="Not Implemented">501</abbr> #}
+
+
+{% if note_obj.get_latest_note %}
+    <a class="btn btn-sm btn-outline-primary related-widget-wrapper-link change-related"
+        id="change_id_note"
+        title="Notiz: {{ note_obj.get_latest_note.text }}"
+        target="_blank"
+        href="{% url change_url note_obj.get_latest_note.pk %}?_to_field=id&_popup=1&inventory={{ current_inventory.id }}&{{ note_objstr }}={{ note_obj.pk }}"
+    >
+        <i class="fas fa-comment-alt"></i>
+    </a>
+{% else %}
+    <a
+        class="btn btn-sm btn-outline-primary related-widget-wrapper-link add-related"
+        id="add_id_room" 
+        title="Add {{ note_objstr }} note"
+        target="_blank"
+        href="{% url add_url %}?_to_field=id&_popup=1&inventory={{ current_inventory.id }}&{{ note_objstr }}={{ note_obj.pk }}"
+    >
+        {# href="{% url 'admin:core_dialogdevice_change' device.id %}?inventory={{ current_inventory.id }}"> #}
+        <i class="far fa-comment-alt"></i>
+    </a>
+{% endif %}

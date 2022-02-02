@@ -1,0 +1,129 @@
+<!doctype html>
+<html class="no-js" lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <title>Liste im Besitz von Mitarbeitern befindlicher Sachanlagen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 1em;
+        }
+      th, td { 
+          border: 1px solid black;
+          padding: 0.25em;
+          vertical-align: top;
+        }
+      th { text-align: left; }
+
+      .nowrap {
+        white-space: nowrap;
+      }
+      .minwidth {
+        width: 1%;
+      }
+      .manualinput {
+          padding: 1.5em 0;
+      }
+  </style>
+</head>
+
+<body>
+
+<h1>Liste im Besitz von Mitarbeitern befindlicher Sachanlagen</h1>
+
+<table>
+    <tbody>
+        <tr>
+            <th class="nowrap minwidth">Datum</th>
+            <td>{{ now|date:"Y-m-d" }}</td>
+        </tr>
+        <tr>
+            <th class="nowrap minwidth">Kostenstelle/PSP Element</th>
+            <td class="manualinput"></td>
+        </tr>
+        <tr>
+            <th>Inventurleitung</th>
+            <td class="manualinput"></td>
+        </tr>
+        <tr>
+            <th>Aufnahmeleitung</th>
+            <td class="manualinput"></td>
+        </tr>
+        <tr>
+            <th>SAP Korrektur</th>
+            <td class="manualinput"></td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Anlagen-Nr.</th>
+            <th>Bezeichnung</th>
+            <th>Raum</th>
+            <th>Baujahr</th>
+            <th>Bemerkung</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d in devices %}
+        <tr>
+            <td>
+                {{ forloop.counter }}
+            </td>
+            <td>
+                {{ d.sap_id }}
+            </td>
+            <td>
+                {{ d.device_type }}<br>
+                {{ d.manufacturer }} {{ d.series }}
+            </td>
+            <td>
+                {{ d.active_record.room.number }}
+            </td>
+            <td>
+                {{ d.purchase_date|date:"Y" }}
+            </td>
+            <td>
+                {% if d.active_record.inventory %}
+                    {{ d.active_record.username }} / {{ d.active_record.inventory }}
+                {% else %}
+                    <i>no current inventory record</i>
+                {% endif %}
+
+                {% if d.inventory_note %}
+                    <br>
+                    <i>
+                        {{ d.inventory_note }}
+                    </i>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table>
+    <tr>
+        <td style="padding-top: 3em;">
+            ----------------------------
+            <br>
+            Datum
+        </td>
+        <td style="padding-top: 3em;">
+            ----------------------------
+            <br>
+            Unterschrift Mitarbeiter*in
+        </td>
+    </tr>
+</table>
+
+</p>
+</body>
+</html>

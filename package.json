@@ -1,0 +1,37 @@
+{
+  "name": "django-dlcdb",
+  "version": "1.0.0",
+  "description": "MPICC-Inventur",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "config": {
+    "srcdir": "frontend",
+    "distdir": "dlcdb/static/dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "bootstrap": "^4.6.1",
+    "bundle-js": "^1.0.3",
+    "dart-sass": "^1.25.0",
+    "mermaid": "^8.13.10",
+    "mermaid.cli": "^0.5.1",
+    "npm-run-all": "^4.1.5",
+    "popper.js": "^1.16.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prod": "npm-run-all scss:prod scss:print js:prod",
+    "scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_srcdir/scss:$npm_package_config_distdir/css",
+    "scss:print": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_srcdir/scss/print.scss:$npm_package_config_distdir/css/print.css",
+    "js:prod": "npm-run-all js:bundle",
+    "js:bundle": "bundle-js $npm_package_config_srcdir/js/app.js --disable-beautify --out $npm_package_config_distdir/js/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.mpicc.de:django/django-dlcdb.git"
+  },
+  "author": "Thomas Breitner",
+  "license": "ISC"
+}

@@ -1,0 +1,9 @@
+<button type="button" class="btn btn-warning" title="Tenant: {{ request.tenant }}">
+    {{ request.tenant|default:"No tenant set!" }}
+</button>
+
+{% if request.user.is_superuser %}
+    <button class="btn btn-danger">
+        Superuser
+    </button>
+{% endif %}

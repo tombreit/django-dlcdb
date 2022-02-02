@@ -1,0 +1,11 @@
+{% extends "admin/change_list.html" %}
+
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href={% url 'admin:core_roomreconcile_changelist' %} class="addlink">
+            Abgleich
+        </a>
+    </li>
+{% endblock %}

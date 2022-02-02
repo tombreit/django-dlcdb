@@ -1,0 +1,77 @@
+{% extends "inventory/base_inventory.html" %}
+
+
+{% block body %}
+
+
+<div class="row">
+    <div class="col-8">
+        <h1>
+            Room {{ room }}
+        </h1>
+        <p>
+            Room QR-Code
+            <br>
+            <code>{{ room.uuid }}</code>
+        </p>
+    </div>
+    <div class="col-4">
+        {% if room.qrcode %}
+        <img 
+            src="{{ room.qrcode.url }}" 
+            style="width: 200px; height: 200px"
+        >
+        {% else %}
+            <i>Currenty no qr code set!</i>
+        {% endif %}
+    </div>
+</div>
+
+<hr>
+
+
+<h2>{{ devices.count }} Devices in Room {{ room }}</h2>
+
+
+<table id="devices-table" class="table">
+    <thead>
+        <tr>
+            <th>Device</th>
+            <th>Description</th>
+            <th>QR</th>
+        </tr>
+    </thead>
+    <tbody id="devices-table-tbody">
+    {% for device in devices %}
+        <tr>
+            <td>
+                <a href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
+                    {{ device }}
+                </a>
+            </td>
+            <td>
+                {% if device.manufacturer or device.series %}
+                {{ device.manufacturer|default:'' }}  {{ device.series|default:'' }}
+                <br>
+                {% endif %}
+                SAP-ID: {{ device.sap_id|default:'n/a' }}
+                <br>
+                <code>{{ device.uuid }}</code>
+            </td>
+            <td>
+                {% if device.qrcode %}
+                <img 
+                    src="{{ device.qrcode.url }}" 
+                    style="width: 200px; height: 200px"
+                >
+                {% else %}
+                    <i>Currenty no qr code set!</i>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock body %}

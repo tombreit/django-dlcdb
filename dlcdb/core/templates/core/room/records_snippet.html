@@ -1,0 +1,8 @@
+<div class="bt">
+    {% for record in records %}
+        <a href="{% url "admin:core_device_change"  record.device.id %}"
+           class="label label-success" style="display:inline-block; font-weight:normal; font-size:13px; margin-bottom:2px;">
+            {{ record.device }}
+        </a>
+    {% endfor %}
+</div>

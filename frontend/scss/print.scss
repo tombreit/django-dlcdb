@@ -1,0 +1,146 @@
+// Better without bootstrap print stylesheet....
+
+@media print, screen {
+
+    @page {
+      size: A4;
+      margin: 40pt 30pt 60pt 30pt;
+    }
+
+
+    *,
+    *:before,
+    *:after,
+    *:first-letter,
+    *:first-line {
+      /* background: transparent !important; */
+      color: #000 !important;
+      /* Black prints faster: http://www.sanbeiji.com/archives/953 */
+      box-shadow: none !important;
+      text-shadow: none !important;
+    }
+    a,
+    a:visited {
+      text-decoration: underline;
+    }
+    /*
+    a[href]:after {
+      content: " (" attr(href) ")";
+    }
+    abbr[title]:after {
+      content: " (" attr(title) ")";
+    }
+    */
+
+    /*
+     * Don't show links that are fragment identifiers,
+     * or use the `javascript:` pseudo protocol
+     */
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+      content: "";
+    }
+    pre,
+    blockquote {
+      border: 1px solid #999;
+      page-break-inside: avoid;
+    }
+    /*
+     * Printing Tables:
+     * http://css-discuss.incutio.com/wiki/Printing_Tables
+     */
+    thead {
+      display: table-header-group;
+    }
+    tr,
+    img {
+      page-break-inside: avoid;
+    }
+    img {
+      max-width: 100% !important;
+    }
+    p,
+    h2,
+    h3 {
+      orphans: 3;
+      widows: 3;
+    }
+    h2,
+    h3 {
+      page-break-after: avoid;
+    }
+    body {
+      font-family: sans-serif;
+      font-size: 10px;
+      -webkit-print-color-adjust: exact;
+    }
+
+    header {
+      border-bottom: 1px solid gray;
+      margin-bottom: 2em;
+      }
+    header img {
+      height: 60pt;
+      }
+
+
+    footer {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      margin-top: 2em;
+      font-size: 8pt;
+      }
+    footer img {
+      max-height: 40pt;
+      }
+
+
+    table {
+      width: 100%;
+      text-align: left;
+      border-collapse: collapse;
+    }
+
+
+    main thead tr {
+      background-color: silver;
+      }
+
+    main th {
+      white-space: nowrap;
+      width: 1%;
+      }
+    main th i {
+      font-style: normal;
+      font-weight: normal;
+      }
+    main td,
+    main th {
+      border: 1px solid #666;
+      vertical-align: top;
+      text-align: left;
+      padding: 4pt 8pt;
+    }
+
+    main table table td,
+    main table table th {
+      border-width: 0;
+      padding: 0;
+    }
+
+
+
+    .confirmation p {
+      float: left;
+      width: 30%;
+      margin-top: 4em;
+      }
+    .confirmation .signature {
+      width: 60%;
+      float: right;
+      border-top: 1px solid gray;
+      }
+
+
+} /* @media print */
