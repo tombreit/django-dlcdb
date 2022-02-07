@@ -1,32 +1,52 @@
 {
   "name": "django-dlcdb",
   "version": "1.0.0",
-  "description": "MPICC-Inventur",
+  "description": "Django Device Lifecycle Database",
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },
   "config": {
     "srcdir": "frontend",
-    "distdir": "dlcdb/static/dist"
+    "distdir": "dlcdb/static/dist",
+    "srcdir_inventory": "dlcdb/inventory/frontend",
+    "distdir_inventory": "dlcdb/inventory/static/inventory"
   },
   "dependencies": {},
   "devDependencies": {
+    "npm": "^6.13.7",
+    "package.json": "^2.0.1",
     "bootstrap": "^4.6.1",
     "bundle-js": "^1.0.3",
     "dart-sass": "^1.25.0",
     "mermaid": "^8.13.10",
     "mermaid.cli": "^0.5.1",
     "npm-run-all": "^4.1.5",
-    "popper.js": "^1.16.1"
+    "popper.js": "^1.16.1",
+    "@fortawesome/fontawesome-free": "^5.12.0",
+    "@ttskch/select2-bootstrap4-theme": "^1.5.2",
+    "bootswatch": "^4.6.1",
+    "jquery": "^3.4.1",
+    "select2": "^4.1.0-rc.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+
     "prod": "npm-run-all scss:prod scss:print js:prod",
     "scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_srcdir/scss:$npm_package_config_distdir/css",
     "scss:print": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_srcdir/scss/print.scss:$npm_package_config_distdir/css/print.css",
     "js:prod": "npm-run-all js:bundle",
-    "js:bundle": "bundle-js $npm_package_config_srcdir/js/app.js --disable-beautify --out $npm_package_config_distdir/js/app.js"
+    "js:bundle": "bundle-js $npm_package_config_srcdir/js/app.js --disable-beautify --out $npm_package_config_distdir/js/app.js",
+
+    "preinventory-prod": "mkdir -p $npm_package_config_distdir_inventory",
+    "inventory-prod": "npm-run-all inventory-scss:prod inventory-js:prod inventory-font:copy-all inventory-img:copy",
+    "inventory-scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_srcdir_inventory/scss:$npm_package_config_distdir_inventory/css",
+    "inventory-js:prod": "npm-run-all inventory-js:bundle inventory-js:copy-qr",
+    "inventory-js:copy-qr": "cp $npm_package_config_srcdir_inventory/js/qr* $npm_package_config_distdir_inventory/js/",
+    "inventory-js:bundle": "bundle-js $npm_package_config_srcdir_inventory/js/app.js --disable-beautify --out $npm_package_config_distdir_inventory/js/app.js",
+    "inventory-font:copy-all": "npm-run-all inventory-font:copy-fontawesome",
+    "inventory-font:copy-fontawesome": "mkdir -p $npm_package_config_distdir_inventory/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_distdir_inventory/fonts/fontawesome/",
+    "inventory-img:copy": "mkdir -p $npm_package_config_distdir_inventory/img && cp $npm_package_config_srcdir_inventory/img/* $npm_package_config_distdir_inventory/img/"
   },
   "repository": {
     "type": "git",
