@@ -79,6 +79,7 @@ LOCAL_APPS = [
     'dlcdb.core',
     'dlcdb.inventory',
     'dlcdb.reporting',
+    'dlcdb.lending',
     'dlcdb.api',
 ]
 
