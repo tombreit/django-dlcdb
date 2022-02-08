@@ -1,0 +1,24 @@
+{% extends 'lending/base_lending.html' %}
+
+{% load crispy_forms_tags %}
+
+
+{% block body %}
+
+<div class="alert alert-danger">
+<h4>Add lending...</h4>
+
+
+<form method="post">
+    {% csrf_token %}
+    {# form.as_p #}
+    {% crispy form %}
+    <button type="submit" class="btn btn-primary"> Leihs mir! </button>
+</form>
+
+</div>
+
+<hr>
+
+
+{% endblock body %}

@@ -1,0 +1,25 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Ausleihe | DLCDB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="{% static 'lending/dist/css/lending.css' %}">
+</head>
+
+<body
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+>
+
+    <div class="container">
+        {% block body %}{% endblock body %}
+    </div>
+
+    <script src="https://unpkg.com/htmx.org@1.6.1" integrity="sha384-tvG/2mnCFmGQzYC1Oh3qxQ7CkQ9kMzYjWZSNtrRZygHPDDqottzEJsqS4oUVodhW" crossorigin="anonymous"></script>
+    {# <script src="{% static 'lending/dist/js/lending.js' %}"></script> #}
+    {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

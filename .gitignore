@@ -27,6 +27,7 @@ node_modules/
 /run/*
 /dlcdb/static/dist/
 /dlcdb/inventory/static/inventory/
+/dlcdb/lending/static/lending/dist/
 /context.json
 /context_*.json
 /temp

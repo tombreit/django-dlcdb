@@ -1,0 +1,49 @@
+{% load static %}
+
+<div class="row alert alert-warning">
+    <div class="col-3">
+        <img src="{% static 'lending/dist/img/SantasLittleHelper.png' %}" alt="" style="max-width: 100px;" class="m-2">
+    </div>
+    <div class="col-9">
+
+        <div class="row">
+
+            <div class="col-4">
+                <span class="alert-heading">DLCDB</span>
+                <hr>
+                <h4>
+                    <a href="{% url 'lending:person_detail' person.id %}" class="d-block py-2">
+                        {{  person.last_name }}, {{  person.first_name }}
+                    </a>
+                </h4>
+                {{ person.email }}
+            </div>
+            <div class="col-8">
+                <span class="alert-heading">UDB</span>
+                <hr>
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <th>Contract ends at</th>
+                            <td>{{ person.udb_contract_planned_checkout }}</td>
+                        </tr>
+                        <tr>
+                            <th>Department</th>
+                            <td>{{ person.udb_contract_organization_unit }}</td>        
+                        </tr>
+                        <tr>
+                            <th>Contract type</th>
+                            <td>{{ person.udb_contract_contract_type }}</td>        
+                        </tr>
+                        <tr>
+                            <th>Positions</th>
+                            <td>{{ person.udb_contract_organizational_positions }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+    
+            </div>
+        </div>
+
+    </div>
+</div>

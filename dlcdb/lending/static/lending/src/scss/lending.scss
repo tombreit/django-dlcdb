@@ -1,0 +1,21 @@
+// $brand-primary: rgb(16,66,122);
+// // $brand-primary-light: lighten( $brand-primary, 50% );
+// $brand-primary-light: rgba( $brand-primary, .15 );
+
+
+// $theme-colors: (
+//   "primary": $brand-primary,
+//   "primary-light": $brand-primary-light,
+// );
+
+
+/* --- Set common styles ---------------------------------------------------- */
+
+@import "bootswatch/dist/sketchy/_variables";
+
+@import "bootstrap/scss/bootstrap";
+
+@import "bootswatch/dist/sketchy/_bootswatch";
+
+@import "components/_fontawesome";
+@import "components/_style";

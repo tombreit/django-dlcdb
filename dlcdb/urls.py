@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('core/', include('dlcdb.core.urls')),
     path('inventory/', include('dlcdb.inventory.urls')),
+    path('lending/', include('dlcdb.lending.urls')),
 
     path('admin/', admin.site.urls),
 

@@ -10,7 +10,9 @@
     "srcdir": "frontend",
     "distdir": "dlcdb/static/dist",
     "srcdir_inventory": "dlcdb/inventory/frontend",
-    "distdir_inventory": "dlcdb/inventory/static/inventory"
+    "distdir_inventory": "dlcdb/inventory/static/inventory",
+    "lending_srcdir": "dlcdb/lending/static/lending/src",
+    "lending_distdir": "dlcdb/lending/static/lending/dist"
   },
   "dependencies": {},
   "devDependencies": {
@@ -46,7 +48,14 @@
     "inventory-js:bundle": "bundle-js $npm_package_config_srcdir_inventory/js/app.js --disable-beautify --out $npm_package_config_distdir_inventory/js/app.js",
     "inventory-font:copy-all": "npm-run-all inventory-font:copy-fontawesome",
     "inventory-font:copy-fontawesome": "mkdir -p $npm_package_config_distdir_inventory/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_distdir_inventory/fonts/fontawesome/",
-    "inventory-img:copy": "mkdir -p $npm_package_config_distdir_inventory/img && cp $npm_package_config_srcdir_inventory/img/* $npm_package_config_distdir_inventory/img/"
+    "inventory-img:copy": "mkdir -p $npm_package_config_distdir_inventory/img && cp $npm_package_config_srcdir_inventory/img/* $npm_package_config_distdir_inventory/img/",
+
+    "prelending-prod": "mkdir -p $npm_package_config_lending_distdir",
+    "lending-prod": "npm-run-all lending-scss:prod lending-font:copy-fontawesome lending-img:copy",
+    "lending-scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_lending_srcdir/scss:$npm_package_config_lending_distdir/css",
+    "lending-font:copy-fontawesome": "mkdir -p $npm_package_config_lending_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_lending_distdir/fonts/fontawesome/",
+    "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/"
+
   },
   "repository": {
     "type": "git",

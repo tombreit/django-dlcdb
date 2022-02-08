@@ -1,0 +1,51 @@
+{% extends 'lending/base_lending.html' %}
+
+
+{% block body %}
+
+    <h1>Person Search</h1>
+    
+    <form method="GET">
+        {# filter.form.as_p #}
+
+        <input 
+            type="text"
+            name="q" 
+            autocomplete="off" 
+            style="padding: 1em;"
+            value="{{ request.GET.q }}"
+            hx-get="{% url 'lending:person_search' %}"
+            hx-trigger="keyup changed delay:200ms"
+            hx-target="#typeahead-results"
+        >
+
+        {% comment %}
+        {% if not request.htmx %}
+            <input 
+                type="submit"
+                value="Search"
+                style="padding: 1em;"
+            >
+        {% else %}
+            <i>no submit button for htmx requests</i>
+        {% endif %}
+        {% endcomment %}
+    </form>
+
+    <hr>
+
+    <div id="typeahead-results">
+        <p>You did not search for something, did you?</p>
+    </div>
+
+    {% comment %}
+    <ol>
+    {% for person in filter.qs %}
+        <li>
+            {% include 'lending/includes/person_list_item.html' %}
+        </li>
+    {% endfor %}
+    </ol>
+    {% endcomment %}
+
+{% endblock body %}
