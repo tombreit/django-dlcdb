@@ -49,8 +49,8 @@
     "inventory-img:copy": "mkdir -p $npm_package_config_distdir_inventory/img && cp $npm_package_config_srcdir_inventory/img/* $npm_package_config_distdir_inventory/img/"
   },
   "repository": {
-    "type": "git",
-    "url": "git@gitlab.mpicc.de:django/django-dlcdb.git"
+    "type": "https",
+    "url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
   },
   "author": "Thomas Breitner",
   "license": "ISC"
