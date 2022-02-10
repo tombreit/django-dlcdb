@@ -10,20 +10,14 @@ from dlcdb.core.models import Person
 logger = logging.getLogger(__name__)
 
 
-# TODO: make this JSON_URL configurable
-JSON_URL = "https://static.csl.mpg.de/udb2_dlcdbpersons/udb2_dlcdbpersons.json"
-# JSON_URL = "file://{}/temp/udb2_dlcdbpersons.json".format(settings.BASE_DIR)
-
-# print(f"{settings.BASE_DIR=}")
-
-
 def import_udb_persons():
     logger.info("[huey persons utils: import_udb_persons] Fetch UDB JSON...")
-    print(f"Fetching data from {JSON_URL=}")
+    UDB_JSON_URL = settings.UDB_JSON_URL
+    print(f"Fetching data from {UDB_JSON_URL=}")
 
     dlcdb_persons = Person.objects.all()
 
-    with urllib.request.urlopen(JSON_URL) as response:
+    with urllib.request.urlopen(UDB_JSON_URL) as response:
         data = response.read()
         udb_obj = json.loads(data.decode('utf-8'))
 

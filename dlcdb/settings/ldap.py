@@ -13,7 +13,7 @@ from django_auth_ldap.config import (
 
 from .base import (
     AUTHENTICATION_BACKENDS,
-    get_evncontext,
+    env,
 )
 
 # Logging stanza
@@ -27,7 +27,7 @@ logger.setLevel(logging.DEBUG)
 # def get_required_groups():
 #     ldap_group_querys = []
 
-#     for group in get_evncontext('LDAP_ACCESS_GROUPS'):
+#     for group in env('LDAP_ACCESS_GROUPS'):
 #         ldap_group_querys.append(
 #             LDAPGroupQuery(
 #                 'cn={0},cn=Users,dc=mpicc,dc=de'.format(group)
@@ -47,7 +47,7 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
     # ldap.OPT_X_TLS_CACERTFILE: '/etc/ssl/localcerts/radiusi.pem',
 }
 
-if get_evncontext('SETTINGS_MODE') == 'dev':
+if env('SETTINGS_MODE') == 'dev':
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     # ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
 
@@ -55,9 +55,9 @@ if get_evncontext('SETTINGS_MODE') == 'dev':
 AUTH_LDAP_SERVER_URI = "ldaps://rodc.mpicc.de"
 
 AUTH_LDAP_BIND_DN = 'cn={},ou=Hidden AD Objects,dc=mpicc,dc=de'.format(
-    get_evncontext('LDAP_QUERY_USERNAME')
+    env('LDAP_QUERY_USERNAME')
 )
-AUTH_LDAP_BIND_PASSWORD = get_evncontext('LDAP_QUERY_PASSWORD')
+AUTH_LDAP_BIND_PASSWORD = env('LDAP_QUERY_PASSWORD')
 
 AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
     LDAPSearch("cn=Users,dc=mpicc,dc=de", ldap.SCOPE_SUBTREE, "(sAMAccountName=%(user)s)"),

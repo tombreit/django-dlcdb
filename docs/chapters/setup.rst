@@ -35,8 +35,8 @@ Set environment for project:
 
 .. code:: bash
     
-    cp context.template.json context.json
-    # ...edit context.json...
+    cp env.template .env
+    # edit .env
 
 
 Run this project:

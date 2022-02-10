@@ -28,9 +28,11 @@ django-auth-ldap==4.0.0
     # via -r requirements.in
 django-crispy-forms==1.14.0
     # via -r requirements.in
+django-environ==0.8.1
+    # via -r requirements.in
 django-filter==21.1
     # via -r requirements.in
-django-select2==7.9.0
+django-select2==7.10.0
     # via -r requirements.in
 djangorestframework==3.13.1
     # via -r requirements.in
@@ -78,7 +80,7 @@ pyparsing==3.0.7
     # via packaging
 python-ldap==3.4.0
     # via django-auth-ldap
-python-magic==0.4.24
+python-magic==0.4.25
     # via -r requirements.in
 pytz==2021.3
     # via

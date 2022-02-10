@@ -1,8 +1,7 @@
 import json
 from pathlib import Path
-
+import environ
 from django.core.exceptions import ImproperlyConfigured
-
 from huey import SqliteHuey
 
 
@@ -14,42 +13,30 @@ IMPORT_DIR = RUN_DIR / "import"
 MEDIA_DIR = RUN_DIR / "media"
 STATICFILES_DIR = RUN_DIR / "staticfiles"
 
-# print(f"{BASE_DIR=}")
-# print(f"{RUN_DIR=}")
-# print(f"{DB_DIR=}")
-# print(f"{IMPORT_DIR=}")
-# print(f"{MEDIA_DIR=}")
-# print(f"{STATICFILES_DIR=}")
-
 # Make sure directory structure exists
 Path(DB_DIR).mkdir(parents=True, exist_ok=True)
 Path(IMPORT_DIR).mkdir(parents=True, exist_ok=True)
 Path(MEDIA_DIR).mkdir(parents=True, exist_ok=True)
 Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
+# Take environment variables from .env file
+env = environ.Env()
+environ.Env.read_env(BASE_DIR /'.env')
 
+SECRET_KEY = env('SECRET_KEY')
 
-# store sensible values in 'secrets.json' (out of version control)
-CONTEXT_FILE = str(Path(BASE_DIR, 'context.json'))
+# Email these people full exception information
+# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
+ADMINS = [x.split(':') for x in env.list('ADMINS')]
+MANAGERS = ADMINS
+# print(f"{ADMINS=}")
+# print(f"{type(ADMINS)=}")
 
-with open(CONTEXT_FILE) as f:
-    CONTEXT = json.loads(f.read())
+# https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+# print(f"{ALLOWED_HOSTS=}")
+# print(f"{type(ALLOWED_HOSTS)=}")
 
-
-def get_evncontext(setting, evncontext=CONTEXT):
-    """
-    Get the secrets variable or return explicit exception.
-    :param setting:
-    :param evncontext:
-    :return:
-    """
-    try:
-        return evncontext[setting]
-    except KeyError:
-        error_msg = 'Set the {0} environment variable'.format(setting)
-        raise ImproperlyConfigured(error_msg)
-
-SECRET_KEY = get_evncontext('SECRET_KEY')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -278,6 +265,9 @@ QRCODE_INFIXES = {
     'device': 'D',
 }
 
-EMAIL_SUBJECT_PREFIX = get_evncontext('EMAIL_SUBJECT_PREFIX')
-DEFAULT_FROM_EMAIL = get_evncontext('DEFAULT_FROM_EMAIL')
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+UDB_JSON_URL = env('UDB_JSON_URL')
+# UDB_JSON_URL = "file://{}/temp/udb.json".format(settings.BASE_DIR)

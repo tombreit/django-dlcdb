@@ -2,6 +2,8 @@ from .base import *
 from .ldap import *
 
 
+DEBUG = True
+
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#enabling-middleware
 #
 # The order of MIDDLEWARE is important. You should include the Debug Toolbar
@@ -20,11 +22,7 @@ INSTALLED_APPS += [
 
 MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
-DEBUG = True
-
 INTERNAL_IPS = ['127.0.0.1']
-
-ALLOWED_HOSTS = ['*']
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
