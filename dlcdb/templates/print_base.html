@@ -4,13 +4,13 @@
 <html lang="de">
 <head>
     <meta charset="utf-8" />
-    <title>Geräte Verleih | MPI-CSL</title>
+    <title>Geräte Verleih | DLCDB</title>
     <link rel="stylesheet" href="{% static 'dist/css/print.css' %}" />
 </head>
 <body>
 
 <header>
-    <img src="{% static 'dlcdb/wortbildmarke_csl_en_black.svg' %}" alt="MPI-CSL">
+    <img src="{% static BRANDING_LOGO_BW %}" alt="{{ BRANDING_ORG_ABBR }}">
 </header>
 
 
@@ -25,22 +25,24 @@
         <tbody>
             <tr>
                 <td>
-                    MPI-CSL<br>
-                    IT-Support
+                    {{ BRANDING_ORG_ABBR }}
+                    <br>
+                    {{ BRANDING_IT_DEPT_NAME }}
                 </td>
                 <td>
-                    Günterstalstraße 73<br>
-                    D-79100 Freiburg i.Br.
+                    {{ BRANDING_ORG_STREET }}
+                    <br>
+                    {{ BRANDING_ORG_ZIP_CITY }}
                 </td>
                 <td>
-                    Tel.: +49 (0)761-7081-444
+                    Tel.: {{ BRANDING_IT_DEPT_PHONE }}
                 </td>
                 <td>
-                    <a href="mailto:it-support@csl.mpg.de">it-support@csl.mpg.de</a><br>
-                    <a href="https://csl.mpg.de">https://csl.mpg.de</a>
+                    <a href="mailto:{{ BRANDING_IT_DEPT_MAIL }}">{{ BRANDING_IT_DEPT_MAIL }}</a><br>
+                    <a href="{{ BRANDING_ORG_URL }}">{{ BRANDING_ORG_URL }}</a>
                 </td>
                 <td>
-                    <img src="{% static 'dlcdb/minerva.svg' %}" alt="MPG Logo">
+                    <img src="{% static 'dlcdb/branding/minerva.svg' %}" alt="">
                 </td>
             </tr>
         </tbody>

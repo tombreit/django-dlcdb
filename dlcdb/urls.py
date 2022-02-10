@@ -37,7 +37,7 @@ urlpatterns = [
     path("select2/", include("django_select2.urls")),
     path('api/v2/', include('dlcdb.api.urls')),
 
-    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("dlcdb/favicon.ico")),
+    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("dlcdb/branding/favicon.ico")),
     ),
 ]
 

@@ -22,9 +22,6 @@ Welcome to DLCDB's documentation!
    chapters/api
 
 
-.. image:: _static/mpicc-dlcdb-poster.jpg
-
-
 Indices and tables
 ==================
 

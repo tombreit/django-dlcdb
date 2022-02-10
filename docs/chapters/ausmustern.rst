@@ -14,7 +14,7 @@ Prozess
 RecordAdmin
 ---------------
 
-URL: https://dlcdb-it.mpicc.de/admin/core/record/
+URL: https://fqdn/admin/core/record/
 
 .. note:: Bulk-Entfernen
    Über diesen Admin ist ein "Massen-Entfernen" (mehrere Geräte auf einmal) möglich. Alternativ steht noch die `CSV-Bulk-Removal`_ Methode zur Verfügung.
@@ -29,7 +29,7 @@ URL: https://dlcdb-it.mpicc.de/admin/core/record/
 RemovedRecordAdmin
 ----------------------
 
-URL: https://dlcdb-it.mpicc.de/admin/core/removedrecord/
+URL: https://fqdn/admin/core/removedrecord/
 
 
 CSV-Bulk-Removal

@@ -30,3 +30,7 @@ node_modules/
 /dlcdb/lending/static/lending/dist/
 /temp
 /.env
+
+# Branding
+/dlcdb/static/dlcdb/branding/logo.svg
+/dlcdb/static/dlcdb/branding/logo_bw.svg

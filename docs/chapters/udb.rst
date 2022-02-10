@@ -7,7 +7,7 @@ Ziele
 
 * **[Autarkie]** Die DLCB bleibt voll funktionsfähig, auch wenn keine UDB-Daten abgreifbar oder vorhanden sind.
 * **[Redundanz]** Die Personen- und Vertragsdaten aus der UDB für den DLCDB-Verleih nutzen.
-* Die UDB soll wissen, welche Devices eine Person ausgehliehen hat (siehe :ref:`API` )
+* Die UDB soll wissen, welche Devices eine Person ausgehliehen hat (siehe :ref:`chapters/api:api` )
 
 User stories
 ------------

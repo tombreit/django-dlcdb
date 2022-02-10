@@ -39,6 +39,12 @@ Set environment for project:
     # edit .env
 
 
+Place your logo files (format: `svg`) at the following paths:
+
+* `dlcdb/static/dlcdb/branding/logo.svg` (white foreground, transparent background)
+* `dlcdb/static/dlcdb/branding/logo_bw.svg` (black foreground, transparent or white background)
+
+
 Run this project:
 
 .. code:: bash
