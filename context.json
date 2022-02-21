@@ -1,0 +1,10 @@
+{
+  "FILENAME": "context.json",
+  "SETTINGS_MODE": "dev",
+  "SECRET_KEY": "alkjflaökjfaöld fkjasf",
+  "LDAP_ACCESS_GROUPS": ["ldap_group_granted_access1", "ldap_group_granted_access2"],
+  "LDAP_QUERY_USERNAME": "",
+  "LDAP_QUERY_PASSWORD": "",
+  "EMAIL_SUBJECT_PREFIX": "[DLCDB fqdn]",
+  "DEFAULT_FROM_EMAIL": "it-support@fqdn"
+}

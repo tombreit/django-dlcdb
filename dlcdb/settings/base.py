@@ -60,6 +60,7 @@ THIRD_PARTY_APPS = [
     'crispy_forms',
     'django_select2',
     'huey.contrib.djhuey',
+    'simple_history',
 ]
 LOCAL_APPS = [
     'dlcdb.accounts',
@@ -84,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'dlcdb.tenants.middleware.CurrentTenantMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'dlcdb.urls'
@@ -211,6 +213,10 @@ REST_FRAMEWORK = {
     ],
     # 'PAGE_SIZE': 10,
 }
+
+# https://django-simple-history.readthedocs.io/en/latest/admin.html#disabling-the-option-to-revert-an-object
+SIMPLE_HISTORY_REVERT_DISABLED=True
+SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 
 HUEY = SqliteHuey(

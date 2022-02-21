@@ -6,6 +6,7 @@ django-auth-ldap
 django-select2
 django-environ
 django-crispy-forms
+django-simple-history
 pymemcache  # needed by django-select2
 Sphinx
 sphinx_rtd_theme

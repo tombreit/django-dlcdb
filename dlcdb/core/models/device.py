@@ -6,6 +6,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 
+from simple_history.models import HistoricalRecords
+
 from dlcdb.inventory.utils import uuid2qrcode
 from dlcdb.tenants.models import TenantAwareModel
 
@@ -93,6 +95,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         null=True,
         storage=OverwriteStorage(),
     )
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = 'Device'
