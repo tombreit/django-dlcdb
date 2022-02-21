@@ -53,10 +53,11 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         'removed_date',
         'get_attachments',
 
-        'user',
-        'username',
-        'created_at',
-        'modified_at',
+        # These fields are already set via get_readonly_fields() in CustomBaseModelAdmin
+        # 'user',
+        # 'username',
+        # 'created_at',
+        # 'modified_at',
     )
     list_display = [
         'get_change_link_display',
