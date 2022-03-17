@@ -2,7 +2,7 @@
 Lizenzen
 ========
 
-*Quick and dirty Lizenzverwaltung:*  `Datenhaltung > Lizenzen <https://dlcdb-it.csl.mpg.de/admin/core/licencerecord/>`_
+*Quick and dirty Lizenzverwaltung:*  `Datenhaltung > Lizenzen <https://fqdn/admin/core/licencerecord/>`_
 
 Damit ein Device eine Lizenz ist/wird:
 
@@ -22,7 +22,7 @@ Eine Lizenz gilt als ausgeben/genutzt, wenn sie:
 * einer Person zugeordnet ist (hier ist nicht der "Verleih" gemeint, sondern schlicht das Feld *Person* im Lizenz-Admin)
 * einem Device zugeordnet ist
 
-Der `Lizenzadmin <https://dlcdb-it.csl.mpg.de/admin/core/licencerecord/>`_ gibt Auskuft über:
+Der `Lizenzadmin <https://fqdn/admin/core/licencerecord/>`_ gibt Auskuft über:
 
 * den Expiry-Status von Lizenzen, inkl. einer 60-tägigen Warnfrist vor Ablauf
 * den *ist ausgegeben/genutzt* Status

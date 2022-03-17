@@ -1,8 +1,8 @@
-from .base import get_evncontext
+from .base import env
 
 # Choosing the settings which fit to our current environment.
 
-if get_evncontext('SETTINGS_MODE') == 'dev':
+if env('SETTINGS_MODE') == 'dev':
     from .dev import *
 else:
     from .production import *

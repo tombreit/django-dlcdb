@@ -17,7 +17,7 @@ Bestätigte Geräte müssen bei einer Revisionsprüfung gegebenenfalls vorgelegt
 Bitte schicken Sie uns Ihre Antwort bis zum {{ deadline|date:"d.m.Y" }}
 
 Mit freundlichen Grüßen,
-it-support@csl.mpg.de
+{{ contact_email }}
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -39,4 +39,4 @@ Equipment that you confirm to be in your possession may need to be submitted for
 Please reply to this email by {{ deadline|date:"m-d-Y" }}.
 
 Best wishes,
-it-support@csl.mpg.de
+{{ contact_email }}

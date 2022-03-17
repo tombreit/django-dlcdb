@@ -28,6 +28,9 @@ node_modules/
 /dlcdb/static/dist/
 /dlcdb/inventory/static/inventory/
 /dlcdb/lending/static/lending/dist/
-/context.json
-/context_*.json
 /temp
+/.env
+
+# Branding
+/dlcdb/static/dlcdb/branding/logo.svg
+/dlcdb/static/dlcdb/branding/logo_bw.svg

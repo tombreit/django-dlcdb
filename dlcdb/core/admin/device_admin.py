@@ -3,9 +3,12 @@ from django.conf import settings
 from django.utils.html import mark_safe, format_html
 from django.contrib import admin
 from django.shortcuts import get_object_or_404
+from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
+
+from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 
@@ -23,7 +26,7 @@ class NoteInline(admin.TabularInline):
 
 
 @admin.register(Device)
-class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
+class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, CustomBaseModelAdmin):
     change_form_template = 'core/device/change_form.html'
     save_as = True
     inlines = [NoteInline]
@@ -189,3 +192,22 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, CustomBaseModelAdmin)
             ct.pk,
             ','.join(str(pk) for pk in selected),
         ))
+
+    # django-simple-history
+    # https://django-simple-history.readthedocs.io/en/latest/admin.html
+    history_list_display = ['get_changed_fields']
+
+    def get_changed_fields(self, obj):
+        changes = []
+        prev_record = obj.prev_record
+        if prev_record:
+            delta = obj.diff_against(prev_record)
+            for change in delta.changes:
+                changes.append({
+                    'field': change.field,
+                    'prev_value': change.old,
+                    'new_value': change.new,
+                })
+
+            context = {"changes": changes}
+            return render_to_string('core/device/history_diff.html', context)

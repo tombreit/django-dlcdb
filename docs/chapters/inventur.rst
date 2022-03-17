@@ -81,6 +81,8 @@ Eingabe-/Ausgabedateien
   Diese Datei sollte bereits ausschließlich Datensätze der Verwaltung enthalten, da diese beim Import nicht gefiltert werden können. Das Format entspricht dem "raw"-Export aus dem SAP-System.
 
 
+.. _section-sap-abgleich-user-story:
+
 User story
 ----------
 
@@ -108,8 +110,11 @@ QR-Code-basierte Inventur (currently disabled)
 ==============================================
 
 
+.. _section-qr-user-story:
+
 User story
 ----------
+
 Eine Inventur steht an. Person läuft mit mobilem Endgerät mit Kamera (Smartphone, Tablet) durch die Räume und scannt die Etiketten mit QR-Codes ein. Werden in einem Raum QR-Codes von Devices gescannt, die bisher nicht diesem Raum zugeordnet wurden, werden sie dem Raum zugeordnet.
 
 

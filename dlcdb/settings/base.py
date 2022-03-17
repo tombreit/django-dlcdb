@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
-
+import environ
 from django.core.exceptions import ImproperlyConfigured
-
+from django.templatetags.static import static
 from huey import SqliteHuey
 
 
@@ -14,42 +14,30 @@ IMPORT_DIR = RUN_DIR / "import"
 MEDIA_DIR = RUN_DIR / "media"
 STATICFILES_DIR = RUN_DIR / "staticfiles"
 
-# print(f"{BASE_DIR=}")
-# print(f"{RUN_DIR=}")
-# print(f"{DB_DIR=}")
-# print(f"{IMPORT_DIR=}")
-# print(f"{MEDIA_DIR=}")
-# print(f"{STATICFILES_DIR=}")
-
 # Make sure directory structure exists
 Path(DB_DIR).mkdir(parents=True, exist_ok=True)
 Path(IMPORT_DIR).mkdir(parents=True, exist_ok=True)
 Path(MEDIA_DIR).mkdir(parents=True, exist_ok=True)
 Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
+# Take environment variables from .env file
+env = environ.Env()
+environ.Env.read_env(BASE_DIR /'.env')
 
+SECRET_KEY = env('SECRET_KEY')
 
-# store sensible values in 'secrets.json' (out of version control)
-CONTEXT_FILE = str(Path(BASE_DIR, 'context.json'))
+# Email these people full exception information
+# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
+ADMINS = [x.split(':') for x in env.list('ADMINS')]
+MANAGERS = ADMINS
+# print(f"{ADMINS=}")
+# print(f"{type(ADMINS)=}")
 
-with open(CONTEXT_FILE) as f:
-    CONTEXT = json.loads(f.read())
+# https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+# print(f"{ALLOWED_HOSTS=}")
+# print(f"{type(ALLOWED_HOSTS)=}")
 
-
-def get_evncontext(setting, evncontext=CONTEXT):
-    """
-    Get the secrets variable or return explicit exception.
-    :param setting:
-    :param evncontext:
-    :return:
-    """
-    try:
-        return evncontext[setting]
-    except KeyError:
-        error_msg = 'Set the {0} environment variable'.format(setting)
-        raise ImproperlyConfigured(error_msg)
-
-SECRET_KEY = get_evncontext('SECRET_KEY')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -72,6 +60,7 @@ THIRD_PARTY_APPS = [
     'crispy_forms',
     'django_select2',
     'huey.contrib.djhuey',
+    'simple_history',
 ]
 LOCAL_APPS = [
     'dlcdb.accounts',
@@ -98,6 +87,7 @@ MIDDLEWARE = [
     'dlcdb.tenants.middleware.CurrentTenantMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dlcdb.lending.middleware.htmx_middleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'dlcdb.urls'
@@ -113,6 +103,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dlcdb.core.context_processors.branding',
             ],
         },
     },
@@ -225,6 +216,10 @@ REST_FRAMEWORK = {
     # 'PAGE_SIZE': 10,
 }
 
+# https://django-simple-history.readthedocs.io/en/latest/admin.html#disabling-the-option-to-revert-an-object
+SIMPLE_HISTORY_REVERT_DISABLED=True
+SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
+
 
 HUEY = SqliteHuey(
     name="dlcdb_huey",
@@ -280,6 +275,29 @@ QRCODE_INFIXES = {
     'device': 'D',
 }
 
-EMAIL_SUBJECT_PREFIX = get_evncontext('EMAIL_SUBJECT_PREFIX')
-DEFAULT_FROM_EMAIL = get_evncontext('DEFAULT_FROM_EMAIL')
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+UDB_JSON_URL = env('UDB_JSON_URL')
+# UDB_JSON_URL = "file://{}/temp/udb.json".format(settings.BASE_DIR)
+
+
+# Branding
+# Place your organization/insitution logos at the following paths to
+# get rid of the default ACME logo.
+logo_path = BASE_DIR / "dlcdb/static/dlcdb/branding/logo.svg"
+logo_bw_path = BASE_DIR / "dlcdb/static/dlcdb/branding/logo_bw.svg"
+
+BRANDING = {
+    "BRANDING_ORG_NAME": env("BRANDING_ORG_NAME", default="ACME Corporation"),
+    "BRANDING_ORG_ABBR": env("BRANDING_ORG_ABBR", default="ACME"),
+    "BRANDING_ORG_STREET": env("BRANDING_ORG_STREET", default="Musterstrasse 123"),
+    "BRANDING_ORG_ZIP_CITY": env("BRANDING_ORG_ZIP_CITY", default="D-98765 Musterstadt"), 
+    "BRANDING_ORG_URL": env("BRANDING_ORG_URL", default="https://acme.de"),
+    "BRANDING_IT_DEPT_NAME": env("BRANDING_IT_DEPT_NAME", default="IT-Support"),
+    "BRANDING_IT_DEPT_PHONE": env("BRANDING_IT_DEPT_PHONE", default="+49 (0)123-456789"),
+    "BRANDING_IT_DEPT_MAIL": env("BRANDING_IT_DEPT_MAIL", default="it-support@fqdn"),
+    "BRANDING_LOGO": 'dlcdb/branding/logo.svg' if logo_path.exists() else 'dlcdb/branding/logo_acme.svg',
+    "BRANDING_LOGO_BW": 'dlcdb/branding/logo_bw.svg' if logo_bw_path.exists() else 'dlcdb/branding/logo_acme_bw.svg',
+}

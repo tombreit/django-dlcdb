@@ -1,6 +1,6 @@
 {
   "FILENAME": "context.json",
-  "SETTINGS_MODE": "production",
+  "SETTINGS_MODE": "dev",
   "SECRET_KEY": "alkjflaökjfaöld fkjasf",
   "LDAP_ACCESS_GROUPS": ["ldap_group_granted_access1", "ldap_group_granted_access2"],
   "LDAP_QUERY_USERNAME": "",

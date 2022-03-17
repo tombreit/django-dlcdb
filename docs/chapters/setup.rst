@@ -35,8 +35,14 @@ Set environment for project:
 
 .. code:: bash
     
-    cp context.template.json context.json
-    # ...edit context.json...
+    cp env.template .env
+    # edit .env
+
+
+Place your logo files (format: `svg`) at the following paths:
+
+* `dlcdb/static/dlcdb/branding/logo.svg` (white foreground, transparent background)
+* `dlcdb/static/dlcdb/branding/logo_bw.svg` (black foreground, transparent or white background)
 
 
 Run this project:

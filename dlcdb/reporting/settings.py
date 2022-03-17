@@ -1,7 +1,7 @@
 from django.conf import settings
 from ..core.models import Record
 
-IT_NOTIFICATION_EMAIL = 'it-support@csl.mpg.de'
+IT_NOTIFICATION_EMAIL = settings.DEFAULT_FROM_EMAIL
 
 LENT_OVERDUE_TOLERANCE_DAYS = 5
 

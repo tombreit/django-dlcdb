@@ -1,0 +1,27 @@
+
+<small>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <td>Field</td>
+            <td>Prev</td>
+            <td>New</td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for change in changes %}
+        <tr class="bg-white">
+            <td class="text-monospace">
+                {{ change.field }}
+            </td>
+            <td class="text-monospace">
+                {{ change.prev_value }}
+            </td>
+            <td class="text-monospace">
+                {{ change.new_value }}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</small>
