@@ -89,3 +89,21 @@ class SoftDeleteAuditBaseModel(AuditBaseModel):
 
     def hard_delete(self):
         super().delete()
+
+
+class SingletonBaseModel(models.Model):
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    class Meta:
+        abstract = True

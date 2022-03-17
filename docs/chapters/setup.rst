@@ -45,6 +45,11 @@ Place your logo files (format: `svg`) at the following paths:
 * `dlcdb/static/dlcdb/branding/logo_bw.svg` (black foreground, transparent or white background)
 
 
+.. note:: Branding
+
+   Branding is done via the two steps above: crafting an individual `.env` and saving the two logo files.
+
+
 Run this project:
 
 .. code:: bash

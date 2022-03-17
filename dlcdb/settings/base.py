@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'dlcdb.core.context_processors.branding',
+                'dlcdb.lending.context_processors.lending_configuration',
             ],
         },
     },

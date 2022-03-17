@@ -1,0 +1,5 @@
+
+/* Force full width texarea wrapper */
+.form-row.field-lending_preparation_checklist > div {
+    width: 100%;
+}

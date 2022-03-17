@@ -90,6 +90,12 @@
       bottom: 0;
       margin-top: 2em;
       font-size: 8pt;
+
+      // ensure width does not expand above 100%:
+      box-sizing: border-box;
+      margin-left: -8px;
+      margin-right: -8px;
+      padding: 0 8px;
       }
     footer img {
       max-height: 40pt;
