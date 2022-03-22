@@ -284,10 +284,14 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         inventorized_devices_count = all_devices.filter(inventory=current_inventory).count()
         all_devices_count = all_devices.count()
 
-        done_percent = ((inventorized_devices_count * 100) / all_devices_count)
-        done_percent = int(round(done_percent, 0))
+        if all([
+            current_inventory,
+            all_devices,
+        ]):
+            done_percent = ((inventorized_devices_count * 100) / all_devices_count)
+            done_percent = int(round(done_percent, 0))
 
-        return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
+            return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
 
 
     def get_context_data(self, **kwargs):
@@ -361,14 +365,12 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
 
 
 class InventoryReportView(TemplateView):
-
-    current_inventory = get_current_inventory()
     template_name = "inventory/inventorize_report.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'devices': LentRecord.get_devices(inventory=self.current_inventory).order_by("sap_id"),
+            'devices': LentRecord.get_devices(inventory=get_current_inventory()).order_by("sap_id"),
             'now': date.today(),
         })
         return context
