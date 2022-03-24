@@ -80,7 +80,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
     autocomplete_fields = [
         'person',
-        'device',
+        'assigned_device',
     ]
 
 
