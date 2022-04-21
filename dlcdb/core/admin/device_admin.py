@@ -56,6 +56,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, C
         'series',
         'serial_number',
         # 'uuid',
+        'order_number',
     ]
 
     list_display = (
@@ -65,7 +66,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, C
         'manufacturer',
         'series',
         'get_record_info_display',
-    ) + CustomBaseModelAdmin.list_display
+    )  # + CustomBaseModelAdmin.list_display
 
     readonly_fields = (
         'is_imported',
@@ -101,6 +102,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, C
             'classes': ('collapse',),
             'fields': (
                 'supplier',
+                'order_number',
                 ('purchase_date', 'warranty_expiration_date', 'maintenance_contract_expiration_date'),
                 'note',
             ),
