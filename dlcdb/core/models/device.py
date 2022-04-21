@@ -95,6 +95,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         null=True,
         storage=OverwriteStorage(),
     )
+    order_number = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Bestellnummer (SAP)",
+    )
     history = HistoricalRecords()
 
     class Meta:
