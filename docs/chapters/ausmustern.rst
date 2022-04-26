@@ -5,18 +5,42 @@ Ausmustern
 Ziel
 ====
 
-Geräte, die nicht mehr existieren, verschrottet oder verkauft sind in der DLCDB kenntlich machen. Hierzu müssen die Geräte bzw. Records identifiziert (gesucht) werden und deren Status entsprechend gesetzt werden.
+Geräte, die nicht mehr existieren, verschrottet oder verkauft sind sind in der DLCDB kenntlich zu machen. Hierzu müssen die Geräte bzw. Records identifiziert (gesucht) werden und deren Status entsprechend gesetzt werden.
+
+.. warning::
+   Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration und ist rechtlich nicht belastbar. Bei Fragen/Unklarheite etc. ist die Finazabteilung die Ansprechpartnerin.
 
 
 Prozess
 =======
 
+Ausgangslage
+------------
+
+Geräte sind defekt/nicht reparabel, veraltet oder können aus sonstigen Gründen vom Institut nicht mehr genutzt werden. Solche Geräte sollen "ausgemustert" werden. Dies geschieht zum Einen in der DLCDB, zum Anderen in der Anlangebuchhaltung der Verwaltung. 
+
+Beim Ausmustern sind einige Regeln zu beachten; Kurzform: 
+
+#. Schriftform einhalten: Formulare ausfüllen, Anhänge ausdrucken etc.
+#. Ausmusterungsgrund muss vorliegen
+#. Gerät muss beschrieben werden
+#. bei Defekt:
+
+   - verschrotten
+
+#. ohne Defekt (veraltet, nicht mehr benötigt etc.):
+
+   - Gerät muss über die MPG-Einkäuferliste anderen Instituten angeboten werden. Diese Meldung übernimmt die Einkaufsabteilung.
+   - Ab bestimmten Wertgrenzen ist ein Verkauf über eine Verwertungsgesellschaft notwendig (falls kein Institut Interesse angemeldet hat)
+
+
+
 RecordAdmin
----------------
+-----------
 
 URL: https://fqdn/admin/core/record/
 
-.. note:: Bulk-Entfernen
+.. note::
    Über diesen Admin ist ein "Massen-Entfernen" (mehrere Geräte auf einmal) möglich. Alternativ steht noch die `CSV-Bulk-Removal`_ Methode zur Verfügung.
 
 
@@ -27,13 +51,13 @@ URL: https://fqdn/admin/core/record/
 
 
 RemovedRecordAdmin
-----------------------
+------------------
 
 URL: https://fqdn/admin/core/removedrecord/
 
 
 CSV-Bulk-Removal
---------------------
+----------------
 
 * Es sollen viele Devices auf einmal entfernt/ausgemustert werden.
 * Diese Devices werden in einer CSV-Datei mit eventuell weiteren Attributen erfasst.
@@ -44,10 +68,12 @@ CSV-Bulk-Removal
 
 
 Ausbuchung
----------------
+----------
 
 Die Ausbuchung muss der Verwaltung mitgeteilt werden: 
 
-See :download:`Ausbuchungsbeleg_Anlagen.docx </_static/Ausbuchungsbeleg_Anlagen.docx>`.
+Via :download:`Ausbuchungsbeleg_Anlagen.docx </_static/Ausbuchungsbeleg_Anlagen.docx>`.
 
-Die Ausgaben der DLCDB (Log-Dateien, generierte CSV-Reports) können als Anlage zu dem Formular genutzt werden, um nicht jedes Device einzeln melden zu müssen.
+Beim Ausbuchen von mehreren Geräten ("Bulk-Entfernen") können die Ausgaben der DLCDB (Log-Dateien, generierte CSV-Reports) als Anlage zu dem Formular genutzt werden, um nicht jedes Device einzeln melden zu müssen.
+
+Der Ausbuchungsbeleg ist dem Inventurverantwortlichen oder dem Abteilungsleiter zur Unterschrift vorzulegen und wird dann an die Verwaltung, Abteilung Finanzen, weitergeleitet.
