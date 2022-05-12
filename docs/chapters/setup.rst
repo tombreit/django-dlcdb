@@ -7,7 +7,7 @@ Prequisites
 -----------------------
 
 * (assuming) Debian 11.x
-* Python>=3.10
+* Python>=3.9
 * for LDAP: libldap2-dev libsasl2-dev
 
 
