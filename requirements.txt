@@ -6,7 +6,7 @@
 #
 alabaster==0.7.12
     # via sphinx
-asgiref==3.5.0
+asgiref==3.5.1
     # via django
 babel==2.10.1
     # via sphinx
@@ -24,7 +24,7 @@ django==4.0.4
     #   djangorestframework
 django-appconf==1.0.5
     # via django-select2
-django-auth-ldap==4.0.0
+django-auth-ldap==4.1.0
     # via -r requirements.in
 django-crispy-forms==1.14.0
     # via -r requirements.in
@@ -34,7 +34,7 @@ django-filter==21.1
     # via -r requirements.in
 django-select2==7.10.0
     # via -r requirements.in
-django-simple-history==3.0.0
+django-simple-history==3.1.1
     # via -r requirements.in
 djangorestframework==3.13.1
     # via -r requirements.in
@@ -56,9 +56,9 @@ importlib-metadata==4.11.3
     # via
     #   markdown
     #   sphinx
-jinja2==3.1.1
+jinja2==3.1.2
     # via sphinx
-markdown==3.3.6
+markdown==3.3.7
     # via -r requirements.in
 markupsafe==2.1.1
     # via jinja2
@@ -78,11 +78,11 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
-pygments==2.11.2
+pygments==2.12.0
     # via sphinx
 pymemcache==3.5.2
     # via -r requirements.in
-pyparsing==3.0.8
+pyparsing==3.0.9
     # via packaging
 python-ldap==3.4.0
     # via django-auth-ldap

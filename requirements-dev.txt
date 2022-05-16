@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements-dev.in
 #
-asgiref==3.5.0
+asgiref==3.5.1
     # via
     #   -c requirements.txt
     #   django
@@ -12,16 +12,16 @@ attrs==21.4.0
     # via pytest
 cffi==1.15.0
     # via cryptography
-coverage[toml]==6.3
+coverage[toml]==6.3.3
     # via pytest-cov
-cryptography==36.0.1
+cryptography==37.0.2
     # via pyopenssl
-django==4.0.2
+django==4.0.4
     # via
     #   -c requirements.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==3.2.4
+django-debug-toolbar==3.4.0
     # via -r requirements-dev.in
 django-extensions==3.1.5
     # via -r requirements-dev.in
@@ -39,11 +39,11 @@ pycparser==2.21
     # via cffi
 pyopenssl==22.0.0
     # via -r requirements-dev.in
-pyparsing==3.0.7
+pyparsing==3.0.9
     # via
     #   -c requirements.txt
     #   packaging
-pytest==6.2.5
+pytest==7.1.2
     # via
     #   -r requirements-dev.in
     #   pytest-cov
@@ -57,9 +57,9 @@ sqlparse==0.4.2
     #   -c requirements.txt
     #   django
     #   django-debug-toolbar
-toml==0.10.2
-    # via pytest
-tomli==2.0.0
-    # via coverage
+tomli==2.0.1
+    # via
+    #   coverage
+    #   pytest
 werkzeug==0.16.1
     # via -r requirements-dev.in
