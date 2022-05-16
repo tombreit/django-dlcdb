@@ -1,16 +1,50 @@
 import json
 
+from django.urls import path
 from django.contrib import admin
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count
 from django.db.models.functions import TruncDay, TruncMonth
 from django.contrib.admin.models import LogEntry
+from django.shortcuts import redirect
 
 from .models import Notification, Report
 
 
 admin.site.register(LogEntry)
-admin.site.register(Notification)
+from .utils.email import build_report_email, send_email
+from .utils.process import create_report_if_needed
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    save_on_top = True
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'trigger-report/<int:notification_pk>',
+                self.admin_site.admin_view(self.trigger_oneshot_reporting),
+                name="trigger-report",
+            )
+        ]
+        all_urls = custom_urls + urls
+        return all_urls
+
+    def trigger_oneshot_reporting(self, request, notification_pk):
+        print("trigger_oneshot_reporting...")
+
+        Result = create_report_if_needed(notification_pk, caller='oneshot')
+        
+        notification_obj = Notification.objects.get(pk=notification_pk)
+        if notification_obj.active:
+            if notification_obj.notify_no_updates or hasattr(Result, 'record_collection.records'):
+                email_objs = build_report_email(notification_obj, Result.report, Result.record_collection)
+                send_email(email_objs)
+
+        # TODO: trigger message
+
+        return redirect('admin:reporting_notification_change', notification_pk)
 
 
 @admin.register(Report)

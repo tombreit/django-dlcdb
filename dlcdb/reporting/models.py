@@ -5,9 +5,6 @@ from django.core.exceptions import ValidationError
 
 from ..core.models import Record
 
-from .utils.process import create_report_if_needed
-from .utils.email import send_email, build_report_email
-
 
 class Notification(models.Model):
 
@@ -111,11 +108,6 @@ class Notification(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        Result = create_report_if_needed(self.pk, caller='oneshot')
-        if self.active:
-            if self.notify_no_updates or hasattr(Result, 'record_collection.records'):
-                email_objs = build_report_email(self, Result.report, Result.record_collection)
-                send_email(email_objs)
 
     def __str__(self):
         return '{active} | {event}/{condition} → {interval} → {recipient}'.format(

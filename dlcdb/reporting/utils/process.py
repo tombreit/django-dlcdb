@@ -15,10 +15,10 @@ from ..settings import LENT_OVERDUE_TOLERANCE_DAYS, IT_NOTIFICATION_EMAIL, NOTIF
 
 from .mappings import get_days_for_interval
 from .representations import get_records_as_spreadsheet, get_records_as_text
-from .email import build_overdue_lender_email, send_email
+from .email import build_report_email, build_overdue_lender_email, send_email
 
 
-def get_affected_records(notification, now, caller):
+def get_affected_records(notification, now):
     """
     Get all items/devices which are relevant for a new report. 
     Constraints:
@@ -26,6 +26,8 @@ def get_affected_records(notification, now, caller):
         * do not report records which were reported in an earlier report: 
           record.created_at must be greater than current time minus interval
     """
+
+    print("get_affected_records...")
 
     from ...core.models import Record
     from ..models import Notification
@@ -39,18 +41,19 @@ def get_affected_records(notification, now, caller):
         'last_run',
     ])
 
-    records = text_repr = file_repr = title_repr = created_at = None
+    records = text_repr = file_repr = title_repr = None
 
     _condition = notification.condition
 
-    if notification.last_run is not None:
+    if notification.last_run:
         _last_run = notification.last_run
     else:
         _days = get_days_for_interval(notification.time_interval)
         # print("_days: ", _days)
         _last_run = now - timedelta(days=_days)
 
-    # print("_last_run: ", _last_run)
+    print(f"_last_run: {_last_run}")
+    print(f"now:       {now}")
 
     since_last_run_filter = Q(
         created_at__gte=_last_run,
@@ -154,6 +157,7 @@ def create_report_if_needed(notification_pk, caller='huey'):
     """
     Check if we want to create a report for this notification.
     """
+    print("create_report_if_needed...")
 
     from ..models import Report, Notification
 
@@ -164,12 +168,14 @@ def create_report_if_needed(notification_pk, caller='huey'):
 
     notification = Notification.objects.get(pk=notification_pk)
 
+    print(f"{caller=} -> {notification.pk=}: {notification=}")
+
     if not notification.active:
         return
 
     _now = timezone.localtime(timezone.now())
     report = None
-    record_collection = get_affected_records(notification, _now, caller)
+    record_collection = get_affected_records(notification, _now)
 
     if record_collection.records:
         filename = '{}_{}.xlsx'.format(slugify(record_collection.title_repr), uuid.uuid1())
@@ -185,7 +191,7 @@ def create_report_if_needed(notification_pk, caller='huey'):
         notification.last_run = _now
 
         User = get_user_model()
-        huey_user, created = User.objects.get_or_create(
+        huey_user, _created = User.objects.get_or_create(
             username='huey',
             is_active=False,
         )
@@ -204,8 +210,9 @@ def create_report_if_needed(notification_pk, caller='huey'):
     return Result(record_collection, report)
 
 
-def create_overdue_lenders_emails(caller):
+def create_overdue_lenders_emails():
     from ..models import Notification
+    print("create_overdue_lenders_emails...")
 
     # now only needed for a valid LenderNotification class
     _now = timezone.localtime(timezone.now())
@@ -235,7 +242,7 @@ def create_overdue_lenders_emails(caller):
     )
 
     # get overdue records
-    lent_overdue_record_collection = get_affected_records(lender_notification, _now, caller)
+    lent_overdue_record_collection = get_affected_records(lender_notification, _now)
 
     # group overdue records for lender/person: get pks for persons with overdue lendings
     lenders_pks = lent_overdue_record_collection.records.values_list('person__pk', flat=True)

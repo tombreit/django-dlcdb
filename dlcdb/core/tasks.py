@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 # Periodic tasks.
 # https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
 
-if settings.DEBUG:
-    @db_periodic_task(huey.crontab(minute='*'))
-    @lock_task('get-udb-persones-minutely')
-    def once_a_minute():
-        logger.info("[huey persons tasks: minutely] Fetch UDB persons...")
-        import_udb_persons()
+# if settings.DEBUG:
+#     @db_periodic_task(huey.crontab(minute='*'))
+#     @lock_task('get-udb-persones-minutely')
+#     def once_a_minute():
+#         logger.info("[huey persons tasks: minutely] Fetch UDB persons...")
+#         import_udb_persons()
 
 # Run every hour, on the hour:
 @db_periodic_task(huey.crontab(minute='0', hour='*/1'))

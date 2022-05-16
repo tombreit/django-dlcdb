@@ -18,25 +18,29 @@ def request_notifications(huey_interval=None):
     """
 
     for notification in Notification.objects.filter(time_interval=huey_interval):
-        _msg1 = 'Processing notification: {}'.format(notification)
+        _msg1 = f"Processing notification: {notification}"
         logger.info(_msg1)
 
         create_report_if_needed(notification.pk, caller='huey')
 
     # Automatically use EVERY_MINUTE when in dev mode
     notifiy_overdue_lenders_interval =  Notification.EVERY_MINUTE if settings.DEBUG else Notification.WEEKLY
-    if (huey_interval == notifiy_overdue_lenders_interval) and (NOTIFY_OVERDUE_LENDERS):
+    if all([
+        NOTIFY_OVERDUE_LENDERS,
+        huey_interval == notifiy_overdue_lenders_interval,
+    ]):
         create_overdue_lenders_emails(caller='huey')
-   
+
 
 # Periodic tasks.
 # https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
 
-# if settings.DEBUG:
-#     @db_periodic_task(huey.crontab(minute='*'))
-#     @lock_task('reports-minutely-lock')
-#     def once_a_minute():
-#         request_notifications(huey_interval=Notification.EVERY_MINUTE)
+if settings.DEBUG:
+    # In fact, every two minutes...
+    @db_periodic_task(huey.crontab(minute='*/2'))
+    @lock_task('reports-minutely-lock')
+    def once_a_minute():
+        request_notifications(huey_interval=Notification.EVERY_MINUTE)
 
 @db_periodic_task(huey.crontab(hour='0', minute='10', day='*'))
 @lock_task('reports-daily-lock')
