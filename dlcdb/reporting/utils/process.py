@@ -27,8 +27,6 @@ def get_affected_records(notification, now):
           record.created_at must be greater than current time minus interval
     """
 
-    print("get_affected_records...")
-
     from ...core.models import Record
     from ..models import Notification
 
@@ -52,8 +50,8 @@ def get_affected_records(notification, now):
         # print("_days: ", _days)
         _last_run = now - timedelta(days=_days)
 
-    print(f"_last_run: {_last_run}")
-    print(f"now:       {now}")
+    # print(f"_last_run: {_last_run}")
+    # print(f"now:       {now}")
 
     since_last_run_filter = Q(
         created_at__gte=_last_run,
@@ -157,8 +155,6 @@ def create_report_if_needed(notification_pk, caller='huey'):
     """
     Check if we want to create a report for this notification.
     """
-    print("create_report_if_needed...")
-
     from ..models import Report, Notification
 
     Result = namedtuple('Result', [
@@ -167,8 +163,6 @@ def create_report_if_needed(notification_pk, caller='huey'):
     ])
 
     notification = Notification.objects.get(pk=notification_pk)
-
-    print(f"{caller=} -> {notification.pk=}: {notification=}")
 
     if not notification.active:
         return
@@ -212,7 +206,6 @@ def create_report_if_needed(notification_pk, caller='huey'):
 
 def create_overdue_lenders_emails():
     from ..models import Notification
-    print("create_overdue_lenders_emails...")
 
     # now only needed for a valid LenderNotification class
     _now = timezone.localtime(timezone.now())
