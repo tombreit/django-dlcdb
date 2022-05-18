@@ -17,11 +17,9 @@
 
 
 {% block branding %}
-    {% comment %}
     <h1 id="site-name">
         <a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a>
     </h1>
-    {% endcomment %}
 {% endblock %}
 
 
