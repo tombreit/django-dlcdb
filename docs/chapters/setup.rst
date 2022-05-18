@@ -8,11 +8,14 @@ Prequisites
 
 * (assuming) Debian 11.x
 * Python>=3.9
+* npm
 * for LDAP: libldap2-dev libsasl2-dev
 
 
 Installation
-------------------------
+------------
+
+*Assuming local development environment*
 
 Create a virtual environment:
 
@@ -27,8 +30,9 @@ Activate the virtualenv and install the requirements:
 .. code:: bash
 
     source .venv/bin/activate
-    pip install --upgrade pip setuptools
+    pip install --upgrade pip setuptools wheel
     pip install -r requirements.txt
+    pip install -r requirements-dev.txt  # only needed if SETTINGS_MODE=dev
 
 
 Set environment for project:
@@ -50,23 +54,23 @@ Place your logo files (format: `svg`) at the following paths:
    Branding is done via the two steps above: crafting an individual `.env` and saving the two logo files.
 
 
-Run this project:
-
-.. code:: bash
-
-    ./manage.py createsuperuser
-    ./manage.py migrate
-    ./manage.py runserver
-    # or, runserver+https:
-    ./manage.py runserver_plus --cert /tmp/cert
-
-
 Build frontend assets:
 
 .. code:: bash
 
     npm install
     npm run prod
+
+
+Run this project:
+
+.. code:: bash
+
+    ./manage.py migrate
+    ./manage.py createsuperuser
+    ./manage.py runserver
+    # or, runserver+https:
+    ./manage.py runserver_plus --cert /tmp/cert
 
 
 Build Dokumentation:
