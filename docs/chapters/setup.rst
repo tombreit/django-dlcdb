@@ -116,3 +116,31 @@ Enable the task runner as a systemd service unit for a given system user:
    $ systemctl --user enable dlcdb_huey.service
    $ systemctl --user restart dlcdb_huey.service
    $ systemctl --user status dlcdb_huey.service
+
+
+Production deployment
+---------------------
+
+.. code:: bash
+
+   mkdir -p /path/to/dlcdb/staticfiles
+   mkdir -p /path/to/dlcdb/dlcdb/media
+   npm install
+   npm run prod
+   source /path/to/dlcdb/venv/bin/activate
+   pip install --upgrade pip setuptools wheel
+   pip install -r requirements.txt
+   python manage.py collectstatic --noinput
+   python manage.py migrate --noinput
+   export XDG_RUNTIME_DIR="/run/user/$UID"
+   export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+   systemctl --user restart dlcdb_huey.service
+   touch dlcdb/wsgi.py
+   cd ./docs/
+   make html
+
+
+Apache
+------
+
+*coming soon*
