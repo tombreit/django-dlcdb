@@ -164,7 +164,7 @@ TIME_ZONE = 'Europe/Berlin'
 
 USE_I18N = True
 
-USE_L10N = True 
+USE_L10N = True
 
 USE_TZ = True
 
@@ -177,7 +177,6 @@ FORMAT_MODULE_PATH = [
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATICFILES_DIRS = [str(BASE_DIR / "dlcdb/static")]
-
 STATIC_ROOT = str(STATICFILES_DIR)
 STATIC_URL = '/static/'
 
