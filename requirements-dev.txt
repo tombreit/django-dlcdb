@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements-dev.in
 #
-asgiref==3.5.1
+asgiref==3.5.2
     # via
     #   -c requirements.txt
     #   django
@@ -12,7 +12,7 @@ attrs==21.4.0
     # via pytest
 cffi==1.15.0
     # via cryptography
-coverage[toml]==6.3.3
+coverage[toml]==6.4
     # via pytest-cov
 cryptography==37.0.2
     # via pyopenssl
