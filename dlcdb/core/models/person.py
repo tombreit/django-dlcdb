@@ -15,6 +15,9 @@ class Person(SoftDeleteAuditBaseModel):
         ('krm', 'Kriminologie'),
         ('psl', 'Öffentliches Recht/Public Law'),
         ('htk', 'Haustechnik'),
+        ('pic', 'RG Personality, Identity, and Crime'),
+        ('scc', 'RG Space, Contexts, and Crime'),
+        ('rgs', 'RG Strafrechtstheorie'),
     )
 
     first_name = models.CharField(max_length=255, verbose_name='Vorname')
@@ -28,6 +31,7 @@ class Person(SoftDeleteAuditBaseModel):
     department = models.CharField(
         max_length=3,
         choices=DEPARTMENT_CHOICES,
+        blank=True,
     )
 
     # Additional UDB mirrored fields, all optional, updated by a cron task:
