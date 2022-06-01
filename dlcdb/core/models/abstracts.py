@@ -47,6 +47,9 @@ class SoftDeleteAuditBaseModelQuerySet(models.QuerySet):
     def with_deleted_objects(self):
         return self.filter()
 
+    def only_deleted_objects(self):
+        return self.filter(deleted_at__isnull=False)
+
 
 class WithDeletedObjectsManager(models.Manager):
     def get_queryset(self):
@@ -56,6 +59,11 @@ class WithDeletedObjectsManager(models.Manager):
 class NotDeletedObjectsManager(models.Manager):
     def get_queryset(self):
         return SoftDeleteAuditBaseModelQuerySet(self.model, using=self._db).not_deleted_objects()
+
+
+class OnlyDeletedObjectsManager(models.Manager):
+    def get_queryset(self):
+        return SoftDeleteAuditBaseModelQuerySet(self.model, using=self._db).only_deleted_objects()
 
 
 class SoftDeleteAuditBaseModel(AuditBaseModel):
@@ -79,6 +87,7 @@ class SoftDeleteAuditBaseModel(AuditBaseModel):
 
     objects = NotDeletedObjectsManager()
     with_softdeleted_objects = WithDeletedObjectsManager()
+    only_softdeleted_objects = OnlyDeletedObjectsManager()
 
     class Meta:
         abstract = True

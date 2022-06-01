@@ -85,5 +85,5 @@ class Person(SoftDeleteAuditBaseModel):
         return '{last_name}{delimiter}{first_name}'.format(first_name=self.first_name, last_name=self.last_name, delimiter=", " if self.first_name else "")
 
     def clean(self):
-        if Person.with_softdeleted_objects.filter(email=self.email).exists():
+        if Person.only_softdeleted_objects.filter(email=self.email).exists():
             raise ValidationError('A soft-deleted person with this email address already exists. Please contact your IT;-)')
