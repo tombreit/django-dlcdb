@@ -107,32 +107,3 @@ def import_udb_persons():
 
     except urllib.error.HTTPError as e:
         print(f"Ups, something went wrong: {e}")
-
-
-def import_udb_person_images():
-    logger.info("[huey person images utils: import_udb_person_images] Fetch UDB JSON...")
-    UDB_JSON_URL = settings.UDB_JSON_PERSON_IMAGES_URL
-    print(f"Fetching data from {UDB_JSON_URL=}")
-
-    dlcdb_person = Person.objects.filter(udb_person_uuid__isnull=False)
-    udb_person_images = {}
-    
-    with urllib.request.urlopen(UDB_JSON_URL) as response:
-        data = response.read()
-        udb_obj = json.loads(data.decode('utf-8'))
-        contracts = udb_obj['results']['contracts']
-
-        for contract in contracts:
-
-            try:
-                udb_person_last_name = contract['person']['person_last_name']
-                person_image = contract['person']['person_image']
-                print(udb_person_last_name, person_image)
-            except KeyError as e:
-                print(e)
-            else:
-                pass
-                # person_uuid = contract['person']['id']
-                # udb_person_images.update({person_uuid: person_image})
-
-        #print(udb_person_images)
