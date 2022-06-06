@@ -1,0 +1,35 @@
+{% extends 'lending/base_lending.html' %}
+
+
+{% block body %}
+
+<h4 class="alert-heading">
+    Things
+
+    <div id="add-thing-button-or-form">
+        
+        <a 
+            class="btn btn-warning text-left"
+            id="add-thing"
+            hx-trigger="click"
+            hx-target="#add-thing-button-or-form"
+            hx-get="{% url 'smallstuff:add_thing' person.id %}"
+        >
+            <i class="fas fa-plus"></i>
+        </a>
+        
+    </div>
+
+</h4>
+
+<hr>
+
+{% if assignments %}
+<div id="assigned-things" hx-trigger="newAssignment from:body"></div>
+    {% include 'smallstuff/includes/assignements.html' %}
+{% else %}
+    <i>No things assigned yet.</i>
+{% endif %}
+</div>
+
+{% endblock %}

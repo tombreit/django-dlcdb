@@ -1,4 +1,4 @@
-{% load static %}
+{% load static django_htmx %}
 
 <!doctype html>
 <html lang="en">
@@ -18,8 +18,11 @@
         {% block body %}{% endblock body %}
     </div>
 
-    <script src="https://unpkg.com/htmx.org@1.6.1" integrity="sha384-tvG/2mnCFmGQzYC1Oh3qxQ7CkQ9kMzYjWZSNtrRZygHPDDqottzEJsqS4oUVodhW" crossorigin="anonymous"></script>
+    <script src="{% static 'lending/dist/js/htmx.min.js' %}" defer></script>
+    {% django_htmx_script %}
+
     {# <script src="{% static 'lending/dist/js/lending.js' %}"></script> #}
     {% block extra_js %}{% endblock extra_js %}
+
 </body>
 </html>

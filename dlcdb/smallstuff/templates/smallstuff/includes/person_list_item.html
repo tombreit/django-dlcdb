@@ -1,0 +1,63 @@
+{% load static %}
+
+<div class="row alert alert-warning search-result-item">
+    <div class="col-md-2">
+        {% if person.udb_person_image %}
+            <img 
+                src="{{ person.udb_person_image.url }}" 
+                loading="lazy"
+                style="max-width: 100px;" class="m-2"
+                width="{{ udb_person_image.width }}" 
+                height="{{ udb_person_image.height }}"
+                alt="" 
+            >
+        {% else %}
+            <img src="{% static 'lending/dist/img/SantasLittleHelper.png' %}" alt="" style="max-width: 100px;" class="m-2">
+        {% endif %}
+    </div>
+    <div class="col-md-10">
+
+            <h4>
+                <a href="{% url 'smallstuff:person_detail' person.id %}" class="">
+                    {{  person.last_name }}, {{  person.first_name }}
+                </a>
+                - {{ person.department }}
+            </h4>
+            <br>
+            <span class="badge badge-primary">
+                {{ person.assignments_count }} thing{{ person.assignments_count|pluralize }}
+            </span>
+
+            <details>
+                <summary>
+                    UDB
+                </summary>
+
+                <div class="details-body">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <th>Contract ends at</th>
+                                <td>{{ person.udb_contract_planned_checkout }}</td>
+                            </tr>
+                            <tr>
+                                <th>Department</th>
+                                <td>{{ person.udb_contract_organization_unit }}</td>        
+                            </tr>
+                            <tr>
+                                <th>Contract type</th>
+                                <td>{{ person.udb_contract_contract_type }}</td>        
+                            </tr>
+                            <tr>
+                                <th>Positions</th>
+                                <td>{{ person.udb_contract_organizational_positions }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </details>
+                
+    
+    </div>
+</div>

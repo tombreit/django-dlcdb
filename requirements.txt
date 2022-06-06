@@ -14,12 +14,13 @@ certifi==2022.5.18.1
     # via requests
 charset-normalizer==2.0.12
     # via requests
-django==4.0.4
+django==4.0.5
     # via
     #   -r requirements.in
     #   django-appconf
     #   django-auth-ldap
     #   django-filter
+    #   django-htmx
     #   django-select2
     #   djangorestframework
 django-appconf==1.0.5
@@ -31,6 +32,8 @@ django-crispy-forms==1.14.0
 django-environ==0.8.1
     # via -r requirements.in
 django-filter==21.1
+    # via -r requirements.in
+django-htmx==1.12.0
     # via -r requirements.in
 django-select2==7.10.0
     # via -r requirements.in
@@ -68,6 +71,8 @@ openpyxl==3.0.10
     # via -r requirements.in
 packaging==21.3
     # via sphinx
+pillow==9.1.1
+    # via -r requirements.in
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
@@ -100,7 +105,7 @@ six==1.16.0
     # via pymemcache
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.0.0
+sphinx==5.0.1
     # via
     #   -r requirements.in
     #   sphinx-rtd-theme

@@ -59,6 +59,7 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'crispy_forms',
     'django_select2',
+    'django_htmx',
     'huey.contrib.djhuey',
     'simple_history',
 ]
@@ -69,6 +70,7 @@ LOCAL_APPS = [
     'dlcdb.inventory',
     'dlcdb.reporting',
     'dlcdb.lending',
+    'dlcdb.smallstuff',
     'dlcdb.api',
 ]
 
@@ -83,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'dlcdb.tenants.middleware.CurrentTenantMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -280,8 +283,10 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 UDB_JSON_URL = env('UDB_JSON_URL')
+UDB_JSON_PERSON_IMAGES_URL = env('UDB_JSON_PERSON_IMAGES_URL')
 # UDB_JSON_URL = "file://{}/temp/udb.json".format(settings.BASE_DIR)
 
+PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
 # Branding
 # Place your organization/insitution logos at the following paths to

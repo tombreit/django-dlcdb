@@ -1,0 +1,54 @@
+{% extends 'lending/base_lending.html' %}
+
+
+{% block body %}
+
+<div class="row">
+    <div class="col-6">
+        <h1>
+            Person
+        </h1>
+    </div>
+    <div class="col-6 text-right">
+        <a href="{% url 'smallstuff:person_search' %}" class="btn btn-info">
+            <i class="fas fa-search"></i>
+            Search User
+        </a>
+    </div>
+</div>
+
+
+{% include 'smallstuff/includes/person_list_item.html' %}
+
+<hr>
+
+<div class="alert alert-info" id="thingies">
+
+    <h4 class="alert-heading">
+        Things
+    </h4>
+
+    <div id="add-thing-button-or-form">
+        <a 
+            class="btn btn-warning text-left"
+            id="add-thing"
+            hx-trigger="click"
+            hx-target="#add-thing-button-or-form"
+            hx-get="{% url 'smallstuff:add_assignement' person.id %}"
+        >
+            <i class="fas fa-plus"></i>
+        </a>
+    </div>
+
+    <hr>
+
+    <div 
+        id="assignements" 
+        hx-trigger="load, newAssignment from:body"
+        hx-get="{% url 'smallstuff:get_assignements' person.id %}"
+    ></div>
+
+
+</div>
+
+{% endblock body %}

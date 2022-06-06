@@ -1,0 +1,76 @@
+{% extends 'lending/base_lending.html' %}
+
+
+{% block body %}
+
+    <h1>
+        Person Search
+        <span class="htmx-indicator"> 
+            <div class="spinner-grow text-info" role="status">
+                <span class="sr-only">Searching...</span>
+              </div>
+        </span> 
+    </h1>
+    
+    <form>
+        <div class="input-group input-group-lg mb-3">
+            <input 
+                type="text"
+                name="search" 
+                class="form-control"
+                placeholder="Tippe halt mal was, oder einfach *..." 
+                autocomplete="off" 
+                hx-post="{% url 'smallstuff:person_search' %}"
+                hx-trigger="keyup changed delay:200ms, search" 
+                hx-target="#search-results"
+                hx-indicator=".htmx-indicator"
+            >
+
+            <div class="input-group-append">
+                <span class="input-group-text">
+                    <span id="results-count">0</span> 
+                </span>
+                <button class="btn btn-success" type="search">Search</button>
+                <button class="btn btn-secondary" type="reset">Reset</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="search-results"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        
+        const resultCountNode = document.getElementById('results-count');
+        const targetNode = document.getElementById('search-results');
+        
+        // Options for the observer (which mutations to observe)
+        const config = { attributes: true, childList: true, subtree: true };
+        
+        // Callback function to execute when mutations are observed
+        const callback = function(mutationList, observer) {
+            // Use traditional 'for loops' for IE 11
+            for(const mutation of mutationList) {
+                if (mutation.type === 'childList') {
+                    console.log('A child node has been added or removed.');
+                    let resultCount = targetNode.childElementCount;
+                    console.log("resultCount: ", resultCount);
+                    resultCountNode.textContent = resultCount;
+                }
+                // else if (mutation.type === 'attributes') {
+                //     console.log('The ' + mutation.attributeName + ' attribute was modified.');
+                // }
+            }
+        };
+        
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+        
+        // Start observing the target node for configured mutations
+        observer.observe(targetNode, config);
+        
+    });
+</script>
+
+
+{% endblock body %}

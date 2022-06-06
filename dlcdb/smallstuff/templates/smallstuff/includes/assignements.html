@@ -1,0 +1,31 @@
+{% if assignments %}
+    {% for assignment in assignments.all %}
+
+    <span class="btn btn-warning text-left">
+        <a 
+            hx-get="{% url 'smallstuff:remove_assignement' assignment.id %}"
+            hx-trigger="click"
+        >
+            <i class="text-danger fa-solid fa-circle-xmark"></i>
+        </a>
+
+        <span style="color: black;">
+            {{ assignment.thing.name }} 
+            <br>
+            <span>
+                {% if assignment.assigned_at %}
+                    ★ {{ assignment.assigned_at }}
+                {% endif %}
+                {% if assignment.unassigned_at %}
+                    ☆ {{ assignment.unassigned_at }}
+                {% endif %}
+            </span>
+        </span>
+    </span>
+
+    {% endfor %}
+{% else %}
+    <i>No things assigned yet.</i>
+{% endif %}
+
+

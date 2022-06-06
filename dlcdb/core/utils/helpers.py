@@ -1,9 +1,14 @@
 import logging
+import base64
+import re
+from io import BytesIO
 from collections import namedtuple
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html
+
+from PIL import Image
 
 from ..models import Device, Record
 
@@ -74,3 +79,16 @@ def get_current_room_href(obj):
         current_room_link = format_html('<a href="{}">{}</a>', url, current_room)
 
     return current_room_link
+
+
+def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
+    try:
+        image_string = re.sub('^data:.+;base64,', '', base64string)
+
+        with Image.open(BytesIO(base64.urlsafe_b64decode(image_string))) as img:
+            img.load()
+            img.thumbnail(thumbnail_size)
+            img = img.convert('RGB')
+            img.save(to_filepath, "JPEG")
+    except BaseException as e:
+        raise e

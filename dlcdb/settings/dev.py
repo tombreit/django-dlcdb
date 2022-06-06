@@ -27,3 +27,8 @@ INTERNAL_IPS = ['127.0.0.1']
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 AUTH_PASSWORD_VALIDATORS = []
+
+IPYTHON_ARGUMENTS = [
+    '--debug',
+    '--NotebookApp.iopub_data_rate_limit=10000000000.0',
+]

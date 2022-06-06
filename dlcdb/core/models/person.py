@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
@@ -60,6 +61,10 @@ class Person(SoftDeleteAuditBaseModel):
         max_length=320,
         blank=True,
         null=True,
+    )
+    udb_person_image = models.ImageField(
+        blank=True,
+        upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/"
     )
     # TODO: Use stay-dates instead of individual contract dates to avoid
     # please-return notifications if a follow up contract exists.

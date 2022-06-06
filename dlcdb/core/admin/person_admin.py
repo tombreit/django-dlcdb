@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
 from ..models import Person
@@ -16,11 +17,14 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'udb_contract_organization_unit',
         'udb_contract_contract_type',
         'udb_contract_organizational_positions',
+        'udb_person_image',
         'udb_person_uuid',
         'udb_data_updated_at',
     ]
 
-    readonly_fields = udb_fields
+    _readonly_fields = udb_fields
+    _readonly_fields.append("udb_person_image_as_image")
+    readonly_fields = _readonly_fields
 
     dlcdb_fields = [
         'last_name',
@@ -44,12 +48,12 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'email',
         'udb_person_email_internal_business',
         'department',
+        'udb_person_image_as_image',
     ]
 
     list_filter = [
         'department'
     ]
-
 
     fieldsets = (
         ('Person', {
@@ -64,3 +68,10 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             ),
         }),
     )
+
+    def udb_person_image_as_image(self, obj):
+        return mark_safe('<img src="{url}" style="max-width: 100px;">'.format(
+            url=obj.udb_person_image.url if obj.udb_person_image else "",
+            )
+    )
+    udb_person_image_as_image.short_description = 'Image'
