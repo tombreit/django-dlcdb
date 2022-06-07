@@ -29,7 +29,9 @@ class PersonFilter(django_filters.FilterSet):
             .order_by("-assignments_count")  # .order_by("-assignedthing")
         )
 
-        if value == "*":
+        if not value:
+            qs = Person.objects.none()
+        elif value == "*":
             qs = qs
         else:
             qs = qs.filter(

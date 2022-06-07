@@ -21,7 +21,7 @@
                 type="text"
                 name="search" 
                 class="form-control"
-                placeholder="Tippe halt mal was, oder einfach *..." 
+                placeholder="Tippe halt mal was, oder einfach *" 
                 autocomplete="off" 
                 hx-trigger="keyup changed delay:200ms" 
                 hx-indicator=".htmx-indicator"
@@ -34,7 +34,7 @@
                     <span id="results-count">0</span> 
                 </span>
                 <button class="btn btn-success" type="search">Search</button>
-                <button class="btn btn-secondary" type="reset">Reset</button>
+                <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
             </div>
         </div>
     </form>
