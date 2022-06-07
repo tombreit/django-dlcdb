@@ -14,10 +14,10 @@
             <br>
             <span>
                 {% if assignment.assigned_at %}
-                    ★ {{ assignment.assigned_at }}
+                    ★ {{ assignment.assigned_at|date:"Y-m-d H:i:s" }}
                 {% endif %}
                 {% if assignment.unassigned_at %}
-                    ☆ {{ assignment.unassigned_at }}
+                    ☆ {{ assignment.unassigned_at|date:"Y-m-d H:i:s" }}
                 {% endif %}
             </span>
         </span>

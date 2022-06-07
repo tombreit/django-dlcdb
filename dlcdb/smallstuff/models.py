@@ -75,12 +75,13 @@ class AssignedThing(models.Model):
     currently_assigned_objects = CurrentlyAssignedThingManager()
 
     def __str__(self):
-        return "{person} ↔ {thing}: ☑ {assigned_at} ☒ {unassigned_at}".format(
+        return "{person} ↔ {thing}: {assigned} {unassigned}".format(
             person=self.person,
             thing=self.thing,
-            assigned_at=f"{self.assigned_at:%Y-%m-%d %H:%M:%S}" if self.assigned_at else 'n/a',
-            unassigned_at=f"{self.unassigned_at:%Y-%m-%d %H:%M:%S}"  if self.unassigned_at else 'n/a',
+            assigned='☑' if self.assigned_at else 'n/a',
+            unassigned='☒' if self.unassigned_at else 'n/a',
         )
+
     def clean(self):
         if self.unassigned_at and not self.assigned_at:
             raise ValidationError(_('Can not be unassigned without being assigned first!'))

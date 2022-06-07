@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
 from django.utils.timezone import now
+from django.utils import timezone
 from django.http import HttpResponse
 
 from dlcdb.core.models import Person
@@ -55,11 +56,13 @@ def get_assignements(request, person_id):
 
 
 def remove_assignement(request, assignment_id):
+    print(f"{now()=}")
+    print(f"{timezone.localtime(timezone.now())=}")
     to_unassign_assignment = AssignedThing.currently_assigned_objects.get(id=assignment_id)
-    to_unassign_assignment.unassigned_at = now()  # datetime.now()
+    to_unassign_assignment.unassigned_at = timezone.localtime(timezone.now())  # datetime.now()
     to_unassign_assignment.unassigned_by = request.user
 
-    to_unassign_assignment.save(update_fields=['unassigned_at', 'unassigned_by'])
+    to_unassign_assignment.save()  # update_fields=['unassigned_at', 'unassigned_by']
 
     response = HttpResponse(status=204)
     response["HX-Trigger"] = "newAssignment"
@@ -72,7 +75,7 @@ def add_assignement(request, person_id):
         form = AssignedThingsForm(request.POST)
         if form.is_valid():
             # print(f"{form.cleaned_data=}")
-            form.instance.assigned_at = now()
+            form.instance.assigned_at = timezone.localtime(timezone.now())
             form.instance.assigned_by = request.user
             form.save()
             response = HttpResponse(status=204)
