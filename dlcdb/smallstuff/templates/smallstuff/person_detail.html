@@ -3,24 +3,24 @@
 
 {% block body %}
 
-<div class="row">
-    <div class="col-6">
+<div class="d-flex">
+    <div class="mr-auto p-2">
         <h1>
             Person
         </h1>
     </div>
-    <div class="col-6 text-right">
+    <div class="p-2">
         <a href="{% url 'smallstuff:person_search' %}" class="btn btn-info">
             <i class="fas fa-search"></i>
-            Search User
+            Search
+        </a>
+        <a href="{% url 'admin:smallstuff_thing_changelist' %}" class="btn btn-primary">
+            <i class="fa-solid fa-gear"></i>
         </a>
     </div>
 </div>
 
-
 {% include 'smallstuff/includes/person_list_item.html' %}
-
-<hr>
 
 <div class="alert alert-info" id="thingies">
 

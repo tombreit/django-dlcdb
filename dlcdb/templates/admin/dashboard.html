@@ -22,6 +22,9 @@
             <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
                 Verleihen
             </a>
+            <a class="btn btn-primary btn-lg" href="{% url "smallstuff:person_search" %}">
+                Gruschd
+            </a>
 
             {% if perms.core.change_inventory %}
                 <a role="button" class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">

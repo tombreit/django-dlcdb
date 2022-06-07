@@ -3,20 +3,29 @@
 
 {% block body %}
 
-    <h1>
-        Person Search
-        <span class="htmx-indicator"> 
-            <div class="spinner-grow text-info" role="status">
-                <span class="sr-only">Searching...</span>
-              </div>
-        </span> 
-    </h1>
+    <div class="d-flex">
+        <div class="mr-auto p-2">
+            <h1>
+                Person Search
+                <span class="htmx-indicator"> 
+                    <div class="spinner-grow text-info" role="status">
+                        <span class="sr-only">Searching...</span>
+                      </div>
+                </span> 
+            </h1>
+        </div>
+        <div class="p-2">
+            <a href="{% url 'admin:smallstuff_thing_changelist' %}" class="btn btn-primary" title="Backend">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+        </div>
+    </div>
     
     <form
         hx-post="{% url 'smallstuff:person_search' %}"
         hx-target="#search-results"
     >
-        <div class="input-group input-group-lg mb-3">
+        <div class="input-group mb-3">
             <input 
                 type="text"
                 name="search" 
