@@ -1,7 +1,7 @@
 {% if assignments %}
     {% for assignment in assignments.all %}
 
-    <span class="btn btn-warning text-left">
+    <span class="btn btn-warning text-left m-1">
         <a 
             hx-get="{% url 'smallstuff:remove_assignement' assignment.id %}"
             hx-trigger="click"

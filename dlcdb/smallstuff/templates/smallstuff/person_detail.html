@@ -24,21 +24,27 @@
 
 <div class="alert alert-info" id="thingies">
 
-    <h4 class="alert-heading">
-        Things
-    </h4>
+    <div class="d-flex">
+        <div class="mr-auto p-2">
+            <h4 class="alert-heading">
+                Things
+            </h4>
+        </div>
+        <div class="p-2">
+            <span id="add-thing-button-or-form">
+                <a 
+                    class="btn btn-warning text-left"
+                    id="add-thing"
+                    hx-trigger="click"
+                    hx-target="#add-thing-button-or-form"
+                    hx-get="{% url 'smallstuff:add_assignement' person.id %}"
+                >
+                    <i class="fas fa-plus"></i>
+                </a>
+            </span>
 
-    <div id="add-thing-button-or-form">
-        <a 
-            class="btn btn-warning text-left"
-            id="add-thing"
-            hx-trigger="click"
-            hx-target="#add-thing-button-or-form"
-            hx-get="{% url 'smallstuff:add_assignement' person.id %}"
-        >
-            <i class="fas fa-plus"></i>
-        </a>
-    </div>
+        </div>
+      </div>
 
     <hr>
 
