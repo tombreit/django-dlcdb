@@ -19,9 +19,12 @@ class PersonFilter(django_filters.FilterSet):
         ]
 
     def custom_user_search(self, queryset, name, value):
+        """
+        Only allow current contracts to get some things.
+        """
 
         qs = (
-            Person.objects.all()
+            Person.active_contract_objects
             .annotate(assignments_count=Count('assignedthing__pk'))
             .order_by("-assignments_count")  # .order_by("-assignedthing")
         )

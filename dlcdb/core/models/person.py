@@ -2,11 +2,35 @@ from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from .abstracts import SoftDeleteAuditBaseModel
 
 
-class Person(SoftDeleteAuditBaseModel):
+class PersonQuerySet(models.QuerySet):
+    def active_contract_objects(self):
+        return self.filter(
+            udb_contract_planned_checkin__lte=timezone.now(),
+            udb_contract_planned_checkout__gte=timezone.now(),
+        )
+
+
+class ActiveContractObjectsManager(models.Manager):
+    def get_queryset(self):
+        return PersonQuerySet(self.model, using=self._db).active_contract_objects()
+
+
+class ActiveContractObjectsBaseModel(models.Model):
+    """
+    https://docs.djangoproject.com/en/4.0/topics/db/managers/#custom-managers-and-model-inheritance
+    """
+    active_contract_objects = ActiveContractObjectsManager()
+
+    class Meta:
+        abstract = True
+
+
+class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
 
     DEPARTMENT_CHOICES = (
         ('edv', 'EDV'),
