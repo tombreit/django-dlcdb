@@ -12,7 +12,10 @@
         </span> 
     </h1>
     
-    <form>
+    <form
+        hx-post="{% url 'smallstuff:person_search' %}"
+        hx-target="#search-results"
+    >
         <div class="input-group input-group-lg mb-3">
             <input 
                 type="text"
@@ -20,10 +23,10 @@
                 class="form-control"
                 placeholder="Tippe halt mal was, oder einfach *..." 
                 autocomplete="off" 
-                hx-post="{% url 'smallstuff:person_search' %}"
-                hx-trigger="keyup changed delay:200ms, search" 
-                hx-target="#search-results"
+                hx-trigger="keyup changed delay:200ms" 
                 hx-indicator=".htmx-indicator"
+                hx-post="{% url 'smallstuff:person_search' %}"
+                hx-target="#search-results"
             >
 
             <div class="input-group-append">
