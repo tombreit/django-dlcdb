@@ -1,15 +1,24 @@
 {% if assignments %}
     {% for assignment in assignments.all %}
 
-    <span class="btn btn-warning text-left m-1">
+    <span class="text-left m-1 btn 
+            {% if assignment.unassigned_at %}
+                btn-secondary text-white
+            {% else %}
+                btn-warning text-dark
+            {% endif %}
+    ">
+
+        {% if not assignment.unassigned_at %}
         <a 
             hx-get="{% url 'smallstuff:remove_assignement' assignment.id %}"
             hx-trigger="click"
         >
             <i class="text-danger fa-solid fa-circle-xmark"></i>
         </a>
+        {% endif %}
 
-        <span style="color: black;">
+        <span>
             {{ assignment.thing.name }} 
             <br>
             <span>

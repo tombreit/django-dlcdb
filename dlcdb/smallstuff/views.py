@@ -32,8 +32,7 @@ def person_search(request):
 def person_detail(request, person_id):
     person = (
         Person
-        .objects
-        .annotate(assignments_count=Count('assignedthing__pk'))
+        .smallstuff_person_objects
         .get(id=person_id)
     )
 
@@ -46,8 +45,13 @@ def person_detail(request, person_id):
     return render(request, template, context)
 
 
-def get_assignements(request, person_id):
-    assignments = AssignedThing.currently_assigned_objects.filter(person=person_id)
+def get_assignements(request, person_id, state):
+
+    if state == "issued":
+        assignments = AssignedThing.currently_assigned_objects.filter(person=person_id)
+    elif state == "returned":
+        assignments = AssignedThing.objects.filter(person=person_id, unassigned_at__isnull=False)
+
     template = "smallstuff/includes/assignements.html"
     context = {
         "assignments": assignments,

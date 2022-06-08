@@ -23,6 +23,7 @@ class Thing(AuditBaseModel):
         return f"{self.name}"
 
     class Meta:
+        ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
                 Lower('name'),

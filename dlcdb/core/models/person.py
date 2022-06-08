@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
+from django.db.models import Count
 from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -14,10 +16,43 @@ class PersonQuerySet(models.QuerySet):
             udb_contract_planned_checkout__gte=timezone.now(),
         )
 
+    def smallstuff_person_objects(self):
+        """
+        Queryset which contains all active persons or persons who
+        have some smallstuff things assigned and not yet returned.
+        """
+        has_active_contract_condition = Q(
+            Q(udb_contract_planned_checkin__lte=timezone.now()) & Q(udb_contract_planned_checkout__gte=timezone.now())
+        )
+
+        qs = (
+            self
+            .annotate(assigned_things_count=Count(
+                'assignedthing',
+                filter=Q(assignedthing__unassigned_at__isnull=True),
+                distinct=True,
+            ))
+            .annotate(
+                unassigned_things_count=Count(
+                    'assignedthing',
+                    filter=Q(assignedthing__unassigned_at__isnull=False),
+                    distinct=True,
+            ))
+            .filter(has_active_contract_condition | Q(assigned_things_count__gte=1)
+            )
+        )
+
+        return qs
+
 
 class ActiveContractObjectsManager(models.Manager):
     def get_queryset(self):
         return PersonQuerySet(self.model, using=self._db).active_contract_objects()
+
+
+class SmallstuffPersonObjectsManager(models.Manager):
+    def get_queryset(self):
+        return PersonQuerySet(self.model, using=self._db).smallstuff_person_objects()
 
 
 class ActiveContractObjectsBaseModel(models.Model):
@@ -25,6 +60,7 @@ class ActiveContractObjectsBaseModel(models.Model):
     https://docs.djangoproject.com/en/4.0/topics/db/managers/#custom-managers-and-model-inheritance
     """
     active_contract_objects = ActiveContractObjectsManager()
+    smallstuff_person_objects = SmallstuffPersonObjectsManager()
 
     class Meta:
         abstract = True

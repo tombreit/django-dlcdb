@@ -17,7 +17,7 @@ class AssignedThingsForm(forms.ModelForm):
             'thing',
             'person',
             HTML("""
-                <button type="submit" name="submit" class="btn btn-warning mb-2"><i class="fas fa-plus"></i></button>
+                <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="fas fa-plus"></i></button>
             """),
         )
         # self.helper.add_input(Submit('submit', '<i class="fas fa-plus"></i>', css_class='btn-primary'))

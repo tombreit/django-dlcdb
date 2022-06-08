@@ -33,7 +33,7 @@
         <div class="p-2">
             <span id="add-thing-button-or-form">
                 <a 
-                    class="btn btn-warning text-left"
+                    class="btn btn-danger text-left"
                     id="add-thing"
                     hx-trigger="click"
                     hx-target="#add-thing-button-or-form"
@@ -51,7 +51,7 @@
     <div 
         id="assignements" 
         hx-trigger="load, newAssignment from:body"
-        hx-get="{% url 'smallstuff:get_assignements' person.id %}"
+        hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
     ></div>
 
 

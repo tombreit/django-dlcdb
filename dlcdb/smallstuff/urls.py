@@ -15,6 +15,6 @@ urlpatterns = [
     path('person/<int:person_id>', person_detail, name='person_detail'),
     
     path('assignements/person/<int:person_id>/add', add_assignement, name='add_assignement'),
-    path('assignements/person/<int:person_id>', get_assignements, name='get_assignements'),
+    path('assignements/person/<int:person_id>/<str:state>', get_assignements, name='get_assignements'),
     path('assignements/remove/<int:assignment_id>', remove_assignement, name='remove_assignement'),
 ]

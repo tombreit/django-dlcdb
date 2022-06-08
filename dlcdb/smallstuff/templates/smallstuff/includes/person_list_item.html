@@ -1,5 +1,6 @@
 {% load static %}
 
+
 <div class="row alert alert-warning search-result-item">
     <div class="col-md-2">
         {% if person.udb_person_image %}
@@ -15,18 +16,51 @@
             <img src="{% static 'lending/dist/img/SantasLittleHelper.png' %}" alt="" style="max-width: 100px;" class="m-2">
         {% endif %}
     </div>
+
     <div class="col-md-10">
 
+        {% if display_type == "list" %}
             <h4>
-                <a href="{% url 'smallstuff:person_detail' person.id %}" class="">
+                <a href="{% url 'smallstuff:person_detail' person.id %}">
                     {{  person.last_name }}, {{  person.first_name }}
                 </a>
-                - {{ person.department }}
+                - {{ person.get_department_display }}
             </h4>
-            <br>
-            <span class="badge badge-primary">
-                {{ person.assignments_count }} thing{{ person.assignments_count|pluralize }}
+            <span 
+                class="badge badge-warning text-dark"
+            >
+                ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
             </span>
+            <span 
+                class="badge badge-secondary"
+            >
+                ☆ {{ person.unassigned_things_count }} thing{{ person.unassigned_things_count|pluralize }} returned
+            </span>
+        {% else %}
+
+            <h4>
+                {{  person.last_name }}, {{  person.first_name }}
+                - {{ person.get_department_display }}
+            </h4>
+
+            <a 
+                class="badge badge-warning text-dark"
+                role="button"
+                hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
+                hx-target="#assignements"
+            >
+                ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
+            </a>
+            <a 
+                class="badge badge-secondary"
+                role="button"
+                hx-get="{% url 'smallstuff:get_assignements' person.id 'returned' %}"
+                hx-target="#assignements"
+            >
+                ☆ {{ person.unassigned_things_count }} thing{{ person.unassigned_things_count|pluralize }} returned
+            </a>
+
+            {% endif %}
 
             <details>
                 <summary>
@@ -57,7 +91,6 @@
                 </div>
 
             </details>
-                
     
     </div>
 </div>
