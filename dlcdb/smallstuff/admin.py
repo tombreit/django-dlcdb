@@ -42,7 +42,21 @@ class AssignedThingAdmin(admin.ModelAdmin):
 
 @admin.register(Thing)
 class ThingAdmin(admin.ModelAdmin):
+    
     search_fields = [
         'name',
         'slug',
     ]
+
+    readonly_fields = [
+        'user',
+        'username',
+    ]
+    prepopulated_fields = {"slug": ("name",)}
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug')
+        }),
+    )
+
