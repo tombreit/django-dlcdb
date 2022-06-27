@@ -2,7 +2,7 @@ from .device_type import DeviceType
 from .device import Device
 from .inventory import Inventory
 from .note import Note
-from .person import Person
+from .person import Person, OrganizationalUnit
 from .record import Record
 from .room import Room
 from .supplier import Supplier

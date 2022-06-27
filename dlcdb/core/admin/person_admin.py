@@ -2,7 +2,20 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
-from ..models import Person
+from ..models import Person, OrganizationalUnit
+
+
+@admin.register(OrganizationalUnit)
+class OrganizationalUnitAdmin(CustomBaseModelAdmin):
+    list_display = [
+        "name",
+        "slug",
+    ]
+
+    prepopulated_fields = {
+        "slug": ("name",)
+    }
+
 
 @admin.register(Person)
 class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
@@ -31,6 +44,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'first_name',
         'email',
         'department',
+        'organizational_unit',
     ]
 
     search_fields = [
@@ -48,11 +62,13 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'email',
         'udb_person_email_internal_business',
         'department',
+        'organizational_unit',
         'udb_person_image_as_image',
     ]
 
     list_filter = [
-        'department'
+        'department',
+        'organizational_unit',
     ]
 
     fieldsets = (

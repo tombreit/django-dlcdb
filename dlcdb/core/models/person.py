@@ -6,7 +6,24 @@ from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from .abstracts import SoftDeleteAuditBaseModel
+from .abstracts import SoftDeleteAuditBaseModel, AuditBaseModel
+
+
+class OrganizationalUnit(AuditBaseModel):
+    name = models.CharField(
+        max_length=255,
+        blank=False,
+        unique=True,
+    )
+    slug = models.SlugField(
+        max_length=255,
+        allow_unicode=False,
+        null=True,
+        unique=True,
+    )
+
+    def __str__(self):
+        return self.name
 
 
 class PersonQuerySet(models.QuerySet):
@@ -93,6 +110,12 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         max_length=3,
         choices=DEPARTMENT_CHOICES,
         blank=True,
+    )
+    organizational_unit = models.ForeignKey(
+        'core.OrganizationalUnit',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     # Additional UDB mirrored fields, all optional, updated by a cron task:

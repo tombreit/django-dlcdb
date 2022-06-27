@@ -24,7 +24,7 @@
                 <a href="{% url 'smallstuff:person_detail' person.id %}">
                     {{  person.last_name }}, {{  person.first_name }}
                 </a>
-                - {{ person.get_department_display }}
+                - {{ person.organizational_unit.name }}
             </h4>
             <span 
                 class="badge badge-warning text-dark"
@@ -40,7 +40,7 @@
 
             <h4>
                 {{  person.last_name }}, {{  person.first_name }}
-                - {{ person.get_department_display }}
+                - {{ person.organizational_unit.name }}
             </h4>
 
             <a 
@@ -75,7 +75,7 @@
                                 <td>{{ person.udb_contract_planned_checkout }}</td>
                             </tr>
                             <tr>
-                                <th>Department</th>
+                                <th>Organizational unit</th>
                                 <td>{{ person.udb_contract_organization_unit }}</td>        
                             </tr>
                             <tr>

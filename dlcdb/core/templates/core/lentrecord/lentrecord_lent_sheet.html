@@ -24,7 +24,7 @@
             </tr>
             <tr>
                 <th>Forschungsgruppe/Abteilung:</th>
-                <td>{{ record.person.get_department_display }}</td>
+                <td>{{ record.person.organizational_unit.name }}</td>
             </tr>
             <tr>
                 <th>Ausleihgrund:</th>
@@ -48,7 +48,7 @@
                         {% endif %}
                     </strong>
                     <br>
-                    <i style="font-size: smaller;">OU: {{ record.device.tenant }}</i>
+                    <i style="font-size: smaller;">Tenant: {{ record.device.tenant }}</i>
                 </td>
             </tr>
             <tr>

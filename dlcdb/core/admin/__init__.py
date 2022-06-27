@@ -11,7 +11,7 @@ from .removedrecord_admin import RemovedRecordAdmin
 from .room_admin import RoomAdmin
 from .inventory_admin import InventoryAdmin
 from .supplier_admin import SupplierAdmin
-from .person_admin import PersonAdmin
+from .person_admin import PersonAdmin, OrganizationalUnitAdmin
 from .note_admin import NoteAdmin
 from .importerlist_admin import ImporterListAdmin
 from .removerlist_admin import RemoverListAdmin
