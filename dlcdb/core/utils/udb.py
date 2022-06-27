@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.timezone import now
 import urllib.request
 
-from dlcdb.core.models import Person
+from dlcdb.core.models import Person, OrganizationalUnit
 from .helpers import save_base64img_as_fileimg
 
 
@@ -47,6 +47,9 @@ def import_udb_persons():
                 _positions = contract['contract_organizational_positions'] if contract['contract_organizational_positions'] else ""
                 _positions = [p.get("name") for p in _positions]
                 _positions = ", ".join(_positions)
+
+                if udb_contract_organization_unit:
+                    _organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
 
                 try:
                     udb_person_image = contract['person']['person_image']
@@ -95,6 +98,12 @@ def import_udb_persons():
                         print(f"Person {person} created!")
                     else:
                         print(f"Person {person} updated!")
+
+                    if _organizational_unit:
+                        person = Person.objects.update(
+                            organizational_unit=_organizational_unit,
+                        )
+                        print(f"Person {person} OU updated to {_organizational_unit}!")
     
                 except Person.DoesNotExist as e:
                     print(f"No dlcdb person found for udb email {udb_person_email_internal_business}")
