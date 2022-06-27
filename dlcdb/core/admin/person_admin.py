@@ -43,7 +43,6 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'last_name',
         'first_name',
         'email',
-        'department',
         'organizational_unit',
     ]
 
@@ -61,13 +60,11 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'first_name',
         'email',
         'udb_person_email_internal_business',
-        'department',
         'organizational_unit',
         'udb_person_image_as_image',
     ]
 
     list_filter = [
-        'department',
         'organizational_unit',
     ]
 

@@ -13,7 +13,6 @@ class PersonFilter(django_filters.FilterSet):
         fields = [
             # 'first_name',
             # 'last_name',
-            # 'department',
             'q'
         ]
 

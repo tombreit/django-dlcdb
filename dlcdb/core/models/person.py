@@ -84,20 +84,6 @@ class ActiveContractObjectsBaseModel(models.Model):
 
 
 class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
-
-    DEPARTMENT_CHOICES = (
-        ('edv', 'EDV'),
-        ('bib', 'Bibliothek'),
-        ('vrw', 'Verwaltung'),
-        ('str', 'Strafrecht'),
-        ('krm', 'Kriminologie'),
-        ('psl', 'Öffentliches Recht/Public Law'),
-        ('htk', 'Haustechnik'),
-        ('pic', 'RG Personality, Identity, and Crime'),
-        ('scc', 'RG Space, Contexts, and Crime'),
-        ('rgs', 'RG Strafrechtstheorie'),
-    )
-
     first_name = models.CharField(max_length=255, verbose_name='Vorname')
     last_name = models.CharField(max_length=255, verbose_name='Nachname')
     email = models.EmailField(
@@ -105,11 +91,6 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         null=True,
         unique=True,
         help_text='IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht anschreiben können.',
-    )
-    department = models.CharField(
-        max_length=3,
-        choices=DEPARTMENT_CHOICES,
-        blank=True,
     )
     organizational_unit = models.ForeignKey(
         'core.OrganizationalUnit',
