@@ -3,10 +3,8 @@ https://fueled.com/the-cache/posts/backend/django/flexible-per-object-permission
 """
 
 from django.contrib import admin
-from django.contrib.auth import get_permission_codename
-from django.template.response import TemplateResponse
-from django.db.models.query import EmptyQuerySet
 
+from ..core.models import Device
 from .models import Tenant
 
 
@@ -90,6 +88,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
 
         # print(f"TenantModelAdmin get_queryset {request.user.username=}")
         # print(f"TenantModelAdmin get_queryset {request.tenant=}")
+        # print(f"{dir(self.model)=}")
 
         # Set an empty queryset as default
         qs = super().get_queryset(request).none()
@@ -103,7 +102,16 @@ class TenantScopedAdmin(admin.ModelAdmin):
             qs = qs
         else:
             qs = super().get_queryset(request)
-            qs = qs.filter(tenant=request.tenant)
+
+            if self.model is Device:
+                qs = qs.filter(tenant=request.tenant)
+            else:
+                """
+                We're interacting with a record or proxy record class.
+                As we do not track the tenant id on the record class
+                yet, we filter against the device tenant.
+                """
+                qs = qs.filter(device__tenant=request.tenant)
 
         return qs
 
@@ -118,13 +126,16 @@ class TenantScopedAdmin(admin.ModelAdmin):
         # print(f"TenantScopedAdmin get_form: {request.tenant=}")
         # print(f"TenantScopedAdmin form.base_fields: {form.base_fields=}")
 
-        form.base_fields['tenant'].disabled = False if request.user.is_superuser else True
+        if form.base_fields.get('tenant'):
+            form.base_fields['tenant'].disabled = False if request.user.is_superuser else True
         
         if not obj:
             if not request.user.is_superuser and request.tenant:
                 # If field value set via get_changeform_initial_data this value
-                # will not be present in the post request, so we set it in the form:
-                form.base_fields['tenant'].initial = request.tenant
+                # will not be present in the post request, so we set it
+                # in the form:
+                if form.base_fields.get('tenant'):
+                    form.base_fields['tenant'].initial = request.tenant
 
         return form
 

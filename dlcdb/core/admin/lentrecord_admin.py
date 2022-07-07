@@ -9,6 +9,7 @@ from django.db.models import Case, CharField, Value, When
 from django.utils.formats import date_format
 from django.contrib import messages
 
+from dlcdb.tenants.admin import TenantScopedAdmin
 from ..models import LentRecord, InRoomRecord, Room, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
@@ -28,7 +29,7 @@ session = SessionStore()
 
 
 @admin.register(LentRecord)
-class LentRecordAdmin(CustomBaseModelAdmin):
+class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
 
     form = LentRecordAdminForm
     change_form_template = 'core/lentrecord/admin_change_form.html'
@@ -69,6 +70,7 @@ class LentRecordAdmin(CustomBaseModelAdmin):
         'get_device_human_readable',
         'get_manufacturer',
         'get_series',
+        'get_tenant',
     ]
 
     autocomplete_fields = [
@@ -80,7 +82,7 @@ class LentRecordAdmin(CustomBaseModelAdmin):
         ('Device', {
             'fields': (
                 'get_device_ids',
-                'get_device_human_readable',
+                ('get_device_human_readable',  'get_tenant'),
             )
         }),
         ('Ausleihe', {
@@ -171,6 +173,10 @@ class LentRecordAdmin(CustomBaseModelAdmin):
     def get_series(self, obj):
         return obj.device.series
     get_series.short_description = 'Model'
+
+    def get_tenant(self, obj):
+        return obj.device.tenant
+    get_tenant.short_description = 'Tenant'
 
     def get_lent_desired_end_date(self, obj):
         return format_html(
