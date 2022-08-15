@@ -16,7 +16,7 @@ coverage[toml]==6.4.1
     # via pytest-cov
 cryptography==37.0.2
     # via pyopenssl
-django==4.0.5
+django==4.0.7
     # via
     #   -c requirements.txt
     #   django-debug-toolbar
