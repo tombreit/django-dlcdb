@@ -20,4 +20,5 @@ class DashboardView(TemplateView):
             device_type_data=json.dumps(stats.get_device_type_data()),
             current_inventory=Inventory.objects.filter(is_active=True).order_by('-created_at').first(),
             device_count=Device.objects.all().count(),
+            notebooks_lending_data=json.dumps(stats.get_notebooks_lending_data()),
         )

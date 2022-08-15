@@ -41,21 +41,27 @@
         </div>
     </div>
     
-    <br class="clear">
+    <hr>
+
+    <h1>Aktuelle Inventurrunde: {{ current_inventory|default:'Keine Inventurrunde angelegt.' }}</h1>
     
+    <hr>
+
     <div class="row">
-        <div class="col-md-12">
-            <h1>{{ device_count }} Geräte</h1>
-            <h1>Aktuelle Inventurrunde: {{ current_inventory|default:'Keine Inventurrunde angelegt.' }}</h1>
+        <div class="col-md-4">
+            <h2>Verleihbare Notebooks</h2>
+            <div style="padding:22px; background:#fbfbfb;">
+                <canvas id="notebook-lending-chart" width="400px" height="400px"></canvas>
+            </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <h2>Geräte nach Verbleib</h2>
             <div style="padding:22px; background:#fbfbfb;">
                 <canvas id="device-location-chart" width="400px" height="400px"></canvas>
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <h2>Geräte nach Typ</h2>
             <div style="padding:22px; background:#fbfbfb;">
                 <canvas id="device-type-chart" width="400px" height="400px"></canvas>
@@ -74,6 +80,7 @@
         (function() {
             var data = {{ record_fraction_data|safe }}
             var device_type_data = {{ device_type_data|safe }}
+            var notebooks_lending_data = {{ notebooks_lending_data|safe }}
 
             var deviceLocationChart = new Chart($('#device-location-chart'), {
                 type: 'bar',
@@ -83,11 +90,19 @@
 
              var deviceTypeChart = new Chart($('#device-type-chart'), {
                 type: 'horizontalBar',
+                // type: 'pie',
+                // type: 'bar',
                 data: device_type_data,
                 options: {responsive: true,
                 legend: {
                 display: true
              }}
+            });
+
+            var ntbLentChart = new Chart($('#notebook-lending-chart'), {
+                type: 'pie',
+                data: notebooks_lending_data,
+                options: {responsive: true}
             });
         })()
     </script>
