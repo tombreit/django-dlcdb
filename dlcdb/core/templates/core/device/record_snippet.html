@@ -76,7 +76,7 @@
     </div>
 
 
-    {% if active_record %}
+    {% if active_record and not list_view %}
         <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ obj.id }}">
             <i class="fa fa-search"></i> Alle Records anzeigen
         </a>

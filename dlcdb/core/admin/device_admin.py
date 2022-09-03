@@ -155,6 +155,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, C
             ctx = dict(
                 add_links=obj.get_record_add_links(),
                 obj=obj,
+                list_view=True,
             )
             return render_to_string('core/device/record_snippet.html', ctx)
         except:
