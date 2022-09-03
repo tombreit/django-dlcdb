@@ -2,6 +2,9 @@
 
 {% load static %}
 
+{% block dark-mode-vars %}
+    {# disable django admin builtin dark mode as our bootstrap usage does not provide a dark mode (yet) #}
+{% endblock %}
 
 {% block extrahead %}
     {{ block.super }}
