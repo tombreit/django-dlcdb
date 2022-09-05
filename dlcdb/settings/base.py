@@ -1,8 +1,6 @@
-import json
 from pathlib import Path
+from email.utils import getaddresses
 import environ
-from django.core.exceptions import ImproperlyConfigured
-from django.templatetags.static import static
 from huey import SqliteHuey
 
 
@@ -28,7 +26,9 @@ SECRET_KEY = env('SECRET_KEY')
 
 # Email these people full exception information
 # https://docs.djangoproject.com/en/1.9/ref/settings/#admins
-ADMINS = [x.split(':') for x in env.list('ADMINS')]
+# ADMINS = [x.split(':') for x in env.list('ADMINS')]
+# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
+ADMINS = getaddresses([env('ADMINS')])
 MANAGERS = ADMINS
 # print(f"{ADMINS=}")
 # print(f"{type(ADMINS)=}")
