@@ -18,7 +18,7 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'description',
         'is_auto_return_room',
         'is_external',
-    ) + CustomBaseModelAdmin.list_display
+    ) # + CustomBaseModelAdmin.list_display
 
     list_filter = [
         'is_auto_return_room',
