@@ -70,8 +70,9 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         )
     qrcode_display.short_description = 'QR Code'
 
-    def has_delete_permission(self, request, obj=None):
-        return True
+    # Falling back to our no-delete-permission via CustomBaseModelAdmin
+    # def has_delete_permission(self, request, obj=None):
+    #     return True
 
 
 
