@@ -43,6 +43,12 @@ Set environment for project:
     # edit .env
 
 
+
+.. note:: Permissions
+
+   Permissions should be assigned to Django groups. Only LDAP groups listet in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups.
+
+
 Place your logo files (format: `svg`) at the following paths:
 
 * `dlcdb/static/dlcdb/branding/logo.svg` (white foreground, transparent background)
