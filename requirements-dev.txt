@@ -14,16 +14,16 @@ cffi==1.15.1
     # via cryptography
 coverage[toml]==6.4.4
     # via pytest-cov
-cryptography==37.0.4
+cryptography==38.0.1
     # via pyopenssl
-django==4.1
+django==4.1.1
     # via
     #   -c requirements.txt
     #   django-debug-toolbar
     #   django-extensions
 django-debug-toolbar==3.6.0
     # via -r requirements-dev.in
-django-extensions==3.2.0
+django-extensions==3.2.1
     # via -r requirements-dev.in
 iniconfig==1.1.1
     # via pytest

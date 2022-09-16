@@ -16,7 +16,7 @@ Welcome to DLCDB's documentation!
    chapters/lizenzen
    chapters/import
    chapters/inventur
-   chapters/ausmustern
+   chapters/ausmustern.md
    chapters/reporting
    chapters/udb
    chapters/api

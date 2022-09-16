@@ -1,7 +1,7 @@
 # requirements.in
 # requirements for production environment
 
-Django==4.1
+Django==4.1.1
 django-auth-ldap
 django-select2
 django-environ
@@ -9,15 +9,18 @@ django-crispy-forms
 django-simple-history
 django-htmx
 pymemcache  # needed by django-select2
-Sphinx
-sphinx_rtd_theme
 flake8
 python-magic
 huey
 openpyxl
-sphinxcontrib-mermaid
 markdown
 Pillow
+
+# docs
+Sphinx
+sphinx_rtd_theme
+sphinxcontrib-mermaid
+myst_parser
 
 # for qr code generation
 segno
