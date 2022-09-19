@@ -46,6 +46,11 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'organizational_unit',
     ]
 
+    dlcdb_deletion_fields = [
+        'deleted_at',
+        'deleted_by',
+    ]
+
     search_fields = [
         'last_name',
         'first_name',
@@ -62,6 +67,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'udb_person_email_internal_business',
         'organizational_unit',
         'udb_person_image_as_image',
+        'deleted_at',
     ]
 
     list_filter = [
@@ -73,6 +79,12 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             'fields': (
                 *dlcdb_fields,
             )
+        }),
+        ('Misc', {
+            'classes': ('collapse',),
+            'fields': (
+                *dlcdb_deletion_fields,
+            ),
         }),
         ('UDB data', {
             'classes': ('collapse',),

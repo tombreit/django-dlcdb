@@ -64,7 +64,10 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         try:
-            queryset = self.model.all_objects.all()
+            if request.user.is_superuser:
+                queryset = self.model.with_softdeleted_objects.all()
+            else:
+                queryset = self.model.objects.all()
         except Exception:
             queryset = self.model._default_manager.all()
 

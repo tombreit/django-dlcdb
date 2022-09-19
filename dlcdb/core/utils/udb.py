@@ -1,7 +1,10 @@
 import json
 import logging
+from operator import itemgetter
+from tkinter import N
 from django.conf import settings
 from django.utils.timezone import now
+from django.db import IntegrityError
 import urllib.request
 
 from dlcdb.core.models import Person, OrganizationalUnit
@@ -25,13 +28,14 @@ def import_udb_persons():
 
     try:
         with urllib.request.urlopen(UDB_JSON_URL) as response:
-            data = response.read()
-            udb_obj = json.loads(data.decode('utf-8'))
+            data = response.read().decode('utf-8')
+            udb_obj = json.loads(data)
 
             contracts = udb_obj['results']['contracts']
 
             for contract in contracts:
-                print(80 * "-")
+                print(80 * "=")
+                print(f"Processing person with UDB uuid = {contract['person']['id']}")
 
                 udb_person_email_internal_business = contract['person']['person_email_internal_business']
                 udb_person_email_private = contract['person']['person_email_private']
@@ -49,7 +53,7 @@ def import_udb_persons():
                 _positions = ", ".join(_positions)
 
                 if udb_contract_organization_unit:
-                    _organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
+                    udb_organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
 
                 try:
                     udb_person_image = contract['person']['person_image']
@@ -87,32 +91,56 @@ def import_udb_persons():
                         udb_person_image=udb_person_image_path_relative,
                     )
 
-                    person, created = Person.objects.update_or_create(
+                    print(f"Search for match for:")
+                    print(f"{match_by_email=}")
+                    print(f"{udb_person_last_name=}")
+                    print(f"{udb_person_first_name=}")
+
+                    person, created = Person.with_softdeleted_objects.update_or_create(
                         email=match_by_email,
                         last_name=udb_person_last_name,
                         first_name=udb_person_first_name,
                         defaults=defaults,
                     )
 
+                    _postponed_save_person = False
+
                     if created:
-                        print(f"Person {person} created!")
+                        print(f"Person '{person}' created!")
                     else:
-                        print(f"Person {person} updated!")
+                        print(f"Person '{person}' updated!")
 
-                    if _organizational_unit:
-                        person = Person.objects.update(
-                            organizational_unit=_organizational_unit,
-                        )
-                        print(f"Person {person} OU updated to {_organizational_unit}!")
+                        # In case the matched person was soft delted, re-activate
+                        # that person. 
+                        # ToDo: Check if a history log entry gets created.
+                        if person.deleted_at:
+                            person.deleted_at = None
+                            person.deleted_by = None
+                            _postponed_save_person = True
+
+                    if all([
+                        udb_organizational_unit,
+                        udb_organizational_unit != person.organizational_unit
+                    ]):
+                        print(f"'{person}' OU '{person.organizational_unit}' updated to '{udb_organizational_unit}'!")
+                        person.organizational_unit = udb_organizational_unit
+                        _postponed_save_person = True
+
+                    if _postponed_save_person:
+                        person.save()
     
-                except Person.DoesNotExist as e:
-                    print(f"No dlcdb person found for udb email {udb_person_email_internal_business}")
-                except Exception as e:
-                    print(80 * "x")
-                    print(e)
+                except Person.DoesNotExist as does_not_exist_exception:
+                    print(f"No dlcdb person found for udb email {udb_person_email_internal_business}: {does_not_exist_exception}")
+                except IntegrityError as integrity_error:
+                    print(
+                        f"Integrity error for:\n"
+                        f"DLCDB: {person.last_name}/{person.first_name}/{person.email}\n"
+                        f"UDB: {udb_person_last_name}/{udb_person_first_name}/{match_by_email}\n"
+                        f"{integrity_error}"
+                    )
+                except Exception as unknown_exception:
+                    print(f"Todo: Catch via more specific exception: for '{person}' {unknown_exception}")
                     print(f"{udb_person_last_name}, {udb_person_first_name}, {udb_person_email_internal_business}")
-                else:
-                    "Congrats: no exception!"
 
-    except urllib.error.HTTPError as e:
-        print(f"Ups, something went wrong: {e}")
+    except urllib.error.HTTPError as http_error:
+        print(f"Ups, something went wrong fetching {UDB_JSON_URL}: {http_error}")
