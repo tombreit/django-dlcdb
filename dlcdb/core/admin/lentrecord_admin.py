@@ -137,26 +137,28 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    @admin.display(description='Verleihgerät')
+    @admin.display(ordering='device__edv_id')
     def get_device(self, obj):
         return format_html(
             '<a href="{0}"><strong>{1}</strong></a>',
             reverse('admin:core_lentrecord_change', args=(obj.pk,)),
             obj.device
         )
-    get_device.short_description = 'Verleihgerät' 
 
+    @admin.display(description='EDV ID')
     def get_edv_id(self, obj):
         return format_html(
             '<a href="{0}" target="_blank"><strong>{1}</strong></a>',
             reverse('admin:core_device_change', args=(obj.device.pk,)),
             obj.device.edv_id,
         )
-    get_edv_id.short_description = 'EDV ID'
 
+    @admin.display(description='SAP ID')
     def get_sap_id(self, obj):
         return obj.device.sap_id
-    get_sap_id.short_description = 'SAP ID' 
 
+    @admin.display(description='IDs')
     def get_device_ids(self, obj):
         return format_html(
             '<a href="{0}" target="_blank"><strong>EDV ID: <code>{1}</code> / SAP ID: <code>{2}</code></strong></a>',
@@ -164,40 +166,41 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
             obj.device.edv_id,
             obj.device.sap_id,
         )
-    get_device_ids.short_description = 'IDs'
 
+    @admin.display(description='Hersteller')
+    @admin.display(ordering='device__manufacturer')
     def get_manufacturer(self, obj):
         return obj.device.manufacturer
-    get_manufacturer.short_description = 'Hersteller'
 
+    @admin.display(description='Model')
+    @admin.display(ordering='device__series')
     def get_series(self, obj):
         return obj.device.series
-    get_series.short_description = 'Model'
 
+    @admin.display(description='Tenant')
     def get_tenant(self, obj):
         return obj.device.tenant
-    get_tenant.short_description = 'Tenant'
 
+    @admin.display(description='Soll-Rückgabedatum')
+    @admin.display(ordering='lent_desired_end_date')
     def get_lent_desired_end_date(self, obj):
         return format_html(
             '<span class="lent-state lent-state-{lent_state}">{lent_desired_end_date}</span>',
             lent_desired_end_date=date_format(obj.lent_desired_end_date, format='DATE_FORMAT') if obj.lent_desired_end_date else '-',
             lent_state=obj.lent_state,
         )
-    get_lent_desired_end_date.short_description = 'Soll-Rückgabedatum'
-    get_lent_desired_end_date.admin_order_field = 'lent_desired_end_date'
 
+    @admin.display(description='Bezeichnung')
     def get_device_human_readable(self, obj):
         return '{} - {}'.format(
             obj.device.manufacturer,
             obj.device.series,
         )
-    get_device_human_readable.short_description = 'Bezeichnung'
 
+    @admin.display(description='Verliehen')
+    @admin.display(boolean=True)
     def get_is_currently_lented(self, obj):
         return obj.is_type_lent
-    get_is_currently_lented.boolean = True
-    get_is_currently_lented.short_description = 'Verliehen'
 
     def save_model(self, request, obj, form, change):
         """
