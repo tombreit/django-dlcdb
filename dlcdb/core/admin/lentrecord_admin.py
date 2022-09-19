@@ -51,6 +51,7 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
         'get_manufacturer',
         'get_series',
         'get_is_currently_lented',
+        'room',
         'person',
         'lent_start_date',
         # 'lent_desired_end_date',
