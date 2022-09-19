@@ -24,7 +24,7 @@
                 </a>
 
             {% elif active_record.record_type == 'LENT' %}
-               <a class="btn btn-info" href="{% url "admin:core_lentrecord_change" obj.pk %}">
+               <a class="btn btn-info" href="{% url "admin:core_lentrecord_change" active_record.pk %}">
                     an {{ active_record.person }}
                 </a>
 
