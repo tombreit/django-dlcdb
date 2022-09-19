@@ -108,6 +108,11 @@ body[class=""] #branding {
     display: block; 
 }
 
+// Ensure BS dropdowns are not cut off:
+body #changelist-form .results {
+    overflow-x: visible;
+}
+
 
 .alert-90-danger,
 tr.lent-state-10-unknown {
