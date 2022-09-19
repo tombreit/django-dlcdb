@@ -1,7 +1,5 @@
 import json
 import logging
-from operator import itemgetter
-from tkinter import N
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import IntegrityError
@@ -11,20 +9,39 @@ from dlcdb.core.models import Person, OrganizationalUnit
 from .helpers import save_base64img_as_fileimg
 
 
-logger = logging.getLogger(__name__)
+log_level = logging.WARNING
+if settings.DEBUG:
+    log_level = logging.DEBUG
+
+# Configure Logging. Shameless copy of:
+# https://docs.python.org/3/howto/logging.html#configuring-logging
+# create logger
+logger = logging.getLogger('task_udb_person_sync')
+logger.setLevel(log_level)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(log_level)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s  [%(levelname)s] - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
 
 
 def import_udb_persons():
-    logger.info("[huey persons utils: import_udb_persons] Fetch UDB JSON...")
+    logger.debug("[huey persons utils: import_udb_persons] Fetch UDB JSON...")
     UDB_JSON_URL = settings.UDB_JSON_URL
-    print(f"Fetching data from {UDB_JSON_URL=}")
+    logger.debug(f"Fetching data from {UDB_JSON_URL=}")
 
     thumbnail_size = 400, 300
     person_images_dir = settings.MEDIA_DIR / settings.PERSON_IMAGE_UPLOAD_DIR
     person_images_dir.mkdir(parents=True, exist_ok=True)
-    print(f"{person_images_dir=}")
-
-    dlcdb_persons = Person.objects.all()
+    logger.debug(f"{person_images_dir=}")
 
     try:
         with urllib.request.urlopen(UDB_JSON_URL) as response:
@@ -34,11 +51,10 @@ def import_udb_persons():
             contracts = udb_obj['results']['contracts']
 
             for contract in contracts:
-                print(80 * "=")
-                print(f"Processing person with UDB uuid = {contract['person']['id']}")
+                logger.debug(80 * "=")
 
                 udb_person_email_internal_business = contract['person']['person_email_internal_business']
-                udb_person_email_private = contract['person']['person_email_private']
+                # udb_person_email_private = contract['person']['person_email_private']
 
                 udb_person_uuid = contract['person']['id']
                 udb_person_first_name = contract['person']['person_first_name']
@@ -52,6 +68,8 @@ def import_udb_persons():
                 _positions = [p.get("name") for p in _positions]
                 _positions = ", ".join(_positions)
 
+                logger.debug(f"Processing UDB person uuid={udb_person_uuid}, last name={udb_person_last_name}, first name={udb_person_first_name}")
+
                 if udb_contract_organization_unit:
                     udb_organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
 
@@ -60,7 +78,7 @@ def import_udb_persons():
                     udb_person_image_path_relative = ""
 
                     if udb_person_image:
-                        print(f"Converting image for {udb_person_uuid}...")
+                        logger.debug(f"Converting image for {udb_person_uuid}...")
                         udb_person_image_path_absolute = f"{person_images_dir}/{udb_person_uuid}.jpg"
                         udb_person_image_path_relative = f"{settings.PERSON_IMAGE_UPLOAD_DIR}/{udb_person_uuid}.jpg"
 
@@ -70,12 +88,14 @@ def import_udb_persons():
                             thumbnail_size=thumbnail_size,
                         )
 
-                except KeyError as e:
-                    print(f"{e}")
+                except KeyError as key_error:
+                    logger.error(f"Failed setting image data: {key_error}")
 
                 # TODO: Re-think matching/update logic
                 try:
-                    match_by_email = udb_person_email_internal_business if udb_person_email_internal_business else udb_person_email_private
+                    # Match by email disabled for now, falling back to only
+                    # match against firstname and lastname combination.
+                    # match_by_email = udb_person_email_internal_business if udb_person_email_internal_business else udb_person_email_private
 
                     defaults = dict(
                         udb_person_uuid=udb_person_uuid,
@@ -89,58 +109,31 @@ def import_udb_persons():
                         udb_contract_organizational_positions=_positions,
                         udb_data_updated_at=now(),
                         udb_person_image=udb_person_image_path_relative,
+                        organizational_unit=udb_organizational_unit,
+                        deleted_at=None,
+                        deleted_by=None,
                     )
 
-                    print(f"Search for match for:")
-                    print(f"{match_by_email=}")
-                    print(f"{udb_person_last_name=}")
-                    print(f"{udb_person_first_name=}")
-
                     person, created = Person.with_softdeleted_objects.update_or_create(
-                        email=match_by_email,
+                        # email=match_by_email,
                         last_name=udb_person_last_name,
                         first_name=udb_person_first_name,
                         defaults=defaults,
                     )
 
-                    _postponed_save_person = False
-
                     if created:
-                        print(f"Person '{person}' created!")
+                        logger.debug(f"Person '{person}' created!")
                     else:
-                        print(f"Person '{person}' updated!")
-
-                        # In case the matched person was soft delted, re-activate
-                        # that person. 
-                        # ToDo: Check if a history log entry gets created.
-                        if person.deleted_at:
-                            person.deleted_at = None
-                            person.deleted_by = None
-                            _postponed_save_person = True
-
-                    if all([
-                        udb_organizational_unit,
-                        udb_organizational_unit != person.organizational_unit
-                    ]):
-                        print(f"'{person}' OU '{person.organizational_unit}' updated to '{udb_organizational_unit}'!")
-                        person.organizational_unit = udb_organizational_unit
-                        _postponed_save_person = True
-
-                    if _postponed_save_person:
-                        person.save()
+                        logger.debug(f"Person '{person}' updated!")
     
                 except Person.DoesNotExist as does_not_exist_exception:
-                    print(f"No dlcdb person found for udb email {udb_person_email_internal_business}: {does_not_exist_exception}")
+                    logger.error(f"No dlcdb person found for udb email {udb_person_email_internal_business}: {does_not_exist_exception}")
                 except IntegrityError as integrity_error:
-                    print(
-                        f"Integrity error for:\n"
-                        f"DLCDB: {person.last_name}/{person.first_name}/{person.email}\n"
-                        f"UDB: {udb_person_last_name}/{udb_person_first_name}/{match_by_email}\n"
-                        f"{integrity_error}"
+                    logger.error(
+                        f"Integrity error: DLCDB: {person.last_name}/{person.first_name}/{person.email} <-> UDB: {udb_person_last_name}/{udb_person_first_name} - {integrity_error}"
                     )
                 except Exception as unknown_exception:
-                    print(f"Todo: Catch via more specific exception: for '{person}' {unknown_exception}")
-                    print(f"{udb_person_last_name}, {udb_person_first_name}, {udb_person_email_internal_business}")
+                    logger.error(f"Todo: Catch via more specific exception for '{person}' with id '{person.id}': {unknown_exception}")
 
     except urllib.error.HTTPError as http_error:
-        print(f"Ups, something went wrong fetching {UDB_JSON_URL}: {http_error}")
+        logger.error(f"Ups, something went wrong fetching {UDB_JSON_URL}: {http_error}")
