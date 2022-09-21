@@ -36,7 +36,18 @@ logger.addHandler(ch)
 def import_udb_persons():
     logger.debug("[huey persons utils: import_udb_persons] Fetch UDB JSON...")
     UDB_JSON_URL = settings.UDB_JSON_URL
+    UDB_API_TOKEN = getattr(settings, 'UDB_API_TOKEN', None)
     logger.debug(f"Fetching data from {UDB_JSON_URL=}")
+    
+    if UDB_API_TOKEN is not None:
+        # assume UDB API request if we have an API_TOKEN
+        contract_fields = 'person,contract_planned_checkin,contract_planned_checkout,contract_organization_unit,contract_contract_type,contract_organizational_positions'
+        person_fields = 'person_first_name,person_last_name,person_email_internal_business,person_email_private,id'
+        url_request = urllib.request.Request(f"{UDB_JSON_URL}/api/external_interface/contracts/?contract-fields={contract_fields}&person-fields={person_fields}",
+                                             headers={'X-API-KEY': UDB_API_TOKEN})
+    else:
+        # use plain JSON_URL
+        url_request = urllib.request.Request(UDB_JSON_URL)
 
     thumbnail_size = 400, 300
     person_images_dir = settings.MEDIA_DIR / settings.PERSON_IMAGE_UPLOAD_DIR
@@ -44,9 +55,10 @@ def import_udb_persons():
     logger.debug(f"{person_images_dir=}")
 
     try:
-        with urllib.request.urlopen(UDB_JSON_URL) as response:
-            data = response.read().decode('utf-8')
-            udb_obj = json.loads(data)
+    
+        with urllib.request.urlopen(url_request) as response:
+            data = response.read()
+            udb_obj = json.loads(data.decode('utf-8'))
 
             contracts = udb_obj['results']['contracts']
 
@@ -73,9 +85,9 @@ def import_udb_persons():
                 if udb_contract_organization_unit:
                     udb_organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
 
+                udb_person_image_path_relative = ""
                 try:
                     udb_person_image = contract['person']['person_image']
-                    udb_person_image_path_relative = ""
 
                     if udb_person_image:
                         logger.debug(f"Converting image for {udb_person_uuid}...")
