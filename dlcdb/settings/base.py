@@ -284,6 +284,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 UDB_JSON_URL = env('UDB_JSON_URL')
 # UDB_JSON_URL = "file://{}/temp/udb.json".format(settings.BASE_DIR)
+UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
