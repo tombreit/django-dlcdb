@@ -1,0 +1,25 @@
+{% extends "admin/change_form.html" %}
+
+
+{% block content_title %}
+    <h1>Raumzuweisung Device {{localize_device}}</h1>
+{% endblock %}
+
+
+{% block content %}
+    {% if localize_device.get_is_currently_lented %}
+    <div class="alert alert-danger">
+        <p>
+            Device {{ localize_device }} ist aktuell verliehen an {{ localize_device.get_person }}.
+        </p>
+        <p>
+            Wenn dieses Device jetzt lokalisiert wird, wird der aktuelle Verleih beendet!
+        </p>
+        <p>
+            Eine Raumänderung für den aktuellen Verleih ist über die <a href="{% url "admin:core_lentrecord_change" localize_device.active_record.pk %}">Verleihansicht</a> durchzuführen.
+        </p>
+    </div>
+    {% endif %}
+
+    {{ block.super }}
+{% endblock %}

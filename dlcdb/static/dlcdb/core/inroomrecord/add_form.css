@@ -1,0 +1,5 @@
+/* Hide initially populated device field for add_form */
+
+.form-row.field-device {
+    display: none; 
+}
