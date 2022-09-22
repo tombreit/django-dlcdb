@@ -23,9 +23,9 @@ class LentRecordAdminForm(forms.ModelForm):
                 if key in required_fields:
                     self.fields[key].required = True
 
-    person = forms.ModelMultipleChoiceField(
+    person = forms.ModelChoiceField(
         queryset=None,
-        widget=Select2Widget()
+        widget=Select2Widget(),
     )
 
     class Meta:
