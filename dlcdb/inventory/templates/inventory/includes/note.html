@@ -18,7 +18,6 @@
         target="_blank"
         href="{% url add_url %}?_to_field=id&_popup=1&inventory={{ current_inventory.id }}&{{ note_objstr }}={{ note_obj.pk }}"
     >
-        {# href="{% url 'admin:core_dialogdevice_change' device.id %}?inventory={{ current_inventory.id }}"> #}
         <i class="far fa-comment-alt"></i>
     </a>
 {% endif %}
