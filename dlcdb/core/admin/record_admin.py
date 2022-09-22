@@ -25,7 +25,7 @@ class CustomRecordModelAdmin(CustomBaseModelAdmin):
 
 @admin.register(Record)
 class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
-    change_form_template = 'core/record_change_form.html'
+    change_form_template = 'core/record/change_form.html'
 
     exclude = [
         'attachments',

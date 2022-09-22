@@ -9,7 +9,7 @@ from .record_admin import CustomRecordModelAdmin
 @admin.register(RemovedRecord)
 class RemovedRecordAdmin(RedirectToDeviceMixin, CustomRecordModelAdmin):
     form = RemovedRecordAdminForm
-    change_form_template = 'core/record_change_form.html'
+    change_form_template = 'core/record/change_form.html'
     fields = ('device', 'disposition_state', 'removed_info', 'attachments', 'get_attachments')
     readonly_fields = ('get_attachments',)
     list_display = ['device', 'get_device', 'disposition_state', 'removed_info', 'removed_date']

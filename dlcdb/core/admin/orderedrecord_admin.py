@@ -9,7 +9,7 @@ from .record_admin import CustomRecordModelAdmin
 
 @admin.register(OrderedRecord)
 class OrderedRecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
-    change_form_template = 'core/record_change_form.html'
+    change_form_template = 'core/record/change_form.html'
     list_display = ['get_device_link', 'date_of_purchase']
     fields = ['device']
 
