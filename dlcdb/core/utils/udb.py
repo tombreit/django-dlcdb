@@ -36,10 +36,10 @@ logger.addHandler(ch)
 def import_udb_persons():
     logger.debug("[huey persons utils: import_udb_persons] Fetch UDB JSON...")
     UDB_JSON_URL = settings.UDB_JSON_URL
-    UDB_API_TOKEN = getattr(settings, 'UDB_API_TOKEN', None)
+    UDB_API_TOKEN = settings.UDB_API_TOKEN
     logger.debug(f"Fetching data from {UDB_JSON_URL=}")
     
-    if UDB_API_TOKEN is not None:
+    if UDB_API_TOKEN:
         # assume UDB API request if we have an API_TOKEN
         contract_fields = 'person,contract_planned_checkin,contract_planned_checkout,contract_organization_unit,contract_contract_type,contract_organizational_positions'
         person_fields = 'person_first_name,person_last_name,person_email_internal_business,person_email_private,id'
