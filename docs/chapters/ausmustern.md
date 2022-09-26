@@ -30,33 +30,6 @@ Geräte, die nicht mehr existieren, verschrottet oder verkauft sind sind in der 
 Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration und ist rechtlich nicht belastbar. Bei Fragen/Unklarheite etc. ist die Finazabteilung die Ansprechpartnerin.
 ```
 
-```{admonition} Inventurverantwortlich
-:class: warning
-
-Das Ausbuchen sollte vom Inventurverantwortlichen durchgeführt werden. Bei Fragen oder Unklarheiten ist in jedem Fall der oder die Inventurverantwortliche zu kontaktieren.
-```
-
-## Ausgangslage/Prosa
-
-
-Geräte sind defekt/nicht reparabel, veraltet oder können aus sonstigen Gründen vom Institut nicht mehr genutzt werden. Solche Geräte sollen "ausgemustert" werden. Dies geschieht zum Einen in der DLCDB, zum Anderen in der Anlangebuchhaltung der Verwaltung. 
-
-Beim Ausmustern sind einige Regeln zu beachten; Kurzform: 
-
-1. Schriftform einhalten: Formulare ausfüllen, Anhänge ausdrucken etc.
-1. Ausmusterungsgrund muss vorliegen
-1. Gerät muss beschrieben werden
-1. bei Defekt:
-
-   - verschrotten
-
-1. ohne Defekt (veraltet, nicht mehr benötigt etc.):
-
-   - Gerät muss über die MPG-Einkäuferliste anderen Instituten angeboten werden. Diese Meldung übernimmt die Einkaufsabteilung.
-   - Ab bestimmten Wertgrenzen ist ein Verkauf über eine Verwertungsgesellschaft notwendig (falls kein Institut Interesse angemeldet hat)
-
-
-
 ## Prozess
 
 ### Ausbuchung DLCDB
@@ -111,14 +84,3 @@ URL: https://fqdn/admin/core/removedrecord/
 * Die DLCDB git eine Zusammenfassung der Vorgänge aus.
 
 </details>
-
-
-### Ausbuchung Verwaltung
-
-Die Ausbuchung muss der Verwaltung mitgeteilt werden: 
-
-Via [**Ausbuchungsbeleg_Anlagen.docx**](../_static/Ausbuchungsbeleg_Anlagen.docx)
-
-Beim Ausbuchen von mehreren Geräten ("Bulk-Entfernen") können die Ausgaben der DLCDB (Log-Dateien, generierte CSV-Reports) als Anlage zu dem Formular genutzt werden, um nicht jedes Device einzeln melden zu müssen.
-
-Der Ausbuchungsbeleg ist dem Inventurverantwortlichen oder dem Abteilungsleiter zur Unterschrift vorzulegen und wird dann an die Verwaltung, Abteilung Finanzen, weitergeleitet.

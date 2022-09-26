@@ -2,23 +2,18 @@
 Umziehen
 ========
 
-
-Spezielle Ansicht für den Umzug ("relocate", neuen Raum zuweisen) von Geräten.
-
-
 Möglichkeiten
 =============
 
 Umzug eines einzelnen Gerätes
 -----------------------------
 
-* "Umzugs-Admin" aufrufen: Start > Core > Umzüge
 * Umzuziehendes Gerät aufrufen. Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
-* Gerätedaten nochmals prüfen.
+* Im Dropdown-Menü "Lokalisiert" auswählen.
 * Neuen Raum angeben. 
-* Button "Relocate devices" anklicken.
+* Neue Raumzuordnung speichern.
 
-*Hinweis*: Ein Umzug von einem einzelnen Gerät ist auch über den Standard "Geräte-Admin" über die Record-Dropdowns möglich.
+**Hinweis**: Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", wird der aktuelle Verleih damit beendet und ein "InRoomRecord" für dieses Gerät erstellt. Ist eine Raumänderung eines verliehenen Geräts gewünscht, so ist diese in der Verleihansicht des Devices vorzunehmen.
 
 
 Umzug mehrerer Geräte
@@ -30,7 +25,7 @@ Umzug mehrerer Geräte
     <iframe width="100%" height="400" src="../_static/relocate.webm" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
-* "Umzugs-Admin" aufrufen: Start > Core > Umzüge
+* "Device-Admin" aufrufen
 * Umzuziehende Gerät aufrufen. 
 
   * Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
@@ -40,5 +35,3 @@ Umzug mehrerer Geräte
 * Gerätedaten nochmals prüfen.
 * Neuen Raum angeben. 
 * Button "Relocate devices" anklicken.
-
-
