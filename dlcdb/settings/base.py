@@ -8,13 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 RUN_DIR = BASE_DIR / "run"
 DB_DIR = RUN_DIR / "db"
-IMPORT_DIR = RUN_DIR / "import"
 MEDIA_DIR = RUN_DIR / "media"
 STATICFILES_DIR = RUN_DIR / "staticfiles"
 
 # Make sure directory structure exists
 Path(DB_DIR).mkdir(parents=True, exist_ok=True)
-Path(IMPORT_DIR).mkdir(parents=True, exist_ok=True)
 Path(MEDIA_DIR).mkdir(parents=True, exist_ok=True)
 Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
@@ -228,39 +226,6 @@ HUEY = SqliteHuey(
     name="dlcdb_huey",
     filename=str(DB_DIR / 'huey_task_queue.sqlite3'),
 )
-
-
-# TODO: Delete Verwaltung Device Types etc.
-VERWALTUNG_DEVICE_TYPES = [
-    'Tisch',
-    'Stuhl',
-    'Bett',
-    'Drehstuhl',
-    'Lampe',
-    'Stehleuchte',
-    'Schrank',
-    'Regal',
-    'Aktenvernichter',
-    'Bücherwagen',
-    'Container',
-    'Bücher',
-    'Zeitschriften',
-    'Sonstiges',
-]
-
-VERWALTUNG_DEVICE_TYPES_ALIASES = {
-    'Tisch': [],
-    'Stuhl': ['Stühle', 'Stuehle'],
-    'Drehstuhl': ['Drehstühle', 'Drehstuehle'],
-    'Lampe/Stehleuchte': [],
-    'Schrank': ['Schränke', 'Schraenke'],
-    'Regal': [],
-    'Aktenvernichter': [],
-    'Bücherwagen': ['Buecherwagen', 'Bücherwägen', 'Buecherwaegen'],
-    'Container': [],
-    'Bücher/Zeitschriften': ['Buch', 'Buecher', 'Zeitschriften', 'Zeitschrift'],
-    'Sonstiges': []
-}
 
 
 # Inventory/Scanner

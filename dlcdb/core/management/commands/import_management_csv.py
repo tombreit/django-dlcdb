@@ -1,30 +1,63 @@
 """
-Import command für SAP-Daten der Verwaltung
+Import command für SAP-Daten der Verwaltung. 
 """
 
 import csv
 import os
-# import re
+import argparse
 from datetime import datetime
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from dlcdb.core.models import Device, Room, Record, DeviceType
-# from django.conf.settings import VERWALTUNG_DEVICE_TYPES, VERWALTUNG_DEVICE_TYPES_ALIASES
+
+
+VERWALTUNG_DEVICE_TYPES = [
+    'Tisch',
+    'Stuhl',
+    'Bett',
+    'Drehstuhl',
+    'Lampe',
+    'Stehleuchte',
+    'Schrank',
+    'Regal',
+    'Aktenvernichter',
+    'Bücherwagen',
+    'Container',
+    'Bücher',
+    'Zeitschriften',
+    'Sonstiges',
+]
+
+VERWALTUNG_DEVICE_TYPES_ALIASES = {
+    'Tisch': [],
+    'Stuhl': ['Stühle', 'Stuehle'],
+    'Drehstuhl': ['Drehstühle', 'Drehstuehle'],
+    'Lampe/Stehleuchte': [],
+    'Schrank': ['Schränke', 'Schraenke'],
+    'Regal': [],
+    'Aktenvernichter': [],
+    'Bücherwagen': ['Buecherwagen', 'Bücherwägen', 'Buecherwaegen'],
+    'Container': [],
+    'Bücher/Zeitschriften': ['Buch', 'Buecher', 'Zeitschriften', 'Zeitschrift'],
+    'Sonstiges': []
+}
+
 
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument('--sapcsvfile', type=argparse.FileType('r'))
+
     def handle(self, *args, **options):
         # unsere csv-Exportdatei aus der Access-Datenbank, !UTF-8!
-        accessdb_file = os.path.join(settings.IMPORT_DIR, 'accessdb_mngmt.csv')
+        accessdb_file = options['sapcsvfile']
 
         with open(accessdb_file) as csv_file:
-
             with transaction.atomic():
-                mngmt_types = [DeviceType(name=n) for n in settings.VERWALTUNG_DEVICE_TYPES]
+                mngmt_types = [DeviceType(name=n) for n in VERWALTUNG_DEVICE_TYPES]
                 DeviceType.objects.bulk_create(mngmt_types)
 
                 csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
@@ -113,7 +146,7 @@ class Command(BaseCommand):
                 """
                 for d_type in DeviceType.objects.all():
                     devices = Device.objects.filter(edv_id__icontains=d_type.name)
-                    for alias in settings.VERWALTUNG_DEVICE_TYPES_ALIASES.get(d_type.name, []):
+                    for alias in VERWALTUNG_DEVICE_TYPES_ALIASES.get(d_type.name, []):
                         devices = devices | Device.objects.filter(edv_id__icontains=alias)
                     devices.update(device_type=d_type)
 
