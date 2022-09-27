@@ -1,6 +1,9 @@
+import csv
+import datetime
 from django.contrib import admin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
+from django.utils import timezone, dateformat
 
 from ..utils.helpers import get_denormalized_user
 
@@ -110,3 +113,57 @@ class RedirectToDeviceMixin(object):
         return HttpResponseRedirect(
             reverse('admin:core_device_change', args=[device_obj.pk])
         )
+
+
+class ExportCsvMixin:
+
+    @admin.action(description='Export selected as CSV')
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        _now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
+        filename = f"dlcdb_export_{_now}_{meta.app_label}-{meta.model_name}.csv"
+
+        fieldnames = [field.name for field in meta.fields]
+
+        if 'active_record' in fieldnames:
+            fieldnames.extend(["room", "record_created_at"])
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f"attachment; filename={filename}"
+        writer = csv.DictWriter(
+            response,
+            fieldnames=fieldnames,
+            dialect='excel-tab',
+            # delimiter=';',
+            # quotechar='"',
+            quoting=csv.QUOTE_ALL,
+            extrasaction='raise',
+        )
+
+        writer.writeheader()
+        for obj in queryset:
+            row_data = {}
+            for field in fieldnames:
+                fieldname = field
+                fielddata = None
+
+                if field == 'active_record':
+                    fielddata = obj.active_record.record_type if obj.active_record else "no record set"
+                elif field == 'record_created_at':
+                    fielddata = obj.active_record.created_at if obj.active_record else "no record set"
+                elif field == 'room':
+                    fielddata = getattr(obj.active_record.room, "number", None) if obj.active_record else "no record set"
+                else:
+                    fielddata = getattr(obj, field)
+
+                if isinstance(fielddata, datetime.datetime):
+                    fielddata = (f'{fielddata:%Y-%m-%d %H:%M}')
+
+                row_data.update({fieldname: fielddata})
+    
+            row = writer.writerow(row_data)
+
+        # Does not work as we do not trigger a HttpResponseRedirect which could display that message.
+        # self.message_user(request, f'Export file "{filename}" created.', messages.SUCCESS)
+
+        return response

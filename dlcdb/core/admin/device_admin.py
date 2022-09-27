@@ -16,7 +16,7 @@ from ..models import Device, Note
 
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
-from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin
+from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
 
 
 class NoteInline(admin.TabularInline):
@@ -26,7 +26,7 @@ class NoteInline(admin.TabularInline):
 
 
 @admin.register(Device)
-class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, CustomBaseModelAdmin):
+class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     change_form_template = 'core/device/change_form.html'
     save_as = True
     inlines = [NoteInline]
@@ -78,7 +78,10 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, C
         # 'qrcode',
     )
 
-    actions = ['relocate']
+    actions = [
+        'relocate',
+        'export_as_csv',
+    ]
 
     # form = DeviceAdminForm
     list_max_show_all = 5000
