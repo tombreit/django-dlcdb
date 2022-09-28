@@ -134,7 +134,14 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     @property
     def get_is_currently_lented(self):
-        return (self.active_record.is_type_lent) and (self.active_record.lent_end_date is None)
+
+        if not self.active_record:
+            return False
+        else:
+            return all([
+                self.active_record.is_type_lent,
+                self.active_record.lent_end_date is None,
+            ])
 
     @property
     def get_lent_start_date(self):
