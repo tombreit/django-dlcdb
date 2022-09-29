@@ -15,10 +15,7 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
     """
 
     def has_delete_permission(self, request, obj=None):
-        if request.user.is_superuser:
-            return True
-        else:
-            return False
+        return request.user.is_superuser
 
     def get_readonly_fields(self, request, obj=None):
         return tuple(self.readonly_fields) + (
