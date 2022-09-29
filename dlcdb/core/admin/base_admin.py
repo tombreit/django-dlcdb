@@ -61,6 +61,9 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
     #     if model.with_softdeleted_objects.filter(crit=crit).exists():
     #         raise ValidationError('A soft-deleted obj with this crit already exists.')
 
+    def delete_model(self, request, obj):
+        obj.deleted_by = request.user
+        obj.delete()
 
     def get_queryset(self, request):
         try:
@@ -87,7 +90,7 @@ class NoModificationModelAdminMixin(object):
     ordering = ['-modified_at']
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return request.user.is_superuser
 
     def has_add_permission(self, request):
         return True

@@ -146,7 +146,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         Add add_links to the context in order to show a dropdown to create the records
         """
         extra_context = extra_context or {}
-        extra_context['record_add_links'] = get_object_or_404(Device, pk=object_id).get_record_add_links()
+        extra_context['record_add_links'] = Device.with_softdeleted_objects.get(pk=object_id).get_record_add_links()
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
