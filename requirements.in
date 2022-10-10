@@ -1,14 +1,14 @@
 # requirements.in
 # requirements for production environment
 
-Django==4.1.1
+Django==4.1.2
 django-auth-ldap
 django-select2
 django-environ
 django-crispy-forms
 django-simple-history
 django-htmx
-pymemcache  # needed by django-select2
+# pymemcache  # needed by django-select2; currently trying the builtin db cache backend
 flake8
 python-magic
 huey

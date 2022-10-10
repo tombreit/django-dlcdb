@@ -10,11 +10,11 @@ asgiref==3.5.2
     # via django
 babel==2.10.3
     # via sphinx
-certifi==2022.9.14
+certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
     # via requests
-django==4.1.1
+django==4.1.2
     # via
     #   -r requirements.in
     #   django-appconf
@@ -39,7 +39,7 @@ django-select2==7.10.1
     # via -r requirements.in
 django-simple-history==3.1.1
     # via -r requirements.in
-djangorestframework==3.13.1
+djangorestframework==3.14.0
     # via -r requirements.in
 docutils==0.17.1
     # via
@@ -70,11 +70,11 @@ markupsafe==2.1.1
     # via jinja2
 mccabe==0.7.0
     # via flake8
-mdit-py-plugins==0.3.0
+mdit-py-plugins==0.3.1
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-myst-parser==0.18.0
+myst-parser==0.18.1
     # via -r requirements.in
 openpyxl==3.0.10
     # via -r requirements.in
@@ -94,15 +94,13 @@ pyflakes==2.5.0
     # via flake8
 pygments==2.13.0
     # via sphinx
-pymemcache==3.5.2
-    # via -r requirements.in
 pyparsing==3.0.9
     # via packaging
-python-ldap==3.4.2
+python-ldap==3.4.3
     # via django-auth-ldap
 python-magic==0.4.27
     # via -r requirements.in
-pytz==2022.2.1
+pytz==2022.4
     # via
     #   babel
     #   djangorestframework
@@ -112,11 +110,9 @@ requests==2.28.1
     # via sphinx
 segno==1.5.2
     # via -r requirements.in
-six==1.16.0
-    # via pymemcache
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.1.1
+sphinx==5.2.3
     # via
     #   -r requirements.in
     #   myst-parser
@@ -137,9 +133,9 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.2
+sqlparse==0.4.3
     # via django
-typing-extensions==4.3.0
+typing-extensions==4.4.0
     # via myst-parser
 urllib3==1.26.12
     # via requests

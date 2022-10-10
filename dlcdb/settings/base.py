@@ -127,14 +127,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 CACHES = {
+    # 'default': {
+    #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+    #     'LOCATION': '127.0.0.1:11211',  # Docker notation: 'memcached:11211', see docker-compose
+    # },
+    # 'select2': {
+    #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+    #     'LOCATION': '127.0.0.1:11211',
+    # },
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',  # Docker notation: 'memcached:11211', see docker-compose
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
     'select2': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'dlcdb_select2',
+    },
 }
 
 
