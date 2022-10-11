@@ -56,7 +56,7 @@
                 Verleihen
             </a>
             
-            {% if perms.core.change_inventory %}
+            {% if perms.core.view_inventory %}
               <a class="dropdown-item" href="{% url "inventory:inventorize-room-list" %}">
                 Inventarisieren
               </a>
