@@ -142,7 +142,7 @@ def import_udb_persons():
                     logger.error(f"No dlcdb person found for udb email {udb_person_email_internal_business}: {does_not_exist_exception}")
                 except IntegrityError as integrity_error:
                     logger.error(
-                        f"Integrity error: DLCDB: {person.last_name}/{person.first_name}/{person.email} <-> UDB: {udb_person_last_name}/{udb_person_first_name} - {integrity_error}"
+                        f"Integrity error for UDB: {udb_person_last_name}/{udb_person_first_name} - {integrity_error}. Hint: Does fist_name and last_name match? Names could have been updated in UDB."
                     )
                 except Exception as unknown_exception:
                     logger.error(f"Todo: Catch via more specific exception for '{person}' with id '{person.id}': {unknown_exception}")
