@@ -55,6 +55,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'last_name',
         'first_name',
         'email',
+        'udb_person_uuid',
         'udb_person_last_name',
         'udb_person_first_name',
         'udb_person_email_internal_business',
