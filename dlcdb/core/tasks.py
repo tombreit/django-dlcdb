@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 # Run every hour, on the hour:
-@db_periodic_task(huey.crontab(minute='13', hour='*/1'))
+@db_periodic_task(huey.crontab(minute='0', hour='*/1'))
 @lock_task('get-udb-persons-hourly')
 def hourly():
     logger.info("[huey persons tasks: hourly] Fetch UDB persons...")
