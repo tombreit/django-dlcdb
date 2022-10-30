@@ -1,0 +1,10 @@
+.env
+run/*
+.venv/
+node_modules/
+.coverage
+.git
+.pytest_cache
+.vscode
+Containerfile
+/temp
