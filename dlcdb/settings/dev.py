@@ -1,5 +1,7 @@
 from .base import *
-from .ldap import *
+
+if env('AUTH_LDAP'):
+    from .ldap import *
 
 
 DEBUG = True

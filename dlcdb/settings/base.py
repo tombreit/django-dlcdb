@@ -17,8 +17,13 @@ Path(MEDIA_DIR).mkdir(parents=True, exist_ok=True)
 Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
 # Take environment variables from .env file
-env = environ.Env()
+env = environ.Env(
+    AUTH_LDAP=(bool, False),
+)
 environ.Env.read_env(BASE_DIR /'.env')
+
+if not env('AUTH_LDAP'):
+    print("AUTH_LDAP disabled in .env!")
 
 SECRET_KEY = env('SECRET_KEY')
 

@@ -1,7 +1,9 @@
 import os
 
 from .base import *
-from .ldap import *
+
+if env('AUTH_LDAP'):
+    from .ldap import *
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
