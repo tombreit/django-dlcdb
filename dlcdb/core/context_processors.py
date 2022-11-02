@@ -4,8 +4,9 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils.html import format_html
 from django.urls import reverse
+from django.template.defaultfilters import pluralize
 
-from dlcdb.core.models import Room
+from dlcdb.core.models import Room, Device
 
 
 def branding(request):
@@ -40,6 +41,19 @@ def hints(request):
         request.path_info.startswith("/admin/login/"),
         request.path_info.startswith("/admin/logout/"),
     ]):
+
+        if Device.objects.filter(active_record__isnull=True).exists():
+            devices_wo_record_changelist = f"{reverse('admin:core_device_changelist')}?has_record=has_no_record"
+            recordless_devices_count = Device.objects.filter(active_record__isnull=True).count()
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=_(f"{recordless_devices_count} Device{pluralize(recordless_devices_count)} without record!"),
+                    cta_link=devices_wo_record_changelist,
+                    cta_text=_("Add proper record?"),
+                )
+            )
+
         if Room.objects.exists():
 
             if not Room.objects.filter(is_external=True).exists():
