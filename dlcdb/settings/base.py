@@ -18,33 +18,32 @@ Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
 # Take environment variables from .env file
 env = environ.Env(
+    DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
-if not env('AUTH_LDAP'):
-    print("AUTH_LDAP disabled in .env!")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = env('DJANGO_DEBUG')
 
 SECRET_KEY = env('SECRET_KEY')
 
-# Email these people full exception information
-# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
-# ADMINS = [x.split(':') for x in env.list('ADMINS')]
-# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
-ADMINS = getaddresses([env('ADMINS')])
-MANAGERS = ADMINS
-# print(f"{ADMINS=}")
-# print(f"{type(ADMINS)=}")
-
 # https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
-# print(f"{ALLOWED_HOSTS=}")
-# print(f"{type(ALLOWED_HOSTS)=}")
-
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# Email these people full exception information
+# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
+# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
+ADMINS = getaddresses([env('ADMINS')])
+MANAGERS = ADMINS
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # Application definition
 DJANGO_APPS = [
@@ -197,21 +196,15 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = str(MEDIA_DIR)
 MEDIA_URL = '/media/'
 
-SAP_LIST_COMPARISON_RESULT_FOLDER = 'sap_list_comparison_results'
-
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/admin/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
 
-SITE_ID = 1
-
 # https://docs.djangoproject.com/en/3.0/ref/clickjacking/#setting-x-frame-options-for-all-responses
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SELECT2_CACHE_BACKEND = 'select2'
-
-MAX_FUTURE_LENT_DESIRED_END_DATE = '2099-12-31'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
@@ -220,9 +213,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        # 'rest_framework.permissions.IsAdminUser',
         'rest_framework.permissions.IsAuthenticated',
-        # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -245,8 +236,7 @@ HUEY = SqliteHuey(
 
 # QRCODE_PREFIX (string) is used to prefix all generated uuids in qr codes
 # in order to let the scanner deceide if a scanned qr code should be handled by
-# this application. 
-# 
+# this application.
 # DO NOT CHANGE THIS PREFIX MID-PROJECT AS IT WILL BREAK THE SCANNER RECOGNIZING
 # ALREADY PRINTED QR CODES.
 QRCODE_DIR = 'qrcode'
@@ -256,12 +246,9 @@ QRCODE_INFIXES = {
     'device': 'D',
 }
 
-EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-
+SAP_LIST_COMPARISON_RESULT_FOLDER = 'sap_list_comparison_results'
+MAX_FUTURE_LENT_DESIRED_END_DATE = '2099-12-31'
 UDB_JSON_URL = env('UDB_JSON_URL')
-# UDB_JSON_URL = "file://{}/temp/udb.json".format(settings.BASE_DIR)
 UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
@@ -284,3 +271,10 @@ BRANDING = {
     "BRANDING_LOGO": 'dlcdb/branding/logo.svg' if logo_path.exists() else 'dlcdb/branding/logo_acme.svg',
     "BRANDING_LOGO_BW": 'dlcdb/branding/logo_bw.svg' if logo_bw_path.exists() else 'dlcdb/branding/logo_acme_bw.svg',
 }
+
+
+if env('AUTH_LDAP'):
+    from .ldap import *
+    print("[i] AUTH_LDAP activated via .env")
+else:
+    print("[i] AUTH_LDAP disabled in .env")

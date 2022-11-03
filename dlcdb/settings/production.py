@@ -1,13 +1,4 @@
-import os
-
 from .base import *
-
-if env('AUTH_LDAP'):
-    from .ldap import *
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
 
 
 # Email configs
