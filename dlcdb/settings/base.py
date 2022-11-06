@@ -29,22 +29,6 @@ DEBUG = env('DJANGO_DEBUG')
 
 SECRET_KEY = env('SECRET_KEY')
 
-# https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
-
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-# Email these people full exception information
-# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
-# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
-ADMINS = getaddresses([env('ADMINS')])
-MANAGERS = ADMINS
-EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-SERVER_EMAIL = DEFAULT_FROM_EMAIL
-
 # Application definition
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -78,6 +62,24 @@ LOCAL_APPS = [
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+# https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Email these people full exception information
+# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
+# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
+ADMINS = getaddresses([env('ADMINS')])
+MANAGERS = ADMINS
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+SITE_ID = 1
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
