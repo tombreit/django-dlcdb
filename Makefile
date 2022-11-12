@@ -20,7 +20,7 @@ test:
 	manage.py test application --verbosity=0 --parallel --failfast
 
 format-server:
-	black --target-version py37 .
+	black .
 	isort .
 
 format: format-server
