@@ -81,9 +81,7 @@ Build Dokumentation:
 
 .. code:: bash
 
-    cd docs
-    make html
-
+    make docs
 
 
 Task runner
@@ -148,8 +146,7 @@ Be sure to use one of the production requirement files:
    export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
    systemctl --user restart dlcdb_huey.service
    touch dlcdb/wsgi.py
-   cd ./docs/
-   make html
+   make docs
 
 
 Apache

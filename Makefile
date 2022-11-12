@@ -1,4 +1,4 @@
-.PHONY: requirements format test
+.PHONY: requirements format test docs
 
 include .env
 
@@ -24,3 +24,7 @@ format-server:
 	isort .
 
 format: format-server
+
+docs: ## generate Sphinx HTML documentation, including API docs
+	make -C docs clean
+	make -C docs html
