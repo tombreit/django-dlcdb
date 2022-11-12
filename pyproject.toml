@@ -12,6 +12,7 @@ exclude = '''
     \.git
   | \.tox
   | \.venv
+  | node_modules
   | dist
   | migrations
 )/
