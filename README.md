@@ -4,6 +4,9 @@
 
 The DLCDB manages the life cycle of IT assets
 
+⚡ Currently, much available only in German. ⚡
+
+
 ## 🔥 Features
 
 - Lending management

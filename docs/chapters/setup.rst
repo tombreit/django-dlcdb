@@ -32,8 +32,6 @@ Activate the virtualenv and install the requirements:
     source .venv/bin/activate
     pip install --upgrade pip setuptools wheel
     pip install -r requirements.txt
-    pip install -r requirements-dev.txt  # only needed if SETTINGS_MODE=dev
-
 
 Set environment for project:
 
@@ -127,6 +125,14 @@ Enable the task runner as a systemd service unit for a given system user:
 Production deployment
 ---------------------
 
+Be sure to use one of the production requirement files:
+.. code:: bash
+
+   requirements
+   |-- requirements-prod-ldap.txt
+   `-- requirements-prod.txt
+
+
 .. code:: bash
 
    mkdir -p /path/to/dlcdb/staticfiles
@@ -135,7 +141,7 @@ Production deployment
    npm run prod
    source /path/to/dlcdb/venv/bin/activate
    pip install --upgrade pip setuptools wheel
-   pip install -r requirements.txt
+   pip install -r requirements/requirements-prod-ldap.txt
    python manage.py collectstatic --noinput
    python manage.py migrate --noinput
    export XDG_RUNTIME_DIR="/run/user/$UID"

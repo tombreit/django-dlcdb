@@ -1,7 +1,12 @@
 # NEWS
 
 
-## 2022-11
+## 2022-11b
+
+* Requirements now build from `setup.cfg`. See `docs/chapters/setup.rst`
+* Defaults to `dev` requirements (`requirements.txt`). Use a dedicated requirements file for production, e.g. `requirements/requirement-prod-ldap.txt`)
+
+## 2022-11a
 
 * New mandatory `.env` variable: `DJANGO_DEBUG`
 * Some setup hints implemented via Django messages framework, warns for:
