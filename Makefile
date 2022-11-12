@@ -1,4 +1,4 @@
-.PHONY: requirements format test docs
+.PHONY: requirements tests format lint docs
 
 include .env
 
@@ -8,6 +8,7 @@ help:
 	@echo "requirements - check style with black, flake8, sort python with isort, and indent html"
 	@echo "format - enforce a consistent code style across the codebase and sort python files with isort"
 	@echo "test - run test suite"
+	@echo "docs - generate Sphinx HTML documentation, including API docs"
 
 requirements:
 	mkdir -p requirements
@@ -16,15 +17,16 @@ requirements:
 	pip-compile --extra dev -o requirements/requirements-dev.txt setup.cfg
 	ln -s $(default_requirements_file) requirements.txt
 
-test:
-	manage.py test application --verbosity=0 --parallel --failfast
+tests:
+	pytest
 
-format-server:
+format:
 	black .
 	isort .
 
-format: format-server
+lint:
+	flake8
 
-docs: ## generate Sphinx HTML documentation, including API docs
+docs:
 	make -C docs clean
 	make -C docs html
