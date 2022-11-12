@@ -1,3 +1,24 @@
 [build-system]
 requires = ["setuptools", "pip-tools"]
 build-backend = "setuptools.build_meta"
+
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+target-version = ['py39']
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | dist
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+skip = ["migrations",".git","__pycache__","LC_MESSAGES",".venv"]
+blocked_extensions = ["rst","html","js","svg","txt","css","scss","png","jpg"]
+default_section = "THIRDPARTY"
