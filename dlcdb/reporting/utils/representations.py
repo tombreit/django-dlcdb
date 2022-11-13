@@ -4,7 +4,7 @@ from copy import copy
 from tempfile import NamedTemporaryFile
 
 from openpyxl import Workbook
-from openpyxl.styles import NamedStyle, Font, Color, Alignment, colors, PatternFill
+from openpyxl.styles import NamedStyle, Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 
 from django.core.files.base import ContentFile

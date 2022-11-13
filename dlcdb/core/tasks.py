@@ -1,6 +1,5 @@
 import logging
 import huey
-from django.conf import settings
 from huey.contrib.djhuey import db_periodic_task, lock_task
 
 from .utils.udb import import_udb_persons

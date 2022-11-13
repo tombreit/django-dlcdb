@@ -1,6 +1,6 @@
 import pytest
 
-from dlcdb.core.models import Device, Room, Person, InRoomRecord, Record
+from dlcdb.core.models import Device, Room
 
 
 @pytest.fixture

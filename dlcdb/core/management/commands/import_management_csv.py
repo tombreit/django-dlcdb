@@ -3,7 +3,6 @@ Import command für SAP-Daten der Verwaltung.
 """
 
 import csv
-import os
 import argparse
 from datetime import datetime
 
@@ -73,10 +72,8 @@ class Command(BaseCommand):
                     print(f"{80 * '~'}")
                     print(f"row: {row}")
 
-                    """
-                    ROOM
-                    Befülle Room-Tabelle, falls in der AccessDB.csv ein Raum vorhanden ist
-                    """
+                    # ROOM
+                    # Befülle Room-Tabelle, falls in der AccessDB.csv ein Raum vorhanden ist
                     room_obj = None
                     room_val = row['Raum']
                     if room_val != '':
@@ -89,10 +86,8 @@ class Command(BaseCommand):
                             room_obj = Room(number=room_val)
                             room_obj.save()
 
-                    """
-                    DEVICE
-                    Befülle die Device-Tabelle mit den Daten der accessdb.csv
-                    """
+                    # DEVICE
+                    # Befülle die Device-Tabelle mit den Daten der accessdb.csv
                     purchase_date = None
                     # print(datetime.strptime(row['Aktivdatum'], '%d.%m.%Y'))
                     try:
@@ -128,10 +123,8 @@ class Command(BaseCommand):
                     )
                     device_obj.save()
 
-                    """
-                    RECORD
-                    record anlegen: mit Device und Room
-                    """
+                    # RECORD
+                    # record anlegen: mit Device und Room
                     # Raum ist vorhanden, record.type -> aufgestellt
                     if room_val != '' and room_obj:
                         record_obj = Record(
@@ -141,9 +134,7 @@ class Command(BaseCommand):
                         )
                         record_obj.save()
 
-                """
-                This part tries to guess the device type by trying different aliases a name can contain
-                """
+                # This part tries to guess the device type by trying different aliases a name can contain
                 for d_type in DeviceType.objects.all():
                     devices = Device.objects.filter(edv_id__icontains=d_type.name)
                     for alias in VERWALTUNG_DEVICE_TYPES_ALIASES.get(d_type.name, []):

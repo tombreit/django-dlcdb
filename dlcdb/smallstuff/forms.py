@@ -1,8 +1,7 @@
 from django import forms
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, HTML
-from crispy_forms.bootstrap import FieldWithButtons, StrictButton, Div
+from crispy_forms.layout import Layout, HTML
 
 from .models import AssignedThing
 
@@ -20,16 +19,9 @@ class AssignedThingsForm(forms.ModelForm):
                 <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="fas fa-plus"></i></button>
             """),
         )
-        # self.helper.add_input(Submit('submit', '<i class="fas fa-plus"></i>', css_class='btn-primary'))
 
     class Meta:
         model = AssignedThing
-        # fields = [
-        #     "person",
-        #     "thing",
-        #     # "assigned_at",
-        #     # "unassigned_at",
-        # ]
         fields = '__all__'
         widgets = {
             'person': forms.HiddenInput(),

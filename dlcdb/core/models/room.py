@@ -4,8 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, IntegerField, Q, F, Value
-from django.template.loader import render_to_string
+from django.db.models import Count, IntegerField, Q
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
 

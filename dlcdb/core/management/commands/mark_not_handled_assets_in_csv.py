@@ -1,10 +1,7 @@
-from os import device_encoding
 import sys
 import csv
 import pathlib
-import argparse
 from shutil import copyfile
-import shutil
 from django.core.management.base import BaseCommand
 
 from ...models import Device
@@ -58,7 +55,6 @@ class Command(BaseCommand):
             writer.writeheader()
 
             for row in reader:
-
                 # if _match_msg: 
                 #     print(80 * "*")
                 #     print(_match_msg)

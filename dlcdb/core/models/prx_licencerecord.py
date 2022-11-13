@@ -1,12 +1,7 @@
-from datetime import datetime
-
 from django.db import models
 from django.db.models import Q
-from django.core.exceptions import ValidationError
-from django.utils.timezone import now
 
 from .record import Record
-from .room import Room
 
 
 class BaseLicenceRecordManager(models.Manager):

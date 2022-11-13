@@ -15,7 +15,7 @@ from ..settings import LENT_OVERDUE_TOLERANCE_DAYS, IT_NOTIFICATION_EMAIL, NOTIF
 
 from .mappings import get_days_for_interval
 from .representations import get_records_as_spreadsheet, get_records_as_text
-from .email import build_report_email, build_overdue_lender_email, send_email
+from .email import build_overdue_lender_email, send_email
 
 
 def get_affected_records(notification, now):
@@ -105,8 +105,7 @@ def get_affected_records(notification, now):
         records = (
             _records
             .filter(
-                ~Q(lent_desired_end_date__isnull=True) | 
-                Q(lent_end_date__isnull=True)
+                ~Q(lent_desired_end_date__isnull=True) | Q(lent_end_date__isnull=True)
             )
             .annotate(
                 lent_desired_end_date_with_tolerance=ExpressionWrapper(
@@ -132,7 +131,7 @@ def get_affected_records(notification, now):
             from_date=_last_run.date(),
             to_date=now.date(),
             event=notification.event,
-            count=records.count(),
+            # count=records.count(),
         )
 
         # Build a string representation for e.g. email body
@@ -175,9 +174,9 @@ def create_report_if_needed(notification_pk, caller='huey'):
         filename = '{}_{}.xlsx'.format(slugify(record_collection.title_repr), uuid.uuid1())
         report = Report(
             notification=notification,
-            body = record_collection.text_repr,
-            title = record_collection.title_repr,
-            spreadsheet = File(record_collection.file_repr, name=filename),
+            body=record_collection.text_repr,
+            title=record_collection.title_repr,
+            spreadsheet=File(record_collection.file_repr, name=filename),
         )
         report.save()
 

@@ -3,7 +3,6 @@ import base64
 import re
 from io import BytesIO
 from collections import namedtuple
-from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html

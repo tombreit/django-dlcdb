@@ -1,12 +1,10 @@
 from django import forms
-from ..models import Record, Device
-from ..models import RemovedRecord
+from ..models import Record
 
 
 class RemovedRecordAdminForm(forms.ModelForm):
 
     def clean(self):
-
         device = self.cleaned_data['device']
         active_record_type = device.active_record.record_type
 

@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.db import models
 
 from .record import Record

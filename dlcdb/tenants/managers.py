@@ -1,10 +1,7 @@
 from django.conf import settings
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
-from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import models
-
-from .shortcuts import get_current_tenant
 
 
 class CurrentTenantManager(models.Manager):

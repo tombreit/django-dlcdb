@@ -86,7 +86,6 @@ def hints(request):
                 )
             )
 
-
     for message in sticky_messages:
         messages.add_message(request, message.level, message.get_formatted_msg())
 

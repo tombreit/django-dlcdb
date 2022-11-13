@@ -238,37 +238,26 @@ def import_data(fileobj, importer_inst_pk=None):
                 )
                 continue
 
-            """
-            ROOM
-            Befülle Room-Tabelle
-            """
+            # ROOM
             room_obj = None
             room_val = row['ROOM']
             if room_val != '':
                 room_obj, created = Room.objects.get_or_create(number=room_val)
 
-            """
-            SUPPLIER
-            Befülle die Supplier-Tabelle
-            """
+            # SUPPLIER
             supplier_obj = None
             supplier_val = row['SUPPLIER']
             if supplier_val != '':
                 supplier_obj, created = Supplier.objects.get_or_create(name=supplier_val)
 
-            """
-            DEVICETYPE
-            """
+            # DEVICETYPE
             device_type_obj = None
             device_type_val = row['DEVICE_TYPE']
             if device_type_val != '':
                 device_type_obj, created = DeviceType.objects.get_or_create(name=device_type_val)
 
-            """
-            DEVICE
-            Befülle die Device-Tabelle mit den Daten der csv-Datei
-            """
-            # purchase_date, warranty_expiration_date, maintenance_contract_expiration_date = 0, 0, 0
+            # DEVICE
+            # Befülle die Device-Tabelle mit den Daten der csv-Datei
             try:
                 purchase_date = row['PURCHASE_DATE'] if row['PURCHASE_DATE'] else None
                 # if row['WARRANTY_EXPIRATION_DATE'] != '':
@@ -310,9 +299,7 @@ def import_data(fileobj, importer_inst_pk=None):
             )
             device_obj.save()
 
-            """
-            INROOMRECORD
-            """
+            # INROOMRECORD
             record_obj, created = InRoomRecord.objects.get_or_create(
                 device=device_obj,
                 room=room_obj,

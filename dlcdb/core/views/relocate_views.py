@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from ..forms.adminactions_forms import RelocateActionForm
-from ..models import Device, InRoomRecord, Room, Record
+from ..models import Device, InRoomRecord, Record
 
 
 @method_decorator(login_required, name='dispatch')

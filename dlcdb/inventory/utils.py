@@ -4,8 +4,6 @@ import os
 from collections import namedtuple
 from io import BytesIO
 
-
-from django.core.files.temp import NamedTemporaryFile
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction

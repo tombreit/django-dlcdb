@@ -1,6 +1,6 @@
 from django import forms
 
-from ..models import Room, Record
+from ..models import Room
 
 
 class RelocateActionForm(forms.Form):

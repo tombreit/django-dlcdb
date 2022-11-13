@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, IntegerField
+from django.db.models import Count, Q
 
 from .models.record import Record
 from .models.device import Device
