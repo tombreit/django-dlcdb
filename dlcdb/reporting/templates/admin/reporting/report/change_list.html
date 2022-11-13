@@ -4,28 +4,26 @@
 <!-- Override extrahead to add Chart.js -->
 {% block extrahead %}
 {{ block.super }}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = document.getElementById('myChart').getContext('2d');
 
   // Sample data
-//   const chartData = [
-//     {"date": "2019-08-08T00:00:00Z", "y": 3},
-//     {"date": "2019-08-07T00:00:00Z", "y": 10},
-//     {"date": "2019-08-06T00:00:00Z", "y": 15},
-//     {"date": "2019-08-05T00:00:00Z", "y": 4},
-//     {"date": "2019-08-03T00:00:00Z", "y": 2},
-//     {"date": "2019-08-04T00:00:00Z", "y": 11},
-//     {"date": "2019-08-02T00:00:00Z", "y": 3},
-//     {"date": "2019-08-01T00:00:00Z", "y": 2},
-//   ];
+  //   const chartData = [
+  //     {"date": "2019-08-08T00:00:00Z", "y": 3},
+  //     {"date": "2019-08-07T00:00:00Z", "y": 10},
+  //     {"date": "2019-08-06T00:00:00Z", "y": 15},
+  //     {"date": "2019-08-05T00:00:00Z", "y": 4},
+  //     {"date": "2019-08-03T00:00:00Z", "y": 2},
+  //     {"date": "2019-08-04T00:00:00Z", "y": 11},
+  //     {"date": "2019-08-02T00:00:00Z", "y": 3},
+  //     {"date": "2019-08-01T00:00:00Z", "y": 2},
+  //   ];
 
   const chartDataLent = {{ chart_data_lent | safe }};
   const chartDataRemoved = {{ chart_data_removed | safe }};
   const chartDataInroom = {{ chart_data_inroom | safe }};
-
 
   // Parse the dates to JS
   chartDataLent.forEach((d) => {
@@ -48,8 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: chartDataLent,
             fill: false,
             backgroundColor: 'blue',
-            borderColor: 'blue'
-
+            borderColor: 'blue',
         },
         {
             label: 'Removed records',
@@ -65,12 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundColor: 'green',
             borderColor: 'green'
         }
-    ],
+      ],
     },
     options: {
       responsive: true,
       scales: {
-        xAxes: [
+        xAxis: [
           {
             display: true,
             type: 'time',
@@ -83,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
           },
         ],
-        yAxes: [
+        yAxis: [
           {
             display: true,
             type: 'logarithmic',

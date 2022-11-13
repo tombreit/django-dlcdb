@@ -78,35 +78,40 @@
 
 {% block footer %}
     {{ block.super }}
-    <script src="{% static 'dlcdb/chart/Chart.bundle.min.js' %}"></script>
+    <script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
     <script>
-        (function() {
-            var data = {{ record_fraction_data|safe }}
-            var device_type_data = {{ device_type_data|safe }}
-            var notebooks_lending_data = {{ notebooks_lending_data|safe }}
+        document.addEventListener("DOMContentLoaded", function() {
 
-            var deviceLocationChart = new Chart($('#device-location-chart'), {
-                type: 'bar',
-                data: data,
-                options: {responsive: true}
+            const data = {{ record_fraction_data|safe }}
+            const device_type_data = {{ device_type_data|safe }}
+            const notebooks_lending_data = {{ notebooks_lending_data|safe }}
+
+            const deviceLocationChart = new Chart(
+                document.getElementById("device-location-chart"), {
+                    type: 'bar',
+                    data: data,
+                    options: {responsive: true}
             });
 
-             var deviceTypeChart = new Chart($('#device-type-chart'), {
-                type: 'horizontalBar',
-                // type: 'pie',
-                // type: 'bar',
-                data: device_type_data,
-                options: {responsive: true,
-                legend: {
-                display: true
-             }}
+            const deviceTypeChart = new Chart(
+                document.getElementById("device-type-chart"), {
+                    type: 'bar',
+                    data: device_type_data,
+                    options: {
+                        responsive: true,
+                        legend: {
+                            display: true
+                        }
+                    }
+            })
+
+            const ntbLentChart = new Chart(
+                document.getElementById("notebook-lending-chart"), {
+                    type: 'pie',
+                    data: notebooks_lending_data,
+                    options: {responsive: true}
             });
 
-            var ntbLentChart = new Chart($('#notebook-lending-chart'), {
-                type: 'pie',
-                data: notebooks_lending_data,
-                options: {responsive: true}
-            });
-        })()
+        });
     </script>
 {% endblock footer %}
