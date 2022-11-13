@@ -17,5 +17,6 @@
 
 @import "bootswatch/dist/sketchy/_bootswatch";
 
-@import "components/_fontawesome";
-@import "components/_style";
+@import "../../common/_fontawesome";
+
+@import "_style";

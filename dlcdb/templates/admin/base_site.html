@@ -8,7 +8,7 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'dist/css/app.css' %}" />
+    <link rel="stylesheet" href="{% static 'dist/core/css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.min.css' %}">
 {% endblock %}
 
@@ -45,8 +45,7 @@
     {# django will return the minified jquery version in <head> if DEBUG=True #}
     <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'admin/js/vendor/select2/select2.full.min.js' %}"></script>
-    <script src="{% static 'dist/js/app.js' %}"></script>
-    {# TODO: delete? <script src="{% static 'admin/js/SelectBox.js' %}"></script> #}
+    <script src="{% static 'dist/core/js/app.js' %}"></script>
     <script>
         $('.list-filters select').select2()
         // init bootstrap tooltips and popovers
