@@ -12,10 +12,10 @@ help:
 
 requirements:
 	mkdir -p requirements
-	pip-compile -o requirements/requirements-prod.txt setup.cfg
-	pip-compile --extra ldap -o requirements/requirements-prod-ldap.txt setup.cfg
-	pip-compile --extra dev -o requirements/requirements-dev.txt setup.cfg
-	ln -s $(default_requirements_file) requirements.txt
+	pip-compile --upgrade --output-file requirements/requirements-prod.txt setup.cfg
+	pip-compile --upgrade --extra ldap --output-file requirements/requirements-prod-ldap.txt setup.cfg
+	pip-compile --upgrade --extra dev --output-file requirements/requirements-dev.txt setup.cfg
+	ln -s --force  $(default_requirements_file) requirements.txt
 
 tests:
 	pytest
