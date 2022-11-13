@@ -28,5 +28,5 @@ lint:
 	flake8
 
 docs:
-	make -C docs clean
-	make -C docs html
+	make --directory=docs clean
+	make --directory=docs html

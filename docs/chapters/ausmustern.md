@@ -32,8 +32,6 @@ Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration 
 
 ## Prozess
 
-### Ausbuchung DLCDB
-
 <details>
 <summary>Device</summary>
 

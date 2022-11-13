@@ -10,6 +10,8 @@ asgiref==3.5.2
     # via django
 babel==2.11.0
     # via sphinx
+beautifulsoup4==4.11.1
+    # via pydata-sphinx-theme
 certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
@@ -44,8 +46,8 @@ djangorestframework==3.14.0
 docutils==0.17.1
     # via
     #   myst-parser
+    #   pydata-sphinx-theme
     #   sphinx
-    #   sphinx-rtd-theme
 et-xmlfile==1.1.0
     # via openpyxl
 huey==2.4.4
@@ -75,7 +77,9 @@ myst-parser==0.18.1
 openpyxl==3.0.10
     # via django-dlcdb (setup.cfg)
 packaging==21.3
-    # via sphinx
+    # via
+    #   pydata-sphinx-theme
+    #   sphinx
 pillow==9.3.0
     # via django-dlcdb (setup.cfg)
 pyasn1==0.4.8
@@ -84,6 +88,8 @@ pyasn1==0.4.8
     #   python-ldap
 pyasn1-modules==0.2.8
     # via python-ldap
+pydata-sphinx-theme==0.8.1
+    # via sphinx-book-theme
 pygments==2.13.0
     # via sphinx
 pyparsing==3.0.9
@@ -97,19 +103,24 @@ pytz==2022.6
     #   babel
     #   djangorestframework
 pyyaml==6.0
-    # via myst-parser
+    # via
+    #   myst-parser
+    #   sphinx-book-theme
 requests==2.28.1
     # via sphinx
 segno==1.5.2
     # via django-dlcdb (setup.cfg)
 snowballstemmer==2.2.0
     # via sphinx
-sphinx==5.3.0
+soupsieve==2.3.2.post1
+    # via beautifulsoup4
+sphinx==4.5.0
     # via
     #   django-dlcdb (setup.cfg)
     #   myst-parser
-    #   sphinx-rtd-theme
-sphinx-rtd-theme==1.1.1
+    #   pydata-sphinx-theme
+    #   sphinx-book-theme
+sphinx-book-theme==0.3.3
     # via django-dlcdb (setup.cfg)
 sphinxcontrib-applehelp==1.0.2
     # via sphinx

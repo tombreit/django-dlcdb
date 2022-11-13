@@ -65,6 +65,6 @@ DLCDB supports:
 -   any Django supported database backends, runs fine with Sqlite in production
 
 
-## 🔓 License
+## ⚖️ License
 
 [EUPL-1.2](https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/blob/main/LICENSE) - The EUPL is a reciprocal (or copyleft) licence, meaning that distributed contributions and improvements (called "derivatives") will be provided back or shared with the licensor and all other users. At the same time (and unlike other copyleft licences like the GPL or AGPL), the EUPL is compatible with most other open reciprocal licences and is interoperable. (Source: https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence)

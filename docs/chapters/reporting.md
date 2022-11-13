@@ -1,29 +1,24 @@
-=========
-Reporting
-=========
+# Reporting
 
-Prosa
------
+## Prosa
 
 Die DLCDB kann über bestimmte Bestandsveränderungen Email-Benachrichtigungen verschicken.
 
 Es existieren zwei Modi:
 
-* "Abo-Modell interne Adressaten": User können sich für bestimmte Zeitintervalle zu bestimmten Ereignissen bei bestimmten Bedingungen Emails schicken lassen.
+- "Abo-Modell interne Adressaten": User können sich für bestimmte Zeitintervalle zu bestimmten Ereignissen bei bestimmten Bedingungen Emails schicken lassen.
 
-  *Beispiel:* 
+  *Beispiel:*
 
   Die Verwaltung (*Empfänger* oder *Abonnent*) will jeden Monat (*Zeitintervall*) über deinventarisierte (*Ereignis*) Devices mit einer SAP-Nummer (*Bedingung*) informiert werden.
 
-* "Benachrichtigung externer Adressaten": Personen (``class Person``) können automatisiert und zeitgesteuert (cron-like) via Email benachrichtigt werden; z.B. über überfällige Ausleihen.
+- "Benachrichtigung externer Adressaten": Personen (`class Person`) können automatisiert und zeitgesteuert (cron-like) via Email benachrichtigt werden; z.B. über überfällige Ausleihen.
 
+## Implementation
 
-Implementation
---------------
+### Ablauf periodischer Aufruf via huey
 
-Ablauf periodischer Aufruf via huey
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+```{eval-rst}
 .. mermaid::
 
    graph TD
@@ -34,10 +29,11 @@ Ablauf periodischer Aufruf via huey
       E[Notification] --> |set last_run, save|F
       F[Done]
 
+```
 
-Ablauf manueller Aufruf via Notification-save
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Ablauf manueller Aufruf via Notification-save
 
+```{eval-rst}
 .. mermaid::
 
    graph TD
@@ -45,3 +41,4 @@ Ablauf manueller Aufruf via Notification-save
       C[Report] --> D
       D(Email) --> E
       F[Done]
+```
