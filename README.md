@@ -4,11 +4,12 @@
 
 The DLCDB manages the life cycle of IT assets
 
-⚡ Currently, much available only in German. ⚡
+⚡ Currently available only in German. ⚡
 
 
 ## 🔥 Features
 
+- Tracking records of devices: a finite number of records/states (*lent*, *removed*, *inroom* etc.) exists, and a device can only have one record at a time. In the life cycle of the device the device collects records.
 - Lending management
 - Inventory
 - REST-API
@@ -47,12 +48,12 @@ https://fqdn/api/v2/
 API docs: `docs/chapters/api.rst`
 
 
-
 ## ⚠️ Tests
 
 ```bash
 # ⚡ jep, tests are missing
-pytest
+pytest  # or
+make tests
 ```
 
 
@@ -61,7 +62,7 @@ pytest
 DLCDB supports:
 
 -   Python 3.9+
--   PostgreSQL and SQLite (with JSON1) as database backends
+-   any Django supported database backends, runs fine with Sqlite in production
 
 
 ## 🔓 License
