@@ -33,11 +33,12 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prod": "npm-run-all scss:prod scss:print js:prod lending-prod inventory-prod",
+    "prod": "npm-run-all scss:prod scss:print js:prod core-font:copy-fontawesome lending-prod inventory-prod",
     "scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_srcdir/scss:$npm_package_config_distdir/css",
     "scss:print": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_srcdir/scss/print.scss:$npm_package_config_distdir/css/print.css",
     "js:prod": "npm-run-all js:bundle",
     "js:bundle": "bundle-js $npm_package_config_srcdir/js/app.js --disable-beautify --out $npm_package_config_distdir/js/app.js",
+    "core-font:copy-fontawesome": "mkdir -p $npm_package_config_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_distdir/fonts/fontawesome",
     "preinventory-prod": "mkdir -p $npm_package_config_distdir_inventory",
     "inventory-prod": "npm-run-all inventory-scss:prod inventory-js:prod inventory-font:copy-all inventory-img:copy",
     "inventory-scss:prod": "dart-sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_srcdir_inventory/scss:$npm_package_config_distdir_inventory/css",
