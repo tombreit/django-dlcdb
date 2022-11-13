@@ -19,14 +19,8 @@ Umzug eines einzelnen Gerätes
 Umzug mehrerer Geräte
 ---------------------
 
-.. raw:: html
-
-    <div style="text-align: center; margin-bottom: 2em;">
-    <iframe width="100%" height="400" src="../_static/relocate.webm" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
-
 * "Device-Admin" aufrufen
-* Umzuziehende Gerät aufrufen. 
+* Umzuziehende Geräte aufrufen. 
 
   * Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
   * Die Paginierung kann via "Zeige alle" in der Fußzeile der Gerätetabelle deaktiviert werden.
