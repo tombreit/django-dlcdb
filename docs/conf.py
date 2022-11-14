@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'DLCDB'
-copyright = '2022, TB'
+copyright = '2022, Thomas Breitner'
 author = 'Thomas Breitner'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -70,6 +70,10 @@ todo_include_todos = True
 
 html_theme = "sphinx_book_theme"
 html_static_path = ['_static']
+
+html_css_files = [
+    'css/custom.css',
+]
 
 html_theme_options = {
     "repository_url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb",

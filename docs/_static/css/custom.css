@@ -1,0 +1,14 @@
+.navbar_extra_footer {
+    display: none;
+}
+
+details {
+    margin-bottom: 0.5em;
+    border: 1px solid silver; 
+    border-radius: 5px; 
+    padding: 0.5em 1em;
+}
+
+summary {
+    font-size: larger;
+}

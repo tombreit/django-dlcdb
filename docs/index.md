@@ -1,9 +1,10 @@
 # Welcome to DLCDB's documentation.
 
 
-## TOC
-
-<hr>
+<details>
+<summary>
+Inhaltsverzeichnis
+</summary>
 
 ```{toctree}
 ---
@@ -22,6 +23,9 @@ chapters/reporting
 chapters/udb
 chapters/api
 ```
+
+</details>
+
 
 ## README
 
