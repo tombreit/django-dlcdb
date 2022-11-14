@@ -1,0 +1,11 @@
+pages:
+  stage: deploy
+  image: python:3.10-slim
+  script:
+  - pip install --upgrade pip setuptools wheel && pip install -r requirements/requirements-prod.txt
+  - sphinx-build -b html docs public
+  artifacts:
+    paths:
+    - public
+  only:
+  - main

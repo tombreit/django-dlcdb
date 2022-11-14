@@ -23,6 +23,7 @@ node_modules/
 
 # Sphinx documentation
 /docs/_build/
+/public/
 
 # Project directories
 /run/*
