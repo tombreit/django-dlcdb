@@ -231,4 +231,4 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
     # get_maintenance_contract_expiration_date.admin_order_field = 'obj.device.maintenance_contract_expiration_date'
 
     class Media:
-        js = ("dlcdb/core/licencerecord/licence.js",)
+        js = ("core/licencerecord/licence.js",)

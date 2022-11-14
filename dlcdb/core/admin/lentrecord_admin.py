@@ -285,4 +285,4 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
         return super().render_change_form(request, context, add, change, form_url, obj)
 
     class Media:
-        js = ("dlcdb/core/lentrecord/lent.js",)
+        js = ("core/lentrecord/lent.js",)
