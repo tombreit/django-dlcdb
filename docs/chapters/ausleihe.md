@@ -23,3 +23,7 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 - Gerät-Ausleihe wird in DLCDB geöffnet
 - Rückgabedatum wird eingetragen
 - Datensatz wird gespeichert
+
+:::{tip}
+Für zurückgegebene Devices wird automatisch ein `INROOM`-Record mit dem definiteren Auto-Return-Room erstellt. Der Auto-Return-Raum wird (einmalig) in der Raumverwaltung definiert.
+:::

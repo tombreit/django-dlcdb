@@ -9,10 +9,9 @@
 - Bei verliehenen Geräten darf der Inventurstatus "Ist nicht da" nur dann gesetzt werden, wenn sichergestellt ist, dass das Gerät nicht im zugeordneten Raum und nicht bei der/dem Ausleiher\*in ist.
 - Verliehen Geräte können auch einem tatsächlichen Raum zugeordnet werden. Wenn das Gerät dort nicht gefunden wird und auf "Ist nicht da ist" geklickt wird, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.
 - Die Existenz von Geräten, die aktuell verliehen sind müssen vom Leihenden bestätigt werden. Das management command `verify_lendings --help` kann das Anmailen der Leihenden übernehmen.
-- Es ist nicht notwendig, von den Leihenden Unterschriften einzuholen, mit denen der Besitz des Leihgeräts bestätig wird, eine Rückmeldung via Email genügt. (Quelle: Telefonat 2021-11-09 mit Herrn Robert Schrank sowie Marcel Klassen (beide GV)).
 - Die Rückmeldung des Leihenden muss als Inventur-Notiz beim Gerät eingetragen werden, z.B. "Bestätigung Besitz durch Ausleiher\*in via Email vom YYYY-MM-DD".
 - Es muss sichergestellt sein, dass für jeden Verleih auch eine Unterschrift des Leihenden geleistet wurde. Die Verleihzettel sind daher ebenfalls auf Vollständigkeit zu kontrollieren.
-- Beim Abschluss der Inventur kann das Formblatt "Liste im Besitz von Mitarbeitern befindlicher Sachanlagen" über die Navigation der Inventur-App generiert werden.
+- Beim Abschluss der Inventur kann das Formblatt "Liste im Besitz von Mitarbeitern befindlicher Sachanlagen" über die Navigation der Inventur-App (*Misc > VG bei MAs*) generiert werden.
 
 ## Inventur Verwaltung
 
