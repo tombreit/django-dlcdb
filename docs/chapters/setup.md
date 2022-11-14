@@ -79,6 +79,11 @@ Be sure to use one of the production requirement files:
 ```
 :::
 
+:::{tip}
+Speed up your sqlite (one off command):
+
+`sqlite3 run/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
+:::
 
 ### Task runner
 
@@ -129,6 +134,44 @@ touch dlcdb/wsgi.py
 make -C docs html
 ```
 
-## Apache
+### Apache and mod_wsgi
 
-*coming soon*
+```
+<VirtualHost *:443>
+    ServerName dlcdb.fqdn
+
+    Alias /docs /path/to/docs/_build/html
+    <Directory /path/to/docs/_build/html>
+        Require all granted
+    </Directory>
+
+    Alias /static /path/to/run/staticfiles
+    <Directory /path/to/run/staticfiles>
+        Require all granted
+    </Directory>
+
+    Alias /media path/to/run/media
+    <Directory path/to/run/media>
+        Require all granted
+    </Directory>
+
+    <Directory /path/to/dlcdb>
+        <Files wsgi.py>
+                Require all granted
+        </Files>
+    </Directory>
+
+    WSGIPassAuthorization On
+    WSGIScriptAlias / /path/to/dlcdb/wsgi.py process-group=dlcdb
+    WSGIDaemonProcess dlcdb \
+        user=dlcdb \
+        group=dlcdb \
+        python-path=/path/to/dlcdb \
+        python-home=/path/to/venv \
+        lang=en_US.UTF-8 \
+        locale=en_US.UTF-8
+
+</VirtualHost>
+
+
+```
