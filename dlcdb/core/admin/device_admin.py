@@ -114,8 +114,9 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         ('Nicks', {
             'classes': ('collapse',),
             'fields': (
-                ('nick_name', 'former_nick_names',),
-                ('mac_address', 'extra_mac_addresses')
+                'nick_name',
+                'mac_address',
+                'extra_mac_addresses',
             ),
         }),
         ('Secrets', {

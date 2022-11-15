@@ -75,7 +75,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name='Haupt-Mac-Adresse')
     extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name='Weitere Mac-Adressen')
     nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nickname / C-Name')
-    former_nick_names = models.CharField(max_length=255, null=True, blank=True, verbose_name='Vorherige Nicknames / C-Names', help_text='Komma-separierte Eingabe bitte')
     is_legacy = models.BooleanField(default=False, verbose_name='Legacy-Device')
 
     is_lentable = models.BooleanField(default=False, verbose_name='Verleihgerät')
