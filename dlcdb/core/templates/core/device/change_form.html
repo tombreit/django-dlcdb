@@ -19,7 +19,7 @@
 
 {% block after_related_objects %}
     {{ block.super }}
-    {# % include 'core/record/record_notes.html' % #}
+    {% include 'core/note/note_listing.html' with notes=original.device_notes.all %}
 {% endblock %}
 
 

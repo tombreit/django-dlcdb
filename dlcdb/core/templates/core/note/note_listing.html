@@ -1,0 +1,35 @@
+{% load static %}
+
+
+<fieldset class="module aligned collapse">
+    <h2>Notes</h2>
+    {% if notes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Inventory</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+        <tbody>
+        {% for note in notes %}
+            <tr>
+                <td>
+                    {# <a class="badge badge-light" href="{% url 'admin:core_note_change' note.id %}" class="d-block">{{ note.created_at }}</a> #}
+                    {{ note.created_at }}
+                </td>
+                <td>
+                    {{ note.inventory }}
+                </td>
+                <td>
+                    {{ note.text }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p><i>No notes for this device found.</i></p>
+    {% endif %}
+</fieldset>

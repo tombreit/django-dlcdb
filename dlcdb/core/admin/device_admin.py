@@ -10,23 +10,23 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 
-from ..models import Device, Note
+from ..models import Device
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
 from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
 
 
-class NoteInline(admin.TabularInline):
-    extra = 0
-    model = Note
-    classes = ['collapse']
+# class NoteInline(admin.TabularInline):
+#     extra = 0
+#     model = Note
+#     classes = ['collapse']
 
 
 @admin.register(Device)
 class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     change_form_template = 'core/device/change_form.html'
     save_as = True
-    inlines = [NoteInline]
+    # inlines = [NoteInline]
 
     list_filter = (
         'device_type',
