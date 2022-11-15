@@ -32,7 +32,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Detailed setup and installation docs: `docs/chapters/setup.rst`
+Detailed setup and installation docs: `docs/betrieb/setup.rst`
 
 ## 📖 Documentation
 

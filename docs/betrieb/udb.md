@@ -6,7 +6,7 @@ Die DLCDB kann die Personendaten (z.B. für den Verleih) mit der UDB abgleichen.
 
 - **[Autarkie]** Die DLCB bleibt voll funktionsfähig, auch wenn keine UDB-Daten abgreifbar oder vorhanden sind.
 - **[Redundanz]** Die Personen- und Vertragsdaten aus der UDB für den DLCDB-Verleih nutzen.
-- Die UDB soll wissen, welche Devices eine Person ausgehliehen hat (siehe {ref}`chapters/api:api` )
+- Die UDB soll wissen, welche Devices eine Person ausgehliehen hat (siehe[API](betrieb/api.md#api))
 
 ## User stories
 

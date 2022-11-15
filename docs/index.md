@@ -7,21 +7,11 @@ Inhaltsverzeichnis
 </summary>
 
 ```{toctree}
----
-maxdepth: 1
----
+:maxdepth: 2
 
-chapters/setup
-chapters/model
-chapters/umziehen
-chapters/ausleihe
-chapters/lizenzen
-chapters/import
-chapters/inventur
-chapters/ausmustern.md
-chapters/reporting
-chapters/udb
-chapters/api
+guides/index
+betrieb/index
+faq
 ```
 
 </details>

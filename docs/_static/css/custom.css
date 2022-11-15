@@ -1,5 +1,9 @@
-.navbar_extra_footer {
+/* .navbar_extra_footer {
     display: none;
+} */
+
+#site-navigation div.navbar_extra_footer {
+    text-align: left;
 }
 
 details {

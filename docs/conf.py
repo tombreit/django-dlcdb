@@ -21,8 +21,9 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinxcontrib.mermaid',
-    'sphinx.ext.autosectionlabel',
+    # 'sphinx.ext.autosectionlabel',  # sphinx WARNING: duplicate label foo other instance in bar
     'myst_parser',
+    # 'linkify',
 ]
 
 autosectionlabel_prefix_document = True
@@ -79,9 +80,13 @@ html_theme_options = {
     "repository_url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb",
     "use_repository_button": True,
     "show_toc_level": 3,
+    "extra_navbar": '<p>Questions?<br><a href="mailto:t.breitner@csl.mpg.de">📧 Thomas Breitner</a></p>',
 }
 
 html_title = "DLCDB Docs"
+# html_logo = "path/to/logo.png"
+# html_favicon = "path/to/favicon.ico"
+
 
 # Language to be used for generating the HTML full-text search index.
 # Sphinx supports the following languages:
@@ -90,5 +95,5 @@ html_title = "DLCDB Docs"
 #
 # html_search_language = 'en'
 
-
 myst_enable_extensions = ["colon_fence"]
+myst_heading_anchors = 6

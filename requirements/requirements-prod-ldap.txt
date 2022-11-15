@@ -60,6 +60,8 @@ jinja2==3.1.2
     # via
     #   myst-parser
     #   sphinx
+linkify-it-py==1.0.3
+    # via myst-parser
 markdown==3.4.1
     # via django-dlcdb (setup.cfg)
 markdown-it-py==2.1.0
@@ -72,7 +74,7 @@ mdit-py-plugins==0.3.1
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-myst-parser==0.18.1
+myst-parser[linkify]==0.18.1
     # via django-dlcdb (setup.cfg)
 openpyxl==3.0.10
     # via django-dlcdb (setup.cfg)
@@ -140,5 +142,7 @@ sqlparse==0.4.3
     # via django
 typing-extensions==4.4.0
     # via myst-parser
+uc-micro-py==1.0.1
+    # via linkify-it-py
 urllib3==1.26.12
     # via requests

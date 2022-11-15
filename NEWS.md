@@ -3,7 +3,7 @@
 
 ## 2022-11b
 
-* Requirements now build from `setup.cfg`. See `docs/chapters/setup.rst`
+* Requirements now build from `setup.cfg`. See `docs/betrieb/setup.rst`
 * ⚡ Refactored some parts of DLCDB. Start your instance from a clean checkout!
 * ⚡ Defaults to `dev` requirements (`requirements.txt`). Use a dedicated requirements file for production, e.g. `requirements/requirement-prod-ldap.txt`)
 

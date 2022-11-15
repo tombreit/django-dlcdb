@@ -76,7 +76,7 @@ docutils==0.17.1
     #   sphinx
 et-xmlfile==1.1.0
     # via openpyxl
-exceptiongroup==1.0.1
+exceptiongroup==1.0.3
     # via pytest
 filelock==3.8.0
     # via
@@ -100,6 +100,8 @@ jinja2==3.1.2
     # via
     #   myst-parser
     #   sphinx
+linkify-it-py==1.0.3
+    # via myst-parser
 markdown==3.4.1
     # via django-dlcdb (setup.cfg)
 markdown-it-py==2.1.0
@@ -114,13 +116,13 @@ mdit-py-plugins==0.3.1
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-mypy==0.990
+mypy==0.991
     # via django-dlcdb (setup.cfg)
 mypy-extensions==0.4.3
     # via
     #   black
     #   mypy
-myst-parser==0.18.1
+myst-parser[linkify]==0.18.1
     # via django-dlcdb (setup.cfg)
 nodeenv==1.7.0
     # via pre-commit
@@ -139,7 +141,7 @@ pep517==0.13.0
     # via build
 pillow==9.3.0
     # via django-dlcdb (setup.cfg)
-pip-tools==6.9.0
+pip-tools==6.10.0
     # via django-dlcdb (setup.cfg)
 platformdirs==2.5.4
     # via
@@ -242,12 +244,14 @@ tomli==2.0.1
     #   pep517
     #   pytest
     #   tox
-tox==3.27.0
+tox==3.27.1
     # via django-dlcdb (setup.cfg)
 typing-extensions==4.4.0
     # via
     #   mypy
     #   myst-parser
+uc-micro-py==1.0.1
+    # via linkify-it-py
 urllib3==1.26.12
     # via requests
 virtualenv==20.16.7
