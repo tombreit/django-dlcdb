@@ -83,7 +83,7 @@ html_theme_options = {
     "extra_navbar": '<p>Questions?<br><a href="mailto:t.breitner@csl.mpg.de">📧 Thomas Breitner</a></p>',
 }
 
-html_title = "DLCDB Docs"
+html_title = "♻ DLCDB Docs"
 # html_logo = "path/to/logo.png"
 # html_favicon = "path/to/favicon.ico"
 
