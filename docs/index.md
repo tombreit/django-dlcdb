@@ -27,9 +27,5 @@ chapters/api
 </details>
 
 
-## README
-
-<hr>
-
 ```{include} ../README.md
 ```
