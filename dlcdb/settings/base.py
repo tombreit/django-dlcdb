@@ -286,6 +286,7 @@ BRANDING = {
 
 if env('AUTH_LDAP'):
     from .ldap import *
-    print("[i] AUTH_LDAP activated via .env")
+    # print("[i] AUTH_LDAP activated via .env")
 else:
-    print("[i] AUTH_LDAP disabled in .env")
+    # print("[i] AUTH_LDAP disabled in .env")
+    pass
