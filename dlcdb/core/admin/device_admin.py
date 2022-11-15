@@ -98,13 +98,17 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 ('manufacturer', 'series', 'serial_number')
             ),
         }),
-        ('Advanced options', {
+        (None, {
+            'fields': (
+                'note',
+            )
+        }),
+        ('Procurement', {
             'classes': ('collapse',),
             'fields': (
                 'supplier',
                 'order_number',
                 ('purchase_date', 'warranty_expiration_date', 'maintenance_contract_expiration_date'),
-                'note',
             ),
         }),
         ('Nicks', {
@@ -112,6 +116,13 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             'fields': (
                 ('nick_name', 'former_nick_names',),
                 ('mac_address', 'extra_mac_addresses')
+            ),
+        }),
+        ('Secrets', {
+            'classes': ('collapse',),
+            'fields': (
+                ('machine_encryption_key',),
+                ('backup_encryption_key',)
             ),
         }),
         ('Informal', {

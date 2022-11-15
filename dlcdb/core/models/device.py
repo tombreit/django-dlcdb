@@ -100,6 +100,17 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         verbose_name="Bestellnummer (SAP)",
     )
+    machine_encryption_key = models.TextField(
+        blank=True,
+        verbose_name="Passwort Festplattenverschlüsselung",
+        help_text="Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für Systemfestplatte."
+    )
+    backup_encryption_key = models.TextField(
+        blank=True,
+        verbose_name="Passwort Backupverschlüsselung",
+        help_text="Z.B. macOS TimeMachine Passwort für Backupfestplatte.",
+    )
+
     history = HistoricalRecords()
 
     class Meta:
