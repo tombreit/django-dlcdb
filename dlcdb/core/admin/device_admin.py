@@ -1,9 +1,7 @@
-from django.urls import reverse
 from django.conf import settings
+from django.urls import reverse
 from django.utils.html import mark_safe, format_html
 from django.contrib import admin
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
@@ -13,7 +11,6 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device, Note
-
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
 from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
@@ -146,11 +143,15 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         Add add_links to the context in order to show a dropdown to create the records
         """
         extra_context = extra_context or {}
-        extra_context['record_add_links'] = Device.with_softdeleted_objects.get(pk=object_id).get_record_add_links()
+        extra_context.update({
+            'record_add_links': Device.with_softdeleted_objects.get(pk=object_id).get_record_add_links(),
+            'has_record_notes_badge': self.has_record_notes_badge(),
+        })
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
 
+    @admin.display(description='Records')
     def get_record_info_display(self, obj):
         try:
             # current record may be none in case this device does
@@ -166,8 +167,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             traceback.print_exc()
             raise
 
-    get_record_info_display.short_description = 'Records'
-
+    @admin.display(description='QR Code')
     def qrcode_display(self, obj):
         return mark_safe('<img src="{url}" width="{width}" height="{height}">'.format(
             url=obj.qrcode.url,
@@ -175,15 +175,22 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             height=200,
             )
         )
-    qrcode_display.short_description = 'QR Code'
 
+    @admin.display(description='Imported via')
     def get_imported_by_link(self, obj):
         return format_html(
             '<a href="{0}">{1}</a>',
             reverse('admin:core_importerlist_change', args=(obj.imported_by.pk,)),
             obj.imported_by,
         )
-    get_imported_by_link.short_description = 'Imported via'
+
+    def has_record_notes_badge(self):
+        return format_html(
+            '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+            type_icon=settings.THEME["RECORD"]["ICON"],
+            note_icon="fa-solid fa-comment",
+            level="warning",
+        )
 
     # Custom Django admin actions
     # https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/

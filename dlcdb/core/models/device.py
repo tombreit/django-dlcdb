@@ -132,9 +132,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         note = self.device_notes.filter(inventory__is_active=True).order_by('-created_at').first()
         return note
 
+    def has_record_notes(self):
+        return self.record_set.exclude(note__isnull=True).exclude(note__exact='').exists()
+
     @property
     def get_is_currently_lented(self):
-
         if not self.active_record:
             return False
         else:

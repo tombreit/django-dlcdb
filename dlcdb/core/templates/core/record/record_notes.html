@@ -1,0 +1,46 @@
+{% comment %}
+{% load static %}
+
+
+<fieldset class="module aligned collapse">
+    <h2>Record Notes</h2>
+    {% if original.get_record_notes %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Record</th>
+                    <th>Active Record?</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+        <tbody>
+        {% for record in original.get_record_notes %}
+            <tr>
+                <td>
+                    <a href="{% url 'admin:core_record_change' record.id %}" class="d-block">
+                        <span class="badge badge-primary mb-1">
+                            {{record.get_record_type_display }}
+                        </span>
+                        <br>
+                        {{ record.created_at }}
+                    </a>
+                </td>
+                <td>
+                    {% if record.is_active %}
+                        <img src="{% static 'admin/img/icon-yes.svg' %}" alt="True">
+                    {% else %}
+                        <img src="{% static 'admin/img/icon-no.svg' %}" alt="True">
+                    {% endif %}
+                </td>
+                <td>
+                    {{ record.note }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p><i>No Record Notes for this device found.</i></p>
+    {% endif %}
+</fieldset>
+{% endcomment %}

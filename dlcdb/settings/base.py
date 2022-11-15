@@ -253,6 +253,17 @@ UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
+THEME = {
+    "RECORD": {
+        "ICON": "fa-solid fa-layer-group",
+        "COLOR": "",
+    },
+    "DEVICE": {
+        "ICON": "fa-solid fa-barcode",
+        "COLOR": "",
+    }
+}
+
 # Branding
 # Place your organization/insitution logos at the following paths to
 # get rid of the default ACME logo.

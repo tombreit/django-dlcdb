@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.template import Template, Context
 from django.urls import reverse
@@ -66,6 +67,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         'is_active',
         'room',
         'inventory',
+        'has_note',
         'user',
         'created_at',
         # 'modified_at',
@@ -100,14 +102,33 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
     def has_add_permission(self, request):
         return False
 
+    @admin.display(
+        ordering='device__sap_id',
+        description='SAP Nr',
+    )
     def get_sap_id(self, obj):
         return Template('<a href="{{url}}">{{label}}</a>').render(Context(dict(
             url=reverse('admin:core_device_change', args=(obj.device.pk,)),
             label=obj.device.sap_id,
         )))
-    get_sap_id.short_description = 'SAP Nr'
-    get_sap_id.admin_order_field = 'device__sap_id'
 
+    @admin.display(description='Has Note?')
+    def has_note(self, obj):
+        note_icon = "fa-solid fa-xmark"
+        level = "light"
+
+        if obj.note:
+            note_icon = "fa-solid fa-comment"
+            level = "warning"
+
+        return format_html(
+            '<span class="p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+            type_icon=settings.THEME["RECORD"]["ICON"],
+            note_icon=note_icon,
+            level=level,
+        )
+
+    @admin.display(description='Type')
     def get_change_link_display(self, obj):
         return Template('<a href="{{url}}{{query_param}}">{{label}}</a>').render(Context(dict(
             url=reverse('admin:core_record_change', args=(obj.id,)),
@@ -117,7 +138,6 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             # query_param='?device__id__exact={}'.format(obj.device.pk),
             label=obj.get_record_type_display()
         )))
-    get_change_link_display.short_description = 'Type'
 
     # Custom admin actions
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/actions/
