@@ -11,6 +11,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device
+from ..utils.helpers import get_has_note_badge
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
 from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
@@ -199,12 +200,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     def has_record_notes_badge(self, request, object_id):
         obj = self.get_object(request, object_id)
         if obj.has_record_notes():
-            return format_html(
-                '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
-                type_icon=settings.THEME["RECORD"]["ICON"],
-                note_icon="fa-solid fa-comment",
-                level="warning",
-            )
+            return get_has_note_badge(obj_type="record", level="warning", has_note=True)
 
     # Custom Django admin actions
     # https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/

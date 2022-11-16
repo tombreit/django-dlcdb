@@ -10,7 +10,7 @@
 {% block object-tools-items %}
     <li>
         <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
-            <i class="fa fa-search"></i> Alle Records anzeigen {{ has_record_notes_badge }}
+            <i class="fa fa-search"></i> Alle Records anzeigen {{ has_record_notes_badge|default:"" }}
         </a>
     </li>
     {{ block.super }}

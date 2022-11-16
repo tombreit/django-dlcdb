@@ -4,6 +4,7 @@ from django.template import Template, Context
 from django.urls import reverse
 from django.utils.html import format_html
 
+from ..utils.helpers import get_has_note_badge
 from ..models import Record
 from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin
 
@@ -114,19 +115,8 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     @admin.display(description='Has Note?')
     def has_note(self, obj):
-        note_icon = "fa-solid fa-xmark"
-        level = "light"
-
-        if obj.note:
-            note_icon = "fa-solid fa-comment"
-            level = "warning"
-
-        return format_html(
-            '<span class="p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
-            type_icon=settings.THEME["RECORD"]["ICON"],
-            note_icon=note_icon,
-            level=level,
-        )
+        level = "warning" if obj.note else "light"
+        return get_has_note_badge(obj_type="record", level=level, has_note=obj.note)
 
     @admin.display(description='Type')
     def get_change_link_display(self, obj):

@@ -3,9 +3,12 @@ import base64
 import re
 from io import BytesIO
 from collections import namedtuple
+
+from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html
+from django.template import Context, Template
 
 from PIL import Image
 
@@ -91,3 +94,23 @@ def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
             img.save(to_filepath, "JPEG")
     except BaseException as e:
         raise e
+
+
+def get_has_note_badge(*, obj_type, level, has_note):
+    if obj_type not in ["device", "record"]:
+        raise NotImplementedError
+
+    type_icon = ""
+    note_icon = "fa-solid fa-comment" if has_note else "fa-solid fa-xmark"
+
+    if obj_type == "record":
+        type_icon = settings.THEME["RECORD"]["ICON"]
+    elif obj_type == "device":
+        type_icon = settings.THEME["DEVICE"]["ICON"]
+
+    return format_html(
+        '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+        type_icon=type_icon,
+        note_icon=note_icon,
+        level=level,
+    )
