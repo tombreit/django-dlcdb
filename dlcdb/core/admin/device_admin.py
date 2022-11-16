@@ -157,7 +157,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         extra_context = extra_context or {}
         extra_context.update({
             'record_add_links': Device.with_softdeleted_objects.get(pk=object_id).get_record_add_links(),
-            'has_record_notes_badge': self.has_record_notes_badge(),
+            'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
         })
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
@@ -196,13 +196,15 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             obj.imported_by,
         )
 
-    def has_record_notes_badge(self):
-        return format_html(
-            '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
-            type_icon=settings.THEME["RECORD"]["ICON"],
-            note_icon="fa-solid fa-comment",
-            level="warning",
-        )
+    def has_record_notes_badge(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        if obj.has_record_notes():
+            return format_html(
+                '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+                type_icon=settings.THEME["RECORD"]["ICON"],
+                note_icon="fa-solid fa-comment",
+                level="warning",
+            )
 
     # Custom Django admin actions
     # https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/
