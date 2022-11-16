@@ -32,11 +32,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Detailed setup and installation docs: `docs/betrieb/setup.rst`
+Detailed setup and installation docs: https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html
 
 ## 📖 Documentation
 
-`docs/` or https://fqdn/docs/ 
+`docs/` or https://dlcdb.pages.gwdg.de/django-dlcdb/
 
 
 ## 📡 REST-API
@@ -45,7 +45,7 @@ The DLCDB exposes some data via its REST-API:
 
 https://fqdn/api/v2/
 
-API docs: `docs/chapters/api.rst`
+API docs: https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/api.html
 
 
 ## ⚠️ Tests
