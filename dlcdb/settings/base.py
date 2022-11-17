@@ -20,7 +20,9 @@ Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
-    SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" )
+    SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" ),
+    ADMINS=(list, []),
+
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
@@ -250,7 +252,7 @@ QRCODE_INFIXES = {
 
 SAP_LIST_COMPARISON_RESULT_FOLDER = 'sap_list_comparison_results'
 MAX_FUTURE_LENT_DESIRED_END_DATE = '2099-12-31'
-UDB_JSON_URL = env('UDB_JSON_URL')
+UDB_JSON_URL = env('UDB_JSON_URL', default=None)
 UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
