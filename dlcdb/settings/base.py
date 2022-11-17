@@ -20,6 +20,7 @@ Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
+    SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" )
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
