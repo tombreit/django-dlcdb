@@ -6,6 +6,7 @@
 Wo ist die Historie eines Devices?
 </summary>
 
+*Coming soon*
 </details>
 
 
@@ -14,6 +15,7 @@ Wo ist die Historie eines Devices?
 Was ist ein "Record"?
 </summary>
 
+*Coming soon*
 </details>
 
 
@@ -22,6 +24,7 @@ Was ist ein "Record"?
 Was ist ein "Auto-Return-Raum"?
 </summary>
 
+*Coming soon*
 </details>
 
 
@@ -30,6 +33,7 @@ Was ist ein "Auto-Return-Raum"?
 Was ist ein "Extern-Raum"?
 </summary>
 
+*Coming soon*
 </details>
 
 
@@ -38,4 +42,5 @@ Was ist ein "Extern-Raum"?
 Was ist "Kleinkram"?
 </summary>
 
+*Coming soon*
 </details>
