@@ -79,8 +79,8 @@ AUTHENTICATION_BACKENDS = [
 # https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
 ADMINS = getaddresses([env('ADMINS')])
 MANAGERS = ADMINS
-EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default="[DLCDB] ")
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default="mail@example.org")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 SITE_ID = 1
