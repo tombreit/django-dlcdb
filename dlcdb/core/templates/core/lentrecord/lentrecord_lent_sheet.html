@@ -2,6 +2,42 @@
 
 {% load markdown_extras %}
 
+
+{% block print_extra_css %}
+{% if lending_configuration.lending_preparation_checklist %}
+<style>
+    .checklist {
+        break-before: page;
+        font-family: monospace;
+    }
+    .admonition {
+        background-color: #e6e6e6;
+        margin: 1rem 0;
+        padding: 1rem;
+        box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+        border-radius: .25rem;
+        overflow: hidden;
+    }
+    .admonition.note {
+        background-color: #ebf6eb;
+    }
+    .admonition-title {
+        display: block;
+        padding: .5rem 1rem;
+        margin: -1rem;
+        margin-bottom: -1rem;
+        margin-bottom: 1rem;
+        color: #fff;
+        background-color: #313131;
+    }
+    .admonition.note .admonition-title {
+        color: #fff;
+        background-color: #5cb85c;
+    }
+</style>
+{% endif %}
+{% endblock %}
+
 {% block main %}
 
     <h2>Geräte Verleih</h2>
@@ -135,41 +171,7 @@
         </tbody>
     </table>
 
-
     {% if lending_configuration.lending_preparation_checklist %}
-    <style>
-        .checklist {
-            break-before: page;
-            font-family: monospace;
-        }
-        .admonition {
-            background-color: #e6e6e6;
-            margin: 1rem 0;
-            padding: 1rem;
-            box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
-            border-radius: .25rem;
-            overflow: hidden;
-        }
-        .admonition.note {
-            background-color: #ebf6eb;
-        }
-
-        .admonition-title {
-            display: block;
-            padding: .5rem 1rem;
-            margin: -1rem;
-            margin-bottom: -1rem;
-            margin-bottom: 1rem;
-            color: #fff;
-            background-color: #313131;
-        }
-        .admonition.note .admonition-title {
-            color: #fff;
-            background-color: #5cb85c;
-        }
-
-    </style>
-
     <div class="checklist">
         <h2>
             Checklist for 

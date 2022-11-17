@@ -58,13 +58,7 @@ make -C docs html
 
 ## Branding
 
-:::{tip}
-**Branding** is done via two steps: crafting an individual `.env` and 
-place your logo files (format: `svg`) at the following paths:
-
-- `dlcdb/static/dlcdb/branding/logo.svg` (white foreground, transparent background)
-- `dlcdb/static/dlcdb/branding/logo_bw.svg` (black foreground, transparent or white background)
-:::
+Get rid of the default ACME branding: Set your organization via *> Start > Organization > Branding*
 
 
 ## Production deployment

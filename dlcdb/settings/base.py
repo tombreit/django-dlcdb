@@ -53,6 +53,7 @@ LOCAL_APPS = [
     'dlcdb.accounts',
     'dlcdb.tenants',
     'dlcdb.core',
+    'dlcdb.organization',
     'dlcdb.inventory',
     'dlcdb.reporting',
     'dlcdb.lending',
@@ -110,8 +111,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'dlcdb.core.context_processors.branding',
                 'dlcdb.core.context_processors.hints',
+                'dlcdb.organization.context_processors.branding',
                 'dlcdb.lending.context_processors.lending_configuration',
             ],
         },
@@ -262,25 +263,6 @@ THEME = {
         "ICON": "fa-solid fa-barcode",
         "COLOR": "",
     }
-}
-
-# Branding
-# Place your organization/insitution logos at the following paths to
-# get rid of the default ACME logo.
-logo_path = BASE_DIR / "dlcdb/static/dlcdb/branding/logo.svg"
-logo_bw_path = BASE_DIR / "dlcdb/static/dlcdb/branding/logo_bw.svg"
-
-BRANDING = {
-    "BRANDING_ORG_NAME": env("BRANDING_ORG_NAME", default="ACME Corporation"),
-    "BRANDING_ORG_ABBR": env("BRANDING_ORG_ABBR", default="ACME"),
-    "BRANDING_ORG_STREET": env("BRANDING_ORG_STREET", default="Musterstrasse 123"),
-    "BRANDING_ORG_ZIP_CITY": env("BRANDING_ORG_ZIP_CITY", default="D-98765 Musterstadt"), 
-    "BRANDING_ORG_URL": env("BRANDING_ORG_URL", default="https://acme.de"),
-    "BRANDING_IT_DEPT_NAME": env("BRANDING_IT_DEPT_NAME", default="IT-Support"),
-    "BRANDING_IT_DEPT_PHONE": env("BRANDING_IT_DEPT_PHONE", default="+49 (0)123-456789"),
-    "BRANDING_IT_DEPT_MAIL": env("BRANDING_IT_DEPT_MAIL", default="it-support@fqdn"),
-    "BRANDING_LOGO": 'dlcdb/branding/logo.svg' if logo_path.exists() else 'dlcdb/branding/logo_acme.svg',
-    "BRANDING_LOGO_BW": 'dlcdb/branding/logo_bw.svg' if logo_bw_path.exists() else 'dlcdb/branding/logo_acme_bw.svg',
 }
 
 

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from django.conf import settings
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.utils.html import format_html
@@ -7,11 +6,6 @@ from django.urls import reverse
 from django.template.defaultfilters import pluralize
 
 from dlcdb.core.models import Room, Device
-
-
-def branding(request):
-    """Make branding settings available for all requests."""
-    return settings.BRANDING
 
 
 def hints(request):

@@ -3,21 +3,21 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <title>Geräte Verleih | DLCDB</title>
-    <link rel="stylesheet" href="{% static 'dist/css/print.css' %}" />
+    <link rel="stylesheet" href="{% static 'dist/css/print.css' %}">
+    {% block print_extra_css %}{% endblock %}
 </head>
 <body>
-
 <header>
-    <img src="{% static BRANDING_LOGO_BW %}" alt="{{ BRANDING_ORG_ABBR }}">
+    <img
+        src="{% if branding.organization_logo_black %}{% get_media_prefix %}{{ branding.organization_logo_black }}{% else %}{% static 'branding/logo_acme_black.svg' %}{% endif %}"
+        alt="{{ branding.organization_abbr }}"
+    >
 </header>
 
-
 <main>
-{% block main %}
-
-{% endblock %}
+{% block main %}{% endblock %}
 </main>
 
 <footer>
@@ -25,24 +25,27 @@
         <tbody>
             <tr>
                 <td>
-                    {{ BRANDING_ORG_ABBR }}
+                    {{ branding.organization_abbr }}
                     <br>
-                    {{ BRANDING_IT_DEPT_NAME }}
+                    {{ branding.organization_it_dept_name }}
                 </td>
                 <td>
-                    {{ BRANDING_ORG_STREET }}
+                    {{ branding.organization_street }}
                     <br>
-                    {{ BRANDING_ORG_ZIP_CITY }}
+                    {{ branding.organization_zip_code }} {{ branding.organization_city }}
                 </td>
                 <td>
-                    Tel.: {{ BRANDING_IT_DEPT_PHONE }}
+                    Tel.: {{ branding.organization_it_dept_phone }}
                 </td>
                 <td>
-                    <a href="mailto:{{ BRANDING_IT_DEPT_MAIL }}">{{ BRANDING_IT_DEPT_MAIL }}</a><br>
-                    <a href="{{ BRANDING_ORG_URL }}">{{ BRANDING_ORG_URL }}</a>
+                    <a href="mailto:{{ branding.organization_it_dept_email }}">{{ branding.organization_it_dept_email }}</a><br>
+                    <a href="{{ branding.organization_url }}">{{ branding.organization_url }}</a>
                 </td>
                 <td>
-                    <img src="{% static 'dlcdb/branding/minerva.svg' %}" alt="">
+                    <img 
+                        src="{% if branding.organization_figurative_mark %}{% get_media_prefix %}{{ branding.organization_figurative_mark }}{% else %}{% static 'branding/logo_acme_black.svg' %}{% endif %}"
+                        alt=""
+                    >
                 </td>
             </tr>
         </tbody>
