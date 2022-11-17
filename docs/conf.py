@@ -4,6 +4,7 @@
 import os
 import sys
 import django
+from django.conf import settings
 
 sys.path.insert(0, os.path.abspath('.'))
 
@@ -13,8 +14,11 @@ sys.path.append(node_bin_path)
 
 
 sys.path.insert(0, os.path.abspath('..'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.dev'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
 
+settings.configure(
+    DEBUG=False,
+)
 django.setup()
 
 
