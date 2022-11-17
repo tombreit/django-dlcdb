@@ -4,7 +4,7 @@
 
 The DLCDB manages the life cycle of IT assets
 
-⚡ Currently available only in German. ⚡
+⚡ Currently available only in German. Application and documentation are work in progress. ⚡
 
 
 ## 🔥 Features
@@ -26,7 +26,7 @@ To get started using the DLCDB, run the following in a virtual environment (deve
 ```bash
 npm install
 npm run prod
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver

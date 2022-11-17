@@ -15,16 +15,20 @@ from dlcdb.core.models import Record
 class Command(BaseCommand):
     """
     Workflow:
-    * cron calls this management command
-    * search for all lented devices which are overdue
-    * collect some stats for all devices
-    * send an email for each overdue device to it-support
+
+    - cron calls this management command
+    - search for all lented devices which are overdue
+    - collect some stats for all devices
+    - send an email for each overdue device to it-support
 
     Hints:
-    * lent_end_date (DateField): device was returned on this date
 
-    /etc/cron.d/dlcdb:
-    * * * * * root /path/to/venv/bin/python3  /path/to/manage.py notify_overdue_rentals
+    - lent_end_date (DateField): device was returned on this date
+
+    ```
+    # /etc/cron.d/dlcdb:
+    * * * * * root /path/to/venv/bin/python3 /path/to/manage.py notify_overdue_rentals
+    ```
     """
 
     help = 'Send email about all overdue lented devices. Triggerd via os cron.'

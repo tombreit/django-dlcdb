@@ -4,6 +4,10 @@
 In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *Ist Verleihgerät?* gesetzt ist.
 :::
 
+## Features
+
+- Automatische Notifications (Emails) an Ausleiher bei überfälliger Rückgabe
+
 ## Gerät wird ausgeliehen
 
 - Gerät-Ausleihe wird in DLCDB geöffnet

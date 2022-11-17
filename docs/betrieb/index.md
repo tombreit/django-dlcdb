@@ -6,6 +6,7 @@
 setup
 model
 news
+management_commands
 api
 udb
 ```
