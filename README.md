@@ -32,20 +32,19 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Detailed setup and installation docs: https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html
+[Detailed setup and installation docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html)
 
 ## 📖 Documentation
 
-`docs/` or https://dlcdb.pages.gwdg.de/django-dlcdb/
+`docs/` or [https://dlcdb.pages.gwdg.de/django-dlcdb/](https://dlcdb.pages.gwdg.de/django-dlcdb/)
 
 
 ## 📡 REST-API
 
 The DLCDB exposes some data via its REST-API:
 
-https://fqdn/api/v2/
-
-API docs: https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/api.html
+* [API docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/api.html)
+* Endpoint: `https://fqdn/api/v2/`
 
 
 ## ⚠️ Tests
@@ -61,10 +60,10 @@ make tests
 
 DLCDB supports:
 
--   Python 3.9+
--   any Django supported database backends, runs fine with Sqlite in production
+- Python 3.9+
+- any Django supported database backends, runs fine with Sqlite in production
 
 
 ## ⚖️ License
 
-[EUPL-1.2](https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/blob/main/LICENSE) - The EUPL is a reciprocal (or copyleft) licence, meaning that distributed contributions and improvements (called "derivatives") will be provided back or shared with the licensor and all other users. At the same time (and unlike other copyleft licences like the GPL or AGPL), the EUPL is compatible with most other open reciprocal licences and is interoperable. (Source: https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence)
+[EUPL-1.2](https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/blob/main/LICENSE) - The EUPL is a reciprocal (or copyleft) licence, meaning that distributed contributions and improvements (called "derivatives") will be provided back or shared with the licensor and all other users. At the same time (and unlike other copyleft licences like the GPL or AGPL), the EUPL is compatible with most other open reciprocal licences and is interoperable. [Source](https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence)
