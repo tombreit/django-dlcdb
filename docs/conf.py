@@ -14,6 +14,7 @@ sys.path.append(node_bin_path)
 
 sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.dev'
+
 django.setup()
 
 

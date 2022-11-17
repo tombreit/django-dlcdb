@@ -22,6 +22,7 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" ),
+    ADMINS=(list, []),
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
@@ -76,7 +77,7 @@ AUTHENTICATION_BACKENDS = [
 # Email these people full exception information
 # https://docs.djangoproject.com/en/1.9/ref/settings/#admins
 # https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
-ADMINS = getaddresses([env('ADMINS')], default=[])
+ADMINS = getaddresses([env('ADMINS')])
 MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default="[DLCDB] ")
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default="mail@example.org")
