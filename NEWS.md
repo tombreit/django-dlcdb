@@ -2,6 +2,7 @@
 
 
 ## 2022-11b
+* DLDB startup now possible without an `.env` file.
 * Branding refactored to be handled in Django admin instead of the previous .env file
 * Docs now on gitlab pages: https://dlcdb.pages.gwdg.de/django-dlcdb/
 * Requirements now build from `setup.cfg`. See `docs/betrieb/setup.rst`
