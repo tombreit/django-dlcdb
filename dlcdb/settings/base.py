@@ -19,7 +19,7 @@ Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 # Take environment variables from .env file
 env = environ.Env(
     SETTINGS_MODE=(str, "dev"),
-    DJANGO_DEBUG=(bool, False),
+    DJANGO_DEBUG=(bool, True),
     AUTH_LDAP=(bool, False),
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" ),
     ADMINS=(list, []),
