@@ -28,6 +28,7 @@ class CustomRecordModelAdmin(CustomBaseModelAdmin):
 @admin.register(Record)
 class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
     change_form_template = 'core/record/change_form.html'
+    change_list_template = 'core/record/change_list.html'
 
     exclude = [
         'attachments',
@@ -131,6 +132,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     # Custom admin actions
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/actions/
+    @admin.display(description="Ausgewählte Records auf 'ENTFERNT' und 'VERKAUFT' setzen")
     def set_removed_sold_record(self, request, queryset):
         for item in queryset:
             # Set new removed record for item:
@@ -144,8 +146,8 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             record_obj.save()
 
         self.message_user(request, '{} records auf ENTFERNT und VERKAUFT gesetzt.'.format(queryset.count()))
-    set_removed_sold_record.short_description = "Ausgewählte Records auf 'ENTFERNT' und 'VERKAUFT' setzen"
 
+    @admin.display(description="Ausgewählte Records auf 'ENTFERNT' und 'VERSCHROTTET' setzen")
     def set_removed_scrapped_record(self, request, queryset):
         for item in queryset:
             # Set new removed record for item:
@@ -159,4 +161,21 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             record_obj.save()
 
         self.message_user(request, '{} records auf ENTFERNT und VERSCHROTTET gesetzt.'.format(queryset.count()))
-    set_removed_scrapped_record.short_description = "Ausgewählte Records auf 'ENTFERNT' und 'VERSCHROTTET' setzen"
+
+    def changelist_view(self, request, extra_context=None):
+        """
+        Customized record listing admin view when only records for one device are shown.
+        TODO: Get action_form object from super() write a nicer method body.
+        """
+        from dlcdb.core.models import Device
+
+        try:
+            device_id = int(request.GET.get('device__id__exact'))
+            extra_context = extra_context or {
+                'device_obj': Device.objects.get(id=device_id),
+                'action_form': False,
+            }
+        except:
+            pass
+
+        return super().changelist_view(request, extra_context=extra_context)

@@ -61,7 +61,6 @@ class ReportAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         from ..core.models import Record
-        # Aggregate new subscribers per day
 
         _records = (
             Record
