@@ -40,3 +40,9 @@ class BrandingAdmin(admin.ModelAdmin):
             ),
         }),
     )
+
+    def has_add_permission(self, request):
+        has_add_permisson = super().has_add_permission(request)
+        if has_add_permisson and Branding.objects.exists():
+            has_add_permisson = False
+        return has_add_permisson
