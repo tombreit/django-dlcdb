@@ -22,7 +22,7 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, True),
     AUTH_LDAP=(bool, False),
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" ),
-    ADMINS=(list, []),
+    ADMINS=(str, ""),
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
