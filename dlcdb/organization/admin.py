@@ -39,6 +39,12 @@ class BrandingAdmin(admin.ModelAdmin):
                 'organization_it_dept_email',
             ),
         }),
+        ('Misc', {
+            'classes': ('collapse',),
+            'fields': (
+                'documentation_url',
+            ),
+        }),
     )
 
     def has_add_permission(self, request):

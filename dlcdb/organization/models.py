@@ -108,7 +108,12 @@ class Branding(SingletonBaseModel):
         verbose_name="IT Department Email",
     )
 
+    documentation_url = models.URLField(
+        blank=True,
+    )
 
+    def __str__(self):
+        return f"Branding for {self.organization_name_en or 'n/a'}"
     class Meta:
         verbose_name = "Branding"
         verbose_name_plural = "Branding"
