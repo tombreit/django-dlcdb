@@ -87,12 +87,18 @@
               Lizenzen
             </a>
 
-            {% if perms.core.change_room %}
+            {% if perms.core.view_room %}
               <a class="dropdown-item" href="{% url 'admin:core_room_changelist' %}">
                   Räume
               </a>
             {% endif %}
             
+            {% if perms.core.view_manufacturer %}
+              <a class="dropdown-item" href="{% url 'admin:core_manufacturer_changelist' %}">
+                {% translate "Manufacturer" %}
+              </a>
+            {% endif %}
+
             <a class="dropdown-item" href="{% url 'admin:core_record_changelist' %}">
                 Records
             </a>
