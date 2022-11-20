@@ -37,17 +37,6 @@
             Lizenzen
           </a>
         </li>
-
-        {% comment %}
-        {% if perms.core.change_inventory %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'inventory:inventorize-room-list' %}">
-            Inventarisieren
-          </a>
-        </li>
-        {% endif %}
-        {% endcomment %}
-
         <li class="nav-item">
             <a class="nav-link" href="{% url 'admin:core_device_changelist' %}">
                 Devices
