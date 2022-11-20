@@ -17,6 +17,7 @@ htmlcov/
 
 # Translations
 *.mo
+*.pot
 
 # Dependency directories
 node_modules/

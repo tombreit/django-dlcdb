@@ -61,6 +61,14 @@ make -C docs html
 Get rid of the default ACME branding: Set your organization via *> Start > Organization > Branding*
 
 
+## Localization
+
+```bash
+./manage.py makemessages --locale de --ignore=.venv/* 
+# ...poedit locale/de/LC_MESSAGES/django.po...
+./manage.py compilemessages --ignore=.venv/*
+```
+
 ## Production deployment
 
 :::{warning}

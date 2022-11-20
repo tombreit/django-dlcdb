@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-20 20:28+0100\n"
+"PO-Revision-Date: 2022-11-20 20:30+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.2\n"
+
+#: dlcdb/core/admin/filters/licence_filters.py:37
+msgid "Licence type"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:45
+msgid "{recordless_devices_count} Device{pluralize(recordless_devices_count)} without record!"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:47
+msgid "Add proper record?"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:57
+msgid "No room configured as 'is_external'!"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:59 dlcdb/core/context_processors.py:69
+msgid "Configure one?"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:67
+msgid "No room configured as 'is_auto_return_room'!"
+msgstr ""
+
+#: dlcdb/core/context_processors.py:77
+msgid "No rooms defined yet."
+msgstr ""
+
+#: dlcdb/core/context_processors.py:79
+msgid "Add some rooms?"
+msgstr ""
+
+#: dlcdb/core/models/device.py:59 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/templates/admin/navbar.html:98
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: dlcdb/core/models/manufacturer.py:12
+msgid "Name"
+msgstr ""
+
+#: dlcdb/core/models/manufacturer.py:17
+msgid "Note"
+msgstr ""
+
+#: dlcdb/core/models/manufacturer.py:22
+msgid "Manufacturers"
+msgstr "Hersteller"
+
+#: dlcdb/core/models/prx_lentrecord.py:68
+#, python-brace-format
+msgid "The end date (lend_desired_end_date) cannot be after {settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!"
+msgstr ""
+
+#: dlcdb/core/templates/core/actions/relocate.html:75
+msgid "No, take me back"
+msgstr ""
+
+#: dlcdb/organization/models.py:25 dlcdb/organization/models.py:32
+msgid "A Company that Makes Everything"
+msgstr ""
+
+#: dlcdb/organization/models.py:26
+msgid "Company, institute, site name (english version)."
+msgstr ""
+
+#: dlcdb/organization/models.py:33
+msgid "Company, institute, site name (german version)."
+msgstr ""
+
+#: dlcdb/organization/models.py:40
+msgid "Company, institute, site abbreviation."
+msgstr ""
+
+#: dlcdb/organization/models.py:69 dlcdb/organization/models.py:77
+msgid "Logo file. SVG, white foreground, transparent background"
+msgstr ""
+
+#: dlcdb/smallstuff/models.py:88
+msgid "Can not be unassigned without being assigned first!"
+msgstr ""
+
+#: dlcdb/smallstuff/models.py:92
+msgid "Unassignment timestamp could not be before assignment timestamp!"
+msgstr ""
+
+#: dlcdb/templates/admin/base_site.html:17
+#: dlcdb/templates/admin/dashboard.html:8
+msgid "Django site admin"
+msgstr ""
+
+#: dlcdb/templates/admin/base_site.html:23
+msgid "Django administration"
+msgstr ""
+
+#: dlcdb/templates/admin/filter.html:5 dlcdb/templates/admin/filter.html:17
+#, python-format
+msgid " By %(filter_title)s "
+msgstr ""
+
+#: dlcdb/templates/simple_history/_object_history_list.html:13
+msgid "Date/time"
+msgstr ""
+
+#: dlcdb/templates/simple_history/_object_history_list.html:14
+msgid "Comment"
+msgstr ""
+
+#: dlcdb/templates/simple_history/_object_history_list.html:15
+msgid "Changed by"
+msgstr ""
+
+#: dlcdb/templates/simple_history/_object_history_list.html:37
+msgid "None"
+msgstr ""
+

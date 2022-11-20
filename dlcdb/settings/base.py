@@ -91,6 +91,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
@@ -184,6 +185,16 @@ TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 
 USE_TZ = True
+
+
+LANGUAGES = (
+    ('de', 'Deutsch'),
+    ('en-us', 'English'),
+)
+
+LOCALE_PATHS = [
+    BASE_DIR / "dlcdb" / "locale",
+]
 
 # https://docs.djangoproject.com/en/4.0/topics/i18n/formatting/#creating-custom-format-files
 FORMAT_MODULE_PATH = [
