@@ -28,6 +28,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     change_form_template = 'core/device/change_form.html'
     save_as = True
     # inlines = [NoteInline]
+    ordering =  ['-active_record__created_at']
 
     list_filter = (
         'device_type',

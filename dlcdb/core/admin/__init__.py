@@ -17,3 +17,4 @@ from .importerlist_admin import ImporterListAdmin
 from .removerlist_admin import RemoverListAdmin
 from .attachment_admin import AttachmentAdmin
 from .licencerecord_admin import LicenceRecordAdmin
+from .manufacturer_admin import ManufacturerAdmin

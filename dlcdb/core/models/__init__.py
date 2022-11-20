@@ -9,6 +9,7 @@ from .supplier import Supplier
 from .importer import ImporterList
 from .remover import RemoverList
 from .attachment import Attachment
+from .manufacturer import Manufacturer
 
 from .prx_inroomrecord import InRoomRecord
 from .prx_lentrecord import LentRecord

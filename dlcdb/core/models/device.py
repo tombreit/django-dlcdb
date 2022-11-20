@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 
 from simple_history.models import HistoricalRecords
 
@@ -55,8 +56,8 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     )
     serial_number = models.CharField(max_length=255, null=True, blank=True, verbose_name='Seriennummer')
     device_type = models.ForeignKey('core.DeviceType', null=True, blank=True, verbose_name='Geräte-Typ', on_delete=models.SET_NULL)
+    manufacturer = models.ForeignKey('core.Manufacturer', on_delete=models.PROTECT, null=True, verbose_name=_('Manufacturer'))
 
-    manufacturer = models.CharField(max_length=255, null=True, blank=True, verbose_name='Hersteller')
     series = models.CharField(max_length=255, null=True, blank=True, verbose_name='Modelbezeichnung')
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Zulieferer')
 
