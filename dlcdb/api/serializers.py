@@ -26,6 +26,9 @@ class DeviceSerializer(serializers.HyperlinkedModelSerializer):
     device_type_prefix = serializers.StringRelatedField(
         source='device_type.prefix',
     )
+    manufacturer = serializers.StringRelatedField(
+        source='manufacturer.name',
+    )
 
     class Meta:
         model = Device
