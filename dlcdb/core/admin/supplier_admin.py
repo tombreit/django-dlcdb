@@ -5,4 +5,4 @@ from ..models import Supplier
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ['name']
-    pass
+    search_fields = ['name']

@@ -57,6 +57,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         # 'uuid',
         'order_number',
     ]
+    autocomplete_fields = [
+        'manufacturer',
+        'device_type',
+        'supplier',
+    ]
 
     list_display = (
         'edv_id',
