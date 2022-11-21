@@ -38,7 +38,9 @@ class RemovedRecordAdmin(RedirectToDeviceMixin, CustomRecordModelAdmin):
 
         return fields
 
+    @admin.display(
+        description='SAP',
+        ordering='device__sap_id',
+    )
     def get_device(self, obj):
         return obj.device.sap_id
-    get_device.short_description = 'SAP'
-    get_device.admin_order_field = 'device__sap_id'
