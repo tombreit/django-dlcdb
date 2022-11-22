@@ -51,7 +51,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'sap_id',
         'nick_name',
         'device_type__name',
-        'manufacturer',
+        'manufacturer__name',
         'series',
         'serial_number',
         # 'uuid',

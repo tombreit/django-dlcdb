@@ -37,7 +37,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
     search_fields = [
         'device__sap_id',
         'device__edv_id',
-        'device__manufacturer',
+        'device__manufacturer__name',
         'device__series',
         'device__serial_number',
         'person__first_name',
