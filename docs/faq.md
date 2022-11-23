@@ -24,7 +24,7 @@ Was ist ein "Record"?
 Was ist ein "Auto-Return-Raum"?
 </summary>
 
-*Coming soon*
+Siehe [Räume anlegen](./guides/erste_schritte.md#räume-anlegen) 
 </details>
 
 
@@ -33,7 +33,7 @@ Was ist ein "Auto-Return-Raum"?
 Was ist ein "Extern-Raum"?
 </summary>
 
-*Coming soon*
+Siehe [Räume anlegen](./guides/erste_schritte.md#räume-anlegen) 
 </details>
 
 
@@ -42,5 +42,5 @@ Was ist ein "Extern-Raum"?
 Was ist "Kleinkram"?
 </summary>
 
-*Coming soon*
+Siehe [Kleinkram](guides/kleinkram.md) 
 </details>

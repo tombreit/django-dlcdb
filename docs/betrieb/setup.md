@@ -82,10 +82,14 @@ Be sure to use one of the production requirement files:
 :::
 
 :::{tip}
-Speed up your sqlite (one off command):
+Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html) (one off command):
 
 `sqlite3 run/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
 :::
+
+### Backup
+
+Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `run/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `run/` sowie - falls vorhanden - die Datei `.env` zu sichern.
 
 ### Task runner
 
