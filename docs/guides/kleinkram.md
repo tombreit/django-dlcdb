@@ -1,4 +1,4 @@
-# Kleinram
+# Kleinkram
 
 🚧 Beta. Ausleihe für z.B. geringwertige Wirtschaftsgüter wie Webcams, Mäuse etc. 🚧
 
