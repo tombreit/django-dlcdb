@@ -6,7 +6,6 @@ import ldap
 
 from django_auth_ldap.config import (
     LDAPSearch,
-    LDAPSearchUnion,
     ActiveDirectoryGroupType,
     LDAPGroupQuery,
 )
@@ -44,12 +43,10 @@ if env.str('SETTINGS_MODE') == 'dev':
     ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
 
 
-AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
-    LDAPSearch(
-        f"{env.str('AUTH_LDAP_USERS_DN')}",
-        ldap.SCOPE_SUBTREE,
-        "(sAMAccountName=%(user)s)",
-    ),
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    f"{env.str('AUTH_LDAP_USERS_DN')}",
+    ldap.SCOPE_SUBTREE,
+    "(sAMAccountName=%(user)s)",
 )
 
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
