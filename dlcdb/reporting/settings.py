@@ -34,11 +34,6 @@ EXPOSED_FIELDS = [
         'field': 'username', 
         'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
     },
-    # {   
-    #     'model': ['device'],
-    #     'field': 'pk',
-    #     'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
-    # },
     {
         'model': ['device'],
         'field': 'sap_id',
@@ -51,17 +46,17 @@ EXPOSED_FIELDS = [
     },
     {
         'model': ['device'],
-        'field': 'manufacturer',
-        'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
-    },
-    {
-        'model': ['device'],
         'field': 'series',
         'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
     },
     {
         'model': ['device'],
         'field': 'serial_number',
+        'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
+    },
+    {
+        'model': ['device','manufacturer'],
+        'field': 'name',
         'used_for': [Record.REMOVED, Record.INROOM, Record.LENT],
     },
     {
