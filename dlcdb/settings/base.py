@@ -70,7 +70,7 @@ DEV_APPS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
-if DEV_SETTINGS_MODE:
+if DEBUG:
     INSTALLED_APPS = INSTALLED_APPS + DEV_APPS
 
 # https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
@@ -83,7 +83,7 @@ CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
-INTERNAL_IPS = ['127.0.0.1'] if DEV_SETTINGS_MODE else []
+INTERNAL_IPS = ['127.0.0.1'] if DEBUG else []
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -125,7 +125,7 @@ MIDDLEWARE = [
 # The order of MIDDLEWARE is important. You should include the Debug Toolbar
 # middleware as early as possible in the list. However, it must come after any
 # other middleware that encodes the response’s content, such as GZipMiddleware.
-if DEV_SETTINGS_MODE:
+if DEBUG:
     MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'dlcdb.urls'
