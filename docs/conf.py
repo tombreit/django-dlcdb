@@ -35,6 +35,7 @@ extensions = [
     'sphinxcontrib.mermaid',
     # 'sphinx.ext.autosectionlabel',  # sphinx WARNING: duplicate label foo other instance in bar
     'myst_parser',
+    'sphinx_design',
     # 'linkify',
 ]
 
@@ -81,11 +82,19 @@ todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
+# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
+# Use local hosted version for mermaid.js; see html_js_files
+mermaid_version = ""
+
 html_theme = "sphinx_book_theme"
 html_static_path = ['_static']
 
 html_css_files = [
     'css/custom.css',
+]
+
+html_js_files = [
+   'vendor/mermaid/mermaid.min.js',
 ]
 
 html_theme_options = {

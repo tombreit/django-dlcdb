@@ -76,17 +76,17 @@ docutils==0.17.1
     #   sphinx
 et-xmlfile==1.1.0
     # via openpyxl
-exceptiongroup==1.0.3
+exceptiongroup==1.0.4
     # via pytest
 filelock==3.8.0
     # via
     #   tox
     #   virtualenv
-flake8==5.0.4
+flake8==6.0.0
     # via django-dlcdb (setup.cfg)
 huey==2.4.4
     # via django-dlcdb (setup.cfg)
-identify==2.5.8
+identify==2.5.9
     # via pre-commit
 idna==3.4
     # via requests
@@ -100,8 +100,6 @@ jinja2==3.1.2
     # via
     #   myst-parser
     #   sphinx
-linkify-it-py==1.0.3
-    # via myst-parser
 markdown==3.4.1
     # via django-dlcdb (setup.cfg)
 markdown-it-py==2.1.0
@@ -122,7 +120,7 @@ mypy-extensions==0.4.3
     # via
     #   black
     #   mypy
-myst-parser[linkify]==0.18.1
+myst-parser==0.18.1
     # via django-dlcdb (setup.cfg)
 nodeenv==1.7.0
     # via pre-commit
@@ -161,13 +159,13 @@ pyasn1==0.4.8
     #   python-ldap
 pyasn1-modules==0.2.8
     # via python-ldap
-pycodestyle==2.9.1
+pycodestyle==2.10.0
     # via flake8
 pycparser==2.21
     # via cffi
 pydata-sphinx-theme==0.8.1
     # via sphinx-book-theme
-pyflakes==2.5.0
+pyflakes==3.0.0
     # via flake8
 pygments==2.13.0
     # via sphinx
@@ -213,7 +211,10 @@ sphinx==4.5.0
     #   myst-parser
     #   pydata-sphinx-theme
     #   sphinx-book-theme
+    #   sphinx-design
 sphinx-book-theme==0.3.3
+    # via django-dlcdb (setup.cfg)
+sphinx-design==0.3.0
     # via django-dlcdb (setup.cfg)
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
@@ -250,9 +251,7 @@ typing-extensions==4.4.0
     # via
     #   mypy
     #   myst-parser
-uc-micro-py==1.0.1
-    # via linkify-it-py
-urllib3==1.26.12
+urllib3==1.26.13
     # via requests
 virtualenv==20.16.7
     # via

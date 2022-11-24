@@ -1,6 +1,6 @@
 # Inventur
 
-### Verleihgeräte
+## Verleihgeräte
 
 - Bei verliehenen Geräten darf der Inventurstatus "Ist nicht da" nur dann gesetzt werden, wenn sichergestellt ist, dass das Gerät nicht im zugeordneten Raum und nicht bei der/dem Ausleiher\*in ist.
 - Verliehen Geräte können auch einem tatsächlichen Raum zugeordnet werden. Wenn das Gerät dort nicht gefunden wird und auf "Ist nicht da ist" geklickt wird, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.
