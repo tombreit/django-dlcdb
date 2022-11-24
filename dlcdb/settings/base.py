@@ -82,6 +82,8 @@ MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = env('EMAIL_SUBJECT_PREFIX', default="[DLCDB] ")
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default="mail@example.org")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_BACKEND = env.str('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+
 
 SITE_ID = 1
 

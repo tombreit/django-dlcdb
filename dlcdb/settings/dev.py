@@ -8,8 +8,6 @@ INSTALLED_APPS += [
 
 INTERNAL_IPS = ['127.0.0.1']
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 AUTH_PASSWORD_VALIDATORS = []
 
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#enabling-middleware
