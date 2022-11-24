@@ -218,6 +218,9 @@ LOGIN_REDIRECT_URL = '/admin/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
 
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
 # https://docs.djangoproject.com/en/3.0/ref/clickjacking/#setting-x-frame-options-for-all-responses
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
