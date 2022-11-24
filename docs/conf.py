@@ -6,14 +6,13 @@ import sys
 import django
 from django.conf import settings
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath(".."))
 
-# Add node_modules/.bin path to path. Only used for mermaid cli atm.
-node_bin_path = os.path.abspath('../node_modules/.bin')
-sys.path.append(node_bin_path)
+# # Add node_modules/.bin path to path. Only used for mermaid cli atm.
+# node_bin_path = os.path.abspath('../node_modules/.bin')
+# sys.path.append(node_bin_path)
 
-
-sys.path.insert(0, os.path.abspath('..'))
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
 
 settings.configure(

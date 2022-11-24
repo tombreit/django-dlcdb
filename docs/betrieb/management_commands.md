@@ -2,6 +2,6 @@
 
 🛠 Work in progress
 
-```{eval-rst}
+<!-- ```{eval-rst}
 .. autoclass:: dlcdb.core.management.commands.notify_overdue_rentals.Command
-```
+``` -->

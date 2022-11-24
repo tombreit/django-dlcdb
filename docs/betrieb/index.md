@@ -21,5 +21,5 @@ udb
 
 DLCDB Repository: [https://gitlab.gwdg.de/dlcdb/django-dlcdb](https://gitlab.gwdg.de/dlcdb/django-dlcdb)
 
-```{include} ../README.md
+```{include} ../../README.md
 ```
