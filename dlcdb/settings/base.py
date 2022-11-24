@@ -153,17 +153,19 @@ WSGI_APPLICATION = 'dlcdb.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(DB_DIR / 'db.sqlite3'),
-    }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': str(DB_DIR / 'db.sqlite3'),
+    # },
+    'default': env.db_url(
+        default=f"sqlite:////{DB_DIR / 'db.sqlite3'}"
+    ),
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-
+# https://docs.djangoproject.com/en/dev/ref/settings/#caches
 CACHES = {
     # 'default': {
     #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
