@@ -5,7 +5,6 @@ from huey import SqliteHuey
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
 RUN_DIR = BASE_DIR / "run"
 DB_DIR = RUN_DIR / "db"
 MEDIA_DIR = RUN_DIR / "media"
@@ -26,10 +25,9 @@ env = environ.Env(
 )
 environ.Env.read_env(BASE_DIR /'.env')
 
-
+DEV_SETTINGS_MODE = True if env("SETTINGS_MODE") == "dev" else False
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG')
-
 SECRET_KEY = env('SECRET_KEY')
 
 # Application definition
@@ -63,16 +61,37 @@ LOCAL_APPS = [
     'dlcdb.smallstuff',
     'dlcdb.api',
 ]
+DEV_APPS = [
+    'debug_toolbar',
+    'django_extensions',
+]
+
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
+if DEV_SETTINGS_MODE:
+    INSTALLED_APPS = INSTALLED_APPS + DEV_APPS
+
 # https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# https://docs.djangoproject.com/en/3.0/ref/clickjacking/#setting-x-frame-options-for-all-responses
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
+INTERNAL_IPS = ['127.0.0.1'] if DEV_SETTINGS_MODE else []
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+SITE_ID = 1
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Email these people full exception information
 # https://docs.djangoproject.com/en/1.9/ref/settings/#admins
@@ -85,10 +104,6 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 EMAIL_BACKEND = env.str('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = env.str("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=0)
-
-SITE_ID = 1
-
-AUTH_USER_MODEL = 'accounts.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -104,6 +119,14 @@ MIDDLEWARE = [
     'dlcdb.lending.middleware.htmx_middleware',
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
+
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#enabling-middleware
+#
+# The order of MIDDLEWARE is important. You should include the Debug Toolbar
+# middleware as early as possible in the list. However, it must come after any
+# other middleware that encodes the response’s content, such as GZipMiddleware.
+if DEV_SETTINGS_MODE:
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'dlcdb.urls'
 
@@ -178,6 +201,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+if DEV_SETTINGS_MODE:
+    AUTH_PASSWORD_VALIDATORS = []
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -188,7 +215,6 @@ TIME_ZONE = 'Europe/Berlin'
 USE_I18N = True
 
 USE_TZ = True
-
 
 LANGUAGES = (
     ('de', 'Deutsch'),
@@ -218,12 +244,6 @@ LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/admin/'
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
-
-# https://docs.djangoproject.com/en/3.0/ref/clickjacking/#setting-x-frame-options-for-all-responses
-X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SELECT2_CACHE_BACKEND = 'select2'
 
@@ -285,6 +305,11 @@ THEME = {
     }
 }
 
+# https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
+# IPYTHON_ARGUMENTS = [
+#     '--debug',
+#     '--NotebookApp.iopub_data_rate_limit=10000000000.0',
+# ]
 
 if env('AUTH_LDAP'):
     from .ldap import *
