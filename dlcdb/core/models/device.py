@@ -41,7 +41,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     sap_id_validator =  RegexValidator(
         regex='^[0-9]+-[0-9]+$',
-        message='SAP-ID muss als Hauptnummer-Unternummer eingegeben werden.',
+        message='Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden.',
         code='invalid_sap_id'
     )
 
@@ -50,8 +50,8 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         null=True,
         blank=True,
         unique=True,
-        verbose_name='SAP-Nummer',
-        help_text='Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
+        verbose_name=_('Inventory ID'),
+        help_text='SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
         validators=[sap_id_validator],
     )
     serial_number = models.CharField(max_length=255, null=True, blank=True, verbose_name='Seriennummer')

@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-20 20:28+0100\n"
-"PO-Revision-Date: 2022-11-20 20:30+0100\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2022-11-25 22:48+0100\n"
+"PO-Revision-Date: 2022-11-25 22:49+0100\n"
+"Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
@@ -49,6 +49,10 @@ msgstr ""
 #: dlcdb/core/context_processors.py:79
 msgid "Add some rooms?"
 msgstr ""
+
+#: dlcdb/core/models/device.py:53
+msgid "Inventory ID"
+msgstr "Inventarnummer"
 
 #: dlcdb/core/models/device.py:59 dlcdb/core/models/manufacturer.py:21
 #: dlcdb/templates/admin/navbar.html:98
