@@ -28,7 +28,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     change_form_template = 'core/device/change_form.html'
     save_as = True
     # inlines = [NoteInline]
-    ordering =  ['-active_record__created_at']
+    ordering =  ['-modified_at']  # '-active_record__created_at'
 
     list_filter = (
         'device_type',
@@ -154,7 +154,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     def get_queryset(self, request):
         return (
             super().get_queryset(request)
-            .select_related('active_record', 'active_record__room', 'device_type')
+            .select_related('active_record', 'active_record__room', 'device_type', 'manufacturer')
         )
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
