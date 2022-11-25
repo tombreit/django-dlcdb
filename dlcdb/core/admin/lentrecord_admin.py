@@ -273,7 +273,9 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
     def response_change(self, request, obj):
         if '_continue' in request.POST and session.get('new_instance_pk'):
             # print("session[new_instance_pk]: ", session['new_instance_pk'])
-            redirect_url = reverse('admin:core_lentrecord_change', args=(session['new_instance_pk'],))
+            # redirect_url = reverse('admin:core_lentrecord_change', args=(session['new_instance_pk'],))
+            redirect_url = reverse('admin:core_lentrecord_changelist')
+            messages.success(request, f'Device {self.get_device_human_readable(obj)} erfolgreich zurückgegeben.')
             return HttpResponseRedirect(redirect_url)
         else:
             return super().response_change(request, obj)
