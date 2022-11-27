@@ -1,3 +1,4 @@
+import json
 from django.conf import settings
 from django.urls import reverse
 from django.utils.html import mark_safe, format_html
@@ -35,7 +36,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'active_record__record_type',
         'is_lentable',
         'active_record__room',
-        # 'is_deinventorized',
         DuplicateFilter,
         'manufacturer',
         'series',
@@ -96,7 +96,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 ('edv_id', 'sap_id'),
                 'device_type',
                 ('is_lentable', 'is_licence'),
-                # 'is_deinventorized',
                 'tenant',  # TODO: set this field in TenantAdmin
             )
         }),
@@ -150,6 +149,64 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             )
         })
     )
+
+    def get_list_display(self, request):
+        """
+        Return a sequence containing the fields to be displayed on the
+        changelist.
+        """
+        list_display = super().get_list_display(request)
+        if settings.DEVICE_HIDE_FIELDS:
+            list_display = list(list_display)
+            list_display = [entry for entry in list_display if entry not in settings.DEVICE_HIDE_FIELDS]
+            # set() operations do not preserve order
+            # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
+        return list_display
+
+    def get_fieldsets(self, request, obj=None):
+        orig_fieldsets = super().get_fieldsets(request, obj)
+
+        # TODO: Possibly dangerous serialization to text format, str.replace()
+        # our DEVICE_HIDE_FIELDS and de-serializize to django fieldsets.
+        if settings.DEVICE_HIDE_FIELDS:
+            _new_fieldsets = json.dumps(orig_fieldsets)
+            for hide_field in settings.DEVICE_HIDE_FIELDS:
+                _new_fieldsets = _new_fieldsets.replace(f'"{hide_field}",', '')
+            new_fieldsets = json.loads(_new_fieldsets)
+
+            # new_fieldsets = []
+            # for fieldset in orig_fieldsets:
+            #     fieldset = list(fieldset)
+            #     print(f"{fieldset=}")
+            #     print(f"{type(fieldset)=}")
+            #     orig_fields = list(fieldset[1].get('fields'))
+            #     print(f"{orig_fields=}")
+            #     print(f"{type(orig_fields)=}")
+
+            #     new_fields =[]
+
+            #     for entry in orig_fields:
+            #         print(f"{entry=}")
+            #         print(f"{type(entry)=}")
+            #         if isinstance(entry, str) and not entry in settings.DEVICE_HIDE_FIELDS:
+            #             new_fields.append(entry)
+            #         elif isinstance(entry, tuple):
+            #             new_subentry = []
+            #             for subentry in entry:
+            #                 if isinstance(subentry, str) and not subentry in settings.DEVICE_HIDE_FIELDS:
+            #                     new_subentry.append(subentry)
+
+            # for  group in get_field_set_groups: #logic to  get the field set group
+            #      fields = []
+            #     for field in  get_group_fields: #logic to get the  group fields
+            #          fields.append(field)
+            #      fieldset_values = {"fields":  tuple(fields), "classes": ['collapse']}
+            #      fieldsets.append((group,  fieldset_values))
+
+            fieldsets = tuple(new_fieldsets)
+        else:
+            fieldsets = orig_fieldsets
+        return fieldsets
 
     def get_queryset(self, request):
         return (

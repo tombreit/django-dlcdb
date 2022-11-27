@@ -28,6 +28,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         related_name='active_device_record',
         blank=True,
         null=True,
+        db_index=True,
     )
     uuid = models.UUIDField(
         default=uuid.uuid4,
@@ -37,7 +38,14 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     # We're keeping null=True for edv_id and sap_id to ensure uniqueness 
     # checks on db level, as empty strings ('') are considered equal
-    edv_id = models.CharField(max_length=512, null=True, blank=True, unique=True, verbose_name='EDV-Nummer')
+    edv_id = models.CharField(
+        max_length=512,
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        verbose_name='EDV-Nummer',
+    )
 
     sap_id_validator =  RegexValidator(
         regex='^[0-9]+-[0-9]+$',
@@ -50,6 +58,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         null=True,
         blank=True,
         unique=True,
+        db_index=True,
         verbose_name=_('Inventory ID'),
         help_text='SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
         validators=[sap_id_validator],
@@ -78,9 +87,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nickname / C-Name')
     is_legacy = models.BooleanField(default=False, verbose_name='Legacy-Device')
 
-    is_lentable = models.BooleanField(default=False, verbose_name='Verleihgerät')
-    is_deinventorized = models.BooleanField(default=False, verbose_name='Deinventarisiert')
-    has_malfunction = models.BooleanField(default=False, verbose_name='Gerät defekt')
+    is_lentable = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name=_('Is loanable?'),
+    )
     is_imported = models.BooleanField(default=False, verbose_name='Via CSV-Import angelegt?')
     imported_by = models.ForeignKey(
         'core.ImporterList',

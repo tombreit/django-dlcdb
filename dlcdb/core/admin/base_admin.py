@@ -1,6 +1,5 @@
 import csv
 import datetime
-from django.conf import settings
 from django.contrib import admin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
@@ -17,40 +16,6 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
-
-    def get_list_display(self, request):
-        """
-        Return a sequence containing the fields to be displayed on the
-        changelist.
-        """
-        list_display = super().get_list_display(request)
-        if settings.HIDE_FIELDS:
-            list_display = list(list_display)
-            list_display = [entry for entry in list_display if entry not in settings.HIDE_FIELDS]
-            # set() operations do not preserve order
-            # list_display = list(set(list_display) - set(settings.HIDE_FIELDS))
-        return list_display
-
-    # def get_fieldsets(self, request, obj=None):
-    #     fieldsets = super().get_fieldsets(request, obj)
-    #     print(f"{fieldsets=}")
-    #     print(f"{type(fieldsets)=}")
-
-    #     for fs in fieldsets:
-    #         fields = (fs[1].get('fields'))
-    #         for entry in fields:
-    #             if isinstance(entry, tuple):
-    #                 print("istuple: ", entry)
-    #                 for field in entry:
-    #                     fields = [field for field in fields if field not in settings.HIDE_FIELDS]
-
-    #     return fieldsets
-
-    def get_fields(self, request, obj=None):
-        print("get_fields")
-        fields = super().get_fields(request, obj)
-        print(f"{type(fields)=} {fields=}")
-        return fields
 
     def get_readonly_fields(self, request, obj=None):
         return tuple(self.readonly_fields) + (
