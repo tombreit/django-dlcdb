@@ -2,16 +2,15 @@ from django.contrib import admin
 
 from ..models import RemovedRecord
 from ..forms.removedrecord_form import RemovedRecordAdminForm
-from .base_admin import RedirectToDeviceMixin
-from .record_admin import CustomRecordModelAdmin
+from .base_admin import RedirectToDeviceMixin, CustomBaseProxyModelAdmin
 
 
 @admin.register(RemovedRecord)
-class RemovedRecordAdmin(RedirectToDeviceMixin, CustomRecordModelAdmin):
+class RemovedRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = RemovedRecordAdminForm
     change_form_template = 'core/record/change_form.html'
     fields = ('device', 'disposition_state', 'removed_info', 'attachments', 'get_attachments')
-    readonly_fields = ('get_attachments',)
+    # readonly_fields = ('get_attachments',)
     list_display = ['device', 'get_device', 'disposition_state', 'removed_info', 'removed_date']
     list_filter = ['disposition_state', 'removed_date']
     search_fields = ['device__edv_id', 'device__sap_id', 'removed_info']

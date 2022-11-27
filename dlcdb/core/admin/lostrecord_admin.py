@@ -1,12 +1,15 @@
 from django.contrib import admin
 
 from ..models import LostRecord
-from .base_admin import NoModificationModelAdminMixin, RedirectToDeviceMixin
-from .record_admin import CustomRecordModelAdmin
+from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
+from .base_admin import CustomBaseProxyModelAdmin, NoModificationModelAdminMixin, RedirectToDeviceMixin
 
 
 @admin.register(LostRecord)
-class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, CustomRecordModelAdmin):
+class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, CustomBaseProxyModelAdmin):
+    form = ProxyRecordAdminForm
+    change_form_template = 'core/lostrecord/change_form.html'
+
     list_display = [
         'device',
         'created_at',

@@ -320,6 +320,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                         url=reverse("admin:core_lentrecord_change", args=[obj.active_record.pk]),
                         label=_('Verleihen'),
                     ))
+            elif record_value == Record.REMOVED and obj.active_record and obj.active_record.record_type == Record.REMOVED:
+                continue
             else:
                 add_links.append(dict(
                     label=record_label,
@@ -327,8 +329,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 ))
 
         return add_links
-
-
 
     @admin.display(description='Records')
     def get_record_info_display(self, obj):

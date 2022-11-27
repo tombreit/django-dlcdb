@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.utils import timezone, dateformat
 
+from ..models import Device
 from ..utils.helpers import get_denormalized_user
 
 
@@ -44,6 +45,38 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
             instance.user, instance.username = get_denormalized_user(request.user)
             instance.save()
         formset.save_m2m()
+
+
+class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if obj: 
+            print("editing an existing object")
+            readonly_fields = tuple(readonly_fields) + ('device', 'room')
+
+        return readonly_fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+ 
+        _device = request.GET.get('device', None)
+
+        if _device:
+            form.base_fields['device'].initial = _device
+
+        if not obj:
+            form.base_fields['device'].disabled = True
+
+        return form
+
+    def add_view(self, request, form_url='', extra_context=None):
+        device_id = request.GET.get('device')
+        device = Device.objects.get(id=device_id)
+        extra_context = extra_context or {}
+        extra_context['device'] = device
+        return super().add_view(
+            request, form_url, extra_context=extra_context,
+        )
 
 
 class SoftDeleteModelAdmin(admin.ModelAdmin):

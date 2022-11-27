@@ -297,8 +297,6 @@ UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
 DEVICE_HIDE_FIELDS = env.list('DEVICE_HIDE_FIELDS', default=[])
-print(f"{DEVICE_HIDE_FIELDS=}")
-
 
 THEME = {
     "RECORD": {
