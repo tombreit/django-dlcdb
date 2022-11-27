@@ -39,12 +39,6 @@
 </div>
 
 {% comment %}
-{% if active_record and not list_view %}
-    <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ obj.id }}">
-        <i class="fa fa-search"></i> Alle Records anzeigen
-    </a>
-{% endif %}
-
 {% if is_device_detail_page %}
     {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
     <a class="small ml-4" href="{% add_preserved_filters history_url %}" class="historylink">
