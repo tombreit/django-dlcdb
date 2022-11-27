@@ -107,8 +107,8 @@ fieldset.collapsed:not(.show) {
 #branding { display: none; }
 
 // ...but re-enable django admin branding for login and logout pages
-body.login #branding, 
-body[class=""] #branding { 
+body.login #branding,
+body.logout #branding { 
     display: block; 
 }
 
