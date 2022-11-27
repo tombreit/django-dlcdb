@@ -3,7 +3,18 @@
 
 {% block content_subtitle %}
     {# Instance heading #}
-    {{ block.super }}
+    {#{ block.super }#}
+    <div class="mb-4">
+    {% if subtitle %}
+        <div style="font-size: 1rem;" class="d-inline btn btn-primary disabled font-weight-bold">{{ subtitle }}</div>
+    {% endif %}
+
+    {% if original %}
+        <div class="d-inline ml-4">
+        {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
+        </div>
+    {% endif %}
+    </div>
 {% endblock %}
 
 
@@ -24,11 +35,6 @@
 
 
 {% block content %}
-
-    {% if original %}
-        {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
-    {% endif %}
-
     {{ block.super }}
 
     {% if not original %}

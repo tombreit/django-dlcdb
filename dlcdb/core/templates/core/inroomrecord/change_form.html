@@ -10,13 +10,13 @@
     {% if localize_device.get_is_currently_lented %}
     <div class="alert alert-danger">
         <p>
-            Device {{ localize_device }} ist aktuell verliehen an {{ localize_device.get_person }}.
+            Device <b>{{ localize_device }}</b> ist aktuell verliehen an <b>{{ localize_device.get_person }}</b>.
         </p>
         <p>
-            Wenn dieses Device jetzt lokalisiert wird, wird der aktuelle Verleih beendet!
+            Wenn dieses Device jetzt lokalisiert wird, <b>wird der aktuelle Verleih beendet!</b>
         </p>
         <p>
-            Eine Raumänderung für den aktuellen Verleih ist über die <a href="{% url "admin:core_lentrecord_change" localize_device.active_record.pk %}">Verleihansicht</a> durchzuführen.
+            Eine Raumänderung für den aktuellen Verleih ist über die <a href="{% url "admin:core_lentrecord_change" localize_device.active_record.pk %}"><b>Verleihansicht</b></a> durchzuführen.
         </p>
     </div>
     {% endif %}

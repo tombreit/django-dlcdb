@@ -221,6 +221,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         extra_context = extra_context or {}
         extra_context.update({
             'record_add_links': Device.with_softdeleted_objects.get(pk=object_id).get_record_add_links(),
+            'current_record_infos': Device.with_softdeleted_objects.get(pk=object_id).get_current_record_infos(),
             'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
         })
         return super().change_view(
@@ -234,6 +235,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             # not have any records yet.
             ctx = dict(
                 add_links=obj.get_record_add_links(),
+                current_record_infos=obj.get_current_record_infos(),
                 obj=obj,
                 list_view=True,
             )

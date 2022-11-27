@@ -27,7 +27,6 @@ urlpatterns = [
 
     path('admin/core/orderedrecord/procure/', procure_views.ProcureDeviceView.as_view(), name='core_procure_device'),
     path('admin/core/lentrecord/print/<int:pk>/', lent_management_views.PrintLentSheetView.as_view(), name='core_print_lent_sheet'),
-    path('admin/core/devices/relocate/', relocate_views.DevicesRelocateView.as_view(), name='core_devices_relocate'),
 
     path('core/', include('dlcdb.core.urls')),
     path('inventory/', include('dlcdb.inventory.urls')),

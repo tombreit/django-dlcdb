@@ -74,6 +74,10 @@ input.btn-light,
 a.btn-light {
     @extend .btn-light;
 }
+input.btn-danger,
+a.btn-danger {
+    @extend .btn-danger;
+}
 
 fieldset.collapse:not(.show), 
 fieldset.collapsed:not(.show) {
