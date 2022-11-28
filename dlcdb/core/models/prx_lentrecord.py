@@ -17,7 +17,7 @@ class LentRecordManager(models.Manager):
 
         non_lentable_filter = Q(
             Q(record_type=Record.REMOVED) |
-            Q(record_type=Record.LOST) |
+            # Q(record_type=Record.LOST) |
             Q(device__is_licence=True)
         )
 

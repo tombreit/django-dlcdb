@@ -39,8 +39,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'active_record__room',
         'manufacturer',
         'series',
-        # HasRecordFilter,
         'active_record__inventory',
+        HasRecordFilter,
         DuplicateFilter,
         'is_imported',
         'created_at',
@@ -309,6 +309,12 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         for record_value, record_label in Record.RECORD_TYPE_CHOICES:
             if record_value == Record.ORDERED:
                 continue
+            elif record_value == Record.REMOVED and obj.active_record and obj.active_record.record_type == Record.REMOVED:
+                # Do not let already removed devices removed again
+                continue
+            elif record_value == Record.LOST and obj.active_record and obj.active_record.record_type == Record.LOST:
+                # Lost records could not be lost again
+                continue
             elif record_value == Record.LENT:
                 if obj.active_record and obj.active_record.record_type == Record.LENT:
                     add_links.append(dict(
@@ -317,15 +323,9 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     ))
                 elif obj.is_lentable:
                     add_links.append(dict(
-                        url=reverse("admin:core_lentrecord_change", args=[obj.active_record.pk]),
+                        url=reverse('admin:core_lentrecord_change', args=[obj.active_record.pk]),
                         label=_('Verleihen'),
                     ))
-            elif record_value == Record.REMOVED and obj.active_record and obj.active_record.record_type == Record.REMOVED:
-                # Do not let already removed devices removed again
-                continue
-            elif record_value == Record.LOST and obj.active_record and obj.active_record.record_type == Record.LOST:
-                # Lost records could not be lost again
-                continue
             else:
                 add_links.append(dict(
                     label=record_label,
