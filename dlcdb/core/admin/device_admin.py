@@ -321,6 +321,10 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                         label=_('Verleihen'),
                     ))
             elif record_value == Record.REMOVED and obj.active_record and obj.active_record.record_type == Record.REMOVED:
+                # Do not let already removed devices removed again
+                continue
+            elif record_value == Record.LOST and obj.active_record and obj.active_record.record_type == Record.LOST:
+                # Lost records could not be lost again
                 continue
             else:
                 add_links.append(dict(
