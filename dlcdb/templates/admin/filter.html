@@ -7,7 +7,7 @@
   </summary>
   
   {% if choices|length > 1 %}
-  <form class="d-block list-filter-select2 ml-4 mr-1">
+  <form class="d-block list-filter-select2 ml-4 mr-1 mb-2">
     <select id="filter-{{ title|escape }}" class="select2" style="width: 100%; max-width: 100%;" onchange="window.location=this.value">
         {% for choice in choices %}
             <option

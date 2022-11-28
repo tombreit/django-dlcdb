@@ -4,8 +4,6 @@ from django.db.models import Count
 from dlcdb.core import models
 
 
-# admin.py
-
 class DuplicateFilter(SimpleListFilter):
     title = 'Dubletten'
     parameter_name = 'dubletten'
@@ -22,7 +20,6 @@ class DuplicateFilter(SimpleListFilter):
         return (
             ('serial_number', 'Seriennummern Dubletten'),
             ('nick_name', 'Nickname Dubletten'),
-            # ('asdf', 'asdf'),
         )
 
     def queryset(self, request, queryset):
@@ -31,7 +28,6 @@ class DuplicateFilter(SimpleListFilter):
         """
 
         if self.value():
-
             duplicate_field = self.value()
 
             field_name = [
