@@ -321,7 +321,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                         url=reverse("admin:core_lentrecord_change", args=[obj.active_record.pk]),
                         label=_('Verleih'),
                     ))
-                elif obj.is_lentable:
+                elif  obj.active_record and obj.is_lentable:
                     add_links.append(dict(
                         url=reverse('admin:core_lentrecord_change', args=[obj.active_record.pk]),
                         label=_('Verleihen'),
