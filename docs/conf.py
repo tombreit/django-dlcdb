@@ -6,18 +6,20 @@ import sys
 import django
 from django.conf import settings
 
-sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))
 
 # # Add node_modules/.bin path to path. Only used for mermaid cli atm.
 # node_bin_path = os.path.abspath('../node_modules/.bin')
 # sys.path.append(node_bin_path)
-
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
 
-settings.configure(
-    DEBUG=False,
-)
+# settings.configure(
+#     DEBUG=False,
+# )
+
+# FIXME Do not alter settings at runtime
+# https://docs.djangoproject.com/en/4.1/topics/settings/#altering-settings-at-runtime
+settings.DEBUG = False
 django.setup()
 
 

@@ -9,6 +9,11 @@ from  dlcdb.inventory.utils import get_match_for_sap_id
 
 
 class Command(BaseCommand):
+    """
+    Takes a CSV file, marks (via new column IS_IT_ASSET) all items which are in this DLCDB instance
+    and gives back a CSV file.
+    """
+
     help = 'Takes a CSV file, marks all items which are in this DLCDB \
             instance and gives back a CSV file.'
 
@@ -25,7 +30,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-
         # Check if output file already exists:
         csv_output_file = options['csv_output_file']
         csv_output_file_obj = pathlib.Path(csv_output_file)
@@ -68,3 +72,5 @@ class Command(BaseCommand):
                 # print(type(row))
 
                 writer.writerow(row)
+
+            self.stdout.write(self.style.SUCCESS('Successfully generated file "%s"' % csv_output_file))
