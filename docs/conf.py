@@ -10,19 +10,11 @@ sys.path.insert(0, os.path.abspath(".."))
 # # Add node_modules/.bin path to path. Only used for mermaid cli atm.
 # node_bin_path = os.path.abspath('../node_modules/.bin')
 # sys.path.append(node_bin_path)
+
+# A minimal .env with production settings is created for gitlab pages
+# see .gitlab.ci.yml
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
-
-# settings.configure(
-#     DEBUG=False,
-# )
-
-# FIXME Do not alter settings at runtime
-# https://docs.djangoproject.com/en/4.1/topics/settings/#altering-settings-at-runtime
-# settings.DEBUG = False
 django.setup()
-
-print(f"{settings.DEBUG=}")
-
 
 # -- General configuration ------------------------------------------------
 

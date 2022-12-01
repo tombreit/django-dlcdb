@@ -6,8 +6,6 @@ pages:
   script:
   - pip install --upgrade pip setuptools wheel && pip install -r requirements/requirements-prod.txt
   - printf "SETTINGS_MODE=production\nDJANGO_DEBUG=false\n" > .env
-  - cat .env
-  - echo "$PWD"
   - sphinx-build -b html docs public
   artifacts:
     paths:
