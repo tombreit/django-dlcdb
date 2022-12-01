@@ -1,8 +1,9 @@
 pages:
   stage: deploy
   image: python:3.10-slim
+  before_script:
+  - apt-get update && apt-get install libmagic1
   script:
-  - apt install libmagic1
   - pip install --upgrade pip setuptools wheel && pip install -r requirements/requirements-prod.txt
   - printf "SETTINGS_MODE=production\nDJANGO_DEBUG=false\n" > .env
   - cat .env
