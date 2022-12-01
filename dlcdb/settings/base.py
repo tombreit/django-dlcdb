@@ -74,7 +74,7 @@ if DEBUG:
     INSTALLED_APPS = INSTALLED_APPS + DEV_APPS
 
 # https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=["*"])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
