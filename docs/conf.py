@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -21,6 +20,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
 # https://docs.djangoproject.com/en/4.1/topics/settings/#altering-settings-at-runtime
 # settings.DEBUG = False
 django.setup()
+
+print(f"{settings.DEBUG=}")
 
 
 # -- General configuration ------------------------------------------------
