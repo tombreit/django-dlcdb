@@ -19,7 +19,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
 
 # FIXME Do not alter settings at runtime
 # https://docs.djangoproject.com/en/4.1/topics/settings/#altering-settings-at-runtime
-settings.DEBUG = False
+# settings.DEBUG = False
 django.setup()
 
 
