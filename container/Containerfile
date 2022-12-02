@@ -1,4 +1,5 @@
-# NPM stage
+######################################################################
+### STAGE NPM
 FROM docker.io/library/node:18-bullseye-slim AS stagenpm
 
 WORKDIR /stagenpm
@@ -9,8 +10,8 @@ COPY ./frontend ./frontend
 RUN mkdir -p /stagenpm/dlcdb/static/dist
 RUN npm run prod
 
-
-# Django app stage
+######################################################################
+### STAGE PYTHON
 # Note: The base image for preparing the python virtual environment
 # must be the same base image as the image that copies that venv.
 FROM docker.io/library/debian:bullseye-slim AS stagepython
@@ -26,8 +27,7 @@ RUN apt-get update --yes --quiet \
       python3 python3-venv python3-dev \
       libldap2-dev libsasl2-dev gcc \
       libmagic1 \
-      make \
-    && rm -rf /var/lib/apt/lists/*
+      make
 
 # https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
 ENV VIRTUAL_ENV=/opt/venv
@@ -38,10 +38,12 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 COPY requirements.txt /stagepython/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# COPY docs docs
-# RUN make -C docs html
+# Generate Sphinx documentation
+COPY . /stagepython
+RUN make docs
 
-# Prepare apache
+######################################################################
+### STAGE FINAL
 FROM docker.io/library/debian:bullseye-slim AS apachestage
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -60,7 +62,6 @@ RUN apt-get update --yes --quiet \
       python3 \
     && rm -rf /var/lib/apt/lists/*
 
-
 COPY container/entrypoint.sh container/entrypoint.sh
 COPY . /app/
 
@@ -69,7 +70,8 @@ COPY --from=stagenpm /stagenpm/dlcdb/static/dist /app/dlcdb/static/dist
 
 # copy prepared venv
 COPY --from=stagepython /opt/venv /opt/venv
-# COPY --from=stagepython /stagepython/docs /app/docs
+
+#COPY --from=stagepython /stagepython/docs /app/docs
 
 ENTRYPOINT ["container/entrypoint.sh"]
 

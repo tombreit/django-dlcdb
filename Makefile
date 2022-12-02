@@ -1,6 +1,6 @@
 .PHONY: requirements tests format lint docs
 
-include .env
+# include .env
 
 default_requirements_file = requirements/requirements-dev.txt
 
