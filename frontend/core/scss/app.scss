@@ -134,3 +134,7 @@ tr.lent-state-40-lent {
     @extend .text-muted;
     @extend .bg-light;
 }
+
+ul.messagelist li {
+    margin: 0;
+}
