@@ -31,7 +31,7 @@ class LicenceRecordAdminForm(forms.ModelForm):
 
 
 @admin.register(LicenceRecord)
-class LicenceRecordAdmin(CustomBaseModelAdmin):    
+class LicenceRecordAdmin(CustomBaseModelAdmin):
     form = LicenceRecordAdminForm
 
     search_fields = [
