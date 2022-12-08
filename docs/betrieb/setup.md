@@ -120,6 +120,7 @@ $ sudo loginctl user-status USERNAME
 $ *login via USERNAME*
 $ export XDG_RUNTIME_DIR="/run/user/$UID"
 $ export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+$ systemctl --user daemon-reload
 $ systemctl --user enable dlcdb_huey.service
 $ systemctl --user restart dlcdb_huey.service
 $ systemctl --user status dlcdb_huey.service
