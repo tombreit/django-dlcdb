@@ -2,6 +2,7 @@ import uuid
 from collections import namedtuple
 from datetime import timedelta
 
+from django.conf import settings
 from django.db.models import Q, DateField, ExpressionWrapper, F
 from django.utils import timezone
 from django.utils.text import slugify
@@ -11,7 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model
 
 from ...core.models import Record
-from ..settings import LENT_OVERDUE_TOLERANCE_DAYS, IT_NOTIFICATION_EMAIL, NOTIFY_OVERDUE_LENDERS
+from ..settings import LENT_OVERDUE_TOLERANCE_DAYS
 
 from .mappings import get_days_for_interval
 from .representations import get_records_as_spreadsheet, get_records_as_text
@@ -40,8 +41,7 @@ def get_affected_records(notification, now):
     ])
 
     records = text_repr = file_repr = title_repr = None
-
-    _condition = notification.condition
+    condition = notification.condition
 
     if notification.last_run:
         _last_run = notification.last_run
@@ -67,32 +67,32 @@ def get_affected_records(notification, now):
         )
     )
 
-    if _condition == Notification.HAS_SAP_ID:
+    if condition == Notification.HAS_SAP_ID:
         records = (
             _records
             .filter(since_last_run_filter)
             .exclude(device__sap_id__isnull=True)
             .exclude(device__sap_id__exact='')
         )
-    elif _condition == Notification.IS_PC:
+    elif condition == Notification.IS_PC:
         records = (
             _records
             .filter(since_last_run_filter)
             .filter(device__device_type__prefix='pc')
         )
-    elif _condition == Notification.IS_NOTEBOOK:
+    elif condition == Notification.IS_NOTEBOOK:
         records = (
             _records
             .filter(since_last_run_filter)
             .filter(device__device_type__prefix='ntb')
         )
-    elif _condition == Notification.IS_PC_OR_NOTEBOOK:
+    elif condition == Notification.IS_PC_OR_NOTEBOOK:
         records = (
             _records
             .filter(since_last_run_filter)
             .filter(Q(device__device_type__prefix='pc') | Q(device__device_type__prefix='ntb'))
         )
-    elif _condition == Notification.IS_NEW_PC_OR_NOTEBOOK:
+    elif condition == Notification.IS_NEW_PC_OR_NOTEBOOK:
         records = (
             _records
             .filter(since_last_run_filter)
@@ -101,7 +101,7 @@ def get_affected_records(notification, now):
             .exclude(device__serial_number__exact='')
             .exclude(device__mac_address__exact='')
         )
-    elif _condition == Notification.LENT_IS_OVERDUE:
+    elif condition == Notification.LENT_IS_OVERDUE:
         records = (
             _records
             .filter(
@@ -156,15 +156,15 @@ def create_report_if_needed(notification_pk, caller='huey'):
     """
     from ..models import Report, Notification
 
-    Result = namedtuple('Result', [
-        'record_collection',
-        'report',
-    ])
-
     notification = Notification.objects.get(pk=notification_pk)
 
     if not notification.active:
         return
+
+    Result = namedtuple('Result', [
+        'record_collection',
+        'report',
+    ])
 
     _now = timezone.localtime(timezone.now())
     report = None
@@ -203,7 +203,7 @@ def create_report_if_needed(notification_pk, caller='huey'):
     return Result(record_collection, report)
 
 
-def create_overdue_lenders_emails():
+def create_overdue_lenders_emails(*, caller=None):
     from ..models import Notification
 
     # now only needed for a valid LenderNotification class
@@ -225,9 +225,9 @@ def create_overdue_lenders_emails():
 
     # ...and instanciate this class
     lender_notification = LenderNotification(
-        active=True if NOTIFY_OVERDUE_LENDERS else False,
+        active=settings.REPORTING_NOTIFY_OVERDUE_LENDERS,
         recipient='',
-        recipient_cc=IT_NOTIFICATION_EMAIL,
+        recipient_cc=settings.DEFAULT_FROM_EMAIL,
         event=Record.LENT,
         condition=Notification.LENT_IS_OVERDUE,
         last_run=_now,

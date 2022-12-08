@@ -274,6 +274,9 @@ HUEY = SqliteHuey(
     filename=str(DB_DIR / 'huey_task_queue.sqlite3'),
 )
 
+# Reporting
+REPORTING_NOTIFY_OVERDUE_LENDERS = env.bool('REPORTING_NOTIFY_OVERDUE_LENDERS', default=True)
+REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool('REPORTING_NOTIFY_OVERDUE_LENDERS', default=True)
 
 # Inventory/Scanner
 

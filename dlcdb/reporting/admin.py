@@ -18,7 +18,6 @@ from .utils.process import create_report_if_needed
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    save_on_top = True
 
     def get_urls(self):
         urls = super().get_urls()
@@ -36,7 +35,6 @@ class NotificationAdmin(admin.ModelAdmin):
         Result = create_report_if_needed(notification_pk, caller='oneshot')
         notification_obj = Notification.objects.get(pk=notification_pk)
 
-        # if notification_obj.notify_no_updates or hasattr(Result, 'record_collection.records'):
         try:
             email_objs = build_report_email(notification_obj, Result.report, Result.record_collection)
             send_email(email_objs)
@@ -108,4 +106,3 @@ class ReportAdmin(admin.ModelAdmin):
 
         # Call the superclass changelist_view to render the page
         return super().changelist_view(request, extra_context=extra_context)
-

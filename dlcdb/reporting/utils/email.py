@@ -6,7 +6,6 @@ from django.contrib.sites.models import Site
 from django.template.loader import get_template
 from django.urls import reverse
 
-from ..settings import IT_NOTIFICATION_EMAIL, NOTIFY_OVERDUE_LENDERS_TO_IT, EMAIL_SUBJECT_PREFIX
 from .mappings import get_admin_url_for_recordtype
 
 
@@ -42,7 +41,7 @@ def build_report_email(notification=None, report=None, record_collection=None):
     email_obj = mail.EmailMessage(
         subject=subject,
         body=email_template.render(email_context),
-        from_email=IT_NOTIFICATION_EMAIL,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         to=[notification.recipient],
         cc=[notification.recipient_cc] if notification.recipient_cc else [],
     )
@@ -65,14 +64,14 @@ def build_overdue_lender_email(records):
     person = records[0].person
 
     # In a testdrive, emails could be sent to an alternative email address
-    to = IT_NOTIFICATION_EMAIL if NOTIFY_OVERDUE_LENDERS_TO_IT else person.email
+    to = settings.DEFAULT_FROM_EMAIL if settings.REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT else person.email
 
     email_context = {
-        'subject_prefix': EMAIL_SUBJECT_PREFIX,
+        'subject_prefix': settings.EMAIL_SUBJECT_PREFIX,
         'records': records,
         'person': person,
         'records_count': len(records),
-        'contact_email': IT_NOTIFICATION_EMAIL,
+        'contact_email': settings.DEFAULT_FROM_EMAIL,
     }
     subject = email_template_subject.render(email_context)
     body = email_template_body.render(email_context) 
@@ -80,7 +79,7 @@ def build_overdue_lender_email(records):
     email_obj = mail.EmailMessage(
         subject=subject,
         body=body,
-        from_email=IT_NOTIFICATION_EMAIL,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         to=[to],
         # cc=[cc],
     )
