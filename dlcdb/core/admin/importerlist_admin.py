@@ -35,10 +35,7 @@ class ImporterListAdmin(admin.ModelAdmin):
     get_change_link_display.short_description = 'CSV-Datei'
 
     def save_model(self, request, obj, form, change):
-
         super().save_model(request, obj, form, change)
-
-        message_match = re.search('Imported devices\:\s(\d*)', obj.messages)
-        admin_success_msg = "{} devices imported. See 'message' field for further information.".format(message_match.group(1))
-
-        messages.add_message(request, messages.INFO, admin_success_msg)
+        # message_match = re.search('Imported devices\:\s(\d*)', obj.messages)
+        # admin_success_msg = "{} devices imported. See 'message' field for further information.".format(message_match.group(1))
+        # messages.add_message(request, messages.INFO, admin_success_msg)
