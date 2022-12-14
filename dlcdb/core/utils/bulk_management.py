@@ -15,10 +15,14 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from ..models import Device, Room, Record, DeviceType, Supplier
+from ..models.manufacturer import Manufacturer
 from .helpers import get_device
 
 
 logger = logging.getLogger(__name__)
+
+
+TRUE_VALUES = ("yes", "ja", "true", "1")
 
 
 def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=None):
@@ -250,6 +254,12 @@ def import_data(fileobj, importer_inst_pk=None):
             if supplier_val != '':
                 supplier_obj, created = Supplier.objects.get_or_create(name=supplier_val)
 
+            # MANUFACTURER
+            manufacturer_obj = None
+            manufacturer_val = row['MANUFACTURER']
+            if manufacturer_val != '':
+                manufacturer_obj, created = Manufacturer.objects.get_or_create(name=manufacturer_val)
+
             # DEVICETYPE
             device_type_obj = None
             device_type_val = row['DEVICE_TYPE']
@@ -267,9 +277,8 @@ def import_data(fileobj, importer_inst_pk=None):
             except ValueError:
                 raise ValidationError('Date format of a date field not recognized for device: {} - {}'.format(row['SAP_ID'], row['EDV_ID']))
 
-            is_lentable = True if row['IS_LENTABLE'] == "True" else False
-
-            is_licence = True if row['IS_LICENCE'] == "True" else False
+            is_lentable = True if row['IS_LENTABLE'].lower() in TRUE_VALUES else False
+            is_licence = True if row['IS_LICENCE'].lower() in TRUE_VALUES else False
 
             device_obj = Device(
                 is_imported=True,
@@ -280,7 +289,6 @@ def import_data(fileobj, importer_inst_pk=None):
                 sap_id=sap_id,
                 book_value=row['BOOK_VALUE'],
                 serial_number=row['SERIAL_NUMBER'],
-                manufacturer=row['MANUFACTURER'],
                 series=row['SERIES'],
                 cost_centre=row['COST_CENTRE'],
                 note=row['NOTE'],
@@ -288,6 +296,7 @@ def import_data(fileobj, importer_inst_pk=None):
                 extra_mac_addresses=row['EXTRA_MAC_ADDRESSES'],
                 nick_name=row['NICK_NAME'],
                 # these fields need some pre-processing
+                manufacturer=manufacturer_obj,
                 device_type=device_type_obj,
                 is_lentable=is_lentable,
                 is_licence=is_licence,
