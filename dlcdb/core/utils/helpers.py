@@ -4,15 +4,19 @@ import re
 from io import BytesIO
 from collections import namedtuple
 
+from collections.abc import Generator
+from contextlib import contextmanager
+from django.db.transaction import atomic
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html
-from django.template import Context, Template
 
 from PIL import Image
 
 from ..models import Device, Record
+
 
 logger = logging.getLogger(__name__)
 
@@ -114,3 +118,25 @@ def get_has_note_badge(*, obj_type, level, has_note):
         note_icon=note_icon,
         level=level,
     )
+
+
+class DoRollback(Exception):
+    """
+    Dry-run mode
+    https://adamj.eu/tech/2022/10/13/dry-run-mode-for-data-imports-in-django/
+    """
+    pass
+
+
+@contextmanager
+def rollback_atomic() -> Generator[None, None, None]:
+    """
+    Dry-run mode
+    https://adamj.eu/tech/2022/10/13/dry-run-mode-for-data-imports-in-django/
+    """
+    try:
+        with atomic():
+            yield
+            raise DoRollback()
+    except DoRollback:
+        pass
