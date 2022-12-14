@@ -21,7 +21,7 @@ class ImporterAdminForm(forms.ModelForm):
         #     raise base_exception
 
         try:
-            import_data(file, importer_inst_pk=None, write=False)
+            import_data(file, importer_inst_pk=None, valid_col_headers=self.instance.VALID_COL_HEADERS, write=False)
         except BaseException as base_exception:
             msg = base_exception
             messages.error(self.request, msg)

@@ -210,7 +210,7 @@ def set_fk(row, key):
     return obj
 
 
-def import_data(fileobj, importer_inst_pk=None, write=False):
+def import_data(fileobj, importer_inst_pk=None, valid_col_headers=None, write=False):
     from dlcdb.tenants.models import Tenant
     from ..models import InRoomRecord
     
@@ -236,6 +236,21 @@ def import_data(fileobj, importer_inst_pk=None, write=False):
                 dialect='custom_dialect',
             )
 
+            # Validating column headers
+            current_col_headers = set(rows.fieldnames)
+            expected_col_headers = set(valid_col_headers)
+
+            if not expected_col_headers.issubset(current_col_headers):
+
+                missing_col_headers = expected_col_headers.difference(current_col_headers)
+                raise ValidationError(
+                    'Erwartete Spaltenköpfe nicht in CSV-Datei gefunden [no subset]! Expected: "{}", got: "{}". Missing headers: "{}"'.format(
+                        expected_col_headers,
+                        current_col_headers,
+                        missing_col_headers,
+                    )
+                )
+
             for idx, row in enumerate(rows, start=1):
                 # Header row is not included in rows (it is in rows.fieldnames),
                 # so we do not need to exclude the header row manually
@@ -247,8 +262,8 @@ def import_data(fileobj, importer_inst_pk=None, write=False):
                 edv_id = row['EDV_ID'] if row['EDV_ID'] else None
                 sap_id = row['SAP_ID'] if row['SAP_ID'] else None
                 
-                print("edv_id: ", edv_id)
-                print("sap_id: ", sap_id)
+                # print("edv_id: ", edv_id)
+                # print("sap_id: ", sap_id)
 
                 device_repr = f"{edv_id or ''} {sap_id or ''}"
 
@@ -316,7 +331,7 @@ def import_data(fileobj, importer_inst_pk=None, write=False):
                 imported_devices_count += 1
 
                 # INROOMRECORD
-                room_number = row.get('ROOM', None)
+                room_number = row['ROOM']
                 if room_number:
                     room_obj, created = Room.objects.get_or_create(number=room_number)
 
@@ -328,11 +343,10 @@ def import_data(fileobj, importer_inst_pk=None, write=False):
 
                     success_messages.append('[Row {}] Device: "{}" / Record: "{}" imported.'.format(idx, device_repr, record_obj.pk))
 
-
         except IntegrityError as integrity_error:
-            raise IntegrityError(f"Device {device_repr}: {integrity_error}")
-        except BaseException as base_exception:
-            raise BaseException(f"Device {device_repr}: {base_exception}")
+            raise IntegrityError(f"IntegrityError {integrity_error}: Row {row}")
+        # except BaseException as base_exception:
+        #     raise BaseException(f"Uncaught exception: {base_exception}: Row {row}")
         else:
             # No exception case
             pass
