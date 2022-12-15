@@ -23,7 +23,8 @@ class ImporterAdminForm(forms.ModelForm):
 
         try:
             print("Dry-run import_data...")
-            import_data(file, importer_inst_pk=None, valid_col_headers=self.instance.VALID_COL_HEADERS, write=False)
+            result_dryrun = import_data(file, importer_inst_pk=None, valid_col_headers=self.instance.VALID_COL_HEADERS, write=False)
+            messages.info(self.request, result_dryrun)
         except IntegrityError as integrity_error:
             msg = integrity_error
             messages.error(self.request, msg)

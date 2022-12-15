@@ -21,6 +21,15 @@ from django.apps import apps
 from ..models import Device, Room, Record
 from .helpers import get_device, rollback_atomic
 
+# https://docs.djangoproject.com/en/4.1/topics/db/instrumentation/
+from django.db import connection
+from .query_logger import QueryLogger
+
+# ql = QueryLogger()
+# with connection.execute_wrapper(ql):
+#     do_queries()
+# # Now we can print the log.
+# print(ql.queries)
 
 logger = logging.getLogger(__name__)
 
@@ -270,7 +279,7 @@ def create_fk_objs(fk_field, rows):
     return
 
 
-def create_devices(rows, importer_inst_pk=None):
+def create_devices(rows, importer_inst_pk=None, write=False):
     from dlcdb.tenants.models import Tenant
 
     device_objs = []
@@ -352,15 +361,20 @@ def create_devices(rows, importer_inst_pk=None):
             )
         )
     try:
-        for device_obj in device_objs:
-            # print(f"{device_obj=}: {device_repr}")
-            device_obj.save()
-            processed_devices_count += 1
+        if write:
+            Device.objects.bulk_create(device_objs)
+            Record.objects.bulk_create([record for record in record_objs if record is not None])
+        else:
+            # In dryrun mode
+            for device_obj in device_objs:
+                # print(f"{device_obj=}: {device_repr}")
+                device_obj.save()
+                processed_devices_count += 1
 
-        for record_obj in record_objs:
-            if record_obj:
-                record_obj.save()
-                processed_records_count += 1
+            for record_obj in record_objs:
+                if record_obj:
+                    record_obj.save()
+                    processed_records_count += 1
 
         print(f"Created {processed_devices_count} devices.")
         print(f"Created {processed_records_count} records.")
@@ -375,13 +389,18 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
     ImporterMessages = namedtuple("ImporterMessages", [
         "success_messages",
         "imported_devices_count",
+        # "queries_log",
     ])
     success_messages = []
+    print(type(csvfile))
 
     if write:
         atomic_context = atomic()
     else:
         atomic_context = rollback_atomic()
+
+    # ql = QueryLogger()
+    # with connection.execute_wrapper(ql):
 
     with atomic_context:
         csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
@@ -401,10 +420,11 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
             create_fk_objs(fk_field, rows)
 
         # Second loop over rows: Creating devices
-        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk)
+        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, write=write)
 
     result = ImporterMessages(
         success_messages,
         f"Imported devices: {len(device_objs)}",
+        # ql.queries,
     )
     return result

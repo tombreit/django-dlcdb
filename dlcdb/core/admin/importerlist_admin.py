@@ -62,7 +62,7 @@ class ImporterListAdmin(admin.ModelAdmin):
             result.imported_devices_count,
             "\n".join(result.success_messages),
         ]
-        html_messages = format_html("{}<br>{}",
+        html_messages = format_html("{}<br>{}<br>",
             result.imported_devices_count,
             mark_safe("<br>".join(result.success_messages)),
         )
