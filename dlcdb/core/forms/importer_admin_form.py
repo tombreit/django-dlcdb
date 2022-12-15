@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.db import IntegrityError
 
 from ..utils.bulk_management import import_data
 
@@ -21,9 +22,10 @@ class ImporterAdminForm(forms.ModelForm):
         #     raise base_exception
 
         try:
+            print("Dry-run import_data...")
             import_data(file, importer_inst_pk=None, valid_col_headers=self.instance.VALID_COL_HEADERS, write=False)
-        except BaseException as base_exception:
-            msg = base_exception
+        except IntegrityError as integrity_error:
+            msg = integrity_error
             messages.error(self.request, msg)
             raise ValidationError(msg)
 

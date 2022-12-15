@@ -25,6 +25,9 @@ class ImporterList(models.Model):
         'IS_LICENCE',
         'USERNAME',
         'TENANT',
+        'RECORD_TYPE',
+        'RECORD_NOTE',
+        'PERSON',
     ]
 
     file = models.FileField(

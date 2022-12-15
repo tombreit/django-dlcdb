@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib import messages
-from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -57,22 +56,17 @@ class ImporterListAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
-        try:
-            result = import_data(obj.file, importer_inst_pk=obj.pk, write=True)
-            plaintext_messages = [
-                result.imported_devices_count,
-                result.processed_rows_count,
-                "\n".join(result.success_messages),
-            ]
-            html_messages = format_html("{}<br>{}<br>{}",
-                result.imported_devices_count,
-                result.processed_rows_count,
-                mark_safe("<br>".join(result.success_messages)),
-            )
-            obj.messages = "\n".join(plaintext_messages)
-            obj.save()
-            messages.success(request, html_messages)
-        except BaseException as base_exception:
-            # This should never happen, as we validated the file in a dry-run
-            # for this import file in the modelforms clean method.
-            raise ValidationError(base_exception)
+        # print("Final import_data...")
+        result = import_data(obj.file, importer_inst_pk=obj.pk, valid_col_headers=obj.VALID_COL_HEADERS, write=True)
+        plaintext_messages = [
+            result.imported_devices_count,
+            "\n".join(result.success_messages),
+        ]
+        html_messages = format_html("{}<br>{}",
+            result.imported_devices_count,
+            mark_safe("<br>".join(result.success_messages)),
+        )
+        obj.messages = "\n".join(plaintext_messages)
+        obj.save()
+        messages.success(request, html_messages)
+
