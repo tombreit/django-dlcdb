@@ -6,17 +6,20 @@ import csv
 import io
 import codecs
 import magic
+import string
 import logging
+from collections import namedtuple
 
 from datetime import datetime
 
+from django.db.transaction import atomic
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.apps import apps
 
-from ..models import Device, Room, Record, DeviceType, Supplier
-from ..models.manufacturer import Manufacturer
-from .helpers import get_device
+from ..models import Device, Room, Record
+from .helpers import get_device, rollback_atomic
 
 
 logger = logging.getLogger(__name__)
@@ -123,7 +126,6 @@ def set_removed_record(fileobj):
     messages = []
     errors_count = 0
     removed_devices_count = 0
-    processed_rows_count = 0
 
     messages.append('[I] Starting set_removed_record...')
 
@@ -137,8 +139,6 @@ def set_removed_record(fileobj):
         for idx, row in enumerate(rows, start=1):
             # header row is not included in rows (it is in rows.fieldnames),
             # so we do not need to exclude the header row manually
-
-            processed_rows_count = idx
 
             EDV_ID = row['EDV_ID'].strip()
             SAP_ID = row['SAP_ID'].strip()
@@ -187,7 +187,6 @@ def set_removed_record(fileobj):
 
     messages.extend([
         "-------------------------------------------",
-        'Processed rows from CSV: {}'.format(processed_rows_count),
         'Errors: {}'.format(errors_count),
         'Removed devices: {}'.format(removed_devices_count),
         "-------------------------------------------",
@@ -195,147 +194,217 @@ def set_removed_record(fileobj):
     return '\n'.join(messages)
 
 
-def import_data(fileobj, importer_inst_pk=None):
-    from dlcdb.tenants.models import Tenant
-    from ..models import InRoomRecord
-    
-    errors = None
-    messages = []
-    imported_devices_count = processed_rows_count = 0
+def validate_column_headers(*, current_col_headers, expected_col_headers):
+    current_col_headers = set(current_col_headers)
+    expected_col_headers = set(expected_col_headers)
+    if not expected_col_headers.issubset(current_col_headers):
+        missing_col_headers = expected_col_headers.difference(current_col_headers)
+        raise ValidationError(
+            'Erwartete Spaltenköpfe nicht in CSV-Datei gefunden [no subset]! Expected: "{}", got: "{}". Missing headers: "{}"'.format(
+                expected_col_headers,
+                current_col_headers,
+                missing_col_headers,
+            )
+        )
 
-    messages.append('[I] Starting import...')
+
+def create_record(*, device, record_type, record_note, room, person, username):
+    from dlcdb.core.models import InRoomRecord, LostRecord
+    print(f"Creating record {record_type} for {device}...")
+    record_obj = None
+
+    if record_type == Record.INROOM:
+        if not room:
+            raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
+
+        room_obj, created = Room.objects.get_or_create(number=room)
+        record_obj = InRoomRecord(
+            device=device,
+            room=room_obj,
+            note=record_note,
+            username=username.strip() if username else '',
+        )
+
+    elif record_type == Record.LOST:
+        record_obj = LostRecord(
+            device=device,
+            note=record_note,
+            username=username.strip() if username else '',
+        )
+
+    return record_obj
+
+
+def set_datetime_field(value):
+    result_value = None
+
+    if value:
+        try:
+            result_value = datetime.strptime(value, '%Y-%m-%d')
+        except ValueError as value_error:
+            raise ValueError(f'{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}')
+
+    return result_value
+
+
+def set_fk_field(row, key):
+    obj = None
+    value = row[key]
 
     try:
-        with transaction.atomic():
-            csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
-            rows = csv.DictReader(
-                codecs.iterdecode(fileobj, 'utf-8'),
-                dialect='custom_dialect',
+        model_class_name = string.capwords(key, sep="_").replace("_", "")
+        ModelClass = apps.get_model(f"core.{model_class_name}")
+        # obj, created = ModelClass.objects.get_or_create(name=value)
+        obj = ModelClass.objects.get(name=value)
+    except IntegrityError as integrity_error:
+        raise IntegrityError(f"{integrity_error} for {model_class_name} {value}")
+
+    return obj.id if obj else None
+
+
+def create_fk_objs(fk_field, rows):
+    model_class_name = string.capwords(fk_field, sep="_").replace("_", "")
+    ModelClass = apps.get_model(f"core.{model_class_name}")
+    for row in rows:
+        instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
+    return
+
+
+def create_devices(rows, importer_inst_pk=None):
+    from dlcdb.tenants.models import Tenant
+
+    device_objs = []
+    record_objs = []
+    processed_devices_count = 0
+    processed_records_count = 0
+
+    for idx, row in enumerate(rows, start=1):
+        # Header row is not included in rows (it is in rows.fieldnames),
+        # so we do not need to exclude the header row manually
+
+        # CSV DictReader always returns an empty string. But at
+        # database level we need a Null value like None to 
+        # support our unique constraints for edv_id and sap_id.
+        edv_id = row['EDV_ID'] if row['EDV_ID'] else None
+        sap_id = row['SAP_ID'] if row['SAP_ID'] else None
+
+        device_repr = f"edv_id: {edv_id or 'n/a'}; sap_id: {sap_id or 'n/a'}"
+
+        try:
+            tenant = Tenant.objects.get(name=row['TENANT'])
+        except KeyError as tenant_key_error:
+            raise KeyError(
+                '[Row {}] Device: "{}" NOT imported: TENANT not available in import file! ({})'.format(idx, device_repr, tenant_key_error)
+            )
+        except ObjectDoesNotExist as tenant_does_not_exists:
+            raise ObjectDoesNotExist(
+                '[Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist! ({})'.format(idx, device_repr, row['TENANT'], tenant_does_not_exists)
             )
 
-            for idx, row in enumerate(rows, start=1):
-                # header row is not included in rows (it is in rows.fieldnames),
-                # so we do not need to exclude the header row manually
+        # Booleans
+        is_lentable = True if row['IS_LENTABLE'].lower() in TRUE_VALUES else False
+        is_licence = True if row['IS_LICENCE'].lower() in TRUE_VALUES else False
 
-                processed_rows_count = idx
+        device_obj = Device(
+            is_imported=True,
+            imported_by_id=importer_inst_pk,
 
-                edv_id = None
-                if row['EDV_ID']:
-                    edv_id = row['EDV_ID']
+            # these fields should be mappable without further processing:
+            username=row['USERNAME'].strip() if row['USERNAME'] else '',
+            book_value=row['BOOK_VALUE'],
+            serial_number=row['SERIAL_NUMBER'],
+            series=row['SERIES'],
+            cost_centre=row['COST_CENTRE'],
+            note=row['NOTE'],
+            mac_address=row['MAC_ADDRESS'],
+            extra_mac_addresses=row['EXTRA_MAC_ADDRESSES'],
+            nick_name=row['NICK_NAME'],
+            
+            # These fields need some pre-processing
+            edv_id=edv_id,
+            sap_id=sap_id,
+            tenant=tenant,
 
-                sap_id = None
-                if row['SAP_ID']:
-                    sap_id = row['SAP_ID']
+            # FK fields
+            manufacturer_id=set_fk_field(row, 'MANUFACTURER'),
+            device_type_id=set_fk_field(row, 'DEVICE_TYPE'),
+            supplier_id=set_fk_field(row, 'SUPPLIER'),
 
-                try:
-                    tenant = Tenant.objects.get(name=row['TENANT'])
-                except KeyError as e:
-                    errors += 1
-                    messages.append(
-                        '[!][Row {}] Device: "{}" NOT imported: TENANT not available in import file!'.format(idx, edv_id)
-                    )
-                    continue
-                except ObjectDoesNotExist:
-                    errors += 1
-                    messages.append(
-                        '[!][Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist!'.format(idx, edv_id, row['TENANT'])
-                    )
-                    continue
+            # Boolean fields
+            is_lentable=is_lentable,
+            is_licence=is_licence,
 
-                # ROOM
-                room_obj = None
-                room_val = row['ROOM']
-                if room_val != '':
-                    room_obj, created = Room.objects.get_or_create(number=room_val)
+            # Date fields
+            purchase_date=set_datetime_field(row['PURCHASE_DATE']),
+            warranty_expiration_date=set_datetime_field(row['WARRANTY_EXPIRATION_DATE']),
+            maintenance_contract_expiration_date=set_datetime_field(row['MAINTENANCE_CONTRACT_EXPIRATION_DATE']),
+        )
 
-                # SUPPLIER
-                supplier_obj = None
-                supplier_val = row['SUPPLIER']
-                if supplier_val != '':
-                    supplier_obj, created = Supplier.objects.get_or_create(name=supplier_val)
+        device_objs.append(device_obj)
+        record_objs.append(
+            create_record(
+                device=device_obj,
+                record_type=row['RECORD_TYPE'],
+                record_note=row['RECORD_NOTE'],
+                room=row['ROOM'],
+                person=row['PERSON'],
+                username=row['USERNAME'],
+            )
+        )
+    try:
+        for device_obj in device_objs:
+            # print(f"{device_obj=}: {device_repr}")
+            device_obj.save()
+            processed_devices_count += 1
 
-                # MANUFACTURER
-                manufacturer_obj = None
-                manufacturer_val = row['MANUFACTURER']
-                if manufacturer_val != '':
-                    manufacturer_obj, created = Manufacturer.objects.get_or_create(name=manufacturer_val)
+        for record_obj in record_objs:
+            if record_obj:
+                record_obj.save()
+                processed_records_count += 1
 
-                # DEVICETYPE
-                device_type_obj = None
-                device_type_val = row['DEVICE_TYPE']
-                if device_type_val != '':
-                    device_type_obj, created = DeviceType.objects.get_or_create(name=device_type_val)
+        print(f"Created {processed_devices_count} devices.")
+        print(f"Created {processed_records_count} records.")
+    except IntegrityError as integrity_error:
+        raise IntegrityError(f"IntegrityError {integrity_error} for {device_repr}")
 
-                # DEVICE
-                # Befülle die Device-Tabelle mit den Daten der csv-Datei
-                try:
-                    purchase_date = row['PURCHASE_DATE'] if row['PURCHASE_DATE'] else None
-                    # if row['WARRANTY_EXPIRATION_DATE'] != '':
-                    warranty_expiration_date = row['WARRANTY_EXPIRATION_DATE'] if row['WARRANTY_EXPIRATION_DATE'] else None
-                    # if row['MAINTENANCE_CONTRACT_EXPIRATION_DATE'] != '':
-                    maintenance_contract_expiration_date = row['MAINTENANCE_CONTRACT_EXPIRATION_DATE'] if row['MAINTENANCE_CONTRACT_EXPIRATION_DATE'] else None
-                except ValueError:
-                    raise ValidationError('Date format of a date field not recognized for device: {} - {}'.format(row['SAP_ID'], row['EDV_ID']))
-
-                is_lentable = True if row['IS_LENTABLE'].lower() in TRUE_VALUES else False
-                is_licence = True if row['IS_LICENCE'].lower() in TRUE_VALUES else False
-
-                device_obj = Device(
-                    is_imported=True,
-                    imported_by_id=importer_inst_pk,
-                    # these fields should be mappable without further processing:
-                    edv_id=edv_id,
-                    username=row['USERNAME'].strip() if row['USERNAME'] else '',
-                    sap_id=sap_id,
-                    book_value=row['BOOK_VALUE'],
-                    serial_number=row['SERIAL_NUMBER'],
-                    series=row['SERIES'],
-                    cost_centre=row['COST_CENTRE'],
-                    note=row['NOTE'],
-                    mac_address=row['MAC_ADDRESS'],
-                    extra_mac_addresses=row['EXTRA_MAC_ADDRESSES'],
-                    nick_name=row['NICK_NAME'],
-                    # these fields need some pre-processing
-                    manufacturer=manufacturer_obj,
-                    device_type=device_type_obj,
-                    is_lentable=is_lentable,
-                    is_licence=is_licence,
-                    supplier=supplier_obj,
-                    purchase_date=purchase_date,
-                    warranty_expiration_date=warranty_expiration_date,
-                    maintenance_contract_expiration_date=maintenance_contract_expiration_date,
-                    tenant=tenant,
-                )
-                device_obj.save()
-
-                # INROOMRECORD
-                record_obj, created = InRoomRecord.objects.get_or_create(
-                    device=device_obj,
-                    room=room_obj,
-                    username=row['USERNAME'].strip() if row['USERNAME'] else '',
-                )
-
-                messages.append('[I][Row {}] Device: "{}" / Record: "{}" imported.'.format(idx, edv_id, record_obj.pk))
-                imported_devices_count += 1
-
-    except IntegrityError:
-        pass
-
-    else:
-        # No exception case
-        messages.success(request, 'Profile details updated.')
-
-    finally:
-        # Regardless of exception thrown or not
-        pass
+    return device_objs
 
 
-    # Hint: 'Imported devices: NNN' is used in importerlist_admin in a regex.
-    messages.extend([
-        "-------------------------------------------",
-        'Processed rows from CSV: {}'.format(processed_rows_count),
-        'Imported devices: {}'.format(imported_devices_count),
-        "-------------------------------------------",
+def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=False):
+    
+    ImporterMessages = namedtuple("ImporterMessages", [
+        "success_messages",
+        "imported_devices_count",
     ])
+    success_messages = []
 
-    return '\n'.join(messages)
+    if write:
+        atomic_context = atomic()
+    else:
+        atomic_context = rollback_atomic()
+
+    with atomic_context:
+        csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
+        rows = csv.DictReader(
+            codecs.iterdecode(csvfile, 'utf-8'),
+            dialect='custom_dialect',
+        )
+
+        validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
+
+        # https://cs205uiuc.github.io/guidebook/python/csv.html
+        rows = [row for row in rows]
+
+        # First loop over rows: Creating foreign key instances
+        fk_fields = ["SUPPLIER", "MANUFACTURER", "DEVICE_TYPE"]
+        for fk_field in fk_fields:
+            create_fk_objs(fk_field, rows)
+
+        # Second loop over rows: Creating devices
+        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk)
+
+    result = ImporterMessages(
+        success_messages,
+        f"Imported devices: {len(device_objs)}",
+    )
+    return result

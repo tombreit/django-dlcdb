@@ -1,7 +1,5 @@
 from django.db import models
 
-from ..utils.bulk_management import import_data, validate_csv
-
 
 class ImporterList(models.Model):
 
@@ -27,12 +25,9 @@ class ImporterList(models.Model):
         'IS_LICENCE',
         'USERNAME',
         'TENANT',
-    ]
-
-    DATE_FIELDS = [
-        'PURCHASE_DATE',
-        'WARRANTY_EXPIRATION_DATE',
-        'MAINTENANCE_CONTRACT_EXPIRATION_DATE',
+        'RECORD_TYPE',
+        'RECORD_NOTE',
+        'PERSON',
     ]
 
     file = models.FileField(
@@ -40,7 +35,11 @@ class ImporterList(models.Model):
         verbose_name='CSV-Datei',
         help_text='Valide Spaltenköpfe: <br>{}'.format("<br>".join(VALID_COL_HEADERS)),
     )
-    note = models.TextField(null=True, blank=True, verbose_name='Anmerkung')
+    note = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Anmerkung',
+    )
     messages = models.TextField(
         blank=True,
         verbose_name='DLCDB-Ausgaben zu diesem Import',
@@ -62,27 +61,3 @@ class ImporterList(models.Model):
 
     def __str__(self):
         return '{}'.format(self.file)
-
-    def clean(self):
-        print("[model clean] Checking CSV file:", self.file)
-        validate_csv(
-            self.file,
-            valid_col_headers=self.VALID_COL_HEADERS,
-            date_fields=self.DATE_FIELDS,
-            bulk_mode='import_devices',
-        )
-
-    def save(self, *args, **kwargs):
-        print("[model save] Importing CSV file:", self.file)
-        
-        adding = False
-        if self._state.adding is True:
-            adding = True
-
-        super().save(*args, **kwargs)
-
-        if adding is True:
-            # Importing after super().save() in order to have an already saved
-            # ImporterList instance, as we set this as a related field on Device.
-            self.messages = import_data(self.file, importer_inst_pk=self.pk)
-            self.save(update_fields=['messages'])
