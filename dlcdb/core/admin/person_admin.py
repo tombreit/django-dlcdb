@@ -105,22 +105,20 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
     )
     udb_person_image_as_image.short_description = 'Image'
 
-    def get_search_results(self, request, queryset, search_term):
-        print("In get search results")
-        results = super().get_search_results(request, queryset, search_term)
-        print(results)
-        return results
+#     def get_search_results(self, request, queryset, search_term):
+#         print("In get search results")
+#         results = super().get_search_results(request, queryset, search_term)
+#         print(results)
+#         return results
 
+#     def get_urls(self):
+#         print("get_urls...")
+#         return [
+#             path('autocomplete/', PersonAutocompleteJsonView.as_view(admin_site=self), name='customers_customer_autocomplete')
+#             if url.pattern.match('autocomplete/')
+#             else url for url in super().get_urls()
+#         ]
 
-
-    def get_urls(self):
-        print("get_urls...")
-        return [
-            path('autocomplete/', PersonAutocompleteJsonView.as_view(admin_site=self), name='customers_customer_autocomplete')
-            if url.pattern.match('autocomplete/')
-            else url for url in super().get_urls()
-        ]
-
-class PersonAutocompleteJsonView(AutocompleteJsonView):
-    def serialize_result(self, obj, to_field_name):
-        return super.serialize_result(obj, to_field_name) | {'notes': obj.notes}
+# class PersonAutocompleteJsonView(AutocompleteJsonView):
+#     def serialize_result(self, obj, to_field_name):
+#         return super.serialize_result(obj, to_field_name) | {'notes': obj.notes}
