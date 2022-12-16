@@ -1,13 +1,15 @@
 import json
+import string
 
 from django.views.generic import TemplateView
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.apps import apps
 
 from ..utils.helpers import get_has_note_badge
 from ..models.inventory import Inventory
-from ..models import Device, Room, DeviceType
+from ..models import Device
 
 from dlcdb.core import stats
 
@@ -15,38 +17,31 @@ from dlcdb.core import stats
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'admin/dashboard.html'
 
+    @staticmethod
+    def create_hasnote_button(*, model_name, changelist_url):
+        human_model_name = model_name.title().replace('_', ' ')
+        model_class_name = string.capwords(model_name, sep="_").replace("_", "")
+        ModelClass = apps.get_model(f"core.{model_class_name}")
+        obj_notes_count = ModelClass.objects.exclude(note__exact="").count()
+        obj_notes_count = obj_notes_count if obj_notes_count >= 1 else ""
+
+        button_template = 'admin/dashboard_button.html'
+        context = {
+            "css_classes": "btn btn-lg btn-{}".format("warning" if obj_notes_count else "primary"),
+            "url": reverse_lazy(changelist_url),
+            "query_params": "has_note=has_note" if obj_notes_count else "",
+            "badge": get_has_note_badge(obj_type=model_name, has_note=obj_notes_count) if obj_notes_count else "",
+            "text": human_model_name,
+            "hover_text": f"{obj_notes_count} {human_model_name} with notes" if obj_notes_count else "",
+        }
+        return render_to_string(button_template, context)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        button_template = 'admin/dashboard_button.html'
-
-        rooms_with_notes_count = Room.objects.exclude(note__exact="").count()
-        room_button_context = {
-            "css_classes": "btn btn-warning btn-lg",
-            # WARNING: Do not use the key name "url" as this triggers a
-            # circular import. And please don't ask why...
-            "url": reverse_lazy('admin:core_room_changelist'),
-            "query_params": "has_note=has_note",
-            "badge": get_has_note_badge(obj_type="room", has_note=rooms_with_notes_count),
-            "text": f"{rooms_with_notes_count} Room with notes",
-        }
-        rendered_room_button = render_to_string(button_template, room_button_context)
-
-        device_types_with_notes_count = DeviceType.objects.exclude(note__exact="").count()
-        device_type_button_context = {
-            "css_classes": "btn btn-warning btn-lg",
-            # WARNING: Do not use the key name "url" as this triggers a
-            # circular import. And please don't ask why...
-            "url": reverse_lazy('admin:core_devicetype_changelist'),
-            "query_params": "has_note=has_note",
-            "badge": get_has_note_badge(obj_type="device_type", has_note=rooms_with_notes_count),
-            "text": f"{device_types_with_notes_count} DeviceTypes with notes",
-        }
-        rendered_device_type_button = render_to_string(button_template, device_type_button_context)
-
         custom_buttons = [
-            rendered_room_button,
-            rendered_device_type_button,
+            self.create_hasnote_button(model_name="room", changelist_url="admin:core_room_changelist"),
+            self.create_hasnote_button(model_name="device_type", changelist_url="admin:core_devicetype_changelist"),
         ]
 
         context.update(dict(
