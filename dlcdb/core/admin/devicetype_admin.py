@@ -3,6 +3,7 @@ from django.contrib import admin
 from ..models import DeviceType
 from ..utils.helpers import get_has_note_badge
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
+from .filters.has_note_filter import HasNoteFilter
 
 
 @admin.register(DeviceType)
@@ -12,6 +13,10 @@ class DeviceTypeAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'prefix',
         'has_note',
     ) + CustomBaseModelAdmin.list_display
+
+    list_filter = (
+        HasNoteFilter,
+    )
     
     search_fields = (
         'name',

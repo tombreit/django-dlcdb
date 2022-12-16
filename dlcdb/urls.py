@@ -1,11 +1,9 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.urls import include, path, reverse_lazy
 from django.contrib import admin
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
-
-from dlcdb.core.views import dashboard_views
 
 
 admin.site.site_header = "DLCDB Admin"
@@ -16,22 +14,19 @@ admin.site.logout_template = 'accounts/logout.html'
 
 
 urlpatterns = [
-    path('', dashboard_views.DashboardView.as_view(), name='core_dashboard'),
+    path("", RedirectView.as_view(url=reverse_lazy("core:core_dashboard"))),
 
-    # Commented out for having a functional listing of installed admin apps:
-    # path('admin/', dashboard_views.DashboardView.as_view(), name='core_dashboard'),
     path('core/', include('dlcdb.core.urls')),
     path('inventory/', include('dlcdb.inventory.urls')),
     path('lending/', include('dlcdb.lending.urls')),
     path('smallstuff/', include('dlcdb.smallstuff.urls')),
 
-    path('admin/', admin.site.urls),
-
     path("select2/", include("django_select2.urls")),
     path('api/v2/', include('dlcdb.api.urls')),
 
-    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("dlcdb/branding/favicon.ico")),
-    ),
+    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("dlcdb/branding/favicon.ico"))),
+
+    path('admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:

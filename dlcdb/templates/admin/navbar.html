@@ -4,7 +4,7 @@
 <div class="container-fluid">
   <nav class="navbar navbar-expand-lg navbar-dark">
 
-    <a class="navbar-brand" href="{% url 'core_dashboard' %}">
+    <a class="navbar-brand" href="{% url 'core:core_dashboard' %}">
         <img 
           src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/logo_acme_white.svg' %}{% endif %}"
           alt="{{ branding.organization_abbr }}"

@@ -19,7 +19,7 @@
     <hr>
     <div class="row">
         <div class="col-12">
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
+            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
                 Verleihen
             </a>
 
@@ -30,17 +30,22 @@
             {% endif %}
 
             {% if perms.core.change_inventory %}
-                <a role="button" class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">
+                <a class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">
                     Inventarisieren
                 </a>
             {% endif %}
 
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_device_changelist' %}">
+            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_device_changelist' %}">
                 Devices
             </a>
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_licencerecord_changelist' %}">
+            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_licencerecord_changelist' %}">
                 Lizenzen
             </a>
+
+            {% for custom_button in custom_buttons %}
+                {{ custom_button }}
+            {% endfor %}
+
         </div>
     </div>
     

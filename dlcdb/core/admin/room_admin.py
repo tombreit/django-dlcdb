@@ -7,6 +7,7 @@ from ..models import Room
 from ..models.room import RoomReconcile
 from ..utils.helpers import get_has_note_badge
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
+from .filters.has_note_filter import HasNoteFilter
 
 
 @admin.register(Room)
@@ -26,6 +27,7 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
     list_filter = [
         'is_auto_return_room',
         'is_external',
+        HasNoteFilter,
     ]
     search_fields = [
         'number',
