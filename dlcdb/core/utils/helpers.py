@@ -107,10 +107,12 @@ def get_has_note_badge(*, obj_type, has_note):
     type_icon = ""
     level = "light"
     note_icon = "fa-regular fa-comment"
+    text = "No notes"
 
     if has_note:
         note_icon = "fa-solid fa-comment"
         level = "warning"
+        text = "Notes exists"
 
     if obj_type == "record":
         type_icon = settings.THEME["RECORD"]["ICON"]
@@ -122,10 +124,11 @@ def get_has_note_badge(*, obj_type, has_note):
         type_icon = settings.THEME["DEVICE_TYPE"]["ICON"]
 
     return format_html(
-        '<span title="Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+        '<span title="{text}" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
         type_icon=type_icon,
         note_icon=note_icon,
         level=level,
+        text=text,
     )
 
 
