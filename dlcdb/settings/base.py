@@ -37,6 +37,7 @@ DJANGO_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django.contrib.sites',
 ]
@@ -107,6 +108,7 @@ EMAIL_PORT = env.int("EMAIL_PORT", default=0)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -268,6 +270,8 @@ REST_FRAMEWORK = {
 SIMPLE_HISTORY_REVERT_DISABLED=True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
+# http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 HUEY = SqliteHuey(
     name="dlcdb_huey",
