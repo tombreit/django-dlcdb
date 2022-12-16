@@ -36,7 +36,16 @@ def hints(request):
         request.path_info.startswith("/admin/logout/"),
     ]):
 
-        if Device.objects.filter(active_record__isnull=True).exists():
+        # Make this queryset tenant aware
+        qs = Device.objects.none()
+
+        if request.user.is_superuser:
+            # No pre-filtering for superusers
+            qs = Device.objects.all()
+        elif request.tenant:
+            qs = qs.filter(tenant=request.tenant)
+
+        if qs.filter(active_record__isnull=True).exists():
             devices_wo_record_changelist = f"{reverse('admin:core_device_changelist')}?has_record=has_no_record"
             recordless_devices_count = Device.objects.filter(active_record__isnull=True).count()
             sticky_messages.append(
