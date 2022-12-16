@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from ..models import DeviceType
+from ..utils.helpers import get_has_note_badge
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
 
 
@@ -9,6 +10,7 @@ class DeviceTypeAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
     list_display = (
         'name',
         'prefix',
+        'has_note',
     ) + CustomBaseModelAdmin.list_display
     
     search_fields = (
@@ -21,6 +23,7 @@ class DeviceTypeAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             'fields': (
                 'name',
                 'prefix',
+                'note',
             )
         }),
         ('Informal', {
@@ -34,3 +37,8 @@ class DeviceTypeAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             )
         })
     )
+
+    @admin.display(description='Has Note?')
+    def has_note(self, obj):
+        return get_has_note_badge(obj_type="device_type", has_note=obj.note)
+

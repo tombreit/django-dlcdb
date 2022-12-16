@@ -314,6 +314,10 @@ THEME = {
         "ICON": "fa-solid fa-door-open",
         "COLOR": "",
     },
+    "DEVICE_TYPE": {
+        "ICON": "fa-solid fa-palette",
+        "COLOR": "",
+    },
 }
 
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
