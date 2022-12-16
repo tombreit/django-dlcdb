@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from ..models import Room
 from ..models.room import RoomReconcile
+from ..utils.helpers import get_has_note_badge
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
 
 
@@ -16,6 +17,7 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'number',
         'nickname',
         'description',
+        'has_note',
         'is_auto_return_room',
         'is_external',
         'deleted_at',
@@ -43,6 +45,7 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
                 'number',
                 'nickname',
                 'description',
+                'note',
                 ('is_auto_return_room', 'is_external'),
             )
         }),
@@ -61,6 +64,7 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         })
     )
 
+    @admin.display(description='QR Code')
     def qrcode_display(self, obj):
         return mark_safe('<img src="{url}" width="{width}" height="{height}">'.format(
             url=obj.qrcode.url,
@@ -68,7 +72,10 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             height=200,
             )
         )
-    qrcode_display.short_description = 'QR Code'
+
+    @admin.display(description='Has Note?')
+    def has_note(self, obj):
+        return get_has_note_badge(obj_type="room", has_note=obj.note)
 
     # Falling back to our no-delete-permission via CustomBaseModelAdmin
     # def has_delete_permission(self, request, obj=None):

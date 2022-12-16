@@ -309,7 +309,11 @@ THEME = {
     "DEVICE": {
         "ICON": "fa-solid fa-barcode",
         "COLOR": "",
-    }
+    },
+    "ROOM": {
+        "ICON": "fa-solid fa-door-open",
+        "COLOR": "",
+    },
 }
 
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration

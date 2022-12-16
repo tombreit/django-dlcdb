@@ -100,20 +100,27 @@ def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
         raise e
 
 
-def get_has_note_badge(*, obj_type, level, has_note):
-    if obj_type not in ["device", "record"]:
+def get_has_note_badge(*, obj_type, has_note):
+    if obj_type not in ["device", "record", "room"]:
         raise NotImplementedError
 
     type_icon = ""
-    note_icon = "fa-solid fa-comment" if has_note else "fa-solid fa-xmark"
+    level = "light"
+    note_icon = "fa-regular fa-comment"
+
+    if has_note:
+        note_icon = "fa-solid fa-comment"
+        level = "warning"
 
     if obj_type == "record":
         type_icon = settings.THEME["RECORD"]["ICON"]
     elif obj_type == "device":
         type_icon = settings.THEME["DEVICE"]["ICON"]
+    elif obj_type == "room":
+        type_icon = settings.THEME["ROOM"]["ICON"]
 
     return format_html(
-        '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+        '<span title="Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
         type_icon=type_icon,
         note_icon=note_icon,
         level=level,

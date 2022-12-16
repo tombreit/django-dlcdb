@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Count, IntegerField, Q
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.inventory.utils import uuid2qrcode
 
@@ -46,10 +47,23 @@ class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
         default=uuid.uuid4,
         editable=False,
         unique=True,
+        verbose_name="UUID",
     )
-    number = models.CharField(max_length=30, unique=True)
-    nickname = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(null=True, blank=True, verbose_name='Kurzbeschreibung')
+    number = models.CharField(
+        max_length=30,
+        unique=True,
+    )
+    nickname = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    description = models.TextField(
+        blank=True,
+    )
+    note = models.TextField(
+        blank=True,
+    )
 
     is_auto_return_room = models.BooleanField(
         default=False,
@@ -73,8 +87,8 @@ class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
     # inventory_objects = RoomInventoryManager() # The Inventory-specific manager.
 
     class Meta:
-        verbose_name = 'Raum'
-        verbose_name_plural = 'Räume'
+        verbose_name = _('Room')
+        verbose_name_plural = _('Rooms')
         ordering = ['number', ]
 
     def __str__(self):
