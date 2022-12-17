@@ -16,6 +16,35 @@
 {% block content %}
     <h1>Device Life Cycle Database</h1>
 
+    <style>
+    .grid-container {
+        display: grid;
+        grid-column-gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        /* place-items: center; */
+        grid-gap: 1em;
+      }
+      .grid-container > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+        border-radius: 9px;
+        background-color: lime;
+        text-align: center;
+      }
+      .grid-container > div > p {
+        display: block; 
+      }
+    </style>
+
+<div class="grid-container">
+    {% for tile in tiles %}
+        {{ tile }}
+    {% endfor %}
+</div>
+
+
     <hr>
     <div class="row">
         <div class="col-12">

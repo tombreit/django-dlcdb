@@ -1,0 +1,20 @@
+
+<a 
+    class="grid-tile"
+    href="{{ url }}{% if query_params %}?{{ query_params }}{% endif %}"
+>
+    <div>
+        <p class="obj-count">
+            {{ obj_count }}
+        </p>
+        <p>
+            {% if badge %}
+                {{ badge }} 
+            {% else %}
+                <i class="{{ model_class_icon }}"></i> 
+            {% endif %}
+            
+            {{ text }}
+        </p>
+    </div>
+</a>
