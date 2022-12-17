@@ -210,6 +210,7 @@ class DeviceCountMixin:
     """
     Adds the count of devices for the given related model to the queryset
     and displays them as in Django admins list_display.
+    With some inspiration from https://forum.djangoproject.com/t/creating-an-admin-mixin-for-a-basemodel/11120
     """
 
     def get_list_display(self, request):
