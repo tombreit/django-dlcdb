@@ -2,12 +2,12 @@ from django.contrib import admin
 
 from ..models import DeviceType
 from ..utils.helpers import get_has_note_badge
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
+from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, DeviceCountMixin
 from .filters.has_note_filter import HasNoteFilter
 
 
 @admin.register(DeviceType)
-class DeviceTypeAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
+class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     list_display = (
         'name',
         'prefix',

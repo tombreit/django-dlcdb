@@ -8,10 +8,11 @@ from ..models.room import RoomReconcile
 from ..utils.helpers import get_has_note_badge
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
 from .filters.has_note_filter import HasNoteFilter
+from .base_admin import DeviceCountMixin
 
 
 @admin.register(Room)
-class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
+class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     change_list_template = 'core/room/change_list.html'
     
     list_display = (
@@ -84,7 +85,6 @@ class RoomAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
     #     return True
 
 
-
 @admin.register(RoomReconcile)
 class RoomReconcileAdmin(admin.ModelAdmin):
     list_display = [
@@ -94,10 +94,10 @@ class RoomReconcileAdmin(admin.ModelAdmin):
         'get_reconcile_button',
     ]
 
+    @admin.display(description='Abgleich')
     def get_reconcile_button(self, obj):
         return format_html(
             '<a class="btn btn-warning" href="{}">&rarr; {}</a>', 
             reverse('core:reconcile-rooms', args=[obj.id]),
             "Abgleichen"
         )
-    get_reconcile_button.short_description = 'Abgleich'

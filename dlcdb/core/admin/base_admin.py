@@ -1,13 +1,17 @@
 import csv
 import datetime
+from django.db.models import Q
 from django.contrib import admin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.utils import timezone, dateformat
+from django.db.models import Count
+from django.utils.http import urlencode
+from django.utils.html import format_html
+from django.urls import reverse
 
-from ..models import Device
+from ..models import Device, Room
 from ..utils.helpers import get_denormalized_user
-
 
 
 class CustomBaseModelAdmin(admin.ModelAdmin):
@@ -200,3 +204,44 @@ class ExportCsvMixin:
         # self.message_user(request, f'Export file "{filename}" created.', messages.SUCCESS)
 
         return response
+
+
+class DeviceCountMixin:
+    """
+    Adds the count of devices for the given related model to the queryset
+    and displays them as in Django admins list_display.
+    """
+
+    def get_list_display(self, request):
+        list_display = list(super().get_list_display(request))  # we could get lists or tuples
+        if not 'get_assets_count' in list_display:
+            list_display.append('get_assets_count')
+        return list(list_display)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        if self.model == Room:
+            queryset = queryset.annotate(
+                _assets_count=Count("record", distinct=True,
+                    filter=Q(record__is_active=True)
+                ),
+            )
+        else:
+            queryset = queryset.annotate(
+                _assets_count=Count("device", distinct=True),
+            )
+
+        return queryset
+
+    @admin.display(
+        description='Assets',
+        ordering='-_assets_count',
+    )
+    def get_assets_count(self, obj):
+        return format_html(
+            '<a href="{url}?{query_kwargs}"><b>{count}</b></a>',
+            url=reverse('admin:core_device_changelist'),
+            query_kwargs=urlencode({'manufacturer__id__exact': obj.pk}),
+            count=obj._assets_count,
+        )
