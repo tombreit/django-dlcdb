@@ -10,7 +10,7 @@ from django.utils.http import urlencode
 from django.utils.html import format_html
 from django.urls import reverse
 
-from ..models import Device, Room
+from ..models import Device, Room, DeviceType, Supplier, Manufacturer
 from ..utils.helpers import get_denormalized_user
 
 
@@ -239,9 +239,29 @@ class DeviceCountMixin:
         ordering='-_assets_count',
     )
     def get_assets_count(self, obj):
-        return format_html(
-            '<a href="{url}?{query_kwargs}"><b>{count}</b></a>',
-            url=reverse('admin:core_device_changelist'),
-            query_kwargs=urlencode({'manufacturer__id__exact': obj.pk}),
-            count=obj._assets_count,
-        )
+        query_key = None
+
+        if self.model == Room:
+            query_key = "active_record__room__id__exact"
+        elif self.model == DeviceType:
+            query_key = "device_type__id__exact"
+        elif self.model == Manufacturer:
+            query_key = "manufacturer__id__exact"
+        elif self.model == Supplier:
+            query_key = "supplier__id__exact"
+            
+        if query_key:
+            result = format_html(
+                '<a class="badge badge-info" href="{url}?{query_kwargs}">{count}</a>',
+                url=reverse('admin:core_device_changelist'),
+                query_kwargs=urlencode({query_key: obj.pk}),
+                count=obj._assets_count,
+            )
+        else:
+            result = format_html(
+                '<span class="badge badge-info">{count}</span>',
+                count=obj._assets_count,
+            )
+
+        return result
+

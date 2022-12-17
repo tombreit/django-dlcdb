@@ -75,6 +75,10 @@ a.btn-danger {
     @extend .btn-danger;
 }
 
+a.badge-info {
+    @extend .badge-info
+}
+
 fieldset.collapse:not(.show), 
 fieldset.collapsed:not(.show) {
     display: block;
