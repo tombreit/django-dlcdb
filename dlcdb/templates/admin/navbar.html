@@ -20,13 +20,21 @@
 
         <li class="nav-item">
             <a class="nav-link" href="{% url 'admin:core_lentrecord_changelist' %}">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i>
                 Verleihen
             </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'admin:core_device_changelist' %}">
+              <i class="fa-solid fa-barcode"></i>
+              Devices
+          </a>
         </li>
 
         {% if perms.smallstuff.view_assignedthing %}
         <li class="nav-item">
           <a class="nav-link" href="{% url 'smallstuff:person_search' %}">
+              <i class="fa-solid fa-stapler"></i>
               Kleinkram
           </a>
         </li>
@@ -34,32 +42,17 @@
 
         <li class="nav-item">
           <a class="nav-link" href="{% url 'admin:core_licencerecord_changelist' %}">
+            <i class="fa-solid fa-scale-balanced"></i>
             Lizenzen
           </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-        </li>
+
     
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Prozesse
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
-            <a class="dropdown-item" href="{% url 'admin:core_lentrecord_changelist' %}">
-                Verleihen
-            </a>
-            
-            {% if perms.core.view_inventory %}
-              <a class="dropdown-item" href="{% url 'inventory:inventorize-room-list' %}">
-                Inventarisieren
-              </a>
-              <a class="dropdown-item" href="{% url 'admin:inventory_saplist_changelist' %}">
-                Abgleichen mit SAP
-              </a>
-            {% endif %}
 
             <a class="dropdown-item" href="{% url 'admin:core_orderedrecord_changelist' %}">
                 Beschaffen
@@ -72,6 +65,15 @@
                   Bulk-Ausmustern
               </a>
             {% endif %}
+
+            {% if perms.core.view_inventory %}
+              <a class="dropdown-item" href="{% url 'inventory:inventorize-room-list' %}">
+                Inventarisieren
+              </a>
+              <a class="dropdown-item" href="{% url 'admin:inventory_saplist_changelist' %}">
+                Abgleichen mit SAP
+              </a>
+            {% endif %}
           </div>
         </li>
 
@@ -80,24 +82,33 @@
             Datenhaltung
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDataDropdown">
-            <a class="dropdown-item" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_licencerecord_changelist' %}">
-              Lizenzen
-            </a>
 
             {% if perms.core.view_room %}
               <a class="dropdown-item" href="{% url 'admin:core_room_changelist' %}">
-                  Räume
+                  <i class="fa-solid fa-door-open"></i>
+                  {% translate "Rooms" %}
               </a>
             {% endif %}
             
             {% if perms.core.view_manufacturer %}
               <a class="dropdown-item" href="{% url 'admin:core_manufacturer_changelist' %}">
+                <i class="fa-solid fa-industry"></i>
                 {% translate "Manufacturer" %}
               </a>
             {% endif %}
+
+            <a class="dropdown-item" href="{% url 'admin:core_supplier_changelist' %}">
+              <i class="fa-solid fa-truck-field"></i>
+              Zulieferer
+            </a>
+            <a class="dropdown-item" href="{% url 'admin:core_devicetype_changelist' %}">
+                <i class="fa-solid fa-palette"></i>
+                Devicetypen
+            </a>
+            <a class="dropdown-item" href="{% url 'admin:core_person_changelist' %}">
+                <i class="fa-solid fa-users"></i>
+                Personen
+            </a>
 
             <a class="dropdown-item" href="{% url 'admin:core_record_changelist' %}">
                 Records
@@ -108,19 +119,11 @@
 
             {% if perms.core.change_inventory %}
               <a class="dropdown-item" href="{% url 'admin:core_inventory_changelist' %}">
+                  <i class="fa-solid fa-glasses"></i>
                   Inventuren
               </a>
             {% endif %}
-
-            <a class="dropdown-item" href="{% url 'admin:core_supplier_changelist' %}">
-                Zulieferer
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_devicetype_changelist' %}">
-                Devicetypen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_person_changelist' %}">
-                Personen
-            </a>
+  
             <a class="dropdown-item" href="{% url 'admin:core_note_changelist' %}">
                 Notizen
             </a>
