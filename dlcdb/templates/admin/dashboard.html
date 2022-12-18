@@ -20,9 +20,10 @@
     .grid-container {
         display: grid;
         grid-column-gap: 15px;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         /* place-items: center; */
         grid-gap: 1em;
+        font-size: large;
       }
       .grid-container > a {
         display: flex;
@@ -30,7 +31,8 @@
         justify-content: center;
         aspect-ratio: 1 / 1;
         border-radius: 9px;
-        background-color: lime;
+        background-color: var(--primary);
+        color: white;
         text-align: center;
       }
       .grid-container > div > p {
@@ -38,68 +40,30 @@
       }
     </style>
 
-<div class="grid-container">
-    {% for tile in tiles %}
-        {{ tile }}
-    {% endfor %}
-</div>
-
-
-    <hr>
-    <div class="row">
-        <div class="col-12">
-            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
-                Verleihen
-            </a>
-
-            {% if perms.smallstuff.view_assignedthing %}
-            <a class="btn btn-primary btn-lg" href="{% url 'smallstuff:person_search' %}">
-                Kleinkram
-            </a>
-            {% endif %}
-
-            {% if perms.core.change_inventory %}
-                <a class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">
-                    Inventarisieren
-                </a>
-            {% endif %}
-
-            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-            <a class="btn btn-primary btn-lg" href="{% url 'admin:core_licencerecord_changelist' %}">
-                Lizenzen
-            </a>
-
-            {% for custom_button in custom_buttons %}
-                {{ custom_button }}
-            {% endfor %}
-
-        </div>
+    <div class="grid-container">
+        {% for tile in tiles %}
+            {{ tile }}
+        {% endfor %}
     </div>
-    
-    <hr>
 
-    <h1>Aktuelle Inventurrunde: {{ current_inventory|default:'Keine Inventurrunde angelegt.' }}</h1>
-    
-    <hr>
+    <hr class="mt-4">
 
     <div class="row">
         <div class="col-md-4">
-            <h2>Verleihbare Notebooks</h2>
+            <h4>Verleihbare Notebooks</h4>
             <div style="padding:22px; background:#fbfbfb;">
                 <canvas id="notebook-lending-chart" width="400px" height="400px"></canvas>
             </div>
         </div>
         <div class="col-md-4">
-            <h2>Geräte nach Verbleib</h2>
+            <h4>Geräte nach Verbleib</h4>
             <div style="padding:22px; background:#fbfbfb;">
                 <canvas id="device-location-chart" width="400px" height="400px"></canvas>
             </div>
         </div>
 
         <div class="col-md-4">
-            <h2>Geräte nach Typ</h2>
+            <h4>Geräte nach Typ</h4>
             <div style="padding:22px; background:#fbfbfb;">
                 <canvas id="device-type-chart" width="400px" height="400px"></canvas>
             </div>

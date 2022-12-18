@@ -104,7 +104,6 @@ def get_icon_for_class(class_name):
     icon = ""
 
     try:
-        class_name = class_name.upper()
         icon = settings.THEME[class_name]["ICON"]
     except KeyError:
         pass
@@ -113,12 +112,13 @@ def get_icon_for_class(class_name):
 
 
 def get_has_note_badge(*, obj_type, has_note):
-    if obj_type not in ["device", "record", "room", "device_type"]:
-        raise NotImplementedError
+    # if obj_type not in ["device", "record", "room", "device_type", "lent_record"]:
+    #     raise NotImplementedError
 
     level = "light"
     note_icon = "fa-regular fa-comment"
     text = "No notes"
+    type_icon = None
 
     if has_note:
         note_icon = "fa-solid fa-comment"

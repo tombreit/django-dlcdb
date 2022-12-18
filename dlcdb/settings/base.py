@@ -305,23 +305,40 @@ PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
 DEVICE_HIDE_FIELDS = env.list('DEVICE_HIDE_FIELDS', default=[])
 
+# TODO: Move icon and color to class var for base model?
 THEME = {
-    "RECORD": {
+    "core.record": {
         "ICON": "fa-solid fa-layer-group",
         "COLOR": "",
     },
-    "DEVICE": {
+    "core.device": {
         "ICON": "fa-solid fa-barcode",
         "COLOR": "",
     },
-    "ROOM": {
+    "core.room": {
         "ICON": "fa-solid fa-door-open",
         "COLOR": "",
     },
-    "DEVICE_TYPE": {
+    "core.devicetype": {
         "ICON": "fa-solid fa-palette",
         "COLOR": "",
     },
+    "core.lentrecord": {
+        "ICON": "fa-solid fa-arrow-right-arrow-left",
+        "COLOR": "",
+    },
+    "core.licencerecord": {
+        "ICON": "fa-solid fa-scale-balanced",
+        "COLOR": "",
+    },
+    "core.inventory": {
+        "ICON": "fa-solid fa-glasses",
+        "COLOR": "",
+    },
+    "smallstuff.assignedthing": {
+        "ICON": "fa-solid fa-stapler",
+        "COLOR": "",
+    }
 }
 
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration

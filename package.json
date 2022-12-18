@@ -17,10 +17,10 @@
     "docs_distdir": "docs/_static/vendor"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^6.1.1",
+    "@fortawesome/fontawesome-free": "^6.2.1",
     "@ttskch/select2-bootstrap4-theme": "^1.5.2",
-    "bootstrap": "^4.6.1",
-    "bootswatch": "^4.6.1",
+    "bootstrap": "^4.6.2",
+    "bootswatch": "^4.6.2",
     "bundle-js": "^1.0.3",
     "chart.js": "^3.9.1",
     "htmx.org": "^1.7.0",
