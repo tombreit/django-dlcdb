@@ -69,7 +69,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     manufacturer = models.ForeignKey('core.Manufacturer', on_delete=models.PROTECT, null=True, verbose_name=_('Manufacturer'))
 
     series = models.CharField(max_length=255, null=True, blank=True, verbose_name='Modelbezeichnung')
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Zulieferer')
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_('Supplier')
+    )
 
     is_licence = models.BooleanField(
         default=False,

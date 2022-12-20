@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-18 17:00+0100\n"
-"PO-Revision-Date: 2022-12-18 17:00+0100\n"
+"POT-Creation-Date: 2022-12-20 11:27+0100\n"
+"PO-Revision-Date: 2022-12-20 11:29+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -95,11 +95,15 @@ msgid "Inventory ID"
 msgstr "Inventarnummer"
 
 #: dlcdb/core/models/device.py:69 dlcdb/core/models/manufacturer.py:21
-#: dlcdb/templates/admin/navbar.html:98
+#: dlcdb/templates/admin/navbar.html:96
 msgid "Manufacturer"
 msgstr "Hersteller"
 
-#: dlcdb/core/models/device.py:94
+#: dlcdb/core/models/device.py:77 dlcdb/core/models/supplier.py:23
+msgid "Supplier"
+msgstr "Distributor"
+
+#: dlcdb/core/models/device.py:100
 msgid "Is loanable?"
 msgstr "Ist Verleihgerät?"
 
@@ -148,9 +152,21 @@ msgstr "Records vom Typ \"Nicht auffindbar\""
 msgid "Room"
 msgstr "Raum"
 
-#: dlcdb/core/models/room.py:91
+#: dlcdb/core/models/room.py:91 dlcdb/templates/admin/navbar.html:89
 msgid "Rooms"
 msgstr "Räume"
+
+#: dlcdb/core/models/supplier.py:16
+msgid ""
+"Contact and support information: contact persons, hotlines, mail addresses "
+"etc."
+msgstr ""
+"Kontakt- und Supportinformationen: Ansprechpersonen, Hotlines, Mailadressen "
+"etc."
+
+#: dlcdb/core/models/supplier.py:24
+msgid "Suppliers"
+msgstr "Distributoren"
 
 #: dlcdb/core/templates/core/actions/relocate.html:75
 msgid "No, take me back"
@@ -216,4 +232,4 @@ msgstr "Geändert von"
 
 #: dlcdb/templates/simple_history/_object_history_list.html:37
 msgid "None"
-msgstr ""
+msgstr "None"
