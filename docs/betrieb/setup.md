@@ -135,6 +135,7 @@ source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements/requirements-prod-ldap.txt
 python manage.py collectstatic --noinput
+python manage.py compilemessages -l de
 python manage.py migrate --noinput
 systemctl --user restart dlcdb_huey.service
 touch dlcdb/wsgi.py
@@ -152,10 +153,7 @@ make -C docs html
         Require all granted
     </Directory>
 
-    Alias /static /path/to/run/staticfiles
-    <Directory /path/to/run/staticfiles>
-        Require all granted
-    </Directory>
+    # staticfiles are handled by the Django app via whitenoise
 
     Alias /media path/to/run/media
     <Directory path/to/run/media>
