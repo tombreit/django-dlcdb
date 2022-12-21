@@ -24,7 +24,7 @@ class LendingConfigurationAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Printouts', {
-            'classes': ('collapse',),
+            # 'classes': ('collapse',),
             'fields': (
                 'lending_preparation_checklist',
             ),
