@@ -32,7 +32,8 @@ session = SessionStore()
 class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
 
     form = LentRecordAdminForm
-    change_form_template = 'core/lentrecord/admin_change_form.html'
+    change_form_template = 'core/lentrecord/change_form.html'
+    change_list_template = 'core/lentrecord/change_list.html'
 
     search_fields = [
         'device__sap_id',

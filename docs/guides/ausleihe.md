@@ -6,6 +6,8 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 
 ## Features
 
+- Druckbarer, gebrandeter Ausleihvertrag
+- Editierbare Checkliste als Anhang zum Ausleihvertrag
 - Automatische Notifications (Emails) an Ausleiher bei überfälliger Rückgabe
 
 ## Gerät wird ausgeliehen
@@ -31,3 +33,8 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 :::{tip}
 Für zurückgegebene Devices wird automatisch ein `INROOM`-Record mit dem definiteren Auto-Return-Room erstellt. Der Auto-Return-Raum wird (einmalig) in der Raumverwaltung definiert.
 :::
+
+:::{note}
+Als Erweiterung des Ausleihzettels können weitere Seiten ausgegeben/generiert werden. Der Inhalt dieser weiteren Seiten ist frei edierbar (Markdown wird unterstützt). Diese Erweiterung ist über die Ansicht *Verleihen > Checklist* zu erreichen.
+:::
+
