@@ -116,6 +116,7 @@ class Branding(SingletonBaseModel):
 
     def __str__(self):
         return f"Branding for {self.organization_name_en or 'n/a'}"
+
     class Meta:
         verbose_name = "Branding"
         verbose_name_plural = "Branding"

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 
 
 class AuditBaseModel(models.Model):
@@ -107,12 +108,21 @@ class SoftDeleteAuditBaseModel(AuditBaseModel):
 
 class SingletonBaseModel(models.Model):
 
-    def save(self, *args, **kwargs):
-        self.pk = 1
-        super().save(*args, **kwargs)
+    def clean(self):
+        if self.__class__.objects.exclude(id=self.id).exists():
+            raise ValidationError('There can be only one instance for this object. Instead of add a new instance, edit the already existing object.')
 
-    def delete(self, *args, **kwargs):
-        pass
+    # This approach does overwrite the first instance with a second
+    # instance.
+    # def save(self, *args, **kwargs):
+    #     self.pk = 1
+    #     super().save(*args, **kwargs)
+
+    # def save(self, *args, **kwargs):
+    #     return super().save(*args, **kwargs)
+
+    # def delete(self, *args, **kwargs):
+    #     pass
 
     @classmethod
     def load(cls):

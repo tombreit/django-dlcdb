@@ -31,5 +31,11 @@ class LendingConfigurationAdmin(admin.ModelAdmin):
         }),
     )
 
+    def has_add_permission(self, request):
+        return not LendingConfiguration.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        False
+
     class Media:
         css = { "all": ("lending/admin/lending_admin.css",)}

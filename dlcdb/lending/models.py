@@ -3,6 +3,7 @@ from ..core.models.abstracts import SingletonBaseModel
 
 class LendingConfiguration(SingletonBaseModel):
     lending_preparation_checklist = models.TextField(
+        blank=True,
         help_text="Basic Markdown supported. '[ ]' converted to checkbox input."
     )
 
