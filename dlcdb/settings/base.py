@@ -213,12 +213,7 @@ if DEV_SETTINGS_MODE:
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
 LANGUAGE_CODE = 'de-de'
-
-TIME_ZONE = 'Europe/Berlin'
-
 USE_I18N = True
-
-USE_TZ = True
 
 LANGUAGES = (
     ('de', 'Deutsch'),
@@ -228,6 +223,10 @@ LANGUAGES = (
 LOCALE_PATHS = [
     BASE_DIR / "dlcdb" / "locale",
 ]
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#std-setting-TIME_ZONE
+USE_TZ = True
+TIME_ZONE = 'Europe/Berlin'  # 'UTC'
 
 # https://docs.djangoproject.com/en/4.0/topics/i18n/formatting/#creating-custom-format-files
 FORMAT_MODULE_PATH = [
