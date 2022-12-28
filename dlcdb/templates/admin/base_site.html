@@ -10,6 +10,8 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'dist/core/css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.min.css' %}">
+
+    {% block extra_css %}{% endblock %}
 {% endblock %}
 
 
@@ -56,4 +58,5 @@
           $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
+    {% block extra_js %}{% endblock %}
 {% endblock footer %}

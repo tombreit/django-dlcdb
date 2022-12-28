@@ -8,6 +8,7 @@
     Dashboard | {{ site_title|default:_('Django site admin') }}
 {% endblock %}
 
+
 {% block content_title %}
     Dashboard
 {% endblock %}
@@ -48,68 +49,56 @@
 
     <hr class="mt-4">
 
-    <div class="row">
+    <div class="row row-stats">
         <div class="col-md-4">
             <h4>Verleihbare Notebooks</h4>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="notebook-lending-chart" width="400px" height="400px"></canvas>
-            </div>
+            <canvas id="notebook-lending-chart"></canvas>
         </div>
         <div class="col-md-4">
             <h4>Geräte nach Verbleib</h4>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="device-location-chart" width="400px" height="400px"></canvas>
-            </div>
+            <canvas id="device-location-chart"></canvas>
         </div>
-
         <div class="col-md-4">
             <h4>Geräte nach Typ</h4>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="device-type-chart" width="400px" height="400px"></canvas>
-            </div>
+            <canvas id="device-type-chart"></canvas>
         </div>
-
     </div>
-
 {% endblock %}
 
 
-{% block footer %}
-    {{ block.super }}
-    <script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
+{% block extra_js %}
+<script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const data = {{ record_fraction_data|safe }};
+    const device_type_data = {{ device_type_data|safe }};
+    const notebooks_lending_data = {{ notebooks_lending_data|safe }};
 
-            const data = {{ record_fraction_data|safe }}
-            const device_type_data = {{ device_type_data|safe }}
-            const notebooks_lending_data = {{ notebooks_lending_data|safe }}
+    const deviceLocationChart = new Chart(
+        document.getElementById("device-location-chart"), {
+            type: 'bar',
+            data: data,
+            options: {responsive: true}
+    });
 
-            const deviceLocationChart = new Chart(
-                document.getElementById("device-location-chart"), {
-                    type: 'bar',
-                    data: data,
-                    options: {responsive: true}
-            });
+    const deviceTypeChart = new Chart(
+        document.getElementById("device-type-chart"), {
+            type: 'bar',
+            data: device_type_data,
+            options: {
+                responsive: true,
+                legend: {
+                    display: true
+                }
+            }
+    })
 
-            const deviceTypeChart = new Chart(
-                document.getElementById("device-type-chart"), {
-                    type: 'bar',
-                    data: device_type_data,
-                    options: {
-                        responsive: true,
-                        legend: {
-                            display: true
-                        }
-                    }
-            })
-
-            const ntbLentChart = new Chart(
-                document.getElementById("notebook-lending-chart"), {
-                    type: 'pie',
-                    data: notebooks_lending_data,
-                    options: {responsive: true}
-            });
-
-        });
-    </script>
-{% endblock footer %}
+    const ntbLentChart = new Chart(
+        document.getElementById("notebook-lending-chart"), {
+            type: 'pie',
+            data: notebooks_lending_data,
+            options: {responsive: true}
+    });
+});
+</script>
+{% endblock extra_js %}

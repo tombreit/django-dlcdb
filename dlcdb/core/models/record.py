@@ -69,6 +69,11 @@ class Record(AuditBaseModel):
         db_index=True,
         verbose_name='Aktiv',
     )
+    effective_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Replaced by the next record at this timestamp."
+    )
 
     # todo: implement field validator for record_type: must be one of...
     record_type = models.CharField(
@@ -166,7 +171,7 @@ class Record(AuditBaseModel):
             # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#django.db.models.query.QuerySet.update
             Record.objects.filter(device=self.device).update(
                 is_active=False,
-                modified_at=timezone.now(),
+                effective_until=timezone.now(),
             )
 
             # As an alternative to qs.update():

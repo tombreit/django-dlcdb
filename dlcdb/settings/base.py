@@ -326,6 +326,10 @@ THEME = {
         "ICON": "fa-solid fa-arrow-right-arrow-left",
         "COLOR": "",
     },
+    "core.lostrecord": {
+        "ICON": "fa-solid fa-layer-group",
+        "COLOR": "",
+    },
     "core.licencerecord": {
         "ICON": "fa-solid fa-scale-balanced",
         "COLOR": "",

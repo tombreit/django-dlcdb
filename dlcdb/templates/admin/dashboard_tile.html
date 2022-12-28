@@ -1,19 +1,85 @@
+{% load static %}
+
 <a 
     class="grid-tile"
     href="{{ url }}{% if query_params %}?{{ query_params }}{% endif %}"
 >
     <div>
-        <p class="obj-count">
+    {% if chart_data_url %}
+        <canvas id="{{ model_name_slug }}-target" style="max-width: 100%;"></canvas>
+        <div id="{{ model_name_slug }}-loading">
+            <i class="fa-solid fa-chart-simple fa-spin"></i>
+        </div>
+
+        <script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
+        <script>
+        "use strict";
+
+        function loadAndDrawChart(data_url, slug) {
+            const jsonURL = data_url
+            const targetElem = document.getElementById(slug + "-target")
+            const targetLoadingElem = document.getElementById(slug + "-loading")
+            let recordsChart;
+
+            async function fetchJSON() {
+                const response = await fetch(jsonURL);
+                const data = await response.json();
+                return data;
+            }
+
+            fetchJSON().then(data => {
+                const chartData = data;
+                // console.log(chartData)
+                targetLoadingElem.style.display = "none";
+
+                let recordsChart = new Chart(targetElem, {
+                    type: 'line',
+                    responsive: true,
+                    data: {
+                        datasets: [{
+                            data: chartData,
+                            fill: false,
+                            tension: 1,
+                            borderColor: 'rgb(255, 255, 255)',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            // label: "Lost devices",
+                            // fill: {
+                            //     target: 'origin',
+                            //     above: 'rgb(255, 255, 255)',
+                            // },
+                        }],
+                    },
+                    options: {
+                        scales: {
+                            x: {display: false,},
+                            y: {display: false,}
+                        },
+                        parsing: {
+                            xAxisKey: 'x',
+                            yAxisKey: 'y'
+                        },
+                        plugins: {
+                            legend: {display: false,}
+                        },
+                    },
+                });
+            });
+            return recordsChart
+        }
+        loadAndDrawChart("{{ chart_data_url }}", "{{ model_name_slug }}");
+        </script>
+    {% elif obj_count %}
+        <div class="obj-count">
             {{ obj_count }}
-        </p>
-        <p>
-            {% if badge %}
-                {{ badge }} 
-            {% else %}
-                <i class="{{ model_class_icon }}"></i> 
-            {% endif %}
-            
-            {{ text }}
-        </p>
+        </div>
+    {% endif %}
+
+    {% if badge %}
+        {{ badge }} 
+    {% else %}
+        <i class="{{ model_class_icon }}"></i> 
+    {% endif %}
+    {{ text }}
     </div>
 </a>

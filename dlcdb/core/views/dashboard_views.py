@@ -1,21 +1,76 @@
 import json
-
-from django.db.models import Q
+from collections import defaultdict
 from django.views.generic import TemplateView
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.apps import apps
+from django.utils.text import slugify
+from django.http import JsonResponse
 
 from ..utils.helpers import get_has_note_badge, get_icon_for_class
 from .. import stats
+
+
+def get_chartjs_data(request, record_type_name):
+    model_class_name = record_type_name
+    ModelClass = apps.get_model(model_class_name)
+
+    def _populate_date_range(earliest_datetime, latest_datetime):
+        date_keys_dict = defaultdict(set)
+
+        earliest_year = int(f"{earliest_datetime:%Y}")
+        earliest_month = int(f"{earliest_datetime:%m}")
+
+        latest_year = int(f"{latest_datetime:%Y}")
+        latest_month = int(f"{latest_datetime:%m}")
+
+        for year in range(earliest_year, latest_year+1):
+            if year == earliest_year:
+                for month in range(earliest_month, 13):
+                    date_keys_dict[f"{year}-{month}"]
+            elif year == latest_year:
+                for month in range(1, latest_month+1):
+                    date_keys_dict[f"{year}-{month}"]
+            else:
+                for month in range(1, 13):
+                    date_keys_dict[f"{year}-{month}"]
+
+        return date_keys_dict
+
+    qs_lost = ModelClass.objects.order_by("created_at")
+    earliest = qs_lost.earliest("created_at")
+    latest = qs_lost.latest("created_at")
+    date_keys_dict = _populate_date_range(earliest.created_at, latest.created_at)
+
+    for record in qs_lost:
+        valid_from_to = _populate_date_range(record.created_at, record.effective_until if record.effective_until else latest.created_at)
+        valid_from_to = list(valid_from_to.keys())
+
+        for valid_datestamp in valid_from_to:
+            lost_devices = date_keys_dict.get(valid_datestamp, set())
+            lost_devices.add(record.device)
+            date_keys_dict[valid_datestamp] = lost_devices
+
+    # chart.js expected data property:
+    # data: [{x: 10, y: 20}, {x: 15, y: null}, {x: 20, y: 10}]
+
+    data = []
+    for date, devices in date_keys_dict.items():
+        data.append({
+            "x": date,
+            "y": len(devices),
+        })
+
+    # return json.dumps(data, cls=DjangoJSONEncoder)
+    return JsonResponse(data, safe=False)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'admin/dashboard.html'
 
     @staticmethod
-    def create_tile(*, model_name, url):
+    def create_tile(*, model_name, url, chart_data_url=None):
         from ..models import Record
 
         model_class_name = model_name
@@ -45,6 +100,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "hover_text": f"{obj_notes_count} {human_model_name} with notes" if obj_notes_count else "",
             "obj_count": obj_count,
             "model_class_icon": model_class_icon,
+            "model_name_slug": slugify(model_name),
+            "chart_data_url": chart_data_url,
         }
 
         if not any([
@@ -68,7 +125,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.create_tile(model_name="core.devicetype", url="admin:core_devicetype_changelist"),
             self.create_tile(model_name="core.licencerecord", url="admin:core_licencerecord_changelist"),
             self.create_tile(model_name="smallstuff.assignedthing", url="smallstuff:person_search"),
-            self.create_tile(model_name="core.inventory", url="inventory:inventorize-room-list")
+            self.create_tile(model_name="core.inventory", url="inventory:inventorize-room-list"),
+            self.create_tile(
+                model_name="core.lostrecord",
+                url="admin:core_lostrecord_changelist",
+                chart_data_url=reverse_lazy("core:get_chartjs_data", args=["core.lostrecord"]),
+            ),
         ]
 
         context.update(dict(

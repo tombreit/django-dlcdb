@@ -72,6 +72,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         'has_note',
         'user',
         'created_at',
+        'effective_until',
         # 'modified_at',
     ]
     list_filter = [
