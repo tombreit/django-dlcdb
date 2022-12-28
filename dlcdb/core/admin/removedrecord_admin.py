@@ -9,7 +9,7 @@ from .base_admin import RedirectToDeviceMixin, CustomBaseProxyModelAdmin
 class RemovedRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = RemovedRecordAdminForm
     change_form_template = 'core/record/change_form.html'
-    fields = ('device', 'disposition_state', 'removed_info', 'attachments', 'get_attachments')
+    fields = ('device', 'disposition_state', 'removed_info', 'attachments')
     # readonly_fields = ('get_attachments',)
     list_display = ['device', 'get_device', 'disposition_state', 'removed_info', 'removed_date']
     list_filter = ['disposition_state', 'removed_date']
