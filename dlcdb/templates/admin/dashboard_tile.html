@@ -30,7 +30,7 @@
             fetchJSON().then(data => {
                 const chartData = data;
                 // console.log(chartData)
-                targetLoadingElem.style.display = "none";
+                targetLoadingElem.style.visibility = "hidden";
 
                 let recordsChart = new Chart(targetElem, {
                     type: 'line',

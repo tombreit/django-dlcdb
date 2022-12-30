@@ -51,16 +51,12 @@
 
     <div class="row row-stats">
         <div class="col-md-4">
-            <h4>Verleihbare Notebooks</h4>
-            <canvas id="notebook-lending-chart"></canvas>
-        </div>
-        <div class="col-md-4">
             <h4>Geräte nach Verbleib</h4>
-            <canvas id="device-location-chart"></canvas>
+            <canvas id="device-location-chart" style="max-height: 300px;"></canvas>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-8">
             <h4>Geräte nach Typ</h4>
-            <canvas id="device-type-chart"></canvas>
+            <canvas id="device-type-chart" style="max-height: 300px;"></canvas>
         </div>
     </div>
 {% endblock %}
@@ -70,35 +66,29 @@
 <script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const data = {{ record_fraction_data|safe }};
+    const record_fraction_data = {{ record_fraction_data|safe }};
     const device_type_data = {{ device_type_data|safe }};
-    const notebooks_lending_data = {{ notebooks_lending_data|safe }};
+
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {display: false}
+        }
+    }
 
     const deviceLocationChart = new Chart(
         document.getElementById("device-location-chart"), {
             type: 'bar',
-            data: data,
-            options: {responsive: true}
+            data: record_fraction_data,
+            options: options,
     });
 
     const deviceTypeChart = new Chart(
         document.getElementById("device-type-chart"), {
             type: 'bar',
             data: device_type_data,
-            options: {
-                responsive: true,
-                legend: {
-                    display: true
-                }
-            }
+            options: options,
     })
-
-    const ntbLentChart = new Chart(
-        document.getElementById("notebook-lending-chart"), {
-            type: 'pie',
-            data: notebooks_lending_data,
-            options: {responsive: true}
-    });
 });
 </script>
 {% endblock extra_js %}

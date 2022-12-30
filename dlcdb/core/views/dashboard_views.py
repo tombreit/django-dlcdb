@@ -136,7 +136,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context.update(dict(
             record_fraction_data=json.dumps(stats.get_record_fraction_data()),
             device_type_data=json.dumps(stats.get_device_type_data()),
-            notebooks_lending_data=json.dumps(stats.get_notebooks_lending_data()),
             tiles=tiles,
         ))
         return context
