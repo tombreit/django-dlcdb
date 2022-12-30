@@ -16,6 +16,9 @@ class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, Cust
         'username',
         'note',
     ]
+    list_filter = [
+        'is_active',
+    ]
     fields = [
         'device',
         'note',
