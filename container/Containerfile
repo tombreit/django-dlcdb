@@ -44,7 +44,7 @@ RUN make docs
 
 ######################################################################
 ### STAGE FINAL
-FROM docker.io/library/debian:bullseye-slim AS apachestage
+FROM docker.io/library/debian:bullseye-slim AS finalstage
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
