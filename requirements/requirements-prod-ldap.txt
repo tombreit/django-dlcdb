@@ -4,9 +4,9 @@
 #
 #    pip-compile --extra=ldap --output-file=requirements/requirements-prod-ldap.txt setup.cfg
 #
-alabaster==0.7.12
+alabaster==0.7.13
     # via sphinx
-asgiref==3.5.2
+asgiref==3.6.0
     # via django
 babel==2.11.0
     # via sphinx
@@ -14,9 +14,9 @@ beautifulsoup4==4.11.1
     # via pydata-sphinx-theme
 certifi==2022.12.7
     # via requests
-charset-normalizer==2.1.1
+charset-normalizer==3.0.1
     # via requests
-django==4.1.4
+django==4.1.5
     # via
     #   django-appconf
     #   django-auth-ldap
@@ -66,7 +66,7 @@ markdown-it-py==2.1.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.1
+markupsafe==2.1.2
     # via jinja2
 mdit-py-plugins==0.3.3
     # via myst-parser
@@ -76,11 +76,11 @@ myst-parser==0.18.1
     # via django-dlcdb (setup.cfg)
 openpyxl==3.0.10
     # via django-dlcdb (setup.cfg)
-packaging==22.0
+packaging==23.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-pillow==9.3.0
+pillow==9.4.0
     # via django-dlcdb (setup.cfg)
 pyasn1==0.4.8
     # via
@@ -90,13 +90,13 @@ pyasn1-modules==0.2.8
     # via python-ldap
 pydata-sphinx-theme==0.8.1
     # via sphinx-book-theme
-pygments==2.13.0
+pygments==2.14.0
     # via sphinx
 python-ldap==3.4.3
     # via django-auth-ldap
 python-magic==0.4.27
     # via django-dlcdb (setup.cfg)
-pytz==2022.6
+pytz==2022.7.1
     # via
     #   babel
     #   djangorestframework
@@ -104,7 +104,7 @@ pyyaml==6.0
     # via
     #   myst-parser
     #   sphinx-book-theme
-requests==2.28.1
+requests==2.28.2
     # via sphinx
 segno==1.5.2
     # via django-dlcdb (setup.cfg)
@@ -123,7 +123,7 @@ sphinx-book-theme==0.3.3
     # via django-dlcdb (setup.cfg)
 sphinx-design==0.3.0
     # via django-dlcdb (setup.cfg)
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==1.0.4
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
@@ -141,7 +141,7 @@ sqlparse==0.4.3
     # via django
 typing-extensions==4.4.0
     # via myst-parser
-urllib3==1.26.13
+urllib3==1.26.14
     # via requests
-whitenoise==6.2.0
+whitenoise==6.3.0
     # via django-dlcdb (setup.cfg)
