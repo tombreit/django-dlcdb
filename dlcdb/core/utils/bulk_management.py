@@ -12,6 +12,7 @@ from collections import namedtuple
 
 from datetime import datetime
 
+from django.db import connection
 from django.db.transaction import atomic
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -187,7 +188,6 @@ def set_removed_record(fileobj):
                     removed_info=row['REMOVED_INFO'],
                     removed_date=row['REMOVED_DATE'] if row['REMOVED_DATE'] else now,
                 )
-                print("created: ", created)
                 messages.append('[I][Row {}] Device {} - Record set to removed: {}.'.format(idx, device, record.pk))
                 removed_devices_count += 1
             except Exception as ex:
@@ -219,7 +219,7 @@ def validate_column_headers(*, current_col_headers, expected_col_headers):
 
 def create_record(*, device, record_type, record_note, room, person, username):
     from dlcdb.core.models import InRoomRecord, LostRecord
-    print(f"Creating record {record_type} for {device}...")
+    # print(f"Creating record {record_type} for {device}...")
     record_obj = None
 
     if record_type == Record.INROOM:
@@ -362,10 +362,32 @@ def create_devices(rows, importer_inst_pk=None, write=False):
         )
     try:
         if write:
-            _devices = Device.objects.bulk_create(device_objs)
-            print(f"{len(_devices)} Devices added: {_devices}")
-            _records = Record.objects.bulk_create([record for record in record_objs if record is not None])
-            print(f"{len(_records)} Devices added: {_records}")
+            _bulk_create_supported = True
+            # Use bulk_create for newer versions of sqlite to avoid 
+            # Exception Value: bulk_create() prohibited to prevent data loss due to unsaved related object 'device'.
+            # See: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#bulk-create
+            # Changed in Django 4.0: Support for the fetching primary key attributes on SQLite 3.35+ was added.
+            if connection.vendor == 'sqlite':
+                import sqlite3
+                from packaging import version
+                
+                installed_sqlite_version = version.parse(sqlite3.sqlite_version)
+                requested_sqlite_version = version.parse("3.35")
+
+                if installed_sqlite_version < requested_sqlite_version:
+                    _bulk_create_supported = False
+
+            if _bulk_create_supported:
+                Device.objects.bulk_create(device_objs)
+                Record.objects.bulk_create([record for record in record_objs if record is not None])
+            else:
+                for device in device_objs:
+                    device.save()
+
+                for record in record_objs:
+                    if record:
+                        record.save()
+
         else:
             # In dryrun mode
             for device_obj in device_objs:
