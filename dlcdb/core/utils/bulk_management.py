@@ -302,11 +302,11 @@ def create_devices(rows, importer_inst_pk=None, write=False):
         try:
             tenant = Tenant.objects.get(name=row['TENANT'])
         except KeyError as tenant_key_error:
-            raise KeyError(
+            raise ValidationError(
                 '[Row {}] Device: "{}" NOT imported: TENANT not available in import file! ({})'.format(idx, device_repr, tenant_key_error)
             )
         except ObjectDoesNotExist as tenant_does_not_exists:
-            raise ObjectDoesNotExist(
+            raise ValidationError(
                 '[Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist! ({})'.format(idx, device_repr, row['TENANT'], tenant_does_not_exists)
             )
 
@@ -389,7 +389,6 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
     ImporterMessages = namedtuple("ImporterMessages", [
         "success_messages",
         "imported_devices_count",
-        # "queries_log",
     ])
     success_messages = []
     print(type(csvfile))
@@ -425,6 +424,5 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
     result = ImporterMessages(
         success_messages,
         f"Imported devices: {len(device_objs)}",
-        # ql.queries,
     )
     return result
