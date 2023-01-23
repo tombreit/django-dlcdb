@@ -362,8 +362,10 @@ def create_devices(rows, importer_inst_pk=None, write=False):
         )
     try:
         if write:
-            Device.objects.bulk_create(device_objs)
-            Record.objects.bulk_create([record for record in record_objs if record is not None])
+            _devices = Device.objects.bulk_create(device_objs)
+            print(f"{len(_devices)} Devices added: {_devices}")
+            _records = Record.objects.bulk_create([record for record in record_objs if record is not None])
+            print(f"{len(_records)} Devices added: {_records}")
         else:
             # In dryrun mode
             for device_obj in device_objs:
@@ -397,9 +399,6 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
         atomic_context = atomic()
     else:
         atomic_context = rollback_atomic()
-
-    # ql = QueryLogger()
-    # with connection.execute_wrapper(ql):
 
     with atomic_context:
         csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
