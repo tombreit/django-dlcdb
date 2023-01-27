@@ -93,7 +93,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             lented_count = ModelClass.objects.filter(record_type=Record.LENT).count()
             obj_count = f"{lented_count} / {obj_count}"
         elif model_name == "core.inventory":
-            obj_count = ModelClass.objects.get(is_active=True)
+            obj_count = ModelClass.objects.filter(is_active=True).first()
 
         template = 'admin/dashboard_tile.html'
         context = {
