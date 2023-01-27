@@ -38,29 +38,33 @@ def get_chartjs_data(request, record_type_name):
 
         return date_keys_dict
 
-    qs_lost = ModelClass.objects.order_by("created_at")
-    earliest = qs_lost.earliest("created_at")
-    latest = qs_lost.latest("created_at")
-    date_keys_dict = _populate_date_range(earliest.created_at, latest.created_at)
+    qs = ModelClass.objects.order_by("created_at")
 
-    for record in qs_lost:
-        valid_from_to = _populate_date_range(record.created_at, record.effective_until if record.effective_until else latest.created_at)
-        valid_from_to = list(valid_from_to.keys())
+    if qs:
+        earliest = qs.earliest("created_at")
+        latest = qs.latest("created_at")
+        date_keys_dict = _populate_date_range(earliest.created_at, latest.created_at)
 
-        for valid_datestamp in valid_from_to:
-            lost_devices = date_keys_dict.get(valid_datestamp, set())
-            lost_devices.add(record.device)
-            date_keys_dict[valid_datestamp] = lost_devices
+        for record in qs:
+            valid_from_to = _populate_date_range(record.created_at, record.effective_until if record.effective_until else latest.created_at)
+            valid_from_to = list(valid_from_to.keys())
 
-    # chart.js expected data property:
-    # data: [{x: 10, y: 20}, {x: 15, y: null}, {x: 20, y: 10}]
+            for valid_datestamp in valid_from_to:
+                lost_devices = date_keys_dict.get(valid_datestamp, set())
+                lost_devices.add(record.device)
+                date_keys_dict[valid_datestamp] = lost_devices
 
-    data = []
-    for date, devices in date_keys_dict.items():
-        data.append({
-            "x": date,
-            "y": len(devices),
-        })
+        # chart.js expected data property:
+        # data: [{x: 10, y: 20}, {x: 15, y: null}, {x: 20, y: 10}]
+
+        data = []
+        for date, devices in date_keys_dict.items():
+            data.append({
+                "x": date,
+                "y": len(devices),
+            })
+    else:
+        data = None
 
     # return json.dumps(data, cls=DjangoJSONEncoder)
     return JsonResponse(data, safe=False)
