@@ -36,6 +36,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
+from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
 from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentRecord, Note
@@ -119,6 +120,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
             'dev_state_added': 'dev_state_added',
             'form': form,
             'device_add_form': device_add_form,
+            'api_token': Token.objects.first(),
         })
         return context
 

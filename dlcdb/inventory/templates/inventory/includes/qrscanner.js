@@ -6,6 +6,7 @@ const QRCODE_PREFIX = String("{{ qrcode_prefix }}");
 const API_URL_DEVICE = '{{ request.scheme }}://{{ request.get_host }}/api/v2/devices/'
 const STATE_BUTTON_PREFIX = 'state-btn-'
 const ROW_UUID_PREFIX = 'tr-uuid-'
+const API_TOKEN = String("{{ api_token }}");
 
 // helper functions
 function isDlcdbQrCode(qrstring) {
@@ -68,8 +69,15 @@ function getDeviceByUuid(uuid) {
     let apiDeviceQuery = API_URL_DEVICE + uuid
     console.log("apiDeviceQuery: " + apiDeviceQuery)
 
-    fetch(apiDeviceQuery)
-    .then((response) => response.json())
+    fetch(apiDeviceQuery, {
+        headers: {Authorization: `Token ${API_TOKEN}`}
+    })
+    .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Network response was not OK, got: ${response.status}`);
+        }
+        return response.json();
+    })
     .then((data) => {
         console.log("fetch(apiDeviceQuery): ", data);
         addNewDeviceRow(data)
