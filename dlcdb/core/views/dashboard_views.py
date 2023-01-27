@@ -50,9 +50,9 @@ def get_chartjs_data(request, record_type_name):
             valid_from_to = list(valid_from_to.keys())
 
             for valid_datestamp in valid_from_to:
-                lost_devices = date_keys_dict.get(valid_datestamp, set())
-                lost_devices.add(record.device)
-                date_keys_dict[valid_datestamp] = lost_devices
+                devices = date_keys_dict.get(valid_datestamp, set())
+                devices.add(record.device)
+                date_keys_dict[valid_datestamp] = devices
 
         # chart.js expected data property:
         # data: [{x: 10, y: 20}, {x: 15, y: null}, {x: 20, y: 10}]
