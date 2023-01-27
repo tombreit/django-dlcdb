@@ -7,19 +7,29 @@ const API_URL_DEVICE = '{{ request.scheme }}://{{ request.get_host }}/api/v2/dev
 const STATE_BUTTON_PREFIX = 'state-btn-'
 const ROW_UUID_PREFIX = 'tr-uuid-'
 const API_TOKEN = String("{{ api_token }}");
+const SCAN_TARGET = String("{{ scan_target }}");
+
+console.log("SCAN_TARGET: ", SCAN_TARGET)
 
 // helper functions
+function gotoRoom(uuid) {
+    const roomModalElem = document.querySelector('#switch_room_modal');
+    console.log("roomModalElem", roomModalElem)
+    roomModalElem.dataset.uuid = uuid; 
+    $('#switch_room_modal').modal('show');
+}
+
 function isDlcdbQrCode(qrstring) {
-    console.log("isDlcdbQrCoded")
+    // Check if QrCode is a valid DLCDB QR code
+    // console.log("Test for isDlcdbQrCode")
     let re = new RegExp("^DLCDB[RD][0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
     return re.test(qrstring)
 }
 
 function getInfix(qrstring) {
-    console.log("getInfix")
+    // console.log("getInfix")
     let len_prefix = QRCODE_PREFIX.length
-    console.log("len_prefix: " + len_prefix)
-
+    // console.log("len_prefix: " + len_prefix)
     let infix = qrstring.substring(len_prefix, len_prefix + 1)
     console.log("infix: " + infix)
     return infix
@@ -29,40 +39,19 @@ function getUnprefixedUuid(uuid) {
     console.log("getUnprefixedUuid")
     let re = new RegExp("^" + QRCODE_PREFIX + "[RD]")
     let result = uuid.replace(re, '')
-    console.log("getUnprefixedUuid: " + result)
+    // console.log("getUnprefixedUuid: " + result)
     return result
 }
 
 function QrCode(qrstring) {
-    // check if result from scanner is a valid DLCDB QR code
+    console.info("qrstring: ", qrstring)
     if ( !isDlcdbQrCode(qrstring)) return false
 
     this.uuid = getUnprefixedUuid(qrstring)
     this.infix = getInfix(qrstring)
     this.raw = qrstring
-
     return this
 }
-
-
-/// START JS DEVICE
-
-// Result dict uuids_states_dict holds uuids and their correspondig states, e.g.:
-// uuids_states_dict = {
-//   uuid1: found,
-//   uuid2: notfound,
-//   uuid3: found,
-//   ...
-// }
-
-const uuids_states_map = new Map();
-
-// DEVICE: Constants
-const DEVICE_STATE_UNKNOWN = "dev_state_unknown";
-const DEVICE_STATE_FOUND = "dev_state_found";
-const DEVICE_STATE_ADDED = "dev_state_added";
-const DEVICE_STATE_NOTFOUND = "dev_state_notfound";
-
 
 function getDeviceByUuid(uuid) {
     // console.log("getDeviceByUuid")
@@ -74,7 +63,7 @@ function getDeviceByUuid(uuid) {
     })
     .then((response) => {
         if (!response.ok) {
-          throw new Error(`Network response was not OK, got: ${response.status}`);
+        throw new Error(`Network response was not OK, got: ${response.status}`);
         }
         return response.json();
     })
@@ -191,7 +180,7 @@ function deviceRowTemplate(device){
             </td>
         </tr>
     `;
- }
+}
 
 function addNewDeviceRow(device) {
     console.log("[addNewDeviceRow] for device: ", device)
@@ -234,80 +223,114 @@ function manageUuid({ uuid, state }) {
     }
 }
 
-// Add new device via form
-const addDeviceButton = document.querySelector("#add-device-button");
+function handleDeviceScan(){
+/// START JS DEVICE
+    // Result dict uuids_states_dict holds uuids and their correspondig states, e.g.:
+    // uuids_states_dict = {
+    //   uuid1: found,
+    //   uuid2: notfound,
+    //   uuid3: found,
+    //   ...
+    // }
 
-addDeviceButton.addEventListener("click", function(event) {
-    let select2SelectedOption = $('#id_device').select2('data')[0].id;
-    // console.log("select2SelectedOption: ", select2SelectedOption)
-    console.log("[addDeviceButton] adding device: ", select2SelectedOption)
-    let newDevice = getDeviceByUuid(select2SelectedOption)
-    event.preventDefault();
-}, false);
+    const uuids_states_map = new Map();
 
+    // DEVICE: Constants
+    const DEVICE_STATE_UNKNOWN = "dev_state_unknown";
+    const DEVICE_STATE_FOUND = "dev_state_found";
+    const DEVICE_STATE_ADDED = "dev_state_added";
+    const DEVICE_STATE_NOTFOUND = "dev_state_notfound";
+
+    // Add new device via form
+    const addDeviceButton = document.querySelector("#add-device-button");
+
+    addDeviceButton.addEventListener("click", function(event) {
+        let select2SelectedOption = $('#id_device').select2('data')[0].id;
+        // console.log("select2SelectedOption: ", select2SelectedOption)
+        console.log("[addDeviceButton] adding device: ", select2SelectedOption)
+        let newDevice = getDeviceByUuid(select2SelectedOption)
+        event.preventDefault();
+    }, false);
 /// END JS DEVICE
-
-
-/// START JS ROOM
-$('#switch_room_modal .modal-footer button').on('click', function (event) {
-    let clicked_button = $(event.target); // The clicked button
-    let parent = clicked_button.closest(".modal")
-    let uuid = parent[0].dataset.uuid
-
-    if (clicked_button[0].id === "change_room") {
-        location = "{% url 'inventory:inventorize-room' '99999999-9999-9999-9999-999999999999' %}".replace(/99999999-9999-9999-9999-999999999999/, uuid.toString());
-    }
-});
-
-function gotoRoom(uuid) {
-    const el = document.querySelector('#switch_room_modal');
-    el.dataset.uuid = uuid; 
-    $('#switch_room_modal').modal('show');
 }
 
-/// END JS ROOM
+
+function handleRoomScan(){
+    /// START JS ROOM
+    $('#switch_room_modal .modal-footer button').on('click', function (event) {
+        let clicked_button = $(event.target); // The clicked button
+        let parent = clicked_button.closest(".modal")
+        let uuid = parent[0].dataset.uuid
+
+        if (clicked_button[0].id === "change_room") {
+            location = "{% url 'inventory:inventorize-room' '99999999-9999-9999-9999-999999999999' %}".replace(/99999999-9999-9999-9999-999999999999/, uuid.toString());
+        }
+    });
+    /// END JS ROOM
+}
+
+
+if (SCAN_TARGET === "device"){
+    handleDeviceScan()
+} else if (SCAN_TARGET === "room") {
+    handleRoomScan()
+} else {
+    alert(`Scan target ${SCAN_TARGET} not handled!`)
+}
 
 
 // SCANNER
-{% comment %}
-import QrScanner from "{% static 'inventory/qr-scanner.min.js' %}";
-QrScanner.WORKER_PATH = "{% static 'inventory/qr-scanner-worker.min.js' %}";
+// via https://github.com/nimiq/qr-scanner
+import QrScanner from "{% static 'dist/inventory/js/qr-scanner.min.js' %}";
+// QrScanner.WORKER_PATH = "{% static 'dist/inventory/js/qr-scanner-worker.min.js' %}";
 
-const video = document.getElementById('qr-video');
+const videoElem = document.getElementById('qr-video');
 const camHasCamera = document.getElementById('cam-has-camera');
 const camQrResult = document.getElementById('cam-qr-result');
 const camQrResultTimestamp = document.getElementById('cam-qr-result-timestamp');
 
 function setResult(label, result) {
-    label.textContent = result;
+    console.log(result.data);
+    label.textContent = result.data;
     camQrResultTimestamp.textContent = new Date().toString();
     label.style.color = 'teal';
     clearTimeout(label.highlightTimeout);
     label.highlightTimeout = setTimeout(() => label.style.color = 'inherit', 100);
-}
 
-// SCANNER Continous Web Cam Scanning
-QrScanner.hasCamera().then(hasCamera => camHasCamera.textContent = hasCamera);
 
-const qrScanner = new QrScanner(video, result => {
-    // console.log('[i] Raw decoded qr code:', result);
-
-    result = result.trim();
-    let QrObj = new QrCode(result)
+    let QrObj = new QrCode(result.data)
+    console.log("QrObj: ", QrObj)
     if (!QrObj) return;
 
     if (QrObj.infix === 'D') {
-        // Trigger DEVICE related tasks
-        manageUuid({uuid: QrObj.uuid, state: DEVICE_STATE_FOUND});
+        console.info("Trigger DEVICE related tasks...")
+        // manageUuid({uuid: QrObj.uuid, state: DEVICE_STATE_FOUND});
     } else if (QrObj.infix === 'R') {
-        // Trigger ROOM related tasks
-        console.log("triggering openRoom...")
+        console.info("Trigger ROOM related tasks...")
         gotoRoom(QrObj.uuid);
     } else {
-        alert("INFIX NOT GIVEN OR NOT KNOWN!")
+        alert(`INFIX "${QrObj.infix}" NOT GIVEN OR NOT KNOWN! Ignoring this QrCode!`)
         return;
     }
+}
 
+const qrScanner = new QrScanner(videoElem, result => setResult(camQrResult, result), {
+        onDecodeError: error => {
+            camQrResult.textContent = error;
+            camQrResult.style.color = 'inherit';
+        },
+        returnDetailedScanResult: true,
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
 });
-qrScanner.start();
-{% endcomment %}
+
+qrScanner.start().then(() => {
+    console.log("qrScanner start...")
+});
+
+QrScanner.hasCamera().then(hasCamera => camHasCamera.textContent = hasCamera);
+
+{% if debug %}
+// for debugging
+window.scanner = qrScanner;
+{% endif %}

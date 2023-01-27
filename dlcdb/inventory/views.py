@@ -113,6 +113,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
             'devices': devices,
             'current_inventory': current_inventory,
             'qrcode_prefix': settings.QRCODE_PREFIX,
+            'debug': settings.DEBUG,
             'dev_state_unknown': 'dev_state_unknown',
             'dev_state_found': 'dev_state_found',
             # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
@@ -310,6 +311,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             'current_inventory': current_inventory,
             'parameters': parameters,
             'qrcode_prefix': settings.QRCODE_PREFIX,
+            'debug': settings.DEBUG,
             # 'room_search_form': self.room_search_form,
             'inventory_progress': self.get_inventory_progress,
         })
