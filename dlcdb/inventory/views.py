@@ -314,6 +314,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             'debug': settings.DEBUG,
             # 'room_search_form': self.room_search_form,
             'inventory_progress': self.get_inventory_progress,
+            'api_token': Token.objects.first(),
         })
         return context
 

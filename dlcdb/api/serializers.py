@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..core.models import Device, Record, Person, LentRecord
+from ..core.models import Device, Record, Person, LentRecord, Room
 
 
 class DeviceSerializer(serializers.HyperlinkedModelSerializer):
@@ -58,6 +58,17 @@ class RecordSerializer(serializers.HyperlinkedModelSerializer):
             'device',
             'record_type',
             'is_active',
+        ]
+
+
+class RoomSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Room
+        lookup_field = 'uuid'
+        fields = [
+            'uuid',
+            'number',
         ]
 
 

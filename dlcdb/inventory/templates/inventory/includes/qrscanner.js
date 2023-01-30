@@ -3,7 +3,7 @@
 // Constants
 const uuidFormField = document.getElementById('id_uuids');
 const QRCODE_PREFIX = String("{{ qrcode_prefix }}");
-const API_URL_DEVICE = '{{ request.scheme }}://{{ request.get_host }}/api/v2/devices/'
+const API_URL_BASE = '{{ request.scheme }}://{{ request.get_host }}/api/v2'
 const STATE_BUTTON_PREFIX = 'state-btn-'
 const ROW_UUID_PREFIX = 'tr-uuid-'
 const API_TOKEN = String("{{ api_token }}");
@@ -11,14 +11,8 @@ const SCAN_TARGET = String("{{ scan_target }}");
 
 console.log("SCAN_TARGET: ", SCAN_TARGET)
 
-// helper functions
-function gotoRoom(uuid) {
-    const roomModalElem = document.querySelector('#switch_room_modal');
-    console.log("roomModalElem", roomModalElem)
-    roomModalElem.dataset.uuid = uuid; 
-    $('#switch_room_modal').modal('show');
-}
 
+// helper functions
 function isDlcdbQrCode(qrstring) {
     // Check if QrCode is a valid DLCDB QR code
     // console.log("Test for isDlcdbQrCode")
@@ -31,12 +25,12 @@ function getInfix(qrstring) {
     let len_prefix = QRCODE_PREFIX.length
     // console.log("len_prefix: " + len_prefix)
     let infix = qrstring.substring(len_prefix, len_prefix + 1)
-    console.log("infix: " + infix)
+    // console.log("infix: ", infix)
     return infix
 }
 
 function getUnprefixedUuid(uuid) {
-    console.log("getUnprefixedUuid")
+    // console.log("getUnprefixedUuid")
     let re = new RegExp("^" + QRCODE_PREFIX + "[RD]")
     let result = uuid.replace(re, '')
     // console.log("getUnprefixedUuid: " + result)
@@ -55,7 +49,7 @@ function QrCode(qrstring) {
 
 function getDeviceByUuid(uuid) {
     // console.log("getDeviceByUuid")
-    let apiDeviceQuery = API_URL_DEVICE + uuid
+    const apiDeviceQuery = `${API_URL_BASE}/devices/${uuid}`
     console.log("apiDeviceQuery: " + apiDeviceQuery)
 
     fetch(apiDeviceQuery, {
@@ -63,7 +57,7 @@ function getDeviceByUuid(uuid) {
     })
     .then((response) => {
         if (!response.ok) {
-        throw new Error(`Network response was not OK, got: ${response.status}`);
+            throw new Error(`Network response was not OK, got: ${response.status}`);
         }
         return response.json();
     })
@@ -78,6 +72,51 @@ function getDeviceByUuid(uuid) {
         console.warn(error);
     })  
 }
+
+
+async function getRoomByUuid(uuid, callback) {
+    console.log("getRoomByUuid")
+    let roomNumber = null
+    const apiRoomQuery = `${API_URL_BASE}/rooms/${uuid}`
+
+    console.log("apiRoomQuery: ", apiRoomQuery)
+
+    const response = await fetch(apiRoomQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
+    const roomData = await response.json();
+    return roomData.number;
+
+    // fetch(apiRoomQuery, {
+    //     headers: {Authorization: `Token ${API_TOKEN}`}
+    // })
+    // .then((response) => {
+    //     if (!response.ok) {
+    //         throw new Error(`Network response was not OK, got: ${response.status}`);
+    //     }
+    //     return response.json();
+    // })
+    // .then((data) => {
+    //     console.log("data: ", data)
+    //     roomNumber = data.number;
+    //     return roomNumber;
+    // })
+    // .catch(function(error) {
+    //     alert("fetch error: " + error)
+    //     console.warn(error);
+    // })
+
+}
+
+async function gotoRoom(uuid) {
+    const roomModalElem = document.querySelector('#switch_room_modal');
+    roomModalElem.dataset.uuid = uuid
+
+    const roomNumber = await getRoomByUuid(uuid);
+    const roomNumberElem = document.querySelector('#modal-to-room-number');
+    roomNumberElem.textContent = roomNumber;
+
+    $('#switch_room_modal').modal('show');
+}
+
 
 // DEVICE: live collection of matched elements
 var btns = document.getElementsByClassName('state-trigger');
@@ -256,9 +295,10 @@ function handleDeviceScan(){
 
 
 function handleRoomScan(){
+
     /// START JS ROOM
     $('#switch_room_modal .modal-footer button').on('click', function (event) {
-        let clicked_button = $(event.target); // The clicked button
+        let clicked_button = $(event.target);
         let parent = clicked_button.closest(".modal")
         let uuid = parent[0].dataset.uuid
 
@@ -315,13 +355,13 @@ function setResult(label, result) {
 }
 
 const qrScanner = new QrScanner(videoElem, result => setResult(camQrResult, result), {
-        onDecodeError: error => {
-            camQrResult.textContent = error;
-            camQrResult.style.color = 'inherit';
-        },
-        returnDetailedScanResult: true,
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
+    onDecodeError: error => {
+        camQrResult.textContent = error;
+        camQrResult.style.color = 'inherit';
+    },
+    returnDetailedScanResult: true,
+    highlightScanRegion: true,
+    highlightCodeOutline: true,
 });
 
 qrScanner.start().then(() => {
