@@ -201,6 +201,9 @@
     <hr>
 </form>
 
+{% include 'inventory/includes/bootstrap/modal.html' with modal_id="switch_room_modal" modal_title="New room scanned" modal_body="Be sure to save the inventory of the current room before switching to a new room" modal_proceed_id="change_room" modal_proceed_text="Switch to room" %}
+
+
 {% endblock body %}
 
 {% block extra_js %}
@@ -221,7 +224,7 @@
 <script type="module">
     $('#id_uuids').attr('readonly', true);
 
-    {% include 'inventory/includes/qrscanner.js' with scan_target='device' %}
+    {% include 'inventory/includes/qrscanner.js' %}
 
     $('#id_device').select2({
         theme: 'bootstrap4',

@@ -7,9 +7,6 @@ const API_URL_BASE = '{{ request.scheme }}://{{ request.get_host }}/api/v2'
 const STATE_BUTTON_PREFIX = 'state-btn-'
 const ROW_UUID_PREFIX = 'tr-uuid-'
 const API_TOKEN = String("{{ api_token }}");
-const SCAN_TARGET = String("{{ scan_target }}");
-
-console.log("SCAN_TARGET: ", SCAN_TARGET)
 
 
 // helper functions
@@ -76,45 +73,11 @@ function getDeviceByUuid(uuid) {
 
 async function getRoomByUuid(uuid, callback) {
     console.log("getRoomByUuid")
-    let roomNumber = null
     const apiRoomQuery = `${API_URL_BASE}/rooms/${uuid}`
-
-    console.log("apiRoomQuery: ", apiRoomQuery)
-
+    // console.log("apiRoomQuery: ", apiRoomQuery)
     const response = await fetch(apiRoomQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
     const roomData = await response.json();
     return roomData.number;
-
-    // fetch(apiRoomQuery, {
-    //     headers: {Authorization: `Token ${API_TOKEN}`}
-    // })
-    // .then((response) => {
-    //     if (!response.ok) {
-    //         throw new Error(`Network response was not OK, got: ${response.status}`);
-    //     }
-    //     return response.json();
-    // })
-    // .then((data) => {
-    //     console.log("data: ", data)
-    //     roomNumber = data.number;
-    //     return roomNumber;
-    // })
-    // .catch(function(error) {
-    //     alert("fetch error: " + error)
-    //     console.warn(error);
-    // })
-
-}
-
-async function gotoRoom(uuid) {
-    const roomModalElem = document.querySelector('#switch_room_modal');
-    roomModalElem.dataset.uuid = uuid
-
-    const roomNumber = await getRoomByUuid(uuid);
-    const roomNumberElem = document.querySelector('#modal-to-room-number');
-    roomNumberElem.textContent = roomNumber;
-
-    $('#switch_room_modal').modal('show');
 }
 
 
@@ -169,26 +132,6 @@ function btnClick() {
     }
 }
 
-// function markRow({ uuid, state }) {
-//     let search_id = ROW_UUID_PREFIX + uuid
-//     let row = document.getElementById(search_id)
-
-//     if ((row) && (state == DEVICE_STATE_FOUND)) {
-//         console.log("row: " + row)
-//         row.classList.remove(DEVICE_STATE_NOTFOUND, DEVICE_STATE_UNKNOWN)
-//         row.classList.add(DEVICE_STATE_FOUND)
-//     } else if ((row) && (state == DEVICE_STATE_NOTFOUND)) {
-//         row.classList.remove(DEVICE_STATE_FOUND, DEVICE_STATE_UNKNOWN)
-//         row.classList.add(DEVICE_STATE_NOTFOUND)
-//     } else if ((row) && (state == DEVICE_STATE_FOUND_UNEXPECTED)) {
-//         row.classList.remove(DEVICE_STATE_FOUND_UNEXPECTED)
-//         row.classList.add(DEVICE_STATE_FOUND)
-//     } else {
-//         console.log("Not yet in this room!")
-//         let newDevice = getDeviceByUuid(uuid)
-//         console.log("Adding newDevice: ", newDevice)
-//     }
-// }
 
 function deviceRowTemplate(device){
     return `
@@ -294,7 +237,16 @@ function handleDeviceScan(){
 }
 
 
-function handleRoomScan(){
+async function handleRoomScan(uuid){
+
+    const roomModalElem = document.querySelector('#switch_room_modal');
+    roomModalElem.dataset.uuid = uuid
+
+    const roomNumber = await getRoomByUuid(uuid);
+    const roomNumberElem = document.querySelector('#modal-to-room-number');
+    roomNumberElem.textContent = roomNumber;
+
+    $('#switch_room_modal').modal('show');
 
     /// START JS ROOM
     $('#switch_room_modal .modal-footer button').on('click', function (event) {
@@ -307,15 +259,6 @@ function handleRoomScan(){
         }
     });
     /// END JS ROOM
-}
-
-
-if (SCAN_TARGET === "device"){
-    handleDeviceScan()
-} else if (SCAN_TARGET === "room") {
-    handleRoomScan()
-} else {
-    alert(`Scan target ${SCAN_TARGET} not handled!`)
 }
 
 
@@ -345,9 +288,10 @@ function setResult(label, result) {
     if (QrObj.infix === 'D') {
         console.info("Trigger DEVICE related tasks...")
         // manageUuid({uuid: QrObj.uuid, state: DEVICE_STATE_FOUND});
+        handleDeviceScan();
     } else if (QrObj.infix === 'R') {
         console.info("Trigger ROOM related tasks...")
-        gotoRoom(QrObj.uuid);
+        handleRoomScan(QrObj.uuid);
     } else {
         alert(`INFIX "${QrObj.infix}" NOT GIVEN OR NOT KNOWN! Ignoring this QrCode!`)
         return;

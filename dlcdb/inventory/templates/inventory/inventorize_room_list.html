@@ -5,7 +5,7 @@
 
 {% block extra_js %}
 <script type="module">
-    {% include 'inventory/includes/qrscanner.js' with scan_target='room' %}
+    {% include 'inventory/includes/qrscanner.js' %}
 
     $('#id_room').select2({
         theme: 'bootstrap4',
@@ -17,7 +17,6 @@
 {% block body %}
 
     {% include 'inventory/includes/qrvideo.html' %}
-
     {% include 'inventory/includes/inventory_progress.html' %}
 
     <hr>
