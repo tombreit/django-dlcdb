@@ -1,13 +1,28 @@
 {% load static %}
 
-// Constants
-const uuidFormField = document.getElementById('id_uuids');
+// Constants from backend
 const QRCODE_PREFIX = String("{{ qrcode_prefix }}");
 const API_URL_BASE = '{{ request.scheme }}://{{ request.get_host }}/api/v2'
-const STATE_BUTTON_PREFIX = 'state-btn-'
-const ROW_UUID_PREFIX = 'tr-uuid-'
 const API_TOKEN = String("{{ api_token }}");
 
+
+// Constants from frontend
+const STATE_BUTTON_PREFIX = 'state-btn-'
+const ROW_UUID_PREFIX = 'tr-uuid-'
+const uuidFormField = document.getElementById('id_uuids');
+
+const DEVICE_STATE_UNKNOWN = "dev_state_unknown";
+const DEVICE_STATE_FOUND = "dev_state_found";
+const DEVICE_STATE_ADDED = "dev_state_added";
+const DEVICE_STATE_NOTFOUND = "dev_state_notfound";
+
+const uuids_states_map = new Map();
+
+// DEVICE: live collection of matched elements
+let btns = document.getElementsByClassName('state-trigger');
+for (let btn of btns) {
+    btn.addEventListener('click', btnClick, false);
+}
 
 // helper functions
 function isDlcdbQrCode(qrstring) {
@@ -16,6 +31,7 @@ function isDlcdbQrCode(qrstring) {
     let re = new RegExp("^DLCDB[RD][0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
     return re.test(qrstring)
 }
+
 
 function getInfix(qrstring) {
     // console.log("getInfix")
@@ -26,6 +42,7 @@ function getInfix(qrstring) {
     return infix
 }
 
+
 function getUnprefixedUuid(uuid) {
     // console.log("getUnprefixedUuid")
     let re = new RegExp("^" + QRCODE_PREFIX + "[RD]")
@@ -33,6 +50,7 @@ function getUnprefixedUuid(uuid) {
     // console.log("getUnprefixedUuid: " + result)
     return result
 }
+
 
 function QrCode(qrstring) {
     console.info("qrstring: ", qrstring)
@@ -43,6 +61,7 @@ function QrCode(qrstring) {
     this.raw = qrstring
     return this
 }
+
 
 function getDeviceByUuid(uuid) {
     // console.log("getDeviceByUuid")
@@ -61,7 +80,7 @@ function getDeviceByUuid(uuid) {
     .then((data) => {
         console.log("fetch(apiDeviceQuery): ", data);
         addNewDeviceRow(data)
-        // We do not trigger dev_state_found automatically, user must push button
+        // We do not trigger dev_state_found automatically, user must push button manually
         // manageUuid({uuid: uuid, state: DEVICE_STATE_ADDED});
     })
     .catch(function(error) {
@@ -80,12 +99,6 @@ async function getRoomByUuid(uuid, callback) {
     return roomData.number;
 }
 
-
-// DEVICE: live collection of matched elements
-var btns = document.getElementsByClassName('state-trigger');
-for (let btn of btns) {
-    btn.addEventListener('click', btnClick, false);
-}
 
 // function update_found_devices_count(count) {
 //     let count_elem = document.getElementById("found_devices_count")
@@ -201,39 +214,50 @@ function manageUuid({ uuid, state }) {
         let serialized_uuids_states_map = JSON.stringify(Object.fromEntries(uuids_states_map));
         uuidFormField.setAttribute('value', serialized_uuids_states_map);
     } else {
-        alert("[manageUuid] This should never happen! uuid: " + uuid + " state: " + state + "Please contact t.breitner@csl.mpg.de");
+        alert("[manageUuid] This should never happen! uuid: " + uuid + " state: " + state + "Please get in touch with your IT.");
     }
 }
 
-function handleDeviceScan(){
-/// START JS DEVICE
-    // Result dict uuids_states_dict holds uuids and their correspondig states, e.g.:
-    // uuids_states_dict = {
-    //   uuid1: found,
-    //   uuid2: notfound,
-    //   uuid3: found,
-    //   ...
-    // }
+// Result dict uuids_states_dict holds uuids and their correspondig states, e.g.:
+// uuids_states_dict = {
+//   uuid1: found,
+//   uuid2: notfound,
+//   uuid3: found,
+//   ...
+// }
+// Add new device via form
+const addDeviceButton = document.querySelector("#add-device-button");
 
-    const uuids_states_map = new Map();
+addDeviceButton.addEventListener("click", function(event) {
+    let select2SelectedOption = $('#id_device').select2('data')[0].id;
+    // console.log("select2SelectedOption: ", select2SelectedOption)
+    console.log("[addDeviceButton] adding device: ", select2SelectedOption)
+    let newDevice = getDeviceByUuid(select2SelectedOption)
+    event.preventDefault();
+}, false);
 
-    // DEVICE: Constants
-    const DEVICE_STATE_UNKNOWN = "dev_state_unknown";
-    const DEVICE_STATE_FOUND = "dev_state_found";
-    const DEVICE_STATE_ADDED = "dev_state_added";
-    const DEVICE_STATE_NOTFOUND = "dev_state_notfound";
 
-    // Add new device via form
-    const addDeviceButton = document.querySelector("#add-device-button");
+function handleDeviceScan(uuid){
+    /* 
+    1. if scanned uuid is in current uuid table -> mark as "found"
+    2. if scanned uuid is not in current uuid table -> add new device row
+    */
 
-    addDeviceButton.addEventListener("click", function(event) {
-        let select2SelectedOption = $('#id_device').select2('data')[0].id;
-        // console.log("select2SelectedOption: ", select2SelectedOption)
-        console.log("[addDeviceButton] adding device: ", select2SelectedOption)
-        let newDevice = getDeviceByUuid(select2SelectedOption)
-        event.preventDefault();
-    }, false);
-/// END JS DEVICE
+    // const _myuuid = "e65b4119-2147-4ff7-9d8a-754995c62d9c"
+    const rowID = `tr-uuid-${uuid}`
+    // console.log("rowID: ", rowID)
+    const matchedRow = document.getElementById(rowID);
+
+    if (matchedRow){
+        console.log("matchedRow: ", matchedRow)
+        const row = matchedRow
+        const this_btn_iconelem = row.querySelector('.fas');
+
+        row.classList.remove(DEVICE_STATE_UNKNOWN, "table-default")
+        row.classList.add(DEVICE_STATE_FOUND, "table-success")
+        this_btn_iconelem.className = "fas fa-check-square";
+        manageUuid({uuid: uuid, state: DEVICE_STATE_FOUND});
+    }
 }
 
 
@@ -288,7 +312,7 @@ function setResult(label, result) {
     if (QrObj.infix === 'D') {
         console.info("Trigger DEVICE related tasks...")
         // manageUuid({uuid: QrObj.uuid, state: DEVICE_STATE_FOUND});
-        handleDeviceScan();
+        handleDeviceScan(QrObj.uuid);
     } else if (QrObj.infix === 'R') {
         console.info("Trigger ROOM related tasks...")
         handleRoomScan(QrObj.uuid);
