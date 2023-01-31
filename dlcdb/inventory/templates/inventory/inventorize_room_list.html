@@ -5,12 +5,13 @@
 
 {% block extra_js %}
 <script type="module">
-    {% include 'inventory/includes/qrscanner.js' %}
-
     $('#id_room').select2({
         theme: 'bootstrap4',
     });
 </script>
+
+{% include 'inventory/includes/qrvideo-jsinit.html' %}
+
 {% endblock extra_js %}
 
 

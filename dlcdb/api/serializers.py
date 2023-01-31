@@ -68,6 +68,7 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field = 'uuid'
         fields = [
             'uuid',
+            'pk',
             'number',
         ]
 

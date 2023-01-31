@@ -1,5 +1,6 @@
 {% extends "inventory/base_inventory.html" %}
 
+
 {% block body %}
 
 {% include 'inventory/includes/qrvideo.html' %}
@@ -199,6 +200,8 @@
 
 {% block extra_js %}
 
+{% include 'inventory/includes/qrvideo-jsinit.html' %}
+
 {# the following js are only needed for this weird admin popup for room and device notes #}
 <script src="/admin/jsi18n/"></script>
 <script src="/static/admin/js/vendor/jquery/jquery.js"></script>
@@ -212,12 +215,9 @@
 <script type="module">
     $('#id_uuids').attr('readonly', true);
 
-    {% include 'inventory/includes/qrscanner.js' %}
-
     $('#id_device').select2({
         theme: 'bootstrap4',
     });
-
 
     (function($){
 

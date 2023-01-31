@@ -1,10 +1,11 @@
-{% load static %}
-
 // Constants from backend
-const QRCODE_PREFIX = String("{{ qrcode_prefix }}");
-const API_URL_BASE = '{{ request.scheme }}://{{ request.get_host }}/api/v2'
-const API_TOKEN = String("{{ api_token }}");
+const dlcdbConstants = document.currentScript.dataset;
+const DJANGO_DEBUG = dlcdbConstants.djangoDebug;
+const QRCODE_PREFIX = dlcdbConstants.qrcodePrefix;
+const API_URL_BASE = dlcdbConstants.apiUrlBase;
+const API_TOKEN = dlcdbConstants.apiToken;
 
+console.info("DJANGO_DEBUG: ", DJANGO_DEBUG)
 
 // Constants from frontend
 const STATE_BUTTON_PREFIX = 'state-btn-'
@@ -18,11 +19,6 @@ const DEVICE_STATE_NOTFOUND = "dev_state_notfound";
 
 const uuids_states_map = new Map();
 
-// DEVICE: live collection of matched elements
-let btns = document.getElementsByClassName('state-trigger');
-for (let btn of btns) {
-    btn.addEventListener('click', btnClick, false);
-}
 
 // helper functions
 function isDlcdbQrCode(qrstring) {
@@ -63,30 +59,33 @@ function QrCode(qrstring) {
 }
 
 
-function getDeviceByUuid(uuid) {
+async function getDeviceByUuid(uuid) {
     // console.log("getDeviceByUuid")
-    const apiDeviceQuery = `${API_URL_BASE}/devices/${uuid}`
-    console.log("apiDeviceQuery: " + apiDeviceQuery)
 
-    fetch(apiDeviceQuery, {
-        headers: {Authorization: `Token ${API_TOKEN}`}
-    })
-    .then((response) => {
-        if (!response.ok) {
-            throw new Error(`Network response was not OK, got: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then((data) => {
-        console.log("fetch(apiDeviceQuery): ", data);
-        addNewDeviceRow(data)
-        // We do not trigger dev_state_found automatically, user must push button manually
-        // manageUuid({uuid: uuid, state: DEVICE_STATE_ADDED});
-    })
-    .catch(function(error) {
-        alert("fetch error: " + error)
-        console.warn(error);
-    })  
+    const apiDeviceQuery = `${API_URL_BASE}/devices/${uuid}`
+    const response = await fetch(apiDeviceQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
+    const deviceData = await response.json();
+    return deviceData;
+
+    // fetch(apiDeviceQuery, {
+    //     headers: {Authorization: `Token ${API_TOKEN}`}
+    // })
+    // .then((response) => {
+    //     if (!response.ok) {
+    //         throw new Error(`Network response was not OK, got: ${response.status}`);
+    //     }
+    //     return response.json();
+    // })
+    // .then((data) => {
+    //     console.log("fetch(apiDeviceQuery): ", data);
+    //     addNewDeviceRow(data)
+    //     // We do not trigger dev_state_found automatically, user must push button manually
+    //     // manageUuid({uuid: uuid, state: DEVICE_STATE_ADDED});
+    // })
+    // .catch(function(error) {
+    //     alert("fetch error: " + error)
+    //     console.warn(error);
+    // })
 }
 
 
@@ -96,7 +95,7 @@ async function getRoomByUuid(uuid, callback) {
     // console.log("apiRoomQuery: ", apiRoomQuery)
     const response = await fetch(apiRoomQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
     const roomData = await response.json();
-    return roomData.number;
+    return roomData;
 }
 
 
@@ -177,20 +176,21 @@ function deviceRowTemplate(device){
     `;
 }
 
-function addNewDeviceRow(device) {
+
+async function addNewDeviceRow(device) {
     console.log("[addNewDeviceRow] for device: ", device)
     // console.log(typeof device)
     // console.log(device.length)
 
     // If no device is selected, do nothing
     if(device.length) {
-        alert("Select device first...")
+        alert("Select device first...");
         return;
     }
 
     let tableTbody = document.getElementById("devices-table-tbody");
-    let newRow = deviceRowTemplate(device)
-    tableTbody.insertAdjacentHTML( 'afterbegin', newRow )
+    let newRow = deviceRowTemplate(device);
+    tableTbody.insertAdjacentHTML( 'afterbegin', newRow );
 
     let query = STATE_BUTTON_PREFIX + device.uuid
     // console.log(query)
@@ -200,7 +200,9 @@ function addNewDeviceRow(device) {
 
     $('#id_device').val(null).trigger('change');
 
+    return true;
 }
+
 
 function manageUuid({ uuid, state }) {
     console.log("uuidFormField: " + uuidFormField.getAttribute('value'))
@@ -218,26 +220,8 @@ function manageUuid({ uuid, state }) {
     }
 }
 
-// Result dict uuids_states_dict holds uuids and their correspondig states, e.g.:
-// uuids_states_dict = {
-//   uuid1: found,
-//   uuid2: notfound,
-//   uuid3: found,
-//   ...
-// }
-// Add new device via form
-const addDeviceButton = document.querySelector("#add-device-button");
 
-addDeviceButton.addEventListener("click", function(event) {
-    let select2SelectedOption = $('#id_device').select2('data')[0].id;
-    // console.log("select2SelectedOption: ", select2SelectedOption)
-    console.log("[addDeviceButton] adding device: ", select2SelectedOption)
-    let newDevice = getDeviceByUuid(select2SelectedOption)
-    event.preventDefault();
-}, false);
-
-
-function handleDeviceScan(uuid){
+async function handleDeviceScan(uuid){
     /* 
     1. if scanned uuid is in current uuid table -> mark as "found"
     2. if scanned uuid is not in current uuid table -> add new device row
@@ -245,7 +229,7 @@ function handleDeviceScan(uuid){
 
     // const _myuuid = "e65b4119-2147-4ff7-9d8a-754995c62d9c"
     const rowID = `tr-uuid-${uuid}`
-    // console.log("rowID: ", rowID)
+    console.log("rowID: ", rowID)
     const matchedRow = document.getElementById(rowID);
 
     if (matchedRow){
@@ -257,38 +241,63 @@ function handleDeviceScan(uuid){
         row.classList.add(DEVICE_STATE_FOUND, "table-success")
         this_btn_iconelem.className = "fas fa-check-square";
         manageUuid({uuid: uuid, state: DEVICE_STATE_FOUND});
+    } else {
+        device = await getDeviceByUuid(uuid);
+        const isDone = await addNewDeviceRow(device);
+        if (isDone) {
+            console.info(`Successfully added new device row for ${device}`);
+            return true;
+        }
     }
 }
 
 
 async function handleRoomScan(uuid){
-
     const roomModalElem = document.querySelector('#switch_room_modal');
-    roomModalElem.dataset.uuid = uuid
-
-    const roomNumber = await getRoomByUuid(uuid);
     const roomNumberElem = document.querySelector('#modal-to-room-number');
-    roomNumberElem.textContent = roomNumber;
+    const roomObj = await getRoomByUuid(uuid);
+    
+    roomModalElem.dataset.uuid = uuid;
+    roomNumberElem.textContent = roomObj.number;
 
     $('#switch_room_modal').modal('show');
 
-    /// START JS ROOM
     $('#switch_room_modal .modal-footer button').on('click', function (event) {
         let clicked_button = $(event.target);
         let parent = clicked_button.closest(".modal")
         let uuid = parent[0].dataset.uuid
 
         if (clicked_button[0].id === "change_room") {
-            location = "{% url 'inventory:inventorize-room' '99999999-9999-9999-9999-999999999999' %}".replace(/99999999-9999-9999-9999-999999999999/, uuid.toString());
+            location = `room/${roomObj.pk}`;
         }
     });
-    /// END JS ROOM
 }
+
+
+// DEVICE: live collection of matched elements
+let btns = document.getElementsByClassName('state-trigger');
+for (let btn of btns) {
+    btn.addEventListener('click', btnClick, false);
+}
+
+// Add new device via form
+const addDeviceButton = document.querySelector("#add-device-button");
+
+if (addDeviceButton){
+    addDeviceButton.addEventListener("click", function(event) {
+        let select2SelectedOption = $('#id_device').select2('data')[0].id;
+        // console.log("select2SelectedOption: ", select2SelectedOption)
+        console.log("[addDeviceButton] adding device: ", select2SelectedOption)
+        let newDevice = getDeviceByUuid(select2SelectedOption)
+        event.preventDefault();
+    }, false);
+}
+
 
 
 // SCANNER
 // via https://github.com/nimiq/qr-scanner
-import QrScanner from "{% static 'dist/inventory/js/qr-scanner.min.js' %}";
+// import QrScanner from QR_LIB_URL;
 // QrScanner.WORKER_PATH = "{% static 'dist/inventory/js/qr-scanner-worker.min.js' %}";
 
 const videoElem = document.getElementById('qr-video');
@@ -338,7 +347,6 @@ qrScanner.start().then(() => {
 
 QrScanner.hasCamera().then(hasCamera => camHasCamera.textContent = hasCamera);
 
-{% if debug %}
-// for debugging
-window.scanner = qrScanner;
-{% endif %}
+if (DJANGO_DEBUG) {
+    window.scanner = qrScanner;
+}
