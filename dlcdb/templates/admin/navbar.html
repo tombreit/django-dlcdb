@@ -18,36 +18,8 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav mr-auto">
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin:core_lentrecord_changelist' %}">
-                <i class="fa-solid fa-arrow-right-arrow-left"></i>
-                Verleihen
-            </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'admin:core_device_changelist' %}">
-              <i class="fa-solid fa-barcode"></i>
-              Devices
-          </a>
-        </li>
-
-        {% if perms.smallstuff.view_assignedthing %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'smallstuff:person_search' %}">
-              <i class="fa-solid fa-stapler"></i>
-              Kleinkram
-          </a>
-        </li>
-        {% endif %}
-
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'admin:core_licencerecord_changelist' %}">
-            <i class="fa-solid fa-scale-balanced"></i>
-            Lizenzen
-          </a>
-        </li>
-
-    
+        {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_main" only %}
+        
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Prozesse

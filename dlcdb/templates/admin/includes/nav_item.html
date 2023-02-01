@@ -1,0 +1,14 @@
+
+{% for nav_item in nav_items %}
+    {% if nav_item.slot == "nav_main" %}
+    <li class="nav-item">
+    <a 
+        class="nav-link" 
+        href="{% url nav_item.url %}"
+    >
+        <i class="{{ nav_item.icon }}"></i>
+        {{ nav_item.label }}
+    </a>
+    </li>
+    {% endif %}
+{% endfor %}

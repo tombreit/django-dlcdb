@@ -1,5 +1,7 @@
+from operator import itemgetter
 from dataclasses import dataclass
 from django.contrib import messages
+from django.apps import apps
 from django.utils.translation import gettext as _
 from django.utils.html import format_html
 from django.urls import reverse
@@ -93,3 +95,59 @@ def hints(request):
         messages.add_message(request, message.level, message.get_formatted_msg())
 
     return {}  # empty dict to make context_processor happy
+
+
+# https://github.com/apache/airavata-django-portal/blob/0e2736ba1e72d24fa47b1699a11cbda4dc3fcc4c/django_airavata/context_processors.py#L99
+def nav(request):
+    nav_items =[]
+    dlcdb_apps = [app for app in apps.get_app_configs()]
+
+    def _get_is_active():
+        #     # convert "/djangoapp/path/in/app" to "path/in/app"
+        #     app_path = "/".join(request.path.split("/")[2:])
+        #     for nav_item in nav:
+        #         if 'active_prefixes' in nav_item:
+        #             if re.match("|".join(nav_item['active_prefixes']), app_path):
+        #                 nav_item['active'] = True
+        #             else:
+        #                 nav_item['active'] = False
+        #         else:
+        #             # 'active_prefixes' is optional, and if not specified, assume
+        #             # current item is active
+        #             nav_item['active'] = True
+        raise NotImplementedError("Function _get_is_active to retrieve the active navigation entry is not implemented (yet).")
+
+    def _get_has_permission(user, applabel, permission):
+        if not all([user, applabel, permission]):
+            return False
+
+        requested_permission = f"{applabel}.{permission}"
+        user_permissions = user.get_all_permissions()
+        return requested_permission in user_permissions
+
+    for app in dlcdb_apps:
+        # print(f"{app}: name: {app.name}; verbose_name: {app.verbose_name}; label: {app.label}")
+
+        if not hasattr(app, "nav_entries"):
+            continue
+
+        for nav_entry in app.nav_entries:
+            # name: dlcdb.reporting; verbose_name: DLCDB Reporting; label: reporting
+            # for a concrete permission string we need the app name without the project prefix
+            # so 'app.label' seems to fit
+            app_label = app.label
+            required_permission = nav_entry.get("required_permission")
+            has_permission = _get_has_permission(request.user, app_label, required_permission)
+
+            if has_permission:
+                nav_item = {
+                    "label": nav_entry.get("label"),
+                    "icon": nav_entry.get("icon"),
+                    "url": nav_entry.get("url"),
+                    "slot": nav_entry.get("slot"),
+                    "order": nav_entry.get("order"),
+                }
+                nav_items.append(nav_item)
+
+    nav_items = sorted(nav_items, key=itemgetter('order')) 
+    return {"nav_items": nav_items}

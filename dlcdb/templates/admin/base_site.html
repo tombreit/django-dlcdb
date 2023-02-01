@@ -34,7 +34,7 @@
 
 {% block nav-global %}
     {% if not is_popup %}
-        {% if user.is_staff and user.is_authenticated %}
+        {% if user.is_authenticated and user.is_staff %}
             {% include 'admin/navbar.html' %}
         {% endif %}
     {% endif %}
