@@ -276,8 +276,10 @@ async function handleRoomScan(uuid){
 
 // DEVICE: live collection of matched elements
 let btns = document.getElementsByClassName('state-trigger');
-for (let btn of btns) {
-    btn.addEventListener('click', btnClick, false);
+if (btns) {
+    for (let btn of btns) {
+        btn.addEventListener('click', btnClick, false);
+    }
 }
 
 // Add new device via form
@@ -286,13 +288,11 @@ const addDeviceButton = document.querySelector("#add-device-button");
 if (addDeviceButton){
     addDeviceButton.addEventListener("click", function(event) {
         let select2SelectedOption = $('#id_device').select2('data')[0].id;
-        // console.log("select2SelectedOption: ", select2SelectedOption)
         console.log("[addDeviceButton] adding device: ", select2SelectedOption)
-        let newDevice = getDeviceByUuid(select2SelectedOption)
+        handleDeviceScan(select2SelectedOption);
         event.preventDefault();
     }, false);
 }
-
 
 
 // SCANNER
