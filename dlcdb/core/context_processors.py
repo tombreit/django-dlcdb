@@ -121,8 +121,13 @@ def nav(request):
         if not all([user, applabel, permission]):
             return False
 
+        if permission == "true":
+            # The string "true" is currently used to disable permission checking
+            return True
+
         requested_permission = f"{applabel}.{permission}"
         user_permissions = user.get_all_permissions()
+        # print(user_permissions)
         return requested_permission in user_permissions
 
     for app in dlcdb_apps:
@@ -149,5 +154,5 @@ def nav(request):
                 }
                 nav_items.append(nav_item)
 
-    nav_items = sorted(nav_items, key=itemgetter('order')) 
+    nav_items = sorted(nav_items, key=itemgetter('order'))
     return {"nav_items": nav_items}

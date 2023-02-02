@@ -8,7 +8,7 @@ class SmallstuffConfig(AppConfig):
     nav_entries = [
         {
             'slot': 'nav_main',
-            'order': 3,
+            'order': 30,
             'label': 'Kleinkram',
             'icon': 'fa-solid fa-stapler',
             'url': 'smallstuff:person_search',

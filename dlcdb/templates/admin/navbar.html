@@ -16,93 +16,29 @@
     </button>
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
+      <div class="navbar-nav mr-auto">
 
         {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_main" only %}
         
-        <li class="nav-item dropdown">
+        <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Prozesse
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
-
-            <a class="dropdown-item" href="{% url 'admin:core_orderedrecord_changelist' %}">
-                Beschaffen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_importerlist_changelist' %}">
-                Bulk-Importieren
-            </a>
-            {% if perms.core.add_removedrecord %}
-              <a class="dropdown-item" href="{% url 'admin:core_removerlist_changelist' %}">
-                  Bulk-Ausmustern
-              </a>
-            {% endif %}
-
-            {% if perms.core.view_inventory %}
-              <a class="dropdown-item" href="{% url 'inventory:inventorize-room-list' %}">
-                Inventarisieren
-              </a>
-              <a class="dropdown-item" href="{% url 'admin:inventory_saplist_changelist' %}">
-                Abgleichen mit SAP
-              </a>
-            {% endif %}
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_processes" only %}
           </div>
-        </li>
+        </div>
 
-        <li class="nav-item dropdown">
+        <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDataDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Datenhaltung
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDataDropdown">
-
-            {% if perms.core.view_room %}
-              <a class="dropdown-item" href="{% url 'admin:core_room_changelist' %}">
-                  <i class="fa-solid fa-door-open"></i>
-                  {% translate "Rooms" %}
-              </a>
-            {% endif %}
-            
-            {% if perms.core.view_manufacturer %}
-              <a class="dropdown-item" href="{% url 'admin:core_manufacturer_changelist' %}">
-                <i class="fa-solid fa-industry"></i>
-                {% translate "Manufacturer" %}
-              </a>
-            {% endif %}
-
-            <a class="dropdown-item" href="{% url 'admin:core_supplier_changelist' %}">
-              <i class="fa-solid fa-truck-field"></i>
-              Zulieferer
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_devicetype_changelist' %}">
-                <i class="fa-solid fa-palette"></i>
-                Devicetypen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_person_changelist' %}">
-                <i class="fa-solid fa-users"></i>
-                Personen
-            </a>
-
-            <a class="dropdown-item" href="{% url 'admin:core_record_changelist' %}">
-                Records
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_removedrecord_changelist' %}">
-                Entfernt-Records
-            </a>
-
-            {% if perms.core.change_inventory %}
-              <a class="dropdown-item" href="{% url 'admin:core_inventory_changelist' %}">
-                  <i class="fa-solid fa-glasses"></i>
-                  Inventuren
-              </a>
-            {% endif %}
-  
-            <a class="dropdown-item" href="{% url 'admin:core_note_changelist' %}">
-                Notizen
-            </a>
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_masterdata" only %}
           </div>
-        </li>
+        </div>
 
-      </ul>
+      </div>
       
       <div class="navbar-nav">
 
