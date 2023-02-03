@@ -78,7 +78,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
 
     @admin.display(description='Has Note?')
     def has_note(self, obj):
-        return get_has_note_badge(obj_type="room", has_note=obj.note)
+        return get_has_note_badge(obj_type="core.room", has_note=obj.note)
 
     # Falling back to our no-delete-permission via CustomBaseModelAdmin
     # def has_delete_permission(self, request, obj=None):

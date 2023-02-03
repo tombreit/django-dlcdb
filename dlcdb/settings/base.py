@@ -315,12 +315,12 @@ THEME = {
         "ICON": "fa-solid fa-barcode",
         "COLOR": "",
     },
-    "core.room": {
-        "ICON": "fa-solid fa-door-open",
-        "COLOR": "",
-    },
     "core.devicetype": {
         "ICON": "fa-solid fa-palette",
+        "COLOR": "",
+    },
+    "core.room": {
+        "ICON": "fa-solid fa-door-open",
         "COLOR": "",
     },
     "core.lentrecord": {
@@ -337,6 +337,14 @@ THEME = {
     },
     "core.inventory": {
         "ICON": "fa-solid fa-glasses",
+        "COLOR": "",
+    },
+    "core.manufacturer": {
+        "ICON": "fa-solid fa-industry",
+        "COLOR": "",
+    },
+    "core.supplier": {
+        "ICON": "fa-solid fa-truck",
         "COLOR": "",
     },
     "smallstuff.assignedthing": {

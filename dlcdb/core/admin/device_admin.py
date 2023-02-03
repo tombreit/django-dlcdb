@@ -370,7 +370,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     def has_record_notes_badge(self, request, object_id):
         obj = self.get_object(request, object_id)
         if obj.has_record_notes():
-            return get_has_note_badge(obj_type="record", has_note=True)
+            return get_has_note_badge(obj_type="core.record", has_note=True)
 
     # Custom Django admin actions
     # https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/

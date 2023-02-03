@@ -45,5 +45,5 @@ class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdm
 
     @admin.display(description='Has Note?')
     def has_note(self, obj):
-        return get_has_note_badge(obj_type="device_type", has_note=obj.note)
+        return get_has_note_badge(obj_type="core.devicetype", has_note=obj.note)
 

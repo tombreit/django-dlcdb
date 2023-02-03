@@ -117,7 +117,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     @admin.display(description='Has Note?')
     def has_note(self, obj):
-        return get_has_note_badge(obj_type="record", has_note=obj.note)
+        return get_has_note_badge(obj_type="core.record", has_note=obj.note)
 
     @admin.display(description='Type')
     def get_change_link_display(self, obj):
