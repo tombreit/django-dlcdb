@@ -22,10 +22,10 @@ from .base_admin import CustomBaseModelAdmin
 #
 # Todo: refactor, get rid of session store and handle the redirect in a
 # friendlier way.
-from importlib import import_module
-from django.conf import settings
-SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
-session = SessionStore()
+# from importlib import import_module
+# from django.conf import settings
+# SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+# session = SessionStore()
 
 
 @admin.register(LentRecord)
@@ -225,7 +225,25 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
         user, username = get_denormalized_user(request.user)
         instance = None
 
-        if obj.record_type == Record.INROOM:
+        if obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
+            # War ein LENT record und hat jetzt einen Rückgabe-Timestamp,
+            # muss gespeichert werden und ein neuer INROOM record angelegt werden:
+            # print("Trigger returning of item, setting new InRoomRecord...")
+            super().save_model(request, obj, form, change)
+
+            instance = InRoomRecord(
+                device=obj.device,
+                room=Room.objects.get(is_auto_return_room=True),
+                user=user,
+                username=username,
+            )
+
+        elif obj.record_type == Record.LENT:
+            # War schon ein LENT record, wird lediglich geändert:
+            # print(f"Already a LENT record, possibly changed. record pk: {obj.pk}.")
+            super().save_model(request, obj, form, change)
+
+        elif obj.record_type == Record.INROOM:
             # War ein INROOM record, muss als neuer LENT record gespeichert werden:
             # print("Trigger lent action: was INROOM record...")
 
@@ -243,43 +261,41 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
                 lent_accessories=obj.lent_accessories,
             )
 
-        elif obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
-            # War ein LENT record und hat jetzt einen Rückgabe-Timestamp,
-            # muss gespeichert werden und ein neuer INROOM record angelegt werden:
-            # print("Trigger returning of item, setting new InRoomRecord...")
-            super().save_model(request, obj, form, change)
-
-            instance = InRoomRecord(
-                device=obj.device,
-                room=Room.objects.get(is_auto_return_room=True),
-                user=user,
-                username=username, 
-            )
-            
-        elif obj.record_type == Record.LENT:
-            # War schon ein LENT record, wird lediglich geändert:
-            # print(f"Already a LENT record, possibly changed. record pk: {obj.pk}.")
-            super().save_model(request, obj, form, change)
-            # Force redirect to this pk to avoid redirects to a pk stored in a 
-            # previous session:
-            session['new_instance_pk'] = obj.pk
-
         else:
             raise ValidationError('Lent state unknown - please report this issue!')
 
         if instance:
             instance.save()
-            session['new_instance_pk'] = instance.pk
 
     def response_change(self, request, obj):
-        if '_continue' in request.POST and session.get('new_instance_pk'):
-            # print("session[new_instance_pk]: ", session['new_instance_pk'])
-            # redirect_url = reverse('admin:core_lentrecord_change', args=(session['new_instance_pk'],))
-            redirect_url = reverse('admin:core_lentrecord_changelist')
-            messages.success(request, f'Device {self.get_device_human_readable(obj)} erfolgreich zurückgegeben.')
-            return HttpResponseRedirect(redirect_url)
+        is_return_action = bool(obj.lent_end_date)
+
+        # if '_continue' in request.POST:  # and session.get('new_instance_pk')
+        #     redirect_url = reverse('admin:core_lentrecord_changelist')
+        #     msg = f"Device {self.get_device_human_readable(obj)} erfolgreich zurückgegeben."
+        #     self.message_user(request, msg, messages.SUCCESS)
+        #     redirect_url = request.path
+        #     return HttpResponseRedirect(redirect_url)
+        # else:
+        #     return super().response_change(request, obj)
+
+        if is_return_action:
+            msg = f"Verleih von “{self.get_device_human_readable(obj)}” beendet."
+            self.message_user(request, msg, messages.SUCCESS)
+            return self.response_post_save_change(request, obj)
         else:
-            return super().response_change(request, obj)
+            msg = f"Verleih von “{self.get_device_human_readable(obj)}” gespeichert."
+            self.message_user(request, msg, messages.SUCCESS)
+            redirect_url = request.path
+            return HttpResponseRedirect(redirect_url)
+
+    def response_post_save_change(self, request, obj):
+        """
+        Figure out where to redirect after the 'Save' button has been pressed
+        when editing an existing object.
+        """
+        return self._response_post_save(request, obj)
+
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context.update({
