@@ -234,6 +234,9 @@ FORMAT_MODULE_PATH = [
     'dlcdb.core.formats',
 ]
 
+# https://docs.djangoproject.com/en/4.1/ref/contrib/sites/#enabling-the-sites-framework
+SITE_ID = 1
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
