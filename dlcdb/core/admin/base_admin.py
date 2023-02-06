@@ -69,18 +69,19 @@ class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
             form.base_fields['device'].initial = _device
 
         if not obj:
-            form.base_fields['device'].disabled = True
+            form.base_fields['device'].disabled = False
 
         return form
 
     def add_view(self, request, form_url='', extra_context=None):
         device_id = request.GET.get('device')
-        device = Device.objects.get(id=device_id)
         extra_context = extra_context or {}
-        extra_context['device'] = device
-        return super().add_view(
-            request, form_url, extra_context=extra_context,
-        )
+
+        if device_id:
+            device = Device.objects.get(id=device_id)
+            extra_context['device'] = device
+
+        return super().add_view(request, form_url, extra_context=extra_context)
 
 
 class SoftDeleteModelAdmin(admin.ModelAdmin):

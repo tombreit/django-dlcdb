@@ -23,6 +23,9 @@ class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, Cust
         'device',
         'note',
     ]
+    autocomplete_fields = [
+        'device',
+    ]
 
     def render_change_form(
         self, request, context, add=False, change=False, form_url="", obj=None
