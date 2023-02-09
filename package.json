@@ -16,22 +16,20 @@
     "common_distdir": "dlcdb/static/dist/common"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^6.1.1",
+    "@fortawesome/fontawesome-free": "^6.3.0",
     "@ttskch/select2-bootstrap4-theme": "^1.5.2",
     "bootstrap": "^4.6.1",
     "bootswatch": "^4.6.1",
     "bundle-js": "^1.0.3",
-    "chart.js": "^3.9.1",
-    "htmx.org": "^1.7.0",
-    "jquery": "^3.4.1",
-    "mermaid": "^8.13.10",
+    "chart.js": "^4.2.0",
+    "htmx.org": "^1.8.5",
+    "jquery": "^3.6.3",
+    "mermaid": "^9.3.0",
     "mermaid.cli": "^0.5.1",
     "npm": "^6.13.7",
     "npm-run-all": "^4.1.5",
-    "package.json": "^2.0.1",
-    "pkg.json": "^2.0.8",
     "popper.js": "^1.16.1",
-    "sass": "^1.56.1",
+    "sass": "^1.58.0",
     "select2": "^4.1.0-rc.0"
   },
   "scripts": {
