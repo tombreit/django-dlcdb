@@ -10,7 +10,7 @@ from django.utils.http import urlencode
 from django.utils.html import format_html
 from django.urls import reverse
 
-from ..models import Device, Room, DeviceType, Supplier, Manufacturer
+from ..models import Device, Room, DeviceType, Supplier, Manufacturer, LentRecord, Record
 from ..utils.helpers import get_denormalized_user
 
 
@@ -157,14 +157,21 @@ class ExportCsvMixin:
 
     @admin.action(description='Export selected as CSV')
     def export_as_csv(self, request, queryset):
-        meta = self.model._meta
+        meta = self.model._meta        
         _now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
         filename = f"dlcdb_export_{_now}_{meta.app_label}-{meta.model_name}.csv"
 
-        fieldnames = [field.name for field in meta.fields]
+        fieldnames = [field.name for field in Device._meta.fields]  # .get_fields()
+        RECORD_FIELDNAMES = [field.name for field in Record._meta.fields]
 
-        if 'active_record' in fieldnames:
-            fieldnames.extend(["room", "record_created_at"])
+        if meta.model is Device:
+            # fieldnames = [field.name for field in meta.fields]
+            fieldnames.extend(["room", "created_at"])
+            export_queryset = queryset
+        elif meta.model is LentRecord:
+            device_pks = queryset.values_list("device", flat=True)
+            export_queryset = Device.objects.filter(pk__in=device_pks)
+            fieldnames.extend(["person", "lent_desired_end_date", "room", "created_at"])
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f"attachment; filename={filename}"
@@ -179,7 +186,7 @@ class ExportCsvMixin:
         )
 
         writer.writeheader()
-        for obj in queryset:
+        for obj in export_queryset:
             row_data = {}
             for field in fieldnames:
                 fieldname = field
@@ -187,10 +194,15 @@ class ExportCsvMixin:
 
                 if field == 'active_record':
                     fielddata = obj.active_record.record_type if obj.active_record else "no record set"
-                elif field == 'record_created_at':
-                    fielddata = obj.active_record.created_at if obj.active_record else "no record set"
-                elif field == 'room':
-                    fielddata = getattr(obj.active_record.room, "number", None) if obj.active_record else "no record set"
+
+                if field in RECORD_FIELDNAMES:
+                # elif field == 'record_created_at':
+                #     fielddata = obj.active_record.created_at if obj.active_record else "no record set"
+                # elif field == 'room':
+                #     fielddata = getattr(obj.active_record.room, "number", None) if obj.active_record else "no record set"
+                # elif field == 'person':
+                #     fielddata = obj.active_record.person if obj.active_record.person else "no person set"
+                    fielddata = getattr(obj.active_record, field)
                 else:
                     fielddata = getattr(obj, field)
 

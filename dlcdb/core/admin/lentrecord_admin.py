@@ -14,7 +14,7 @@ from ..models import LentRecord, InRoomRecord, Room, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
 from .filters.lentstate_filter import LentStateRecordFilter
-from .base_admin import CustomBaseModelAdmin
+from .base_admin import CustomBaseModelAdmin, ExportCsvMixin
 
 # Create a session store to pass the new created instance.pk from save_model()
 # to response_change(). Considered a dirty hack.
@@ -29,7 +29,7 @@ session = SessionStore()
 
 
 @admin.register(LentRecord)
-class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
+class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
     form = LentRecordAdminForm
     change_form_template = 'core/lentrecord/change_form.html'
@@ -64,6 +64,11 @@ class LentRecordAdmin(TenantScopedAdmin, CustomBaseModelAdmin):
         'device__device_type',
         'person',
     ]
+
+    actions = [
+        'export_as_csv',
+    ]
+
     
     readonly_fields = [
         'get_edv_id',
