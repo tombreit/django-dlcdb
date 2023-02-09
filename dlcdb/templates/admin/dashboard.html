@@ -8,6 +8,7 @@
     Dashboard | {{ site_title|default:_('Django site admin') }}
 {% endblock %}
 
+
 {% block content_title %}
     Dashboard
 {% endblock %}
@@ -16,102 +17,78 @@
 {% block content %}
     <h1>Device Life Cycle Database</h1>
 
-    <hr>
-    <div class="row">
-        <div class="col-12">
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_lentrecord_changelist' %}">
-                Verleihen
-            </a>
+    <style>
+    .grid-container {
+        display: grid;
+        grid-column-gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        /* place-items: center; */
+        grid-gap: 1em;
+        font-size: large;
+      }
+      .grid-container > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1 / 1;
+        border-radius: 9px;
+        background-color: var(--primary);
+        color: white;
+        text-align: center;
+      }
+      .grid-container > div > p {
+        display: block; 
+      }
+    </style>
 
-            {% if perms.smallstuff.view_assignedthing %}
-            <a class="btn btn-primary btn-lg" href="{% url 'smallstuff:person_search' %}">
-                Kleinkram
-            </a>
-            {% endif %}
-
-            {% if perms.core.change_inventory %}
-                <a role="button" class="btn btn-primary btn-lg" href="{% url 'inventory:inventorize-room-list' %}">
-                    Inventarisieren
-                </a>
-            {% endif %}
-
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-            <a role="button" class="btn btn-primary btn-lg" href="{% url 'admin:core_licencerecord_changelist' %}">
-                Lizenzen
-            </a>
-        </div>
-    </div>
-    
-    <hr>
-
-    <h1>Aktuelle Inventurrunde: {{ current_inventory|default:'Keine Inventurrunde angelegt.' }}</h1>
-    
-    <hr>
-
-    <div class="row">
-        <div class="col-md-4">
-            <h2>Verleihbare Notebooks</h2>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="notebook-lending-chart" width="400px" height="400px"></canvas>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <h2>Geräte nach Verbleib</h2>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="device-location-chart" width="400px" height="400px"></canvas>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <h2>Geräte nach Typ</h2>
-            <div style="padding:22px; background:#fbfbfb;">
-                <canvas id="device-type-chart" width="400px" height="400px"></canvas>
-            </div>
-        </div>
-
+    <div class="grid-container">
+        {% for tile in tiles %}
+            {{ tile }}
+        {% endfor %}
     </div>
 
+    <hr class="mt-4">
+
+    <div class="row row-stats">
+        <div class="col-md-4">
+            <h4>Geräte nach Verbleib</h4>
+            <canvas id="device-location-chart" style="max-height: 300px;"></canvas>
+        </div>
+        <div class="col-md-8">
+            <h4>Geräte nach Typ</h4>
+            <canvas id="device-type-chart" style="max-height: 300px;"></canvas>
+        </div>
+    </div>
 {% endblock %}
 
 
-{% block footer %}
-    {{ block.super }}
-    <script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
+{% block extra_js %}
+<script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const record_fraction_data = {{ record_fraction_data|safe }};
+    const device_type_data = {{ device_type_data|safe }};
 
-            const data = {{ record_fraction_data|safe }}
-            const device_type_data = {{ device_type_data|safe }}
-            const notebooks_lending_data = {{ notebooks_lending_data|safe }}
+    const options = {
+        responsive: true,
+        plugins: {
+            legend: {display: false}
+        }
+    }
 
-            const deviceLocationChart = new Chart(
-                document.getElementById("device-location-chart"), {
-                    type: 'bar',
-                    data: data,
-                    options: {responsive: true}
-            });
+    const deviceLocationChart = new Chart(
+        document.getElementById("device-location-chart"), {
+            type: 'bar',
+            data: record_fraction_data,
+            options: options,
+    });
 
-            const deviceTypeChart = new Chart(
-                document.getElementById("device-type-chart"), {
-                    type: 'bar',
-                    data: device_type_data,
-                    options: {
-                        responsive: true,
-                        legend: {
-                            display: true
-                        }
-                    }
-            })
-
-            const ntbLentChart = new Chart(
-                document.getElementById("notebook-lending-chart"), {
-                    type: 'pie',
-                    data: notebooks_lending_data,
-                    options: {responsive: true}
-            });
-
-        });
-    </script>
-{% endblock footer %}
+    const deviceTypeChart = new Chart(
+        document.getElementById("device-type-chart"), {
+            type: 'bar',
+            data: device_type_data,
+            options: options,
+    })
+});
+</script>
+{% endblock extra_js %}

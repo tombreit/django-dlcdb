@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.db import models
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
@@ -18,12 +19,14 @@ class Manager(models.Manager):
 
 
 class LostRecord(Record):
-    class Meta:
-        proxy = True
-
     objects = Manager()
 
     def save(self, **kwargs):
         self.record_type = Record.LOST
         self.room = None
         super().save(**kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Record of type 'Lost'")
+        verbose_name_plural = _("Records of type 'Lost'")

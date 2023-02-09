@@ -1,19 +1,17 @@
 {% if branding.documentation_url %}
-<button
+<a
     class="btn btn-success"
-    onclick="location.href='{{ branding.documentation_url }}'"
-    type="button"
+    href="{{ branding.documentation_url }}"
 >
     <i class="fa-solid fa-book"></i> Docs
-</button>
+</a>
 {% else %}
-<button
-    onclick="location.href='{% url 'admin:organization_branding_changelist' %}'"
+<a
+    href="{% url 'admin:organization_branding_changelist' %}"
     class="btn btn-danger"
-    type="button"
 >
     <i class="fa-solid fa-book"></i> Documentation URL not set in Organization Branding!
-</button>
+</a>
 {% endif %}
 
 <button type="button" class="btn btn-warning" title="Tenant: {{ request.tenant }}">

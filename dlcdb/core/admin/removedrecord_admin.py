@@ -2,16 +2,15 @@ from django.contrib import admin
 
 from ..models import RemovedRecord
 from ..forms.removedrecord_form import RemovedRecordAdminForm
-from .base_admin import RedirectToDeviceMixin
-from .record_admin import CustomRecordModelAdmin
+from .base_admin import RedirectToDeviceMixin, CustomBaseProxyModelAdmin
 
 
 @admin.register(RemovedRecord)
-class RemovedRecordAdmin(RedirectToDeviceMixin, CustomRecordModelAdmin):
+class RemovedRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = RemovedRecordAdminForm
     change_form_template = 'core/record/change_form.html'
-    fields = ('device', 'disposition_state', 'removed_info', 'attachments', 'get_attachments')
-    readonly_fields = ('get_attachments',)
+    fields = ('device', 'disposition_state', 'removed_info', 'attachments')
+    # readonly_fields = ('get_attachments',)
     list_display = ['device', 'get_device', 'disposition_state', 'removed_info', 'removed_date']
     list_filter = ['disposition_state', 'removed_date']
     search_fields = ['device__edv_id', 'device__sap_id', 'removed_info']
@@ -38,7 +37,18 @@ class RemovedRecordAdmin(RedirectToDeviceMixin, CustomRecordModelAdmin):
 
         return fields
 
+    @admin.display(
+        description='SAP',
+        ordering='device__sap_id',
+    )
     def get_device(self, obj):
         return obj.device.sap_id
-    get_device.short_description = 'SAP'
-    get_device.admin_order_field = 'device__sap_id'
+
+    def render_change_form(
+        self, request, context, add=False, change=False, form_url="", obj=None
+    ):
+        context.update({
+            'show_save_and_add_another': False,
+            'show_save_and_continue': False,
+        })
+        return super().render_change_form(request, context, add, change, form_url, obj)

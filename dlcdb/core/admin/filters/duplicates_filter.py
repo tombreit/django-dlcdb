@@ -4,11 +4,9 @@ from django.db.models import Count
 from dlcdb.core import models
 
 
-# admin.py
-
 class DuplicateFilter(SimpleListFilter):
-    title = 'Dupletten'
-    parameter_name = 'dupletten'
+    title = 'Dubletten'
+    parameter_name = 'dubletten'
 
     def lookups(self, request, model_admin):
         """
@@ -20,20 +18,16 @@ class DuplicateFilter(SimpleListFilter):
         """
 
         return (
-            ('sap_id', 'SAP Dupletten'),
-            ('edv_id', 'EDV-ID Dupletten'),
-            ('serial_number', 'Seriennummern Dupletten'),
-            ('nick_name', 'Nickname Dupletten'),
+            ('serial_number', 'Seriennummern Dubletten'),
+            ('nick_name', 'Nickname Dubletten'),
         )
 
     def queryset(self, request, queryset):
-
         """
         Todo: make query case-insensitive
         """
 
         if self.value():
-
             duplicate_field = self.value()
 
             field_name = [

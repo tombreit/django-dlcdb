@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.functions import Upper
+from django.utils.translation import gettext_lazy as _
 
 
 class Supplier(models.Model):
@@ -10,11 +11,18 @@ class Supplier(models.Model):
         verbose_name='Name',
         unique=True,
     )
+    contact = models.TextField(
+        blank=True,
+        help_text=_("Contact and support information: contact persons, hotlines, mail addresses etc."),
+    )
+    note = models.TextField(
+        blank=True,
+    )
 
     class Meta:
-        verbose_name = 'Zulieferer'
-        verbose_name_plural = 'Zulieferer'
+        verbose_name = _('Supplier')
+        verbose_name_plural = _('Suppliers')
         ordering = [Upper('name')]
 
     def __str__(self):
-        return '{name}'.format(name=self.name)
+        return self.name

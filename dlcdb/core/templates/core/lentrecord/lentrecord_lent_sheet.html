@@ -77,10 +77,13 @@
                 <th>Gerät</th>
                 <td>
                     <strong>
-                        {{ record.device }}, Inventar Nr.: {{ record.device.sap_id|default:'n/a' }}
+                        {{ record.device }}, Inventarnummer: {{ record.device.sap_id|default:'n/a' }}
                         {% if record.device.manufacturer or record.device.series %}
                             <br>
-                            {{ record.device.manufacturer }} {{ record.device.series }}
+                            {{ record.device.manufacturer }} {{ record.device.device_type }} {{ record.device.series }} 
+                            {% if record.device.serial_number %}
+                                ({{ record.device.serial_number }})
+                            {% endif %}
                         {% endif %}
                     </strong>
                     <br>

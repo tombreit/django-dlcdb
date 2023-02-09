@@ -31,13 +31,13 @@ class LicenceRecordAdminForm(forms.ModelForm):
 
 
 @admin.register(LicenceRecord)
-class LicenceRecordAdmin(CustomBaseModelAdmin):    
+class LicenceRecordAdmin(CustomBaseModelAdmin):
     form = LicenceRecordAdminForm
 
     search_fields = [
         'device__sap_id',
         'device__edv_id',
-        'device__manufacturer',
+        'device__manufacturer__name',
         'device__series',
         'device__serial_number',
         'person__first_name',
@@ -184,7 +184,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
     def get_device_ids(self, obj):
         return format_html(
-            '<a href="{0}" target="_blank"><strong>EDV ID: <code>{1}</code> / SAP ID: <code>{2}</code></strong></a>',
+            '<a href="{0}" target="_blank"><strong>EDV ID: <code>{1}</code> / Inventarnummer: <code>{2}</code></strong></a>',
             reverse('admin:core_device_change', args=(obj.device.pk,)),
             obj.device.edv_id,
             obj.device.sap_id,

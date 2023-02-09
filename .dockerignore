@@ -1,0 +1,14 @@
+.env
+.coverage
+.git
+.gitignore
+.pytest_cache
+.vscode
+
+Containerfile
+
+# /docs/*
+run/*
+.venv/
+node_modules/
+/temp

@@ -8,7 +8,7 @@ class LentRecordAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['person'].queryset = Person.objects.all()
+        # self.fields['person'].queryset = Person.objects.all()
 
         # Declaring some fields as required for this admin
         required_fields = [
@@ -23,10 +23,10 @@ class LentRecordAdminForm(forms.ModelForm):
                 if key in required_fields:
                     self.fields[key].required = True
 
-    person = forms.ModelChoiceField(
-        queryset=None,
-        widget=Select2Widget(),
-    )
+    # person = forms.ModelChoiceField(
+    #     queryset=None,
+    #     widget=Select2Widget(),
+    # )
 
     class Meta:
         model = LentRecord

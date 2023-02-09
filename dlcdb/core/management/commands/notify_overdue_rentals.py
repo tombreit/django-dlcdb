@@ -37,7 +37,7 @@ class Command(BaseCommand):
         # time = timezone.now().strftime('%X')
         # self.stdout.write("It's now %s" % time)
 
-        receipient_list = [settings.IT_NOTIFICATION_EMAIL]
+        receipient_list = [settings.DEFAULT_FROM_EMAIL]
         from_email = settings.SERVER_EMAIL
         changelist_url = reverse('admin:core_lentrecord_changelist')
         email_template = get_template('email/notify_overdue_device.html')

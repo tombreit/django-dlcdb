@@ -5,7 +5,7 @@ from django.conf import settings
 import huey
 from huey.contrib.djhuey import db_periodic_task, lock_task
 
-from .settings import NOTIFY_OVERDUE_LENDERS
+from .utils.email import build_report_email, send_email
 from .utils.process import create_report_if_needed, create_overdue_lenders_emails
 from .models import Notification
 
@@ -20,15 +20,21 @@ def request_notifications(huey_interval=None):
     for notification in Notification.objects.filter(time_interval=huey_interval):
         _msg1 = f"Processing notification: {notification}"
         logger.info(_msg1)
+        report = create_report_if_needed(notification.pk, caller='huey')
 
-        create_report_if_needed(notification.pk, caller='huey')
+        # Finally sent mail notifications
+        if notification.active:
+            if notification.notify_no_updates or hasattr(report, 'record_collection.records'):
+                email_objs = build_report_email(notification, report.report, report.record_collection)
+                send_email(email_objs)
 
-    # Automatically use EVERY_MINUTE when in dev mode
+    # Weekly overdue lending emails. Automatically use EVERY_MINUTE when in dev mode.
     notifiy_overdue_lenders_interval =  Notification.EVERY_MINUTE if settings.DEBUG else Notification.WEEKLY
     if all([
-        NOTIFY_OVERDUE_LENDERS,
+        settings.REPORTING_NOTIFY_OVERDUE_LENDERS,
         huey_interval == notifiy_overdue_lenders_interval,
     ]):
+        print(f"11create_overdue_lenders_emails...")
         create_overdue_lenders_emails(caller='huey')
 
 
@@ -37,7 +43,7 @@ def request_notifications(huey_interval=None):
 
 if settings.DEBUG:
     # In fact, every two minutes...
-    @db_periodic_task(huey.crontab(minute='*/2'))
+    @db_periodic_task(huey.crontab(minute='*/1'))
     @lock_task('reports-minutely-lock')
     def once_a_minute():
         request_notifications(huey_interval=Notification.EVERY_MINUTE)

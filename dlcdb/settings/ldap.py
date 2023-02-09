@@ -6,7 +6,6 @@ import ldap
 
 from django_auth_ldap.config import (
     LDAPSearch,
-    LDAPSearchUnion,
     ActiveDirectoryGroupType,
     LDAPGroupQuery,
 )
@@ -31,7 +30,7 @@ AUTH_LDAP_BIND_PASSWORD = env.str('AUTH_LDAP_BIND_PASSWORD')
 AUTHENTICATION_BACKENDS = ['django_auth_ldap.backend.LDAPBackend'] + AUTHENTICATION_BACKENDS
 AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
 AUTH_LDAP_FIND_GROUP_PERMS = True
-
+AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 
 AUTH_LDAP_GLOBAL_OPTIONS = {
     # ldap.OPT_PROTOCOL_VERSION: 3,
@@ -44,12 +43,10 @@ if env.str('SETTINGS_MODE') == 'dev':
     ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
 
 
-AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
-    LDAPSearch(
-        f"{env.str('AUTH_LDAP_USERS_DN')}",
-        ldap.SCOPE_SUBTREE,
-        "(sAMAccountName=%(user)s)",
-    ),
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    f"{env.str('AUTH_LDAP_USERS_DN')}",
+    ldap.SCOPE_SUBTREE,
+    "(sAMAccountName=%(user)s)",
 )
 
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
@@ -58,8 +55,6 @@ AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
     "(objectClass=group)"
 )
 
-AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
-AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 AUTH_LDAP_FIND_GROUP_PERMS = True
 AUTH_LDAP_CACHE_TIMEOUT = (60 * 60)
 

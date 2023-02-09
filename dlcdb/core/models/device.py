@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 
 from simple_history.models import HistoricalRecords
 
@@ -28,6 +29,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         related_name='active_device_record',
         blank=True,
         null=True,
+        db_index=True,
     )
     uuid = models.UUIDField(
         default=uuid.uuid4,
@@ -37,11 +39,18 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     # We're keeping null=True for edv_id and sap_id to ensure uniqueness 
     # checks on db level, as empty strings ('') are considered equal
-    edv_id = models.CharField(max_length=512, null=True, blank=True, unique=True, verbose_name='EDV-Nummer')
+    edv_id = models.CharField(
+        max_length=512,
+        null=True,
+        blank=True,
+        unique=True,
+        db_index=True,
+        verbose_name='EDV-Nummer',
+    )
 
     sap_id_validator =  RegexValidator(
         regex='^[0-9]+-[0-9]+$',
-        message='SAP-ID muss als Hauptnummer-Unternummer eingegeben werden.',
+        message='Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden.',
         code='invalid_sap_id'
     )
 
@@ -50,8 +59,9 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         null=True,
         blank=True,
         unique=True,
-        verbose_name='SAP-Nummer',
-        help_text='Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
+        db_index=True,
+        verbose_name=_('Inventory ID'),
+        help_text='SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
         validators=[sap_id_validator],
     )
     serial_number = models.CharField(max_length=255, null=True, blank=True, verbose_name='Seriennummer')
@@ -59,7 +69,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     manufacturer = models.ForeignKey('core.Manufacturer', on_delete=models.PROTECT, null=True, verbose_name=_('Manufacturer'))
 
     series = models.CharField(max_length=255, null=True, blank=True, verbose_name='Modelbezeichnung')
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Zulieferer')
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_('Supplier')
+    )
 
     is_licence = models.BooleanField(
         default=False,
@@ -78,9 +94,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nickname / C-Name')
     is_legacy = models.BooleanField(default=False, verbose_name='Legacy-Device')
 
-    is_lentable = models.BooleanField(default=False, verbose_name='Verleihgerät')
-    is_deinventorized = models.BooleanField(default=False, verbose_name='Deinventarisiert')
-    has_malfunction = models.BooleanField(default=False, verbose_name='Gerät defekt')
+    is_lentable = models.BooleanField(
+        default=False,
+        db_index=True,
+        verbose_name=_('Is loanable?'),
+    )
     is_imported = models.BooleanField(default=False, verbose_name='Via CSV-Import angelegt?')
     imported_by = models.ForeignKey(
         'core.ImporterList',
@@ -179,22 +197,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     @property
     def get_room(self):
         return self.active_record.room
-
-    def get_record_add_links(self):
-        """
-        Returns a list of dicts each representing an add link in order to display
-        dropdowns to create records for a given.
-        :return:
-        """
-        from . import Record
-        add_links = []
-        for db_value, verbose_name in Record.RECORD_TYPE_CHOICES:
-            add_links.append(dict(
-                db_value=db_value,
-                label=verbose_name,
-                url=Record.get_proxy_model_by_record_type(db_value).get_admin_action_url()
-            ))
-        return add_links
 
     def get_edv_id(self):
         """

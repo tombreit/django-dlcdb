@@ -4,7 +4,7 @@
 <div class="container-fluid">
   <nav class="navbar navbar-expand-lg navbar-dark">
 
-    <a class="navbar-brand" href="{% url 'core_dashboard' %}">
+    <a class="navbar-brand" href="{% url 'core:core_dashboard' %}">
         <img 
           src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/logo_acme_white.svg' %}{% endif %}"
           alt="{{ branding.organization_abbr }}"
@@ -16,118 +16,29 @@
     </button>
   
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
+      <div class="navbar-nav mr-auto">
 
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin:core_lentrecord_changelist' %}">
-                Verleihen
-            </a>
-        </li>
-
-        {% if perms.smallstuff.view_assignedthing %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'smallstuff:person_search' %}">
-              Kleinkram
-          </a>
-        </li>
-        {% endif %}
-
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'admin:core_licencerecord_changelist' %}">
-            Lizenzen
-          </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-        </li>
-    
-        <li class="nav-item dropdown">
+        {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_main" only %}
+        
+        <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Prozesse
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
-            <a class="dropdown-item" href="{% url 'admin:core_lentrecord_changelist' %}">
-                Verleihen
-            </a>
-            
-            {% if perms.core.view_inventory %}
-              <a class="dropdown-item" href="{% url 'inventory:inventorize-room-list' %}">
-                Inventarisieren
-              </a>
-              <a class="dropdown-item" href="{% url 'admin:inventory_saplist_changelist' %}">
-                Abgleichen mit SAP
-              </a>
-            {% endif %}
-
-            <a class="dropdown-item" href="{% url 'admin:core_orderedrecord_changelist' %}">
-                Beschaffen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_importerlist_changelist' %}">
-                Bulk-Importieren
-            </a>
-            {% if perms.core.add_removedrecord %}
-              <a class="dropdown-item" href="{% url 'admin:core_removerlist_changelist' %}">
-                  Bulk-Ausmustern
-              </a>
-            {% endif %}
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_processes" only %}
           </div>
-        </li>
+        </div>
 
-        <li class="nav-item dropdown">
+        <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDataDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Datenhaltung
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDataDropdown">
-            <a class="dropdown-item" href="{% url 'admin:core_device_changelist' %}">
-                Devices
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_licencerecord_changelist' %}">
-              Lizenzen
-            </a>
-
-            {% if perms.core.view_room %}
-              <a class="dropdown-item" href="{% url 'admin:core_room_changelist' %}">
-                  Räume
-              </a>
-            {% endif %}
-            
-            {% if perms.core.view_manufacturer %}
-              <a class="dropdown-item" href="{% url 'admin:core_manufacturer_changelist' %}">
-                {% translate "Manufacturer" %}
-              </a>
-            {% endif %}
-
-            <a class="dropdown-item" href="{% url 'admin:core_record_changelist' %}">
-                Records
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_removedrecord_changelist' %}">
-                Entfernt-Records
-            </a>
-
-            {% if perms.core.change_inventory %}
-              <a class="dropdown-item" href="{% url 'admin:core_inventory_changelist' %}">
-                  Inventuren
-              </a>
-            {% endif %}
-
-            <a class="dropdown-item" href="{% url 'admin:core_supplier_changelist' %}">
-                Zulieferer
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_devicetype_changelist' %}">
-                Devicetypen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_person_changelist' %}">
-                Personen
-            </a>
-            <a class="dropdown-item" href="{% url 'admin:core_note_changelist' %}">
-                Notizen
-            </a>
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_masterdata" only %}
           </div>
-        </li>
+        </div>
 
-      </ul>
+      </div>
       
       <div class="navbar-nav">
 

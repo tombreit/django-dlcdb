@@ -36,6 +36,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 
+from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
 from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentRecord, Note
@@ -112,6 +113,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
             'devices': devices,
             'current_inventory': current_inventory,
             'qrcode_prefix': settings.QRCODE_PREFIX,
+            'debug': settings.DEBUG,
             'dev_state_unknown': 'dev_state_unknown',
             'dev_state_found': 'dev_state_found',
             # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
@@ -119,6 +121,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
             'dev_state_added': 'dev_state_added',
             'form': form,
             'device_add_form': device_add_form,
+            'api_token': Token.objects.first(),
         })
         return context
 
@@ -308,8 +311,10 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             'current_inventory': current_inventory,
             'parameters': parameters,
             'qrcode_prefix': settings.QRCODE_PREFIX,
+            'debug': settings.DEBUG,
             # 'room_search_form': self.room_search_form,
             'inventory_progress': self.get_inventory_progress,
+            'api_token': Token.objects.first(),
         })
         return context
 

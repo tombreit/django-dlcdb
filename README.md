@@ -2,7 +2,7 @@
 
 *Device Live Cycle Database*
 
-The DLCDB manages the life cycle of IT assets
+The DLCDB manages the life cycle of IT assets. With a little help of a [Django](https://www.djangoproject.com/) admin interface.
 
 ⚡ Currently available only in German. Application and documentation are work in progress. ⚡
 
@@ -19,9 +19,9 @@ The DLCDB manages the life cycle of IT assets
 
 ## 👉 Getting started
 
-The DLCD works with [Python 3](https://www.python.org/downloads/) and [nodejs](https://nodejs.org/en/download/), on Debian Linux.
+The DLCD is a Django project, works with [Python 3](https://www.python.org/downloads/) and [nodejs](https://nodejs.org/en/download/) on Debian Linux.
 
-To get started using the DLCDB, run the following in a virtual environment (development setup, not to be used in production):
+To get started using the DLCDB, run the following in a virtual python environment (development setup, not to be used in production):
 
 ```bash
 npm install

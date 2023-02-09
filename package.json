@@ -13,13 +13,14 @@
     "inventory_distdir": "dlcdb/static/dist/inventory",
     "lending_srcdir": "frontend/lending",
     "lending_distdir": "dlcdb/static/dist/lending",
-    "common_distdir": "dlcdb/static/dist/common"
+    "common_distdir": "dlcdb/static/dist/common",
+    "docs_distdir": "docs/_static/vendor"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^6.3.0",
     "@ttskch/select2-bootstrap4-theme": "^1.5.2",
-    "bootstrap": "^4.6.1",
-    "bootswatch": "^4.6.1",
+    "bootstrap": "^4.6.2",
+    "bootswatch": "^4.6.2",
     "bundle-js": "^1.0.3",
     "chart.js": "^4.2.0",
     "htmx.org": "^1.8.5",
@@ -34,7 +35,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prod": "npm-run-all scss:prod scss:print js:prod common-font:copy-fontawesome common-js:copy-chartjs lending-prod inventory-prod",
+    "prod": "npm-run-all scss:prod scss:print js:prod common-font:copy-fontawesome common-js:copy-chartjs lending-prod inventory-prod docs:copy-mermaid",
     "scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_core_srcdir/scss:$npm_package_config_core_distdir/css",
     "scss:print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_core_srcdir/scss/print.scss:$npm_package_config_core_distdir/css/print.css",
     "js:prod": "npm-run-all js:bundle",
@@ -55,7 +56,8 @@
     "lending-scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_lending_srcdir/scss:$npm_package_config_lending_distdir/css",
     "lending-font:copy-fontawesome": "mkdir -p $npm_package_config_lending_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_lending_distdir/fonts/fontawesome/",
     "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/",
-    "htmx:copy-htmx": "mkdir -p $npm_package_config_lending_distdir/js && cp node_modules/htmx.org/dist/htmx.min.js $npm_package_config_lending_distdir/js/"
+    "htmx:copy-htmx": "mkdir -p $npm_package_config_lending_distdir/js && cp node_modules/htmx.org/dist/htmx.min.js $npm_package_config_lending_distdir/js/",
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docs_distdir/mermaid/"
   },
   "repository": {
     "type": "https",

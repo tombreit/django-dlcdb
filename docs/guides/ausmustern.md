@@ -1,24 +1,5 @@
 # Ausmustern
 
-<style>
-/* Experimenting with styles from 
-   https://myst-parser.readthedocs.io/en/latest/
-*/
-
-
-details {
-    margin-bottom: 0.5em;
-}
-
-summary {
-    margin-bottom: 1em;
-    font-size: larger;
-    font-weight: bold; 
-}
-
-</style>
-
-
 ## Ziel
 
 Geräte, die nicht mehr existieren, verschrottet oder verkauft sind sind in der DLCDB kenntlich zu machen. Hierzu müssen die Geräte bzw. Records identifiziert (gesucht) werden und deren Status entsprechend gesetzt werden.
@@ -32,8 +13,8 @@ Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration 
 
 ## Prozess
 
-<details>
-<summary>Device</summary>
+
+`````{dropdown} Device
 
 URL: https://fqdn/admin/core/device/
 
@@ -42,11 +23,10 @@ URL: https://fqdn/admin/core/device/
 1. Verbleib nach Ausmusterung via Dropdown angeben
 1. Notiz (*removed_info*) angeben: z.B. "veraltet", "Speichermedium sicher gelöscht" etc.
 
-</details>
+`````
 
 
-<details>
-<summary>RecordAdmin</summary>
+`````{dropdown} RecordAdmin
 
 URL: https://fqdn/admin/core/record/
 
@@ -60,25 +40,21 @@ URL: https://fqdn/admin/core/record/
 1. Gewünschte Records markieren (Checkbox in erster Spalte).
 1. Admin-Action in Dropdown-Menü auswählen und ausführen.
 
-</details>
+`````
 
 
-<details>
-<summary>RemovedRecordAdmin</summary>
+`````{dropdown} RemovedRecordAdmin
 
 URL: https://fqdn/admin/core/removedrecord/
 
-</details>
+`````
 
-<details>
-<summary>CSV-Bulk-Removal</summary>
-
+`````{dropdown} CSV-Bulk-Removal
 
 * Es sollen viele Devices auf einmal entfernt/ausgemustert werden.
 * Diese Devices werden in einer CSV-Datei mit eventuell weiteren Attributen erfasst.
-
   * *Hinweis:* Eine existierende CSV-Removal-Datai nutzen und mit neuen Daten füllen.
 * Die CSV-Datei wird von der DLCDB eingelesen und die entsprechende Aktion (Record auf "REMOVED" setzen) wird für alle Devices ausgeführt.
 * Die DLCDB git eine Zusammenfassung der Vorgänge aus.
 
-</details>
+`````

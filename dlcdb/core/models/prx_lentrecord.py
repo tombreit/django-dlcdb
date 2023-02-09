@@ -17,9 +17,8 @@ class LentRecordManager(models.Manager):
 
         non_lentable_filter = Q(
             Q(record_type=Record.REMOVED) |
-            Q(record_type=Record.LOST) |
-            Q(device__is_licence=True) |
-            Q(device__has_malfunction=True)
+            # Q(record_type=Record.LOST) |
+            Q(device__is_licence=True)
         )
 
         qs = (
@@ -123,5 +122,5 @@ class LentRecord(Record):
 
     class Meta:
         proxy = True
-        verbose_name = 'Ausleih-Record'
-        verbose_name_plural = 'Ausleih-Records'
+        verbose_name = _("Lending")
+        verbose_name_plural = _("Lendings")

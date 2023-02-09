@@ -1,6 +1,5 @@
-from django.db.models import Count, Q
+from django.db.models import Count
 
-from .models.record import Record
 from .models.device import Device
 from .models.device_type import DeviceType
 
@@ -88,19 +87,3 @@ def get_devices_by_series_data():
     for elem in qs:
         data['labels'].append(elem['series'])
         data['datasets'][0]['data'].append(elem['count'])
-
-
-def get_notebooks_lending_data():
-    # all_ntbs = LentRecord.objects.filter(device__device_type__prefix="ntb").count()
-    assigned_ntbs = LentRecord.objects.filter(device__device_type__prefix="ntb").filter(record_type=Record.LENT).count()
-    not_assigned_ntbs = LentRecord.objects.filter(device__device_type__prefix="ntb").filter(~Q(record_type=Record.LENT)).count()
-
-    data = dict(labels=[], datasets=[dict(label='Freie Notebooks', data=[], backgroundColor=["orange", "red"])],)
-
-    _labels = ['NTBs verliehen', 'NTBs verfügbar']
-
-    data['labels'].extend(_labels)
-    data['datasets'][0]['data'].extend([assigned_ntbs, not_assigned_ntbs])
-
-    return data
-

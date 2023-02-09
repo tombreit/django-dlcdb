@@ -1,16 +1,25 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .abstracts import SoftDeleteAuditBaseModel
 
 
 class DeviceType(SoftDeleteAuditBaseModel):
-    name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Name')
-    prefix = models.CharField(max_length=255, null=True, blank=True, verbose_name='Präfix')
-
+    name = models.CharField(
+        max_length=255,
+        blank=False,
+    )
+    prefix = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+    note = models.TextField(
+        blank=True,
+    )
     class Meta:
         ordering = ('name',)
-        verbose_name = 'Gerätetyp'
-        verbose_name_plural = 'Gerätetypen'
+        verbose_name = _('Device Type')
+        verbose_name_plural = _('Device Types')
 
     def __str__(self):
         return self.name

@@ -82,10 +82,14 @@ Be sure to use one of the production requirement files:
 :::
 
 :::{tip}
-Speed up your sqlite (one off command):
+Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html) (one off command):
 
 `sqlite3 run/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
 :::
+
+### Backup
+
+Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `run/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `run/` sowie - falls vorhanden - die Datei `.env` zu sichern.
 
 ### Task runner
 
@@ -116,6 +120,7 @@ $ sudo loginctl user-status USERNAME
 $ *login via USERNAME*
 $ export XDG_RUNTIME_DIR="/run/user/$UID"
 $ export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+$ systemctl --user daemon-reload
 $ systemctl --user enable dlcdb_huey.service
 $ systemctl --user restart dlcdb_huey.service
 $ systemctl --user status dlcdb_huey.service
@@ -130,6 +135,7 @@ source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements/requirements-prod-ldap.txt
 python manage.py collectstatic --noinput
+python manage.py compilemessages -l de
 python manage.py migrate --noinput
 systemctl --user restart dlcdb_huey.service
 touch dlcdb/wsgi.py
@@ -147,10 +153,7 @@ make -C docs html
         Require all granted
     </Directory>
 
-    Alias /static /path/to/run/staticfiles
-    <Directory /path/to/run/staticfiles>
-        Require all granted
-    </Directory>
+    # staticfiles are handled by the Django app via whitenoise
 
     Alias /media path/to/run/media
     <Directory path/to/run/media>

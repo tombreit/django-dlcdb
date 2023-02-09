@@ -4,15 +4,19 @@ import re
 from io import BytesIO
 from collections import namedtuple
 
+from collections.abc import Generator
+from contextlib import contextmanager
+from django.db.transaction import atomic
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html
-from django.template import Context, Template
 
 from PIL import Image
 
 from ..models import Device, Record
+
 
 logger = logging.getLogger(__name__)
 
@@ -96,21 +100,58 @@ def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
         raise e
 
 
-def get_has_note_badge(*, obj_type, level, has_note):
-    if obj_type not in ["device", "record"]:
-        raise NotImplementedError
+def get_icon_for_class(class_name):
+    icon = ""
 
-    type_icon = ""
-    note_icon = "fa-solid fa-comment" if has_note else "fa-solid fa-xmark"
+    try:
+        icon = settings.THEME[class_name]["ICON"]
+    except KeyError:
+        pass
 
-    if obj_type == "record":
-        type_icon = settings.THEME["RECORD"]["ICON"]
-    elif obj_type == "device":
-        type_icon = settings.THEME["DEVICE"]["ICON"]
+    return icon
+
+
+def get_has_note_badge(*, obj_type, has_note):
+    # if obj_type not in ["device", "record", "room", "device_type", "lent_record"]:
+    #     raise NotImplementedError
+
+    level = "light"
+    note_icon = "fa-regular fa-comment"
+    text = "No notes"
+    type_icon = None
+
+    if has_note:
+        note_icon = "fa-solid fa-comment"
+        level = "warning"
+        text = "Notes exists"
+        type_icon = get_icon_for_class(obj_type)
 
     return format_html(
-        '<span title="Record Notes exists" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
+        '<span title="{text}" class="ml-2 p-1 badge badge-{level}"><i class="mr-2 fa-lg {type_icon}"></i><i class="fa-lg {note_icon}"></i></span>',
         type_icon=type_icon,
         note_icon=note_icon,
         level=level,
+        text=text,
     )
+
+
+class DoRollback(Exception):
+    """
+    Dry-run mode
+    https://adamj.eu/tech/2022/10/13/dry-run-mode-for-data-imports-in-django/
+    """
+    pass
+
+
+@contextmanager
+def rollback_atomic() -> Generator[None, None, None]:
+    """
+    Dry-run mode
+    https://adamj.eu/tech/2022/10/13/dry-run-mode-for-data-imports-in-django/
+    """
+    try:
+        with atomic():
+            yield
+            raise DoRollback()
+    except DoRollback:
+        pass

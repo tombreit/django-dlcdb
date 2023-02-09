@@ -1,10 +1,11 @@
-from datetime import datetime
+import datetime
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from .abstracts import AuditBaseModel
 from .device import Device
@@ -67,6 +68,11 @@ class Record(AuditBaseModel):
         default=False,
         db_index=True,
         verbose_name='Aktiv',
+    )
+    effective_until = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Replaced by the next record at this timestamp."
     )
 
     # todo: implement field validator for record_type: must be one of...
@@ -132,7 +138,7 @@ class Record(AuditBaseModel):
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_lent_desired_end_date",
-                check=Q(lent_desired_end_date__lte=datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, '%Y-%m-%d')),
+                check=Q(lent_desired_end_date__lte=datetime.datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, '%Y-%m-%d')),
             )
         ]
 
@@ -158,15 +164,28 @@ class Record(AuditBaseModel):
         # set is active if instance is created
         is_new_record = self._state.adding
         if is_new_record:
-            # set all existing records to non active
-            Record.objects.filter(device=self.device).update(is_active=False)
-            # set current record as active
+            # Set all existing records to non active
+            # qs.update() does not call the custom save method, does not
+            # emit any signals and did not update the auto_now field so we
+            # need to explictly set the modified_at field.
+            # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#django.db.models.query.QuerySet.update
+            Record.objects.filter(device=self.device).update(
+                is_active=False,
+                effective_until=timezone.now(),
+            )
+
+            # As an alternative to qs.update():
+            # for device_record in Record.objects.filter(device=self.device):
+            #     if device_record.is_active == True:
+            #         device_record.is_active == False
+            #         device_record.save()
+
+            # Set current record as active
             self.is_active = True
 
         super().save(*args, **kwargs)
         if is_new_record:
             self.update_active_record_on_device()
-
 
     def get_proxy_instance(self):
         """

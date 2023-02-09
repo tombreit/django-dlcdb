@@ -1,12 +1,17 @@
 import csv
 import datetime
+from django.db.models import Q
 from django.contrib import admin
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.utils import timezone, dateformat
+from django.db.models import Count
+from django.utils.http import urlencode
+from django.utils.html import format_html
+from django.urls import reverse
 
+from ..models import Device, Room, DeviceType, Supplier, Manufacturer
 from ..utils.helpers import get_denormalized_user
-
 
 
 class CustomBaseModelAdmin(admin.ModelAdmin):
@@ -44,6 +49,39 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
             instance.user, instance.username = get_denormalized_user(request.user)
             instance.save()
         formset.save_m2m()
+
+
+class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        if obj: 
+            print("editing an existing object")
+            readonly_fields = tuple(readonly_fields) + ('device', 'room')
+
+        return readonly_fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+ 
+        _device = request.GET.get('device', None)
+
+        if _device:
+            form.base_fields['device'].initial = _device
+
+        if not obj:
+            form.base_fields['device'].disabled = False
+
+        return form
+
+    def add_view(self, request, form_url='', extra_context=None):
+        device_id = request.GET.get('device')
+        extra_context = extra_context or {}
+
+        if device_id:
+            device = Device.objects.get(id=device_id)
+            extra_context['device'] = device
+
+        return super().add_view(request, form_url, extra_context=extra_context)
 
 
 class SoftDeleteModelAdmin(admin.ModelAdmin):
@@ -167,3 +205,65 @@ class ExportCsvMixin:
         # self.message_user(request, f'Export file "{filename}" created.', messages.SUCCESS)
 
         return response
+
+
+class DeviceCountMixin:
+    """
+    Adds the count of devices for the given related model to the queryset
+    and displays them as in Django admins list_display.
+    With some inspiration from https://forum.djangoproject.com/t/creating-an-admin-mixin-for-a-basemodel/11120
+    """
+
+    def get_list_display(self, request):
+        list_display = list(super().get_list_display(request))  # we could get lists or tuples
+        if not 'get_assets_count' in list_display:
+            list_display.append('get_assets_count')
+        return list(list_display)
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+
+        if self.model == Room:
+            queryset = queryset.annotate(
+                _assets_count=Count("record", distinct=True,
+                    filter=Q(record__is_active=True)
+                ),
+            )
+        else:
+            queryset = queryset.annotate(
+                _assets_count=Count("device", distinct=True),
+            )
+
+        return queryset
+
+    @admin.display(
+        description='Assets',
+        ordering='-_assets_count',
+    )
+    def get_assets_count(self, obj):
+        query_key = None
+
+        if self.model == Room:
+            query_key = "active_record__room__id__exact"
+        elif self.model == DeviceType:
+            query_key = "device_type__id__exact"
+        elif self.model == Manufacturer:
+            query_key = "manufacturer__id__exact"
+        elif self.model == Supplier:
+            query_key = "supplier__id__exact"
+            
+        if query_key:
+            result = format_html(
+                '<a class="badge badge-info" href="{url}?{query_kwargs}">{count}</a>',
+                url=reverse('admin:core_device_changelist'),
+                query_kwargs=urlencode({query_key: obj.pk}),
+                count=obj._assets_count,
+            )
+        else:
+            result = format_html(
+                '<span class="badge badge-info">{count}</span>',
+                count=obj._assets_count,
+            )
+
+        return result
+

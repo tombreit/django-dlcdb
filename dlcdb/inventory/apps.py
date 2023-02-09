@@ -4,3 +4,22 @@ from django.apps import AppConfig
 class InventoryConfig(AppConfig):
     name = 'dlcdb.inventory'
     verbose_name = 'DLCDB Inventory'
+
+    nav_entries = [
+        {
+            'slot': 'nav_processes',
+            'order': 40,
+            'label': 'Inventarisieren',
+            'icon': '',
+            'url': 'inventory:inventorize-room-list',
+            'required_permission': 'true',
+        },
+        {
+            'slot': 'nav_processes',
+            'order': 50,
+            'label': 'Abgleichen mit SAP',
+            'icon': '',
+            'url': 'admin:inventory_saplist_changelist',
+            'required_permission': 'true',
+        },
+    ]

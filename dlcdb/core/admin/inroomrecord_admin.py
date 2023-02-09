@@ -1,50 +1,51 @@
 from django.contrib import admin
+from django.contrib import messages
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 
-from ..models import InRoomRecord, Device
-from ..forms.inroomrecordadmin_form import InroomRecordAdminForm
-from .base_admin import CustomBaseModelAdmin, RedirectToDeviceMixin
+from ..models import InRoomRecord, Room
+from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
+from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 
 
 @admin.register(InRoomRecord)
-class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseModelAdmin):
-    form = InroomRecordAdminForm
+class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
+    form = ProxyRecordAdminForm
     change_form_template = 'core/inroomrecord/change_form.html'
-    list_display = ['device', 'created_at', 'note']
-    fields = ('device', 'room', 'note')
+    list_display = [
+        'device',
+        'created_at',
+        'note',
+    ]
+    fields = [
+        'device',
+        'room',
+        'note',
+    ]
 
     autocomplete_fields = [
         'room',
     ]
 
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
-        if obj: 
-            print("editing an existing object")
-            readonly_fields = tuple(readonly_fields) + ('device', 'room')
-
-        return readonly_fields
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
- 
-        _device = request.GET.get('device', None)
-
-        if _device:
-            form.base_fields['device'].initial = _device
-
-        if not obj:
-            form.base_fields['device'].disabled = True
-
-        return form
-
-    def add_view(self, request, form_url='', extra_context=None):
-        device_id = request.GET.get('device')
-        device = Device.objects.get(id=device_id)
-        extra_context = extra_context or {}
-        extra_context['localize_device'] = device
-        return super().add_view(
-            request, form_url, extra_context=extra_context,
-        )
-
     def has_add_permission(self, request):
         return True
+
+    def response_add(self, request, obj, post_url_continue=None):
+        if '_save' in request.POST:
+            redirect_url = reverse('admin:core_device_changelist')
+            device = obj.device
+            room = Room.objects.get(pk=request.POST.get("room"))
+            messages.success(request, f'Raumänderung nach Raum “{room}” für Device “{device}” durchgeführt.')
+            return HttpResponseRedirect(redirect_url)
+        else:
+            return super().response_change(request, obj, post_url_continue=post_url_continue)
+
+    def render_change_form(
+        self, request, context, add=False, change=False, form_url="", obj=None
+    ):
+        context.update({
+            'show_save_and_add_another': False,
+            'show_save_and_continue': False,
+        })
+        return super().render_change_form(request, context, add, change, form_url, obj)
+

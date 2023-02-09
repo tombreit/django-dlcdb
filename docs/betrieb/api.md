@@ -22,13 +22,13 @@
      -
    * - Filter Devices by EDV-ID
      - https://fqdn/api/v2/devices/?edv_id=NTB1146
-     - *Hinweis: Filter-String muss exakt angegeben werden!*
+     - *Note: Filter string must be an exact match.*
    * - Search Devices
      - https://fqdn/api/v2/devices/?search=ntb1146
      -
    * - Persons with devices lent
      - https://fqdn/api/v2/persons/
-     - filterable via ``?first_name=&last_name=&email=``
+     - Filterable via ``?first_name=&last_name=&email=``
 ```
 
 ## Token Authentication
@@ -48,3 +48,9 @@ apiuser.save()
 # Generate token for that user:
 Token.objects.create(user=apiuser)
 ```
+
+:::{note}
+In your queries the token must be present via HTTP header, e.g.:
+
+`Authorization: Token 9949899m0980f9418ad8464c345x4x4ee4b`
+:::

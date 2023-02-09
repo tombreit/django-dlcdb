@@ -29,10 +29,6 @@ caption {
     @extend .h3;
 }
 
-#changelist-filter h3 {
-    font-size: 1em;
-}
-
 .object-tools a.addlink {
     @extend .btn;
     @extend .btn-primary;
@@ -74,6 +70,14 @@ input.btn-light,
 a.btn-light {
     @extend .btn-light;
 }
+input.btn-danger,
+a.btn-danger {
+    @extend .btn-danger;
+}
+
+a.badge-info {
+    @extend .badge-info
+}
 
 fieldset.collapse:not(.show), 
 fieldset.collapsed:not(.show) {
@@ -103,8 +107,8 @@ fieldset.collapsed:not(.show) {
 #branding { display: none; }
 
 // ...but re-enable django admin branding for login and logout pages
-body.login #branding, 
-body[class=""] #branding { 
+body.login #branding,
+body.logout #branding { 
     display: block; 
 }
 
@@ -133,4 +137,8 @@ tr.licence-state-40-lent,
 tr.lent-state-40-lent {
     @extend .text-muted;
     @extend .bg-light;
+}
+
+ul.messagelist li {
+    margin: 0;
 }

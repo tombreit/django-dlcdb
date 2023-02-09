@@ -2,21 +2,21 @@
 
 
 {% block content_title %}
-    <h1>Raumzuweisung Device {{localize_device}}</h1>
+    <h1>{{ opts.verbose_name }} für Device {{ device }} hinzufügen</h1>
 {% endblock %}
 
 
 {% block content %}
-    {% if localize_device.get_is_currently_lented %}
+    {% if device.get_is_currently_lented %}
     <div class="alert alert-danger">
         <p>
-            Device {{ localize_device }} ist aktuell verliehen an {{ localize_device.get_person }}.
+            Device <b>{{ device }}</b> ist aktuell verliehen an <b>{{ device.get_person }}</b>.
         </p>
         <p>
-            Wenn dieses Device jetzt lokalisiert wird, wird der aktuelle Verleih beendet!
+            Wenn dieses Device jetzt lokalisiert wird, <b>wird der aktuelle Verleih beendet!</b>
         </p>
         <p>
-            Eine Raumänderung für den aktuellen Verleih ist über die <a href="{% url "admin:core_lentrecord_change" localize_device.active_record.pk %}">Verleihansicht</a> durchzuführen.
+            Eine Raumänderung für den aktuellen Verleih ist über die <a href="{% url "admin:core_lentrecord_change" device.active_record.pk %}"><b>Verleihansicht</b></a> durchzuführen.
         </p>
     </div>
     {% endif %}

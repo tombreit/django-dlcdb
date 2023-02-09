@@ -10,6 +10,8 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static 'dist/core/css/app.css' %}" />
     <link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.min.css' %}">
+
+    {% block extra_css %}{% endblock %}
 {% endblock %}
 
 
@@ -32,7 +34,7 @@
 
 {% block nav-global %}
     {% if not is_popup %}
-        {% if user.is_staff and user.is_authenticated %}
+        {% if user.is_authenticated and user.is_staff %}
             {% include 'admin/navbar.html' %}
         {% endif %}
     {% endif %}
@@ -47,7 +49,7 @@
     <script src="{% static 'admin/js/vendor/select2/select2.full.min.js' %}"></script>
     <script src="{% static 'dist/core/js/app.js' %}"></script>
     <script>
-        $('.list-filters select').select2()
+        $('.list-filter-select2 select').select2()
         // init bootstrap tooltips and popovers
         $(function () {
           $('[data-toggle="popover"]').popover()
@@ -56,4 +58,5 @@
           $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
+    {% block extra_js %}{% endblock %}
 {% endblock footer %}

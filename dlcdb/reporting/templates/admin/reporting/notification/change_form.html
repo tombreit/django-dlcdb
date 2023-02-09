@@ -1,35 +1,33 @@
 {% extends 'admin/change_form.html' %}
 
-{% block submit_buttons_top %}
+
+{% block object-tools %}
+    <style>
+        .admin-btn-primary {
+            color: white !important;
+            background: var(--primary) !important;
+        }
+    </style>
     {{ block.super }}
-    <div class="submit-row">
+{% endblock object-tools %}
 
-        <style>
-            .admin-btn {
-                border: none;
-                border-radius: 4px;
-                color: white !important;
-                background: var(--button-bg);
-                padding: 10px 15px;
-                margin: 0 0 0 10px;
-                height: 35px;
-                line-height: 15px;
-            }
-        </style>
 
+{% block object-tools-items %}
+    <li>
         {% if original.id %}
             <a 
-                class="admin-btn" 
+                class="admin-btn-primary"
                 href="{% url 'admin:trigger-report' original.id %}"
             >
                 &rarr; Trigger ad hoc report
             </a>
         {% else %}
-            <span class="admin-btn">
+            <span 
+                class="admin-btn-primary"
+            >
                 <i>Trigger ad hoc report. Please save notification first.</i>
             </span>
         {% endif %}
-
-
-    </div>
-{% endblock %}
+    </li>
+    {{ block.super }}
+{% endblock object-tools-items %}

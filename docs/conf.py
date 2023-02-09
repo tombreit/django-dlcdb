@@ -1,26 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import os
 import sys
 import django
 from django.conf import settings
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath(".."))
 
-# Add node_modules/.bin path to path. Only used for mermaid cli atm.
-node_bin_path = os.path.abspath('../node_modules/.bin')
-sys.path.append(node_bin_path)
+# # Add node_modules/.bin path to path. Only used for mermaid cli atm.
+# node_bin_path = os.path.abspath('../node_modules/.bin')
+# sys.path.append(node_bin_path)
 
-
-sys.path.insert(0, os.path.abspath('..'))
+# A minimal .env with production settings is created for gitlab pages
+# see .gitlab.ci.yml
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
-
-settings.configure(
-    DEBUG=False,
-)
 django.setup()
-
 
 # -- General configuration ------------------------------------------------
 
@@ -35,6 +29,7 @@ extensions = [
     'sphinxcontrib.mermaid',
     # 'sphinx.ext.autosectionlabel',  # sphinx WARNING: duplicate label foo other instance in bar
     'myst_parser',
+    'sphinx_design',
     # 'linkify',
 ]
 
@@ -81,11 +76,19 @@ todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
+# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
+# Use local hosted version for mermaid.js; see html_js_files
+mermaid_version = ""
+
 html_theme = "sphinx_book_theme"
 html_static_path = ['_static']
 
 html_css_files = [
     'css/custom.css',
+]
+
+html_js_files = [
+   'vendor/mermaid/mermaid.min.js',
 ]
 
 html_theme_options = {

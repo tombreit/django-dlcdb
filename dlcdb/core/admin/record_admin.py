@@ -72,6 +72,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         'has_note',
         'user',
         'created_at',
+        'effective_until',
         # 'modified_at',
     ]
     list_filter = [
@@ -99,7 +100,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
     ordering = ('-created_at',)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('device', 'room')
+        return super().get_queryset(request).select_related('device', 'room', 'user')
 
     def has_add_permission(self, request):
         return False
@@ -116,8 +117,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     @admin.display(description='Has Note?')
     def has_note(self, obj):
-        level = "warning" if obj.note else "light"
-        return get_has_note_badge(obj_type="record", level=level, has_note=obj.note)
+        return get_has_note_badge(obj_type="core.record", has_note=obj.note)
 
     @admin.display(description='Type')
     def get_change_link_display(self, obj):

@@ -1,8 +1,8 @@
 from django import forms
 from ..models import Record
+from .proxyrecord_admin_form import ProxyRecordAdminForm
 
-
-class RemovedRecordAdminForm(forms.ModelForm):
+class RemovedRecordAdminForm(ProxyRecordAdminForm):
 
     def clean(self):
         device = self.cleaned_data['device']
