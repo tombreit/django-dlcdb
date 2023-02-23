@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .abstracts import AuditBaseModel
 from .device import Device
@@ -18,13 +19,15 @@ from .inventory import Inventory
 SOLD = 'SLD'
 SCRAPPED = 'SCR'
 SURRENDERED = 'SRD'
+STOLEN = 'STL'
 DUPLICATE = 'DPL'
 
 DEVICE_DISPOSITION_CHOICES = [
-    (SOLD, 'verkauft'),
-    (SCRAPPED, 'verschrottet'),
-    (SURRENDERED, 'abgegeben'),
-    (DUPLICATE, 'Duplikat'),
+    (SOLD, _('Sold')),
+    (SCRAPPED, _('Scrapped')),
+    (SURRENDERED, _('Surrendered')),
+    (STOLEN, _('Stolen')),
+    (DUPLICATE, _('Duplicate')),
 ]
 
 
@@ -56,7 +59,7 @@ class Record(AuditBaseModel):
         (INROOM, 'LOKALISIERT'),
         (LENT, 'VERLIEHEN'),
         (LOST, 'NICHT AUFFINDBAR'),
-        (REMOVED, 'ENTFERNT')
+        (REMOVED, 'ENTFERNT'),
     ]
 
     device = models.ForeignKey(
@@ -120,7 +123,7 @@ class Record(AuditBaseModel):
         max_length=3,
         choices=DEVICE_DISPOSITION_CHOICES,
         blank=True,
-        verbose_name='Verbleib nach der Ausmusterung',
+        verbose_name=_('Whereabouts after decommissioning'),
     )
     removed_info = models.TextField(null=True, blank=True, verbose_name='Verbleib (removed_info)')
     removed_date = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Entfernt am')

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-02 10:54+0100\n"
-"PO-Revision-Date: 2023-02-02 10:56+0100\n"
+"POT-Creation-Date: 2023-02-23 10:21+0100\n"
+"PO-Revision-Date: 2023-02-23 10:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -180,6 +180,30 @@ msgstr "Record vom Typ \"Nicht auffindbar\""
 msgid "Records of type 'Lost'"
 msgstr "Records vom Typ \"Nicht auffindbar\""
 
+#: dlcdb/core/models/record.py:26
+msgid "Sold"
+msgstr "Verkauft"
+
+#: dlcdb/core/models/record.py:27
+msgid "Scrapped"
+msgstr "Verschrottet"
+
+#: dlcdb/core/models/record.py:28
+msgid "Surrendered"
+msgstr "Abgegeben"
+
+#: dlcdb/core/models/record.py:29
+msgid "Stolen"
+msgstr "Gestohlen"
+
+#: dlcdb/core/models/record.py:30
+msgid "Duplicate"
+msgstr "Duplikat"
+
+#: dlcdb/core/models/record.py:126
+msgid "Whereabouts after decommissioning"
+msgstr "Verbleib nach der Ausmusterung"
+
 #: dlcdb/core/models/room.py:90
 msgid "Room"
 msgstr "Raum"
@@ -202,7 +226,7 @@ msgstr "Nein, bitte zurück"
 
 #: dlcdb/core/templates/core/lentrecord/change_list.html:10
 msgid "Checklist"
-msgstr ""
+msgstr "Checklist"
 
 #: dlcdb/organization/models.py:25 dlcdb/organization/models.py:32
 msgid "A Company that Makes Everything"
