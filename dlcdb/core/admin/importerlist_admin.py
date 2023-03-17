@@ -18,12 +18,27 @@ class ImporterListAdmin(admin.ModelAdmin):
         'MAINTENANCE_CONTRACT_EXPIRATION_DATE',
     ]
 
-    fields = (
-        'file',
-        'note',
-        'messages',
-        'created_at',
-        'modified_at',
+    fieldsets = (
+        (None, {
+            'fields': (
+                'file',
+                'note',
+            )
+        }),
+        ('Import (specified)', {
+            'classes': ('collapse',),
+            'fields': (
+                'import_format',
+                'tenant',
+            ),
+        }),
+        (None, {
+            'fields': (
+                'messages',
+                'created_at',
+                'modified_at',
+            )
+        }),
     )
 
     readonly_fields = (
@@ -56,8 +71,14 @@ class ImporterListAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
-        # print("Final import_data...")
-        result = import_data(obj.file, importer_inst_pk=obj.pk, valid_col_headers=obj.VALID_COL_HEADERS, write=True)
+        result = import_data(
+            obj.file,
+            importer_inst_pk=obj.pk,
+            valid_col_headers=obj.VALID_COL_HEADERS,
+            import_format=obj.import_format,
+            tenant=obj.tenant,
+            write=True,
+        )
         plaintext_messages = [
             result.imported_devices_count,
             "\n".join(result.success_messages),

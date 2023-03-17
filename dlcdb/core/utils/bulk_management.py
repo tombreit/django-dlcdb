@@ -4,6 +4,7 @@ Importer für Device-Listen im CSV-Format
 
 import csv
 import io
+from io import StringIO
 import codecs
 import magic
 import string
@@ -21,6 +22,8 @@ from django.apps import apps
 
 from ..models import Device, Room, Record
 from .helpers import get_device, rollback_atomic
+from .sap_converter import convert_raw_sap_export
+
 
 # https://docs.djangoproject.com/en/4.1/topics/db/instrumentation/
 from django.db import connection
@@ -408,14 +411,26 @@ def create_devices(rows, importer_inst_pk=None, write=False):
     return device_objs
 
 
-def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=False):
-    
+def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False):
+    from ..models import ImporterList
+
+    print(f"csvfile before: {type(csvfile)=}")
+
+    if import_format == ImporterList.ImportFormatChoices.INTERNALCSV:
+        csvfile.seek(0)
+        csvfile = StringIO(csvfile.read().decode('utf-8'))
+    elif import_format == ImporterList.ImportFormatChoices.SAPCSV:
+        csvfile = convert_raw_sap_export(csvfile, tenant, valid_col_headers)
+    else:
+        raise ValidationError("Import format not specified.")
+
+    print(f"csvfile after: {type(csvfile)=}")
+
     ImporterMessages = namedtuple("ImporterMessages", [
         "success_messages",
         "imported_devices_count",
     ])
     success_messages = []
-    print(type(csvfile))
 
     if write:
         atomic_context = atomic()
@@ -425,11 +440,12 @@ def import_data(csvfile, importer_inst_pk=None, valid_col_headers=None, write=Fa
     with atomic_context:
         csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
         rows = csv.DictReader(
-            codecs.iterdecode(csvfile, 'utf-8'),
+            # codecs.iterdecode(csvfile, 'utf-8'),
+            csvfile,
             dialect='custom_dialect',
         )
 
-        validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
+        # validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
 
         # https://cs205uiuc.github.io/guidebook/python/csv.html
         rows = [row for row in rows]

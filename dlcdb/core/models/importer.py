@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class ImporterList(models.Model):
@@ -30,6 +31,10 @@ class ImporterList(models.Model):
         'PERSON',
     ]
 
+    class ImportFormatChoices(models.TextChoices):
+        INTERNALCSV = 'INTCSV', _('Internal (CSV)')
+        SAPCSV = 'SAPCSV', _('SAP (CSV)')
+
     file = models.FileField(
         upload_to='imported_csv',
         verbose_name='CSV-Datei',
@@ -39,6 +44,18 @@ class ImporterList(models.Model):
         null=True,
         blank=True,
         verbose_name='Anmerkung',
+    )
+    import_format = models.CharField(
+        max_length=10,
+        choices=ImportFormatChoices.choices,
+        default=ImportFormatChoices.INTERNALCSV,
+        help_text=f"Specifiy the format of the import file. Currently officially supported is only '{ImportFormatChoices.INTERNALCSV},'."
+    )
+    tenant = models.ForeignKey(
+        "tenants.tenant",
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="Import as given tenant."
     )
     messages = models.TextField(
         blank=True,
