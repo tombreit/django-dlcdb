@@ -285,6 +285,8 @@ def create_fk_objs(fk_field, rows):
 def create_devices(rows, importer_inst_pk=None, write=False):
     from dlcdb.tenants.models import Tenant
 
+    already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
+
     device_objs = []
     record_objs = []
     processed_devices_count = 0
@@ -352,17 +354,20 @@ def create_devices(rows, importer_inst_pk=None, write=False):
             maintenance_contract_expiration_date=set_datetime_field(row['MAINTENANCE_CONTRACT_EXPIRATION_DATE']),
         )
 
-        device_objs.append(device_obj)
-        record_objs.append(
-            create_record(
-                device=device_obj,
-                record_type=row['RECORD_TYPE'],
-                record_note=row['RECORD_NOTE'],
-                room=row['ROOM'],
-                person=row['PERSON'],
-                username=row['USERNAME'],
+        # If the sap_id already exists in our DLCDB, we skip and do not import 
+        # this asset!
+        if sap_id not in already_existing_sap_ids:
+            device_objs.append(device_obj)
+            record_objs.append(
+                create_record(
+                    device=device_obj,
+                    record_type=row['RECORD_TYPE'],
+                    record_note=row['RECORD_NOTE'],
+                    room=row['ROOM'],
+                    person=row['PERSON'],
+                    username=row['USERNAME'],
+                )
             )
-        )
     try:
         if write:
             _bulk_create_supported = True
@@ -414,8 +419,6 @@ def create_devices(rows, importer_inst_pk=None, write=False):
 def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False):
     from ..models import ImporterList
 
-    print(f"csvfile before: {type(csvfile)=}")
-
     if import_format == ImporterList.ImportFormatChoices.INTERNALCSV:
         csvfile.seek(0)
         csvfile = StringIO(csvfile.read().decode('utf-8'))
@@ -423,8 +426,6 @@ def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, vali
         csvfile = convert_raw_sap_export(csvfile, tenant, valid_col_headers)
     else:
         raise ValidationError("Import format not specified.")
-
-    print(f"csvfile after: {type(csvfile)=}")
 
     ImporterMessages = namedtuple("ImporterMessages", [
         "success_messages",
@@ -445,7 +446,7 @@ def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, vali
             dialect='custom_dialect',
         )
 
-        # validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
+        validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
 
         # https://cs205uiuc.github.io/guidebook/python/csv.html
         rows = [row for row in rows]
