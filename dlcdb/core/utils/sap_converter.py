@@ -56,6 +56,44 @@ csv.register_dialect(
     strict=True,
 )
 
+
+def guess_device_type(description, tenant=None):
+    """
+    Tries to extract a device_type instance from a SAP description
+    field.
+    TODO: Use Tenant-aware device types.
+    """
+    description = description.lower()
+    guessed_device_type = 'Sonstiges (Verwaltung)'
+
+    SAP_DEVICE_TYPES_MAP = {
+        'Tisch': [],
+        'Stuhl': ['Stühle', 'Stuehle'],
+        'Drehstuhl': ['Drehstühle', 'Drehstuehle'],
+        'Hocker': [],
+        'Lampe/Leuchte': [],
+        'Schrank': ['Schränke', 'Schraenke'],
+        'Regal': [],
+        'Aktenvernichter': [],
+        'Bücherwagen': ['Buecherwagen', 'Bücherwägen', 'Buecherwaegen'],
+        'Container': [],
+        'Bücher/Zeitschriften': ['Buch', 'Buecher', 'Zeitschriften', 'Zeitschrift'],
+        'Stellwand': [],
+        'Bett': [],
+        'Sonstiges (Verwaltung)': [],
+    }
+
+    for (type_key, type_aliases) in SAP_DEVICE_TYPES_MAP.items():
+        if type_key.lower() in description:
+            # print(f"*** -> {type_key} or IN {description}!")
+            guessed_device_type = type_key
+        elif any([alias.lower() in description for alias in type_aliases]):
+            # print(f"*** -> alias IN {description}!")
+            guessed_device_type = type_key
+
+    return guessed_device_type
+
+
 def get_iso_datestr(datestr):
     """
     Converts a german date string (31.12.2020) to an ISO date string (2020-12-31).
@@ -94,7 +132,9 @@ def cleanup_sap_csv(file):
 
 def adapt_cleaned_csv(file, tenant):
     """
-    Modify SAP data to fit our schema
+    Modify SAP data to fit our schema.
+    TODO/Idea: Use EDV_ID for the complete SAP description, with an counter
+    added to be unique.
     """
 
     reader = csv.DictReader(file, dialect='cleaned_dialect')
@@ -108,6 +148,7 @@ def adapt_cleaned_csv(file, tenant):
         row['SAP_ID'] = f"{row['Anlage']}-{row['UNr.']}"
         row['PURCHASE_DATE'] = get_iso_datestr(row['PURCHASE_DATE'])
         row['TENANT'] = tenant.name
+        row['DEVICE_TYPE'] = guess_device_type(row['SERIES'])  # Was: row['Anlagenbezeichnung']
         _adapted_writer.writerow(row)
 
     adapted_buffer.seek(0)
