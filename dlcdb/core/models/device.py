@@ -85,7 +85,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     purchase_date = models.DateField(null=True, blank=True, verbose_name='Kaufdatum')
     warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name='Garantieablaufdatum')
     maintenance_contract_expiration_date = models.DateField(null=True, blank=True, verbose_name='Ablaufdatum Lizenz- oder Wartungsvertrag')
-    cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name='Kostenstelle')
+    cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name=_('Cost centre'))
     book_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='Buchwert')
 
     note = models.TextField(null=True, blank=True, verbose_name='Notiz')

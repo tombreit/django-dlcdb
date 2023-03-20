@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-23 10:21+0100\n"
-"PO-Revision-Date: 2023-02-23 10:23+0100\n"
+"POT-Creation-Date: 2023-03-20 12:30+0100\n"
+"PO-Revision-Date: 2023-03-20 12:32+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -135,6 +135,10 @@ msgstr "Inventarnummer"
 msgid "Supplier"
 msgstr "Distributor"
 
+#: dlcdb/core/models/device.py:88
+msgid "Cost centre"
+msgstr "Kostenstelle"
+
 #: dlcdb/core/models/device.py:100
 msgid "Is loanable?"
 msgstr "Ist Verleihgerät?"
@@ -146,6 +150,14 @@ msgstr "Geräteklasse"
 #: dlcdb/core/models/device_type.py:22
 msgid "Device Types"
 msgstr "Geräteklassen"
+
+#: dlcdb/core/models/importer.py:35
+msgid "Internal (CSV)"
+msgstr ""
+
+#: dlcdb/core/models/importer.py:36
+msgid "SAP (CSV)"
+msgstr ""
 
 #: dlcdb/core/models/manufacturer.py:12
 msgid "Name"
@@ -276,7 +288,7 @@ msgstr ""
 
 #: dlcdb/templates/simple_history/_object_history_list.html:13
 msgid "Date/time"
-msgstr ""
+msgstr "Datum/Zeit"
 
 #: dlcdb/templates/simple_history/_object_history_list.html:14
 msgid "Comment"
