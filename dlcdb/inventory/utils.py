@@ -33,15 +33,29 @@ def uuid2qrcode(uuid, infix=None):
     return qrcode(qr_filename, qr_fileobj)
 
 
-def get_devices_for_room(room_pk):
+def get_devices_for_room(request, room_pk):
     from ..core.models import Device
 
-    devices_qs = (
-        Device
-        .objects
-        .filter(active_record__room__pk=room_pk)
-        .order_by('-modified_at')
-    )
+    # By default do not expose any devices
+    devices_qs = Device.objects.none()
+
+    if request.user.is_superuser:
+        # No pre-filtering for superusers
+        devices_qs = (
+            Device
+            .objects
+            .filter(active_record__room__pk=room_pk)
+            .order_by('-modified_at')
+        )
+    elif request.tenant:
+        # Filter by tenant
+        devices_qs = (
+            Device
+            .objects
+            .filter(tenant=request.tenant)
+            .filter(active_record__room__pk=room_pk)
+            .order_by('-modified_at')
+        )
 
     return devices_qs
 

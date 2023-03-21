@@ -87,7 +87,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         current_inventory = get_current_inventory
 
         # Get all devices in this room:
-        devices = get_devices_for_room(self.object.pk)
+        devices = get_devices_for_room(self.request, self.object.pk)
 
         form = InventorizeRoomForm(initial={
             # 'room': self.object.pk,
@@ -362,7 +362,7 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         # Get all devices in given room.
-        devices = get_devices_for_room(self.object.pk)
+        devices = get_devices_for_room(self.request, self.object.pk)
 
         context = super().get_context_data(**kwargs)
         context['devices'] = devices
