@@ -14,6 +14,7 @@ SAP_COL_ADD = [
     'DEVICE_TYPE',
     'MAINTENANCE_CONTRACT_EXPIRATION_DATE',
     'RECORD_NOTE',
+    'REMOVED_DATE',
     'NOTE',
     'NICK_NAME',
     'EXTRA_MAC_ADDRESSES',
@@ -33,6 +34,7 @@ SAP_COL_MAP = {
     "AnschWert": "BOOK_VALUE",
     "Kostenst.": "COST_CENTRE",
     "Aktivdatum": "PURCHASE_DATE",
+    "Deakt.Dat.": "DEACTIVATED_DATE",
 
     # # Cells needing preprocessing:
     # "Anlage": "",
@@ -55,6 +57,34 @@ csv.register_dialect(
     delimiter=',',
     strict=True,
 )
+
+
+def get_iso_datestr(datestr):
+    """
+    Converts a german date string (31.12.2020) to an ISO date string (2020-12-31).
+    """
+    dateformat = "%d.%m.%Y"
+    dateobj = datetime.strptime(datestr,dateformat)
+    return f"{dateobj:%Y-%m-%d}"
+
+
+def guess_record_type(*, room, deactivated_date):
+    """
+    If an asset has a deactivated_date, it was already decommissionend
+    at that date and gets a REMOVED. Else an INROOM record.
+    """
+    from dlcdb.core.models import Record
+
+    record_type = _room = _removed_date = None
+
+    if deactivated_date:
+        record_type = Record.REMOVED
+        _removed_date = get_iso_datestr(deactivated_date)
+    elif room:
+        record_type = Record.INROOM
+        _room = room
+
+    return record_type, _room, _removed_date
 
 
 def guess_device_type(description, tenant=None):
@@ -92,15 +122,6 @@ def guess_device_type(description, tenant=None):
             guessed_device_type = type_key
 
     return guessed_device_type
-
-
-def get_iso_datestr(datestr):
-    """
-    Converts a german date string (31.12.2020) to an ISO date string (2020-12-31).
-    """
-    dateformat = "%d.%m.%Y"
-    dateobj = datetime.strptime(datestr,dateformat)
-    return f"{dateobj:%Y-%m-%d}"
 
 
 def cleanup_sap_csv(file):
@@ -145,10 +166,19 @@ def adapt_cleaned_csv(file, tenant):
 
     _adapted_writer.writeheader()
     for index, row in enumerate(reader):
+
+        record_type, _room, _removed_date = guess_record_type(
+            room=row['ROOM'],
+            deactivated_date=row['DEACTIVATED_DATE'],
+        )
+
         row['SAP_ID'] = f"{row['Anlage']}-{row['UNr.']}"
         row['PURCHASE_DATE'] = get_iso_datestr(row['PURCHASE_DATE'])
         row['TENANT'] = tenant.name
         row['DEVICE_TYPE'] = guess_device_type(row['SERIES'])  # Was: row['Anlagenbezeichnung']
+        row['RECORD_TYPE'] = record_type
+        row['ROOM'] = _room
+        row['REMOVED_DATE'] = _removed_date
         _adapted_writer.writerow(row)
 
     adapted_buffer.seek(0)

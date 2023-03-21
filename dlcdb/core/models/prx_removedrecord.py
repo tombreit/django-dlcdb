@@ -28,7 +28,10 @@ class RemovedRecord(Record):
 
     def save(self, **kwargs):
         self.record_type = Record.REMOVED
-        self.removed_date = now()
+
+        if not self.removed_date:
+            self.removed_date = now()
+        
         super().save(**kwargs)
 
     def __str__(self):

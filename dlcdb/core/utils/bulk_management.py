@@ -220,8 +220,8 @@ def validate_column_headers(*, current_col_headers, expected_col_headers):
         )
 
 
-def create_record(*, device, record_type, record_note, room, person, username):
-    from dlcdb.core.models import InRoomRecord, LostRecord
+def create_record(*, device, record_type, record_note, room, person, username, removed_date):
+    from dlcdb.core.models import InRoomRecord, LostRecord, RemovedRecord
     # print(f"Creating record {record_type} for {device}...")
     record_obj = None
 
@@ -241,6 +241,14 @@ def create_record(*, device, record_type, record_note, room, person, username):
         record_obj = LostRecord(
             device=device,
             note=record_note,
+            username=username.strip() if username else '',
+        )
+
+    elif record_type == Record.REMOVED:
+        record_obj = RemovedRecord(
+            device=device,
+            note=record_note,
+            removed_date=removed_date,
             username=username.strip() if username else '',
         )
 
@@ -366,35 +374,38 @@ def create_devices(rows, importer_inst_pk=None, write=False):
                     room=row['ROOM'],
                     person=row['PERSON'],
                     username=row['USERNAME'],
+                    removed_date=row['REMOVED_DATE'],
                 )
             )
     try:
         if write:
-            _bulk_create_supported = True
-            # Use bulk_create for newer versions of sqlite to avoid 
-            # Exception Value: bulk_create() prohibited to prevent data loss due to unsaved related object 'device'.
-            # See: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#bulk-create
-            # Changed in Django 4.0: Support for the fetching primary key attributes on SQLite 3.35+ was added.
-            if connection.vendor == 'sqlite':
-                import sqlite3
-                from packaging import version
+            # As bulk_create() does not call model.save() method, we can not use it for now
+            # _bulk_create_supported = True
+            # # Use bulk_create for newer versions of sqlite to avoid 
+            # # Exception Value: bulk_create() prohibited to prevent data loss due to unsaved related object 'device'.
+            # # See: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#bulk-create
+            # # Changed in Django 4.0: Support for the fetching primary key attributes on SQLite 3.35+ was added.
+            # if connection.vendor == 'sqlite':
+            #     import sqlite3
+            #     from packaging import version
                 
-                installed_sqlite_version = version.parse(sqlite3.sqlite_version)
-                requested_sqlite_version = version.parse("3.35")
+            #     installed_sqlite_version = version.parse(sqlite3.sqlite_version)
+            #     requested_sqlite_version = version.parse("3.35")
 
-                if installed_sqlite_version < requested_sqlite_version:
-                    _bulk_create_supported = False
+            #     if installed_sqlite_version < requested_sqlite_version:
+            #         _bulk_create_supported = False
 
-            if _bulk_create_supported:
-                Device.objects.bulk_create(device_objs)
-                Record.objects.bulk_create([record for record in record_objs if record is not None])
-            else:
-                for device in device_objs:
-                    device.save()
+            # if _bulk_create_supported:
+            #     Device.objects.bulk_create(device_objs)
+            #     Record.objects.bulk_create([record for record in record_objs if record is not None])
+            # else:
 
-                for record in record_objs:
-                    if record:
-                        record.save()
+            for device in device_objs:
+                device.save()
+
+            for record in record_objs:
+                if record:
+                    record.save()
 
         else:
             # In dryrun mode
@@ -404,6 +415,7 @@ def create_devices(rows, importer_inst_pk=None, write=False):
                 processed_devices_count += 1
 
             for record_obj in record_objs:
+                print(f"{record_obj=}")
                 if record_obj:
                     record_obj.save()
                     processed_records_count += 1
