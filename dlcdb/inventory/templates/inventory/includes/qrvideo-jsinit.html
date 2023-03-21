@@ -1,6 +1,8 @@
 {% load static %}
 
 
+{% if request.session.qrscanner_enabled == 1 %}
+
 <script src="{% static 'inventory/qr-scanner.umd.min.js' %}"></script>
 
 <script 
@@ -12,3 +14,5 @@
     data-django-debug="{{ debug }}"
 >
 </script>
+
+{% endif %}

@@ -30,7 +30,8 @@ from django.views import View
 from django.views.generic import DetailView, ListView, FormView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
-from django.http import HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect
+from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -46,6 +47,16 @@ from .utils import get_devices_for_room, create_sap_list_comparison
 from .filters import RoomFilter
 from .forms import InventorizeRoomForm, DeviceAddForm
 from .models import SapList
+
+
+def update_session_qrtoggle(request):
+    if request.method == "POST": 
+        data = json.loads(request.body)
+        request.session['qrscanner_enabled'] = data['qrScanner']
+        # print(f"{request.session['qrscanner_enabled']=}")
+        return JsonResponse(data)
+    else:
+        return HttpResponse("")
 
 
 def get_current_inventory():

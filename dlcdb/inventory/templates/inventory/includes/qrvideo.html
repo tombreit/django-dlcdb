@@ -1,3 +1,4 @@
+{% if request.session.qrscanner_enabled == 1 %}
 
 <div class="rounded bg-light my-2">
 <div class="row">
@@ -27,3 +28,5 @@
     </div>
 </div>
 </div>
+
+{% endif %}

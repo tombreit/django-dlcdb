@@ -49,13 +49,18 @@
                             VG bei MAs
                           </a>
                         </div>
-                      </li>
+                    </li>
                 </ul>
+                <span class="navbar-text">
+                  <span class="custom-control custom-switch qr-toggle-swicht">
+                    <input type="checkbox" {% if request.session.qrscanner_enabled == 1 %} checked {% endif %} class="custom-control-input" id="qr-toggle">
+                    <label class="custom-control-label" for="qr-toggle">QR scanner</label>
+                  </span>
+                </span>
             </div>
         </nav>
 
         <hr>
-
 
         {% if not current_inventory %}
         <div class="alert alert-danger">
@@ -69,6 +74,36 @@
 
     </div>
     <script src="{% static 'dist/inventory/js/app.js' %}"></script>
+    <script>
+
+function updateQrSwitch(state) {
+  console.log("state: ", state)
+  fetch("{% url 'inventory:update-qrtoggle' %}", {
+      method: 'POST',
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ "qrScanner": state })
+      })
+    .then(response => response.json())
+    .then(response => console.log(JSON.stringify(response)))
+    }
+
+const qrSwitcherCheckbox = document.getElementById('qr-toggle');
+
+qrSwitcherCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    console.log('qrSwitcherCheckbox is checked!');
+    updateQrSwitch(1)
+  } else {
+    console.log('qrSwitcherCheckbox is unchecked!');
+    updateQrSwitch(0)
+  }
+});
+  
+    </script>
     {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
