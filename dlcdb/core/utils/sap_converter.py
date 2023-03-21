@@ -9,6 +9,7 @@ SAP_COL_ADD = [
     'RECORD_TYPE',
     'SAP_ID',
     'EDV_ID',
+    'SERIES',
     'WARRANTY_EXPIRATION_DATE',
     'IS_LENTABLE',
     'DEVICE_TYPE',
@@ -27,7 +28,7 @@ SAP_COL_ADD = [
 
 SAP_COL_MAP = {
     # Directly mappable cells:
-    "Anlagenbezeichnung": "SERIES",
+    # "Anlagenbezeichnung": "SERIES",  # we fill edv_id with Anlagebezeichnung
     "SerialNr": "SERIAL_NUMBER",
     "Hersteller": "MANUFACTURER",
     "Raum": "ROOM",
@@ -39,6 +40,7 @@ SAP_COL_MAP = {
     # # Cells needing preprocessing:
     # "Anlage": "",
     # "UNr.": "",
+    # "Anlagenbezeichnung"
 
     # # Currently ignored cells:
     # "Zujr": "",
@@ -172,10 +174,16 @@ def adapt_cleaned_csv(file, tenant):
             deactivated_date=row['DEACTIVATED_DATE'],
         )
 
-        row['SAP_ID'] = f"{row['Anlage']}-{row['UNr.']}"
+        sap_id = f"{row['Anlage']}-{row['UNr.']}"
+        # We use the SAP asset description as the edv_id and prepend a
+        # unique identifier (here: sap_id)
+        edv_id = f"{row['Anlagenbezeichnung']} ({sap_id})"
+
+        row['SAP_ID'] = sap_id
+        row['EDV_ID'] = edv_id
         row['PURCHASE_DATE'] = get_iso_datestr(row['PURCHASE_DATE'])
         row['TENANT'] = tenant.name
-        row['DEVICE_TYPE'] = guess_device_type(row['SERIES'])  # Was: row['Anlagenbezeichnung']
+        row['DEVICE_TYPE'] = guess_device_type(edv_id)  # Was: row['Anlagenbezeichnung']
         row['RECORD_TYPE'] = record_type
         row['ROOM'] = _room
         row['REMOVED_DATE'] = _removed_date
