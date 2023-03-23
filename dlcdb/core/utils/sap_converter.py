@@ -20,7 +20,6 @@ SAP_COL_ADD = [
     'NICK_NAME',
     'EXTRA_MAC_ADDRESSES',
     'PERSON',
-    'USERNAME',
     'SUPPLIER',
     'IS_LICENCE',
     'MAC_ADDRESS',

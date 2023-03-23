@@ -77,6 +77,7 @@ class ImporterListAdmin(admin.ModelAdmin):
             valid_col_headers=obj.VALID_COL_HEADERS,
             import_format=obj.import_format,
             tenant=obj.tenant,
+            username=request.user.username,
             write=True,
         )
         plaintext_messages = [

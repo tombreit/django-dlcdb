@@ -24,11 +24,11 @@ class ImporterList(models.Model):
         'NICK_NAME',
         'IS_LENTABLE',
         'IS_LICENCE',
-        'USERNAME',
-        'TENANT',
         'RECORD_TYPE',
         'RECORD_NOTE',
         'PERSON',
+        'REMOVED_DATE',
+        'ORDER_NUMBER',
     ]
 
     class ImportFormatChoices(models.TextChoices):

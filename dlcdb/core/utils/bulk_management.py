@@ -290,7 +290,7 @@ def create_fk_objs(fk_field, rows):
     return
 
 
-def create_devices(rows, importer_inst_pk=None, write=False):
+def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, write=False):
     from dlcdb.tenants.models import Tenant
 
     already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
@@ -312,16 +312,16 @@ def create_devices(rows, importer_inst_pk=None, write=False):
 
         device_repr = f"edv_id: {edv_id or 'n/a'}; sap_id: {sap_id or 'n/a'}"
 
-        try:
-            tenant = Tenant.objects.get(name=row['TENANT'])
-        except KeyError as tenant_key_error:
-            raise ValidationError(
-                '[Row {}] Device: "{}" NOT imported: TENANT not available in import file! ({})'.format(idx, device_repr, tenant_key_error)
-            )
-        except ObjectDoesNotExist as tenant_does_not_exists:
-            raise ValidationError(
-                '[Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist! ({})'.format(idx, device_repr, row['TENANT'], tenant_does_not_exists)
-            )
+        # try:
+        #     tenant = Tenant.objects.get(name=row['TENANT'])
+        # except KeyError as tenant_key_error:
+        #     raise ValidationError(
+        #         '[Row {}] Device: "{}" NOT imported: TENANT not available in import file! ({})'.format(idx, device_repr, tenant_key_error)
+        #     )
+        # except ObjectDoesNotExist as tenant_does_not_exists:
+        #     raise ValidationError(
+        #         '[Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist! ({})'.format(idx, device_repr, row['TENANT'], tenant_does_not_exists)
+        #     )
 
         # Booleans
         is_lentable = True if row['IS_LENTABLE'].lower() in TRUE_VALUES else False
@@ -332,7 +332,7 @@ def create_devices(rows, importer_inst_pk=None, write=False):
             imported_by_id=importer_inst_pk,
 
             # these fields should be mappable without further processing:
-            username=row['USERNAME'].strip() if row['USERNAME'] else '',
+            username=username if username else '',
             book_value=row['BOOK_VALUE'],
             serial_number=row['SERIAL_NUMBER'],
             series=row['SERIES'],
@@ -341,6 +341,7 @@ def create_devices(rows, importer_inst_pk=None, write=False):
             mac_address=row['MAC_ADDRESS'],
             extra_mac_addresses=row['EXTRA_MAC_ADDRESSES'],
             nick_name=row['NICK_NAME'],
+            order_number=row['ORDER_NUMBER'],
             
             # These fields need some pre-processing
             edv_id=edv_id,
@@ -373,7 +374,7 @@ def create_devices(rows, importer_inst_pk=None, write=False):
                     record_note=row['RECORD_NOTE'],
                     room=row['ROOM'],
                     person=row['PERSON'],
-                    username=row['USERNAME'],
+                    username=username,
                     removed_date=row['REMOVED_DATE'],
                 )
             )
@@ -428,7 +429,7 @@ def create_devices(rows, importer_inst_pk=None, write=False):
     return device_objs
 
 
-def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False):
+def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False):
     from ..models import ImporterList
 
     if import_format == ImporterList.ImportFormatChoices.INTERNALCSV:
@@ -469,7 +470,7 @@ def import_data(csvfile, tenant, importer_inst_pk=None, import_format=None, vali
             create_fk_objs(fk_field, rows)
 
         # Second loop over rows: Creating devices
-        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, write=write)
+        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write)
 
     result = ImporterMessages(
         success_messages,
