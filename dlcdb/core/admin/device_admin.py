@@ -383,7 +383,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         """
         selected = queryset.values_list('pk', flat=True)
         ct = ContentType.objects.get_for_model(queryset.model, for_concrete_model=False)
-        return HttpResponseRedirect('/admin/core/devices/relocate/?ct=%s&ids=%s' % (
+        return HttpResponseRedirect('/core/devices/relocate/?ct=%s&ids=%s' % (
             ct.pk,
             ','.join(str(pk) for pk in selected),
         ))
