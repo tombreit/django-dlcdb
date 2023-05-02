@@ -45,7 +45,7 @@ from dlcdb.core.utils.helpers import get_denormalized_user
 
 from .utils import get_devices_for_room, create_sap_list_comparison
 from .filters import RoomFilter
-from .forms import InventorizeRoomForm, DeviceAddForm
+from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList
 
 
@@ -406,3 +406,43 @@ class SapCompareListView(DetailView):
         create_sap_list_comparison(sap_list)
         messages.success(request, 'Abgleich erzeugt')
         return HttpResponseRedirect(reverse('inventory:compare-sap-list', kwargs=dict(pk=sap_list.pk)))
+
+
+def update_room_note(request, room_pk, note_pk):
+    note = Note.objects.get(pk=note_pk)
+    inventory = get_current_inventory()
+    print(f"{request.method=}")
+    print(f"{note=}, {inventory=}")
+
+    initial = {
+        "text": note.text,
+        "room": room_pk,
+        "inventory": inventory,
+    }
+
+    if request.method == "POST":
+        print("in POST req")
+        # create a form instance and populate it with data from the request:
+        form = NoteForm(request.POST, instance=note)  # instance=note, initial=initial
+        print(f"{form=}")
+        # check whether it's valid:
+        if form.is_valid():
+            print("is_valid")
+            # process the data in form.cleaned_data as required)
+            form.save()
+            return HttpResponse(
+            '<div class="alert alert-success" role="alert" id="message-response">' \
+               'Update successful!</div>'
+            )
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NoteForm(initial=initial)
+    
+    context = {
+        'note': note, 
+        'form': form,
+    }
+    template = 'inventory/includes/note_form.html'
+
+    return render(request, template, context)

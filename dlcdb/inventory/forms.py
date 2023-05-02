@@ -4,6 +4,8 @@ from crispy_forms.layout import Layout
 
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 
+from dlcdb.core.models import Note
+
 
 class InventorizeRoomForm(forms.Form):
     uuids = forms.CharField(
@@ -42,3 +44,16 @@ class RoomSearchForm(forms.Form):
                 StrictButton('<i class="fas fa-search"></i>', type="submit", css_class="btn-sm btn btn-outline-primary")
             ),
         )
+
+
+
+class NoteForm(forms.ModelForm):
+    class Meta:
+        model = Note
+        fields = '__all__'
+
+# class NoteForm(forms.Form):
+#     text = forms.CharField(
+#         label="Note",
+#         widget=forms.Textarea(),
+#     )

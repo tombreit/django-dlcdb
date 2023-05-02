@@ -1,0 +1,29 @@
+{% extends "inventory/base_inventory.html" %}
+
+
+{% load crispy_forms_tags %}
+
+{% block body %}
+
+<h2>
+    Note: {{ note }}
+</h2>
+
+
+<form 
+    action=""
+    method="POST"
+    class="form-inline"
+>
+{% csrf_token %}
+    {{ form.as_p }}
+    {#% crispy form %#}
+
+    <input 
+        type="submit" 
+        value="Submit"
+        {# hx-post="{{ request.path }}" #}
+    >
+</form>
+
+{% endblock %}

@@ -1,6 +1,3 @@
-{# <abbr title="Not Implemented">501</abbr> #}
-
-
 {% if note_obj.get_latest_note %}
     <a class="btn btn-sm btn-outline-primary related-widget-wrapper-link change-related"
         id="change_id_note"
@@ -10,6 +7,14 @@
     >
         <i class="fas fa-comment-alt"></i>
     </a>
+
+<a 
+    class="btn btn-danger"
+    href="{% url 'inventory:room-note-update' room_pk=room.pk note_pk=note_obj.get_latest_note.pk %}"
+>
+    NoteUpdate
+</a>
+
 {% else %}
     <a
         class="btn btn-sm btn-outline-primary related-widget-wrapper-link add-related"

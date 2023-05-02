@@ -1,4 +1,5 @@
 {% load static %}
+{% load django_htmx %}
 
 <!doctype html>
 <html lang="en">
@@ -10,7 +11,7 @@
   <link rel="stylesheet" href="{% static 'dist/inventory/css/inventory2.css' %}">
 </head>
 
-<body>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <div class="container">
     
@@ -74,6 +75,8 @@
 
     </div>
     <script src="{% static 'dist/inventory/js/app.js' %}"></script>
+    {% django_htmx_script %}
+
     <script>
 
 function updateQrSwitch(state) {
