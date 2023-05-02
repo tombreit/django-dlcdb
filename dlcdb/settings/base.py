@@ -46,6 +46,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'crispy_forms',
+    'crispy_bootstrap4',
     'django_select2',
     'django_htmx',
     'huey.contrib.djhuey',
@@ -254,7 +255,8 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
 
 SELECT2_CACHE_BACKEND = 'select2'
 
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
