@@ -1,4 +1,25 @@
 {% if note_obj.get_latest_note %}
+    <button 
+        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}" 
+        hx-target="#dialog"
+        class="note-btn btn btn-sm btn-outline-primary"
+    >
+        <i class="fas fa-comment-alt"></i>
+    </button>
+{% else %}
+    <button 
+        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}" 
+        hx-target="#dialog"
+        class="note-btn btn btn-sm btn-outline-primary"
+    >
+        <i class="far fa-comment-alt"></i>
+    </button>
+{% endif %}
+
+
+
+{% comment %}
+{% if note_obj.get_latest_note %}
     <a class="btn btn-sm btn-outline-primary related-widget-wrapper-link change-related"
         id="change_id_note"
         title="Notiz: {{ note_obj.get_latest_note.text }}"
@@ -7,14 +28,6 @@
     >
         <i class="fas fa-comment-alt"></i>
     </a>
-
-<a 
-    class="btn btn-danger"
-    href="{% url 'inventory:room-note-update' room_pk=room.pk note_pk=note_obj.get_latest_note.pk %}"
->
-    NoteUpdate
-</a>
-
 {% else %}
     <a
         class="btn btn-sm btn-outline-primary related-widget-wrapper-link add-related"
@@ -25,4 +38,26 @@
     >
         <i class="far fa-comment-alt"></i>
     </a>
+
+    {% if note_obj.get_latest_note %}
+    <span 
+        class="note-btn btn btn-sm btn-outline-primary"
+        hx-target="#room-{{ room.uuid }}-note" 
+        hx-swap="innerHTML"
+        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}"
+    >
+        <i class="fas fa-comment-alt"></i>
+    </span>
+    {% else %}
+    <span 
+        class="note-btn btn btn-sm btn-outline-primary"
+        hx-target="#room-{{ room.uuid }}-note" 
+        hx-swap="innerHTML"
+        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}"
+    >
+        <i class="far fa-comment-alt"></i>
+    </span>
+    {% endif %}
+    
 {% endif %}
+{% endcomment %}

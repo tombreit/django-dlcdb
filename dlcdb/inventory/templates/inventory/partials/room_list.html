@@ -1,0 +1,29 @@
+{% for room in object_list %}
+<tr id="tr_uuid_{{ room.uuid }}">
+    <td>
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'inventory:inventorize-room' room.pk %}">
+            {{ room.number }}
+            {% if room.nickname %}
+                <div class="small">{{ room.nickname }}</div>
+            {% endif %}
+        </a>
+
+        {% comment %}
+        <a href="{% url 'inventory:qr-room-printout' room.pk %}">
+            <i class="fas fa-qrcode"></i> QR codes
+        </a>
+        {% endcomment %}
+
+    </td>
+    <td>
+        {% include 'inventory/includes/note.html' with note_obj=room note_objstr='room' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
+    </td>
+    <td>
+        <a href="{% url 'inventory:inventorize-room' room.pk %}">
+        {% include 'inventory/includes/inventory_status_badge.html' %}
+        </a>
+    </td>
+</tr>
+{% empty %}
+    <tr><td>No rooms found.</td></tr>
+{% endfor %}

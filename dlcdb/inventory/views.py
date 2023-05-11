@@ -41,7 +41,7 @@ from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
 from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentRecord, Note
-from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.core.utils.helpers import get_denormalized_user, get_user_email
 
 from .utils import get_devices_for_room, create_sap_list_comparison
 from .filters import RoomFilter
@@ -50,9 +50,9 @@ from .models import SapList
 
 
 def update_session_qrtoggle(request):
-    if request.method == "POST": 
+    if request.method == "POST":
         data = json.loads(request.body)
-        request.session['qrscanner_enabled'] = data['qrScanner']
+        request.session["qrscanner_enabled"] = data["qrScanner"]
         # print(f"{request.session['qrscanner_enabled']=}")
         return JsonResponse(data)
     else:
@@ -61,6 +61,7 @@ def update_session_qrtoggle(request):
 
 def get_current_inventory():
     from dlcdb.core.models import Inventory
+
     try:
         current_inventory = Inventory.objects.get(is_active=True)
     except Inventory.DoesNotExist:
@@ -70,7 +71,7 @@ def get_current_inventory():
 
 
 class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
-    template_name = 'inventory/inventorize_room_detail.html'
+    template_name = "inventory/inventorize_room_detail.html"
     form_class = InventorizeRoomForm
     model = Room
 
@@ -82,16 +83,16 @@ class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
         return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse('inventory:inventorize-room', kwargs={'pk': self.object.pk})
+        return reverse("inventory:inventorize-room", kwargs={"pk": self.object.pk})
 
 
 class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
     queryset = Room.inventory_objects.all()
-    context_object_name = 'room'
-    template_name = 'inventory/inventorize_room_detail.html'
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
+    context_object_name = "room"
+    template_name = "inventory/inventorize_room_detail.html"
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
     def get_context_data(self, **kwargs):
         # print(f"get_contex_data self.object.pk: {self.object.pk}")
@@ -100,45 +101,46 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         # Get all devices in this room:
         devices = get_devices_for_room(self.request, self.object.pk)
 
-        form = InventorizeRoomForm(initial={
-            # 'room': self.object.pk,
-            # 'uuids': self.object.get_inventory_status.inventorized_uuids,
-        })
+        form = InventorizeRoomForm(
+            initial={
+                # 'room': self.object.pk,
+                # 'uuids': self.object.get_inventory_status.inventorized_uuids,
+            }
+        )
 
         # Allow only adding devices which are not already present in this room:
         valid_add_devices = Device.objects.exclude(active_record__room=self.object.pk)
         device_choices = [("", "Add device")]
-        device_choices += [
-            (f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices
-        ]
+        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices]
 
         device_add_form = DeviceAddForm(
             device_choices=device_choices,
             initial={
-                'room': self.object.pk,
+                "room": self.object.pk,
             },
         )
 
         context = super().get_context_data(**kwargs)
-        context.update({
-            'devices': devices,
-            'current_inventory': current_inventory,
-            'qrcode_prefix': settings.QRCODE_PREFIX,
-            'debug': settings.DEBUG,
-            'dev_state_unknown': 'dev_state_unknown',
-            'dev_state_found': 'dev_state_found',
-            # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
-            'dev_state_notfound': 'dev_state_notfound',
-            'dev_state_added': 'dev_state_added',
-            'form': form,
-            'device_add_form': device_add_form,
-            'api_token': Token.objects.first(),
-        })
+        context.update(
+            {
+                "devices": devices,
+                "current_inventory": current_inventory,
+                "qrcode_prefix": settings.QRCODE_PREFIX,
+                "debug": settings.DEBUG,
+                "dev_state_unknown": "dev_state_unknown",
+                "dev_state_found": "dev_state_found",
+                # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
+                "dev_state_notfound": "dev_state_notfound",
+                "dev_state_added": "dev_state_added",
+                "form": form,
+                "device_add_form": device_add_form,
+                "api_token": Token.objects.first(),
+            }
+        )
         return context
 
 
 class InventorizeRoomView(LoginRequiredMixin, View):
-
     def get(self, request, *args, **kwargs):
         view = InventorizeRoomDetailView.as_view()
         return view(request, *args, **kwargs)
@@ -163,9 +165,9 @@ class InventorizeRoomView(LoginRequiredMixin, View):
 
             try:
                 external_room = Room.objects.get(is_external=True)
-            except Room.DoesNotExist as e:
+            except Room.DoesNotExist:
                 return HttpResponseServerError(
-                    f"<h4>Server Error 500</h4><p>Something went wrong. No room is flagged with 'is_external'. Please contact your it staff.</p>"
+                    "<h4>Server Error 500</h4><p>Something went wrong. No room is flagged with 'is_external'. Please contact your it staff.</p>"
                 )
 
             for uuid, state in uuids_states_dict.items():
@@ -175,7 +177,7 @@ class InventorizeRoomView(LoginRequiredMixin, View):
 
                 new_record = None
 
-                if state == 'dev_state_found':
+                if state == "dev_state_found":
                     print("state == 'dev_state_found'")
                     new_record = active_record
                     new_record.pk = new_record.id = None
@@ -190,7 +192,7 @@ class InventorizeRoomView(LoginRequiredMixin, View):
                     new_record._state.adding = True
                     new_record.save()
 
-                elif state == 'dev_state_notfound':
+                elif state == "dev_state_notfound":
                     """
                     If an expected device is not found in a given room, we need
                     to check if it is currently lended. When lended, we do not
@@ -199,24 +201,22 @@ class InventorizeRoomView(LoginRequiredMixin, View):
                     """
                     print("state == 'dev_state_notfound'")
 
-                    if all([
-                        active_record.record_type == Record.LENT,
-                        active_record.room != external_room,
-                    ]):
+                    if all(
+                        [
+                            active_record.record_type == Record.LENT,
+                            active_record.room != external_room,
+                        ]
+                    ):
                         active_record.room = external_room
                         active_record.save()
 
                         # Set inventory note
                         # TODO: Fix multiple injections of same note string
                         lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`. Please contact lender."
-                        note_obj, note_obj_created = (
-                            Note
-                            .objects
-                            .get_or_create(
-                                inventory=current_inventory,
-                                device=active_record.device,
-                                room=external_room,
-                            )
+                        note_obj, note_obj_created = Note.objects.get_or_create(
+                            inventory=current_inventory,
+                            device=active_record.device,
+                            room=external_room,
                         )
                         note_obj.text = f"{note_obj.text} *** {lent_not_found_msg}"
                         note_obj.save()
@@ -228,7 +228,7 @@ class InventorizeRoomView(LoginRequiredMixin, View):
                             username=username,
                         )
 
-                elif state == 'dev_state_unknown':
+                elif state == "dev_state_unknown":
                     print("state == 'dev_state_unknown'")
                     new_record = active_record
                     new_record.pk = new_record.id = None
@@ -252,45 +252,26 @@ class InventorizeRoomView(LoginRequiredMixin, View):
 
 class InventorizeRoomListView(LoginRequiredMixin, FilterView):
     model = Room
-    context_object_name = 'rooms'
+    context_object_name = "rooms"
     queryset = Room.inventory_objects.all()
-    template_name = 'inventory/inventorize_room_list.html'
     filterset_class = RoomFilter
-    # paginate_by = 10
 
-    # def get_queryset(self):
-    #     qs = super().get_queryset()
-    #     qs = qs.annotate(
-    #         num_records=Count('record', filter=Q(record__is_active=True)), 
-    #     )
-    #     return qs
-
-    # rooms = Room.objects.all()
-    # room_choices = [("", "Search rooms")]
-    # room_choices += [
-    #     (f"{r.pk}", f"{r.number} ({r.nickname})") for r in rooms
-    # ]
-
-    # room_search_form = RoomSearchForm(
-    #     room_choices=room_choices,
-    # )
-
-    # def get_rooms_progress(self):
-    #     all_rooms = Room.objects.all()
-    #     inventory_complete_rooms = 0
-    #     for room in all_rooms:
-    #         if room.get_inventory_status.count_expected == room.get_inventory_status.count_inventorized:
-    #             inventory_complete_rooms += 1
-    #     print(f"all rooms count: {all_rooms.count()}, complete rooms: {inventory_complete_rooms}")
-    #     return progress_percent
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["inventory/partials/room_list.html"]
+        else:
+            return ["inventory/inventorize_room_list.html"]
 
     @staticmethod
     def get_inventory_progress():
-        inventory_progress = namedtuple("inventory_progress", [
-            "done_percent",
-            "all_devices_count",
-            "inventorized_devices_count",
-        ])
+        inventory_progress = namedtuple(
+            "inventory_progress",
+            [
+                "done_percent",
+                "all_devices_count",
+                "inventorized_devices_count",
+            ],
+        )
 
         done_percent = 0
         current_inventory = Inventory.objects.get(is_active=True)
@@ -298,19 +279,19 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         inventorized_devices_count = all_devices.filter(inventory=current_inventory).count()
         all_devices_count = all_devices.count()
 
-        if all([
-            current_inventory,
-            all_devices,
-        ]):
-            done_percent = ((inventorized_devices_count * 100) / all_devices_count)
+        if all(
+            [
+                current_inventory,
+                all_devices,
+            ]
+        ):
+            done_percent = (inventorized_devices_count * 100) / all_devices_count
             done_percent = int(round(done_percent, 0))
-
             return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
-
 
     def get_context_data(self, **kwargs):
         _request_copy = self.request.GET.copy()
-        parameters = _request_copy.pop('page', True) and _request_copy.urlencode()
+        parameters = _request_copy.pop("page", True) and _request_copy.urlencode()
 
         try:
             current_inventory = Inventory.objects.get(is_active=True)
@@ -318,24 +299,33 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             current_inventory = None
 
         context = super().get_context_data(**kwargs)
-        context.update({
-            'current_inventory': current_inventory,
-            'parameters': parameters,
-            'qrcode_prefix': settings.QRCODE_PREFIX,
-            'debug': settings.DEBUG,
-            # 'room_search_form': self.room_search_form,
-            'inventory_progress': self.get_inventory_progress,
-            'api_token': Token.objects.first(),
-        })
+        context.update(
+            {
+                "current_inventory": current_inventory,
+                "parameters": parameters,
+                "qrcode_prefix": settings.QRCODE_PREFIX,
+                "debug": settings.DEBUG,
+                "api_token": Token.objects.first(),
+                "inventory_progress": self.get_inventory_progress,
+            }
+        )
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+
+        if self.request.htmx and self.request.META.get("QUERY_STRING"):
+            response["HX-Push-Url"] = f"{self.request.path}?{self.request.META.get('QUERY_STRING')}"
+
+        return response
 
 
 class DevicesSearchView(ListView):
-    template_name = 'inventory/inventorize_devices_list.html'
+    template_name = "inventory/inventorize_devices_list.html"
     model = Device
 
     def get_queryset(self):
-        name = self.kwargs.get('name', '')
+        name = self.kwargs.get("name", "")
         object_list = self.model.objects.all()
         if name:
             object_list = object_list.filter(name__icontains=name)
@@ -345,11 +335,11 @@ class DevicesSearchView(ListView):
         """Search according to fields defined in Admin's search_fields"""
         all_queries = None
 
-        for keyword in keywords.split(' '):  #breaks query_string into 'Foo' and 'Bar'
+        for keyword in keywords.split(" "):  # breaks query_string into 'Foo' and 'Bar'
             keyword_query = None
 
             for field in search_fields:
-                each_query = Q(**{field+'__icontains':keyword})
+                each_query = Q(**{field + "__icontains": keyword})
 
                 if not keyword_query:
                     keyword_query = each_query
@@ -368,15 +358,15 @@ class DevicesSearchView(ListView):
 
 class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
-    context_object_name = 'room'
-    template_name = 'inventory/room_qrcodes_detail.html'
+    context_object_name = "room"
+    template_name = "inventory/room_qrcodes_detail.html"
 
     def get_context_data(self, **kwargs):
         # Get all devices in given room.
         devices = get_devices_for_room(self.request, self.object.pk)
 
         context = super().get_context_data(**kwargs)
-        context['devices'] = devices
+        context["devices"] = devices
         return context
 
 
@@ -385,64 +375,94 @@ class InventoryReportView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            'devices': LentRecord.get_devices(inventory=get_current_inventory()).order_by("sap_id"),
-            'now': date.today(),
-        })
+        context.update(
+            {
+                "devices": LentRecord.get_devices(inventory=get_current_inventory()).order_by("sap_id"),
+                "now": date.today(),
+            }
+        )
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class SapCompareListView(DetailView):
     model = SapList
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'inventory/compare_sap_list.html', dict(
-            sap_list=self.get_object()
-        ))
+        return render(request, "inventory/compare_sap_list.html", dict(sap_list=self.get_object()))
 
     def post(self, request, *args, **kwargs):
         sap_list = self.get_object()
         create_sap_list_comparison(sap_list)
-        messages.success(request, 'Abgleich erzeugt')
-        return HttpResponseRedirect(reverse('inventory:compare-sap-list', kwargs=dict(pk=sap_list.pk)))
+        messages.success(request, "Abgleich erzeugt")
+        return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
-def update_room_note(request, room_pk, note_pk):
-    note = Note.objects.get(pk=note_pk)
+def update_room_note(request, room_pk, note_pk=None):
     inventory = get_current_inventory()
-    print(f"{request.method=}")
-    print(f"{note=}, {inventory=}")
+    room = Room.objects.get(pk=room_pk)
+    request_user_email = get_user_email(request.user)
+    hx_post_url = reverse("inventory:room-note-update", kwargs={"room_pk": room.pk})
 
-    initial = {
-        "text": note.text,
-        "room": room_pk,
-        "inventory": inventory,
-    }
+    note = None
+    if room.get_latest_note:
+        note = room.get_latest_note()
+    else:
+        print("No note for room found, creating a new one")
 
     if request.method == "POST":
-        print("in POST req")
         # create a form instance and populate it with data from the request:
-        form = NoteForm(request.POST, instance=note)  # instance=note, initial=initial
-        print(f"{form=}")
-        # check whether it's valid:
+        form = NoteForm(
+            request.POST,
+            instance=note,
+            hx_post_url=hx_post_url,
+        )
+
         if form.is_valid():
-            print("is_valid")
-            # process the data in form.cleaned_data as required)
+            instance = form.save(commit=False)
+            if not note:
+                # Dealing with a new note instance
+                instance.created_by = request_user_email
+            instance.updated_by = request_user_email
+            instance.inventory = inventory
+            instance.room = room
+            instance.save()
             form.save()
+
+            message = "{room} note {action}".format(
+                room=room,
+                action="edited" if note else "added",
+            )
+
+            headers = {
+                "HX-Trigger": json.dumps(
+                    {
+                        "objectListChanged": None,
+                        "showMessage": message,
+                    }
+                ),
+            }
+
+            if request.htmx and request.META.get("QUERY_STRING"):
+                headers["HX-Push-Url"] = f"{request.path}?{request.META.get('QUERY_STRING')}"
+
             return HttpResponse(
-            '<div class="alert alert-success" role="alert" id="message-response">' \
-               'Update successful!</div>'
+                status=204,
+                headers=headers,
             )
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = NoteForm(initial=initial)
-    
+        form = NoteForm(
+            instance=note if note else None,
+            hx_post_url=hx_post_url,
+        )
+
     context = {
-        'note': note, 
-        'form': form,
+        "note_object": room,
+        "hx_post_url": hx_post_url,
+        "form": form,
     }
-    template = 'inventory/includes/note_form.html'
+    template = "inventory/includes/note_form.html"
 
     return render(request, template, context)
