@@ -56,7 +56,7 @@
     "lending-font:copy-fontawesome": "mkdir -p $npm_package_config_lending_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_lending_distdir/fonts/fontawesome/",
     "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/",
     "htmx:copy-htmx": "mkdir -p $npm_package_config_lending_distdir/js && cp node_modules/htmx.org/dist/htmx.min.js $npm_package_config_lending_distdir/js/",
-    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docs_distdir/mermaid/"
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.esm.min.mjs $npm_package_config_docs_distdir/mermaid/"
   },
   "repository": {
     "type": "https",
