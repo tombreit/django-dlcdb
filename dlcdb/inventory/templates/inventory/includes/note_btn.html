@@ -1,4 +1,4 @@
-<pre>{{ obj_type }} / {{ obj }} / {{ obj.uuid }}</pre>
+{# <pre>{{ obj_type }} / {{ obj }} / {{ obj.uuid }}</pre> #}
 <button 
     hx-get="{% url 'inventory:note-update' obj_type=obj_type obj_uuid=obj.uuid %}" 
     hx-target="#dialog"

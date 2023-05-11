@@ -11,15 +11,11 @@
 
 {% block extra_js %}
 <script type="module">
-    $('#id_room').select2({
-        theme: 'bootstrap4',
-    });
-
     {% include 'inventory/includes/qrtoggle.js' %}
     {% include 'inventory/partials/htmx_note.js' %}
 </script>
 
-{% include 'inventory/includes/qrvideo-jsinit.html' %}
+{% include 'inventory/includes/inventorize-jsinit.html' %}
 
 {% endblock extra_js %}
 

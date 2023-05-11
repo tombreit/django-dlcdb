@@ -1,0 +1,21 @@
+{% load static %}
+
+
+<script 
+    defer
+    src="{% static 'inventory/inventorize.js' %}"
+    data-api-url-base="{{ request.scheme }}://{{ request.get_host }}/api/v2"
+    data-api-token="{{ api_token }}"
+    data-django-debug="{{ debug }}"
+></script>
+
+
+{% if request.session.qrscanner_enabled == 1 %}
+<script src="{% static 'inventory/qr-scanner.umd.min.js' %}"></script>
+<script 
+    defer
+    src="{% static 'inventory/inventorize_via_qrscanner.js' %}"
+    data-qrcode-prefix="{{ qrcode_prefix }}"
+    data-django-debug="{{ debug }}"
+></script>
+{% endif %}
