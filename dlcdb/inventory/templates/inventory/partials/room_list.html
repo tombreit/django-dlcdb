@@ -16,7 +16,7 @@
 
     </td>
     <td>
-        {% include 'inventory/includes/note.html' with note_obj=room note_objstr='room' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
+        {% include 'inventory/includes/note_btn.html' with obj_type="room" obj=room %}
     </td>
     <td>
         <a href="{% url 'inventory:inventorize-room' room.pk %}">

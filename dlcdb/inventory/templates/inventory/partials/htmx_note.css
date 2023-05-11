@@ -1,0 +1,14 @@
+.tr-note td {
+    border-top: 0;
+    padding: 0;
+}
+.note-update-wrapper {
+    padding: 1rem;
+}
+.note-update-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.note-update-form textarea {
+    height: 5rem;
+}

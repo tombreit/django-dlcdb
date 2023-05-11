@@ -26,9 +26,7 @@
         {% endcomment %}
     </div>
     <div class="flex-shrink-1">
-
-        {% include 'inventory/includes/note.html' with note_obj=room note_objstr='room' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
-
+        {% include 'inventory/includes/note_btn.html' with obj_type="room" obj=room %}
     </div>
 </div>
 
@@ -78,7 +76,6 @@
             <tr>
                 <th>Device</th>
                 <th>Description</th>
-                {# <th>UUID</th> #}
                 <th>State</th>
                 <th>Record</th>
                 <th>Note</th>
@@ -136,13 +133,6 @@
                     <br>
                     {% endif %}
                 </td>
-                {% comment %}
-                <td>
-                    <span id="uuid_{{ device.uuid }}">
-                        {{ device.uuid }}
-                    </span>
-                </td>
-                {% endcomment %}
                 <td>
                     <button 
                         type="button"
@@ -174,9 +164,7 @@
                     </small>
                 </td>
                 <td>
-
-                    {% include 'inventory/includes/note.html' with note_obj=device note_objstr='device' change_url='admin:core_note_change' add_url='admin:core_note_add' %}
-
+                    {% include 'inventory/includes/note_btn.html' with obj_type="device" obj=device %}
                 </td>
             </tr>
         {% endfor %}
@@ -194,6 +182,8 @@
 </form>
 
 {% include 'inventory/includes/bootstrap/modal.html' with modal_id="switch_room_modal" modal_title="New room scanned" modal_body="Be sure to save the inventory of the current room before switching to a new room" modal_proceed_id="change_room" modal_proceed_text="Switch to room" %}
+{% include 'inventory/partials/bs_modal.html' %}
+{% include 'inventory/partials/bs_toast.html' %}
 
 {% endblock body %}
 
@@ -201,16 +191,6 @@
 {% block extra_js %}
 
 {% include 'inventory/includes/qrvideo-jsinit.html' %}
-
-{# the following js are only needed for this weird admin popup for room and device notes #}
-<script src="/admin/jsi18n/"></script>
-<script src="/static/admin/js/vendor/jquery/jquery.js"></script>
-<script src="/static/admin/js/jquery.init.js"></script>
-<script src="/static/admin/js/core.js"></script>
-<script src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
-<script src="/static/admin/js/actions.js"></script>
-<script src="/static/admin/js/SelectBox.js"></script>
-<script src="/static/admin/js/SelectFilter2.js"></script>
 
 <script type="module">
     $('#id_uuids').attr('readonly', true);
@@ -257,5 +237,14 @@
 
     }(jQuery));
 
+    {% include 'inventory/partials/htmx_note.js' %}
+    {% include 'inventory/includes/qrtoggle.js' %}
 </script>
 {% endblock extra_js %}
+
+
+{% block extra_css %}
+    <style>
+        {% include 'inventory/partials/htmx_note.css' %}
+    </style>
+{% endblock %}

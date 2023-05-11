@@ -398,17 +398,24 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
-def update_room_note(request, room_pk, note_pk=None):
+def update_note_view(request, obj_type, obj_uuid):
+    print(f"{request=}")
+    print(f"{obj_type=}, {obj_uuid=}")
     inventory = get_current_inventory()
-    room = Room.objects.get(pk=room_pk)
     request_user_email = get_user_email(request.user)
-    hx_post_url = reverse("inventory:room-note-update", kwargs={"room_pk": room.pk})
+
+    if obj_type == "room":
+        obj = Room.objects.get(uuid=obj_uuid)
+    elif obj_type == "device":
+        obj = Device.objects.get(uuid=obj_uuid)
+
+    hx_post_url = reverse("inventory:note-update", args=[obj_type, obj.uuid])
 
     note = None
-    if room.get_latest_note:
-        note = room.get_latest_note()
+    if obj.get_latest_note:
+        note = obj.get_latest_note()
     else:
-        print("No note for room found, creating a new one")
+        print(f"No note for obj {obj} found, creating a new one")
 
     if request.method == "POST":
         # create a form instance and populate it with data from the request:
@@ -425,12 +432,15 @@ def update_room_note(request, room_pk, note_pk=None):
                 instance.created_by = request_user_email
             instance.updated_by = request_user_email
             instance.inventory = inventory
-            instance.room = room
+
+            # instance.room = room
+            setattr(instance, obj_type, obj)
+
             instance.save()
             form.save()
 
-            message = "{room} note {action}".format(
-                room=room,
+            message = "{obj} note {action}".format(
+                obj=obj,
                 action="edited" if note else "added",
             )
 
@@ -459,7 +469,7 @@ def update_room_note(request, room_pk, note_pk=None):
         )
 
     context = {
-        "note_object": room,
+        "note_object": obj,
         "hx_post_url": hx_post_url,
         "form": form,
     }

@@ -4,22 +4,9 @@
 
 
 {% block extra_css %}
-<style>
-.tr-note td {
-    border-top: 0;
-    padding: 0;
-}
-.note-update-wrapper {
-    padding: 1rem;
-}
-.note-update-form {
-    max-width: 600px;
-    margin: 0 auto;
-}
-.note-update-form textarea {
-    height: 5rem;
-}
-</style>
+    <style>
+        {% include 'inventory/partials/htmx_note.css' %}
+    </style>
 {% endblock %}
 
 {% block extra_js %}
@@ -28,40 +15,8 @@
         theme: 'bootstrap4',
     });
 
-
-    ;(function () {
-
-        const modal = new bootstrap.Modal(document.getElementById("modal"))
-
-        htmx.on("htmx:afterSwap", (e) => {
-        // Response targeting #dialog => show the modal
-        if (e.detail.target.id == "dialog") {
-            modal.show()
-        }
-        })
-
-        htmx.on("htmx:beforeSwap", (e) => {
-        // Empty response targeting #dialog => hide the modal
-        if (e.detail.target.id == "dialog" && !e.detail.xhr.response) {
-            modal.hide()
-            e.detail.shouldSwap = false
-        }
-        })
-
-        // Remove dialog content after hiding
-        htmx.on("hidden.bs.modal", () => {
-        document.getElementById("dialog").innerHTML = ""
-        })
-
-        const toastElement = document.getElementById("toast")
-        const toastBody = document.getElementById("toast-body")
-        const toast = new bootstrap.Toast(toastElement, { delay: 2000 })
-
-        htmx.on("showMessage", (e) => {
-            toastBody.innerText = e.detail.value
-            toast.show()
-        })
-})()
+    {% include 'inventory/includes/qrtoggle.js' %}
+    {% include 'inventory/partials/htmx_note.js' %}
 </script>
 
 {% include 'inventory/includes/qrvideo-jsinit.html' %}
@@ -128,7 +83,7 @@
 
         <tbody id="room-list-body" hx-trigger="load, objectListChanged from:body" hx-get hx-params="*" hx-target="this">
             <tr>
-                <td colspan="4">
+                <td colspan="3">
                     <div class="text-center">
                         <div class="spinner-border" role="status">
                           <span class="sr-only">Loading...</span>
