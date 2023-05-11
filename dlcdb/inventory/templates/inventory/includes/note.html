@@ -1,19 +1,39 @@
-{% if note_obj.get_latest_note %}
+{% if note_type == "room_note" %}
+    {% if note_obj.get_latest_note %}
+        <button 
+            hx-get="{% url 'inventory:room-note-update' room_uuid=room.uuid %}" 
+            hx-target="#dialog"
+            class="note-btn btn btn-sm btn-outline-primary"
+        >
+            <i class="fas fa-comment-alt"></i>
+        </button>
+    {% else %}
+        <button 
+            hx-get="{% url 'inventory:room-note-update' room_uuid=room.uuid %}" 
+            hx-target="#dialog"
+            class="note-btn btn btn-sm btn-outline-primary"
+        >
+            <i class="far fa-comment-alt"></i>
+        </button>
+    {% endif %}
+{% elif note_type == "device_note" %}
+    {% if note_obj.get_latest_note %}
     <button 
-        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}" 
+        hx-get="{% url 'inventory:device-note-update' device_uuid=device.uuid %}" 
         hx-target="#dialog"
         class="note-btn btn btn-sm btn-outline-primary"
     >
         <i class="fas fa-comment-alt"></i>
     </button>
-{% else %}
+    {% else %}
     <button 
-        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}" 
+        hx-get="{% url 'inventory:device-note-update' device_uuid=device.uuid %}" 
         hx-target="#dialog"
         class="note-btn btn btn-sm btn-outline-primary"
     >
         <i class="far fa-comment-alt"></i>
     </button>
+    {% endif %}
 {% endif %}
 
 
@@ -38,26 +58,5 @@
     >
         <i class="far fa-comment-alt"></i>
     </a>
-
-    {% if note_obj.get_latest_note %}
-    <span 
-        class="note-btn btn btn-sm btn-outline-primary"
-        hx-target="#room-{{ room.uuid }}-note" 
-        hx-swap="innerHTML"
-        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}"
-    >
-        <i class="fas fa-comment-alt"></i>
-    </span>
-    {% else %}
-    <span 
-        class="note-btn btn btn-sm btn-outline-primary"
-        hx-target="#room-{{ room.uuid }}-note" 
-        hx-swap="innerHTML"
-        hx-get="{% url 'inventory:room-note-update' room_pk=room.pk %}"
-    >
-        <i class="far fa-comment-alt"></i>
-    </span>
-    {% endif %}
-    
 {% endif %}
 {% endcomment %}
