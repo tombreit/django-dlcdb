@@ -399,8 +399,6 @@ class SapCompareListView(DetailView):
 
 
 def update_note_view(request, obj_type, obj_uuid):
-    print(f"{request=}")
-    print(f"{obj_type=}, {obj_uuid=}")
     inventory = get_current_inventory()
     request_user_email = get_user_email(request.user)
 

@@ -13,12 +13,8 @@ $font-size-base:  0.75rem;
 
 /* --- Set common styles ---------------------------------------------------- */
 
-// @import "bootswatch/dist/sketchy/_variables";
-
 /* todo: only include used bootstrap components */
 @import "bootstrap/scss/bootstrap";
-
-// @import "bootswatch/dist/sketchy/_bootswatch";
 
 @import "select2/dist/css/select2.min";
 @import "@ttskch/select2-bootstrap4-theme/dist/select2-bootstrap4.min";
