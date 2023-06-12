@@ -22,7 +22,7 @@ charset-normalizer==3.1.0
     # via requests
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
-django==4.1.9
+django==4.2.2
     # via
     #   crispy-bootstrap4
     #   django-appconf
@@ -73,7 +73,7 @@ markdown-it-py==2.2.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.2
+markupsafe==2.1.3
     # via jinja2
 mdit-py-plugins==0.3.5
     # via myst-parser
@@ -137,9 +137,9 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sqlparse==0.4.4
     # via django
-typing-extensions==4.6.2
+typing-extensions==4.6.3
     # via pydata-sphinx-theme
-urllib3==2.0.2
+urllib3==2.0.3
     # via requests
 whitenoise==6.4.0
     # via django-dlcdb (setup.cfg)
