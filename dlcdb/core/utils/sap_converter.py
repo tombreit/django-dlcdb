@@ -195,18 +195,14 @@ def fill_col_headers(file):
 
     rows = csv.reader(codecs.iterdecode(file, 'utf-8'))
     for index, row in enumerate(rows):
-
         # Remove leading and trailing whitespace
         row = [cell.strip() for cell in row]
 
-        if index == 0:
-            print(f"{row=}")
-
         # if set(SAP_COL_MAP.keys()).issubset(row):
+        if index == 0:
             # This should be the header row
             row = [SAP_COL_MAP.get(cell, cell) for cell in row]
             row.extend(SAP_COL_ADD)  # Add obligatory column headers not present in import file
-            print(f"{row=}")
         _cleaned_writer.writerow(row)
 
     cleaned_buffer.seek(0)

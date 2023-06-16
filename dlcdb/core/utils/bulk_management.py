@@ -289,8 +289,8 @@ def create_fk_objs(fk_field, rows):
     model_class_name = string.capwords(fk_field, sep="_").replace("_", "")
     ModelClass = apps.get_model(f"core.{model_class_name}")
     for row in rows:
-        print(f"{row[fk_field]=}")
         # instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
+        # Get objects with case insensitive lookup or create a new object:
         instance, created = ModelClass.objects.get_or_create(
             name__iexact=row[fk_field],
             defaults={'name': row[fk_field]},
