@@ -4,6 +4,8 @@ from io import StringIO
 from datetime import datetime
 
 
+SAP_COL_UNTERNUMMER_KEYS = ['Unternummer', 'UNr.']
+
 SAP_COL_ADD = [
     'TENANT',
     'RECORD_TYPE',
@@ -23,18 +25,24 @@ SAP_COL_ADD = [
     'SUPPLIER',
     'IS_LICENCE',
     'MAC_ADDRESS',
+    'ORDER_NUMBER',
 ]
 
 SAP_COL_MAP = {
     # Directly mappable cells:
     # "Anlagenbezeichnung": "SERIES",  # we fill edv_id with Anlagebezeichnung
     "SerialNr": "SERIAL_NUMBER",
+    "Serialnummer": "SERIAL_NUMBER",
     "Hersteller": "MANUFACTURER",
+    "Hersteller der Anlage": "MANUFACTURER",
     "Raum": "ROOM",
     "AnschWert": "BOOK_VALUE",
     "Kostenst.": "COST_CENTRE",
+    "Kostenstelle": "COST_CENTRE",
     "Aktivdatum": "PURCHASE_DATE",
+    "Aktivierung am": "PURCHASE_DATE",
     "Deakt.Dat.": "DEACTIVATED_DATE",
+    "Deaktivierung am": "DEACTIVATED_DATE",
 
     # # Cells needing preprocessing:
     # "Anlage": "",
@@ -125,27 +133,80 @@ def guess_device_type(description, tenant=None):
     return guessed_device_type
 
 
-def cleanup_sap_csv(file):
-    """
-    Process the SAP CSV file to clean it up:
-    Remove empty rows, leading non-data rows etc.
-    """
+# def cleanup_sap_csv(file):
+#     """
+#     Process the SAP CSV file to clean it up:
+#     Remove empty rows, leading non-data rows etc.
+
+#     SAP is able to export to Excel, but in a weird format. We do not
+#     handle Excel files for now, so these files have to be converted to
+#     plain CSV manually (keeping the weird format intact).
+
+#     Example:
+#     row=b'"13.02.2023                                                                                  Dynamische Listenausgabe                                                                                          1",,,,,,,,,,,,,,,,,,,,,,,\n'
+#     row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
+#     row=b'"     Berichtsdatum:",,,,31.12.2023,,"Anlagenbestand (aktueller Buchwert) - 01 Handelsrecht",,,,,,,,,,,,,,,,,\n'
+#     row=b'"  Erstellungsdatum:",,,,13.02.2023,,,,,,,,,,,,,,,,,,,1\n'
+#     row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
+#     row=b'"Buchungskreis",,,,,"GeschBereich",,"Bilanzposition","BestandskontoAHK",,,"Anlagenklasse",,,,,,,,,,,,\n'
+#     row=b'"STRA",,,,,,,1010101000,2812913,,,2812913,,,,,,,,,,,,\n'
+#     row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
+#     row=b',"Anlage","UNr.","Anlagenbezeichnung",,,,,"Aktivdatum","Zujr","      AnschWert",,"      kumul AfA","       Buchwert","W\xc3\xa4hrg","BuKr","Deakt.Dat.","Raum","Kreditor","Kostenst.","PSP-Element","SerialNr","Hersteller",\n'
+#     row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
+#     row=b',6000224,0,"Microsoft Office 365 E3 Lizenz Annual",,,,,05.10.2022,2022,435,,-435,0,"EUR","STRA",,,800133,"K5300",,,,\n'
+
+#     Basically we
+#     * search the first row which seems to be the column headers
+#     * strip all rows above
+#     * convert the column header names to our own defined column headers
+#     * check if the next row is empty, if so, delete that empty row
+#     * return the cleaned CSV result file
+
+#     2023-06-16: 
+#     SAP *does* export a simple Excel file if the right
+#     buttons are used, so this function is not needed anymore
+#     """
+
+#     cleaned_buffer = StringIO()
+#     _cleaned_writer = csv.writer(cleaned_buffer, dialect='cleaned_dialect')
+
+#     rows = csv.reader(codecs.iterdecode(file, 'utf-8'))
+#     for index, row in enumerate(rows):
+#         # Remove leading and trailing whitespace
+#         row = [cell.strip() for cell in row]
+
+#         if index <= 7:
+#             continue
+#         elif not any(row):
+#             continue
+#         elif set(SAP_COL_MAP.keys()).issubset(row):
+#             # This should be the header row
+#             row = [SAP_COL_MAP.get(cell, cell) for cell in row]
+#             row.extend(SAP_COL_ADD)  # Add obligatory column headers not present in import file
+#         _cleaned_writer.writerow(row)
+
+#     cleaned_buffer.seek(0)
+#     return cleaned_buffer
+
+
+def fill_col_headers(file):
     cleaned_buffer = StringIO()
     _cleaned_writer = csv.writer(cleaned_buffer, dialect='cleaned_dialect')
 
     rows = csv.reader(codecs.iterdecode(file, 'utf-8'))
     for index, row in enumerate(rows):
+
         # Remove leading and trailing whitespace
         row = [cell.strip() for cell in row]
 
-        if index <= 7:
-            continue
-        elif not any(row):
-            continue
-        elif set(SAP_COL_MAP.keys()).issubset(row):
+        if index == 0:
+            print(f"{row=}")
+
+        # if set(SAP_COL_MAP.keys()).issubset(row):
             # This should be the header row
             row = [SAP_COL_MAP.get(cell, cell) for cell in row]
             row.extend(SAP_COL_ADD)  # Add obligatory column headers not present in import file
+            print(f"{row=}")
         _cleaned_writer.writerow(row)
 
     cleaned_buffer.seek(0)
@@ -173,7 +234,20 @@ def adapt_cleaned_csv(file, tenant):
             deactivated_date=row['DEACTIVATED_DATE'],
         )
 
-        sap_id = f"{row['Anlage']}-{row['UNr.']}"
+        # In some SAP export files the column is named 'Unternummer', in some
+        # others 'UNr.':
+        _unternummer = None
+
+        for unternummer_key in SAP_COL_UNTERNUMMER_KEYS:
+            try:
+                _unternummer = row[unternummer_key]
+            except KeyError:
+                pass
+
+        if not _unternummer:
+            raise KeyError("Keine Unternummer (keine Spalte 'Unternummer' oder 'UNr.') gefunden!")
+
+        sap_id = f"{row['Anlage']}-{_unternummer}"
         # We use the SAP asset description as the edv_id and prepend a
         # unique identifier (here: sap_id)
         edv_id = f"{row['Anlagenbezeichnung']} ({sap_id})"
@@ -212,34 +286,9 @@ def convert_to_csv(csv_data):
 
 
 def convert_raw_sap_export(sap_csvfile, tenant, valid_col_headers):
-    """
-    SAP is able to export to Excel, but in a weird format. We do not
-    handle Excel files for now, so these files have to be converted to
-    plain CSV manually (keeping the weird format intact).
-
-    Example:
-    row=b'"13.02.2023                                                                                  Dynamische Listenausgabe                                                                                          1",,,,,,,,,,,,,,,,,,,,,,,\n'
-    row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
-    row=b'"     Berichtsdatum:",,,,31.12.2023,,"Anlagenbestand (aktueller Buchwert) - 01 Handelsrecht",,,,,,,,,,,,,,,,,\n'
-    row=b'"  Erstellungsdatum:",,,,13.02.2023,,,,,,,,,,,,,,,,,,,1\n'
-    row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
-    row=b'"Buchungskreis",,,,,"GeschBereich",,"Bilanzposition","BestandskontoAHK",,,"Anlagenklasse",,,,,,,,,,,,\n'
-    row=b'"STRA",,,,,,,1010101000,2812913,,,2812913,,,,,,,,,,,,\n'
-    row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
-    row=b',"Anlage","UNr.","Anlagenbezeichnung",,,,,"Aktivdatum","Zujr","      AnschWert",,"      kumul AfA","       Buchwert","W\xc3\xa4hrg","BuKr","Deakt.Dat.","Raum","Kreditor","Kostenst.","PSP-Element","SerialNr","Hersteller",\n'
-    row=b',,,,,,,,,,,,,,,,,,,,,,,\n'
-    row=b',6000224,0,"Microsoft Office 365 E3 Lizenz Annual",,,,,05.10.2022,2022,435,,-435,0,"EUR","STRA",,,800133,"K5300",,,,\n'
-
-    Basically we
-    * search the first row which seems to be the column headers
-    * strip all rows above
-    * convert the column header names to our own defined column headers
-    * check if the next row is empty, if so, delete that empty row
-    * return the cleaned CSV result file
-    """
-
-    cleaned_csv = cleanup_sap_csv(sap_csvfile)
-    adapted_csv = adapt_cleaned_csv(cleaned_csv, tenant)
+    # cleaned_csv = cleanup_sap_csv(sap_csvfile)
+    filled_headers_csv = fill_col_headers(sap_csvfile)
+    adapted_csv = adapt_cleaned_csv(filled_headers_csv, tenant)
     final_csv = convert_to_csv(adapted_csv)
 
     return final_csv

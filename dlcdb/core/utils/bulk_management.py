@@ -274,8 +274,11 @@ def set_fk_field(row, key):
     try:
         model_class_name = string.capwords(key, sep="_").replace("_", "")
         ModelClass = apps.get_model(f"core.{model_class_name}")
-        # obj, created = ModelClass.objects.get_or_create(name=value)
-        obj = ModelClass.objects.get(name=value)
+        obj = ModelClass.objects.get(name__iexact=value)
+    except ModelClass.DoesNotExist as does_not_exist_error:
+        raise ObjectDoesNotExist(f"{does_not_exist_error} for {model_class_name} {value}")
+    except ModelClass.MultipleObjectsReturned as multiple_objects_returned_error:
+        raise IntegrityError(f"{multiple_objects_returned_error} for {model_class_name} {value}")
     except IntegrityError as integrity_error:
         raise IntegrityError(f"{integrity_error} for {model_class_name} {value}")
 
@@ -286,7 +289,12 @@ def create_fk_objs(fk_field, rows):
     model_class_name = string.capwords(fk_field, sep="_").replace("_", "")
     ModelClass = apps.get_model(f"core.{model_class_name}")
     for row in rows:
-        instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
+        print(f"{row[fk_field]=}")
+        # instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
+        instance, created = ModelClass.objects.get_or_create(
+            name__iexact=row[fk_field],
+            defaults={'name': row[fk_field]},
+        )
     return
 
 
