@@ -229,7 +229,11 @@ def create_record(*, device, record_type, record_note, room, person, username, r
         if not room:
             raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
 
-        room_obj, created = Room.objects.get_or_create(number=room)
+        # room_obj, created = Room.objects.get_or_create(number=room)
+        room_obj, created = Room.objects.get_or_create(
+            number__iexact=room,
+            defaults={'number': room},
+        )
         record_obj = InRoomRecord(
             device=device,
             room=room_obj,

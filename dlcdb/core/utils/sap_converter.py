@@ -1,3 +1,4 @@
+import re
 import csv
 import codecs
 from io import StringIO
@@ -75,6 +76,20 @@ def get_iso_datestr(datestr):
     dateformat = "%d.%m.%Y"
     dateobj = datetime.strptime(datestr,dateformat)
     return f"{dateobj:%Y-%m-%d}"
+
+
+def fix_room_notation(room: str) -> str:
+    room = str(room)
+    room = room.strip()
+
+    try:
+        pattern = re.compile("^(\d{1,2})$")
+        room = pattern.match(room).group(1)
+        room = f"{room:0>3}"
+    except Exception:
+        pass
+
+    return room
 
 
 def guess_record_type(*, room, deactivated_date):
@@ -224,9 +239,10 @@ def adapt_cleaned_csv(file, tenant):
 
     _adapted_writer.writeheader()
     for index, row in enumerate(reader):
+        room = fix_room_notation(row['ROOM'])
 
         record_type, _room, _removed_date = guess_record_type(
-            room=row['ROOM'],
+            room=room,
             deactivated_date=row['DEACTIVATED_DATE'],
         )
 
@@ -254,7 +270,7 @@ def adapt_cleaned_csv(file, tenant):
         row['TENANT'] = tenant.name
         row['DEVICE_TYPE'] = guess_device_type(edv_id)  # Was: row['Anlagenbezeichnung']
         row['RECORD_TYPE'] = record_type
-        row['ROOM'] = _room
+        row['ROOM'] = room
         row['REMOVED_DATE'] = _removed_date
         _adapted_writer.writerow(row)
 
