@@ -39,23 +39,19 @@ def get_devices_for_room(request, room_pk):
     # By default do not expose any devices
     devices_qs = Device.objects.none()
 
+    base_qs = (
+        Device
+        .objects
+        .filter(active_record__room__pk=room_pk)
+        .order_by('-modified_at')
+    )
+
     if request.user.is_superuser:
         # No pre-filtering for superusers
-        devices_qs = (
-            Device
-            .objects
-            .filter(active_record__room__pk=room_pk)
-            .order_by('-modified_at')
-        )
+        devices_qs = base_qs
     elif request.tenant:
         # Filter by tenant
-        devices_qs = (
-            Device
-            .objects
-            .filter(tenant=request.tenant)
-            .filter(active_record__room__pk=room_pk)
-            .order_by('-modified_at')
-        )
+        devices_qs = base_qs.filter(tenant=request.tenant)
 
     return devices_qs
 
