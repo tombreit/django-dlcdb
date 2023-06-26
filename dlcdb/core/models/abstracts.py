@@ -42,6 +42,9 @@ class SoftDeleteAuditBaseModelQuerySet(models.QuerySet):
             obj.deleted_at=now()
             obj.save()
 
+    def hard_delete(self):
+        return super().delete()
+
     def not_deleted_objects(self):
         return self.filter(deleted_at__isnull=True)
     

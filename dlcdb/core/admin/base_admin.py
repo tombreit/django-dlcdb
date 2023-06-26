@@ -89,6 +89,17 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         # "is_not_soft_deleted",
     )
 
+    def get_actions(self, request):
+        """
+        Only expose hard delete queryset option for superusers.
+        https://docs.djangoproject.com/en/4.2/ref/contrib/admin/actions/#conditionally-enabling-or-disabling-actions
+        """
+        actions = super().get_actions(request)
+        if not request.user.is_superuser:
+            if "hard_delete_action" in actions:
+                del actions["hard_delete_action"]
+        return actions
+
     def get_readonly_fields(self, request, obj=None):
         return tuple(super().get_readonly_fields(request, obj=None)) + (
             "deleted_at",
@@ -117,11 +128,17 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
             queryset = queryset.order_by(*ordering)
         return queryset
 
+    @admin.action(description="Hard delete")
+    def hard_delete_action(self, request, queryset):
+        queryset.hard_delete()
+
     # To get a nice green icon for not soft deleted objects
+    @admin.display(
+        boolean=True,
+        description="Not soft deleted",
+    )
     def is_not_soft_deleted(self, obj):
         return False if obj.deleted_at else True
-    is_not_soft_deleted.boolean = True
-    is_not_soft_deleted.short_description = 'Not soft deleted'
 
 
 class NoModificationModelAdminMixin(object):

@@ -14,7 +14,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device, Record
-from ..utils.helpers import get_has_note_badge, make_tenant_aware
+from ..utils.helpers import get_has_note_badge, get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
 from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
@@ -87,6 +87,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     actions = [
         'relocate',
         'export_as_csv',
+        'hard_delete_action',
     ]
 
     # form = DeviceAdminForm
@@ -154,7 +155,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
     def get_list_filter(self, request):
         list_filter = super().get_list_filter(request)
-        return make_tenant_aware(list_filter, request.user.is_superuser)
+        return get_superuser_list(list_filter, "tenant", request.user.is_superuser)
 
     def get_list_display(self, request):
         """
@@ -168,7 +169,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             # set() operations do not preserve order
             # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
 
-        return make_tenant_aware(list_display, request.user.is_superuser)
+        return get_superuser_list(list_display, "tenant", request.user.is_superuser)
 
     def get_fieldsets(self, request, obj=None):
         orig_fieldsets = super().get_fieldsets(request, obj)

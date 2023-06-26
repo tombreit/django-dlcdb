@@ -176,16 +176,16 @@ def rollback_atomic() -> Generator[None, None, None]:
         pass
 
 
-def make_tenant_aware(listing: list, is_superuser: bool) -> list:
+def get_superuser_list(listing: list, list_item: str, is_superuser: bool) -> list:
     """
     Adds or removes 'tenant' from a list based on is_superuser.
     """
 
     with suppress(ValueError):
         if is_superuser:
-            if 'tenant' not in listing:
-                listing.append('tenant')
+            if list_item not in listing:
+                listing.append(list_item)
         else:
-            listing.remove('tenant')
+            listing.remove(list_item)
 
     return listing
