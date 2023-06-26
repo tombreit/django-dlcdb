@@ -1,4 +1,5 @@
 import json
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils.html import mark_safe, format_html
@@ -13,7 +14,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device, Record
-from ..utils.helpers import get_has_note_badge
+from ..utils.helpers import get_has_note_badge, make_tenant_aware
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
 from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
@@ -32,7 +33,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     # inlines = [NoteInline]
     ordering =  ['-modified_at']  # '-active_record__created_at'
 
-    list_filter = (
+    list_filter = [
         'device_type',
         'active_record__record_type',
         'is_lentable',
@@ -45,7 +46,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'is_imported',
         'created_at',
         'modified_at',
-    )
+    ]
 
     search_fields = [
         'edv_id',
@@ -64,14 +65,14 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'supplier',
     ]
 
-    list_display = (
+    list_display = [
         'edv_id',
         'sap_id',
         'device_type',
         'manufacturer',
         'series',
         'get_record_info_display',
-    )  # + CustomBaseModelAdmin.list_display
+    ]  # + CustomBaseModelAdmin.list_display
 
     readonly_fields = (
         'is_imported',
@@ -151,6 +152,10 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         })
     )
 
+    def get_list_filter(self, request):
+        list_filter = super().get_list_filter(request)
+        return make_tenant_aware(list_filter, request.user.is_superuser)
+
     def get_list_display(self, request):
         """
         Return a sequence containing the fields to be displayed on the
@@ -162,7 +167,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             list_display = [entry for entry in list_display if entry not in settings.DEVICE_HIDE_FIELDS]
             # set() operations do not preserve order
             # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
-        return list_display
+
+        return make_tenant_aware(list_display, request.user.is_superuser)
 
     def get_fieldsets(self, request, obj=None):
         orig_fieldsets = super().get_fieldsets(request, obj)

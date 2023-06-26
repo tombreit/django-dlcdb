@@ -3,11 +3,11 @@ import base64
 import re
 from io import BytesIO
 from collections import namedtuple
-
 from collections.abc import Generator
 from contextlib import contextmanager
-from django.db.transaction import atomic
+from contextlib import suppress
 
+from django.db.transaction import atomic
 from django.conf import settings
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -174,3 +174,18 @@ def rollback_atomic() -> Generator[None, None, None]:
             raise DoRollback()
     except DoRollback:
         pass
+
+
+def make_tenant_aware(listing: list, is_superuser: bool) -> list:
+    """
+    Adds or removes 'tenant' from a list based on is_superuser.
+    """
+
+    with suppress(ValueError):
+        if is_superuser:
+            if 'tenant' not in listing:
+                listing.append('tenant')
+        else:
+            listing.remove('tenant')
+
+    return listing
