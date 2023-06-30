@@ -398,6 +398,17 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
+def get_note_btn(request, obj_type, obj_uuid):
+    if obj_type == "device":
+        obj = Device.objects.get(uuid=obj_uuid)
+
+    return render(
+        request,
+        "inventory/includes/note_btn.html",
+        {"obj_type": obj_type, "obj_uuid": obj_uuid, "obj": obj}
+    )
+
+
 def update_note_view(request, obj_type, obj_uuid):
     inventory = get_current_inventory()
     request_user_email = get_user_email(request.user)

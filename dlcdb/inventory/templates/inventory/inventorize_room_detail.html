@@ -164,7 +164,9 @@
                     </small>
                 </td>
                 <td>
-                    {% include 'inventory/includes/note_btn.html' with obj_type="device" obj=device %}
+                    <div hx-trigger="load, objectListChanged from:body" hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}" hx-swap="innerHTML">
+                        {# include 'inventory/includes/note_btn.html' with obj_type="device" obj=device #}
+                    </div>
                 </td>
             </tr>
         {% endfor %}
