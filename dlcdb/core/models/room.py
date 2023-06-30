@@ -17,13 +17,19 @@ from .abstracts import SoftDeleteAuditBaseModel
 
 class RoomInventoryManager(models.Manager):
     def get_queryset(self):
-
         qs = (
             super()
             .get_queryset()
             .annotate(
-                room_devices_count=Count('pk', filter=Q(record__is_active=True), output_field=IntegerField()),
-                room_inventorized_devices_count=Count('pk', filter=Q(record__is_active=True, record__inventory__is_active=True), output_field=IntegerField()),
+                room_devices_count=Count('pk', filter=Q(
+                    record__is_active=True,
+                    record__device__deleted_at__isnull=True,
+                ), output_field=IntegerField()),
+                room_inventorized_devices_count=Count('pk', filter=Q(
+                    record__is_active=True,
+                    record__inventory__is_active=True,
+                    record__device__deleted_at__isnull=True,
+                ), output_field=IntegerField()),
             )
             .order_by("number")
         )
@@ -143,15 +149,16 @@ class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
         """
         from . import Device
 
-        # return Device.objects.none()
-        # device_ids = self.record_set.filter(is_active=True).values_list("device", flat=True)
-        # return Device.objects.filter(pk__in=device_ids)
-        
-        return Device.objects.select_related('record').filter(record__is_active=True, record__room=self)
-
-        # records = self.get_active_records().values_list("pk")
-        # devices = Device.objects.filter(record__in=records)
-        # return devices
+        return (
+            Device
+            .objects
+            .select_related('active_record')
+            .filter(
+                active_record__is_active=True,
+                active_record__room=self,
+                active_record__device__deleted_at__isnull=True,
+            )
+        )
 
     def get_latest_note(self):
         """

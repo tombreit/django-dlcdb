@@ -34,17 +34,13 @@ def uuid2qrcode(uuid, infix=None):
 
 
 def get_devices_for_room(request, room_pk):
-    from ..core.models import Device
+    from ..core.models import Device, Room
 
     # By default do not expose any devices
     devices_qs = Device.objects.none()
 
-    base_qs = (
-        Device
-        .objects
-        .filter(active_record__room__pk=room_pk)
-        .order_by('-modified_at')
-    )
+    room = Room.objects.get(pk=room_pk)
+    base_qs = room.get_devices()
 
     if request.user.is_superuser:
         # No pre-filtering for superusers
@@ -53,7 +49,7 @@ def get_devices_for_room(request, room_pk):
         # Filter by tenant
         devices_qs = base_qs.filter(tenant=request.tenant)
 
-    return devices_qs
+    return devices_qs.order_by('-modified_at')
 
 
 def unique_seq(sequence):
