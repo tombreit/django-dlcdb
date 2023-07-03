@@ -1,4 +1,5 @@
 {% extends "admin/change_form.html" %}
+{% load i18n %}
 
 
 {% block content_subtitle %}
@@ -6,12 +7,14 @@
     {#{ block.super }#}
     <div class="mb-4">
     {% if subtitle %}
-        <div style="font-size: 1rem;" class="d-inline btn btn-primary disabled font-weight-bold">{{ subtitle }}</div>
+        <div style="font-size: 1rem;" class="d-inline btn btn-primary disabled font-weight-bold">
+            {{ subtitle }}
+        </div>
     {% endif %}
 
     {% if original %}
         <div class="d-inline ml-4">
-        {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
+            {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
         </div>
     {% endif %}
     </div>
@@ -21,7 +24,8 @@
 {% block object-tools-items %}
     <li>
         <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
-            <i class="fa fa-search"></i> Alle Records anzeigen {{ has_record_notes_badge|default:"" }}
+            <i class="fa-solid fa-layer-group"></i> 
+            {% translate "Show all records" %} {{ has_record_notes_badge|default:"" }}
         </a>
     </li>
     {{ block.super }}

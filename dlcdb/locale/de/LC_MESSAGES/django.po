@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-20 12:30+0100\n"
-"PO-Revision-Date: 2023-03-20 12:32+0100\n"
+"POT-Creation-Date: 2023-07-03 14:32+0200\n"
+"PO-Revision-Date: 2023-07-03 14:33+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.3.2\n"
 
 #: dlcdb/accounts/templates/accounts/logout.html:23
 msgid "Thanks for spending some quality time with the web site today."
@@ -26,31 +26,31 @@ msgstr ""
 msgid "Log in again"
 msgstr "Erneut anmelden"
 
-#: dlcdb/core/admin/device_admin.py:251
+#: dlcdb/core/admin/device_admin.py:258
 msgid "In room"
 msgstr "In Raum"
 
-#: dlcdb/core/admin/device_admin.py:263
+#: dlcdb/core/admin/device_admin.py:270
 msgid "Relocate device"
 msgstr "Gerät umziehen"
 
-#: dlcdb/core/admin/device_admin.py:272
+#: dlcdb/core/admin/device_admin.py:279
 msgid "Edit lending"
 msgstr "Verleih bearbeiten"
 
-#: dlcdb/core/admin/device_admin.py:290
+#: dlcdb/core/admin/device_admin.py:297
 msgid "Previous records for this device"
 msgstr "Vorheriger Record für dieses Device"
 
-#: dlcdb/core/admin/device_admin.py:296
+#: dlcdb/core/admin/device_admin.py:303
 msgid "Unknown record type! Contact your administrator!"
 msgstr "Unbekannter Record Type! Kontaktieren sie ihren DLCDB-Administrator!"
 
-#: dlcdb/core/admin/device_admin.py:322 dlcdb/core/models/prx_lentrecord.py:125
+#: dlcdb/core/admin/device_admin.py:329 dlcdb/core/models/prx_lentrecord.py:125
 msgid "Lending"
 msgstr "Ausleihe"
 
-#: dlcdb/core/admin/device_admin.py:327
+#: dlcdb/core/admin/device_admin.py:334
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -58,7 +58,7 @@ msgstr "Ausleihen"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:91
+#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:97
 msgid "Rooms"
 msgstr "Räume"
 
@@ -216,7 +216,7 @@ msgstr "Duplikat"
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
-#: dlcdb/core/models/room.py:90
+#: dlcdb/core/models/room.py:96
 msgid "Room"
 msgstr "Raum"
 
@@ -235,6 +235,10 @@ msgstr "Distributoren"
 #: dlcdb/core/templates/core/actions/relocate.html:75
 msgid "No, take me back"
 msgstr "Nein, bitte zurück"
+
+#: dlcdb/core/templates/core/device/change_form.html:28
+msgid "Show all records"
+msgstr "Alle Records anzeigen"
 
 #: dlcdb/core/templates/core/lentrecord/change_list.html:10
 msgid "Checklist"
