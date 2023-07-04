@@ -17,7 +17,7 @@ class InventoryConfig(AppConfig):
         {
             'slot': 'nav_processes',
             'order': 50,
-            'label': 'Abgleichen mit SAP',
+            'label': 'SAP Abgleich',
             'icon': '',
             'url': 'admin:inventory_saplist_changelist',
             'required_permission': 'true',
