@@ -75,7 +75,7 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
 
 - Tip: Mobiles Endgerät (Smartphone, Tablet) nutzen
 - Inventur-Ansicht öffnen
-- *QR-Scanner" (Schalter rechts oben) einschalten
+- *QR-Scanner* (Schalter rechts oben) einschalten
 - Seite neu laden
 - Raum-Schild scannen, App welchselt in den gescannten Raum
 - Assets scannen

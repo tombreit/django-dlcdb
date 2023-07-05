@@ -1,7 +1,10 @@
 from django.db import models
 from django.db.models.functions import Lower
 
-from .managers import TenantManager
+
+class TenantManager(models.Manager):
+    def get_current(self, request=None):
+        return self.get_current_tenant(request)
 
 
 class Tenant(models.Model):

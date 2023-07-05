@@ -16,24 +16,43 @@ from .abstracts import SoftDeleteAuditBaseModel
 
 
 class RoomInventoryManager(models.Manager):
-    def get_queryset(self):
-        qs = (
-            super()
-            .get_queryset()
-            .annotate(
-                room_devices_count=Count('pk', filter=Q(
-                    record__is_active=True,
-                    record__device__deleted_at__isnull=True,
-                ), output_field=IntegerField()),
-                room_inventorized_devices_count=Count('pk', filter=Q(
-                    record__is_active=True,
-                    record__inventory__is_active=True,
-                    record__device__deleted_at__isnull=True,
-                ), output_field=IntegerField()),
+    def get_tenant_aware_objects(self, tenant=None):
+        qs = super().get_queryset()
+
+        if tenant:
+            qs = (
+                qs
+                .annotate(
+                    room_devices_count=Count('pk', filter=Q(
+                        record__is_active=True,
+                        record__device__deleted_at__isnull=True,
+                        record__device__tenant=tenant,
+                    ), output_field=IntegerField()),
+                    room_inventorized_devices_count=Count('pk', filter=Q(
+                        record__is_active=True,
+                        record__inventory__is_active=True,
+                        record__device__deleted_at__isnull=True,
+                        record__device__tenant=tenant,
+                    ), output_field=IntegerField()),
+                )
             )
-            .order_by("number")
-        )
-        return qs
+        else:
+            qs = (
+                qs
+                .annotate(
+                    room_devices_count=Count('pk', filter=Q(
+                        record__is_active=True,
+                        record__device__deleted_at__isnull=True,
+                    ), output_field=IntegerField()),
+                    room_inventorized_devices_count=Count('pk', filter=Q(
+                        record__is_active=True,
+                        record__inventory__is_active=True,
+                        record__device__deleted_at__isnull=True,
+                    ), output_field=IntegerField()),
+                )
+            )
+
+        return qs.order_by("number")
 
 
 class RoomInventoryManagerAbstract(models.Model):

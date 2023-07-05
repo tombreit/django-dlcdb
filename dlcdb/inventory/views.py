@@ -21,8 +21,10 @@ Procedure:
 from datetime import date
 import json
 from collections import namedtuple
+from typing import Any
 
 from django.conf import settings
+from django.db import models
 from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
@@ -88,11 +90,13 @@ class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
 
 class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
-    queryset = Room.inventory_objects.all()
     context_object_name = "room"
     template_name = "inventory/inventorize_room_detail.html"
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
+
+    def get_queryset(self):
+        return Room.inventory_objects.get_tenant_aware_objects(self.request.tenant)
 
     def get_context_data(self, **kwargs):
         # print(f"get_contex_data self.object.pk: {self.object.pk}")
@@ -253,8 +257,10 @@ class InventorizeRoomView(LoginRequiredMixin, View):
 class InventorizeRoomListView(LoginRequiredMixin, FilterView):
     model = Room
     context_object_name = "rooms"
-    queryset = Room.inventory_objects.all()
     filterset_class = RoomFilter
+
+    def get_queryset(self):
+        return Room.inventory_objects.get_tenant_aware_objects(self.request.tenant)
 
     def get_template_names(self):
         if self.request.htmx:
