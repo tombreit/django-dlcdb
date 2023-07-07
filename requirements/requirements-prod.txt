@@ -22,7 +22,7 @@ charset-normalizer==3.1.0
     # via requests
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
-django==4.2.2
+django==4.2.3
     # via
     #   crispy-bootstrap4
     #   django-appconf
