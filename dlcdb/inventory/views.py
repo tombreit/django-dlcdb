@@ -113,9 +113,19 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         )
 
         # Allow only adding devices which are not already present in this room:
-        valid_add_devices = Device.objects.exclude(active_record__room=self.object.pk)
+        valid_add_devices_qs = (
+            Device
+            .objects
+            .exclude(active_record__room=self.object.pk)
+        )
+
+        if self.request.tenant:
+            valid_add_devices_qs = valid_add_devices_qs.filter(
+                tenant=self.request.tenant
+            )
+
         device_choices = [("", "Add device")]
-        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices]
+        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices_qs]
 
         device_add_form = DeviceAddForm(
             device_choices=device_choices,
