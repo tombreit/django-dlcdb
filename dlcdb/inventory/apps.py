@@ -7,10 +7,18 @@ class InventoryConfig(AppConfig):
 
     nav_entries = [
         {
+            'slot': 'nav_main',
+            'order': 5,
+            'label': 'Inventarisieren',
+            'icon': 'fa-solid fa-glasses',
+            'url': 'inventory:inventorize-room-list',
+            'required_permission': 'true',
+        },
+        {
             'slot': 'nav_processes',
             'order': 40,
             'label': 'Inventarisieren',
-            'icon': '',
+            'icon': 'fa-solid fa-glasses',
             'url': 'inventory:inventorize-room-list',
             'required_permission': 'true',
         },
