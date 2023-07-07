@@ -278,8 +278,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         else:
             return ["inventory/inventorize_room_list.html"]
 
-    @staticmethod
-    def get_inventory_progress():
+    def get_inventory_progress(self):
         inventory_progress = namedtuple(
             "inventory_progress",
             [
@@ -292,15 +291,17 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         done_percent = 0
         current_inventory = Inventory.objects.get(is_active=True)
         all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
+
+        if self.request.tenant:
+            all_devices = all_devices.filter(device__tenant=self.request.tenant)
+
         inventorized_devices_count = all_devices.filter(inventory=current_inventory).count()
         all_devices_count = all_devices.count()
 
-        if all(
-            [
-                current_inventory,
-                all_devices,
-            ]
-        ):
+        if all([
+            current_inventory,
+            all_devices,
+        ]):
             done_percent = (inventorized_devices_count * 100) / all_devices_count
             done_percent = int(round(done_percent, 0))
             return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
