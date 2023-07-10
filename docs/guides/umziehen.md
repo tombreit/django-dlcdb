@@ -18,7 +18,8 @@ Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", 
 - Umzuziehende Geräte aufrufen.
   - Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
   - Die Paginierung kann via "Zeige alle" in der Fußzeile der Gerätetabelle deaktiviert werden.
-- Im Django-Admin Actions Dropdown "relocate" auswählen
+- Im Django-Admin Actions Dropdown "Relocate" auswählen
 - Gerätedaten nochmals prüfen.
 - Neuen Raum angeben.
+  - Nur für Superuser: Es kann auch ein neuer Tenant angegeben werden.
 - Button "Relocate devices" anklicken.
