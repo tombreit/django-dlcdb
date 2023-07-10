@@ -4,10 +4,6 @@ from django.contrib import messages
 def get_current_tenant(request):
     """
     Get current ``Tenant`` object based on request.user.groups.
-
-    Return values:
-    None: no tenant found for given groups
-    tenant
     """
 
     from .models import Tenant
@@ -23,9 +19,7 @@ def get_current_tenant(request):
                 .filter(groups__in=request_user_groups)
                 # Multiple tenent matches ares possible, so we could not use .get()
                 # https://docs.djangoproject.com/en/3.2/ref/models/querysets/#get
-                # .get()
                 .distinct()
-                # .first()
             )
             _tenant_count = _tenant.count()
         except Exception as e:
