@@ -14,6 +14,12 @@ class DevicesRelocateView(FormView):
     template_name = 'core/actions/relocate.html'
     form_class = RelocateActionForm
 
+    def get_form_kwargs(self):
+        """Added keyword 'is_superuser' for instantiating and validating the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['is_superuser'] = self.request.user.is_superuser
+        return kwargs
+
     def get_initial(self):
         initial = super().get_initial()
 
@@ -33,43 +39,49 @@ class DevicesRelocateView(FormView):
         selected_instances = self.get_initial().get('devices')
         user = self.get_initial().get('user')
         new_room = form.cleaned_data.get('new_room')
+        new_tenant = form.cleaned_data.get('new_tenant')
 
-        if new_room is None:
-            self.add_error("new_room", "No new room given!")
-
-        self.relocate_devices(selected_instances, new_room, user)
+        self.relocate_devices(selected_instances, new_room, user, new_tenant)
         return super().form_valid(form)
 
-    def relocate_devices(self, devices, new_room, user):
+    def relocate_devices(self, devices, new_room, user, new_tenant):
         for device in devices:
             # print(f"Processing device: {device}...")
 
-            if hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.LENT:
-                device.active_record.room = new_room
-                device.active_record.save()
+            if new_tenant:
+                device.tenant = new_tenant
+                device.save()
 
-                update_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - just updating the room for the current LENT record." 
+                update_msg = f"Device <{device}>: Set new tenant to {new_tenant}."
                 messages.add_message(self.request, messages.INFO, update_msg)
 
-            elif hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.REMOVED:
-                error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - this device should not be here anymore. Not relocating this device!"
-                messages.add_message(self.request, messages.WARNING, error_msg)
-                continue
+            if new_room:
+                if hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.LENT:
+                    device.active_record.room = new_room
+                    device.active_record.save()
 
-            elif hasattr(device.active_record, "record_type") and device.active_record.room == new_room:
-                error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> and is already in room <{new_room}>. No need to relocate this device!"
-                messages.add_message(self.request, messages.WARNING, error_msg)
-                continue
+                    update_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - just updating the room for the current LENT record."
+                    messages.add_message(self.request, messages.INFO, update_msg)
 
-            else:
-                record_obj, created = InRoomRecord.objects.get_or_create(
-                    device=device,
-                    room=new_room,
-                    user=user,
-                    username=user.username,
-                )
-                
-                update_msg = f"Device <{device}> has record type <{device.active_record.record_type}>. Creating a new INROOM record for room <{new_room}>." 
-                messages.add_message(self.request, messages.INFO, update_msg)
+                elif hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.REMOVED:
+                    error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - this device should not be here anymore. Not relocating this device!"
+                    messages.add_message(self.request, messages.WARNING, error_msg)
+                    continue
+
+                elif hasattr(device.active_record, "record_type") and device.active_record.room == new_room:
+                    error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> and is already in room <{new_room}>. No need to relocate this device!"
+                    messages.add_message(self.request, messages.WARNING, error_msg)
+                    continue
+
+                else:
+                    record_obj, created = InRoomRecord.objects.get_or_create(
+                        device=device,
+                        room=new_room,
+                        user=user,
+                        username=user.username,
+                    )
+
+                    update_msg = f"Device <{device}> has record type <{device.active_record.record_type}>. Creating a new INROOM record for room <{new_room}>."
+                    messages.add_message(self.request, messages.INFO, update_msg)
 
         return

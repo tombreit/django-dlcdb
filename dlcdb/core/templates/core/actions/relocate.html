@@ -24,6 +24,10 @@
                     <td>{{ device.series }}</td>
                 </tr>
                 <tr>
+                    <th>Current tenant</th>
+                    <td>{{ device.tenant }}</td>
+                </tr>
+                <tr>
                     <th>Current room</th>
                     <td>{{ device.active_record.room }}</td>
                 </tr>
@@ -45,6 +49,7 @@
             <thead>
                 <tr>
                     <th>Device</th>
+                    <th>Tenant</th>
                     <th>Current room</th>
                     <th>Current record</th>
                 </tr>
@@ -53,6 +58,7 @@
             {% for device in form.initial.devices %}
             <tr>
                 <td>{{ device }}</td>
+                <td>{{ device.tenant }}</td>
                 <td>{{ device.active_record.room }}</td>
                 <td>
                     <span class="badge {% if device.active_record.record_type == 'REMOVED' %} badge-danger {% else %} badge-info {% endif %}">
