@@ -38,6 +38,7 @@ Inventur-Ansicht: *Prozesse > Inventur*
 ## Verleihgeräte
 
 - Wird bei einem verliehenen Gerät auf "Ist nicht da ist" geklickt wird, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.
+- Wird ein aktuell verliehenes Gerät in einem Raum gefunden und auf "Ist da" geklickt, wird die Raumzuordnung des Verleihs geändert, der Verleih bleibt jedoch weiterhin bestehen.
 - Die Existenz von Geräten, die aktuell verliehen sind müssen vom Leihenden bestätigt werden. Das management command `verify_lendings --help` kann das Anmailen der Leihenden übernehmen.
 - Die Rückmeldung des Leihenden muss als Inventur-Notiz beim Gerät eingetragen werden, z.B. "Bestätigung Besitz durch Ausleiher\*in via Email vom YYYY-MM-DD".
 - Es muss sichergestellt sein, dass für jeden Verleih auch eine Unterschrift des Leihenden geleistet wurde. Die Verleihzettel sind daher ebenfalls auf Vollständigkeit zu kontrollieren.
