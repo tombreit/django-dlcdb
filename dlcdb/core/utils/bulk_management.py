@@ -229,11 +229,12 @@ def create_record(*, device, record_type, record_note, room, person, username, r
         if not room:
             raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
 
-        # room_obj, created = Room.objects.get_or_create(number=room)
-        room_obj, created = Room.objects.get_or_create(
-            number__iexact=room,
-            defaults={'number': room},
-        )
+        # room_obj, created = Room.objects.get_or_create(
+        #     number__iexact=room,
+        #     defaults={'number': room},
+        # )
+        room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
+
         record_obj = InRoomRecord(
             device=device,
             room=room_obj,
@@ -289,16 +290,45 @@ def set_fk_field(row, key):
     return obj.id if obj else None
 
 
+def create_fk_obj(*, model_class, instance_key, instance_value):
+    # instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
+    # Get objects with case insensitive lookup or create a new object.
+    # Needs to check if dealing with a soft-delete enabled model.
+    # print(f"{model_class=}; {instance_key=}: {instance_value=}")
+
+    instance_key_iexact = f"{instance_key}__iexact"
+    defaults = {
+        instance_key: instance_value,
+    }
+
+    if hasattr(model_class, "with_softdeleted_objects"):
+        instance, created = model_class.with_softdeleted_objects.get_or_create(
+            **{instance_key_iexact: instance_value},
+            # name__iexact=instance_value,
+            defaults=defaults,
+        )
+
+        # Ensure previously soft-deleted objects gets undeleted
+        instance.deleted_at = None
+        instance.deleted_by = None
+        instance.save()
+    else:
+        instance, created = model_class.objects.get_or_create(
+            # name__iexact=instance_value,
+            **{instance_key_iexact: instance_value},
+            defaults=defaults,
+        )
+
+    return instance
+
+
 def create_fk_objs(fk_field, rows):
     model_class_name = string.capwords(fk_field, sep="_").replace("_", "")
-    ModelClass = apps.get_model(f"core.{model_class_name}")
+    model_class = apps.get_model(f"core.{model_class_name}")
+
     for row in rows:
-        # instance, created = ModelClass.objects.get_or_create(name=row[fk_field])
-        # Get objects with case insensitive lookup or create a new object:
-        instance, created = ModelClass.objects.get_or_create(
-            name__iexact=row[fk_field],
-            defaults={'name': row[fk_field]},
-        )
+        create_fk_obj(model_class=model_class, instance_key="name", instance_value=row[fk_field])
+
     return
 
 
