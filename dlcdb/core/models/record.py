@@ -113,8 +113,15 @@ class Record(AuditBaseModel):
     lent_note = models.TextField(blank=True, verbose_name='Interne Bemerkung (Ausleihe)')
     lent_reason = models.TextField(blank=True, verbose_name='Ausleihgrund')
     lent_accessories = models.TextField(blank=True, verbose_name='Zubehör')
+
     # InRoomRecord
-    room = models.ForeignKey(Room, null=True, blank=True, verbose_name='Raum', on_delete=models.SET_NULL)
+    room = models.ForeignKey(
+        Room,
+        null=True,
+        blank=True,
+        verbose_name=_('Room'),
+        on_delete=models.PROTECT,
+    )
     # Bestellvorgang
     date_of_purchase = models.DateField(null=True, blank=True, verbose_name='Bestelldatum')
 
