@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-03 14:32+0200\n"
-"PO-Revision-Date: 2023-07-03 14:33+0200\n"
+"POT-Creation-Date: 2023-07-11 17:31+0200\n"
+"PO-Revision-Date: 2023-07-11 17:31+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -58,11 +58,11 @@ msgstr "Ausleihen"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:97
+#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:116
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:69 dlcdb/core/models/device.py:69
+#: dlcdb/core/apps.py:69 dlcdb/core/models/device.py:85
 #: dlcdb/core/models/manufacturer.py:21
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -131,17 +131,52 @@ msgstr "Räume hinzufügen?"
 msgid "Inventory ID"
 msgstr "Inventarnummer"
 
-#: dlcdb/core/models/device.py:77 dlcdb/core/models/supplier.py:23
+#: dlcdb/core/models/device.py:71
+msgid "Serial number"
+msgstr "Seriennummer"
+
+#: dlcdb/core/models/device.py:77
+msgid "Device type"
+msgstr "Geräteklasse"
+
+#: dlcdb/core/models/device.py:91
+msgid "Model name"
+msgstr "Modellbezeichnung"
+
+#: dlcdb/core/models/device.py:98 dlcdb/core/models/supplier.py:23
 msgid "Supplier"
 msgstr "Distributor"
 
-#: dlcdb/core/models/device.py:88
+#: dlcdb/core/models/device.py:103
+msgid "Is license?"
+msgstr "Ist Lizenz?"
+
+#: dlcdb/core/models/device.py:108
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:100
+#: dlcdb/core/models/device.py:120
 msgid "Is loanable?"
-msgstr "Ist Verleihgerät?"
+msgstr "Ist verleihbar?"
+
+#: dlcdb/core/models/device.py:143
+msgid "Password Hard Disk Encryption"
+msgstr "Passwort Festplattenverschlüsselung"
+
+#: dlcdb/core/models/device.py:144
+msgid ""
+"E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
+msgstr ""
+"Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
+"Systemfestplatte."
+
+#: dlcdb/core/models/device.py:148
+msgid "Password backup encryption"
+msgstr "Passwort Backupverschlüsselung"
+
+#: dlcdb/core/models/device.py:149
+msgid "E.g. macOS TimeMachine password for backup hard disk."
+msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
 #: dlcdb/core/models/device_type.py:21
 msgid "Device Type"
@@ -212,13 +247,41 @@ msgstr "Gestohlen"
 msgid "Duplicate"
 msgstr "Duplikat"
 
-#: dlcdb/core/models/record.py:126
-msgid "Whereabouts after decommissioning"
-msgstr "Verbleib nach der Ausmusterung"
+#: dlcdb/core/models/record.py:67
+msgid "Device"
+msgstr "Gerät"
 
-#: dlcdb/core/models/room.py:96
+#: dlcdb/core/models/record.py:73
+msgid "Active"
+msgstr "Aktiv"
+
+#: dlcdb/core/models/record.py:78
+msgid "Replaced by the next record at this timestamp."
+msgstr ""
+
+#: dlcdb/core/models/record.py:87
+msgid "Record type"
+msgstr "Record Typ"
+
+#: dlcdb/core/models/record.py:91
+msgid "Record note"
+msgstr "Record Notiz"
+
+#: dlcdb/core/models/record.py:101
+msgid "Assigned device"
+msgstr "Zugeordnetes Gerät"
+
+#: dlcdb/core/models/record.py:109
+msgid "Inventory"
+msgstr "Inventur"
+
+#: dlcdb/core/models/record.py:130 dlcdb/core/models/room.py:115
 msgid "Room"
 msgstr "Raum"
+
+#: dlcdb/core/models/record.py:141
+msgid "Whereabouts after decommissioning"
+msgstr "Verbleib nach der Ausmusterung"
 
 #: dlcdb/core/models/supplier.py:16
 msgid ""
@@ -232,7 +295,7 @@ msgstr ""
 msgid "Suppliers"
 msgstr "Distributoren"
 
-#: dlcdb/core/templates/core/actions/relocate.html:75
+#: dlcdb/core/templates/core/actions/relocate.html:81
 msgid "No, take me back"
 msgstr "Nein, bitte zurück"
 

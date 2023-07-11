@@ -64,11 +64,32 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         help_text='SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
         validators=[sap_id_validator],
     )
-    serial_number = models.CharField(max_length=255, null=True, blank=True, verbose_name='Seriennummer')
-    device_type = models.ForeignKey('core.DeviceType', null=True, blank=True, verbose_name='Geräte-Typ', on_delete=models.SET_NULL)
-    manufacturer = models.ForeignKey('core.Manufacturer', on_delete=models.PROTECT, null=True, verbose_name=_('Manufacturer'))
-
-    series = models.CharField(max_length=255, null=True, blank=True, verbose_name='Modelbezeichnung')
+    serial_number = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_('Serial number'),
+    )
+    device_type = models.ForeignKey(
+        'core.DeviceType',
+        null=True,
+        blank=True,
+        verbose_name=_('Device type'),
+        on_delete=models.PROTECT,
+    )
+    manufacturer = models.ForeignKey(
+        'core.Manufacturer',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        verbose_name=_('Manufacturer'),
+    )
+    series = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_('Model name'),
+    )
     supplier = models.ForeignKey(
         Supplier,
         on_delete=models.PROTECT,
@@ -76,11 +97,10 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         verbose_name=_('Supplier')
     )
-
     is_licence = models.BooleanField(
         default=False,
         db_index=True,
-        verbose_name='Ist Lizenz?',
+        verbose_name=_('Is license?'),
     )
     purchase_date = models.DateField(null=True, blank=True, verbose_name='Kaufdatum')
     warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name='Garantieablaufdatum')
@@ -120,13 +140,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     )
     machine_encryption_key = models.TextField(
         blank=True,
-        verbose_name="Passwort Festplattenverschlüsselung",
-        help_text="Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für Systemfestplatte."
+        verbose_name=_("Password Hard Disk Encryption"),
+        help_text=_("E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."),
     )
     backup_encryption_key = models.TextField(
         blank=True,
-        verbose_name="Passwort Backupverschlüsselung",
-        help_text="Z.B. macOS TimeMachine Passwort für Backupfestplatte.",
+        verbose_name=_("Password backup encryption"),
+        help_text=_("E.g. macOS TimeMachine password for backup hard disk."),
     )
 
     history = HistoricalRecords()

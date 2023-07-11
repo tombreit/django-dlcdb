@@ -64,18 +64,18 @@ class Record(AuditBaseModel):
 
     device = models.ForeignKey(
         Device,
-        verbose_name='Device',
+        verbose_name=_('Device'),
         on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(
         default=False,
         db_index=True,
-        verbose_name='Aktiv',
+        verbose_name=_('Active'),
     )
     effective_until = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="Replaced by the next record at this timestamp."
+        help_text=_("Replaced by the next record at this timestamp."),
     )
 
     # todo: implement field validator for record_type: must be one of...
@@ -84,11 +84,11 @@ class Record(AuditBaseModel):
         choices=RECORD_TYPE_CHOICES,
         blank=False,
         db_index=True,
-        verbose_name='Record Typ',
+        verbose_name=_('Record type'),
     )
     note = models.TextField(
         blank=True,
-        verbose_name='Bemerkung (Record)',
+        verbose_name=_('Record note'),
     )
     # Licences could be bound to persons or devices
     assigned_device = models.ForeignKey(
@@ -98,10 +98,18 @@ class Record(AuditBaseModel):
         related_name='assigned_device',
         limit_choices_to={'is_licence': False},
         on_delete=models.CASCADE,
-        verbose_name='Zugeordnetes Device',
+        verbose_name=_('Assigned device'),
     )
+
     # Inventory
-    inventory = models.ForeignKey(Inventory, null=True, blank=True, verbose_name='Inventur', on_delete=models.SET_NULL)
+    inventory = models.ForeignKey(
+        Inventory,
+        null=True,
+        blank=True,
+        verbose_name=_('Inventory'),
+        on_delete=models.PROTECT,
+    )
+
     # LentRecord
     person = models.ForeignKey(Person, null=True, blank=True, verbose_name='Person', on_delete=models.SET_NULL)
     lent_start_date = models.DateField(null=True, blank=True, verbose_name='Verleihbeginn')
