@@ -40,7 +40,8 @@ def get_devices_for_room(request, room_pk):
     devices_qs = Device.objects.none()
 
     # Allow all rooms, even soft deleted rooms
-    room = Room.with_softdeleted_objects.get(pk=room_pk)
+    # room = Room.with_softdeleted_objects.get(pk=room_pk)
+    room = Room.objects.get(pk=room_pk)
     base_qs = room.get_devices()
 
     if request.user.is_superuser:

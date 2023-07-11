@@ -18,6 +18,7 @@ from .abstracts import SoftDeleteAuditBaseModel
 class RoomInventoryManager(models.Manager):
     def get_tenant_aware_objects(self, tenant=None):
         qs = super().get_queryset()
+        qs = qs.exclude(deleted_at__isnull=False)
 
         if tenant:
             qs = (
