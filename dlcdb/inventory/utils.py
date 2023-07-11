@@ -39,7 +39,8 @@ def get_devices_for_room(request, room_pk):
     # By default do not expose any devices
     devices_qs = Device.objects.none()
 
-    room = Room.objects.get(pk=room_pk)
+    # Allow all rooms, even soft deleted rooms
+    room = Room.with_softdeleted_objects.get(pk=room_pk)
     base_qs = room.get_devices()
 
     if request.user.is_superuser:
