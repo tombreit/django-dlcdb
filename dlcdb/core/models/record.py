@@ -159,6 +159,9 @@ class Record(AuditBaseModel):
                 check=Q(lent_desired_end_date__lte=datetime.datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, '%Y-%m-%d')),
             )
         ]
+        indexes = [
+            models.Index(fields=["is_active", "record_type", "inventory"]),
+        ]
 
     def update_active_record_on_device(self):
         related_device = self.device

@@ -27,7 +27,9 @@ class Manufacturer(models.Model):
                 name='manufacturer_name_unique',
             ),
         ]
-
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return f'{self.name}'

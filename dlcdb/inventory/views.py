@@ -34,10 +34,12 @@ from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect
 from django.http import JsonResponse
+from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator
 
 from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
@@ -46,7 +48,7 @@ from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentR
 from dlcdb.core.utils.helpers import get_denormalized_user, get_user_email
 
 from .utils import get_devices_for_room, create_sap_list_comparison
-from .filters import RoomFilter
+from .filters import RoomFilter, DeviceFilter
 from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList
 
@@ -59,17 +61,6 @@ def update_session_qrtoggle(request):
         return JsonResponse(data)
     else:
         return HttpResponse("")
-
-
-def get_current_inventory():
-    from dlcdb.core.models import Inventory
-
-    try:
-        current_inventory = Inventory.objects.get(is_active=True)
-    except Inventory.DoesNotExist:
-        current_inventory = None
-
-    return current_inventory
 
 
 class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
@@ -100,7 +91,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         # print(f"get_contex_data self.object.pk: {self.object.pk}")
-        current_inventory = get_current_inventory
+        current_inventory = Inventory.objects.get(is_active=True)
 
         # Get all devices in this room:
         devices = get_devices_for_room(self.request, self.object.pk)
@@ -278,42 +269,16 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         else:
             return ["inventory/inventorize_room_list.html"]
 
-    def get_inventory_progress(self):
-        inventory_progress = namedtuple(
-            "inventory_progress",
-            [
-                "done_percent",
-                "all_devices_count",
-                "inventorized_devices_count",
-            ],
-        )
-
-        done_percent = 0
-        current_inventory = Inventory.objects.get(is_active=True)
-        all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
-
-        if self.request.tenant:
-            all_devices = all_devices.filter(device__tenant=self.request.tenant)
-
-        inventorized_devices_count = all_devices.filter(inventory=current_inventory).count()
-        all_devices_count = all_devices.count()
-
-        if all([
-            current_inventory,
-            all_devices,
-        ]):
-            done_percent = (inventorized_devices_count * 100) / all_devices_count
-            done_percent = int(round(done_percent, 0))
-            return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
-
     def get_context_data(self, **kwargs):
         _request_copy = self.request.GET.copy()
         parameters = _request_copy.pop("page", True) and _request_copy.urlencode()
 
-        try:
-            current_inventory = Inventory.objects.get(is_active=True)
-        except Inventory.DoesNotExist:
-            current_inventory = None
+        # try:
+        #     current_inventory = Inventory.objects.get(is_active=True)
+        # except Inventory.DoesNotExist:
+        #     current_inventory = None
+
+        current_inventory = Inventory.objects.get(is_active=True)
 
         context = super().get_context_data(**kwargs)
         context.update(
@@ -323,7 +288,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
                 "qrcode_prefix": settings.QRCODE_PREFIX,
                 "debug": settings.DEBUG,
                 "api_token": Token.objects.first(),
-                "inventory_progress": self.get_inventory_progress,
+                "inventory_progress": current_inventory.get_inventory_progress(tenant=self.request.tenant),
             }
         )
         return context
@@ -337,40 +302,43 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         return response
 
 
-class DevicesSearchView(ListView):
-    template_name = "inventory/inventorize_devices_list.html"
-    model = Device
+def search_devices(request):
+    if request.htmx:
+        template = "inventory/partials/device_search.html"
+    else:
+        template = 'inventory/device_search.html'
 
-    def get_queryset(self):
-        name = self.kwargs.get("name", "")
-        object_list = self.model.objects.all()
-        if name:
-            object_list = object_list.filter(name__icontains=name)
-        return object_list
+    devices = (
+        Device
+        .objects
+        .select_related(
+            'manufacturer',
+            'active_record',
+            'active_record__room',
+            'active_record__inventory',
+            'device_type',
+        )
+    )
 
-    def django_admin_keyword_search(model, keywords, search_fields):
-        """Search according to fields defined in Admin's search_fields"""
-        all_queries = None
+    if request.tenant:
+        devices = devices.filter(tenant=request.tenant)
 
-        for keyword in keywords.split(" "):  # breaks query_string into 'Foo' and 'Bar'
-            keyword_query = None
+    filter_devices = DeviceFilter(request.GET, queryset=devices)
 
-            for field in search_fields:
-                each_query = Q(**{field + "__icontains": keyword})
+    request_copy = request.GET.copy()
+    parameters = request_copy.pop('page', True) and request_copy.urlencode()
 
-                if not keyword_query:
-                    keyword_query = each_query
-                else:
-                    keyword_query = keyword_query | each_query
+    paginator = Paginator(filter_devices.qs, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
-            if not all_queries:
-                all_queries = keyword_query
-            else:
-                all_queries = all_queries & keyword_query
-
-        result_set = model.objects.filter(all_queries).distinct()
-
-        return result_set
+    context = {
+        "current_inventory": Inventory.objects.get(is_active=True),
+        'page_obj': page_obj,
+        'filter_devices': filter_devices,
+        'parameters': parameters,
+    }
+    return TemplateResponse(request, template, context)
 
 
 class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
@@ -394,7 +362,7 @@ class InventoryReportView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                "devices": LentRecord.get_devices(inventory=get_current_inventory()).order_by("sap_id"),
+                "devices": LentRecord.get_devices(inventory=Inventory.objects.get(is_active=True)).order_by("sap_id"),
                 "now": date.today(),
             }
         )
@@ -429,7 +397,7 @@ def get_note_btn(request, obj_type, obj_uuid):
 
 
 def update_note_view(request, obj_type, obj_uuid):
-    inventory = get_current_inventory()
+    inventory = Inventory.objects.get(is_active=True)
     request_user_email = get_user_email(request.user)
 
     if obj_type == "room":

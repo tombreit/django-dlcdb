@@ -1,6 +1,5 @@
 import csv
 import os
-
 from collections import namedtuple
 from io import BytesIO
 
@@ -10,8 +9,6 @@ from django.db import transaction
 from django.utils import formats
 
 import segno
-
-from .models import SapListComparisonResult
 
 
 def uuid2qrcode(uuid, infix=None):
@@ -103,6 +100,8 @@ def create_sap_list_comparison(sap_list_obj):
     :param sap_list_obj:
     :return:
     """
+
+    from .models import SapListComparisonResult
 
     # ensure that no objects are created if any exception occurs during
     # compare.

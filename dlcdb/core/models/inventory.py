@@ -1,3 +1,4 @@
+from collections import namedtuple
 from django.db import models
 
 
@@ -28,3 +29,34 @@ class Inventory(models.Model):
             Inventory.objects.exclude(id=self.id).update(is_active=False)
 
         super().save(*args, **kw)
+
+
+    def get_inventory_progress(self, tenant=None):
+        """
+        Get status for inventory, e.g. "5 from 10 assets already inventorized".
+        TODO: Should be a method of the Inventory class.
+        """
+        from dlcdb.core.models import Record
+
+        inventory_progress = namedtuple(
+            "inventory_progress",
+            [
+                "done_percent",
+                "all_devices_count",
+                "inventorized_devices_count",
+            ],
+        )
+
+        done_percent = 0
+        all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
+
+        if tenant:
+            all_devices = all_devices.filter(device__tenant=tenant)
+
+        inventorized_devices_count = all_devices.filter(inventory=self).count()
+        all_devices_count = all_devices.count()
+
+        done_percent = (inventorized_devices_count * 100) / all_devices_count
+        done_percent = int(round(done_percent, 0))
+
+        return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)

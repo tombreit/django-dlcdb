@@ -155,6 +155,9 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         verbose_name = 'Device'
         verbose_name_plural = 'Devices'
         ordering = ['-modified_at', 'edv_id']
+        indexes = [
+            models.Index(fields=["edv_id", "sap_id", "modified_at"]),
+        ]
 
     def __repr__(self):
         return str(self.uuid)

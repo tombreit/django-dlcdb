@@ -1,7 +1,7 @@
 from django import forms
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout
+from crispy_forms.layout import Layout, Row, Column
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 
 from dlcdb.core.models import Note
@@ -29,6 +29,23 @@ class DeviceAddForm(forms.Form):
     # device = forms.ChoiceField(choices=device_choices)
     room = forms.CharField(widget=forms.HiddenInput())
 
+
+class DeviceSearchForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.template_pack = "bootstrap4"
+        # self.form_tag = True
+        self.helper.form_method = "get"
+        self.helper.disable_csrf = True
+
+        self.helper.layout = Layout(
+            Row(
+                Column('q'), 
+                Column('device_type'),
+                Column('record'), 
+            )
+        )
 
 class RoomSearchForm(forms.Form):
     def __init__(self, *args, **kwargs):

@@ -37,23 +37,13 @@
             </h3>
         </div>
         <div class="col-12 col-md-6">
-            {% comment %}
-            <form 
-                hx-get="."
-                hx-target="#room-list-body" 
-            >
-                {% crispy filter.form %}
-            </form>
-            {% endcomment %}
-
-
             <form>
                 <div class="form-group">
                     <div class="input-group ">
                         <input 
                             type="text" name="q" class="textinput form-control" id="id_q"
-                            hx-trigger="keyup changed delay:500ms" 
                             placeholder="Search rooms..."
+                            hx-trigger="keyup changed delay:500ms" 
                             hx-get="." 
                             hx-target="#room-list-body" 
                         >
@@ -97,24 +87,3 @@
     {% include 'inventory/partials/bs_modal.html' %}
     {% include 'inventory/partials/bs_toast.html' %}
 {% endblock body %}
-
-
-{% comment %}
-    <div class="col">
-        <span id="cam-has-camera" style="display: none;"></span>
-        <video muted playsinline id="qr-video" style="max-height: 200px; max-width: 200px;"></video>
-    </div>
-
-    <form method="get">
-        <div class="input-group input-group-sm mb-3">
-            {{ filter.form.q }}
-            <div class="input-group-append">
-                <button class="btn-sm btn btn-outline-primary" type="submit" id="search-room-button">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
-    </form>
-
-    {% include 'inventory/includes/pagination.html' %}
-{% endcomment %}

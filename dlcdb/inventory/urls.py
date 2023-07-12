@@ -12,7 +12,7 @@ urlpatterns = [
     path('note-btn/<str:obj_type>/<uuid:obj_uuid>/', views.get_note_btn, name='get_note_btn'),
     path('note/<str:obj_type>/<uuid:obj_uuid>/', views.update_note_view, name='note-update'),
     path('misc/inventory_lending_report', views.InventoryReportView.as_view(), name="inventory-lending-report"),
-    path('devices', views.DevicesSearchView.as_view(), name='search-devices'),
+    path('devices/', views.search_devices, name='search-devices'),
     path('saplist/compare_sap_list/<int:pk>/', views.SapCompareListView.as_view(), name='compare-sap-list'),
     path('update-qrtoggle', views.update_session_qrtoggle, name='update-qrtoggle')
 ]

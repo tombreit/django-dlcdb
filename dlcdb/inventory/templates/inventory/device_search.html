@@ -1,0 +1,97 @@
+{% extends "inventory/base_inventory.html" %}
+{% load crispy_forms_tags %}
+
+{% block extra_css %}
+    <style>
+        {% include 'inventory/partials/htmx_note.css' %}
+    </style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="module">
+    {% include 'inventory/partials/htmx_note.js' %}
+</script>
+{% endblock %}
+
+
+{% block body %}
+
+
+<div id="device-search-form" class="small alert alert-info">
+    <div class="d-flex bd-highlight">
+        <div class="w-100">
+            <form
+                id="id-search-form"
+                hx-trigger="change, keyup changed delay:500ms"
+                hx-get="."
+                hx-target="#devices-table-tbody"
+            >
+                {% crispy filter_devices.form %}
+            </form>
+    
+        </div>
+        <div class="p-2 pt-3 flex-shrink-1 align-self-center">
+            <a href="." class="btn btn-secondary">Reset</a>
+        </div>
+      </div>
+</div>
+
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <h3>
+            Devices 
+            <span class="badge badge-secondary">
+                {{ filter_devices.qs|length }}
+            </span>
+        </h3>
+    </div>
+    <div class="col-12 col-md-6">
+        {% include 'inventory/includes/pagination.html' %}
+    </div>
+
+</div>
+
+<form method="post" class="small">
+    {% csrf_token %}
+
+    <div class="table-responsive">
+    <table id="devices-table" class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Description</th>
+                <th>State</th>
+                <th>Record</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody 
+            id="devices-table-tbody"
+            hx-trigger="load, objectListChanged from:body"
+            hx-get
+            hx-params="*"
+            hx-target="this"
+        >
+
+          <tr>
+            <td colspan="3">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </td>
+          </tr>
+
+        </tbody>
+    </table>
+    </div>
+
+</form>
+
+{% include 'inventory/partials/bs_modal.html' %}
+{% include 'inventory/partials/bs_toast.html' %}
+
+{% endblock body %}

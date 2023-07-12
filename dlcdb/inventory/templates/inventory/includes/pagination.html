@@ -1,4 +1,3 @@
-{% if is_paginated %}
 <nav>
     <ul class="pagination justify-content-end">
         
@@ -8,14 +7,13 @@
             <span aria-hidden="true">&laquo;</span>
         </a>
         </li>
-        {% else %}
+    {% else %}
         <li class="page-item disabled">
         <span class="page-link">
             <span aria-hidden="true">&laquo;</span>
         </span>
         </li>
     {% endif %}
-
 
     <li class="page-item active disabled" aria-current="page">
         <span class="page-link text-center">
@@ -38,4 +36,3 @@
     {% endif %}
     </ul>
 </nav>
-{% endif %}

@@ -20,6 +20,9 @@ class DeviceType(SoftDeleteAuditBaseModel):
         ordering = ('name',)
         verbose_name = _('Device Type')
         verbose_name_plural = _('Device Types')
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
 
     def __str__(self):
         return self.name
