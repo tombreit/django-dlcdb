@@ -41,9 +41,9 @@ class DeviceSearchForm(forms.Form):
 
         self.helper.layout = Layout(
             Row(
-                Column('q'), 
-                Column('device_type'),
-                Column('record'), 
+                Column('q', css_class="col-12 col-md-4"), 
+                Column('device_type', css_class="col-6 col-md-4"),
+                Column('record', css_class="col-6 col-md-4"), 
             )
         )
 

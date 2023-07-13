@@ -13,29 +13,29 @@
         "
     >
         <td>
-            <strong>
-            <a class="d-block rounded bg-light p-1" href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
-                {% if device.edv_id %}
-                    <div class="">
-                        <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
-                    </div>
-                {% endif %}
-                {% if device.sap_id %}
-                    <div class="">
-                        <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
-                    </div>
-                {% endif %}
-            </a>
-            </strong>
-        </td>
-        <td>
-            {{ device.manufacturer|default:'' }}
-            <br>
-            {{ device.series|default:'' }}
-            {% if device.serial_number %}
-            <br>
-            Serial: <span class="text-monospace">{{ device.serial_number }}</span>
-            {% endif %}
+            <div class="d-flex">
+                <a class="strong d-block rounded bg-light p-1" href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
+                    {% if device.edv_id %}
+                        <div class="">
+                            <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
+                        </div>
+                    {% endif %}
+                    {% if device.sap_id %}
+                        <div class="">
+                            <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="ml-2 p-1">
+                    {{ device.manufacturer|default:'' }}
+                    <br>
+                    {{ device.series|default:'' }}
+                    {% if device.serial_number %}
+                    <br>
+                    Serial: <span class="text-monospace">{{ device.serial_number }}</span>
+                    {% endif %}
+                </div>
+            </div>
         </td>
         <td>
             <span class="badge badge-info small">
@@ -73,7 +73,11 @@
             </small>
         </td>
         <td>
-            <div hx-trigger="objectListChanged from:body" hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}" hx-swap="innerHTML">
+            <div 
+                hx-trigger="objectListChanged from:body"
+                hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}"
+                hx-swap="innerHTML"
+            >
                 {% include 'inventory/includes/note_btn.html' with obj_type="device" obj=device obj_uuid=device.uuid %}
             </div>
         </td>
