@@ -27,6 +27,10 @@
                     {% endif %}
                 </a>
                 <div class="ml-2 p-1">
+                    <span class="badge badge-info small">
+                        {{ device.device_type.name }}
+                    </span>
+                    <br>
                     {{ device.manufacturer|default:'' }}
                     <br>
                     {{ device.series|default:'' }}
@@ -38,38 +42,42 @@
             </div>
         </td>
         <td>
-            <span class="badge badge-info small">
-                {{ device.device_type.name }}
-            </span>
             <br>
             <span class="badge 
-                {% if device.active_record.record_type == "LOST" %} badge-danger {% else %} badge-success {% endif %} 
-                small text-left text-wrap {# text-break #}">
+                {% if device.active_record.record_type == "LOST" %} badge-danger {% else %} badge-primary {% endif %} 
+                text-center text-wrap {# text-break #}">
                 {% if device.active_record.is_type_lent %}
                     {{ device.active_record.get_record_type_display }} an 
                     <br>
                     {{ device.active_record.person }}
                 {% else %}
                     {{ device.active_record.get_record_type_display }}
+                    {% if device.active_record.room %}
+                        <br>
+                        <span class="text-monospace">
+                            {{ device.active_record.room|default:"n/a" }}
+                        </span>
+                    {% endif %}
                 {% endif %}
             </span>
-        </td>
-        <td>
+
+            <br>
+            <span title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}">
+                {{ device.active_record.created_at|date:"Y-m-d" }}
+                {# <br> vor {{ device.active_record.created_at|timesince }} #}
+            </span>
             
+            {% if device.active_record.inventory %}
+                <br>
+                <span class="badge badge-success" title="Inventory: {{ device.active_record.inventory.name }}">
+                    {{ device.active_record.inventory.name }}
+                </span>
+                <br>
+            {% endif %}
         </td>
         <td>
             <small>
-                {% if device.active_record.inventory %}
-                    <span class="badge badge-success">
-                        {{ device.active_record.inventory.name }}
-                    </span>
-                    <br>
-                {% endif %}
 
-                <span title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}">
-                    {{ device.active_record.created_at|date:"Y-m-d" }}
-                    {# <br> vor {{ device.active_record.created_at|timesince }} #}
-                </span>
             </small>
         </td>
         <td>
