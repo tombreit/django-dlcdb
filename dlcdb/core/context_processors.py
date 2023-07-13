@@ -50,6 +50,7 @@ def hints(request):
         if qs.filter(active_record__isnull=True).exists():
             devices_wo_record_changelist = f"{reverse('admin:core_device_changelist')}?has_record=has_no_record"
             recordless_devices_count = Device.objects.filter(active_record__isnull=True).count()
+
             sticky_messages.append(
                 StickyMessage(
                     level=messages.WARNING,
@@ -92,7 +93,10 @@ def hints(request):
             )
 
     for message in sticky_messages:
-        messages.add_message(request, message.level, message.get_formatted_msg())
+        # Only add current message if not already exists in messages display
+        current_messages_content = [msg.message for msg in list(messages.get_messages(request))]
+        if message.get_formatted_msg() not in current_messages_content:
+            messages.add_message(request, message.level, message.get_formatted_msg())
 
     return {}  # empty dict to make context_processor happy
 
