@@ -209,6 +209,14 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     def get_is_currently_lented(self, obj):
         return obj.is_type_lent
 
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Pass current record_type of device to form for validation.
+        """
+        form = super().get_form(request, obj=obj, **kwargs)
+        form.record_type = obj.record_type
+        return form
+
     def save_model(self, request, obj, form, change):
         """
         By saving a record, check original record type and create new records
@@ -228,8 +236,6 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
         # Save logic
         user, username = get_denormalized_user(request.user)
-
-        print(f"{obj.record_type=}")
 
         if obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
             # War ein LENT record und hat jetzt einen Rückgabe-Timestamp,
