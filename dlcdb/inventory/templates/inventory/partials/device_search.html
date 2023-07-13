@@ -29,6 +29,15 @@
             </strong>
         </td>
         <td>
+            {{ device.manufacturer|default:'' }}
+            <br>
+            {{ device.series|default:'' }}
+            {% if device.serial_number %}
+            <br>
+            Serial: <span class="text-monospace">{{ device.serial_number }}</span>
+            {% endif %}
+        </td>
+        <td>
             <span class="badge badge-info small">
                 {{ device.device_type.name }}
             </span>
@@ -44,12 +53,6 @@
                     {{ device.active_record.get_record_type_display }}
                 {% endif %}
             </span>
-
-            <br>
-            {% if device.manufacturer or device.series %}
-            {{ device.manufacturer|default:'' }} {{ device.series|default:'' }}
-            <br>
-            {% endif %}
         </td>
         <td>
             

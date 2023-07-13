@@ -23,7 +23,8 @@
         <div class="w-100">
             <form
                 id="id-search-form"
-                hx-trigger="change, keyup changed delay:500ms"
+                autocomplete="off"
+                hx-trigger="keyup, change, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
                 hx-get="."
                 hx-target="#devices-table-tbody"
             >
@@ -60,6 +61,7 @@
     <table id="devices-table" class="table table-sm table-hover">
         <thead>
             <tr>
+                <th>IDs</th>
                 <th>Device</th>
                 <th>Description</th>
                 <th>State</th>
@@ -69,10 +71,8 @@
         </thead>
         <tbody 
             id="devices-table-tbody"
-            hx-trigger="load, objectListChanged from:body"
-            hx-get
-            hx-params="*"
-            hx-target="this"
+            hx-trigger="load"
+            hx-get="."
         >
 
           <tr>

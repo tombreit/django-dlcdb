@@ -47,6 +47,7 @@ class DeviceSearchForm(forms.Form):
             )
         )
 
+
 class RoomSearchForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
