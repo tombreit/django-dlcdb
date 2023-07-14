@@ -16,6 +16,10 @@ Procedure:
   * [NOT FOUND] Expected device is not in room: disprove device
   * [FOUND]     Not expected device is in room: add device to room and confirm device
 * Room is finished, when all devices got their inventory stamp
+
+TODO:
+* Move domain-specific methods to the Inventory class (eg InventorizeRoomView.post stuff)
+* Move queryset getters to Inventory class
 """
 
 from datetime import date
