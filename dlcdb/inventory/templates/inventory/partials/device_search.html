@@ -42,7 +42,12 @@
             </div>
         </td>
         <td>
-            <br>
+
+            <div class="small">
+                {% include "core/device/record_snippet.html" with current_record=device.active_record is_device_detail_page=True %}
+            </div>
+
+            {% comment %}
             <span class="badge 
                 {% if device.active_record.record_type == "LOST" %} badge-danger {% else %} badge-primary {% endif %} 
                 text-center text-wrap {# text-break #}">
@@ -60,11 +65,13 @@
                     {% endif %}
                 {% endif %}
             </span>
-
             <br>
-            <span title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}">
+            {% endcomment %}
+
+            <span 
+                class="text-muted"
+                title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago">
                 {{ device.active_record.created_at|date:"Y-m-d" }}
-                {# <br> vor {{ device.active_record.created_at|timesince }} #}
             </span>
             
             {% if device.active_record.inventory %}
@@ -76,9 +83,7 @@
             {% endif %}
         </td>
         <td>
-            <small>
-
-            </small>
+            {{ device.tenant }}
         </td>
         <td>
             <div 

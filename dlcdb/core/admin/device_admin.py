@@ -230,116 +230,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
         extra_context = extra_context or {}
         extra_context.update({
-            'record_add_links': self.get_record_add_links(obj),
-            'current_record_infos': self.get_current_record_infos(obj),
             'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
         })
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
         )
-
-    def get_current_record_infos(self, obj):
-        """
-        Returns a list of dicts with infos for the current state of the
-        device.
-        """
-        current_record_infos = []
-        active_record = obj.active_record
-
-        if not active_record:
-            current_record_infos.append(dict(
-                label="No current record",
-                css_classes="btn btn-warning disabled",
-            ))
-        else:
-            if active_record.room:
-                current_record_infos.append(dict(
-                    css_classes="btn btn-info",
-                    title="{text} {obj}".format(text=_('In room'), obj=active_record.room.number),
-                    url=f"{reverse('admin:core_device_changelist')}?active_record__room__id__exact={active_record.room.id}",
-                    label=active_record.room.number,
-                ))
-
-            # Common infos for all record types
-            active_record_type = active_record.record_type
-            record_type_info = {}
-
-            if active_record_type == Record.INROOM:
-                record_type_info = dict(
-                    css_classes="btn btn-info",
-                    title=_("Relocate device"),
-                    url=f"{reverse('core:core_devices_relocate')}?ids={obj.pk}",
-                    label=active_record.get_record_type_display,
-                )
-            elif active_record_type == Record.LENT:
-                record_type_info = dict(
-                    css_classes="btn btn-info",
-                    url=reverse("admin:core_lentrecord_change", args=[active_record.pk]),
-                    label=f"an {active_record.person }",
-                    title=_("Edit lending"),
-                )
-            elif active_record_type == Record.ORDERED:
-                record_type_info = dict(
-                    css_classes="btn btn-info",
-                    label=active_record.get_record_type_display,
-                )
-            elif active_record_type == Record.REMOVED:
-                record_type_info = dict(
-                    css_classes="btn btn-warning",
-                    url=reverse("admin:core_record_change", args=[active_record.pk]),
-                    label=active_record.get_record_type_display,
-                )
-            elif active_record_type == Record.LOST:
-                record_type_info = dict(
-                    css_classes="btn btn-danger",
-                    url=f"{reverse('admin:core_record_changelist')}?device__id__exact={obj.pk}",
-                    label=active_record.get_record_type_display,
-                    title=_("Previous records for this device"),
-                )
-            else:
-                record_type_info = dict(
-                    css_classes="btn btn-danger",
-                    url=f'{reverse("admin:core_record_changelist")}?device__id__exact={obj.pk}',
-                    label=_("Unknown record type! Contact your administrator!"),
-                )
-
-            current_record_infos.append(record_type_info)
-
-        return current_record_infos
-
-    def get_record_add_links(self, obj):
-        """
-        Returns a list of dicts each representing an add link in order to display
-        dropdowns to create records for a given device.
-        """
-        add_links = []
-        for record_value, record_label in Record.RECORD_TYPE_CHOICES:
-            if record_value == Record.ORDERED:
-                continue
-            elif record_value == Record.REMOVED and obj.active_record and obj.active_record.record_type == Record.REMOVED:
-                # Do not let already removed devices removed again
-                continue
-            elif record_value == Record.LOST and obj.active_record and obj.active_record.record_type == Record.LOST:
-                # Lost records could not be lost again
-                continue
-            elif record_value == Record.LENT:
-                if obj.active_record and obj.active_record.record_type == Record.LENT:
-                    add_links.append(dict(
-                        url=reverse("admin:core_lentrecord_change", args=[obj.active_record.pk]),
-                        label=_('Lending'),
-                    ))
-                elif  obj.active_record and obj.is_lentable:
-                    add_links.append(dict(
-                        url=reverse('admin:core_lentrecord_change', args=[obj.active_record.pk]),
-                        label=_('Lend'),
-                    ))
-            else:
-                add_links.append(dict(
-                    label=record_label,
-                    url=f"{Record.get_proxy_model_by_record_type(record_value).get_admin_action_url()}?device={obj.id}"
-                ))
-
-        return add_links
 
     @admin.display(description='Records')
     def get_record_info_display(self, obj):
@@ -347,8 +242,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             # current record may be none in case this device does
             # not have any records yet.
             ctx = dict(
-                add_links=self.get_record_add_links(obj),
-                current_record_infos=self.get_current_record_infos(obj),
+                current_record=obj.active_record,
                 list_view=True,
             )
             return render_to_string('core/device/record_snippet.html', ctx)

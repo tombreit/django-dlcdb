@@ -29,6 +29,7 @@ Inventur-Ansicht: *Prozesse > Inventur*
    - Gerät in Raum gefunden, welches nicht in der Liste ist: via "Add device" hinzufügen und Status setzen
    - Es können Inventurnotizen zu jedem Gerät und/oder zu jedem Raum angegeben werden
    - Rauminventur speichern
+   - Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht. Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant eingeschränkt. 
 
 1. Nacharbeiten
 
@@ -43,6 +44,9 @@ Inventur-Ansicht: *Prozesse > Inventur*
 - Die Rückmeldung des Leihenden muss als Inventur-Notiz beim Gerät eingetragen werden, z.B. "Bestätigung Besitz durch Ausleiher\*in via Email vom YYYY-MM-DD".
 - Es muss sichergestellt sein, dass für jeden Verleih auch eine Unterschrift des Leihenden geleistet wurde. Die Verleihzettel sind daher ebenfalls auf Vollständigkeit zu kontrollieren.
 - Beim Abschluss der Inventur kann das Formblatt "Liste im Besitz von Mitarbeitern befindlicher Sachanlagen" über die Navigation der Inventur-App (*Misc > VG bei MAs*) generiert werden.
+
+## Hinweise
+- Die Person, die an der DLCDB angemeldet ist, wird in diversen Auswertungen vermerkt. Daher sollten personalisierte Accounts für die Inventarisierung genutzt werden (und z.B. nicht der Benutzername 'admin').
 
 ## SAP-Abgleich
 

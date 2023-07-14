@@ -320,8 +320,9 @@ def search_devices(request):
         )
     )
 
-    if request.tenant:
-        devices = devices.filter(tenant=request.tenant)
+    # For now provide a tenant-agnostiv device-view
+    # if request.tenant:
+    #     devices = devices.filter(tenant=request.tenant)
 
     filter_devices = DeviceFilter(request.GET, queryset=devices)
 

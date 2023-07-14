@@ -14,7 +14,7 @@
 
     {% if original %}
         <div class="d-inline ml-4">
-            {% include "core/device/record_snippet.html" with current_record=original.active_record add_links=record_add_links obj=original is_device_detail_page=True %}
+            {% include "core/device/record_snippet.html" with current_record=original.active_record is_device_detail_page=True %}
         </div>
     {% endif %}
     </div>
