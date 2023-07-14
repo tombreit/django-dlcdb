@@ -1,8 +1,9 @@
 {% load i18n admin_urls %}
 
+
 <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
 
-    {% for info in current_record.device.get_current_record_infos %}
+    {% for info in active_record.device.get_record_action_snippet.record_infos %}
         {% if info.url %}
             <a 
                 class="{{ info.css_classes }}"
@@ -26,7 +27,7 @@
             <i class="fa fa-plus"></i>
         </button>
         <div class="dropdown-menu" aria-labelledby="newRecord">
-        {% for add_link in current_record.device.get_record_add_links %}
+        {% for add_link in active_record.device.get_record_action_snippet.add_links %}
             <a 
                 class="dropdown-item"
                 href="{{ add_link.url }}"

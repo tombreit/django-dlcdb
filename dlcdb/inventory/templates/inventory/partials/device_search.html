@@ -44,7 +44,7 @@
         <td>
 
             <div class="small">
-                {% include "core/device/record_snippet.html" with current_record=device.active_record is_device_detail_page=True %}
+                {% include "core/device/record_action_snippet.html" with active_record=device.active_record is_device_detail_page=True %}
             </div>
 
             {% comment %}

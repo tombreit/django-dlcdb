@@ -241,11 +241,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         try:
             # current record may be none in case this device does
             # not have any records yet.
-            ctx = dict(
-                current_record=obj.active_record,
+            context = dict(
+                active_record=obj.active_record,
                 list_view=True,
             )
-            return render_to_string('core/device/record_snippet.html', ctx)
+            return render_to_string('core/device/record_action_snippet.html', context)
         except:
             import traceback
             traceback.print_exc()
