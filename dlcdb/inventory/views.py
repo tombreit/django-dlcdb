@@ -8,7 +8,6 @@ Subgoals:
 * ...
 
 Procedure:
-
 * Go in room
 * Check if expected device is in room
 * Cases:
@@ -20,24 +19,22 @@ Procedure:
 TODO:
 * Move domain-specific methods to the Inventory class (eg InventorizeRoomView.post stuff)
 * Move queryset getters to Inventory class
+* Refactor some CBVs to be FBVs
 """
 
-from datetime import date
 import json
-from collections import namedtuple
-from typing import Any
+from datetime import date
 
 from django.conf import settings
-from django.db import models
-from django.db.models import Q
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, ListView, FormView
+from django.views.generic import DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect
-from django.http import JsonResponse
+from django.http import (HttpResponse, HttpResponseForbidden, 
+                         HttpResponseServerError, HttpResponseRedirect,
+                         JsonResponse)
 from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
