@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q, OuterRef, Subquery
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -36,6 +36,7 @@ class LentRecordManager(models.Manager):
         )
 
         return qs
+
 
 class LentRecord(Record):
     objects = LentRecordManager()
@@ -79,46 +80,6 @@ class LentRecord(Record):
     @property
     def get_lent_string_repr(self):
         return f"EDV-ID: {self.device.edv_id}, SAP-ID: {self.device.sap_id}, Manufacturer: {self.device.manufacturer}, Model: {self.device.series}"
-
-    @staticmethod
-    def get_devices(inventory=None, exclude_already_inventorized=False):
-        """
-        Get devices for lent verification. Used e.d. in case of an inventory:
-        Device must be lented and must have a sap_id and do not have a current
-        inventory record.
-        """
-        from ..models import Device, Note
-
-        _exclude_expr = Q()
-        if exclude_already_inventorized:
-            _exclude_expr = Q(active_record__inventory=inventory)
-
-        devices = (
-            Device
-            .objects
-            # Testing if device has a sap_id and is currently lented
-            .exclude(
-                Q(sap_id__isnull=True) | 
-                Q(sap_id__exact='') |
-                Q(active_record__person__isnull=True)
-            )
-            # Testing if device is currently not already inventorized
-            .exclude(
-                _exclude_expr
-             )
-            .annotate(
-                inventory_note=Subquery(
-                    Note
-                    .objects
-                    .filter(device=OuterRef('pk'))
-                    .filter(inventory=inventory)
-                    .order_by('-pk')
-                    .values('text')
-                )
-            )
-            .order_by('active_record__person__email')
-        )
-        return devices
 
     class Meta:
         proxy = True

@@ -48,7 +48,7 @@ from django_filters.views import FilterView
 from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentRecord, Note
 from dlcdb.core.utils.helpers import get_denormalized_user, get_user_email
 
-from .utils import get_devices_for_room, create_sap_list_comparison
+from .utils import create_sap_list_comparison
 from .filters import RoomFilter, DeviceFilter
 from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList
@@ -88,14 +88,14 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
     slug_url_kwarg = "uuid"
 
     def get_queryset(self):
-        return Room.inventory_objects.get_tenant_aware_objects(self.request.tenant)
+        return Inventory.objects.tenant_aware_room_objects(self.request.tenant)
 
     def get_context_data(self, **kwargs):
         # print(f"get_contex_data self.object.pk: {self.object.pk}")
-        current_inventory = Inventory.objects.get(is_active=True)
+        current_inventory = Inventory.objects.active_inventory()
 
         # Get all devices in this room:
-        devices = get_devices_for_room(self.request, self.object.pk)
+        devices = Inventory.objects.devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
 
         form = InventorizeRoomForm(
             initial={
@@ -165,7 +165,7 @@ class InventorizeRoomView(LoginRequiredMixin, View):
             )
 
         if _uuids:
-            current_inventory = Inventory.objects.get(is_active=True)
+            current_inventory = Inventory.objects.active_inventory()
             user, username = get_denormalized_user(request.user)
             uuids_states_dict = json.loads(_uuids)
 
@@ -262,7 +262,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
     filterset_class = RoomFilter
 
     def get_queryset(self):
-        return Room.inventory_objects.get_tenant_aware_objects(self.request.tenant)
+        return Inventory.objects.tenant_aware_room_objects(self.request.tenant)
 
     def get_template_names(self):
         if self.request.htmx:
@@ -271,15 +271,11 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             return ["inventory/inventorize_room_list.html"]
 
     def get_context_data(self, **kwargs):
+        # Capture URL query parameters to persist pagination
         _request_copy = self.request.GET.copy()
         parameters = _request_copy.pop("page", True) and _request_copy.urlencode()
 
-        # try:
-        #     current_inventory = Inventory.objects.get(is_active=True)
-        # except Inventory.DoesNotExist:
-        #     current_inventory = None
-
-        current_inventory = Inventory.objects.get(is_active=True)
+        current_inventory = Inventory.objects.active_inventory()
 
         context = super().get_context_data(**kwargs)
         context.update(
@@ -309,22 +305,7 @@ def search_devices(request):
     else:
         template = 'inventory/device_search.html'
 
-    devices = (
-        Device
-        .objects
-        .select_related(
-            'manufacturer',
-            'active_record',
-            'active_record__room',
-            'active_record__inventory',
-            'device_type',
-        )
-    )
-
-    # For now provide a tenant-agnostiv device-view
-    # if request.tenant:
-    #     devices = devices.filter(tenant=request.tenant)
-
+    devices = Inventory.objects.tenant_unaware_device_objects()
     filter_devices = DeviceFilter(request.GET, queryset=devices)
 
     request_copy = request.GET.copy()
@@ -335,7 +316,7 @@ def search_devices(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
-        "current_inventory": Inventory.objects.get(is_active=True),
+        "current_inventory": Inventory.objects.active_inventory(),
         'page_obj': page_obj,
         'filter_devices': filter_devices,
         'parameters': parameters,
@@ -349,9 +330,7 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
     template_name = "inventory/room_qrcodes_detail.html"
 
     def get_context_data(self, **kwargs):
-        # Get all devices in given room.
-        devices = get_devices_for_room(self.request, self.object.pk)
-
+        devices = Inventory.objects.devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
         context = super().get_context_data(**kwargs)
         context["devices"] = devices
         return context
@@ -364,7 +343,7 @@ class InventoryReportView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                "devices": LentRecord.get_devices(inventory=Inventory.objects.get(is_active=True)).order_by("sap_id"),
+                "devices": Inventory.objects.lent_devices().order_by("sap_id"),
                 "now": date.today(),
             }
         )
@@ -399,7 +378,7 @@ def get_note_btn(request, obj_type, obj_uuid):
 
 
 def update_note_view(request, obj_type, obj_uuid):
-    inventory = Inventory.objects.get(is_active=True)
+    inventory = Inventory.objects.active_inventory()
     request_user_email = get_user_email(request.user)
 
     if obj_type == "room":

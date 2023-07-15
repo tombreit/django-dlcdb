@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import Q
 
-from ..core.models import Room, Device, DeviceType, Record
+from ..core.models import Room, Device, DeviceType, Record, Inventory
 from .forms import RoomSearchForm, DeviceSearchForm
 
 
@@ -9,7 +9,7 @@ class RoomFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(method='string_search_filter', label="Search rooms")
 
     def string_search_filter(self, queryset, name, value):
-        return Room.inventory_objects.get_tenant_aware_objects(self.request.tenant).filter(
+        return Inventory.objects.tenant_aware_room_objects(self.request.tenant).filter(
             Q(number__icontains=value) | 
             Q(nickname__icontains=value) | 
             Q(description__icontains=value)
@@ -25,7 +25,6 @@ class DeviceFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(method='string_search_filter', label="Search devices")
     device_type = django_filters.ModelChoiceFilter(queryset=DeviceType.objects.all(), label="Geräteklasse")
     record = django_filters.ChoiceFilter(field_name="active_record__record_type", choices=Record.RECORD_TYPE_CHOICES, label="Record")
-
 
     def string_search_filter(self, queryset, name, value):
         return self.queryset.filter(

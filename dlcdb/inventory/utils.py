@@ -30,27 +30,6 @@ def uuid2qrcode(uuid, infix=None):
     return qrcode(qr_filename, qr_fileobj)
 
 
-def get_devices_for_room(request, room_pk):
-    from ..core.models import Device, Room
-
-    # By default do not expose any devices
-    devices_qs = Device.objects.none()
-
-    # Allow all rooms, even soft deleted rooms
-    # room = Room.with_softdeleted_objects.get(pk=room_pk)
-    room = Room.objects.get(pk=room_pk)
-    base_qs = room.get_devices()
-
-    if request.user.is_superuser:
-        # No pre-filtering for superusers
-        devices_qs = base_qs
-    elif request.tenant:
-        # Filter by tenant
-        devices_qs = base_qs.filter(tenant=request.tenant)
-
-    return devices_qs.order_by('-modified_at')
-
-
 def unique_seq(sequence):
     """
     Eleminate duplicates in a list while preserving the order

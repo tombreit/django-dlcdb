@@ -4,7 +4,6 @@ from pathlib import Path
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Count, IntegerField, Q
 from django.utils import timezone, dateformat
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -15,59 +14,7 @@ from ..storage import OverwriteStorage
 from .abstracts import SoftDeleteAuditBaseModel
 
 
-class RoomInventoryManager(models.Manager):
-    def get_tenant_aware_objects(self, tenant=None):
-        qs = super().get_queryset()
-        qs = qs.exclude(deleted_at__isnull=False)
-
-        if tenant:
-            qs = (
-                qs
-                .annotate(
-                    room_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                        record__device__tenant=tenant,
-                    ), output_field=IntegerField()),
-                    room_inventorized_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__inventory__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                        record__device__tenant=tenant,
-                    ), output_field=IntegerField()),
-                )
-            )
-        else:
-            qs = (
-                qs
-                .annotate(
-                    room_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                    ), output_field=IntegerField()),
-                    room_inventorized_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__inventory__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                    ), output_field=IntegerField()),
-                )
-            )
-
-        return qs.order_by("number")
-
-
-class RoomInventoryManagerAbstract(models.Model):
-    """
-    See https://docs.djangoproject.com/en/4.0/topics/db/managers/#custom-managers-and-model-inheritance
-    for the reasoning behind this weird manager instanciation.
-    """
-    inventory_objects = RoomInventoryManager()
-
-    class Meta:
-        abstract = True
-
-
-class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
+class Room(SoftDeleteAuditBaseModel):
 
     uuid = models.UUIDField(
         default=uuid.uuid4,
@@ -107,10 +54,6 @@ class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
         null=True,
         storage=OverwriteStorage(),
     )
-
-    # Managers are injected via class inheritance (see signature of this class)
-    # objects = models.Manager()
-    # inventory_objects = RoomInventoryManager() # The Inventory-specific manager.
 
     class Meta:
         verbose_name = _('Room')
@@ -161,24 +104,6 @@ class Room(SoftDeleteAuditBaseModel, RoomInventoryManagerAbstract):
         """
         from . import LentRecord
         return LentRecord.objects.filter(room=self, is_active=True)
-
-    def get_devices(self):
-        """
-        Returns the devices associated with this room.
-        :return:
-        """
-        from . import Device
-
-        return (
-            Device
-            .objects
-            .select_related('active_record')
-            .filter(
-                active_record__is_active=True,
-                active_record__room=self,
-                active_record__device__deleted_at__isnull=True,
-            )
-        )
 
     def get_latest_note(self):
         """

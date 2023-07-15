@@ -1,9 +1,5 @@
 from django.db import models
 
-from .device import Device
-from .inventory import Inventory
-from .room import Room
-
 
 class Note(models.Model):
     """
@@ -13,10 +9,25 @@ class Note(models.Model):
     """
 
     text = models.TextField()
-    device = models.ForeignKey(Device, blank=True, null=True, related_name="device_notes", on_delete=models.SET_NULL)
-    room = models.ForeignKey(Room, blank=True, null=True, related_name="room_notes", on_delete=models.SET_NULL)
+    device = models.ForeignKey(
+        "core.Device", blank=True,
+        null=True,
+        related_name="device_notes",
+        on_delete=models.SET_NULL,
+    )
+    room = models.ForeignKey(
+        "core.Room",
+        blank=True,
+        null=True,
+        related_name="room_notes",
+        on_delete=models.SET_NULL,
+    )
     inventory = models.ForeignKey(
-        Inventory, null=True, blank=True, verbose_name="Inventurzuordnung", on_delete=models.SET_NULL
+        "core.Inventory",
+        null=True,
+        blank=True,
+        verbose_name="Inventurzuordnung",
+        on_delete=models.SET_NULL,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
