@@ -15,8 +15,6 @@ from django.utils.html import format_html
 
 from PIL import Image
 
-from ..models import Device, Record
-
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +24,8 @@ def get_device(EDV_ID=None, SAP_ID=None):
     #     EDV_ID=EDV_ID,
     #     SAP_ID=SAP_ID,
     # ))
+
+    from ..models import Device
 
     _message = ""
     _device = None
@@ -81,6 +81,8 @@ def get_user_email(user):
 
 
 def get_current_room_href(obj):
+    from ..models import Record, Device
+
     # Currently not used, leftover from MoveDeviceAdmin
     current_room_link = None
     current_room = None

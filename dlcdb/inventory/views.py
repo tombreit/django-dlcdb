@@ -41,12 +41,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
+from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
-from dlcdb.core.models import Room, Device, Record, Inventory, LostRecord, LentRecord, Note
-from dlcdb.core.utils.helpers import get_denormalized_user, get_user_email
+from dlcdb.core.models import Room, Device, Inventory
+from dlcdb.core.utils.helpers import get_user_email
 
 from .utils import create_sap_list_comparison
 from .filters import RoomFilter, DeviceFilter
@@ -154,104 +155,15 @@ class InventorizeRoomView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         view = InventorizeRoomFormView.as_view()
 
-        _uuids = request.POST.get("uuids")
-        _room_pk = self.kwargs.get("pk")
+        uuids = request.POST.get("uuids")
+        room_pk = self.kwargs.get("pk")
 
         try:
-            room = Room.objects.get(pk=_room_pk)
-        except Room.DoesNotExist:
-            return HttpResponseServerError(
-                f"<h4>Server Error 500</h4><p>Something went wrong. A room with pk={_room_pk} does not exist. Please contact your it staff.</p>"
-            )
-
-        if _uuids:
-            current_inventory = Inventory.objects.active_inventory()
-            user, username = get_denormalized_user(request.user)
-            uuids_states_dict = json.loads(_uuids)
-
-            try:
-                external_room = Room.objects.get(is_external=True)
-            except Room.DoesNotExist:
-                return HttpResponseServerError(
-                    "<h4>Server Error 500</h4><p>Something went wrong. No room is flagged with 'is_external'. Please contact your it staff.</p>"
-                )
-
-            for uuid, state in uuids_states_dict.items():
-                device = Device.objects.get(uuid=uuid)
-                active_record = device.active_record
-                print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
-
-                new_record = None
-
-                if state == "dev_state_found":
-                    print("state == 'dev_state_found'")
-                    new_record = active_record
-                    new_record.pk = new_record.id = None
-                    new_record.room = room
-                    new_record.inventory = current_inventory
-                    new_record.user = user
-                    new_record.username = username
-
-                    if new_record.record_type == Record.LOST:
-                        new_record.record_type = Record.INROOM
-
-                    new_record._state.adding = True
-                    new_record.save()
-
-                elif state == "dev_state_notfound":
-                    """
-                    If an expected device is not found in a given room, we need
-                    to check if it is currently lended. When lended, we do not
-                    set this device as "not found", but instead move it to an
-                    "external room".
-                    """
-                    print("state == 'dev_state_notfound'")
-
-                    if all(
-                        [
-                            active_record.record_type == Record.LENT,
-                            active_record.room != external_room,
-                        ]
-                    ):
-                        active_record.room = external_room
-                        active_record.save()
-
-                        # Set inventory note
-                        # TODO: Fix multiple injections of same note string
-                        lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`. Please contact lender."
-                        note_obj, note_obj_created = Note.objects.get_or_create(
-                            inventory=current_inventory,
-                            device=active_record.device,
-                            room=external_room,
-                        )
-                        note_obj.text = f"{note_obj.text} *** {lent_not_found_msg}"
-                        note_obj.save()
-                    else:
-                        new_record = LostRecord(
-                            device=device,
-                            inventory=current_inventory,
-                            user=user,
-                            username=username,
-                        )
-
-                elif state == "dev_state_unknown":
-                    print("state == 'dev_state_unknown'")
-                    new_record = active_record
-                    new_record.pk = new_record.id = None
-                    new_record.room = room
-                    new_record.inventory = None
-                    new_record.user = user
-                    new_record.username = username
-                    new_record._state.adding = True
-                    new_record.save()
-
-                else:
-                    msg = f"This should never happen: given state `{state}` not recognized! Raising 500."
-                    print(msg)
-                    return HttpResponseServerError(msg)
-
-                if new_record:
-                    new_record.save()
+            Inventory.inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
+        except RuntimeError as runtime_error:
+            return HttpResponseServerError(runtime_error)
+        except ObjectDoesNotExist as object_does_not_exist:
+            return HttpResponseServerError(object_does_not_exist)
 
         return view(request, *args, **kwargs)
 

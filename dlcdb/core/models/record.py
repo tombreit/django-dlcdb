@@ -9,10 +9,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .abstracts import AuditBaseModel
-from .device import Device
-from .room import Room
-from .person import Person
-from .inventory import Inventory
 
 
 # Verbleib des Gerätes nach Ausmusterung
@@ -63,7 +59,7 @@ class Record(AuditBaseModel):
     ]
 
     device = models.ForeignKey(
-        Device,
+        'core.Device',
         verbose_name=_('Device'),
         on_delete=models.CASCADE,
     )
@@ -103,7 +99,7 @@ class Record(AuditBaseModel):
 
     # Inventory
     inventory = models.ForeignKey(
-        Inventory,
+        'core.Inventory',
         null=True,
         blank=True,
         verbose_name=_('Inventory'),
@@ -111,7 +107,13 @@ class Record(AuditBaseModel):
     )
 
     # LentRecord
-    person = models.ForeignKey(Person, null=True, blank=True, verbose_name='Person', on_delete=models.SET_NULL)
+    person = models.ForeignKey(
+        'core.Person',
+        null=True,
+        blank=True,
+        verbose_name='Person',
+        on_delete=models.SET_NULL,
+    )
     lent_start_date = models.DateField(null=True, blank=True, verbose_name='Verleihbeginn')
     lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name='Soll-Rückgabedatum')
     lent_end_date = models.DateField(
@@ -124,7 +126,7 @@ class Record(AuditBaseModel):
 
     # InRoomRecord
     room = models.ForeignKey(
-        Room,
+        'core.Room',
         null=True,
         blank=True,
         verbose_name=_('Room'),

@@ -1,10 +1,16 @@
+import json
 from collections import namedtuple
-from django.db import models
+
+from django.db import models, transaction
 from django.db.models import Count, IntegerField, Q, OuterRef, Subquery
+from django.core.exceptions import ObjectDoesNotExist
+from dlcdb.core.utils.helpers import get_denormalized_user
 
 from .room import Room
 from .device import Device
 from .note import Note
+from .record import Record
+from .prx_lostrecord import LostRecord
 
 
 class InventoryQuerySet(models.QuerySet):
@@ -148,7 +154,6 @@ class InventoryQuerySet(models.QuerySet):
         return devices
 
 
-
 class Inventory(models.Model):
     """
     Represents an inventory.
@@ -179,7 +184,6 @@ class Inventory(models.Model):
 
         super().save(*args, **kw)
 
-
     def get_inventory_progress(self, tenant=None):
         """
         Get status for inventory, e.g. "5 from 10 assets already inventorized".
@@ -209,3 +213,109 @@ class Inventory(models.Model):
         done_percent = int(round(done_percent, 0))
 
         return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
+
+    @staticmethod
+    @transaction.atomic
+    def inventorize_uuids_for_room(*, uuids, room_pk, user):
+        """
+        Main inventorization method: Expects a list of device uuids,
+        an inventory status for each uuid and a room and sets an
+        appropriate inventory record. 
+        """
+
+        try:
+            room = Room.objects.get(pk=room_pk)
+        except Room.DoesNotExist:
+            raise ObjectDoesNotExist("Something went wrong. A room with pk={room_pk} does not exist. Please contact your it staff.")
+
+        try:
+            external_room = Room.objects.get(is_external=True)
+        except Room.DoesNotExist:
+            raise ObjectDoesNotExist("No room is flagged with 'is_external'. Please contact your it staff.")
+
+        current_inventory = Inventory.objects.active_inventory()
+        user, username = get_denormalized_user(user)
+        uuids_states_dict = json.loads(uuids)
+
+        for uuid, state in uuids_states_dict.items():
+
+            try:
+                device = Device.objects.get(uuid=uuid)
+            except Device.DoesNotExist as does_not_exist:
+                raise ObjectDoesNotExist(f"No device for uuid {uuid}! {does_not_exist}")
+            
+            active_record = device.active_record
+            
+            print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
+
+            new_record = None
+
+            if state == "dev_state_found":
+                print("state == 'dev_state_found'")
+                new_record = active_record
+                new_record.pk = new_record.id = None
+                new_record.room = room
+                new_record.inventory = current_inventory
+                new_record.user = user
+                new_record.username = username
+
+                if new_record.record_type == Record.LOST:
+                    new_record.record_type = Record.INROOM
+
+                new_record._state.adding = True
+                new_record.save()
+
+            elif state == "dev_state_notfound":
+                """
+                If an expected device is not found in a given room, we need
+                to check if it is currently lended. When lended, we do not
+                set this device as "not found", but instead move it to an
+                "external room".
+                """
+                print("state == 'dev_state_notfound'")
+
+                if all(
+                    [
+                        active_record.record_type == Record.LENT,
+                        active_record.room != external_room,
+                    ]
+                ):
+                    active_record.room = external_room
+                    active_record.save()
+
+                    # Set inventory note
+                    # TODO: Fix multiple injections of same note string
+                    lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`. Please contact lender."
+                    note_obj, note_obj_created = Note.objects.get_or_create(
+                        inventory=current_inventory,
+                        device=active_record.device,
+                        room=external_room,
+                    )
+                    note_obj.text = f"{note_obj.text} *** {lent_not_found_msg}"
+                    note_obj.save()
+                else:
+                    new_record = LostRecord(
+                        device=device,
+                        inventory=current_inventory,
+                        user=user,
+                        username=username,
+                    )
+
+            elif state == "dev_state_unknown":
+                print("state == 'dev_state_unknown'")
+                new_record = active_record
+                new_record.pk = new_record.id = None
+                new_record.room = room
+                new_record.inventory = None
+                new_record.user = user
+                new_record.username = username
+                new_record._state.adding = True
+                new_record.save()
+
+            else:
+                msg = f"This should never happen: given state `{state}` not recognized! Raising 500."
+                print(msg)
+                raise RuntimeError(msg)
+
+            if new_record:
+                new_record.save()
