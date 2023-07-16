@@ -93,29 +93,26 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         current_inventory = Inventory.objects.active_inventory()
+        tenant = self.request.tenant
+        is_superuser = self.request.user.is_superuser
 
         devices_in_room = (
             Inventory
             .objects
-            .devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
+            .devices_for_room(self.object.pk, tenant=tenant, is_superuser=is_superuser)
         )
 
         # Allow only adding devices which are not already present in this room:
-        valid_add_devices_qs = (
+        add_devices_qs = (
             Inventory
             .objects
-            .tenant_aware_device_objects(tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
+            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
             .exclude(active_record__room=self.object.pk)
         )
 
-        device_choices = [("", "Add device")]
-        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices_qs]
-
         device_add_form = DeviceAddForm(
-            device_choices=device_choices,
-            initial={
-                "room": self.object.pk,
-            },
+            add_devices_qs=add_devices_qs,
+            initial={"room": self.object.pk,},
         )
 
         context = super().get_context_data(**kwargs)

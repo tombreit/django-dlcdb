@@ -22,7 +22,7 @@ const uuids_states_map = new Map();
 async function getDeviceByUuid(uuid) {
     // console.log("getDeviceByUuid")
 
-    const apiDeviceQuery = `${API_URL_BASE}/devices/${uuid}`
+    const apiDeviceQuery = `${API_URL_BASE}/devices/${uuid}/`
     const response = await fetch(apiDeviceQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
     const deviceData = await response.json();
     return deviceData;
@@ -51,7 +51,7 @@ async function getDeviceByUuid(uuid) {
 
 async function getRoomByUuid(uuid, callback) {
     console.log("getRoomByUuid")
-    const apiRoomQuery = `${API_URL_BASE}/rooms/${uuid}`
+    const apiRoomQuery = `${API_URL_BASE}/rooms/${uuid}/`
     // console.log("apiRoomQuery: ", apiRoomQuery)
     const response = await fetch(apiRoomQuery, {headers: {Authorization: `Token ${API_TOKEN}`} });
     const roomData = await response.json();
@@ -128,6 +128,10 @@ function deviceRowTemplate(device){
                 </button>
             </td>
             <td>
+                Current:
+                <span class="badge badge-pill badge-warning small">
+                    ${device.record_type} ${device.room ? device.room : ''}
+                </span>
             </td>
             <td>
                 <abbr title="Not Implemented">501</abbr>

@@ -22,11 +22,12 @@ class InventorizeRoomForm(forms.Form):
 
 class DeviceAddForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        device_choices = kwargs.pop("device_choices")
+        add_devices_qs = kwargs.pop("add_devices_qs")
+        device_choices = [("", "Add device")]
+        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in add_devices_qs]
         super().__init__(*args, **kwargs)
         self.fields["device"] = forms.ChoiceField(choices=device_choices)
 
-    # device = forms.ChoiceField(choices=device_choices)
     room = forms.CharField(widget=forms.HiddenInput())
 
 
