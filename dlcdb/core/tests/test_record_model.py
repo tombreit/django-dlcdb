@@ -1,7 +1,8 @@
 import pytest
 from django.core.exceptions import ValidationError
-from dlcdb.core.models import Device, Room, Person, LentRecord, InRoomRecord, Record, OrderedRecord
-from dlcdb.core.tests import basetest
+from dlcdb.core.models import (
+    Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord
+)
 
 
 @pytest.mark.django_db
@@ -39,11 +40,11 @@ def test_get_current_record(lentable_device, room):
 
     inroom_record = InRoomRecord.objects.create(device=lentable_device, room=room)
 
-    print("inroom_record: ", type(inroom_record), inroom_record.__class__)
+    # print("inroom_record: ", type(inroom_record), inroom_record.__class__)
 
     current_record = lentable_device.active_record
 
-    print("current_record: ", type(current_record), current_record.__class__)
+    # print("current_record: ", type(current_record), current_record.__class__)
 
     # Tests if current_record is not an interable    
     with pytest.raises(TypeError):
@@ -106,3 +107,27 @@ def test_is_proxy_model(plain_device):
     # Creating plain record instances is not allowed:
     with pytest.raises(ValidationError):
         Record.objects.create(device=plain_device, record_type='ORDERED')
+
+
+@pytest.mark.django_db
+def test_removed_or_lost_record_has_no_room(room, device_1):
+
+    inroom = InRoomRecord.objects.create(device=device_1, room=room)
+    # print(f"{device_1.active_record.room=}")
+    assert inroom.room == room
+    assert device_1.active_record.room == room
+
+    lost = LostRecord.objects.create(device=device_1)
+    # print(f"{device_1.active_record.room=}")
+    assert lost.room == None
+    assert device_1.active_record.room == None
+
+    inroom2 = InRoomRecord.objects.create(device=device_1, room=room)
+    # print(f"{device_1.active_record.room=}")
+    assert inroom2.room == room
+    assert device_1.active_record.room == room
+
+    removed = RemovedRecord.objects.create(device=device_1)
+    # print(f"{device_1.active_record.room=}")
+    assert removed.room == None
+    assert device_1.active_record.room == None

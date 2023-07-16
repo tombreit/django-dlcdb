@@ -28,6 +28,7 @@ class RemovedRecord(Record):
 
     def save(self, **kwargs):
         self.record_type = Record.REMOVED
+        self.room = None
 
         if not self.removed_date:
             self.removed_date = now()

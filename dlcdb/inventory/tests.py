@@ -3,31 +3,6 @@ import pytest
 from dlcdb.core.models import Inventory, Device, InRoomRecord, Room
 
 
-@pytest.fixture
-def inventory_1(db) -> Inventory:
-    inventory = Inventory.objects.create(name="inventory_1", is_active=True)
-    return inventory
-
-@pytest.fixture
-def inventory_2(db) -> Inventory:
-    inventory = Inventory.objects.create(name="inventory_2", is_active=True)
-    return inventory
-
-@pytest.fixture
-def inventory_3(db) -> Inventory:
-    inventory = Inventory.objects.create(name="inventory_3", is_active=True)
-    return inventory
-
-@pytest.fixture
-def device_1(db) -> Device:
-    device = Device.objects.create(sap_id="123")
-    return device
-
-@pytest.fixture
-def room_1(db) -> Room:
-    room = Room.objects.create(number="456")
-    return room
-
 @pytest.mark.django_db
 def test_inventory_unset_other_active_inventories(inventory_1, inventory_2, inventory_3):
     assert all([
