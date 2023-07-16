@@ -261,6 +261,13 @@ class Inventory(models.Model):
 
                 if new_record.record_type == Record.LOST:
                     new_record.record_type = Record.INROOM
+                    new_record.note = ""
+                elif new_record.record_type == Record.REMOVED:
+                    new_record.record_type = Record.INROOM
+                    new_record.disposition_state = ""
+                    new_record.removed_info = ""
+                    new_record.note = ""
+                    new_record.removed_date = None
 
                 new_record._state.adding = True
                 new_record.save()

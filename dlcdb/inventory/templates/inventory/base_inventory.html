@@ -96,6 +96,17 @@
             </div>
         </nav>
 
+        {% if messages %}
+        <hr>
+        <div class="messages">
+            {% for message in messages %}
+              <div {% if message.tags %} class="py-1 my-1 alert alert-{{ message.tags }}"{% endif %}>
+                {{ message }}
+              </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <hr>
 
         {% if not current_inventory %}

@@ -159,7 +159,10 @@ class InventorizeRoomView(LoginRequiredMixin, View):
         room_pk = self.kwargs.get("pk")
 
         try:
-            Inventory.inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
+            if uuids:
+                Inventory.inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
+            else:
+                messages.add_message(request, messages.WARNING, "Nothing marked as inventorized.")
         except RuntimeError as runtime_error:
             return HttpResponseServerError(runtime_error)
         except ObjectDoesNotExist as object_does_not_exist:
