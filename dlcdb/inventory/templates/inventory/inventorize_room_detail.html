@@ -52,24 +52,31 @@
 
 <hr>
 
-<div class="row">
-    <div class="col-12 col-md-12">
-        <form method="post">
-            {% csrf_token %}
-            <div class="input-group input-group-sm mb-3 small">
-                {{ device_add_form.device }}
-                <div class="input-group-append">
-                    <button class="btn-sm btn btn-outline-primary" type="button" id="add-device-button">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-            </div>
-        </form>
+
+<form method="post" class="d-block">
+    {% csrf_token %}
+    <div class="input-group input-group mb-3">
+        {{ device_add_form.device }}
+        <div class="input-group-append">
+            <button class="btn btn btn-outline-primary" type="button" id="add-device-button">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+</form>
+
+<div>
+    <div class="input-group input-group mb-3">
+        <input id="search-table-input" type="search" class="form-control" placeholder="Search device table" autocomplete="off">
+        <div class="input-group-append">
+            <button class="btn btn btn-outline-primary" type="button" id="search-table-button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
     </div>
 </div>
 
-
-<form method="post" class="small">
+<form method="post">
     {% csrf_token %}
 
     <div class="table-responsive">
@@ -203,43 +210,32 @@
         theme: 'bootstrap4',
     });
 
-    (function($){
+    const devicesTable = document.querySelector("#devices-table tbody");
+    const devicesTableSearchInput = document.querySelector("#search-table-input");
 
-        $.fn.tableSearch = function(options){
-            if(!$(this).is('table')){
-                return;
+    function filterDeviceTable(){
+        const query = devicesTableSearchInput.value.toLowerCase();
+        const rows = devicesTable.rows;
+
+        for (const row of rows) {
+            let matchInRow = false;
+
+            for (const cell of row.cells) {
+                let cellContent = cell.textContent || cell.innerText;
+                cellContent = cellContent.toLowerCase();
+                if (cellContent.includes(query)) {
+                    matchInRow = true;
+                }
             }
-            var tableObj = $(this),
-                searchText = (options.searchText)?options.searchText:'Search: ',
-                searchPlaceholder = (options.searchPlaceholder)?options.searchPlaceholder:'',
-                divObj = $('<div class="input-group input-group-sm mb-3"></div>'),
-                inputObj = $('<input type="search" class="form-control" placeholder="'+searchPlaceholder+'" ><div class="input-group-append"><button class="btn-sm btn btn-outline-primary" type="button" id="add-device-button"><i class="fas fa-search"></i></button></div>'),
-                caseSensitive = (options.caseSensitive===true)?true:false,
-                searchFieldVal = '',
-                pattern = '';
-            inputObj.off('keyup').on('keyup', function(){
-                searchFieldVal = $(this).val();
-                pattern = (caseSensitive)?RegExp(searchFieldVal):RegExp(searchFieldVal, 'i');
-                tableObj.find('tbody tr').hide().each(function(){
-                    var currentRow = $(this);
-                    currentRow.find('td').each(function(){
-                        if(pattern.test($(this).html())){
-                            currentRow.show();
-                            return false;
-                        }
-                    });
-                });
-            });
-            tableObj.before(divObj.append(inputObj));
-            return tableObj;
+
+            if (matchInRow) {
+                row.style.display = "table-row";
+            } else {
+                row.style.display = "none";
+            }
         }
-
-        $('table#devices-table').tableSearch({
-            searchText:'',
-            searchPlaceholder:'Search device table'
-        });
-
-    }(jQuery));
+    }
+    document.querySelector("#search-table-input").addEventListener("keyup", filterDeviceTable);
 
     {% include 'inventory/partials/htmx_note.js' %}
     {% include 'inventory/includes/qrtoggle.js' %}
