@@ -32,16 +32,18 @@
     "select2": "^4.1.0-rc.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prod": "npm-run-all scss:prod scss:print js:prod common-font:copy-fontawesome common-js:copy-chartjs lending-prod inventory-prod docs:copy-mermaid",
     "scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_core_srcdir/scss:$npm_package_config_core_distdir/css",
     "scss:print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_core_srcdir/scss/print.scss:$npm_package_config_core_distdir/css/print.css",
-    "js:prod": "npm-run-all js:bundle",
+    "precopy-maps": "mkdir -p $npm_package_config_core_distdir/js",
+    "copy-maps:popper": "cp node_modules/popper.js/dist/popper.min.js.map $npm_package_config_core_distdir/js/",
+    "copy-maps:bs": "cp node_modules/bootstrap/dist/js/bootstrap.min.js.map $npm_package_config_core_distdir/js/",
+    "js:prod": "npm-run-all js:bundle copy-maps:**",
     "js:bundle": "bundle-js $npm_package_config_core_srcdir/js/app.js --disable-beautify --out $npm_package_config_core_distdir/js/app.js",
     "common-font:copy-fontawesome": "mkdir -p $npm_package_config_common_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_common_distdir/fonts/fontawesome",
     "common-js:copy-chartjs": "mkdir -p $npm_package_config_common_distdir/vendor/chartjs && cp -r node_modules/chart.js/dist/* $npm_package_config_common_distdir/vendor/chartjs/",
     "preinventory-prod": "mkdir -p $npm_package_config_inventory_distdir",
-    "inventory-prod": "npm-run-all inventory-scss:prod inventory-js:prod inventory-font:copy-all inventory-img:copy",
+    "inventory-prod": "npm-run-all inventory-scss:prod inventory-js:prod inventory-font:copy-all inventory-img:copy inventory-copy-maps:**",
     "inventory-scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_inventory_srcdir/scss:$npm_package_config_inventory_distdir/css",
     "inventory-js:prod": "npm-run-all inventory-js:bundle inventory-js:copy-qr",
     "inventory-js:copy-qr": "cp $npm_package_config_inventory_srcdir/js/qr* $npm_package_config_inventory_distdir/js/",
@@ -49,6 +51,10 @@
     "inventory-font:copy-all": "npm-run-all inventory-font:copy-fontawesome",
     "inventory-font:copy-fontawesome": "mkdir -p $npm_package_config_inventory_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_inventory_distdir/fonts/fontawesome/",
     "inventory-img:copy": "mkdir -p $npm_package_config_inventory_distdir/img && cp $npm_package_config_inventory_srcdir/img/* $npm_package_config_inventory_distdir/img/",
+
+    "inventory-copy-maps:popper": "cp node_modules/popper.js/dist/popper.min.js.map $npm_package_config_inventory_distdir/js/",
+    "inventory-copy-maps:bs": "cp node_modules/bootstrap/dist/js/bootstrap.min.js.map $npm_package_config_inventory_distdir/js/",
+
     "prelending-prod": "mkdir -p $npm_package_config_lending_distdir",
     "lending-prod": "npm-run-all lending-scss:prod lending-font:copy-fontawesome lending-img:copy htmx:copy-htmx",
     "lending-scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_lending_srcdir/scss:$npm_package_config_lending_distdir/css",
