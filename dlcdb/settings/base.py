@@ -276,7 +276,11 @@ SIMPLE_HISTORY_REVERT_DISABLED=True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 # http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # "whitenoise.storage.CompressedStaticFilesStorage"
+    },
+}
 
 HUEY = SqliteHuey(
     name="dlcdb_huey",
