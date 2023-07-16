@@ -34,9 +34,32 @@ class InventoryQuerySet(models.QuerySet):
             )
         )
 
+    def tenant_aware_device_objects(self, tenant=None, is_superuser=False):
+        qs = Device.objects.none()
+
+        devices_qs = (
+            Device
+            .objects
+            .select_related(
+                'manufacturer',
+                'active_record',
+                'active_record__room',
+                'active_record__inventory',
+                'device_type',
+            )
+        )
+
+        if tenant:
+            qs = devices_qs.filter(tenant=tenant)
+
+        if is_superuser:
+            qs = devices_qs
+
+        return qs
+
     def devices_for_room(self, room_pk, tenant=None, is_superuser=False):
         qs = Device.objects.none()
-        
+
         devices_qs = (
             Device
             .objects

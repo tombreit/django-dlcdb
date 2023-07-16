@@ -92,30 +92,21 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         return Inventory.objects.tenant_aware_room_objects(self.request.tenant)
 
     def get_context_data(self, **kwargs):
-        # print(f"get_contex_data self.object.pk: {self.object.pk}")
         current_inventory = Inventory.objects.active_inventory()
 
-        # Get all devices in this room:
-        devices = Inventory.objects.devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
-
-        form = InventorizeRoomForm(
-            initial={
-                # 'room': self.object.pk,
-                # 'uuids': self.object.get_inventory_status.inventorized_uuids,
-            }
+        devices_in_room = (
+            Inventory
+            .objects
+            .devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
         )
 
         # Allow only adding devices which are not already present in this room:
         valid_add_devices_qs = (
-            Device
+            Inventory
             .objects
+            .tenant_aware_device_objects(tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
             .exclude(active_record__room=self.object.pk)
         )
-
-        if self.request.tenant:
-            valid_add_devices_qs = valid_add_devices_qs.filter(
-                tenant=self.request.tenant
-            )
 
         device_choices = [("", "Add device")]
         device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in valid_add_devices_qs]
@@ -130,7 +121,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                "devices": devices,
+                "devices": devices_in_room,
                 "current_inventory": current_inventory,
                 "qrcode_prefix": settings.QRCODE_PREFIX,
                 "debug": settings.DEBUG,
@@ -139,7 +130,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
                 # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
                 "dev_state_notfound": "dev_state_notfound",
                 "dev_state_added": "dev_state_added",
-                "form": form,
+                "form": InventorizeRoomForm(),
                 "device_add_form": device_add_form,
                 "api_token": Token.objects.first(),
             }
