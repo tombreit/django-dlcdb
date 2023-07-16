@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from .abstracts import AuditBaseModel
 
 
-# Verbleib des Gerätes nach Ausmusterung
+# Whereabouts of the device after decommissioning.
 SOLD = 'SLD'
 SCRAPPED = 'SCR'
 SURRENDERED = 'SRD'
@@ -74,7 +74,7 @@ class Record(AuditBaseModel):
         help_text=_("Replaced by the next record at this timestamp."),
     )
 
-    # todo: implement field validator for record_type: must be one of...
+    # TODO: implement field validator for record_type: must be one of...
     record_type = models.CharField(
         max_length=20,
         choices=RECORD_TYPE_CHOICES,
@@ -150,7 +150,7 @@ class Record(AuditBaseModel):
     )
 
     # objects = models.Manager()  # The default manager.
-    objects = RecordManager()  # Custom records only manager
+    objects = RecordManager()
 
     class Meta:
         verbose_name = 'Record'
@@ -181,7 +181,6 @@ class Record(AuditBaseModel):
         """
         Always set the most recent record (the one which is created) as active for
         the related device.
-        :return:
         """
 
         # set is active if instance is created
@@ -197,13 +196,7 @@ class Record(AuditBaseModel):
                 effective_until=timezone.now(),
             )
 
-            # As an alternative to qs.update():
-            # for device_record in Record.objects.filter(device=self.device):
-            #     if device_record.is_active == True:
-            #         device_record.is_active == False
-            #         device_record.save()
-
-            # Set current record as active
+             # Set current record as active
             self.is_active = True
 
         super().save(*args, **kwargs)
@@ -215,7 +208,6 @@ class Record(AuditBaseModel):
         Return the concrete proxy model instance
         """
         modelclass = self.get_proxy_model()
-        # query the concrete proy model instance
         return modelclass.objects.get(id=self.id)
 
     @staticmethod
@@ -240,7 +232,6 @@ class Record(AuditBaseModel):
 
 
     def get_proxy_model(self):
-        # print("self.recored_type: ", self.record_type)
         return Record.get_proxy_model_by_record_type(self.record_type)
 
     @classmethod
@@ -248,7 +239,6 @@ class Record(AuditBaseModel):
         """
         Returns the admin add url. Whenever this method is called on a concrete
         proxy model it returns the add url of this proxy model.
-        :return:
         """
         return reverse('admin:core_{model_name}_add'.format(
             model_name=cls.__name__.lower()
@@ -257,7 +247,6 @@ class Record(AuditBaseModel):
     def get_latest_note(self):
         """
         Returns the latest note of the related device.
-        :return:
         """
         return self.device.device_notes.all().order_by('-created_at').first()
 
