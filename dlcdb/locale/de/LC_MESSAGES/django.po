@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-11 17:31+0200\n"
-"PO-Revision-Date: 2023-07-11 17:31+0200\n"
+"POT-Creation-Date: 2023-07-16 11:32+0200\n"
+"PO-Revision-Date: 2023-07-16 11:33+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -26,43 +26,15 @@ msgstr ""
 msgid "Log in again"
 msgstr "Erneut anmelden"
 
-#: dlcdb/core/admin/device_admin.py:258
-msgid "In room"
-msgstr "In Raum"
-
-#: dlcdb/core/admin/device_admin.py:270
-msgid "Relocate device"
-msgstr "Gerät umziehen"
-
-#: dlcdb/core/admin/device_admin.py:279
-msgid "Edit lending"
-msgstr "Verleih bearbeiten"
-
-#: dlcdb/core/admin/device_admin.py:297
-msgid "Previous records for this device"
-msgstr "Vorheriger Record für dieses Device"
-
-#: dlcdb/core/admin/device_admin.py:303
-msgid "Unknown record type! Contact your administrator!"
-msgstr "Unbekannter Record Type! Kontaktieren sie ihren DLCDB-Administrator!"
-
-#: dlcdb/core/admin/device_admin.py:329 dlcdb/core/models/prx_lentrecord.py:125
-msgid "Lending"
-msgstr "Ausleihe"
-
-#: dlcdb/core/admin/device_admin.py:334
-msgid "Lend"
-msgstr "Ausleihen"
-
 #: dlcdb/core/admin/filters/licence_filters.py:37
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:116
+#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:60
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:69 dlcdb/core/models/device.py:85
+#: dlcdb/core/apps.py:69 dlcdb/core/models/device.py:84
 #: dlcdb/core/models/manufacturer.py:21
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -95,7 +67,7 @@ msgstr "Inventuren"
 msgid "Notes"
 msgstr "Notizen"
 
-#: dlcdb/core/context_processors.py:56
+#: dlcdb/core/context_processors.py:57
 msgid ""
 "{recordless_devices_count} Device{pluralize(recordless_devices_count)} "
 "without record!"
@@ -103,78 +75,78 @@ msgstr ""
 "{recordless_devices_count} Device{pluralize(recordless_devices_count)} ohne "
 "Record!"
 
-#: dlcdb/core/context_processors.py:58
+#: dlcdb/core/context_processors.py:59
 msgid "Add proper record?"
 msgstr "Einen Record hinzufügen?"
 
-#: dlcdb/core/context_processors.py:68
+#: dlcdb/core/context_processors.py:69
 msgid "No room configured as 'is_external'!"
 msgstr "Kein Raum als 'is_external' konfiguriert!"
 
-#: dlcdb/core/context_processors.py:70 dlcdb/core/context_processors.py:80
+#: dlcdb/core/context_processors.py:71 dlcdb/core/context_processors.py:81
 msgid "Configure one?"
 msgstr "Konfigurieren?"
 
-#: dlcdb/core/context_processors.py:78
+#: dlcdb/core/context_processors.py:79
 msgid "No room configured as 'is_auto_return_room'!"
 msgstr "Kein \"Auto return\" Raum konfiguriert!"
 
-#: dlcdb/core/context_processors.py:88
+#: dlcdb/core/context_processors.py:89
 msgid "No rooms defined yet."
 msgstr "Bisher wurden keine Räume  eingegeben."
 
-#: dlcdb/core/context_processors.py:90
+#: dlcdb/core/context_processors.py:91
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
-#: dlcdb/core/models/device.py:63
+#: dlcdb/core/models/device.py:62
 msgid "Inventory ID"
 msgstr "Inventarnummer"
 
-#: dlcdb/core/models/device.py:71
+#: dlcdb/core/models/device.py:70
 msgid "Serial number"
 msgstr "Seriennummer"
 
-#: dlcdb/core/models/device.py:77
+#: dlcdb/core/models/device.py:76
 msgid "Device type"
 msgstr "Geräteklasse"
 
-#: dlcdb/core/models/device.py:91
+#: dlcdb/core/models/device.py:90
 msgid "Model name"
 msgstr "Modellbezeichnung"
 
-#: dlcdb/core/models/device.py:98 dlcdb/core/models/supplier.py:23
+#: dlcdb/core/models/device.py:97 dlcdb/core/models/supplier.py:23
 msgid "Supplier"
 msgstr "Distributor"
 
-#: dlcdb/core/models/device.py:103
+#: dlcdb/core/models/device.py:102
 msgid "Is license?"
 msgstr "Ist Lizenz?"
 
-#: dlcdb/core/models/device.py:108
+#: dlcdb/core/models/device.py:107
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:120
+#: dlcdb/core/models/device.py:119
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:143
+#: dlcdb/core/models/device.py:142
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:144
+#: dlcdb/core/models/device.py:143
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:148
+#: dlcdb/core/models/device.py:147
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:149
+#: dlcdb/core/models/device.py:148
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -206,7 +178,7 @@ msgstr "Notiz"
 msgid "Manufacturers"
 msgstr "Hersteller"
 
-#: dlcdb/core/models/prx_lentrecord.py:67
+#: dlcdb/core/models/prx_lentrecord.py:68
 #, python-brace-format
 msgid ""
 "The end date (lend_desired_end_date) cannot be after {settings."
@@ -215,7 +187,11 @@ msgstr ""
 "Das Verleihende (lend_desired_end_date) kann nicht nach {settings."
 "MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
 
-#: dlcdb/core/models/prx_lentrecord.py:126
+#: dlcdb/core/models/prx_lentrecord.py:86 dlcdb/core/ui_helpers.py:108
+msgid "Lending"
+msgstr "Ausleihe"
+
+#: dlcdb/core/models/prx_lentrecord.py:87
 msgid "Lendings"
 msgstr "Ausleihen"
 
@@ -227,59 +203,59 @@ msgstr "Record vom Typ \"Nicht auffindbar\""
 msgid "Records of type 'Lost'"
 msgstr "Records vom Typ \"Nicht auffindbar\""
 
-#: dlcdb/core/models/record.py:26
+#: dlcdb/core/models/record.py:22
 msgid "Sold"
 msgstr "Verkauft"
 
-#: dlcdb/core/models/record.py:27
+#: dlcdb/core/models/record.py:23
 msgid "Scrapped"
 msgstr "Verschrottet"
 
-#: dlcdb/core/models/record.py:28
+#: dlcdb/core/models/record.py:24
 msgid "Surrendered"
 msgstr "Abgegeben"
 
-#: dlcdb/core/models/record.py:29
+#: dlcdb/core/models/record.py:25
 msgid "Stolen"
 msgstr "Gestohlen"
 
-#: dlcdb/core/models/record.py:30
+#: dlcdb/core/models/record.py:26
 msgid "Duplicate"
 msgstr "Duplikat"
 
-#: dlcdb/core/models/record.py:67
+#: dlcdb/core/models/record.py:63
 msgid "Device"
 msgstr "Gerät"
 
-#: dlcdb/core/models/record.py:73
+#: dlcdb/core/models/record.py:69
 msgid "Active"
 msgstr "Aktiv"
 
-#: dlcdb/core/models/record.py:78
+#: dlcdb/core/models/record.py:74
 msgid "Replaced by the next record at this timestamp."
 msgstr ""
 
-#: dlcdb/core/models/record.py:87
+#: dlcdb/core/models/record.py:83
 msgid "Record type"
 msgstr "Record Typ"
 
-#: dlcdb/core/models/record.py:91
+#: dlcdb/core/models/record.py:87
 msgid "Record note"
 msgstr "Record Notiz"
 
-#: dlcdb/core/models/record.py:101
+#: dlcdb/core/models/record.py:97
 msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
-#: dlcdb/core/models/record.py:109
+#: dlcdb/core/models/record.py:105
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/record.py:130 dlcdb/core/models/room.py:115
+#: dlcdb/core/models/record.py:132 dlcdb/core/models/room.py:59
 msgid "Room"
 msgstr "Raum"
 
-#: dlcdb/core/models/record.py:141
+#: dlcdb/core/models/record.py:143
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
@@ -306,6 +282,30 @@ msgstr "Alle Records anzeigen"
 #: dlcdb/core/templates/core/lentrecord/change_list.html:10
 msgid "Checklist"
 msgstr "Checklist"
+
+#: dlcdb/core/ui_helpers.py:39
+msgid "In room"
+msgstr "In Raum"
+
+#: dlcdb/core/ui_helpers.py:51
+msgid "Relocate device"
+msgstr "Gerät umziehen"
+
+#: dlcdb/core/ui_helpers.py:60
+msgid "Edit lending"
+msgstr "Verleih bearbeiten"
+
+#: dlcdb/core/ui_helpers.py:78
+msgid "Show previous records for this device"
+msgstr "Frühere Records dieses Devices anzeigen"
+
+#: dlcdb/core/ui_helpers.py:84
+msgid "Unknown record type! Contact your administrator!"
+msgstr "Unbekannter Record Type! Kontaktieren sie ihren DLCDB-Administrator!"
+
+#: dlcdb/core/ui_helpers.py:113
+msgid "Lend"
+msgstr "Ausleihen"
 
 #: dlcdb/organization/models.py:25 dlcdb/organization/models.py:32
 msgid "A Company that Makes Everything"

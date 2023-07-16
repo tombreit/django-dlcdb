@@ -6,7 +6,7 @@
     {% for info in active_record.device.get_record_action_snippet.record_infos %}
         {% if info.url %}
             <a 
-                class="{{ info.css_classes }}"
+                class="{{ info.css_classes }} text-nowrap"
                 title="{{ info.title }}"
                 href="{{ info.url }}"
             >
@@ -14,7 +14,7 @@
             </a>
         {% else %}
             <span
-                class="{{ info.css_classes }}"
+                class="{{ info.css_classes }} text-nowrap"
                 title="{{ info.title }}"
             >
                 {{ info.label }}

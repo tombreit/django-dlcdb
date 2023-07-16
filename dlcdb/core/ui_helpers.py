@@ -75,7 +75,7 @@ class UIRecordActionSnippetContext:
                     css_classes="btn btn-danger",
                     url=f"{reverse('admin:core_record_changelist')}?device__id__exact={device_pk}",
                     label=self.record_obj.get_record_type_display,
-                    title=_("Previous records for this device"),
+                    title=_("Show previous records for this device"),
                 )
             else:
                 record_type_info = dict(
