@@ -248,17 +248,19 @@ class Inventory(models.Model):
             
             print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
 
-            new_record = None
+            new_record = False
 
             if state == "dev_state_found":
                 print("state == 'dev_state_found'")
                 new_record = active_record
-                new_record.pk = new_record.id = None
                 new_record.room = room
                 new_record.inventory = current_inventory
                 new_record.user = user
                 new_record.username = username
 
+                # As we copied a previous record, we need to do some
+                # cleanup in fields which doest not match the new
+                # record type:
                 if new_record.record_type == Record.LOST:
                     new_record.record_type = Record.INROOM
                     new_record.note = ""
@@ -269,24 +271,18 @@ class Inventory(models.Model):
                     new_record.note = ""
                     new_record.removed_date = None
 
-                new_record._state.adding = True
-                new_record.save()
-
             elif state == "dev_state_notfound":
-                """
-                If an expected device is not found in a given room, we need
-                to check if it is currently lended. When lended, we do not
-                set this device as "not found", but instead move it to an
-                "external room".
-                """
+                # If an expected device is not found in a given room, we need
+                # to check if it is currently lended. When lended, we do not
+                # set this device as "not found", but instead move it to an
+                # "external room".
+
                 print("state == 'dev_state_notfound'")
 
-                if all(
-                    [
+                if all([
                         active_record.record_type == Record.LENT,
                         active_record.room != external_room,
-                    ]
-                ):
+                ]):
                     active_record.room = external_room
                     active_record.save()
 
@@ -308,21 +304,14 @@ class Inventory(models.Model):
                         username=username,
                     )
 
-            elif state == "dev_state_unknown":
-                print("state == 'dev_state_unknown'")
-                new_record = active_record
-                new_record.pk = new_record.id = None
-                new_record.room = room
-                new_record.inventory = None
-                new_record.user = user
-                new_record.username = username
-                new_record._state.adding = True
-                new_record.save()
-
             else:
                 msg = f"This should never happen: given state `{state}` not recognized! Raising 500."
                 print(msg)
                 raise RuntimeError(msg)
 
             if new_record:
+                # Copying model instances
+                # https://docs.djangoproject.com/en/4.2/topics/db/queries/#copying-model-instances
+                new_record.pk = None
+                new_record._state.adding = True
                 new_record.save()
