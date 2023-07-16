@@ -18,7 +18,7 @@ beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
 certifi==2023.5.7
     # via requests
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
@@ -42,7 +42,7 @@ django-environ==0.10.0
     # via django-dlcdb (setup.cfg)
 django-filter==23.2
     # via django-dlcdb (setup.cfg)
-django-htmx==1.15.0
+django-htmx==1.16.0
     # via django-dlcdb (setup.cfg)
 django-select2==8.1.2
     # via django-dlcdb (setup.cfg)

@@ -16,7 +16,7 @@ babel==2.12.1
     #   sphinx
 beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
-black==23.3.0
+black==23.7.0
     # via django-dlcdb (setup.cfg)
 build==0.10.0
     # via pip-tools
@@ -30,9 +30,9 @@ cfgv==3.3.1
     # via pre-commit
 chardet==5.1.0
     # via tox
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
-click==8.1.4
+click==8.1.5
     # via
     #   black
     #   pip-tools
@@ -42,7 +42,7 @@ coverage[toml]==7.2.7
     # via pytest-cov
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
-cryptography==41.0.1
+cryptography==41.0.2
     # via pyopenssl
 distlib==0.3.6
     # via virtualenv
@@ -75,7 +75,7 @@ django-extensions==3.2.3
     # via django-dlcdb (setup.cfg)
 django-filter==23.2
     # via django-dlcdb (setup.cfg)
-django-htmx==1.15.0
+django-htmx==1.16.0
     # via django-dlcdb (setup.cfg)
 django-select2==8.1.2
     # via django-dlcdb (setup.cfg)
@@ -151,7 +151,7 @@ pathspec==0.11.1
     # via black
 pillow==10.0.0
     # via django-dlcdb (setup.cfg)
-pip-tools==6.14.0
+pip-tools==7.0.0
     # via django-dlcdb (setup.cfg)
 platformdirs==3.8.1
     # via
@@ -253,7 +253,7 @@ typing-extensions==4.7.1
     #   pydata-sphinx-theme
 urllib3==2.0.3
     # via requests
-virtualenv==20.23.1
+virtualenv==20.24.0
     # via
     #   pre-commit
     #   tox
