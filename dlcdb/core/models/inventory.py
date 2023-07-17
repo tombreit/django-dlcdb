@@ -21,33 +21,25 @@ class InventoryQuerySet(models.QuerySet):
     def active_inventory(self):
         return self.get(is_active=True)
 
-    def tenant_unaware_device_objects(self, tenant=None):
-        return (
-            Device
-            .objects
-            .select_related(
-                'manufacturer',
-                'active_record',
-                'active_record__room',
-                'active_record__inventory',
-                'device_type',
-            )
+    _devices_qs = (
+        Device
+        .objects
+        .select_related(
+            'manufacturer',
+            'active_record',
+            'active_record__room',
+            'active_record__inventory',
+            'device_type',
+            'tenant',
         )
+    )
+
+    def tenant_unaware_device_objects(self, tenant=None):
+        return self._devices_qs
 
     def tenant_aware_device_objects(self, tenant=None, is_superuser=False):
         qs = Device.objects.none()
-
-        devices_qs = (
-            Device
-            .objects
-            .select_related(
-                'manufacturer',
-                'active_record',
-                'active_record__room',
-                'active_record__inventory',
-                'device_type',
-            )
-        )
+        devices_qs = self._devices_qs
 
         if tenant:
             qs = devices_qs.filter(tenant=tenant)
@@ -57,13 +49,11 @@ class InventoryQuerySet(models.QuerySet):
 
         return qs
 
-    def devices_for_room(self, room_pk, tenant=None, is_superuser=False):
+    def tenant_aware_device_objects_for_room(self, room_pk, tenant=None, is_superuser=False):
         qs = Device.objects.none()
 
         devices_qs = (
-            Device
-            .objects
-            .select_related('active_record')
+            self._devices_qs
             .filter(
                 active_record__is_active=True,
                 active_record__room__pk=room_pk,
@@ -79,27 +69,12 @@ class InventoryQuerySet(models.QuerySet):
 
         return qs
 
-
-    def tenant_aware_devices_for_room(self, room_pk, is_superuser, tenant):
-        # By default do not expose any devices
-        devices_qs = Device.objects.none()
-
-        # Allow all rooms, even soft deleted rooms
-        # room = Room.with_softdeleted_objects.get(pk=room_pk)
-        room = Room.objects.get(pk=room_pk)
-        base_qs = room.get_devices()
-
-        if tenant:
-            devices_qs = base_qs.filter(tenant=tenant)
-
-        if is_superuser:
-            devices_qs = base_qs
-
-        return devices_qs.order_by('-modified_at')
-
-
     def tenant_aware_room_objects(self, tenant=None):
-        qs = Room.objects.exclude(deleted_at__isnull=False)
+        qs = (
+            Room
+            .objects
+            .exclude(deleted_at__isnull=False)
+        )
 
         if tenant:
             qs = (

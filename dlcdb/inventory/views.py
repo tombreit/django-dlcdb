@@ -99,7 +99,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
         devices_in_room = (
             Inventory
             .objects
-            .devices_for_room(self.object.pk, tenant=tenant, is_superuser=is_superuser)
+            .tenant_aware_device_objects_for_room(self.object.pk, tenant=tenant, is_superuser=is_superuser)
         )
 
         # Allow only adding devices which are not already present in this room:

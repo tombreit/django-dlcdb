@@ -17,5 +17,5 @@ def test_inventory_only_one_active_inventory(inventory_1, inventory_2, inventory
 @pytest.mark.django_db
 def test_device_in_inventory_devices_for_room(device_1, room_1):
     device_record = InRoomRecord.objects.create(device=device_1, room=room_1)
-    devices_in_room = Inventory.objects.devices_for_room(room_pk=room_1.pk, tenant=None, is_superuser=True)
+    devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(room_pk=room_1.pk, tenant=None, is_superuser=True)
     assert device_1 in devices_in_room
