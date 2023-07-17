@@ -1,6 +1,19 @@
 from django.db import models
 
 
+class NoteManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "room",
+                "inventory",
+                "device",
+            )
+        )
+
+
 class Note(models.Model):
     """
     Represents a note. Notes are always bount to a device and optionally bount to an inventory.
@@ -10,7 +23,8 @@ class Note(models.Model):
 
     text = models.TextField()
     device = models.ForeignKey(
-        "core.Device", blank=True,
+        "core.Device",
+        blank=True,
         null=True,
         related_name="device_notes",
         on_delete=models.SET_NULL,
@@ -26,14 +40,16 @@ class Note(models.Model):
         "core.Inventory",
         null=True,
         blank=True,
-        verbose_name="Inventurzuordnung",
         on_delete=models.SET_NULL,
         related_name="inventory_notes",
+        verbose_name="Inventurzuordnung",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.EmailField(blank=True, editable=False)
     updated_by = models.EmailField(blank=True, editable=False)
+
+    objects = NoteManager()
 
     class Meta:
         verbose_name = "Notiz"
