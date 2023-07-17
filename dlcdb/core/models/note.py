@@ -28,6 +28,7 @@ class Note(models.Model):
         blank=True,
         verbose_name="Inventurzuordnung",
         on_delete=models.SET_NULL,
+        related_name="inventory_notes",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
