@@ -100,7 +100,6 @@ class Room(SoftDeleteAuditBaseModel):
     def get_lent_records(self):
         """
         Returns the active lent records associated with this room.
-        :return:
         """
         from . import LentRecord
         return LentRecord.objects.filter(room=self, is_active=True)
@@ -108,7 +107,6 @@ class Room(SoftDeleteAuditBaseModel):
     def get_latest_note(self):
         """
         Returns the latest note of the related room and the current inventory.
-        :return:
         """
         note = self.room_notes.filter(inventory__is_active=True).order_by('-created_at').first()
         return note

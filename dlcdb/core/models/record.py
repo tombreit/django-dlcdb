@@ -131,6 +131,7 @@ class Record(AuditBaseModel):
         blank=True,
         verbose_name=_('Room'),
         on_delete=models.PROTECT,
+        # related_name="room_records",
     )
     # Bestellvorgang
     date_of_purchase = models.DateField(null=True, blank=True, verbose_name='Bestelldatum')

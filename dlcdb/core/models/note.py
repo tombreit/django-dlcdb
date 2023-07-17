@@ -54,6 +54,10 @@ class Note(models.Model):
     class Meta:
         verbose_name = "Notiz"
         verbose_name_plural = "Notizen"
+        indexes = [
+            models.Index(fields=["created_at", "inventory"]),
+        ]
+
 
     def __str__(self):
         return "{inventory} - {ts}".format(inventory=self.inventory or "", ts=self.created_at)
