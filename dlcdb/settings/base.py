@@ -277,6 +277,9 @@ SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 # http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # "whitenoise.storage.CompressedStaticFilesStorage"
     },
