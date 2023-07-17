@@ -1,3 +1,35 @@
+
+<div class="row">
+    <div class="col-12 col-md-6">
+        <h3>
+            Devices 
+            <span class="badge badge-secondary">
+                {{ filter_devices.qs|length }} / {{ all_devices_count }}
+            </span>
+        </h3>
+    </div>
+    <div class="col-12 col-md-6">
+        {% include 'inventory/includes/pagination_htmx.html' %}
+    </div>
+
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="table-responsive">
+    <table id="devices-table" class="table table-sm table-hover">
+        <thead>
+            <tr>
+                <th>Device</th>
+                <th>Record</th>
+                <th>Tenant</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody id="devices-table-tbody">
+          <tr>
+
 {% for device in page_obj %}
     <tr 
         id="tr-uuid-{{ device.uuid }}"
@@ -96,3 +128,12 @@
         </td>
     </tr>
 {% endfor %}
+
+
+</tr>
+
+</tbody>
+</table>
+</div>
+
+</form>

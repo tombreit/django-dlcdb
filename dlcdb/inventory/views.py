@@ -204,12 +204,12 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
 
 def search_devices(request):
     if request.htmx:
-        template = "inventory/partials/device_search.html"
+        template = "inventory/partials/device_search_htmx.html"
     else:
         template = 'inventory/device_search.html'
 
-    devices = Inventory.objects.tenant_unaware_device_objects()
-    filter_devices = DeviceFilter(request.GET, queryset=devices)
+    all_devices = Inventory.objects.tenant_unaware_device_objects()
+    filter_devices = DeviceFilter(request.GET, queryset=all_devices)
 
     request_copy = request.GET.copy()
     parameters = request_copy.pop('page', True) and request_copy.urlencode()
@@ -222,6 +222,7 @@ def search_devices(request):
         "current_inventory": Inventory.objects.active_inventory(),
         'page_obj': page_obj,
         'filter_devices': filter_devices,
+        'all_devices_count': all_devices.count(),
         'parameters': parameters,
     }
     return TemplateResponse(request, template, context)

@@ -1,0 +1,48 @@
+
+<nav>
+    <ul class="pagination justify-content-end">
+
+    {% if page_obj.has_previous %}
+        <li class="page-item">
+        <span 
+            class="page-link" 
+            hx-get="?page={{ page_obj.previous_page_number }}&{{ parameters }}"
+            hx-target="#device-search-htmx" 
+            aria-label="Previous"
+        >
+            <span aria-hidden="true">&laquo;</span>
+        </a>
+        </li>
+    {% else %}
+        <li class="page-item disabled">
+        <span class="page-link">
+            <span aria-hidden="true">&laquo;</span>
+        </span>
+        </li>
+    {% endif %}
+
+    <li class="page-item active disabled" aria-current="page">
+        <span class="page-link text-center">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+    </li>
+
+    {% if page_obj.has_next %}
+        <li class="page-item">
+        <span 
+            class="page-link" 
+            hx-get="?page={{ page_obj.next_page_number }}&{{ parameters }}"
+            hx-target="#device-search-htmx" 
+        >
+            <span aria-hidden="true">&raquo;</span>
+        </a>
+        </li>
+    {% else %}
+        <li class="page-item disabled">
+        <span class="page-link">
+            <span aria-hidden="true">&raquo;</span>
+        </span>
+        </li>
+    {% endif %}
+    </ul>
+</nav>

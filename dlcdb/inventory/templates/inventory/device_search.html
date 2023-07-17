@@ -26,7 +26,7 @@
                 autocomplete="off"
                 hx-trigger="keyup, change, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
                 hx-get="."
-                hx-target="#devices-table-tbody"
+                hx-target="#device-search-htmx"
             >
                 {% crispy filter_devices.form %}
             </form>
@@ -39,55 +39,17 @@
 </div>
 
 
-<div class="row">
-    <div class="col-12 col-md-6">
-        <h3>
-            Devices 
-            <span class="badge badge-secondary">
-                {{ filter_devices.qs|length }}
-            </span>
-        </h3>
+<div
+    id="device-search-htmx"
+    hx-trigger="load"
+    hx-get="."
+>
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
-    <div class="col-12 col-md-6">
-        {% include 'inventory/includes/pagination.html' %}
-    </div>
-
 </div>
-
-<form method="post">
-    {% csrf_token %}
-
-    <div class="table-responsive">
-    <table id="devices-table" class="table table-sm table-hover">
-        <thead>
-            <tr>
-                <th>Device</th>
-                <th>Record</th>
-                <th>Tenant</th>
-                <th>Note</th>
-            </tr>
-        </thead>
-        <tbody 
-            id="devices-table-tbody"
-            hx-trigger="load"
-            hx-get="."
-        >
-
-          <tr>
-            <td colspan="4">
-                <div class="text-center">
-                    <div class="spinner-border" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            </td>
-          </tr>
-
-        </tbody>
-    </table>
-    </div>
-
-</form>
 
 {% include 'inventory/partials/bs_modal.html' %}
 {% include 'inventory/partials/bs_toast.html' %}
