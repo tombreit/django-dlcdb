@@ -119,7 +119,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'dlcdb.tenants.middleware.CurrentTenantMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'dlcdb.lending.middleware.htmx_middleware',
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
