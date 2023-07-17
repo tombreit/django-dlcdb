@@ -147,7 +147,6 @@ TEMPLATES = [
                 'dlcdb.core.context_processors.hints',
                 'dlcdb.core.context_processors.nav',
                 'dlcdb.organization.context_processors.branding',
-                'dlcdb.lending.context_processors.lending_configuration',
             ],
         },
     },
