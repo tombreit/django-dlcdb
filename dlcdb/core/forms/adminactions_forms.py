@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from dlcdb.tenants.models import Tenant
-from ..models import Room
+from ..models import Room, DeviceType
 
 
 class RelocateActionForm(forms.Form):
@@ -18,6 +18,10 @@ class RelocateActionForm(forms.Form):
         queryset=Room.objects.all(),
         required=False,
     )
+    new_device_type = forms.ModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+    )
 
     def clean_new_tenant(self):
         new_tenant = self.cleaned_data['new_tenant']
@@ -31,8 +35,13 @@ class RelocateActionForm(forms.Form):
         cleaned_data = super().clean()
         new_tenant = cleaned_data.get("new_tenant")
         new_room = cleaned_data.get("new_room")
+        new_device_type = cleaned_data.get("new_device_type")
 
-        if not new_tenant and not new_room:
+        if not any([
+            new_tenant,
+            new_room,
+            new_device_type,
+        ]):
             raise ValidationError(
                 "Either a new room and/or a new tenant must be entered!"
             )

@@ -40,11 +40,12 @@ class DevicesRelocateView(FormView):
         user = self.get_initial().get('user')
         new_room = form.cleaned_data.get('new_room')
         new_tenant = form.cleaned_data.get('new_tenant')
+        new_device_type = form.cleaned_data.get('new_device_type')
 
-        self.relocate_devices(selected_instances, new_room, user, new_tenant)
+        self.relocate_devices(selected_instances, new_room, user, new_tenant, new_device_type)
         return super().form_valid(form)
 
-    def relocate_devices(self, devices, new_room, user, new_tenant):
+    def relocate_devices(self, devices, new_room, user, new_tenant, new_device_type):
         for device in devices:
             # print(f"Processing device: {device}...")
 
@@ -53,6 +54,13 @@ class DevicesRelocateView(FormView):
                 device.save()
 
                 update_msg = f"Device <{device}>: Set new tenant to {new_tenant}."
+                messages.add_message(self.request, messages.INFO, update_msg)
+
+            if new_device_type:
+                device.device_type = new_device_type
+                device.save()
+
+                update_msg = f"Device <{device}>: Set device type to {new_device_type}."
                 messages.add_message(self.request, messages.INFO, update_msg)
 
             if new_room:
