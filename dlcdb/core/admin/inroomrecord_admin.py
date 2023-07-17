@@ -12,11 +12,13 @@ from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = ProxyRecordAdminForm
     change_form_template = 'core/inroomrecord/change_form.html'
+
     list_display = [
         'device',
         'created_at',
         'note',
     ]
+
     fields = [
         'device',
         'room',

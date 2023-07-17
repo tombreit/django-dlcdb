@@ -38,6 +38,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     search_fields = [
         'device__sap_id',
         'device__edv_id',
+        'device__uuid',
         'device__manufacturer__name',
         'device__series',
         'person__first_name',

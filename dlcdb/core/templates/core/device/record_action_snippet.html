@@ -1,9 +1,8 @@
 {% load i18n admin_urls %}
 
-
 <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
 
-    {% for info in active_record.device.get_record_action_snippet.record_infos %}
+    {% for info in device_obj.get_record_action_snippet.record_infos %}
         {% if info.url %}
             <a 
                 class="{{ info.css_classes }} text-nowrap"
@@ -22,12 +21,13 @@
         {% endif %}
     {% endfor %}
 
+    {% if device_obj.get_record_action_snippet.add_links %}
     <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
         <button id="newRecord" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-plus"></i>
         </button>
         <div class="dropdown-menu" aria-labelledby="newRecord">
-        {% for add_link in active_record.device.get_record_action_snippet.add_links %}
+        {% for add_link in device_obj.get_record_action_snippet.add_links %}
             <a 
                 class="dropdown-item"
                 href="{{ add_link.url }}"
@@ -37,6 +37,8 @@
         {% endfor %}
         </div>
     </div>
+    {% endif %}
+
 </div>
 
 {% comment %}

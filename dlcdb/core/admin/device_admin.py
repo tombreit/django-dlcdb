@@ -242,7 +242,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             # current record may be none in case this device does
             # not have any records yet.
             context = dict(
-                active_record=obj.active_record,
+                # active_record=obj.active_record,
+                device_obj=obj,
                 list_view=True,
             )
             return render_to_string('core/device/record_action_snippet.html', context)

@@ -231,4 +231,4 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     @property
     def get_record_action_snippet(self):
-        return UIRecordActionSnippetContext(record_obj=self.active_record)
+        return UIRecordActionSnippetContext(device_obj=self)
