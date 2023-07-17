@@ -166,9 +166,10 @@
                             <br>
                         {% endif %}
 
-                        <span title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}">
+                        <span 
+                            title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago"
+                        >
                             {{ device.active_record.created_at|date:"Y-m-d" }}
-                            {# <br> vor {{ device.active_record.created_at|timesince }} #}
                         </span>
                     </small>
                 </td>
