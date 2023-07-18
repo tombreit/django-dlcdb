@@ -56,9 +56,15 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         'manufacturer__name',
         'series',
         'serial_number',
-        # 'uuid',
         'order_number',
     ]
+
+    def get_search_fields(self, request):
+        search_fields = self.search_fields
+        if request.user.is_superuser:
+            search_fields.append("uuid")
+        return search_fields
+
     autocomplete_fields = [
         'manufacturer',
         'device_type',
