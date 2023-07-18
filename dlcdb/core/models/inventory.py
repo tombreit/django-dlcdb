@@ -2,7 +2,7 @@ import json
 from collections import namedtuple
 
 from django.db import models, transaction
-from django.db.models import Count, IntegerField, Q, OuterRef, Subquery
+from django.db.models import Count, IntegerField, Q, OuterRef, Subquery, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from dlcdb.core.utils.helpers import get_denormalized_user
 
@@ -52,13 +52,20 @@ class InventoryQuerySet(models.QuerySet):
     def tenant_aware_device_objects_for_room(self, room_pk, tenant=None, is_superuser=False):
         qs = Device.objects.none()
 
+        current_inventory_device_note = Note.objects.filter(
+            device=OuterRef("pk"),
+            inventory=self.get(is_active=True),
+        )
+
         devices_qs = (
-            self._devices_qs
+            self
+            ._devices_qs
             .filter(
                 active_record__is_active=True,
                 active_record__room__pk=room_pk,
                 active_record__device__deleted_at__isnull=True,
             )
+            .annotate(has_inventory_note=Exists(current_inventory_device_note))
         )
 
         if tenant:
@@ -70,10 +77,17 @@ class InventoryQuerySet(models.QuerySet):
         return qs
 
     def tenant_aware_room_objects(self, tenant=None):
+
+        current_inventory_room_note = Note.objects.filter(
+            room=OuterRef("pk"),
+            inventory=self.get(is_active=True),
+        )
+
         qs = (
             Room
             .objects
             .exclude(deleted_at__isnull=False)
+            .annotate(has_inventory_note=Exists(current_inventory_room_note))
         )
 
         if tenant:

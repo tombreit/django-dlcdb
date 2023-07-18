@@ -108,8 +108,7 @@ class Room(SoftDeleteAuditBaseModel):
         """
         Returns the latest note of the related room and the current inventory.
         """
-        note = self.room_notes.filter(inventory__is_active=True).order_by('-created_at').first()
-        return note
+        return self.room_notes.filter(inventory__is_active=True).order_by('-created_at').first()
 
     @property
     def get_inventory_status(self):
