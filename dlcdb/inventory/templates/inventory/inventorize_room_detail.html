@@ -37,20 +37,40 @@
 </div>
 
 {% if room.is_external %}
-<div class="my-1 alert alert-warning">
-    <strong>Raumtyp "extern"</strong>
+<div class="my-1 alert alert-danger">
+    <strong>Raumtyp "extern": verliehene Geräte</strong>
     <p>
-        Verliehene Geräte in diesem Raum werden beim Klick auf "Ist nicht da" 
-        als "Nicht auffindbar" deklariert ein aktuell definierter Verleih wird 
+        Verliehene Geräte in diesem virtuellen Raum werden beim Klick auf "Ist nicht da" 
+        als "Nicht auffindbar" deklariert und ein aktuell definierter Verleih wird 
         damit abgebrochen!
-        <br>
-        Verliehen Geräte immer erst auf "Ist nicht da" setzen, wenn bei 
-        Ausleiher*in nachgefragt wurde, ob sich das Gerät noch in Ihrem Besitz
-        befindet.
-        <br>
-        Rücklaufmeldungen derartiger Nachfragen als "Inventurnotiz" abspeichern,
-        z.B.: <i>Besitz bestätigt von Ausleiher*in via Email vom 06.12.2021</i>
     </p>
+</div>
+<div class="my-1 alert alert-warning">
+    <strong>Raumtyp "extern": Besitzbestätigung </strong>
+    <ul>
+        <li>
+            Für ein verliehens Gerät, welches nicht physikalisch vorgeführt werden kann,
+            muss der Bestand/Besitz anderweitig schriftlich geklärt werden.
+        </li>
+        <li>
+            Die DLCDB kann die Ausleihenden automatisiert anschreiben und den
+            Besitzstatus erfragen. Diese Funktionalität wird vom DLCDB-Betreiber
+            aktiviert.
+        </li>
+        <li>
+            Die schriftlichen Rücklaufmeldungen derartiger Nachfragen werden als
+            "Inventurnotiz" zum Gerät abgespeichert. Das Übertragen
+            dieser Meldungen in eine DLCDB-Notiz erfolgt manuell. Die Notiz
+            muss nicht personalisiert sein und kann z.B. in folgender Form
+            erfolgen: <i>Besitz bestätigt von Ausleiher*in via Email vom
+            06.12.2021</i>
+        </li>
+        <li>
+            Erst wenn auch die/der Ausleihende nicht reagiert oder den
+            Besitz verneint, kann ein Gerät über "Ist nicht da" als "Nicht
+            Auffindbar" deklariert werden.
+        </li>
+    </ul>
 </div>
 {% endif %}
 
