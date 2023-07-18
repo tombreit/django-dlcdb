@@ -1,11 +1,12 @@
 <div class="progress bg-primary" style="height: 2rem;">
     <div 
-        class="progress-bar progress-bar-striped bg-success" 
+        class="font-weight-bold progress-bar progress-bar-striped bg-success" 
         role="progressbar" 
         style="overflow: visible; min-width: 5%; width: {{ inventory_progress.done_percent }}%;" 
         aria-valuenow="{{ inventory_progress.done_percent }}" 
         aria-valuemin="0" 
         aria-valuemax="100"
+        title="Inventory progress for current tenant, counting only devices with an inventory id"
     >
         {{ inventory_progress.done_percent }}% 
         ({{ inventory_progress.inventorized_devices_count }} / {{ inventory_progress.all_devices_count }} Devices)

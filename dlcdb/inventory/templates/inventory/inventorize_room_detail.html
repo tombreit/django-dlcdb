@@ -3,14 +3,17 @@
 
 {% block body %}
 
+{% include 'inventory/includes/inventory_progress.html' %}
 {% include 'inventory/includes/qrvideo.html' %}
+
+<hr>
 
 <div class="d-flex">
     <div class="w-100">
-        <h6>
+        <h3>
             Devices in <strong>{{ room }}</strong>
             {% include 'inventory/includes/inventory_status_badge.html' with style="badge" %}
-        </h6>
+        </h>
 
         {% comment %}
         <div class="border rounded p-1">

@@ -115,6 +115,11 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
             initial={"room": self.object.pk,},
         )
 
+        inventory_progress = current_inventory.get_inventory_progress(
+            tenant=self.request.tenant,
+            is_superuser=self.request.user.is_superuser,
+        )
+
         context = super().get_context_data(**kwargs)
         context.update(
             {
@@ -130,6 +135,7 @@ class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
                 "form": InventorizeRoomForm(),
                 "device_add_form": device_add_form,
                 "api_token": Token.objects.first(),
+                "inventory_progress": inventory_progress,
             }
         )
         return context
@@ -179,6 +185,10 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         parameters = _request_copy.pop("page", True) and _request_copy.urlencode()
 
         current_inventory = Inventory.objects.active_inventory()
+        inventory_progress = current_inventory.get_inventory_progress(
+            tenant=self.request.tenant,
+            is_superuser=self.request.user.is_superuser,
+        )
 
         context = super().get_context_data(**kwargs)
         context.update(
@@ -188,7 +198,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
                 "qrcode_prefix": settings.QRCODE_PREFIX,
                 "debug": settings.DEBUG,
                 "api_token": Token.objects.first(),
-                "inventory_progress": current_inventory.get_inventory_progress(tenant=self.request.tenant),
+                "inventory_progress": inventory_progress,
             }
         )
         return context
@@ -202,6 +212,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         return response
 
 
+@login_required
 def search_devices(request):
     if request.htmx:
         template = "inventory/partials/device_search_htmx.html"
@@ -268,6 +279,7 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
+@login_required
 def get_note_btn(request, obj_type, obj_uuid):
     if obj_type == "device":
         obj = Inventory.objects.tenant_unaware_device_objects().get(uuid=obj_uuid)
@@ -281,6 +293,7 @@ def get_note_btn(request, obj_type, obj_uuid):
     )
 
 
+@login_required
 def update_note_view(request, obj_type, obj_uuid):
     inventory = Inventory.objects.active_inventory()
     request_user_email = get_user_email(request.user)

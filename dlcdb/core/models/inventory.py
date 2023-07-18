@@ -96,6 +96,7 @@ class InventoryQuerySet(models.QuerySet):
             .annotate(has_inventory_note=Exists(current_inventory_room_note))
         )
 
+        # Some inventory stats done by the database.
         if tenant:
             qs = (
                 qs
@@ -202,10 +203,9 @@ class Inventory(models.Model):
 
         super().save(*args, **kw)
 
-    def get_inventory_progress(self, tenant=None):
+    def get_inventory_progress(self, tenant=None, is_superuser=False):
         """
         Get status for inventory, e.g. "5 from 10 assets already inventorized".
-        TODO: Should be a method of the Inventory class.
         """
         from dlcdb.core.models import Record
 
@@ -219,18 +219,30 @@ class Inventory(models.Model):
         )
 
         done_percent = 0
-        all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
+        # all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
+        # if tenant:
+        #     all_devices = all_devices.filter(device__tenant=tenant)
+        # inventorized_devices_count = all_devices.filter(inventory=self).count()
+        # all_devices_count = all_devices.count()
 
-        if tenant:
-            all_devices = all_devices.filter(device__tenant=tenant)
+        all_inventory_relevant_devices = (
+            Inventory
+            .objects
+            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+            .exclude(sap_id__isnull=True).exclude(sap_id__exact='')
+        )
 
-        inventorized_devices_count = all_devices.filter(inventory=self).count()
-        all_devices_count = all_devices.count()
+        inventorized_devices = all_inventory_relevant_devices.filter(
+            record__inventory=Inventory.objects.active_inventory()
+        ).distinct()
 
-        done_percent = (inventorized_devices_count * 100) / all_devices_count
+        all_inventory_relevant_devices_count = all_inventory_relevant_devices.count()
+        inventorized_devices_count = inventorized_devices.count()
+
+        done_percent = (inventorized_devices_count * 100) / all_inventory_relevant_devices_count
         done_percent = int(round(done_percent, 0))
 
-        return inventory_progress(done_percent, all_devices_count, inventorized_devices_count)
+        return inventory_progress(done_percent, all_inventory_relevant_devices_count, inventorized_devices_count)
 
     @staticmethod
     @transaction.atomic
@@ -333,7 +345,8 @@ class Inventory(models.Model):
 
                 print(f"{state=}")
                 new_record = active_record
-                new_record.inventory = None
+                # Keeping the current inventory value
+                # new_record.inventory = None
                 new_record.room = room
                 new_record.user = user
                 new_record.username = username
