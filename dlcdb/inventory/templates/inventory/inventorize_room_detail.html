@@ -26,7 +26,11 @@
         {% endcomment %}
     </div>
     <div class="flex-shrink-1">
-        <div hx-trigger="objectListChanged from:body" hx-get="{% url 'inventory:get_note_btn' obj_type='room' obj_uuid=room.uuid %}" hx-swap="innerHTML">
+        <div
+            hx-trigger="objectListChanged from:body"
+            hx-get="{% url 'inventory:get_note_btn' obj_type='room' obj_uuid=room.uuid %}"
+            hx-swap="innerHTML"
+        >
             {% include 'inventory/includes/note_btn.html' with obj_type="room" obj=room %}
         </div>
     </div>

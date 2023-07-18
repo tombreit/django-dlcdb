@@ -35,7 +35,13 @@ class InventoryQuerySet(models.QuerySet):
     )
 
     def tenant_unaware_device_objects(self, tenant=None):
-        return self._devices_qs
+
+        current_inventory_device_note = Note.objects.filter(
+            device=OuterRef("pk"),
+            inventory=self.get(is_active=True),
+        )
+
+        return self._devices_qs.annotate(has_inventory_note=Exists(current_inventory_device_note))
 
     def tenant_aware_device_objects(self, tenant=None, is_superuser=False):
         qs = Device.objects.none()

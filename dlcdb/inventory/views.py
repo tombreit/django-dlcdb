@@ -270,9 +270,9 @@ class SapCompareListView(DetailView):
 
 def get_note_btn(request, obj_type, obj_uuid):
     if obj_type == "device":
-        obj = Device.objects.get(uuid=obj_uuid)
+        obj = Inventory.objects.tenant_unaware_device_objects().get(uuid=obj_uuid)
     elif obj_type == "room":
-        obj = Room.objects.get(uuid=obj_uuid)
+        obj = Inventory.objects.tenant_aware_room_objects().get(uuid=obj_uuid)
 
     return render(
         request,
