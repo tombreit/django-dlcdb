@@ -1,19 +1,6 @@
 from django.db import models
 
 
-class NoteManager(models.Manager):
-    def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .select_related(
-                "room",
-                "inventory",
-                "device",
-            )
-        )
-
-
 class Note(models.Model):
     """
     Represents a note. Notes are always bount to a device and optionally bount to an inventory.
@@ -49,15 +36,14 @@ class Note(models.Model):
     created_by = models.EmailField(blank=True, editable=False)
     updated_by = models.EmailField(blank=True, editable=False)
 
-    objects = NoteManager()
-
     class Meta:
+        # TODO: Define unique and unique_together constraints. Eg a
+        # device could only have one inventory note per inventory.
         verbose_name = "Notiz"
         verbose_name_plural = "Notizen"
         indexes = [
             models.Index(fields=["created_at", "inventory"]),
         ]
-
 
     def __str__(self):
         return "{inventory} - {ts}".format(inventory=self.inventory or "", ts=self.created_at)
