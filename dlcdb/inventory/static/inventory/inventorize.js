@@ -145,9 +145,10 @@ async function addNewDeviceRow(device) {
     console.log("[addNewDeviceRow] for device: ", device)
     // console.log(typeof device)
     // console.log(device.length)
+    // console.info("device: ", device)
 
     // If no device is selected, do nothing
-    if(device.length) {
+    if (device.length) {
         alert("Select device first...");
         return;
     }
@@ -157,12 +158,13 @@ async function addNewDeviceRow(device) {
     tableTbody.insertAdjacentHTML( 'afterbegin', newRow );
 
     let query = STATE_BUTTON_PREFIX + device.uuid
-    // console.log(query)
     let stateButton = document.getElementById(query);
     // console.log("stateButton: ", stateButton)
     stateButton.addEventListener('click', btnClick, false);
 
     $('#id_device').val(null).trigger('change');
+
+    manageUuid({uuid: device.uuid, state: DEVICE_STATE_UNKNOWN});
 
     return true;
 }

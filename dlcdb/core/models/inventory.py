@@ -268,8 +268,11 @@ class Inventory(models.Model):
 
             new_record = False
 
+            # TODO: Refactor these inventory actions to be part of the Inventory
+            # model
+
             if state == "dev_state_found":
-                print("state == 'dev_state_found'")
+                print(f"{state=}")
                 new_record = active_record
                 new_record.room = room
                 new_record.inventory = current_inventory
@@ -295,7 +298,7 @@ class Inventory(models.Model):
                 # set this device as "not found", but instead move it to an
                 # "external room".
 
-                print("state == 'dev_state_notfound'")
+                print(f"{state=}")
 
                 if all([
                         active_record.record_type == Record.LENT,
@@ -321,6 +324,32 @@ class Inventory(models.Model):
                         user=user,
                         username=username,
                     )
+
+            elif state == "dev_state_unknown":
+                # This could happen if a device is added to a room via add_device
+                # but that device is not marked as "found" or "not found". 
+                # That device should be added to current room, but without
+                # an inventory record.
+
+                print(f"{state=}")
+                new_record = active_record
+                new_record.inventory = None
+                new_record.room = room
+                new_record.user = user
+                new_record.username = username
+
+                # As we copied a previous record, we need to do some
+                # cleanup in fields which doest not match the new
+                # record type:
+                if new_record.record_type == Record.LOST:
+                    new_record.record_type = Record.INROOM
+                    new_record.note = ""
+                elif new_record.record_type == Record.REMOVED:
+                    new_record.record_type = Record.INROOM
+                    new_record.disposition_state = ""
+                    new_record.removed_info = ""
+                    new_record.note = ""
+                    new_record.removed_date = None
 
             else:
                 msg = f"This should never happen: given state `{state}` not recognized! Raising 500."
