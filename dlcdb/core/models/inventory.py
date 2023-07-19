@@ -102,6 +102,16 @@ class InventoryQuerySet(models.QuerySet):
             .distinct()
         )
 
+    def inventory_relevant_devices_not_inventorized(self, tenant=None, is_superuser=False):
+        return (
+            Inventory
+            .objects
+            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+            .exclude(
+                record__inventory=Inventory.objects.active_inventory()
+            )
+            .distinct()
+        )
 
     def tenant_aware_room_objects(self, tenant=None):
 

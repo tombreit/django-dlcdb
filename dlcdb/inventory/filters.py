@@ -22,9 +22,41 @@ class RoomFilter(django_filters.FilterSet):
 
 
 class DeviceFilter(django_filters.FilterSet):
+
+    OUTSTANDING_CHOICES = (
+        ('outstanding', 'Outstanding'),
+        ('done', 'Done'),
+    )
+
+    def filter_not_already_inventorized(self, queryset, name, value):
+        if value == "outstanding":
+            return (
+                queryset
+                .exclude(sap_id__isnull=True)
+                .exclude(sap_id__exact='')
+                .exclude(record__inventory=Inventory.objects.active_inventory()
+                )
+                .distinct()
+            )
+        elif value == "done":
+            return (
+                queryset
+                .exclude(sap_id__isnull=True)
+                .exclude(sap_id__exact='')
+                .filter(record__inventory=Inventory.objects.active_inventory()
+                )
+                .distinct()
+            )
+
     q = django_filters.CharFilter(method='string_search_filter', label="Search devices")
     device_type = django_filters.ModelChoiceFilter(queryset=DeviceType.objects.all(), label="Geräteklasse")
     record = django_filters.ChoiceFilter(field_name="active_record__record_type", choices=Record.RECORD_TYPE_CHOICES, label="Record")
+    not_already_inventorized = django_filters.ChoiceFilter(
+        field_name='not_already_inventorized',
+        method='filter_not_already_inventorized',
+        label='Outstanding',
+        choices=OUTSTANDING_CHOICES,
+    )
 
     def string_search_filter(self, queryset, name, value):
         return self.queryset.filter(
@@ -38,6 +70,5 @@ class DeviceFilter(django_filters.FilterSet):
         model = Device
         form = DeviceSearchForm
         fields = [
-            # 'device_type',
-            # 'active_record__record_type',
+            'not_already_inventorized',
         ]

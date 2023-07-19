@@ -42,9 +42,10 @@ class DeviceSearchForm(forms.Form):
 
         self.helper.layout = Layout(
             Row(
-                Column('q', css_class="col-12 col-md-4"), 
-                Column('device_type', css_class="col-6 col-md-4"),
-                Column('record', css_class="col-6 col-md-4"), 
+                Column('q', css_class="col-12 col-md-3"),
+                Column('device_type', css_class="col-12 col-md-3"),
+                Column('record', css_class="col-6 col-md-3"),
+                Column('not_already_inventorized', css_class="col-6 col-md-3"),
             )
         )
 
