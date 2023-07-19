@@ -43,6 +43,7 @@ class BrandingAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': (
                 'documentation_url',
+                'room_plan',
             ),
         }),
     )

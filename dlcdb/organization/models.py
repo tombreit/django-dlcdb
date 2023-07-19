@@ -108,6 +108,12 @@ class Branding(SingletonBaseModel):
         verbose_name="IT Department Email",
     )
 
+    room_plan = models.FileField(
+        blank=True,
+        null=True,
+        upload_to='branding/',
+    )
+
     documentation_url = models.URLField(
         blank=True,
         default="https://dlcdb.pages.gwdg.de/django-dlcdb/",
