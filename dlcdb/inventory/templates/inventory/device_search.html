@@ -17,6 +17,11 @@
 
 {% block body %}
 
+<div 
+    hx-push-url="true"
+    hx-target="#device-search-htmx"
+>
+
 
 <div id="device-search-form" class="small alert alert-info">
     <div class="d-flex bd-highlight">
@@ -25,7 +30,8 @@
                 id="id-search-form"
                 autocomplete="off"
                 hx-trigger="keyup, change, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
-                hx-target="#device-search-htmx"
+                hx-get
+                hx-push-url="false"
             >
                 {% crispy filter_devices.form %}
             </form>
@@ -42,13 +48,14 @@
     id="device-search-htmx"
     hx-trigger="load"
     hx-get
-    hx-push-url="true"
 >
     <div class="text-center">
         <div class="spinner-border" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </div>
+</div>
+
 </div>
 
 {% include 'inventory/partials/bs_modal.html' %}

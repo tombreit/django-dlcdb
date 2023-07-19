@@ -36,8 +36,7 @@ class DeviceSearchForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.template_pack = "bootstrap4"
-        # self.form_tag = True
-        self.helper.form_method = "get"
+        self.form_tag = False
         self.helper.disable_csrf = True
 
         self.helper.layout = Layout(

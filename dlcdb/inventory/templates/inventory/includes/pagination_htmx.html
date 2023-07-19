@@ -8,7 +8,6 @@
                 role="button"
                 class="page-link"
                 hx-get="?page=1&{{ parameters }}"
-                hx-target="#device-search-htmx" 
             >
                 <i class="fa-solid fa-angles-left"></i>
             </span>
@@ -19,7 +18,6 @@
                 role="button"
                 class="page-link" 
                 hx-get="?page={{ page_obj.previous_page_number }}&{{ parameters }}"
-                hx-target="#device-search-htmx" 
             >
                 <i class="fa-solid fa-angle-left"></i>
             </span>
@@ -56,7 +54,6 @@
                 role="button"
                 class="page-link"
                 hx-get="?page={{ page_obj.next_page_number }}&{{ parameters }}"
-                hx-target="#device-search-htmx"
             >
                 <i class="fa-solid fa-angle-right"></i>
             </span>
@@ -67,7 +64,6 @@
                 role="button"
                 class="page-link"
                 hx-get="?page={{ page_obj.paginator.num_pages }}&{{ parameters }}"
-                hx-target="#device-search-htmx"
             >
                 <i class="fa-solid fa-angles-right"></i>
             </span>

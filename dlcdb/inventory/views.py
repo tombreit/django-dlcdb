@@ -222,6 +222,9 @@ def search_devices(request):
     all_devices = Inventory.objects.tenant_unaware_device_objects()
     filter_devices = DeviceFilter(request.GET, queryset=all_devices)
 
+    # print(f"{request=}")
+    # print(f"{request.GET}=")
+
     request_copy = request.GET.copy()
     parameters = request_copy.pop('page', True) and request_copy.urlencode()
 
