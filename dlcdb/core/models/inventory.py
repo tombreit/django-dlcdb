@@ -82,6 +82,27 @@ class InventoryQuerySet(models.QuerySet):
 
         return qs
 
+    def inventory_relevant_devices(self, tenant=None, is_superuser=False):
+        return (
+            Inventory
+            .objects
+            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+            .exclude(sap_id__isnull=True)
+            .exclude(sap_id__exact='')
+        )
+
+    def inventory_relevant_devices_inventorized(self, tenant=None, is_superuser=False):
+        return (
+            Inventory
+            .objects
+            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+            .filter(
+                record__inventory=Inventory.objects.active_inventory()
+            )
+            .distinct()
+        )
+
+
     def tenant_aware_room_objects(self, tenant=None):
 
         current_inventory_room_note = Note.objects.filter(
@@ -218,31 +239,23 @@ class Inventory(models.Model):
             ],
         )
 
-        done_percent = 0
-        # all_devices = Record.objects.active_records().exclude(record_type=Record.REMOVED)
-        # if tenant:
-        #     all_devices = all_devices.filter(device__tenant=tenant)
-        # inventorized_devices_count = all_devices.filter(inventory=self).count()
-        # all_devices_count = all_devices.count()
-
-        all_inventory_relevant_devices = (
+        inventory_relevant_devices_count = (
             Inventory
             .objects
-            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
-            .exclude(sap_id__isnull=True).exclude(sap_id__exact='')
-        )
+            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+        ).count()
 
-        inventorized_devices = all_inventory_relevant_devices.filter(
-            record__inventory=Inventory.objects.active_inventory()
-        ).distinct()
+        inventory_relevant_devices_inventorized_count = (
+            Inventory
+            .objects
+            .inventory_relevant_devices_inventorized(tenant=tenant, is_superuser=is_superuser)
+        ).count()
 
-        all_inventory_relevant_devices_count = all_inventory_relevant_devices.count()
-        inventorized_devices_count = inventorized_devices.count()
-
-        done_percent = (inventorized_devices_count * 100) / all_inventory_relevant_devices_count
+        done_percent = 0
+        done_percent = (inventory_relevant_devices_inventorized_count * 100) / inventory_relevant_devices_count
         done_percent = int(round(done_percent, 0))
 
-        return inventory_progress(done_percent, all_inventory_relevant_devices_count, inventorized_devices_count)
+        return inventory_progress(done_percent, inventory_relevant_devices_count, inventory_relevant_devices_inventorized_count)
 
     @staticmethod
     @transaction.atomic
