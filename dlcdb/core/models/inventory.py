@@ -34,8 +34,7 @@ class InventoryQuerySet(models.QuerySet):
         )
     )
 
-    def tenant_unaware_device_objects(self, tenant=None):
-
+    def tenant_unaware_device_objects(self):
         current_inventory_device_note = Note.objects.filter(
             device=OuterRef("pk"),
             inventory=self.get(is_active=True),
