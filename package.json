@@ -51,10 +51,8 @@
     "inventory-font:copy-all": "npm-run-all inventory-font:copy-fontawesome",
     "inventory-font:copy-fontawesome": "mkdir -p $npm_package_config_inventory_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_inventory_distdir/fonts/fontawesome/",
     "inventory-img:copy": "mkdir -p $npm_package_config_inventory_distdir/img && cp $npm_package_config_inventory_srcdir/img/* $npm_package_config_inventory_distdir/img/",
-
     "inventory-copy-maps:popper": "cp node_modules/popper.js/dist/popper.min.js.map $npm_package_config_inventory_distdir/js/",
     "inventory-copy-maps:bs": "cp node_modules/bootstrap/dist/js/bootstrap.min.js.map $npm_package_config_inventory_distdir/js/",
-
     "prelending-prod": "mkdir -p $npm_package_config_lending_distdir",
     "lending-prod": "npm-run-all lending-scss:prod lending-font:copy-fontawesome lending-img:copy htmx:copy-htmx",
     "lending-scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_lending_srcdir/scss:$npm_package_config_lending_distdir/css",
