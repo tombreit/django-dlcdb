@@ -62,6 +62,11 @@ class InventoryQuerySet(models.QuerySet):
             inventory=self.get(is_active=True),
         )
 
+        current_inventory_records = Record.objects.filter(
+            device=OuterRef("pk"),
+            inventory=Inventory.objects.active_inventory()
+        )
+
         devices_qs = (
             self
             ._devices_qs
@@ -71,6 +76,7 @@ class InventoryQuerySet(models.QuerySet):
                 active_record__device__deleted_at__isnull=True,
             )
             .annotate(has_inventory_note=Exists(current_inventory_device_note))
+            .annotate(already_inventorized=Exists(current_inventory_records))
         )
 
         if tenant:
@@ -82,6 +88,12 @@ class InventoryQuerySet(models.QuerySet):
         return qs
 
     def inventory_relevant_devices(self, tenant=None, is_superuser=False):
+
+        current_inventory_records = Record.objects.filter(
+            device=OuterRef("pk"),
+            inventory=Inventory.objects.active_inventory()
+        )
+
         return (
             Inventory
             .objects
@@ -89,29 +101,8 @@ class InventoryQuerySet(models.QuerySet):
             .exclude(active_record__record_type=Record.REMOVED)
             .exclude(sap_id__isnull=True)
             .exclude(sap_id__exact='')
-        )
-
-    def inventory_relevant_devices_inventorized(self, tenant=None, is_superuser=False):
-        return (
-            Inventory
-            .objects
-            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
-            .filter(
-                record__inventory=Inventory.objects.active_inventory()
-            )
-            .distinct()
-        )
-
-    def inventory_relevant_devices_not_inventorized(self, tenant=None, is_superuser=False):
-        return (
-            Inventory
-            .objects
-            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
-            .exclude(
-                record__inventory=Inventory.objects.active_inventory()
-            )
-            .distinct()
-        )
+            .annotate(already_inventorized=Exists(current_inventory_records))
+        ).distinct()
 
     def tenant_aware_room_objects(self, tenant=None):
 
@@ -258,7 +249,8 @@ class Inventory(models.Model):
         inventory_relevant_devices_inventorized_count = (
             Inventory
             .objects
-            .inventory_relevant_devices_inventorized(tenant=tenant, is_superuser=is_superuser)
+            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+            .filter(already_inventorized=True)
         ).count()
 
         done_percent = 0
@@ -275,6 +267,8 @@ class Inventory(models.Model):
         an inventory status for each uuid and a room and sets an
         appropriate inventory record. 
         """
+
+        print(f"inventorize_uuids_for_room {uuids=}, {room_pk=}, {user=}")
 
         try:
             room = Room.objects.get(pk=room_pk)

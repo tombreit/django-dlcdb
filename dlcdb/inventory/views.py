@@ -81,70 +81,60 @@ class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
         return reverse("inventory:inventorize-room", kwargs={"pk": self.object.pk})
 
 
-class InventorizeRoomDetailView(LoginRequiredMixin, DetailView):
-    model = Room
-    context_object_name = "room"
-    template_name = "inventory/inventorize_room_detail.html"
-    slug_field = "uuid"
-    slug_url_kwarg = "uuid"
+@login_required
+def inventorize_room(request, pk):
+    template = "inventory/inventorize_room_detail.html"
+    current_inventory = Inventory.objects.active_inventory()
+    tenant = request.tenant
+    is_superuser = request.user.is_superuser
 
-    def get_queryset(self):
-        return Inventory.objects.tenant_aware_room_objects(self.request.tenant)
+    devices_in_room = (
+        Inventory
+        .objects
+        .tenant_aware_device_objects_for_room(pk, tenant=tenant, is_superuser=is_superuser)
+    )
 
-    def get_context_data(self, **kwargs):
-        current_inventory = Inventory.objects.active_inventory()
-        tenant = self.request.tenant
-        is_superuser = self.request.user.is_superuser
+    # Allow only adding devices which are not already present in this room:
+    add_devices_qs = (
+        Inventory
+        .objects
+        .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+        .exclude(active_record__room=pk)
+    )
 
-        devices_in_room = (
-            Inventory
-            .objects
-            .tenant_aware_device_objects_for_room(self.object.pk, tenant=tenant, is_superuser=is_superuser)
-        )
+    device_add_form = DeviceAddForm(
+        add_devices_qs=add_devices_qs,
+        initial={"room": pk,},
+    )
 
-        # Allow only adding devices which are not already present in this room:
-        add_devices_qs = (
-            Inventory
-            .objects
-            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
-            .exclude(active_record__room=self.object.pk)
-        )
+    inventory_progress = current_inventory.get_inventory_progress(
+        tenant=tenant,
+        is_superuser=is_superuser,
+    )
 
-        device_add_form = DeviceAddForm(
-            add_devices_qs=add_devices_qs,
-            initial={"room": self.object.pk,},
-        )
+    context = {
+        "room": Inventory.objects.tenant_aware_room_objects(tenant=tenant).get(pk=pk),
+        "devices": devices_in_room,
+        "current_inventory": current_inventory,
+        "qrcode_prefix": settings.QRCODE_PREFIX,
+        "debug": settings.DEBUG,
+        "dev_state_unknown": "dev_state_unknown",
+        "dev_state_found": "dev_state_found",
+        # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
+        "dev_state_notfound": "dev_state_notfound",
+        "dev_state_added": "dev_state_added",
+        "form": InventorizeRoomForm(),
+        "device_add_form": device_add_form,
+        "api_token": Token.objects.first(),
+        "inventory_progress": inventory_progress,
+    }
 
-        inventory_progress = current_inventory.get_inventory_progress(
-            tenant=self.request.tenant,
-            is_superuser=self.request.user.is_superuser,
-        )
-
-        context = super().get_context_data(**kwargs)
-        context.update(
-            {
-                "devices": devices_in_room,
-                "current_inventory": current_inventory,
-                "qrcode_prefix": settings.QRCODE_PREFIX,
-                "debug": settings.DEBUG,
-                "dev_state_unknown": "dev_state_unknown",
-                "dev_state_found": "dev_state_found",
-                # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
-                "dev_state_notfound": "dev_state_notfound",
-                "dev_state_added": "dev_state_added",
-                "form": InventorizeRoomForm(),
-                "device_add_form": device_add_form,
-                "api_token": Token.objects.first(),
-                "inventory_progress": inventory_progress,
-            }
-        )
-        return context
+    return TemplateResponse(request, template, context)
 
 
 class InventorizeRoomView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        view = InventorizeRoomDetailView.as_view()
-        return view(request, *args, **kwargs)
+        return inventorize_room(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         view = InventorizeRoomFormView.as_view()

@@ -13,20 +13,7 @@
         <h3>
             Devices in <strong>{{ room }}</strong>
             {% include 'inventory/includes/inventory_status_badge.html' with style="badge" %}
-        </h>
-
-        {% comment %}
-        <div class="border rounded p-1">
-            <span class="text-secondary">
-                Exp.: <span class="badge badge-pill badge-secondary">{{ devices.count }}</span>
-            </span> 
-            <span class="pl-2 text-success">
-                Found 
-                (initial): <span class="badge badge-pill badge-primary">{{ room.room_inventorized_devices_count }}</span> 
-                (new): <span class="badge badge-pill badge-primary" id="found_devices_count">0</span> 
-            </span>
-        </div>
-        {% endcomment %}
+        </h3>
     </div>
     <div class="flex-shrink-1">
         <div
@@ -123,7 +110,7 @@
                 id="tr-uuid-{{ device.uuid }}"
                 class="
                     inventory_row 
-                    {% if device.active_record.inventory.is_active %}
+                    {% if device.already_inventorized %}
                         {{ dev_state_found }}
                         table-success
                     {% else %}
@@ -176,7 +163,7 @@
                         id="state-btn-{{ device.uuid }}"
                     >
                         <i class="
-                            {% if device.active_record.inventory.is_active %}
+                            {% if device.already_inventorized %}
                                 fas fa-check-square
                             {% else %}
                                 fas fa-question-circle
@@ -186,9 +173,9 @@
                 </td>
                 <td>
                     <small>
-                        {% if device.active_record.inventory %}
+                        {% if device.already_inventorized %}
                             <span class="badge badge-success">
-                                {{ device.active_record.inventory.name }}
+                                {{ current_inventory.name }}
                             </span>
                             <br>
                         {% endif %}

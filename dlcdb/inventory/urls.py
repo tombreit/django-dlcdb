@@ -5,8 +5,6 @@ app_name = 'inventory'
 
 urlpatterns = [
     path('', views.InventorizeRoomListView.as_view(), name='inventorize-room-list'),
-    path('room/<int:pk>/', views.InventorizeRoomView.as_view(), name='inventorize-room'),
-    path('room/<uuid:uuid>/', views.InventorizeRoomView.as_view(), name='inventorize-room'),
     path('room/<int:pk>/qrs/', views.QrCodesForRoomDetailView.as_view(), name='qr-room-printout'),
     path('room/<int:pk>/', views.InventorizeRoomView.as_view(), name='inventorize-room'),
     path('note-btn/<str:obj_type>/<uuid:obj_uuid>/', views.get_note_btn, name='get_note_btn'),

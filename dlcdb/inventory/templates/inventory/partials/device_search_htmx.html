@@ -30,7 +30,7 @@
         id="tr-uuid-{{ device.uuid }}"
         class="
             inventory_row 
-            {% if device.active_record.inventory.is_active %}
+            {% if device.already_inventorized %}
                 {{ dev_state_found }}
                 table-success
             {% else %}
@@ -74,37 +74,16 @@
                 {% include "core/device/record_action_snippet.html" with device_obj=device is_device_detail_page=True %}
             </div>
 
-            {% comment %}
-            <span class="badge 
-                {% if device.active_record.record_type == "LOST" %} badge-danger {% else %} badge-primary {% endif %} 
-                text-center text-wrap {# text-break #}">
-                {% if device.active_record.is_type_lent %}
-                    {{ device.active_record.get_record_type_display }} an 
-                    <br>
-                    {{ device.active_record.person }}
-                {% else %}
-                    {{ device.active_record.get_record_type_display }}
-                    {% if device.active_record.room %}
-                        <br>
-                        <span class="text-monospace">
-                            {{ device.active_record.room|default:"n/a" }}
-                        </span>
-                    {% endif %}
-                {% endif %}
-            </span>
-            <br>
-            {% endcomment %}
-
             <span 
                 class="text-muted"
                 title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago">
                 {{ device.active_record.created_at|date:"Y-m-d" }}
             </span>
             
-            {% if device.active_record.inventory %}
+            {% if device.already_inventorized %}
                 <br>
                 <span class="badge badge-success" title="Inventory: {{ device.active_record.inventory.name }}">
-                    {{ device.active_record.inventory.name }}
+                    {{ current_inventory.name }}
                 </span>
                 <br>
             {% endif %}
