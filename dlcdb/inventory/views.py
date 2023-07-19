@@ -219,7 +219,7 @@ def search_devices(request):
     else:
         template = 'inventory/device_search.html'
 
-    all_devices = Inventory.objects.tenant_unaware_device_objects()
+    all_devices = Inventory.objects.inventory_relevant_devices(tenant=request.tenant, is_superuser=request.user.is_superuser)
     filter_devices = DeviceFilter(request.GET, queryset=all_devices)
 
     # print(f"{request=}")

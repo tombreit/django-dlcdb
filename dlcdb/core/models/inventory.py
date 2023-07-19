@@ -86,6 +86,7 @@ class InventoryQuerySet(models.QuerySet):
             Inventory
             .objects
             .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+            .exclude(active_record__record_type=Record.REMOVED)
             .exclude(sap_id__isnull=True)
             .exclude(sap_id__exact='')
         )
