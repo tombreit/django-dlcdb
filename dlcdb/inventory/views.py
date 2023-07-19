@@ -350,8 +350,9 @@ def update_note_view(request, obj_type, obj_uuid):
                 ),
             }
 
-            if request.htmx and request.META.get("QUERY_STRING"):
-                headers["HX-Push-Url"] = f"{request.path}?{request.META.get('QUERY_STRING')}"
+            # Could not remember why I had this snippet here:
+            # if request.htmx and request.META.get("QUERY_STRING"):
+            #     headers["HX-Push-Url"] = f"{request.path}?{request.META.get('QUERY_STRING')}"
 
             return HttpResponse(
                 status=204,
