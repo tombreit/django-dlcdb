@@ -25,7 +25,6 @@
                 id="id-search-form"
                 autocomplete="off"
                 hx-trigger="keyup, change, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
-                hx-get="."
                 hx-target="#device-search-htmx"
             >
                 {% crispy filter_devices.form %}
@@ -42,7 +41,8 @@
 <div
     id="device-search-htmx"
     hx-trigger="load"
-    hx-get="."
+    hx-get
+    hx-push-url="true"
 >
     <div class="text-center">
         <div class="spinner-border" role="status">

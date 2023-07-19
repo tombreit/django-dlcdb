@@ -1,23 +1,45 @@
-
 <nav>
     <ul class="pagination justify-content-end">
 
     {% if page_obj.has_previous %}
         <li class="page-item">
-        <span 
-            class="page-link" 
-            hx-get="?page={{ page_obj.previous_page_number }}&{{ parameters }}"
-            hx-target="#device-search-htmx" 
-            aria-label="Previous"
-        >
-            <span aria-hidden="true">&laquo;</span>
-        </a>
+            <span
+                title="First page"
+                role="button"
+                class="page-link"
+                hx-get="?page=1&{{ parameters }}"
+                hx-target="#device-search-htmx" 
+            >
+                <i class="fa-solid fa-angles-left"></i>
+            </span>
+        </li>
+        <li class="page-item">
+            <span 
+                title="Previous page"
+                role="button"
+                class="page-link" 
+                hx-get="?page={{ page_obj.previous_page_number }}&{{ parameters }}"
+                hx-target="#device-search-htmx" 
+            >
+                <i class="fa-solid fa-angle-left"></i>
+            </span>
         </li>
     {% else %}
         <li class="page-item disabled">
-        <span class="page-link">
-            <span aria-hidden="true">&laquo;</span>
-        </span>
+            <span
+                title="Next page"
+                class="page-link"
+            >
+                <i class="fa-solid fa-angles-left"></i>
+            </span>
+        </li>
+        <li class="page-item disabled">
+            <span 
+                title="First page"
+                class="page-link"
+            >
+                <i class="fa-solid fa-angle-left"></i>
+            </span>
         </li>
     {% endif %}
 
@@ -29,19 +51,44 @@
 
     {% if page_obj.has_next %}
         <li class="page-item">
-        <span 
-            class="page-link" 
-            hx-get="?page={{ page_obj.next_page_number }}&{{ parameters }}"
-            hx-target="#device-search-htmx" 
-        >
-            <span aria-hidden="true">&raquo;</span>
-        </a>
+            <span 
+                title="Next page"
+                role="button"
+                class="page-link"
+                hx-get="?page={{ page_obj.next_page_number }}&{{ parameters }}"
+                hx-target="#device-search-htmx"
+            >
+                <i class="fa-solid fa-angle-right"></i>
+            </span>
+        </li>
+        <li class="page-item">
+            <span
+                title="Last page"
+                role="button"
+                class="page-link"
+                hx-get="?page={{ page_obj.paginator.num_pages }}&{{ parameters }}"
+                hx-target="#device-search-htmx"
+            >
+                <i class="fa-solid fa-angles-right"></i>
+            </span>
         </li>
     {% else %}
         <li class="page-item disabled">
-        <span class="page-link">
-            <span aria-hidden="true">&raquo;</span>
-        </span>
+            <span 
+                title="Next page"
+                class="page-link"
+            >
+                <i class="fa-solid fa-angle-right"></i>
+            </span>
+        </li>
+        <li class="page-item disabled">
+            <span
+                title="Last page"
+                role="button"
+                class="page-link"
+            >
+                <i class="fa-solid fa-angles-right"></i>
+            </span>
         </li>
     {% endif %}
     </ul>
