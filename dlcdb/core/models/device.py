@@ -2,7 +2,6 @@ import uuid
 
 from django.conf import settings
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -18,9 +17,6 @@ from .supplier import Supplier
 
 
 class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
-    """
-    Represents a single Device. There are tons of device types.
-    """
 
     active_record = models.OneToOneField(
         'Record',
@@ -177,11 +173,9 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def get_latest_note(self):
         """
-        Returns the latest note of the related room and the current inventory.
-        :return:
+        Returns the latest note for this device and the current inventory.
         """
-        note = self.device_notes.filter(inventory__is_active=True).order_by('-created_at').first()
-        return note
+        return self.device_notes.filter(inventory__is_active=True).order_by('-created_at').first()
 
     def has_record_notes(self):
         return self.record_set.exclude(note__isnull=True).exclude(note__exact='').exists()
@@ -221,11 +215,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return self.active_record.room
 
     def get_edv_id(self):
-        """
-        Returns the edv id or a "blank" string (used for the model admins)
-        :param obj:
-        :return:
-        """
         return self.edv_id or '----'
     get_edv_id.short_description = 'EDV ID'
 
