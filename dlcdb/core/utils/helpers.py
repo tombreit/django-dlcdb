@@ -19,42 +19,6 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 
-def get_device(EDV_ID=None, SAP_ID=None):
-    # print('[get_device]: EDV_ID {EDV_ID}, SAP_ID {SAP_ID}'.format(
-    #     EDV_ID=EDV_ID,
-    #     SAP_ID=SAP_ID,
-    # ))
-
-    from ..models import Device
-
-    _message = ""
-    _device = None
-    _identifier = ""
-
-    if SAP_ID and EDV_ID:
-        _identifier = "BOTH"
-
-    # Check if EDV_ID and SAP_ID describe the same device:
-    if _identifier == "BOTH":
-        try:
-            _device = Device.objects.get(edv_id=EDV_ID, sap_id=SAP_ID)
-        except Device.DoesNotExist as error:
-            logger.error(error)
-            _message = '[E] [get_device] EDV_ID "{EDV_ID}" and SAP_ID "{SAP_ID}" does not match!'
-
-    try:
-        if EDV_ID and not SAP_ID:
-            _device = Device.objects.get(edv_id=EDV_ID)
-        elif SAP_ID and not EDV_ID:
-            _device = Device.objects.get(edv_id=SAP_ID)
-        # print("[get_device] device: ", _device)
-    except Device.DoesNotExist as error:
-        logger.error(error)
-        # raise
-
-    return (_device, _message)
-
-
 def get_denormalized_user(user):
     """
     Keeping a string representation of the last user, even when the

@@ -13,7 +13,6 @@ from collections import namedtuple
 
 from datetime import datetime
 
-from django.db import connection
 from django.db.transaction import atomic
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -21,7 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.apps import apps
 
 from ..models import Device, Room, Record
-from .helpers import get_device, rollback_atomic
+from .helpers import rollback_atomic
 from .sap_converter import convert_raw_sap_export
 
 
@@ -156,8 +155,19 @@ def set_removed_record(fileobj):
             EDV_ID = row['EDV_ID'].strip()
             SAP_ID = row['SAP_ID'].strip()
 
-            # Check if we have either an EDV_ID, a SAP_ID or both
-            device, _message = get_device(EDV_ID=EDV_ID, SAP_ID=SAP_ID)
+            _message = ""
+            device = None
+
+            try:
+                if SAP_ID and EDV_ID:
+                    device = Device.objects.get(edv_id=EDV_ID, sap_id=SAP_ID)
+                elif EDV_ID and not SAP_ID:
+                    device = Device.objects.get(edv_id=EDV_ID)
+                elif SAP_ID and not EDV_ID:
+                    device = Device.objects.get(sap_id=SAP_ID)
+            except Device.DoesNotExist as does_not_exist_error:
+                logger.error(does_not_exist_error)
+
             if not device:
                 messages.append('[E][Row {}] Device not found: EDV_ID "{}", SAP_ID "{}"! Ignoring this device!'.format(idx, EDV_ID, SAP_ID))
                 errors_count += 1

@@ -12,6 +12,7 @@ class RemoverList(models.Model):
         'DISPOSITION_STATE',
         'REMOVED_INFO',
         'REMOVED_DATE',
+        'USERNAME',
     ]
 
     file = models.FileField(
