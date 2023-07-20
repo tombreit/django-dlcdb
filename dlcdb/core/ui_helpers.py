@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .models.record import Record
 
+
 @dataclass
 class UIRecordActionSnippetContext:
     """
@@ -14,6 +15,7 @@ class UIRecordActionSnippetContext:
     dropdowns to create records for a given device.
     """
     device_obj: object
+    for_view: str
     record_infos: list = field(init=False)
     add_links: list = field(init=False)
 
@@ -27,11 +29,19 @@ class UIRecordActionSnippetContext:
         record_infos = []
 
         if self.active_record:
+
+            inroom_url = None
+            if self.active_record.room:
+                if self.for_view == "inventory":
+                    inroom_url = f"{reverse('inventory:inventorize-room', kwargs={'pk': self.active_record.room.pk})}"
+                else:
+                    inroom_url = f"{reverse('admin:core_device_changelist')}?active_record__room__id__exact={self.active_record.room.id}"
+
             if self.active_record.room:
                 record_infos.append(dict(
                     css_classes="btn btn-info",
                     title="{text} {obj}".format(text=_('In room'), obj=self.active_record.room.number),
-                    url=f"{reverse('admin:core_device_changelist')}?record__room__id__exact={self.active_record.room.id}",
+                    url=inroom_url,
                     label=self.active_record.room.number,
                 ))
 

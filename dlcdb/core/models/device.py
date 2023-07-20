@@ -229,6 +229,8 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return self.edv_id or '----'
     get_edv_id.short_description = 'EDV ID'
 
-    @property
-    def get_record_action_snippet(self):
-        return UIRecordActionSnippetContext(device_obj=self)
+    def get_record_action_snippet(self, for_view=None):
+        return UIRecordActionSnippetContext(device_obj=self, for_view=for_view)
+        
+    def get_record_action_snippet_for_inventory_views(self):
+        return self.get_record_action_snippet(for_view="inventory")

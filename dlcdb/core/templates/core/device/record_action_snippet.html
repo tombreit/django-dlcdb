@@ -2,24 +2,50 @@
 
 <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
 
-    {% for info in device_obj.get_record_action_snippet.record_infos %}
-        {% if info.url %}
-            <a 
-                class="{{ info.css_classes }} text-nowrap"
-                title="{{ info.title }}"
-                href="{{ info.url }}"
-            >
-                {{ info.label }}
-            </a>
-        {% else %}
-            <span
-                class="{{ info.css_classes }} text-nowrap"
-                title="{{ info.title }}"
-            >
-                {{ info.label }}
-            </span>
-        {% endif %}
-    {% endfor %}
+    {# FIXME: This if-for-view-eq-inventory-else should never have seen the light of day. #}
+    {% if for_view == "inventory" %}
+
+        {% for info in device_obj.get_record_action_snippet_for_inventory_views.record_infos %}
+            {% if info.url %}
+                <a 
+                    class="{{ info.css_classes }} text-nowrap"
+                    title="{{ info.title }}"
+                    href="{{ info.url }}"
+                >
+                    {{ info.label }}
+                </a>
+            {% else %}
+                <span
+                    class="{{ info.css_classes }} text-nowrap"
+                    title="{{ info.title }}"
+                >
+                    {{ info.label }}
+                </span>
+            {% endif %}
+        {% endfor %}
+
+    {% else %}
+
+        {% for info in device_obj.get_record_action_snippet.record_infos %}
+            {% if info.url %}
+                <a 
+                    class="{{ info.css_classes }} text-nowrap"
+                    title="{{ info.title }}"
+                    href="{{ info.url }}"
+                >
+                    {{ info.label }}
+                </a>
+            {% else %}
+                <span
+                    class="{{ info.css_classes }} text-nowrap"
+                    title="{{ info.title }}"
+                >
+                    {{ info.label }}
+                </span>
+            {% endif %}
+        {% endfor %}
+
+    {% endif %}
 
     {% if device_obj.get_record_action_snippet.add_links %}
     <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">

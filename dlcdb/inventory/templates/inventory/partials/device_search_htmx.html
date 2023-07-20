@@ -71,7 +71,7 @@
         <td>
 
             <div class="small">
-                {% include "core/device/record_action_snippet.html" with device_obj=device is_device_detail_page=True %}
+                {% include "core/device/record_action_snippet.html" with device_obj=device for_view="inventory" %}
             </div>
 
             <span 
