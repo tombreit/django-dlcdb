@@ -161,7 +161,12 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
     filterset_class = RoomFilter
 
     def get_queryset(self):
-        return Inventory.objects.tenant_aware_room_objects(self.request.tenant)
+        try:
+            qs = Inventory.objects.tenant_aware_room_objects(self.request.tenant)
+        except Inventory.DoesNotExist:
+            qs = Room.objects.all()
+
+        return qs
 
     def get_template_names(self):
         if self.request.htmx:
@@ -175,10 +180,14 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
         parameters = _request_copy.pop("page", True) and _request_copy.urlencode()
 
         current_inventory = Inventory.objects.active_inventory()
-        inventory_progress = current_inventory.get_inventory_progress(
-            tenant=self.request.tenant,
-            is_superuser=self.request.user.is_superuser,
-        )
+
+        if current_inventory:
+            inventory_progress = current_inventory.get_inventory_progress(
+                tenant=self.request.tenant,
+                is_superuser=self.request.user.is_superuser,
+            )
+        else:
+            inventory_progress = None
 
         context = super().get_context_data(**kwargs)
         context.update(

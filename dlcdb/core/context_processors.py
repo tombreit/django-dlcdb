@@ -148,6 +148,15 @@ def nav(request):
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, app_label, required_permission)
 
+            # Ugly hack to conditionally hide some nav_entries
+            show_condition = nav_entry.get("show_condition")
+            if show_condition:
+                if show_condition == "active_inventory_exists":
+                    from dlcdb.core.models.inventory import Inventory
+                    active_inventory_exists = Inventory.objects.active_inventory()
+                    if not active_inventory_exists:
+                        continue
+
             if has_permission:
                 nav_item = {
                     "label": nav_entry.get("label"),

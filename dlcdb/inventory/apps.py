@@ -13,6 +13,7 @@ class InventoryConfig(AppConfig):
             'icon': 'fa-solid fa-glasses',
             'url': 'inventory:inventorize-room-list',
             'required_permission': 'true',
+            'show_condition': 'active_inventory_exists',
         },
         {
             'slot': 'nav_processes',

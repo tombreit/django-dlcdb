@@ -19,7 +19,12 @@ class InventoryQuerySet(models.QuerySet):
     """
 
     def active_inventory(self):
-        return self.get(is_active=True)
+        try:
+            inventory = self.get(is_active=True)
+        except Inventory.DoesNotExist:
+            inventory = None
+        
+        return inventory
 
     _devices_qs = (
         Device
@@ -161,7 +166,7 @@ class InventoryQuerySet(models.QuerySet):
         inventory record.
         """
 
-        current_inventory = self.get(is_active=True)
+        current_inventory = Inventory.objects.active_inventory()
 
         _exclude_expr = Q()
         if exclude_already_inventorized:

@@ -20,7 +20,9 @@
     </td>
     <td>
         <a href="{% url 'inventory:inventorize-room' room.pk %}">
-        {% include 'inventory/includes/inventory_status_badge.html' %}
+        {% if current_inventory %}
+            {% include 'inventory/includes/inventory_status_badge.html' %}
+        {% endif %}
         </a>
     </td>
 </tr>

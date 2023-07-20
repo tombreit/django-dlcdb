@@ -21,10 +21,16 @@
                 <img src="{% static 'dist/inventory/img/dlcdb-inventory-logo.svg' %}" alt="DLCDB Inventory room list">
             </a>
 
-            <span class="badge badge-primary">
-                <img src="{% static 'admin/img/icon-yes.svg' %}" alt="">
-                {{ current_inventory.name }}
-            </span>
+            {% if current_inventory %}
+              <span class="badge badge-primary">
+                  <img src="{% static 'admin/img/icon-yes.svg' %}" alt="">
+                  {{ current_inventory.name }}
+              </span>
+            {% else %}
+              <span class="badge badge-danger">
+                No active inventory
+              </span>
+            {% endif %}
 
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
