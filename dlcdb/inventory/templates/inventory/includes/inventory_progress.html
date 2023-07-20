@@ -1,3 +1,6 @@
+{% load cache %}
+
+{% cache 600 inventory_progress request.user.username %}
 <div class="progress bg-primary" style="height: 2rem;">
     <div 
         class="font-weight-bold progress-bar progress-bar-striped bg-success" 
@@ -12,3 +15,4 @@
         ({{ inventory_progress.inventorized_devices_count }} / {{ inventory_progress.all_devices_count }} Devices)
     </div>
 </div>
+{% endcache %}

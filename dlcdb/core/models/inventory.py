@@ -239,18 +239,17 @@ class Inventory(models.Model):
             ],
         )
 
-        inventory_relevant_devices_count = (
+        _inventory_relevant_devices = (
             Inventory
             .objects
             .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
-        ).count()
+        )
 
         inventory_relevant_devices_inventorized_count = (
-            Inventory
-            .objects
-            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+            _inventory_relevant_devices
             .filter(already_inventorized=True)
         ).count()
+        inventory_relevant_devices_count = _inventory_relevant_devices.count()
 
         done_percent = 0
         done_percent = (inventory_relevant_devices_inventorized_count * 100) / inventory_relevant_devices_count
