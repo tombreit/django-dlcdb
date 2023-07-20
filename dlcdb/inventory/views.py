@@ -205,8 +205,8 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
 
-        if self.request.htmx and self.request.META.get("QUERY_STRING"):
-            response["HX-Push-Url"] = f"{self.request.path}?{self.request.META.get('QUERY_STRING')}"
+        # if self.request.htmx and self.request.META.get("QUERY_STRING"):
+        #     response["HX-Push-Url"] = f"{self.request.path}?{self.request.META.get('QUERY_STRING')}"
 
         return response
 

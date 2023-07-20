@@ -1,7 +1,7 @@
 from django import forms
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column
+from crispy_forms.layout import Layout, Row, Column, Field
 from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 
 from dlcdb.core.models import Note
@@ -41,7 +41,10 @@ class DeviceSearchForm(forms.Form):
 
         self.helper.layout = Layout(
             Row(
-                Column('q', css_class="col-12 col-md-3"),
+                Column(
+                    Field('q', autofocus="on"),
+                    css_class="col-12 col-md-3"
+                ),
                 Column('device_type', css_class="col-12 col-md-3"),
                 Column('record', css_class="col-6 col-md-3"),
                 Column('not_already_inventorized', css_class="col-6 col-md-3"),
@@ -49,24 +52,23 @@ class DeviceSearchForm(forms.Form):
         )
 
 
-class RoomSearchForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_show_labels = False
-        self.helper.template_pack = "bootstrap4"
-        self.form_tag = False
-        self.helper.form_method = "get"
-        self.helper.disable_csrf = True
-
-        self.helper.layout = Layout(
-            FieldWithButtons(
-                "q",
-                StrictButton(
-                    '<i class="fas fa-search"></i>', type="submit", css_class="btn-sm btn btn-outline-primary"
-                ),
-            ),
-        )
+# class RoomSearchForm(forms.Form):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.helper = FormHelper()
+#         self.helper.form_show_labels = False
+#         self.helper.template_pack = "bootstrap4"
+#         self.form_tag = False
+#         self.helper.form_method = "get"
+#         self.helper.disable_csrf = True
+#         self.helper.layout = Layout(
+#             FieldWithButtons(
+#                 Field('q', autofocus="on"),
+#                 StrictButton(
+#                     '<i class="fas fa-search"></i>', type="submit", css_class="btn-sm btn btn-outline-primary"
+#                 ),
+#             ),
+#         )
 
 
 class NoteForm(forms.ModelForm):

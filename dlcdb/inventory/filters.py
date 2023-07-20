@@ -2,7 +2,7 @@ import django_filters
 from django.db.models import Q
 
 from ..core.models import Room, Device, DeviceType, Record, Inventory
-from .forms import RoomSearchForm, DeviceSearchForm
+from .forms import DeviceSearchForm
 
 
 class RoomFilter(django_filters.FilterSet):
@@ -17,7 +17,7 @@ class RoomFilter(django_filters.FilterSet):
 
     class Meta:
         model = Room
-        form = RoomSearchForm
+        # form = RoomSearchForm
         fields = ['q']
 
 

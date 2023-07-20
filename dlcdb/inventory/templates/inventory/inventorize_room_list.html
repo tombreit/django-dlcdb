@@ -41,11 +41,16 @@
                 <div class="form-group">
                     <div class="input-group ">
                         <input 
-                            type="text" name="q" class="textinput form-control" id="id_q"
+                            type="text"
+                            name="q"
+                            class="textinput form-control"
+                            id="id_q"
+                            autofocus
                             placeholder="Search rooms..."
-                            hx-trigger="keyup changed delay:500ms" 
-                            hx-get="." 
-                            hx-target="#room-list-body" 
+                            hx-trigger="keyup changed delay:500ms"
+                            hx-target="#room-list-body"
+                            hx-push-url="true"
+                            hx-get="."
                         >
                         <span class="input-group-append">
                                 <button class="btn btn-sm btn btn-outline-primary" type="submit">
