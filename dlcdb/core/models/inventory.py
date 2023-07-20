@@ -16,7 +16,35 @@ from .prx_lostrecord import LostRecord
 class InventoryQuerySet(models.QuerySet):
     """
     (Experiment with) consolidating most inventory-related querysets.
+    TODO: Refactor to chainable querysets, e.g. with "for_room()", "for_tenant()"
     """
+
+    def _devices_qs(self):
+        return (
+            Device
+            .objects
+            .select_related(
+                'manufacturer',
+                'active_record',
+                'active_record__room',
+                'active_record__inventory',
+                'device_type',
+                'tenant',
+            )
+        )
+
+    def _current_inventory_records(self):
+        return Record.objects.filter(
+            device=OuterRef("pk"),
+            inventory=self.get(is_active=True),
+            is_active=True,
+        )
+    
+    def _current_inventory_device_note(self):
+        return Note.objects.filter(
+            device=OuterRef("pk"),
+            inventory=self.get(is_active=True),
+        )
 
     def active_inventory(self):
         try:
@@ -26,30 +54,12 @@ class InventoryQuerySet(models.QuerySet):
         
         return inventory
 
-    _devices_qs = (
-        Device
-        .objects
-        .select_related(
-            'manufacturer',
-            'active_record',
-            'active_record__room',
-            'active_record__inventory',
-            'device_type',
-            'tenant',
-        )
-    )
-
     def tenant_unaware_device_objects(self):
-        current_inventory_device_note = Note.objects.filter(
-            device=OuterRef("pk"),
-            inventory=self.get(is_active=True),
-        )
-
-        return self._devices_qs.annotate(has_inventory_note=Exists(current_inventory_device_note))
+        return self._devices_qs().annotate(has_inventory_note=Exists(self._current_inventory_device_note()))
 
     def tenant_aware_device_objects(self, tenant=None, is_superuser=False):
         qs = Device.objects.none()
-        devices_qs = self._devices_qs
+        devices_qs = self._devices_qs()
 
         if tenant:
             qs = devices_qs.filter(tenant=tenant)
@@ -62,26 +72,16 @@ class InventoryQuerySet(models.QuerySet):
     def tenant_aware_device_objects_for_room(self, room_pk, tenant=None, is_superuser=False):
         qs = Device.objects.none()
 
-        current_inventory_device_note = Note.objects.filter(
-            device=OuterRef("pk"),
-            inventory=self.get(is_active=True),
-        )
-
-        current_inventory_records = Record.objects.filter(
-            device=OuterRef("pk"),
-            inventory=Inventory.objects.active_inventory()
-        )
-
         devices_qs = (
             self
-            ._devices_qs
+            ._devices_qs()
             .filter(
                 active_record__is_active=True,
                 active_record__room__pk=room_pk,
                 active_record__device__deleted_at__isnull=True,
             )
-            .annotate(has_inventory_note=Exists(current_inventory_device_note))
-            .annotate(already_inventorized=Exists(current_inventory_records))
+            .annotate(has_inventory_note=Exists(self._current_inventory_device_note()))
+            .annotate(already_inventorized=Exists(self._current_inventory_records()))
         )
 
         if tenant:
@@ -93,12 +93,6 @@ class InventoryQuerySet(models.QuerySet):
         return qs
 
     def inventory_relevant_devices(self, tenant=None, is_superuser=False):
-
-        current_inventory_records = Record.objects.filter(
-            device=OuterRef("pk"),
-            inventory=Inventory.objects.active_inventory()
-        )
-
         return (
             Inventory
             .objects
@@ -106,7 +100,7 @@ class InventoryQuerySet(models.QuerySet):
             .exclude(active_record__record_type=Record.REMOVED)
             .exclude(sap_id__isnull=True)
             .exclude(sap_id__exact='')
-            .annotate(already_inventorized=Exists(current_inventory_records))
+            .annotate(already_inventorized=Exists(self._current_inventory_records()))
         ).distinct()
 
     def tenant_aware_room_objects(self, tenant=None):
@@ -166,7 +160,7 @@ class InventoryQuerySet(models.QuerySet):
         inventory record.
         """
 
-        current_inventory = Inventory.objects.active_inventory()
+        current_inventory = self.active_inventory()
 
         _exclude_expr = Q()
         if exclude_already_inventorized:
