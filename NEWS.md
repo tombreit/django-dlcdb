@@ -2,6 +2,10 @@
 
 *Latest news top*
 
+* Some tests!
+* (WIP) Speed up inventorization mode by more efficient database queries
+* Inventorization mode with a sleek htmx-powered interface, device listings, ability to request a room plan (if available, see `Organization > Branding`)
+* Bulk relocate admin action for devices could now set new tenant and/or new device type
 * Staticfiles now served via whitenoise from the Django app itself. Separate webserver configs (nginx, apache etc.) are not needed anymore for /static
 * (WIP) Importer now handles record creation for more than INROOM records and could be triggered by management command `import_csv` or via bulk importer admin interface
 * Device types and rooms with notes and has_note badge display in admin listings and dasboard buttons
