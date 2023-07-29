@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -213,6 +214,20 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     @property
     def get_room(self):
         return self.active_record.room
+    
+    @property
+    def get_is_already_inventorized(self):
+        from ..models import Inventory, Record
+
+        try:
+            current_inventory = Inventory.objects.get(is_active=True)
+            already_inventorized = self.record_set.filter(
+                Q(Q(record_type=Record.INROOM) | Q(record_type=Record.LENT)),
+                inventory=current_inventory,
+            ).exists()
+        except Inventory.DoesNotExist:
+            return False
+        return already_inventorized
 
     def get_edv_id(self):
         return self.edv_id or '----'

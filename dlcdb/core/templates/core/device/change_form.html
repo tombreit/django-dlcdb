@@ -22,8 +22,29 @@
 
 
 {% block object-tools-items %}
+    {% if inventory_status.active_inventory %}
     <li>
-        <a class="small ml-4" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
+        <a 
+            class="small"
+            href="{{ inventory_status.inventorize_url }}"
+            {% if inventory_status.already_inventorized %}
+                style="background-color: var(--success)"
+            {% else %}
+                style="background-color: var(--danger)"
+            {% endif %}
+        >
+            <i class="fa-solid fa-glasses"></i> 
+            {% if inventory_status.already_inventorized %}
+                {% translate "Already inventorized" %}
+            {% else %}
+                {% translate "Not yet inventorized" %}
+            {% endif %}
+        </a>
+    </li>
+    {% endif %}
+
+    <li>
+        <a class="small" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
             <i class="fa-solid fa-layer-group"></i> 
             {% translate "Show all records" %} {{ has_record_notes_badge|default:"" }}
         </a>

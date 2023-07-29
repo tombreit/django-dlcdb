@@ -232,11 +232,18 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         """
         Add add_links to the context in order to show a dropdown to create the records
         """
+        from ..models import Inventory
+
         obj = Device.with_softdeleted_objects.get(pk=object_id)
 
         extra_context = extra_context or {}
         extra_context.update({
             'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
+            'inventory_status': {
+                'active_inventory': Inventory.objects.filter(is_active=True),
+                'already_inventorized': obj.get_is_already_inventorized,
+                'inventorize_url': f"{reverse('inventory:search-devices')}?id={obj.pk}",
+            },
         })
         return super().change_view(
             request, object_id, form_url, extra_context=extra_context,
