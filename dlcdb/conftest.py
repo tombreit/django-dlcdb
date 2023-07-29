@@ -53,7 +53,14 @@ def inventory_3(db) -> Inventory:
 def device_1(db) -> Device:
     return Device.objects.create(sap_id="123")
 
+@pytest.fixture
+def device_2(db) -> Device:
+    return Device.objects.create(sap_id="foo")
 
 @pytest.fixture
 def room_1(db) -> Room:
     return Room.objects.create(number="456")
+
+@pytest.fixture
+def room_2(db) -> Room:
+    return Room.objects.create(number="789")
