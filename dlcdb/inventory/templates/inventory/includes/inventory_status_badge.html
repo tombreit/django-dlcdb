@@ -1,12 +1,12 @@
 {% if style == "badge" %}
     <span class="badge badge-{{ room.get_inventory_status.css_class }}">
-        {{ room.room_inventorized_devices_count }} / {{ room.room_devices_count }}
+        {{ room.get_inventory_status.n_of_ns }}
     </span>
 {% else %}
     <span class="btn btn-sm btn-{{ room.get_inventory_status.css_class }}">
         {{ room.get_inventory_status.status_str }} 
         <span class="badge badge-light">
-            {{ room.room_inventorized_devices_count }} / {{ room.room_devices_count }}
+            {{ room.get_inventory_status.n_of_ns }}
         </span>
     </span>
 {% endif %}

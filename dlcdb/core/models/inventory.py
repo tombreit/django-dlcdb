@@ -2,7 +2,8 @@ import json
 from collections import namedtuple
 
 from django.db import models, transaction
-from django.db.models import Count, IntegerField, Q, OuterRef, Subquery, Exists
+from django.db.models import Count, Q, OuterRef, Subquery, Exists
+from django.db.models import Count  # Case, When, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from dlcdb.core.utils.helpers import get_denormalized_user
 
@@ -17,6 +18,9 @@ class InventoryQuerySet(models.QuerySet):
     """
     (Experiment with) consolidating most inventory-related querysets.
     TODO: Refactor to chainable querysets, e.g. with "for_room()", "for_tenant()"
+    FIXME: Implement a reliable and performant way to get already inventorized
+    devices for rooms.
+    TODO: underscore methods could possibly replaced by Subqueries
     """
 
     def _devices_qs(self):
@@ -36,14 +40,17 @@ class InventoryQuerySet(models.QuerySet):
     def _current_inventory_records(self):
         return Record.objects.filter(
             device=OuterRef("pk"),
-            inventory=self.get(is_active=True),
-            is_active=True,
+            inventory__is_active=True,
+            # We don't care if the iventory stamp is on the latest active
+            # record, we regard a device as inventorized, if we have any
+            # record with a inventory stamp for the current inventory:
+            # is_active=True,
         )
     
     def _current_inventory_device_note(self):
         return Note.objects.filter(
             device=OuterRef("pk"),
-            inventory=self.get(is_active=True),
+            inventory__is_active=True,
         )
 
     def active_inventory(self):
@@ -122,32 +129,55 @@ class InventoryQuerySet(models.QuerySet):
             qs = (
                 qs
                 .annotate(
-                    room_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                        record__device__tenant=tenant,
-                    ), output_field=IntegerField()),
-                    room_inventorized_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__inventory__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                        record__device__tenant=tenant,
-                    ), output_field=IntegerField()),
+                    room_devices_count=Count(
+                        'record',
+                        filter=Q(
+                            record__is_active=True,
+                            record__device__deleted_at__isnull=True,
+                            record__device__tenant=tenant,
+                        )
+                    ),
+                    room_inventorized_devices_count=Count(
+                        'record',
+                        filter=Q(
+                            Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                            record__device__deleted_at__isnull=True,
+                            record__inventory__is_active=True,
+                            record__device__tenant=tenant,
+                        )
+                    ),
+                    # room_inventorized_devices_count=Sum(
+                    #     Case(
+                    #         When(
+                    #             record__in=inventorized_records_in_room,
+                    #             # record__is_active=True,
+                    #             then=1
+                    #         ),
+                    #         default=0,
+                    #         output_field=models.IntegerField()
+                    #     )
+                    # )
                 )
             )
         else:
             qs = (
                 qs
                 .annotate(
-                    room_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                    ), output_field=IntegerField()),
-                    room_inventorized_devices_count=Count('pk', filter=Q(
-                        record__is_active=True,
-                        record__inventory__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                    ), output_field=IntegerField()),
+                    room_devices_count=Count(
+                        'record',
+                        filter=Q(
+                            record__is_active=True,
+                            record__device__deleted_at__isnull=True,
+                        )
+                    ),
+                    room_inventorized_devices_count=Count(
+                        'record',
+                        filter=Q(
+                            Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                            record__device__deleted_at__isnull=True,
+                            record__inventory__is_active=True,
+                        )
+                    ),
                 )
             )
 
@@ -211,7 +241,7 @@ class Inventory(models.Model):
         verbose_name_plural = 'Inventuren'
 
     def __str__(self):
-        return 'Inventur %s' % self.name
+        return f'Inventur {self.name}'
 
     def save(self, *args, **kw):
         """

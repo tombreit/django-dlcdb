@@ -47,6 +47,7 @@ Inventur-Ansicht: *Prozesse > Inventur*
 
 ## Hinweise
 - Die Person, die an der DLCDB angemeldet ist, wird in diversen Auswertungen vermerkt. Daher sollten personalisierte Accounts für die Inventarisierung genutzt werden (und z.B. nicht der Benutzername 'admin').
+- Ein Raum gilt als fertig inventarisiert, wenn alle Devices die aktuell diesem Raum zugeordnet sind irgendeinen Record vom Typ INROOM oder LENT haben, der einen aktuellen Inventurstempel hat.
 
 ## SAP-Abgleich
 

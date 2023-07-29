@@ -119,12 +119,17 @@ class Room(SoftDeleteAuditBaseModel):
         * outstanding: no devices with current inventory
         * inprogress: some devices with current inventory
         * completed: all devices with current inventory
+
+        Special case: room_devices_count < room_inventorized_devices_count
         """
 
         inventory_status = namedtuple("inventory_status", [
             "status_str",
             "css_class",
+            "n_of_ns",
         ])
+
+        n_of_ns = f"{self.room_inventorized_devices_count} / {self.room_devices_count}"
 
         if self.room_devices_count == self.room_inventorized_devices_count:
             status_str = 'completed'
@@ -138,11 +143,15 @@ class Room(SoftDeleteAuditBaseModel):
         elif self.room_devices_count > self.room_inventorized_devices_count:
             status_str = 'inprogress'
             css_class = 'primary'
+        elif self.room_devices_count < self.room_inventorized_devices_count:
+            status_str = 'completed'
+            css_class = 'success'
+            n_of_ns = f"{self.room_devices_count} / {self.room_devices_count}"
         else:
-            status_str = 'undefined'
+            status_str = 'FIXME'
             css_class = 'danger'
 
-        return inventory_status(status_str, css_class)  # ._asdict()
+        return inventory_status(status_str, css_class, n_of_ns)
 
 
 def timestamped_file_path(instance, filename):
