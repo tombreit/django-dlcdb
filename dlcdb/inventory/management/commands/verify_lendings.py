@@ -31,11 +31,6 @@ class Command(BaseCommand):
             # default=settings.DEFAULT_FROM_EMAIL,
             help=f'Send verification emails to given email address. Defaults to `{settings.DEFAULT_FROM_EMAIL}`. Set to value `{self.MAILTO_KEYWORD_LENDER}` to mail actual lenders; or Set to value to a single email addr to send all emails to this given addr; or give a list of email addrs (format: `"receipient1@fqdn, receipient2@fqdn,...")` to only notifiy this given email addresses. Processed only when --send_mails is set.',
         )
-        # parser.add_argument(
-        #     '--generate_inventory_lending_report',
-        #     action='store_true',
-        #     help='Generate html report of lended devices.',
-        # )
         parser.add_argument(
             '--deadline_days_from_now',
             default=8,
@@ -151,7 +146,6 @@ class Command(BaseCommand):
         # Command line args
         send_mails_arg = options['send_mails']
         mailto_addr_arg = options['mailto_addr'].replace(" ", "") if options['mailto_addr'] else None
-        # generate_inventory_lending_report_arg = options['generate_inventory_lending_report']
         deadline_days_from_now_arg = options['deadline_days_from_now']
 
         print(self.SEPARATOR)
@@ -159,13 +153,11 @@ class Command(BaseCommand):
         print(f"send_mails:                        {send_mails_arg}")  # type={type(send_mails_arg)}
         print(f"mailto_addr:                       {mailto_addr_arg}")  # type={type(mailto_addr_arg)}
         print(f"deadline_days_from_now:            {deadline_days_from_now_arg}")
-        # print(f"generate_inventory_lending_report: {generate_inventory_lending_report_arg}")  # type={type(generate_inventory_lending_report_arg)}
         print(self.SEPARATOR)
 
         if not any([
             send_mails_arg,
             mailto_addr_arg,
-            # generate_inventory_lending_report_arg,
         ]):
             self.stdout.write(f"+++ No action given on command line. Try `--help`. +++")
             return
