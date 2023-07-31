@@ -214,20 +214,43 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     @property
     def get_room(self):
         return self.active_record.room
-    
+
     @property
-    def get_is_already_inventorized(self):
+    def get_current_inventory_record(self):
+        """
+        Try to get the latest record which has an inventory stamp attached.
+        """
         from ..models import Inventory, Record
 
         try:
             current_inventory = Inventory.objects.get(is_active=True)
-            already_inventorized = self.record_set.filter(
-                Q(Q(record_type=Record.INROOM) | Q(record_type=Record.LENT)),
+
+            # Did not use qs.last() convenience method as I want to
+            # catch an exception for no matching record found.
+            already_inventorized = self.record_set.order_by("-pk").filter(
                 inventory=current_inventory,
-            ).exists()
+            )[:1].get()
         except Inventory.DoesNotExist:
-            return False
+            already_inventorized = None
+        except Record.DoesNotExist:
+            already_inventorized = None
+        except Exception as e:
+            raise Exception(f"Exception: {e=}")
+
         return already_inventorized
+
+    # @property
+    # def get_is_already_inventorized(self):
+    #     from ..models import Inventory, Record
+    #     try:
+    #         current_inventory = Inventory.objects.get(is_active=True)
+    #         already_inventorized = self.record_set.filter(
+    #             Q(Q(record_type=Record.INROOM) | Q(record_type=Record.LENT)),
+    #             inventory=current_inventory,
+    #         ).exists()
+    #     except Inventory.DoesNotExist:
+    #         return False
+    #     return already_inventorized
 
     def get_edv_id(self):
         return self.edv_id or '----'

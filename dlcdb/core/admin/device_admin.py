@@ -241,7 +241,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
             'inventory_status': {
                 'active_inventory': Inventory.objects.filter(is_active=True),
-                'already_inventorized': obj.get_is_already_inventorized,
+                'already_inventorized': obj.get_current_inventory_record,
                 'inventorize_url': f"{reverse('inventory:search-devices')}?id={obj.pk}",
             },
         })

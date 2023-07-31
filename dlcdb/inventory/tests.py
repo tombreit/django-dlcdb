@@ -1,6 +1,6 @@
 import pytest
 
-from dlcdb.core.models import Inventory, InRoomRecord
+from dlcdb.core.models import Inventory, InRoomRecord, Device, Record
 
 
 @pytest.mark.django_db
@@ -39,3 +39,42 @@ def test_if_device_counts_as_inventorized(device_1, device_2, room_1, room_2, in
         "room_devices_count": 2,
     }
     assert test_dict_false not in Inventory.objects.tenant_aware_room_objects().values("number", "room_devices_count")
+
+
+@pytest.mark.django_db
+def test_get_is_already_inventorized(device_1, device_2, room_1, room_2, inventory_1):
+
+    device_record_2 = InRoomRecord.objects.create(device=device_2, room=room_1)
+    assert device_2.get_current_inventory_record == None
+
+    device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1, inventory=inventory_1)
+    assert device_1.active_record.inventory == inventory_1
+    assert device_1.get_current_inventory_record is not None
+    assert isinstance(device_1.get_current_inventory_record, Record)
+
+    # device_1 should count as inventorized, even if a later (not the active) record
+    # has the inventory stamp
+    device_record_1_1 = InRoomRecord.objects.create(device=device_1, room=room_2)
+
+    # Reload old record from db to get changes (is_active)
+    device_record_1 = Record.objects.get(id=device_record_1.id)
+
+    assert device_1.active_record == device_record_1_1
+    assert device_record_1.is_active == False
+    assert device_record_1_1.is_active == True
+    assert device_1.get_current_inventory_record is not None
+
+
+@pytest.mark.django_db
+def test_get_current_inventory_record(device_1, room_1, room_2, inventory_1):
+    device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1, inventory=inventory_1)
+    device_record_2 = InRoomRecord.objects.create(device=device_1, room=room_2, inventory=inventory_1)
+    device_record_3 = InRoomRecord.objects.create(device=device_1, room=room_1)
+
+    # Reload old record from db to get changes (is_active)
+    device_record_1 = Record.objects.get(id=device_record_1.id)
+    device_record_2 = Record.objects.get(id=device_record_2.id)
+    device_1 = Device.objects.get(id=device_1.id)
+
+
+    assert device_1.get_current_inventory_record == device_record_2

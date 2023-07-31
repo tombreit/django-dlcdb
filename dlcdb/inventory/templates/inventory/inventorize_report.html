@@ -81,27 +81,38 @@
                 {{ d.sap_id }}
             </td>
             <td>
-                {{ d.device_type }}<br>
+                {{ d.device_type }}
+                <br>
                 {{ d.manufacturer }} {{ d.series }}
             </td>
             <td>
-                {{ d.active_record.room.number }}
+                {{ d.get_current_inventory_record.room.number }}
             </td>
             <td>
                 {{ d.purchase_date|date:"Y" }}
             </td>
             <td>
-                {% if d.active_record.inventory %}
-                    {{ d.active_record.username }} / {{ d.active_record.inventory }}
+                {% comment %}
+                    {% if d.active_record.inventory %}
+                        {{ d.active_record.username }} / {{ d.active_record.inventory }}
+                    {% else %}
+                        <i>no current inventory record</i>
+                    {% endif %}
+                {% endcomment %}
+
+                {% if d.get_current_inventory_record %}
+                    {{ d.get_current_inventory_record.inventory }} -
+                    {{ d.get_current_inventory_record.record_type }} -
+                    {{ d.get_current_inventory_record.user.username }}
                 {% else %}
-                    <i>no current inventory record</i>
+                    <i> no current inventory record</i>
                 {% endif %}
 
                 {% if d.inventory_note %}
-                    <br>
-                    <i>
-                        {{ d.inventory_note }}
-                    </i>
+                <br>
+                <i>
+                    {{ d.inventory_note }}
+                </i>
                 {% endif %}
             </td>
         </tr>
