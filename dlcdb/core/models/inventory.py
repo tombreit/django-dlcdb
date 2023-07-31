@@ -190,11 +190,12 @@ class InventoryQuerySet(models.QuerySet):
         inventory record.
         """
 
-        current_inventory = self.active_inventory()
-
         _exclude_expr = Q()
         if exclude_already_inventorized:
-            _exclude_expr = Q(active_record__inventory=current_inventory)
+            # _exclude_expr = Q(active_record__inventory=self.active_inventory())
+            # If any record has an current inventory stamp, count this device as
+            # inventorized and exclude it from the mailing.
+            _exclude_expr = Q(already_inventorized=True)
 
         devices = (
             Device
@@ -205,6 +206,9 @@ class InventoryQuerySet(models.QuerySet):
                 Q(sap_id__exact='') |
                 Q(active_record__person__isnull=True)
             )
+            .annotate(
+                already_inventorized=Exists(self._current_inventory_records())
+            )
             # Testing if device is currently not already inventorized
             .exclude(
                 _exclude_expr
@@ -214,7 +218,7 @@ class InventoryQuerySet(models.QuerySet):
                     Note
                     .objects
                     .filter(device=OuterRef('pk'))
-                    .filter(inventory=current_inventory)
+                    .filter(inventory=self.active_inventory())
                     .order_by('-pk')
                     .values('text')
                 )

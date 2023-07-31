@@ -22,14 +22,14 @@ class Command(BaseCommand):
         parser.add_argument(
             '--send_mails',
             action='store_true',
-            help='Send mails. Defaults to False. If send_mails is true but no --mail_addr is given, emails only get reported via console.',
+            help='Send mails. Defaults to False. If send_mails is true but no --mailto_addr is given, emails only get reported via console.',
         )
         parser.add_argument(
             '--mailto_addr',
             required=False,
             type=str,
             # default=settings.DEFAULT_FROM_EMAIL,
-            help=f'Send verification emails to given email address. Defaults to `{settings.DEFAULT_FROM_EMAIL}`. Set to value `{self.MAILTO_KEYWORD_LENDER}` to mail actual lenders; or Set to value to a single email addr to send all emails to this given addr; or give a list of email addrs (format: `"receipient1@fqdn, receipient2@fqdn,...")` to only notifiy this given email addresses. Processed only when --mails=True is set.',
+            help=f'Send verification emails to given email address. Defaults to `{settings.DEFAULT_FROM_EMAIL}`. Set to value `{self.MAILTO_KEYWORD_LENDER}` to mail actual lenders; or Set to value to a single email addr to send all emails to this given addr; or give a list of email addrs (format: `"receipient1@fqdn, receipient2@fqdn,...")` to only notifiy this given email addresses. Processed only when --send_mails is set.',
         )
         # parser.add_argument(
         #     '--generate_inventory_lending_report',
@@ -55,7 +55,20 @@ class Command(BaseCommand):
 
         for lender in self.get_lenders_qs(devices):
             lent_devices = devices.filter(active_record__person=lender).order_by("device_type")
-            recipient = self.get_recipient(lender_email=lender.email, mailto_addr=mailto_addr_arg)
+
+            lender_email = None
+
+            if lender.udb_person_email_internal_business:
+                lender_email=lender.udb_person_email_internal_business
+            elif lender.email:
+                lender_email=lender.email
+            elif lender.udb_person_email_private:
+                lender_email=lender.udb_person_email_private
+
+            if not lender_email:
+                raise CommandError(f"No email address found for user {lender}. No emails sent. Exit!")
+
+            recipient = self.get_recipient(lender_email=lender_email, mailto_addr=mailto_addr_arg)
 
             if recipient: 
                 print(f"Preparing email. Lender: `{lender}`. Recipient: `{recipient}`. Devices: `{lent_devices.count()}`")
@@ -158,11 +171,12 @@ class Command(BaseCommand):
             return
 
         now = date.today()
-        current_inventory = Inventory.objects.get(is_active=True)
 
         # Invocation of main methods:
         if send_mails_arg:
-            mail_devices = LentRecord.get_devices(inventory=current_inventory, exclude_already_inventorized=True)
+            mail_devices = Inventory.objects.lent_devices(
+                exclude_already_inventorized=True,
+            )
 
             if mailto_addr_arg:
                 print("Will send mails...")
