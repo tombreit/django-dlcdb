@@ -49,7 +49,7 @@ from django_filters.views import FilterView
 from dlcdb.core.models import Room, Device, Inventory
 from dlcdb.core.utils.helpers import get_user_email
 
-from .utils import create_sap_list_comparison
+from .sap import create_sap_list_comparison
 from .filters import RoomFilter, DeviceFilter
 from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList

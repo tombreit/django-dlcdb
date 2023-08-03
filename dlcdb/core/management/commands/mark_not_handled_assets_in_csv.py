@@ -5,7 +5,7 @@ from shutil import copyfile
 from django.core.management.base import BaseCommand
 
 from ...models import Device
-from  dlcdb.inventory.utils import get_match_for_sap_id
+from  dlcdb.inventory.sap import get_match_for_sap_id
 
 
 class Command(BaseCommand):
