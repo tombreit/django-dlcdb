@@ -7,11 +7,25 @@
 - npm
 - for LDAP: libldap2-dev libsasl2-dev
 
+## Container
+
+Want to try it containerized via podman?: `container/README.container.md`
+
+```
+         .--"--.
+       / -     - \
+      / (O)   (O) \
+   ~~~| -=(,Y,)=- |
+    .---. /`  \   |~~
+ ~/  o  o \~~~~.----. ~~
+  | =(X)= |~  / (O (O) \
+   ~~~~~~~  ~| =(Y_)=-  |
+  ~~~~    ~~~|   U      |~~
+```
+
 ## Installation
 
 *Assuming local development environment in a virtual python environment*
-
-
 
 ```bash
 cd django-dlcdb
@@ -89,7 +103,7 @@ Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/
 
 ### Backup
 
-Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `run/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `run/` sowie - falls vorhanden - die Datei `.env` zu sichern.
+Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `data/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `data/` sowie - falls vorhanden - die Datei `.env` zu sichern.
 
 ### Task runner
 
@@ -155,8 +169,8 @@ make -C docs html
 
     # staticfiles are handled by the Django app via whitenoise
 
-    Alias /media path/to/run/media
-    <Directory path/to/run/media>
+    Alias /media path/to/data/media
+    <Directory path/to/data/media>
         Require all granted
     </Directory>
 
@@ -177,6 +191,4 @@ make -C docs html
         locale=en_US.UTF-8
 
 </VirtualHost>
-
-
 ```
