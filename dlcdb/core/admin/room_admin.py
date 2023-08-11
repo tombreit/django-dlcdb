@@ -19,6 +19,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
         'number',
         'nickname',
         'description',
+        'website_link',
         'has_note',
         'is_auto_return_room',
         'is_external',
@@ -81,6 +82,14 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     @admin.display(description='Has Note?')
     def has_note(self, obj):
         return get_has_note_badge(obj_type="core.room", has_note=obj.note)
+
+    @admin.display(description='Website')
+    def website_link(self, obj):
+        if obj.website:
+            return mark_safe('<a href="{url}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>'.format(
+                url=obj.website,
+                )
+            )
 
     # Falling back to our no-delete-permission via CustomBaseModelAdmin
     # def has_delete_permission(self, request, obj=None):
