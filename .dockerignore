@@ -4,11 +4,14 @@
 .gitignore
 .pytest_cache
 .vscode
+.gitlab-ci.yml
+.ruff_cache
 
 Containerfile
 
 # /docs/*
-run/*
+/run/
+/data/
 .venv/
 node_modules/
 /temp

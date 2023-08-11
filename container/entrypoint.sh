@@ -1,23 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
-echo "docker-entrypoint.sh"
+set -o errexit
+set -o nounset
 
-echo "======================================================="
-echo "ls -lA"
-echo "$(ls -lA)"
-
-echo "======================================================="
-echo "ls -lA run/"
-echo "$(ls -lA run/)"
-
-echo "======================================================="
-echo "ls -lA /opt/venv/"
-echo "$(ls -lA /opt/venv/)"
+echo "Run entrypoint.sh..."
 
 echo "Prepare django app..."
-# source /opt/venv/bin/activate
-
-python3 manage.py collectstatic --noinput
 python3 manage.py migrate --noinput
+python3 manage.py collectstatic --noinput
+python manage.py runserver 0.0.0.0:8000
 
 exec "$@"

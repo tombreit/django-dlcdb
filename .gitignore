@@ -30,7 +30,8 @@ node_modules/
 /public/
 
 # Project directories
-/run/*
+/run/
+/data/
 /dlcdb/static/dist/
 /temp
 /.env

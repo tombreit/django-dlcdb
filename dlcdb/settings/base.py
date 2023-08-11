@@ -6,8 +6,9 @@ from huey import SqliteHuey
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RUN_DIR = BASE_DIR / "run"
-DB_DIR = RUN_DIR / "db"
-MEDIA_DIR = RUN_DIR / "media"
+DATA_DIR = BASE_DIR / "data"
+DB_DIR = DATA_DIR / "db"
+MEDIA_DIR = DATA_DIR / "media"
 STATICFILES_DIR = RUN_DIR / "staticfiles"
 
 # Make sure directory structure exists
