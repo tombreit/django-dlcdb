@@ -72,5 +72,3 @@ COPY --from=stagepython /opt/venv /opt/venv
 #COPY --from=stagepython /stagepython/docs /app/docs
 
 ENTRYPOINT ["container/entrypoint.sh"]
-
-CMD ["/bin/bash"]
