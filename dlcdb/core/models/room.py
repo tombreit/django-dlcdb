@@ -37,16 +37,19 @@ class Room(SoftDeleteAuditBaseModel):
     note = models.TextField(
         blank=True,
     )
-
+    website = models.URLField(
+        blank=True,
+        help_text=_("For example, a URL to a room plan. When available and applicable, room details are linked to this URL."),
+    )
     is_auto_return_room = models.BooleanField(
         default=False,
-        verbose_name='"Auto return" Raum',
-        help_text='Zurückgebene Leihgeräte werden automatisch diesem Raum zugeordnet'
+        verbose_name=_('"Auto return" room'),
+        help_text=_('Returned loaned devices are automatically assigned to this room'),
     )
     is_external = models.BooleanField(
         default=False,
-        verbose_name='Extern/Verliehen-Raum',
-        help_text='Location/Raum, in dem Assets gesammelt werden, die außer Haus sind, z.B. verliehen.',
+        verbose_name=_('External/Lent Room'),
+        help_text=_('Location/room where assets are collected that cannot be located, e.g., loaned, off-site .'),
     )
     qrcode = models.FileField(
         upload_to=f'{settings.QRCODE_DIR}/',

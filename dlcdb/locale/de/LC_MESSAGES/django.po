@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-29 19:20+0200\n"
-"PO-Revision-Date: 2023-07-29 19:21+0200\n"
+"POT-Creation-Date: 2023-08-11 09:58+0200\n"
+"PO-Revision-Date: 2023-08-11 10:01+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -30,7 +30,7 @@ msgstr "Erneut anmelden"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:60
+#: dlcdb/core/apps.py:61 dlcdb/core/models/room.py:63
 msgid "Rooms"
 msgstr "Räume"
 
@@ -251,13 +251,41 @@ msgstr "Zugeordnetes Gerät"
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/record.py:132 dlcdb/core/models/room.py:59
+#: dlcdb/core/models/record.py:132 dlcdb/core/models/room.py:62
 msgid "Room"
 msgstr "Raum"
 
 #: dlcdb/core/models/record.py:143
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
+
+#: dlcdb/core/models/room.py:42
+msgid ""
+"For example, a URL to a room plan. When available and applicable, room "
+"details are linked to this URL."
+msgstr ""
+"Zum Beispiel ein Link zu einem Raumplan. Wenn verfügbar und anwendbar werden "
+"Raum-Nennungen mit dieser URL verlinkt."
+
+#: dlcdb/core/models/room.py:46
+msgid "\"Auto return\" room"
+msgstr "\"Auto return\" Raum"
+
+#: dlcdb/core/models/room.py:47
+msgid "Returned loaned devices are automatically assigned to this room"
+msgstr "Zurückgebene Leihgeräte werden automatisch diesem Raum zugeordnet"
+
+#: dlcdb/core/models/room.py:51
+msgid "External/Lent Room"
+msgstr "Extern/Verliehen-Raum"
+
+#: dlcdb/core/models/room.py:52
+msgid ""
+"Location/room where assets are collected that cannot be located, e.g., "
+"loaned, off-site ."
+msgstr ""
+"Location/Raum, in dem Assets gesammelt werden, die nicht lokalisierbar sind, "
+"z.B. verliehen, außer Haus ."
 
 #: dlcdb/core/models/supplier.py:16
 msgid ""
@@ -275,15 +303,15 @@ msgstr "Distributoren"
 msgid "No, take me back"
 msgstr "Nein, bitte zurück"
 
-#: dlcdb/core/templates/core/device/change_form.html:37
+#: dlcdb/core/templates/core/device/change_form.html:38
 msgid "Already inventorized"
 msgstr "Schon inventorisiert"
 
-#: dlcdb/core/templates/core/device/change_form.html:39
+#: dlcdb/core/templates/core/device/change_form.html:40
 msgid "Not yet inventorized"
 msgstr "Noch nicht inventorisiert"
 
-#: dlcdb/core/templates/core/device/change_form.html:46
+#: dlcdb/core/templates/core/device/change_form.html:49
 msgid "Show all records"
 msgstr "Alle Records anzeigen"
 

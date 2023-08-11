@@ -48,8 +48,10 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
                 'number',
                 'nickname',
                 'description',
+                'website',
                 'note',
-                ('is_auto_return_room', 'is_external'),
+                'is_auto_return_room',
+                'is_external',
             )
         }),
         ('Informal', {
