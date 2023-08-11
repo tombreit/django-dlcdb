@@ -2,6 +2,7 @@
 
 *Latest news top*
 
+* New room attribute: "website", an optional link to external space management systems
 * Some tests!
 * (WIP) Speed up inventorization mode by more efficient database queries
 * Inventorization mode with a sleek htmx-powered interface, device listings, ability to request a room plan (if available, see `Organization > Branding`)
