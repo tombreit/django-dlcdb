@@ -16,13 +16,13 @@ babel==2.12.1
     #   sphinx
 beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
-django==4.2.3
+django==4.2.5
     # via
     #   crispy-bootstrap4
     #   django-appconf
@@ -38,7 +38,7 @@ django-crispy-forms==2.0
     # via
     #   crispy-bootstrap4
     #   django-dlcdb (setup.cfg)
-django-environ==0.10.0
+django-environ==0.11.2
     # via django-dlcdb (setup.cfg)
 django-filter==23.2
     # via django-dlcdb (setup.cfg)
@@ -67,7 +67,7 @@ jinja2==3.1.2
     # via
     #   myst-parser
     #   sphinx
-markdown==3.4.3
+markdown==3.4.4
     # via django-dlcdb (setup.cfg)
 markdown-it-py==3.0.0
     # via
@@ -91,16 +91,16 @@ pillow==10.0.0
     # via django-dlcdb (setup.cfg)
 pydata-sphinx-theme==0.13.3
     # via sphinx-book-theme
-pygments==2.15.1
+pygments==2.16.1
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
 python-magic==0.4.27
     # via django-dlcdb (setup.cfg)
-pytz==2023.3
+pytz==2023.3.post1
     # via djangorestframework
-pyyaml==6.0
+pyyaml==6.0.1
     # via myst-parser
 requests==2.31.0
     # via sphinx
@@ -108,7 +108,7 @@ segno==1.5.2
     # via django-dlcdb (setup.cfg)
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.4.1
+soupsieve==2.5
     # via beautifulsoup4
 sphinx==6.2.1
     # via
@@ -117,29 +117,34 @@ sphinx==6.2.1
     #   pydata-sphinx-theme
     #   sphinx-book-theme
     #   sphinx-design
+    #   sphinxcontrib-applehelp
+    #   sphinxcontrib-devhelp
+    #   sphinxcontrib-htmlhelp
+    #   sphinxcontrib-qthelp
+    #   sphinxcontrib-serializinghtml
 sphinx-book-theme==1.0.1
     # via django-dlcdb (setup.cfg)
-sphinx-design==0.4.1
+sphinx-design==0.5.0
     # via django-dlcdb (setup.cfg)
-sphinxcontrib-applehelp==1.0.4
+sphinxcontrib-applehelp==1.0.7
     # via sphinx
-sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-devhelp==1.0.5
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.1
+sphinxcontrib-htmlhelp==2.0.4
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
 sphinxcontrib-mermaid==0.9.2
     # via django-dlcdb (setup.cfg)
-sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-qthelp==1.0.6
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.5
+sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
 sqlparse==0.4.4
     # via django
 typing-extensions==4.7.1
     # via pydata-sphinx-theme
-urllib3==2.0.3
+urllib3==2.0.4
     # via requests
 whitenoise==6.5.0
     # via django-dlcdb (setup.cfg)
