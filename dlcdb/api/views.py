@@ -18,7 +18,12 @@ class DeviceViewSet(viewsets.ReadOnlyModelViewSet):
         Device
         .objects
         .all()
-        .select_related('active_record', 'active_record__room', 'device_type')
+        .select_related(
+            'active_record__person',
+            'active_record__room',
+            'device_type',
+            'manufacturer',
+        )
     )
     serializer_class = serializers.DeviceSerializer
     lookup_field = 'uuid'
@@ -27,12 +32,12 @@ class DeviceViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['edv_id', 'uuid', 'device_type__prefix', 'active_record__record_type']
 
 
-class RecordViewSet(viewsets.ReadOnlyModelViewSet):
+class LentRecordViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    API endpoint that allows active records to be viewed.
+    API endpoint that allows active lendings to be viewed.
     """
-    queryset = LentRecord.objects.select_related('device')
-    serializer_class = serializers.RecordSerializer
+    queryset = LentRecord.objects.filter(is_active=True)
+    serializer_class = serializers.LentRecordSerializer
 
 
 class RoomViewSet(viewsets.ReadOnlyModelViewSet):

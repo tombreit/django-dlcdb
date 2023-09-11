@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..core.models import Device, Record, Person, LentRecord, Room
+from ..core.models import Device, Person, LentRecord, Room
 
 
 class DeviceSerializer(serializers.HyperlinkedModelSerializer):
@@ -49,15 +49,22 @@ class DeviceSerializer(serializers.HyperlinkedModelSerializer):
         ]
 
 
-class RecordSerializer(serializers.HyperlinkedModelSerializer):
+class LentRecordSerializer(serializers.HyperlinkedModelSerializer):
+
+    device = serializers.HyperlinkedRelatedField(
+        view_name='device-detail',
+        read_only=True,
+        lookup_field='uuid',
+    )
 
     class Meta:
-        model = Record
+        model = LentRecord
         fields = [
             'pk',
             'device',
             'record_type',
             'is_active',
+            'person',
         ]
 
 
