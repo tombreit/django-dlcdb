@@ -30,13 +30,18 @@ def person_search(request):
 
 
 def person_detail(request, person_id):
-    person = (
-        Person
-        .smallstuff_person_objects
-        .get(id=person_id)
-    )
 
-    assignments = AssignedThing.currently_assigned_objects.filter(person=person)
+    try:
+        person = (
+            Person
+            .smallstuff_person_objects
+            .get(id=person_id)
+        )
+        assignments = AssignedThing.currently_assigned_objects.filter(person=person)
+    except Person.DoesNotExist:
+        person = None
+        assignments = None
+
     template = "smallstuff/person_detail.html"
     context = {
         "person": person,

@@ -20,40 +20,46 @@
     </div>
 </div>
 
-{% include 'smallstuff/includes/person_list_item.html' %}
+{% if person %}
+    {% include 'smallstuff/includes/person_list_item.html' %}
 
-<div class="alert alert-info" id="thingies">
+    <div class="alert alert-info" id="thingies">
 
-    <div class="d-flex">
-        <div class="mr-auto p-2">
-            <h4 class="alert-heading">
-                Things
-            </h4>
+        <div class="d-flex">
+            <div class="mr-auto p-2">
+                <h4 class="alert-heading">
+                    Things
+                </h4>
+            </div>
+            <div class="p-2">
+                <span id="add-thing-button-or-form">
+                    <a 
+                        class="btn btn-danger text-left"
+                        id="add-thing"
+                        hx-trigger="click"
+                        hx-target="#add-thing-button-or-form"
+                        hx-get="{% url 'smallstuff:add_assignement' person.id %}"
+                    >
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </span>
+
+            </div>
         </div>
-        <div class="p-2">
-            <span id="add-thing-button-or-form">
-                <a 
-                    class="btn btn-danger text-left"
-                    id="add-thing"
-                    hx-trigger="click"
-                    hx-target="#add-thing-button-or-form"
-                    hx-get="{% url 'smallstuff:add_assignement' person.id %}"
-                >
-                    <i class="fas fa-plus"></i>
-                </a>
-            </span>
 
-        </div>
-      </div>
+        <hr>
 
-    <hr>
-
-    <div 
-        id="assignements" 
-        hx-trigger="load, newAssignment from:body"
-        hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
-    ></div>
-
+        <div 
+            id="assignements" 
+            hx-trigger="load, newAssignment from:body"
+            hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
+        ></div>
+{% else %}
+    <div class="alert alert-warning">
+        The requested person does not exist or does not have a current contract
+        and current smallstuffs assigned.
+    </div>
+{% endif %}
 
 </div>
 
