@@ -157,15 +157,18 @@ def compare_sap(sap_list_obj):
                     new_row.update({'REC CREATED_AT': record_created_at})
                     new_row.update({'REC CREATED BY': record_created_by})
 
-                # finally append the notes for this inventory
-                if current_inventory:
-                    note_str = ''
-                    for note in obj.device_notes.filter(inventory=current_inventory):
-                        note_str += note.text + '***'
-                    new_row.update({'NOTE': note_str})
-
             else:
+                # SAP-ID not found in DLDB
                 new_row.update({'IN_DLCDB?': 'NOT IN DLCDB'})
+
+            # Append inventory notes for this device
+            # A DLCDB inventory note could exists even if the given device does not
+            # exist in the SAP file.
+            if current_inventory:
+                note_str = ''
+                for note in obj.device_notes.filter(inventory=current_inventory):
+                    note_str += note.text + '***'
+                new_row.update({'NOTE': note_str})
 
             new_rows.append(new_row)
 
