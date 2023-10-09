@@ -10,7 +10,7 @@ alabaster==0.7.13
     # via sphinx
 asgiref==3.7.2
     # via django
-babel==2.12.1
+babel==2.13.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -18,11 +18,11 @@ beautifulsoup4==4.12.2
     # via pydata-sphinx-theme
 certifi==2023.7.22
     # via requests
-charset-normalizer==3.2.0
+charset-normalizer==3.3.0
     # via requests
 crispy-bootstrap4==2022.1
     # via django-dlcdb (setup.cfg)
-django==4.2.5
+django==4.2.6
     # via
     #   crispy-bootstrap4
     #   django-appconf
@@ -35,7 +35,7 @@ django==4.2.5
     #   djangorestframework
 django-appconf==1.0.5
     # via django-select2
-django-auth-ldap==4.5.0
+django-auth-ldap==4.6.0
     # via django-dlcdb (setup.cfg)
 django-crispy-forms==2.0
     # via
@@ -43,13 +43,13 @@ django-crispy-forms==2.0
     #   django-dlcdb (setup.cfg)
 django-environ==0.11.2
     # via django-dlcdb (setup.cfg)
-django-filter==23.2
+django-filter==23.3
     # via django-dlcdb (setup.cfg)
 django-htmx==1.16.0
     # via django-dlcdb (setup.cfg)
 django-select2==8.1.2
     # via django-dlcdb (setup.cfg)
-django-simple-history==3.3.0
+django-simple-history==3.4.0
     # via django-dlcdb (setup.cfg)
 djangorestframework==3.14.0
     # via django-dlcdb (setup.cfg)
@@ -60,7 +60,7 @@ docutils==0.19
     #   sphinx
 et-xmlfile==1.1.0
     # via openpyxl
-huey==2.4.5
+huey==2.5.0
     # via django-dlcdb (setup.cfg)
 idna==3.4
     # via requests
@@ -70,7 +70,7 @@ jinja2==3.1.2
     # via
     #   myst-parser
     #   sphinx
-markdown==3.4.4
+markdown==3.5
     # via django-dlcdb (setup.cfg)
 markdown-it-py==3.0.0
     # via
@@ -86,11 +86,11 @@ myst-parser==2.0.0
     # via django-dlcdb (setup.cfg)
 openpyxl==3.1.2
     # via django-dlcdb (setup.cfg)
-packaging==23.1
+packaging==23.2
     # via
     #   pydata-sphinx-theme
     #   sphinx
-pillow==10.0.0
+pillow==10.0.1
     # via django-dlcdb (setup.cfg)
 pyasn1==0.5.0
     # via
@@ -98,7 +98,7 @@ pyasn1==0.5.0
     #   python-ldap
 pyasn1-modules==0.3.0
     # via python-ldap
-pydata-sphinx-theme==0.13.3
+pydata-sphinx-theme==0.14.1
     # via sphinx-book-theme
 pygments==2.16.1
     # via
@@ -153,9 +153,9 @@ sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
 sqlparse==0.4.4
     # via django
-typing-extensions==4.7.1
+typing-extensions==4.8.0
     # via pydata-sphinx-theme
-urllib3==2.0.4
+urllib3==2.0.6
     # via requests
 whitenoise==6.5.0
     # via django-dlcdb (setup.cfg)
