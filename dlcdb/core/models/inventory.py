@@ -370,7 +370,7 @@ class Inventory(models.Model):
 
                     # Set inventory note
                     # TODO: Fix multiple injections of same note string
-                    lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`. Please contact lender."
+                    lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`. Lender was contacted via email, so far without feedback."
                     note_obj, note_obj_created = Note.objects.get_or_create(
                         inventory=current_inventory,
                         device=active_record.device,
