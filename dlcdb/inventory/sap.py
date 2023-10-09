@@ -108,16 +108,11 @@ def compare_sap(sap_list_obj):
     new_rows = []
 
     with open(file_path, 'r', encoding='utf-8') as f:
-
         rows = csv.DictReader(f, delimiter=",")
 
-        for idx, row in enumerate(rows):
+        for row in rows:
             new_row = row
             sap_id = get_match_for_sap_id(device_sap_ids, row['Anlage'], row['Unternummer'], return_type="device_sap_id")
-
-            # print(80 * '=')
-            # print(f"{type(sap_id)=}")
-            # print(f"{sap_id=}")
 
             if sap_id:
                 obj = Device.objects.get(sap_id=sap_id)
@@ -125,37 +120,47 @@ def compare_sap(sap_list_obj):
                 inventorized_record = obj.get_current_inventory_record
 
                 if inventorized_record:
+                    if inventorized_record.inventory.name != current_inventory.name:
+                        raise ValidationError(f"{inventorized_record.inventory.name=} does not match {current_inventory.name=}. Exit!")
+
+                # Defaults
+                record_for_sap = None
+                record_inventory = 'FALSE'
+
+                # Find the record to be listed in sap comparison
+                if inventorized_record and active_record and inventorized_record.id < active_record.id:
+                    # This device has an inventorized record but newer records
+                    # exist so we pick the newest (active) record for sap
+                    # compare sheet.
+                    record_for_sap = active_record
                     record_inventory = inventorized_record.inventory.name
-                    if record_inventory != current_inventory.name:
-                        raise ValidationError(f"{record_inventory=} does not match {current_inventory.name=}. Exit!")
+                elif inventorized_record and active_record:
+                    # The inventorized record is the active record, no newer
+                    # records exist
+                    record_for_sap = inventorized_record
+                    record_inventory = inventorized_record.inventory.name
+                elif active_record and not inventorized_record:
+                    # This device has no inventorized record but an active
+                    # record.
+                    record_for_sap = active_record
 
-                    new_room = inventorized_record.room.number if inventorized_record.room else ""
-                    record_type = inventorized_record.get_record_type_display()
-                    record_created_at = formats.date_format(inventorized_record.created_at, "SHORT_DATETIME_FORMAT")
-                    record_created_by = inventorized_record.username
+                # Finally set data for sap comparison csv file
+                if record_for_sap:
+                    old_room = row['Raum']
+                    new_room = record_for_sap.room.number if record_for_sap.room else ""
 
-                elif active_record:
-                    record_inventory = 'FALSE'
-                    new_room = active_record.room.number if active_record.room else ""
-                    record_type = active_record.get_record_type_display()
-                    record_created_at = formats.date_format(active_record.created_at, "SHORT_DATETIME_FORMAT")
-                    record_created_by = active_record.username
-
+                    new_row.update({
+                        'CURRENT INVENTORY': record_inventory,
+                        'TYPE': record_for_sap.get_record_type_display(),
+                        'OLD ROOM': old_room,
+                        'NEW ROOM': new_room,
+                        'ROOM NEQ': old_room != new_room,
+                        'REC CREATED_AT': formats.date_format(record_for_sap.created_at, "SHORT_DATETIME_FORMAT"),
+                        'REC CREATED BY': record_for_sap.username,
+                    })
                 else:
                     # there is no record for this device
                     new_row.update({'CURRENT RECORD?': 'NO RECORD'})
-
-                if inventorized_record or active_record:
-                    old_room = row['Raum']
-
-                    new_row.update({'CURRENT INVENTORY': record_inventory})
-                    new_row.update({'TYPE': record_type})
-                    new_row.update({'OLD ROOM': old_room})
-
-                    new_row.update({'NEW ROOM': new_room})
-                    new_row.update({'ROOM NEQ': old_room != new_room})
-                    new_row.update({'REC CREATED_AT': record_created_at})
-                    new_row.update({'REC CREATED BY': record_created_by})
 
             else:
                 # SAP-ID not found in DLDB
