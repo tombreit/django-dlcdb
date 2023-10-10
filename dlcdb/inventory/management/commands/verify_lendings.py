@@ -18,6 +18,7 @@ class Command(BaseCommand):
     MAILTO_KEYWORD_LENDER = "to_lender"
     SEPARATOR = 80 * "*"
 
+
     def add_arguments(self, parser):
         parser.add_argument(
             '--send_mails',
@@ -37,6 +38,7 @@ class Command(BaseCommand):
             type=int,
             help=f'Deadline for answer emails in days from now. Defaults to `8`.',
         )
+
 
     def get_lenders_qs(self, devices_qs):
         lenders_pks = set(devices_qs.values_list('active_record__person__pk', flat=True))
@@ -142,6 +144,23 @@ class Command(BaseCommand):
         return recipient
 
 
+    def update_inventory_note(self, devices, inventory):
+        """
+        If a lender get an email, remember this via an inventory note.
+        """
+        print(f"{devices=}")
+        lender_contacted_msg = f"Lender was contacted via email about the location of the device, so far without feedback."
+
+        for device in devices:
+            inventory_note_obj, inventory_note_obj_created = Note.objects.get_or_create(
+                inventory=inventory,
+                device=device,
+            )
+            # Append lender contacted msg to inventory note:
+            inventory_note_obj.text = f"{inventory_note_obj.text}{'; ' if inventory_note_obj.text else ''}{lender_contacted_msg}"
+            inventory_note_obj.save()
+
+
     def handle(self, *args, **options):
         # Command line args
         send_mails_arg = options['send_mails']
@@ -171,8 +190,12 @@ class Command(BaseCommand):
             )
 
             if mailto_addr_arg:
-                print("Will send mails...")
+                self.stdout.write("Will send mails...")
                 self.send_mails(devices=mail_devices, now=now, mailto_addr_arg=mailto_addr_arg, deadline_days=deadline_days_from_now_arg)
+
+                self.stdout.write("Add or update inventory notes...")
+                current_inventory = Inventory.objects.active_inventory()
+                self.update_inventory_note(mail_devices, current_inventory)
             else:
                 lenders = mail_devices
                 self.stdout.write(f"+++ No `--mail_addr` given, only report mailings +++")

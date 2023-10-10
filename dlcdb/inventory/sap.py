@@ -170,10 +170,8 @@ def compare_sap(sap_list_obj):
             # A DLCDB inventory note could exists even if the given device does not
             # exist in the SAP file.
             if current_inventory:
-                note_str = ''
-                for note in obj.device_notes.filter(inventory=current_inventory):
-                    note_str += note.text + '***'
-                new_row.update({'NOTE': note_str})
+                notes = obj.device_notes.filter(inventory=current_inventory)
+                new_row.update({'NOTE': "; ".join(notes)})
 
             new_rows.append(new_row)
 
