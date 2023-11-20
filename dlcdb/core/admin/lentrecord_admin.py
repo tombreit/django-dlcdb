@@ -70,7 +70,6 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
         'export_as_csv',
     ]
 
-    
     readonly_fields = [
         'get_edv_id',
         'get_sap_id',

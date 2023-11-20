@@ -61,7 +61,7 @@ class Room(SoftDeleteAuditBaseModel):
     class Meta:
         verbose_name = _('Room')
         verbose_name_plural = _('Rooms')
-        ordering = ['number', ]
+        ordering = ['number']
 
     def __str__(self):
         if not self.nickname:
