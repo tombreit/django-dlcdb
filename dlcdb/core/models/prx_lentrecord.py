@@ -67,6 +67,13 @@ class LentRecord(Record):
             raise ValidationError({
                 'lent_desired_end_date': _(f'The end date (lend_desired_end_date) cannot be after {settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!')
             })
+        
+        if not self.room:
+            try:
+                extern_room = Room.objects.get(is_external=True)
+            except Room.DoesNotExist as e:
+                raise ValidationError('No extern room set! "{}"'.format(e), code='invalid')
+            raise ValidationError({'room': f'A room must be set! If the location is unclear, the extern room `{extern_room}` room can be selected.'})
 
         try:
             Room.objects.get(is_auto_return_room=True)
