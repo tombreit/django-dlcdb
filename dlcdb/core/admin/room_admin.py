@@ -15,6 +15,8 @@ from .base_admin import DeviceCountMixin
 class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     change_list_template = 'core/room/change_list.html'
     
+    ordering = ["number"]
+
     list_display = (
         'number',
         'nickname',
