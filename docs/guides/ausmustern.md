@@ -4,7 +4,6 @@
 
 Geräte, die nicht mehr existieren, verschrottet oder verkauft sind sind in der DLCDB kenntlich zu machen. Hierzu müssen die Geräte bzw. Records identifiziert (gesucht) werden und deren Status entsprechend gesetzt werden.
 
-
 ```{admonition} Verwaltungsakt
 :class: warning
 
@@ -12,7 +11,6 @@ Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration 
 ```
 
 ## Prozess
-
 
 `````{dropdown} Device
 
@@ -24,7 +22,6 @@ URL: https://fqdn/admin/core/device/
 1. Notiz (*removed_info*) angeben: z.B. "veraltet", "Speichermedium sicher gelöscht" etc.
 
 `````
-
 
 `````{dropdown} RecordAdmin
 
@@ -41,7 +38,6 @@ URL: https://fqdn/admin/core/record/
 1. Admin-Action in Dropdown-Menü auswählen und ausführen.
 
 `````
-
 
 `````{dropdown} RemovedRecordAdmin
 

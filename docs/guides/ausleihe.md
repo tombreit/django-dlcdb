@@ -12,6 +12,10 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 
 ## Gerät wird ausgeliehen
 
+:::{note}
+Auch einem verliehenen Gerät kann ein Raum zugeordnet werden. Wenn beim Verleih davon auszugehen ist, dass das Device mit hoher Wahrscheinlichkeit in Raum X wiederzufinden, so ist hier auch Raum X einzutragen. Wenn mit hoher Wahrscheinlichkeit unklar ist, wo sich das Device befinden wird (z.B. Homeoffice-Ausleihen), kann der Raum “Extern” angegeben werden.
+:::
+
 - Gerät-Ausleihe wird in DLCDB geöffnet
 - Ausleihfrist wird eingetragen
   - Enddatum der Ausleihe darf aktuell nicht nach dem 31.12.2099 sein
