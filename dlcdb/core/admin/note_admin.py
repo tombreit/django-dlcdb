@@ -34,6 +34,8 @@ class NoteAdmin(admin.ModelAdmin):
         "updated_at",
     ]
 
+    show_facets = admin.ShowFacets.NEVER
+
     @admin.display(description="Device room")
     @admin.display(ordering="device__active_record__room")
     def get_device_room(self, obj):

@@ -19,6 +19,8 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
     Base class for all admins which should track request.user.
     """
 
+    show_facets = admin.ShowFacets.NEVER
+
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
 
