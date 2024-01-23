@@ -16,7 +16,7 @@ class ImporterAdminForm(forms.ModelForm):
         username = self.request.user.username
 
         try:
-            print("Dry-run import_data...")
+            # print("Dry-run import_data...")
             result_dryrun = import_data(
                 file,
                 importer_inst_pk=None,
@@ -26,7 +26,11 @@ class ImporterAdminForm(forms.ModelForm):
                 username=username,
                 write=False,
             )
-            messages.info(self.request, result_dryrun)
+        except ValueError as value_error:
+            msg = value_error
+            self.add_error(None, msg)
         except IntegrityError as integrity_error:
             msg = integrity_error
             self.add_error(None, msg)
+        else:
+            messages.info(self.request, result_dryrun)

@@ -17,7 +17,12 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 import pytest
 
 from dlcdb.core.models import Device, Room, Inventory
+from dlcdb.tenants.models import Tenant
 
+
+@pytest.fixture
+def tenant():
+    return Tenant.objects.create(name="PytestTenant")
 
 @pytest.fixture
 def room():

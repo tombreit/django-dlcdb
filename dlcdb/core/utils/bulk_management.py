@@ -25,14 +25,14 @@ from .sap_converter import convert_raw_sap_export
 
 
 # https://docs.djangoproject.com/en/4.1/topics/db/instrumentation/
-from django.db import connection
-from .query_logger import QueryLogger
-
+# from django.db import connection
+# from .query_logger import QueryLogger
 # ql = QueryLogger()
 # with connection.execute_wrapper(ql):
 #     do_queries()
 # # Now we can print the log.
 # print(ql.queries)
+
 
 logger = logging.getLogger(__name__)
 
@@ -463,20 +463,22 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
         else:
             # In dryrun mode
             for device_obj in device_objs:
-                # print(f"{device_obj=}: {device_repr}")
                 device_obj.save()
                 processed_devices_count += 1
 
             for record_obj in record_objs:
-                print(f"{record_obj=}")
                 if record_obj:
                     record_obj.save()
                     processed_records_count += 1
 
-        print(f"Created {processed_devices_count} devices.")
-        print(f"Created {processed_records_count} records.")
+        # print(f"Created {processed_devices_count} devices.")
+        # print(f"Created {processed_records_count} records.")
     except IntegrityError as integrity_error:
         raise IntegrityError(f"IntegrityError {integrity_error} for {device_repr}")
+    except ValueError as value_error:
+        raise ValueError(f"ValueError {value_error} for {device_repr}")
+    except Exception as base_exception:
+        raise IntegrityError(f"Exception {base_exception} for {device_repr}")
 
     return device_objs
 
@@ -495,6 +497,7 @@ def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_fo
     ImporterMessages = namedtuple("ImporterMessages", [
         "success_messages",
         "imported_devices_count",
+        "error",
     ])
     success_messages = []
 
@@ -522,10 +525,14 @@ def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_fo
             create_fk_objs(fk_field, rows)
 
         # Second loop over rows: Creating devices
-        device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write)
-
-    result = ImporterMessages(
-        success_messages,
-        f"Imported devices: {len(device_objs)}",
-    )
+        try:
+            device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write)
+        except ValueError as value_error:
+            raise ValueError(value_error)
+        else:
+            result = ImporterMessages(
+                success_messages,
+                f"Imported devices: {len(device_objs)}",
+                error=False,
+            )
     return result
