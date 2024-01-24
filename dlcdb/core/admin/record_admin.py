@@ -115,6 +115,15 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             label=obj.device.sap_id,
         )))
 
+    def lookup_allowed(self, key, value):
+        """
+        DisallowedModelAdminLookup at /admin/core/record/
+        Filtering by device__id__exact not allowed
+        """
+        if key in ['device__id__exact']:
+            return True
+        return super().lookup_allowed(key, value)
+
     @admin.display(description='Has Note?')
     def has_note(self, obj):
         return get_has_note_badge(obj_type="core.record", has_note=obj.note)
