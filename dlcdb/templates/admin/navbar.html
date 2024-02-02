@@ -55,10 +55,7 @@
                 Reporting
             </a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item"  href="{% url 'admin:logout' %}">
-                <i class="fa fa-sign-out"></i>
-                Logout {{ request.user.username }}
-            </a>
+            {% include 'logout_link.html' %}
           </div>
         </div>
 
