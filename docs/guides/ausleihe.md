@@ -6,7 +6,7 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 
 ## Features
 
-- Druckbarer, gebrandeter Ausleihvertrag
+- Druckbarer, gebrandeter Ausleihvertrag, inklusive Version für die Ausleihenden
 - Editierbare Checkliste als Anhang zum Ausleihvertrag
 - Automatische Notifications (Emails) an Ausleiher bei überfälliger Rückgabe
 

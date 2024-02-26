@@ -1,10 +1,14 @@
 from django.db import models
 from ..core.models.abstracts import SingletonBaseModel
 
+
 class LendingConfiguration(SingletonBaseModel):
     lending_preparation_checklist = models.TextField(
+        blank=True, help_text="Basic Markdown supported. '[ ]' converted to checkbox input."
+    )
+    mandatory_regulations = models.ManyToManyField(
+        "core.Link",
         blank=True,
-        help_text="Basic Markdown supported. '[ ]' converted to checkbox input."
     )
 
     def __str__(self):

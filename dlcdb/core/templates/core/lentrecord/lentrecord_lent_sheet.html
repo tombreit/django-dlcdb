@@ -113,11 +113,21 @@
                 <td colspan="2">
                     <p>
                         Ich bestätige, dass ich das Gerät in einwandfreiem Zustand am {{ record.lent_start_date }} erhalten habe. Ich werde das Gerät pfleglich und mit Sorgfalt behandeln. Ich bin darauf hingewiesen worden, dass ich bei Verlust oder Beschädigung regresspflichtig gemacht werden kann.
-                    </p>
-                    <p class="small">
-                        (Diebstahl aus nicht gesicherten Bereichen, sowie Verletzungen der Sorgfaltspflicht bei Transport gelten als grob fahrlässig.)
+                        Diebstahl aus nicht gesicherten Bereichen, sowie Verletzungen der Sorgfaltspflicht bei Transport gelten als grob fahrlässig.
                         <!--Die Ausführung in <b>Anlage 1</b> zum Geräteverleih habe ich zur Kenntnis genommen. -->
                     </p>
+
+                    {% if lending_configuration.mandatory_regulations.all %}
+                        Ich bestätige, die folgenden Ordnungen zur Kenntnis genommen zu haben:
+                        <ul>
+                        {% for regulation in lending_configuration.mandatory_regulations.all %}
+                        <li>
+                            ☑ {{ regulation.linktext}} &lt;<a href="{{ regulation.display_url }}">{{ regulation.display_url }}</a>&gt;
+                        </li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+
                     <div class="confirmation">
                         <p>Freiburg, den {% now "SHORT_DATE_FORMAT" %}</p>
                         <p class="signature">Unterschrift des/der Ausleiher/in</p>

@@ -1,20 +1,18 @@
-from django.contrib import admin
-
-from .device_admin import DeviceAdmin
-from .record_admin import RecordAdmin
-from .orderedrecord_admin import OrderedRecordAdmin
-from .lentrecord_admin import LentRecordAdmin
-from .inroomrecord_admin import InRoomRecordAdmin
-from .devicetype_admin import DeviceTypeAdmin
-from .lostrecord_admin import LostRecordAdmin
-from .removedrecord_admin import RemovedRecordAdmin
-from .room_admin import RoomAdmin
-from .inventory_admin import InventoryAdmin
-from .supplier_admin import SupplierAdmin
-from .person_admin import PersonAdmin, OrganizationalUnitAdmin
-from .note_admin import NoteAdmin
-from .importerlist_admin import ImporterListAdmin
-from .removerlist_admin import RemoverListAdmin
-from .attachment_admin import AttachmentAdmin
-from .licencerecord_admin import LicenceRecordAdmin
-from .manufacturer_admin import ManufacturerAdmin
+from .device_admin import DeviceAdmin  # noqa
+from .record_admin import RecordAdmin  # noqa
+from .orderedrecord_admin import OrderedRecordAdmin  # noqa
+from .lentrecord_admin import LentRecordAdmin  # noqa
+from .inroomrecord_admin import InRoomRecordAdmin  # noqa
+from .devicetype_admin import DeviceTypeAdmin  # noqa
+from .lostrecord_admin import LostRecordAdmin  # noqa
+from .removedrecord_admin import RemovedRecordAdmin  # noqa
+from .room_admin import RoomAdmin  # noqa
+from .inventory_admin import InventoryAdmin  # noqa
+from .supplier_admin import SupplierAdmin  # noqa
+from .person_admin import PersonAdmin, OrganizationalUnitAdmin  # noqa
+from .note_admin import NoteAdmin  # noqa
+from .importerlist_admin import ImporterListAdmin  # noqa
+from .removerlist_admin import RemoverListAdmin  # noqa
+from .misc_admin import AttachmentAdmin, LinkAdmin  # noqa
+from .licencerecord_admin import LicenceRecordAdmin  # noqa
+from .manufacturer_admin import ManufacturerAdmin  # noqa

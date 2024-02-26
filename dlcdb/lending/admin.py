@@ -7,28 +7,29 @@ from .models import LendingConfiguration
 
 @admin.register(LendingConfiguration)
 class LendingConfigurationAdmin(admin.ModelAdmin):
-
     search_fields = [
-        'lending_preparation_checklist',
+        "lending_preparation_checklist",
     ]
 
     formfield_overrides = {
-        models.TextField: {
-            'widget': Textarea(
-                attrs={
-                    'style': 'width: 100%;'
-                }
-            )
-        },
+        models.TextField: {"widget": Textarea(attrs={"style": "width: 100%;"})},
     }
 
     fieldsets = (
-        ('Printouts', {
-            # 'classes': ('collapse',),
-            'fields': (
-                'lending_preparation_checklist',
-            ),
-        }),
+        (
+            "Printouts",
+            {
+                # 'classes': ('collapse',),
+                "fields": ("lending_preparation_checklist",),
+            },
+        ),
+        (
+            "Regulations",
+            {
+                "classes": ("collapse",),
+                "fields": ("mandatory_regulations",),
+            },
+        ),
     )
 
     def has_add_permission(self, request):
@@ -38,4 +39,4 @@ class LendingConfigurationAdmin(admin.ModelAdmin):
         False
 
     class Media:
-        css = { "all": ("lending/admin/lending_admin.css",)}
+        css = {"all": ("lending/admin/lending_admin.css",)}
