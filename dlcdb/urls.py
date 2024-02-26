@@ -10,28 +10,24 @@ admin.site.site_header = "DLCDB Admin"
 admin.site.site_title = "DLCDB Admin"
 admin.site.index_title = "DLCDB Administration"
 admin.site.enable_nav_sidebar = False
-admin.site.logout_template = 'accounts/logout.html'
+admin.site.logout_template = "accounts/logout.html"
 
 
 urlpatterns = [
     path("", RedirectView.as_view(url=reverse_lazy("core:core_dashboard"))),
-
-    path('core/', include('dlcdb.core.urls')),
-    path('inventory/', include('dlcdb.inventory.urls')),
-    path('lending/', include('dlcdb.lending.urls')),
-    path('smallstuff/', include('dlcdb.smallstuff.urls')),
-
+    path("core/", include("dlcdb.core.urls")),
+    path("inventory/", include("dlcdb.inventory.urls")),
+    path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("select2/", include("django_select2.urls")),
-    path('api/v2/', include('dlcdb.api.urls')),
-
+    path("api/v2/", include("dlcdb.api.urls")),
     path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("branding/favicon.ico"))),
-
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
+        path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns
