@@ -2,7 +2,7 @@
 
 # include .env
 
-default_requirements_file = requirements/requirements-dev.txt
+default_requirements_file = requirements/prod-ldap.txt
 
 help:
 	@echo "requirements - check style with black, flake8, sort python with isort, and indent html"
@@ -12,9 +12,10 @@ help:
 
 requirements:
 	mkdir -p requirements
-	pip-compile --upgrade --output-file requirements/requirements-prod.txt setup.cfg
-	pip-compile --upgrade --extra ldap --output-file requirements/requirements-prod-ldap.txt setup.cfg
-	pip-compile --upgrade --extra dev --output-file requirements/requirements-dev.txt setup.cfg
+	python3 -m pip install --upgrade pip-tools pip wheel setuptools
+	python3 -m piptools compile --upgrade --strip-extras              -o requirements/prod.txt pyproject.toml
+	python3 -m piptools compile --upgrade --strip-extras --extra ldap -o requirements/prod-ldap.txt pyproject.toml
+	python3 -m piptools compile --upgrade --strip-extras --extra dev  -o requirements/dev.txt pyproject.toml
 	ln -s --force  $(default_requirements_file) requirements.txt
 
 tests:

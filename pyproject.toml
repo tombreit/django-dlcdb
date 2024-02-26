@@ -1,28 +1,96 @@
+[project]
+name = "django-dlcdb"
+# dynamic = ["version"]
+version = "0"
+# description = "Device Live Cycle Database"
+# authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
+# license = {file = "LICENSE"}
+# readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Framework :: Django",
+    "Topic :: Documentation",
+    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "Django==5.0.1",
+    "django-select2",
+    "django-environ",
+    "django-crispy-forms",
+    "crispy-bootstrap4",
+    "django-simple-history",
+    "django-htmx",
+    "whitenoise",
+    # pymemcache  # needed by django-select2; currently trying the builtin db cache backend
+    "python-magic",
+    "huey",
+    "openpyxl",
+    "markdown",
+    "Pillow",
+    "segno",
+    "djangorestframework",
+    "django-filter",
+    "Sphinx",
+    "sphinx-book-theme",
+    "sphinxcontrib-mermaid",
+    "myst_parser",  # currently not working: myst_parser[linkify]
+    "sphinx-design",
+]
+
+[project.urls]
+Homepage = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+Documentation = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/tree/main/docs"
+Repository = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+Issues = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
+
+
+[project.optional-dependencies]
+ldap = [
+    "django-auth-ldap",
+]
+dev = [
+    "pre-commit",
+    "ruff",
+    "pytest",
+    "pytest-django",
+    "pytest-cov",
+    "pip-tools",
+    "django-auth-ldap",
+    "django-debug-toolbar",
+    "django_extensions",
+    # for js qr scanner https connections on localhost runserver:
+    # see: https://github.com/django-extensions/django-extensions/issues/1475
+    # "Werkzeug==0.16.1",
+    # "pyOpenSSL",
+]
+
 [build-system]
-requires = ["setuptools", "pip-tools"]
+requires = [
+    "setuptools>=61.0.0",
+    "setuptools-scm>=8.0",
+    "wheel"
+]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+where = ["dlcdb"]
 
 [tool.ruff]
 line-length = 120
+target-version = "py311"
 
-[tool.black]
-line-length = 120
-preview-string-processing = true
-# skip-string-normalization = true
-target-version = ['py39']
-exclude = '''
-/(
-    \.git
-  | \.tox
-  | \.venv
-  | node_modules
-  | dist
-  | migrations
-)/
-'''
-
-[tool.isort]
-profile = "black"
-skip = ["migrations",".git","__pycache__","LC_MESSAGES",".venv"]
-blocked_extensions = ["rst","html","js","svg","txt","css","scss","png","jpg"]
-default_section = "THIRDPARTY"
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "dlcdb.settings"
+# norecursedirs = [
+#     "*/node_modules/",
+#     "/.venv/",
+#     "/docs/",
+#     "/container/",
+#     "/frontend/",
+#     "/run/",
+#     "/temp/",
+# ]
