@@ -2,6 +2,7 @@
 
 *Latest news top*
 
+* Lending: TOS or regulations could be added to the lent sheet
 * New room attribute: "website", an optional link to external space management systems
 * Some tests!
 * (WIP) Speed up inventorization mode by more efficient database queries

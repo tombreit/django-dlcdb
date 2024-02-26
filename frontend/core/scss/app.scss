@@ -84,6 +84,17 @@ fieldset.collapsed:not(.show) {
     display: block;
 }
 
+// Reset bootstrap .form-row { display: flex; }
+.inline-group .form-row {
+    display: table-row;
+}
+
+
+// Fix upstream or bootstrap height: 1.1em
+.inline-group .tabular td.original p {
+    height: auto;
+}
+
 #header {
     overflow: visible;
 
