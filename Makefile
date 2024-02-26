@@ -21,13 +21,6 @@ requirements:
 tests:
 	pytest
 
-format:
-	black .
-	isort .
-
-lint:
-	flake8
-
 docs:
 	make --directory=docs clean
 	make --directory=docs html
