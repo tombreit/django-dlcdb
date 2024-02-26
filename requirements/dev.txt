@@ -35,7 +35,7 @@ crispy-bootstrap4==2023.1
     # via django-dlcdb (pyproject.toml)
 distlib==0.3.8
     # via virtualenv
-django==5.0.1
+django==5.0.2
     # via
     #   crispy-bootstrap4
     #   django-appconf
