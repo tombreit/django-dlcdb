@@ -82,6 +82,7 @@ where = ["dlcdb"]
 [tool.ruff]
 line-length = 120
 target-version = "py311"
+extend-exclude = ["migrations"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "dlcdb.settings"
