@@ -21,8 +21,11 @@ Auch einem verliehenen Gerät kann ein Raum zugeordnet werden. Wenn beim Verleih
   - Enddatum der Ausleihe darf aktuell nicht nach dem 31.12.2099 sein
 - Zubehör wird in Notiz-Feld hinterlegt
 - Ausleihzettel wird generiert und ausgedruckt
-- Ausleihzettel wird unterschrieben
+  - Einstellungen für den Druck: beidseitiger Druck, Kopf- und Fuzßzeilen drucken, Hintergrund drucken
+- Ausleihzettel: Ausfertigung für Ausleihenden wird übergeben
+- Ausleihzettel: Ausfertigung für Institut wird von Ausleiher*in sowie Mitarbeiter unterschrieben
 - Gerät wird übergeben
+- Unterschriebener Ausleihzettel wird abgeheftet
 
 ### Gerät wird während der Ausleihe editiert
 
@@ -41,4 +44,3 @@ Für zurückgegebene Devices wird automatisch ein `INROOM`-Record mit dem defini
 :::{note}
 Als Erweiterung des Ausleihzettels können weitere Seiten ausgegeben/generiert werden. Der Inhalt dieser weiteren Seiten ist frei edierbar (Markdown wird unterstützt). Diese Erweiterung ist über die Ansicht *Verleihen > Checklist* zu erreichen.
 :::
-

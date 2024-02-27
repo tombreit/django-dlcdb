@@ -7,12 +7,15 @@
       margin: 40pt 30pt 60pt 30pt;
     }
 
+    body {
+      font-family: sans-serif;
+      font-size: 9pt;
+      -webkit-print-color-adjust: exact;
+    }
 
     *,
     *:before,
-    *:after,
-    *:first-letter,
-    *:first-line {
+    *:after {
       /* background: transparent !important; */
       color: #000 !important;
       /* Black prints faster: http://www.sanbeiji.com/archives/953 */
@@ -68,11 +71,6 @@
     h2,
     h3 {
       page-break-after: avoid;
-    }
-    body {
-      font-family: sans-serif;
-      font-size: 10px;
-      -webkit-print-color-adjust: exact;
     }
 
     header {

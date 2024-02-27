@@ -1,0 +1,168 @@
+{% load i18n %}
+
+
+<div 
+    class="{% if pagebreak %} pagebreak {% endif %}"
+    style="display: flex; justify-content: space-between;"
+>
+    <div>
+        <h2 style="margin-top: 0;">Geräte Verleih</h2>
+        <p>Antrag auf Ausleihe eines IT-Geräts</p>
+    </div>
+    <div>
+        <p>
+            <strong style="padding: 0.2rem 0.5rem; border: 3px solid red; border-radius: 5px; color: white !important; background-color: red;">
+                Ausfertigung für {{ sheet_for }}
+            </strong>
+        </p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th colspan="2">I. Ausleihende</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>
+                Name:
+                <br>
+                <i>(Name, Vorname)</i>
+            </th>
+            <td>{{ record.person }}</td>
+        </tr>
+        <tr>
+            <th>Abteilung/Forschungsgruppe:</th>
+            <td>{{ record.person.organizational_unit.name }}</td>
+        </tr>
+        {% comment %}
+        <tr>
+            <th>Ausleihgrund:</th>
+            <td>{{ record.lent_reason }}</td>
+        </tr>
+        {% endcomment %}
+    </tbody>
+    <thead>
+        <tr>
+            <th colspan="2">II. IT Gerät</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Gerät</th>
+            <td>
+                <strong>
+                    {% if record.device.manufacturer or record.device.series %}
+                        {{ record.device.manufacturer }} {{ record.device.device_type }} {{ record.device.series }} 
+                        {% if record.device.serial_number %}
+                            ({{ record.device.serial_number }})
+                        {% endif %}
+                        <br>
+                    {% endif %}
+                    {{ record.device }}, Inventarnummer: {{ record.device.sap_id|default:'n/a' }}
+                </strong>
+                <br>
+                <i style="font-size: smaller;">Tenant: {{ record.device.tenant }}</i>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Sonstiges:
+                <br>
+                <i>(Zubehör, Mängel, Zusätze)</i>
+            </th>
+            <td>{{ record.lent_accessories|linebreaks }}</td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th colspan="2">III. Ausleihe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Vereinbarte Ausleihfrist</th>
+            <td>
+                {% language 'de' %}
+                    {{ record.lent_start_date }} {% if record.lent_desired_end_date %} – {{ record.lent_desired_end_date }}{% endif %}
+                {% endlanguage %}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <p>
+                    Ich bestätige, dass ich das Gerät in einwandfreiem Zustand am {% language 'de' %}{{ record.lent_start_date | date:"j. F Y" }}{% endlanguage %} erhalten habe. Ich werde das Gerät pfleglich und mit Sorgfalt behandeln. Ich bin darauf hingewiesen worden, dass ich bei Verlust oder Beschädigung regresspflichtig gemacht werden kann.
+                    Diebstahl aus nicht gesicherten Bereichen, sowie Verletzungen der Sorgfaltspflicht bei Transport gelten als grob fahrlässig.
+                    <!--Die Ausführung in <b>Anlage 1</b> zum Geräteverleih habe ich zur Kenntnis genommen. -->
+                </p>
+
+                {% if lending_configuration.mandatory_regulations.all %}
+                    Ich bestätige, die folgenden Ordnungen zur Kenntnis genommen zu haben:
+                    <ul>
+                    {% for regulation in lending_configuration.mandatory_regulations.all %}
+                    <li style="margin-bottom: 0.5rem;">
+                        ☑ {{ regulation.linktext}}
+                        <br>
+                        &lt;<a href="{{ regulation.display_url }}">{{ regulation.display_url }}</a>&gt;
+                    </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="confirmation">
+                    <p>Freiburg, den {% language 'de' %}{% now "j. F Y" %}{% endlanguage %}</p>
+                    <p class="signature">Unterschrift des Ausleihenden</p>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th colspan="2">IV. Verleih-Bearbeitung <span>(EDV-Abteilung)</span></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Bearbeitet:</th>
+            <td>
+
+                <table>
+                    <tr>
+                        <td>Name:</td>
+                        <td></td>
+                        <td>Datum: {% language 'de' %}{% now "SHORT_DATE_FORMAT" %}{% endlanguage %}</td>
+                        <td></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th colspan="2">V. Rückgabe-Bearbeitung <span>(EDV-Abteilung)</span></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        <tr>
+            <th>Zurückerhalten:</th>
+            <td>
+                <table>
+                    <tr>
+                        <td>Name:</td>
+                        <td></td>
+                        <td>Datum: {# now "SHORT_DATE_FORMAT" #}</td>
+                        <td></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <th>Zustand:</th>
+            <td></td>
+        </tr>
+
+    </tbody>
+</table>

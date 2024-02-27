@@ -1,0 +1,26 @@
+{% load markdown_extras %}
+
+
+{% if lending_configuration.lending_preparation_checklist %}
+<style>
+    .checklist {
+        font-family: monospace;
+        font-size: 9pt;
+    }
+</style>
+
+<div class="{% if pagebreak %} pagebreak {% endif %} checklist">
+    <h2>
+        Checklist for 
+        EDV-ID: {{ record.device.edv_id|default:'n/a' }}, 
+        SAP-ID: {{ record.device.sap_id|default:'n/a' }}
+        <br>
+        {{ record.device.manufacturer }} {{ record.device.series }}
+        <br>
+        for {{ record.person }}
+    </h2>
+    <hr>
+    {{ lending_configuration.lending_preparation_checklist | from_markdown | safe }}
+    <hr>
+</div>
+{% endif %}
