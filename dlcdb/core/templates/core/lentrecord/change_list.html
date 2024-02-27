@@ -5,9 +5,9 @@
 {% block object-tools-items %}
     {{ block.super }}
     <li>
-        <a href="{% url 'admin:lending_lendingconfiguration_changelist' %}">
+        <a href="{% url 'admin:lending_lendingconfiguration_change' 1 %}">
             <i class="fa-solid fa-file-pen"></i>
-            {% translate "Checklist" %}
+            {% translate "Checklist & Lending configuration" %}
         </a>
     </li>
 {% endblock %}

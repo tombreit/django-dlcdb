@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-11 09:58+0200\n"
-"PO-Revision-Date: 2023-08-11 10:01+0200\n"
+"POT-Creation-Date: 2024-02-27 09:05+0100\n"
+"PO-Revision-Date: 2024-02-27 09:06+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: dlcdb/accounts/templates/accounts/logout.html:23
 msgid "Thanks for spending some quality time with the web site today."
@@ -187,11 +187,11 @@ msgstr ""
 "Das Verleihende (lend_desired_end_date) kann nicht nach {settings."
 "MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
 
-#: dlcdb/core/models/prx_lentrecord.py:86
+#: dlcdb/core/models/prx_lentrecord.py:93
 msgid "Lending"
 msgstr "Ausleihe"
 
-#: dlcdb/core/models/prx_lentrecord.py:87
+#: dlcdb/core/models/prx_lentrecord.py:94
 msgid "Lendings"
 msgstr "Ausleihen"
 
@@ -316,8 +316,8 @@ msgid "Show all records"
 msgstr "Alle Records anzeigen"
 
 #: dlcdb/core/templates/core/lentrecord/change_list.html:10
-msgid "Checklist"
-msgstr "Checklist"
+msgid "Checklist & Lending configuration"
+msgstr "Checkliste & Ausleihkonfiguration"
 
 #: dlcdb/core/ui_helpers.py:43
 msgid "In room"
@@ -408,3 +408,6 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:37
 msgid "None"
 msgstr "None"
+
+#~ msgid "Checklist"
+#~ msgstr "Checklist"
