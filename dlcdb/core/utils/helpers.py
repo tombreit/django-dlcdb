@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.html import format_html
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 
 logger = logging.getLogger(__name__)
@@ -77,6 +77,8 @@ def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
             img.thumbnail(thumbnail_size)
             img = img.convert("RGB")
             img.save(to_filepath, "JPEG")
+    except UnidentifiedImageError as unidentified_image_error:
+        logger.warning(f"Unidentified Image Error for `{to_filepath}`: {unidentified_image_error}")
     except BaseException as e:
         raise e
 
