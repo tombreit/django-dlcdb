@@ -21,52 +21,52 @@ env = environ.Env(
     SETTINGS_MODE=(str, "dev"),
     DJANGO_DEBUG=(bool, True),
     AUTH_LDAP=(bool, False),
-    SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!" ),
+    SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!"),
     ADMINS=(str, ""),
 )
-environ.Env.read_env(BASE_DIR /'.env')
+environ.Env.read_env(BASE_DIR / ".env")
 
 DEV_SETTINGS_MODE = True if env("SETTINGS_MODE") == "dev" else False
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG')
-SECRET_KEY = env('SECRET_KEY')
+DEBUG = env("DJANGO_DEBUG")
+SECRET_KEY = env("SECRET_KEY")
 
 # Application definition
 DJANGO_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
-    'django.contrib.staticfiles',
-    'django.contrib.sites',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
 ]
 THIRD_PARTY_APPS = [
-    'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
-    'crispy_forms',
-    'crispy_bootstrap4',
-    'django_select2',
-    'django_htmx',
-    'huey.contrib.djhuey',
-    'simple_history',
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_filters",
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "django_select2",
+    "django_htmx",
+    "huey.contrib.djhuey",
+    "simple_history",
 ]
 LOCAL_APPS = [
-    'dlcdb.accounts',
-    'dlcdb.tenants',
-    'dlcdb.core',
-    'dlcdb.organization',
-    'dlcdb.inventory',
-    'dlcdb.reporting',
-    'dlcdb.lending',
-    'dlcdb.smallstuff',
-    'dlcdb.api',
+    "dlcdb.accounts",
+    "dlcdb.tenants",
+    "dlcdb.core",
+    "dlcdb.organization",
+    "dlcdb.inventory",
+    "dlcdb.reporting",
+    "dlcdb.lending",
+    "dlcdb.smallstuff",
+    "dlcdb.api",
 ]
 DEV_APPS = [
-    'debug_toolbar',
-    'django_extensions',
+    "debug_toolbar",
+    "django_extensions",
 ]
 
 
@@ -77,50 +77,50 @@ if DEBUG:
     INSTALLED_APPS = INSTALLED_APPS + DEV_APPS
 
 # https://docs.djangoproject.com/en/1.9/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=["*"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#csrf-trusted-origins
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # https://docs.djangoproject.com/en/3.0/ref/clickjacking/#setting-x-frame-options-for-all-responses
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
-INTERNAL_IPS = ['127.0.0.1'] if DEBUG else []
+INTERNAL_IPS = ["127.0.0.1"] if DEBUG else []
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 SITE_ID = 1
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = "accounts.CustomUser"
 
 # Email these people full exception information
 # https://docs.djangoproject.com/en/1.9/ref/settings/#admins
 # https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
-ADMINS = getaddresses([env('ADMINS')])
+ADMINS = getaddresses([env("ADMINS")])
 MANAGERS = ADMINS
-EMAIL_SUBJECT_PREFIX = env.str('EMAIL_SUBJECT_PREFIX', default="[DLCDB] ")
-DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', default="mail@example.org")
+EMAIL_SUBJECT_PREFIX = env.str("EMAIL_SUBJECT_PREFIX", default="[DLCDB] ")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="mail@example.org")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_BACKEND = env.str('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env.str("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=0)
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django_htmx.middleware.HtmxMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'dlcdb.tenants.middleware.CurrentTenantMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "dlcdb.tenants.middleware.CurrentTenantMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#enabling-middleware
@@ -129,30 +129,30 @@ MIDDLEWARE = [
 # middleware as early as possible in the list. However, it must come after any
 # other middleware that encodes the response’s content, such as GZipMiddleware.
 if DEBUG:
-    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
-ROOT_URLCONF = 'dlcdb.urls'
+ROOT_URLCONF = "dlcdb.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [str(BASE_DIR / 'dlcdb/templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'dlcdb.core.context_processors.hints',
-                'dlcdb.core.context_processors.nav',
-                'dlcdb.organization.context_processors.branding',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [str(BASE_DIR / "dlcdb/templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "dlcdb.core.context_processors.hints",
+                "dlcdb.core.context_processors.nav",
+                "dlcdb.organization.context_processors.branding",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'dlcdb.wsgi.application'
+WSGI_APPLICATION = "dlcdb.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -161,12 +161,10 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': str(DB_DIR / 'db.sqlite3'),
     # },
-    'default': env.db_url(
-        default=f"sqlite:////{DB_DIR / 'db.sqlite3'}"
-    ),
+    "default": env.db_url(default=f"sqlite:////{DB_DIR / 'db.sqlite3'}"),
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#caches
 CACHES = {
@@ -178,12 +176,12 @@ CACHES = {
     #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
     #     'LOCATION': '127.0.0.1:11211',
     # },
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     },
-    'select2': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'dlcdb_select2',
+    "select2": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "dlcdb_select2",
     },
 }
 
@@ -193,16 +191,16 @@ CACHES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -213,12 +211,12 @@ if DEV_SETTINGS_MODE:
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
-LANGUAGE_CODE = 'de-de'
+LANGUAGE_CODE = "de-de"
 USE_I18N = True
 
 LANGUAGES = (
-    ('de', 'Deutsch'),
-    ('en-us', 'English'),
+    ("de", "Deutsch"),
+    ("en-us", "English"),
 )
 
 LOCALE_PATHS = [
@@ -227,11 +225,11 @@ LOCALE_PATHS = [
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#std-setting-TIME_ZONE
 USE_TZ = True
-TIME_ZONE = 'Europe/Berlin'  # 'UTC'
+TIME_ZONE = "Europe/Berlin"  # 'UTC'
 
 # https://docs.djangoproject.com/en/4.0/topics/i18n/formatting/#creating-custom-format-files
 FORMAT_MODULE_PATH = [
-    'dlcdb.core.formats',
+    "dlcdb.core.formats",
 ]
 
 # https://docs.djangoproject.com/en/4.1/ref/contrib/sites/#enabling-the-sites-framework
@@ -242,37 +240,37 @@ SITE_ID = 1
 
 STATICFILES_DIRS = [str(BASE_DIR / "dlcdb/static")]
 STATIC_ROOT = str(STATICFILES_DIR)
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 MEDIA_ROOT = str(MEDIA_DIR)
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 
-LOGIN_URL = '/admin/login/'
-LOGIN_REDIRECT_URL = '/admin/'
+LOGIN_URL = "/admin/login/"
+LOGIN_REDIRECT_URL = "/admin/"
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
 
-SELECT2_CACHE_BACKEND = 'select2'
+SELECT2_CACHE_BACKEND = "select2"
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
     ],
     # 'PAGE_SIZE': 10,
 }
 
 # https://django-simple-history.readthedocs.io/en/latest/admin.html#disabling-the-option-to-revert-an-object
-SIMPLE_HISTORY_REVERT_DISABLED=True
+SIMPLE_HISTORY_REVERT_DISABLED = True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 # http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
@@ -287,12 +285,12 @@ STORAGES = {
 
 HUEY = SqliteHuey(
     name="dlcdb_huey",
-    filename=str(DB_DIR / 'huey_task_queue.sqlite3'),
+    filename=str(DB_DIR / "huey_task_queue.sqlite3"),
 )
 
 # Reporting
-REPORTING_NOTIFY_OVERDUE_LENDERS = env.bool('REPORTING_NOTIFY_OVERDUE_LENDERS', default=True)
-REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool('REPORTING_NOTIFY_OVERDUE_LENDERS', default=True)
+REPORTING_NOTIFY_OVERDUE_LENDERS = env.bool("REPORTING_NOTIFY_OVERDUE_LENDERS", default=True)
+REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool("REPORTING_NOTIFY_OVERDUE_LENDERS", default=True)
 
 # Inventory/Scanner
 
@@ -301,21 +299,23 @@ REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool('REPORTING_NOTIFY_OVERDUE_LEND
 # this application.
 # DO NOT CHANGE THIS PREFIX MID-PROJECT AS IT WILL BREAK THE SCANNER RECOGNIZING
 # ALREADY PRINTED QR CODES.
-QRCODE_DIR = 'qrcode'
-QRCODE_PREFIX = 'DLCDB'
+QRCODE_DIR = "qrcode"
+QRCODE_PREFIX = "DLCDB"
 QRCODE_INFIXES = {
-    'room': 'R',
-    'device': 'D',
+    "room": "R",
+    "device": "D",
 }
 
-SAP_LIST_COMPARISON_RESULT_FOLDER = 'sap_list_comparison_results'
-MAX_FUTURE_LENT_DESIRED_END_DATE = '2099-12-31'
-UDB_JSON_URL = env('UDB_JSON_URL', default=None)
-UDB_API_TOKEN = env('UDB_API_TOKEN', default=None)
+SAP_LIST_COMPARISON_RESULT_FOLDER = "sap_list_comparison_results"
+MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
+
+UDB_INTEGRATION = env.bool("UDB_INTEGRATION", default=False)
+UDB_JSON_URL = env("UDB_JSON_URL", default=None)
+UDB_API_TOKEN = env("UDB_API_TOKEN", default=None)
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
-DEVICE_HIDE_FIELDS = env.list('DEVICE_HIDE_FIELDS', default=[])
+DEVICE_HIDE_FIELDS = env.list("DEVICE_HIDE_FIELDS", default=[])
 
 # TODO: Move icon and color to class var for base model?
 THEME = {
@@ -362,7 +362,7 @@ THEME = {
     "smallstuff.assignedthing": {
         "ICON": "fa-solid fa-stapler",
         "COLOR": "",
-    }
+    },
 }
 
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
@@ -371,8 +371,8 @@ THEME = {
 #     '--NotebookApp.iopub_data_rate_limit=10000000000.0',
 # ]
 
-if env('AUTH_LDAP'):
-    from .ldap import *
+if env("AUTH_LDAP"):
+    from .ldap import *  # NOQA
     # print("[i] AUTH_LDAP activated via .env")
 else:
     # print("[i] AUTH_LDAP disabled in .env")

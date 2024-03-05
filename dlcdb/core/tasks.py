@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 #         import_udb_persons()
 
 
-# Run every hour, on the hour:
 @db_periodic_task(huey.crontab(minute="*/10"))
 @lock_task("task_import_udb_persons")
 def task_import_udb_persons():
