@@ -25,7 +25,7 @@ Inventur-Ansicht: *Prozesse > Inventur*
      - "✔": Device gefunden/ist in diesem Raum
      - "❌": Device ist nicht in diesem Raum
 
-   - Gerät ist aktuell verliehen: siehe [Hinweise Verleihgeräte](#verleihgerate)
+   - Gerät ist aktuell verliehen: siehe [Hinweise Verleihgeräte](#verleihgeraete-target)
    - Gerät in Raum gefunden, welches nicht in der Liste ist: via "Add device" hinzufügen und Status setzen
    - Es können Inventurnotizen zu jedem Gerät und/oder zu jedem Raum angegeben werden
    - Rauminventur speichern
@@ -35,7 +35,7 @@ Inventur-Ansicht: *Prozesse > Inventur*
 
    - SAP-Ableich (*Prozesse > SAP-Abgleich*)
 
-
+(verleihgeraete-target)=
 ## Verleihgeräte
 
 - Wird bei einem verliehenen Gerät auf "Ist nicht da ist" geklickt wird, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.

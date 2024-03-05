@@ -3,7 +3,6 @@
 import os
 import sys
 import django
-from django.conf import settings
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -13,7 +12,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # A minimal .env with production settings is created for gitlab pages
 # see .gitlab.ci.yml
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dlcdb.settings.base'
+os.environ["DJANGO_SETTINGS_MODULE"] = "dlcdb.settings.base"
 django.setup()
 
 # -- General configuration ------------------------------------------------
@@ -22,54 +21,54 @@ django.setup()
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.viewcode',
-    'sphinxcontrib.mermaid',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.todo",
+    "sphinx.ext.coverage",
+    "sphinx.ext.viewcode",
+    "sphinxcontrib.mermaid",
     # 'sphinx.ext.autosectionlabel',  # sphinx WARNING: duplicate label foo other instance in bar
-    'myst_parser',
-    'sphinx_design',
+    "myst_parser",
+    "sphinx_design",
     # 'linkify',
 ]
 
 autosectionlabel_prefix_document = True
 autosectionlabel_maxdepth = 1
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'DLCDB'
-copyright = '2022, Thomas Breitner'
-author = 'Thomas Breitner'
+project = "DLCDB"
+copyright = "2022, Thomas Breitner"
+author = "Thomas Breitner"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-#version = '1.0'
+# version = '1.0'
 
 # The full version, including alpha/beta/rc tags.
-#release = '0'
+# release = '0'
 
 language = "de"
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -81,21 +80,22 @@ todo_include_todos = True
 mermaid_version = ""
 
 html_theme = "sphinx_book_theme"
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 html_css_files = [
-    'css/custom.css',
+    "css/custom.css",
 ]
 
 html_js_files = [
-   'vendor/mermaid/mermaid.min.js',
+    "vendor/mermaid/mermaid.min.js",
 ]
 
 html_theme_options = {
     "repository_url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb",
     "use_repository_button": True,
     "show_toc_level": 3,
-    "extra_navbar": '<p>Questions?<br><a href="mailto:t.breitner@csl.mpg.de">📧 Thomas Breitner</a></p>',
+    "navigation_with_keys": True,
+    "extra_footer": '<p>Questions?<br><a href="mailto:t.breitner@csl.mpg.de">📧 Thomas Breitner</a></p>',
 }
 
 html_title = "♻ DLCDB Docs"
