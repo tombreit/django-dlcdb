@@ -36,7 +36,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 COPY requirements.txt /stagepython/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements/dev.txt
 
 # Generate Sphinx documentation
 COPY . /stagepython
