@@ -1,6 +1,6 @@
 ######################################################################
 ### STAGE NPM
-FROM docker.io/library/node:18-bookworm-slim AS stagenpm
+FROM docker.io/library/node:20-bookworm-slim AS stagenpm
 
 WORKDIR /stagenpm
 
@@ -35,8 +35,8 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-COPY requirements.txt /stagepython/
-RUN pip install --no-cache-dir -r requirements/dev.txt
+COPY requirements/dev.txt /stagepython/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Generate Sphinx documentation
 COPY . /stagepython
