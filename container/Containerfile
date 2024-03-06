@@ -1,6 +1,6 @@
 ######################################################################
 ### STAGE NPM
-FROM docker.io/library/node:18-bookworm-slim AS stagenpm
+FROM docker.io/library/node:20-bookworm-slim AS stagenpm
 
 WORKDIR /stagenpm
 
