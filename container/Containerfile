@@ -20,6 +20,7 @@ WORKDIR /stagepython
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system packages required by Django app
 RUN apt-get update --yes --quiet \
