@@ -12,7 +12,6 @@ The DLCDB manages the life cycle of IT assets. With a little help of a [Django](
 
 ⚡ Currently available only in German. Application and documentation are work in progress. ⚡
 
-
 ## 🔥 Features
 
 - Tracking records of devices: a finite number of records/states (*lent*, *removed*, *inroom* etc.) exists, and a device can only have one record at a time. In the life cycle of the device the device collects records.
@@ -32,7 +31,7 @@ To get started using the DLCDB, run the following in a virtual python environmen
 ```bash
 npm install
 npm run prod
-pip install -r requirements.txt
+pip install -r requirements/dev.txt
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
@@ -44,14 +43,12 @@ python manage.py runserver
 
 `docs/` or [https://dlcdb.pages.gwdg.de/django-dlcdb/](https://dlcdb.pages.gwdg.de/django-dlcdb/)
 
-
 ## 📡 REST-API
 
 The DLCDB exposes some data via its REST-API:
 
 * [API docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/api.html)
 * Endpoint: `https://fqdn/api/v2/`
-
 
 ## ⚠️ Tests
 
@@ -61,14 +58,12 @@ pytest  # or
 make tests
 ```
 
-
 ## 📌 Compatibility
 
 DLCDB supports:
 
 - Python 3.9+
 - any Django supported database backends, runs fine with Sqlite in production
-
 
 ## ⚖️ License
 
