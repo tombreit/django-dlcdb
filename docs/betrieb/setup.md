@@ -4,7 +4,7 @@
 
 ### Install with podman
 
-Want to try it containerized via podman?: `container/README.container.md`
+Want to try it containerized via `podman`?
 
 ```sh
          .--"--.
@@ -16,6 +16,20 @@ Want to try it containerized via podman?: `container/README.container.md`
   | =(X)= |~  / (O (O) \
    ~~~~~~~  ~| =(Y_)=-  |
   ~~~~    ~~~|   U      |~~
+```
+
+```bash
+podman build \
+    --tag dlcdb  \
+    --file container/Containerfile .
+
+podman run \
+    --name podman-dlcdb \
+    --tty --interactive \
+    --publish 8000:8000 \
+    --volume ./data:/app/data \
+    --rm \
+    dlcdb dev
 ```
 
 ### Install from source
