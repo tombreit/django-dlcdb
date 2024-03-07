@@ -1,17 +1,12 @@
 # Setup
 
-## Prequisites
+## Development setup
 
-- (assuming) Debian 11.x
-- Python>=3.9
-- npm
-- for LDAP: libldap2-dev libsasl2-dev
-
-## Container
+### Install with podman
 
 Want to try it containerized via podman?: `container/README.container.md`
 
-```
+```sh
          .--"--.
        / -     - \
       / (O)   (O) \
@@ -23,19 +18,29 @@ Want to try it containerized via podman?: `container/README.container.md`
   ~~~~    ~~~|   U      |~~
 ```
 
-## Installation
+### Install from source
+
+**Prequisites**
+
+- (assuming) Debian 11.x
+- Python>=3.9
+- npm
+- for LDAP: libldap2-dev libsasl2-dev
+
+**Python**
 
 *Assuming local development environment in a virtual python environment*
 
 ```bash
+git clone git@gitlab.gwdg.de:dlcdb/django-dlcdb.git
 cd django-dlcdb
-python3 -m venv .venv  # Create a virtual env
-source .venv/bin/activate  # Activate the virtual env
-pip install --upgrade pip setuptools wheel  # Bring your virtual env uptodate
-pip install -r requirements.txt  # Install development requirements
+python3 -m venv .venv  # Create a virtual environment
+source .venv/bin/activate  # Activate the virtual environment
+pip install --upgrade pip setuptools wheel  # Update virtual environment
+pip install -r requirements/dev.txt  # Install development requirements
 ```
 
-Set environment for project:
+**Set environment for project**
 
 ```bash
 cp env.template .env
@@ -46,15 +51,14 @@ cp env.template .env
 **Permissions** should be assigned to Django groups. Only LDAP groups listet in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups.
 :::
 
-
-Build frontend assets:
+**Build frontend assets**
 
 ```bash
 npm install
 npm run prod
 ```
 
-Run this project:
+**Run this project**
 
 ```bash
 ./manage.py migrate
@@ -64,35 +68,13 @@ Run this project:
 ./manage.py runserver_plus --cert /tmp/cert
 ```
 
-Build (this) Documentation:
-
-```bash
-make -C docs html
-```
-
-## Branding
-
-Get rid of the default ACME branding: Set your organization via *> Start > Organization > Branding*
-
-
-## Localization
-
-```bash
-./manage.py makemessages --locale de --ignore=.venv/* 
-# ...poedit locale/de/LC_MESSAGES/django.po...
-./manage.py compilemessages --ignore=.venv/*
-```
-
 ## Production deployment
 
 :::{warning}
 Be sure to use one of the production requirement files:
 
-```bash
-> requirements
-> -- requirements-prod-ldap.txt
-> -- requirements-prod.txt
-```
+* `requirements/prod.txt`
+* `requirements/prod-ldap.txt`
 :::
 
 :::{tip}
@@ -100,10 +82,6 @@ Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/
 
 `sqlite3 run/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
 :::
-
-### Backup
-
-Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `data/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `data/` sowie - falls vorhanden - die Datei `.env` zu sichern.
 
 ### Task runner
 
@@ -147,13 +125,13 @@ npm install
 npm run prod
 source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
-pip install -r requirements/requirements-prod-ldap.txt
+pip install -r requirements/prod-ldap.txt  # requirements/prod.txt
 python manage.py collectstatic --noinput
 python manage.py compilemessages -l de
 python manage.py migrate --noinput
 systemctl --user restart dlcdb_huey.service
 touch dlcdb/wsgi.py
-make -C docs html
+make docs
 ```
 
 ### Apache and mod_wsgi
@@ -162,21 +140,19 @@ make -C docs html
 <VirtualHost *:443>
     ServerName dlcdb.fqdn
 
-    Alias /docs /path/to/docs/_build/html
-    <Directory /path/to/docs/_build/html>
+    Alias /docs /path/to/run/docs/html
+    <Directory /path/to/run/docs/html>
         Require all granted
     </Directory>
 
-    # staticfiles are handled by the Django app via whitenoise
-
-    Alias /media path/to/data/media
-    <Directory path/to/data/media>
+    Alias /media /path/to/data/media
+    <Directory /path/to/data/media>
         Require all granted
     </Directory>
 
     <Directory /path/to/dlcdb>
         <Files wsgi.py>
-                Require all granted
+            Require all granted
         </Files>
     </Directory>
 
@@ -189,6 +165,31 @@ make -C docs html
         python-home=/path/to/venv \
         lang=en_US.UTF-8 \
         locale=en_US.UTF-8
-
 </VirtualHost>
+```
+
+## Misc
+
+### Branding
+
+Get rid of the default ACME branding: Set your organization via *> Start > Organization > Branding*
+
+### Backup
+
+Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `data/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `data/` sowie - falls vorhanden - die Datei `.env` zu sichern.
+
+### Documentation
+
+Build (this) Documentation:
+
+```bash
+make -C docs html
+```
+
+### Localization
+
+```bash
+./manage.py makemessages --locale de --ignore=.venv/* 
+# ...poedit locale/de/LC_MESSAGES/django.po...
+./manage.py compilemessages --ignore=.venv/*
 ```
