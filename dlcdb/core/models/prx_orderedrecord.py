@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
 
 from .record import Record
@@ -10,16 +14,14 @@ class OrderedRecordManager(models.Manager):
     """
 
     def get_queryset(self):
-        return super().get_queryset().filter(
-            record_type=Record.ORDERED
-        )
+        return super().get_queryset().filter(record_type=Record.ORDERED)
 
 
 class OrderedRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = 'Bestellung'
-        verbose_name_plural = 'Bestellungen'
+        verbose_name = "Bestellung"
+        verbose_name_plural = "Bestellungen"
 
     objects = OrderedRecordManager()
 

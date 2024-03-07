@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
 from django.db.models.functions import Upper
 from django.utils.translation import gettext_lazy as _
@@ -8,7 +12,7 @@ class Supplier(models.Model):
         max_length=255,
         null=True,
         blank=True,
-        verbose_name='Name',
+        verbose_name="Name",
         unique=True,
     )
     contact = models.TextField(
@@ -20,9 +24,9 @@ class Supplier(models.Model):
     )
 
     class Meta:
-        verbose_name = _('Supplier')
-        verbose_name_plural = _('Suppliers')
-        ordering = [Upper('name')]
+        verbose_name = _("Supplier")
+        verbose_name_plural = _("Suppliers")
+        ordering = [Upper("name")]
 
     def __str__(self):
         return self.name

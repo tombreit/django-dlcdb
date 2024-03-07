@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import re
 import csv
 import codecs
@@ -5,28 +9,28 @@ from io import StringIO
 from datetime import datetime
 
 
-SAP_COL_UNTERNUMMER_KEYS = ['Unternummer', 'UNr.']
+SAP_COL_UNTERNUMMER_KEYS = ["Unternummer", "UNr."]
 
 SAP_COL_ADD = [
-    'TENANT',
-    'RECORD_TYPE',
-    'SAP_ID',
-    'EDV_ID',
-    'SERIES',
-    'WARRANTY_EXPIRATION_DATE',
-    'IS_LENTABLE',
-    'DEVICE_TYPE',
-    'MAINTENANCE_CONTRACT_EXPIRATION_DATE',
-    'RECORD_NOTE',
-    'REMOVED_DATE',
-    'NOTE',
-    'NICK_NAME',
-    'EXTRA_MAC_ADDRESSES',
-    'PERSON',
-    'SUPPLIER',
-    'IS_LICENCE',
-    'MAC_ADDRESS',
-    'ORDER_NUMBER',
+    "TENANT",
+    "RECORD_TYPE",
+    "SAP_ID",
+    "EDV_ID",
+    "SERIES",
+    "WARRANTY_EXPIRATION_DATE",
+    "IS_LENTABLE",
+    "DEVICE_TYPE",
+    "MAINTENANCE_CONTRACT_EXPIRATION_DATE",
+    "RECORD_NOTE",
+    "REMOVED_DATE",
+    "NOTE",
+    "NICK_NAME",
+    "EXTRA_MAC_ADDRESSES",
+    "PERSON",
+    "SUPPLIER",
+    "IS_LICENCE",
+    "MAC_ADDRESS",
+    "ORDER_NUMBER",
 ]
 
 SAP_COL_MAP = {
@@ -44,12 +48,10 @@ SAP_COL_MAP = {
     "Aktivierung am": "PURCHASE_DATE",
     "Deakt.Dat.": "DEACTIVATED_DATE",
     "Deaktivierung am": "DEACTIVATED_DATE",
-
     # # Cells needing preprocessing:
     # "Anlage": "",
     # "UNr.": "",
     # "Anlagenbezeichnung"
-
     # # Currently ignored cells:
     # "Zujr": "",
     # "kumul AfA": "",
@@ -62,9 +64,9 @@ SAP_COL_MAP = {
 }
 
 csv.register_dialect(
-    'cleaned_dialect',
+    "cleaned_dialect",
     skipinitialspace=True,
-    delimiter=',',
+    delimiter=",",
     strict=True,
 )
 
@@ -74,7 +76,7 @@ def get_iso_datestr(datestr):
     Converts a german date string (31.12.2020) to an ISO date string (2020-12-31).
     """
     dateformat = "%d.%m.%Y"
-    dateobj = datetime.strptime(datestr,dateformat)
+    dateobj = datetime.strptime(datestr, dateformat)
     return f"{dateobj:%Y-%m-%d}"
 
 
@@ -118,26 +120,26 @@ def guess_device_type(description, tenant=None):
     TODO: Use Tenant-aware device types.
     """
     description = description.lower()
-    guessed_device_type = 'Sonstiges (Verwaltung)'
+    guessed_device_type = "Sonstiges (Verwaltung)"
 
     SAP_DEVICE_TYPES_MAP = {
-        'Tisch': [],
-        'Stuhl': ['Stühle', 'Stuehle'],
-        'Drehstuhl': ['Drehstühle', 'Drehstuehle'],
-        'Hocker': [],
-        'Lampe/Leuchte': [],
-        'Schrank': ['Schränke', 'Schraenke'],
-        'Regal': [],
-        'Aktenvernichter': [],
-        'Bücherwagen': ['Buecherwagen', 'Bücherwägen', 'Buecherwaegen'],
-        'Container': [],
-        'Bücher/Zeitschriften': ['Buch', 'Buecher', 'Zeitschriften', 'Zeitschrift'],
-        'Stellwand': [],
-        'Bett': [],
-        'Sonstiges (Verwaltung)': [],
+        "Tisch": [],
+        "Stuhl": ["Stühle", "Stuehle"],
+        "Drehstuhl": ["Drehstühle", "Drehstuehle"],
+        "Hocker": [],
+        "Lampe/Leuchte": [],
+        "Schrank": ["Schränke", "Schraenke"],
+        "Regal": [],
+        "Aktenvernichter": [],
+        "Bücherwagen": ["Buecherwagen", "Bücherwägen", "Buecherwaegen"],
+        "Container": [],
+        "Bücher/Zeitschriften": ["Buch", "Buecher", "Zeitschriften", "Zeitschrift"],
+        "Stellwand": [],
+        "Bett": [],
+        "Sonstiges (Verwaltung)": [],
     }
 
-    for (type_key, type_aliases) in SAP_DEVICE_TYPES_MAP.items():
+    for type_key, type_aliases in SAP_DEVICE_TYPES_MAP.items():
         if type_key.lower() in description:
             # print(f"*** -> {type_key} or IN {description}!")
             guessed_device_type = type_key
@@ -177,7 +179,7 @@ def guess_device_type(description, tenant=None):
 #     * check if the next row is empty, if so, delete that empty row
 #     * return the cleaned CSV result file
 
-#     2023-06-16: 
+#     2023-06-16:
 #     SAP *does* export a simple Excel file if the right
 #     buttons are used, so this function is not needed anymore
 #     """
@@ -206,9 +208,9 @@ def guess_device_type(description, tenant=None):
 
 def fill_col_headers(file):
     cleaned_buffer = StringIO()
-    _cleaned_writer = csv.writer(cleaned_buffer, dialect='cleaned_dialect')
+    _cleaned_writer = csv.writer(cleaned_buffer, dialect="cleaned_dialect")
 
-    rows = csv.reader(codecs.iterdecode(file, 'utf-8'))
+    rows = csv.reader(codecs.iterdecode(file, "utf-8"))
     for index, row in enumerate(rows):
         # Remove leading and trailing whitespace
         row = [cell.strip() for cell in row]
@@ -231,19 +233,19 @@ def adapt_cleaned_csv(file, tenant):
     added to be unique.
     """
 
-    reader = csv.DictReader(file, dialect='cleaned_dialect')
+    reader = csv.DictReader(file, dialect="cleaned_dialect")
     fieldnames = reader.fieldnames
 
     adapted_buffer = StringIO()
-    _adapted_writer = csv.DictWriter(adapted_buffer, fieldnames=fieldnames, dialect='cleaned_dialect')
+    _adapted_writer = csv.DictWriter(adapted_buffer, fieldnames=fieldnames, dialect="cleaned_dialect")
 
     _adapted_writer.writeheader()
     for index, row in enumerate(reader):
-        room = fix_room_notation(row['ROOM'])
+        room = fix_room_notation(row["ROOM"])
 
         record_type, _room, _removed_date = guess_record_type(
             room=room,
-            deactivated_date=row['DEACTIVATED_DATE'],
+            deactivated_date=row["DEACTIVATED_DATE"],
         )
 
         # In some SAP export files the column is named 'Unternummer', in some
@@ -264,14 +266,14 @@ def adapt_cleaned_csv(file, tenant):
         # unique identifier (here: sap_id)
         edv_id = f"{row['Anlagenbezeichnung']} ({sap_id})"
 
-        row['SAP_ID'] = sap_id
-        row['EDV_ID'] = edv_id
-        row['PURCHASE_DATE'] = get_iso_datestr(row['PURCHASE_DATE'])
-        row['TENANT'] = tenant.name
-        row['DEVICE_TYPE'] = guess_device_type(edv_id)  # Was: row['Anlagenbezeichnung']
-        row['RECORD_TYPE'] = record_type
-        row['ROOM'] = room
-        row['REMOVED_DATE'] = _removed_date
+        row["SAP_ID"] = sap_id
+        row["EDV_ID"] = edv_id
+        row["PURCHASE_DATE"] = get_iso_datestr(row["PURCHASE_DATE"])
+        row["TENANT"] = tenant.name
+        row["DEVICE_TYPE"] = guess_device_type(edv_id)  # Was: row['Anlagenbezeichnung']
+        row["RECORD_TYPE"] = record_type
+        row["ROOM"] = room
+        row["REMOVED_DATE"] = _removed_date
         _adapted_writer.writerow(row)
 
     adapted_buffer.seek(0)
@@ -280,7 +282,7 @@ def adapt_cleaned_csv(file, tenant):
 
 def convert_to_csv(csv_data):
     # Create a DictReader instance from the CSV data
-    reader = csv.DictReader(csv_data, dialect='cleaned_dialect')
+    reader = csv.DictReader(csv_data, dialect="cleaned_dialect")
     fieldnames = reader.fieldnames
 
     # Convert the reader to a list of dictionaries

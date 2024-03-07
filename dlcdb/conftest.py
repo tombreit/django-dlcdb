@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 """
 conftest.py: sharing fixtures across multiple files
 
@@ -23,6 +27,7 @@ from dlcdb.tenants.models import Tenant
 @pytest.fixture
 def tenant():
     return Tenant.objects.create(name="PytestTenant")
+
 
 @pytest.fixture
 def room():
@@ -58,13 +63,16 @@ def inventory_3(db) -> Inventory:
 def device_1(db) -> Device:
     return Device.objects.create(sap_id="123")
 
+
 @pytest.fixture
 def device_2(db) -> Device:
     return Device.objects.create(sap_id="foo")
 
+
 @pytest.fixture
 def room_1(db) -> Room:
     return Room.objects.create(number="456")
+
 
 @pytest.fixture
 def room_2(db) -> Room:

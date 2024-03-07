@@ -1,6 +1,8 @@
-from django.urls import reverse
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from .record import Record
@@ -13,9 +15,7 @@ class Manager(models.Manager):
     """
 
     def get_queryset(self):
-        return super().get_queryset().filter(
-            record_type=Record.LOST
-        )
+        return super().get_queryset().filter(record_type=Record.LOST)
 
 
 class LostRecord(Record):

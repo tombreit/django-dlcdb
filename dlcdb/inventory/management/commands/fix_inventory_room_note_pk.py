@@ -1,9 +1,14 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.core.management.base import BaseCommand
 from dlcdb.core.models import Device, Record
 from dlcdb.core.models.inventory import Inventory
 
+
 class Command(BaseCommand):
-    help = 'Fix devices which are inventorized to a note pk instead to the room pk.'
+    help = "Fix devices which are inventorized to a note pk instead to the room pk."
 
     def add_arguments(self, parser):
         # Positional obligatory arguments
@@ -15,9 +20,9 @@ class Command(BaseCommand):
 
         # Named (optional) arguments
         parser.add_argument(
-            '--doit',
-            action='store_true',
-            help='Do alter the database. The default (without this switch) is to only print what would be done by this command.',
+            "--doit",
+            action="store_true",
+            help="Do alter the database. The default (without this switch) is to only print what would be done by this command.",
         )
 
     def handle(self, *args, **options):
@@ -27,21 +32,22 @@ class Command(BaseCommand):
         - Record before was LENT Record
         """
 
-        if options['doit']:
+        if options["doit"]:
             print(80 * "#")
             print("#")
             print("# Running with --doit turned on: Apply changes!")
             print("#")
             print(80 * "#")
 
-        result = []
         current_inventory = Inventory.objects.get(is_active=True)
 
         for device in Device.objects.all():
-            if any([
-                device.active_record.record_type == Record.LOST,
-                device.active_record.record_type == Record.REMOVED,
-            ]):
+            if any(
+                [
+                    device.active_record.record_type == Record.LOST,
+                    device.active_record.record_type == Record.REMOVED,
+                ]
+            ):
                 # print(f"Is LOST or REMOVED record. Continue with next device.")
                 continue
 
@@ -56,4 +62,6 @@ class Command(BaseCommand):
                 print(f"NOTE:   {device_inventory_note.pk}, {device_inventory_note.text=}")
 
                 if device_room.pk == device_inventory_note.pk:
-                    print(f"Match! device_room.pk {{ device_room.pk }} == device_inventory_note.pk {{ device_inventory_note.pk }}")
+                    print(
+                        "Match! device_room.pk { device_room.pk } == device_inventory_note.pk { device_inventory_note.pk }"
+                    )

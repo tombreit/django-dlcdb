@@ -1,13 +1,11 @@
-from django.db import models
-import os.path
-from pathlib import Path
-from uuid import uuid4
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
 
 from django.db import models
-from django.core.exceptions import ValidationError
+
 from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
-from django.utils.text import slugify
 
 from dlcdb.core.models.abstracts import SingletonBaseModel
 
@@ -36,58 +34,45 @@ class Branding(SingletonBaseModel):
         max_length=255,
         blank=False,
         verbose_name="Abbreviation",
-        default="ACME",
+        default="DLCDB",
         help_text=_("Company, institute, site abbreviation."),
     )
     organization_street = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Street and house number. Used in printouts etc."
+        max_length=255, blank=True, help_text="Street and house number. Used in printouts etc."
     )
     organization_zip_code = models.CharField(
-        max_length=255,
-        blank=True,
-        verbose_name="Organization ZIP Code",
-        help_text="Used in printouts etc."
+        max_length=255, blank=True, verbose_name="Organization ZIP Code", help_text="Used in printouts etc."
     )
-    organization_city = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="Used in printouts etc."
-    )
-    organization_url = models.URLField(
-        blank=True,
-        verbose_name="Organization URL",
-        help_text="Used in printouts etc."
-    )
+    organization_city = models.CharField(max_length=255, blank=True, help_text="Used in printouts etc.")
+    organization_url = models.URLField(blank=True, verbose_name="Organization URL", help_text="Used in printouts etc.")
     organization_logo_white = models.FileField(
         null=True,
         blank=True,
-        upload_to='branding/',
+        upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Logo file (white)",
-        help_text=_('Logo file. SVG, white foreground, transparent background'),
+        help_text=_("Logo file. SVG, white foreground, transparent background"),
     )
     organization_logo_black = models.FileField(
         null=True,
         blank=True,
-        upload_to='branding/',
+        upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Logo file (black)",
-        help_text=_('Logo file. SVG, white foreground, transparent background'),
+        help_text=_("Logo file. SVG, white foreground, transparent background"),
     )
     organization_figurative_mark = models.FileField(
         null=True,
         blank=True,
-        upload_to='branding/',
+        upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Figurative Mark/Bildmarke",
-        help_text='Bildmarke, quasi Logo ohne Wortmarke.',
+        help_text="Bildmarke, quasi Logo ohne Wortmarke.",
     )
     organization_favicon = models.FileField(
         null=True,
         blank=True,
-        upload_to='branding/',
+        upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Favicon file",
     )
@@ -96,7 +81,7 @@ class Branding(SingletonBaseModel):
         max_length=255,
         blank=True,
         verbose_name="IT Department Name",
-        help_text="Wording for the IT department. Used in printouts etc."
+        help_text="Wording for the IT department. Used in printouts etc.",
     )
     organization_it_dept_phone = models.CharField(
         max_length=255,
@@ -111,13 +96,13 @@ class Branding(SingletonBaseModel):
     room_plan = models.FileField(
         blank=True,
         null=True,
-        upload_to='branding/',
+        upload_to="branding/",
     )
 
     documentation_url = models.URLField(
         blank=True,
         default="https://dlcdb.pages.gwdg.de/django-dlcdb/",
-        help_text="If you host the documentation on your own, provide the URL here."
+        help_text="If you host the documentation on your own, provide the URL here.",
     )
 
     def __str__(self):

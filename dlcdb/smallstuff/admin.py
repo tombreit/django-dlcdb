@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 
 from .models import Thing, AssignedThing
@@ -5,33 +9,25 @@ from .models import Thing, AssignedThing
 
 @admin.register(AssignedThing)
 class AssignedThingAdmin(admin.ModelAdmin):
-
-    list_display = [
-        'thing',
-        'person',
-        'assigned_at',
-        'assigned_by',
-        'unassigned_at',
-        'unassigned_by'
-    ]
+    list_display = ["thing", "person", "assigned_at", "assigned_by", "unassigned_at", "unassigned_by"]
 
     list_filter = [
-        'person',
-        'thing',
-        'assigned_at',
-        'unassigned_at',
+        "person",
+        "thing",
+        "assigned_at",
+        "unassigned_at",
     ]
 
     search_fields = [
-        'person__last_name',
-        'person__first_name',
-        'thing__name',
-        'thing__slug',
+        "person__last_name",
+        "person__first_name",
+        "thing__name",
+        "thing__slug",
     ]
 
     autocomplete_fields = [
-        'person',
-        'thing',
+        "person",
+        "thing",
     ]
 
     def has_delete_permission(self, request, obj=None):
@@ -40,21 +36,15 @@ class AssignedThingAdmin(admin.ModelAdmin):
 
 @admin.register(Thing)
 class ThingAdmin(admin.ModelAdmin):
-    
     search_fields = [
-        'name',
-        'slug',
+        "name",
+        "slug",
     ]
 
     readonly_fields = [
-        'user',
-        'username',
+        "user",
+        "username",
     ]
     prepopulated_fields = {"slug": ("name",)}
 
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'slug')
-        }),
-    )
-
+    fieldsets = ((None, {"fields": ("name", "slug")}),)

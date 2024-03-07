@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path, reverse_lazy

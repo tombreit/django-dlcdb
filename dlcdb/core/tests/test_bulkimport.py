@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from pathlib import Path
 import pytest
 from django.core.exceptions import ValidationError
@@ -21,8 +25,9 @@ def test_bulk_import_csv(tenant):
             write=True,
         )
 
+
 @pytest.mark.django_db
-def test_bulk_import_csv(tenant):
+def test_bulk_import_csv_wrongdate(tenant):
     with pytest.raises(ValueError):
         csv_path = Path("dlcdb/core/tests/test_data/devices.wrongdateformat.csv")
 
@@ -53,4 +58,3 @@ def test_bulk_import_csv_incomplete_rowheader(tenant):
                 username="pytestuser",
                 write=True,
             )
-

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib.admin import SimpleListFilter
 from django.db.models import Count
 
@@ -5,8 +9,8 @@ from dlcdb.core import models
 
 
 class DuplicateFilter(SimpleListFilter):
-    title = 'Dubletten'
-    parameter_name = 'dubletten'
+    title = "Dubletten"
+    parameter_name = "dubletten"
 
     def lookups(self, request, model_admin):
         """
@@ -18,8 +22,8 @@ class DuplicateFilter(SimpleListFilter):
         """
 
         return (
-            ('serial_number', 'Seriennummern Dubletten'),
-            ('nick_name', 'Nickname Dubletten'),
+            ("serial_number", "Seriennummern Dubletten"),
+            ("nick_name", "Nickname Dubletten"),
         )
 
     def queryset(self, request, queryset):
@@ -37,14 +41,21 @@ class DuplicateFilter(SimpleListFilter):
 
             field_empty = {
                 # should expand to: sap_id=''
-                duplicate_field: '',
+                duplicate_field: "",
             }
 
-            duplicates = models.Device.objects.exclude(**field_empty).values(*field_name).annotate(count=Count('id')).values(*field_name).order_by().filter(count__gt=1)
+            duplicates = (
+                models.Device.objects.exclude(**field_empty)
+                .values(*field_name)
+                .annotate(count=Count("id"))
+                .values(*field_name)
+                .order_by()
+                .filter(count__gt=1)
+            )
 
             field_in = {
                 # should expand to: sap_id__in=duplicates
-                duplicate_field + '__in': duplicates,
+                duplicate_field + "__in": duplicates,
             }
 
             return models.Device.objects.filter(**field_in)

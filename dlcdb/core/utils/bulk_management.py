@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 """
 Importer für Device-Listen im CSV-Format
 """
@@ -50,9 +54,9 @@ def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=No
     error_list = []
 
     ALLOWED_CONTENT_TYPES = [
-        'text/plain',
-        'text/csv',
-        'application/csv',
+        "text/plain",
+        "text/csv",
+        "application/csv",
     ]
 
     # Validating file type
@@ -62,7 +66,7 @@ def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=No
 
     print(_content_type)
 
-    if (_content_type not in ALLOWED_CONTENT_TYPES) or (not _file_suffix.endswith('csv')):
+    if (_content_type not in ALLOWED_CONTENT_TYPES) or (not _file_suffix.endswith("csv")):
         raise ValidationError(
             'Datei scheint keine CSV-Datei zu sein. Got: content_type: "{}", suffix: "{}"'.format(
                 _content_type,
@@ -71,14 +75,14 @@ def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=No
         )
 
     csvfile.seek(0, 0)
-    decoded_file = csvfile.read().decode('utf-8')
+    decoded_file = csvfile.read().decode("utf-8")
     io_string = io.StringIO(decoded_file)
     # print(io_string.getvalue())
 
-    csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
+    csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
     rows = csv.DictReader(
         io_string,
-        dialect='custom_dialect',
+        dialect="custom_dialect",
     )
 
     # Validating column headers
@@ -86,40 +90,44 @@ def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=No
     expected_col_headers = set(valid_col_headers)
 
     if not expected_col_headers.issubset(current_col_headers):
-
         missing_col_headers = expected_col_headers.difference(current_col_headers)
-        error_list.append(ValidationError(
-            'Erwartete Spaltenköpfe nicht in CSV-Datei gefunden [no subset]! Expected: "{}", got: "{}". Missing headers: "{}"'.format(
-                expected_col_headers,
-                current_col_headers,
-                missing_col_headers,
+        error_list.append(
+            ValidationError(
+                'Erwartete Spaltenköpfe nicht in CSV-Datei gefunden [no subset]! Expected: "{}", got: "{}". Missing headers: "{}"'.format(
+                    expected_col_headers,
+                    current_col_headers,
+                    missing_col_headers,
+                )
             )
-        ))
+        )
 
     for idx, row in enumerate(rows, start=1):
-
         # Validating items without EDV_ID or SAP_ID
-        if (not row['EDV_ID']) and (not row['SAP_ID']):
-            error_list.append(ValidationError(f'Item in row {idx} without EDV_ID and SAP_ID! Row raw data: {row}'))
+        if (not row["EDV_ID"]) and (not row["SAP_ID"]):
+            error_list.append(ValidationError(f"Item in row {idx} without EDV_ID and SAP_ID! Row raw data: {row}"))
 
-        if bulk_mode == 'import_devices':
+        if bulk_mode == "import_devices":
             # Validating clash with already existing Devices
-            if row['EDV_ID'].strip() and Device.objects.filter(edv_id=row['EDV_ID']).exists():
-                error_list.append(ValidationError('Device with this EDV_ID already exists: {}'.format(row['EDV_ID'])))
+            if row["EDV_ID"].strip() and Device.objects.filter(edv_id=row["EDV_ID"]).exists():
+                error_list.append(ValidationError("Device with this EDV_ID already exists: {}".format(row["EDV_ID"])))
 
-            if row['SAP_ID'].strip() and Device.objects.filter(sap_id=row['SAP_ID']).exists():
-                error_list.append(ValidationError('Device with this SAP_ID already exists: {}'.format(row['SAP_ID'])))
+            if row["SAP_ID"].strip() and Device.objects.filter(sap_id=row["SAP_ID"]).exists():
+                error_list.append(ValidationError("Device with this SAP_ID already exists: {}".format(row["SAP_ID"])))
 
         if date_fields:
             for key, value in row.items():
                 # Validating date format for DateFields
                 if key in date_fields:
                     # print(key, value)
-                    if value != '':
+                    if value != "":
                         try:
-                            datetime.strptime(value, '%Y-%m-%d')
+                            datetime.strptime(value, "%Y-%m-%d")
                         except ValueError:
-                            error_list.append(ValidationError('Incorrect date format, should be YYYY-MM-DD: {}: {}'.format(key, value)))
+                            error_list.append(
+                                ValidationError(
+                                    "Incorrect date format, should be YYYY-MM-DD: {}: {}".format(key, value)
+                                )
+                            )
 
     if error_list:
         raise ValidationError(error_list)
@@ -132,28 +140,28 @@ def set_removed_record(fileobj):
     * Search active record for given device
     * Create a new removed-record with attributes given in CSV
     """
-    print('[set_removed_record]...')
+    print("[set_removed_record]...")
     now = datetime.now()
 
     messages = []
     errors_count = 0
     removed_devices_count = 0
 
-    messages.append('[I] Starting set_removed_record...')
+    messages.append("[I] Starting set_removed_record...")
 
     with transaction.atomic():
-        csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
+        csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
         rows = csv.DictReader(
-            codecs.iterdecode(fileobj, 'utf-8'),
-            dialect='custom_dialect',
+            codecs.iterdecode(fileobj, "utf-8"),
+            dialect="custom_dialect",
         )
 
         for idx, row in enumerate(rows, start=1):
             # header row is not included in rows (it is in rows.fieldnames),
             # so we do not need to exclude the header row manually
 
-            EDV_ID = row['EDV_ID'].strip()
-            SAP_ID = row['SAP_ID'].strip()
+            EDV_ID = row["EDV_ID"].strip()
+            SAP_ID = row["SAP_ID"].strip()
 
             _message = ""
             device = None
@@ -169,7 +177,11 @@ def set_removed_record(fileobj):
                 logger.error(does_not_exist_error)
 
             if not device:
-                messages.append('[E][Row {}] Device not found: EDV_ID "{}", SAP_ID "{}"! Ignoring this device!'.format(idx, EDV_ID, SAP_ID))
+                messages.append(
+                    '[E][Row {}] Device not found: EDV_ID "{}", SAP_ID "{}"! Ignoring this device!'.format(
+                        idx, EDV_ID, SAP_ID
+                    )
+                )
                 errors_count += 1
                 continue
 
@@ -187,7 +199,11 @@ def set_removed_record(fileobj):
             ).first()
 
             if _already_removed_record:
-                messages.append('[I][Row {}] Device already "removed": EDV_ID "{}", SAP_ID "{}", Record PK: "{}". Ignoring this device.'.format(idx, EDV_ID, SAP_ID, _already_removed_record.pk))
+                messages.append(
+                    '[I][Row {}] Device already "removed": EDV_ID "{}", SAP_ID "{}", Record PK: "{}". Ignoring this device.'.format(
+                        idx, EDV_ID, SAP_ID, _already_removed_record.pk
+                    )
+                )
                 continue
 
             # Create new record for this device
@@ -195,25 +211,31 @@ def set_removed_record(fileobj):
                 record, created = Record.objects.get_or_create(
                     device=device,
                     record_type=Record.REMOVED,
-                    note=row['NOTE'],
-                    username=row['USERNAME'].strip() if row['USERNAME'] else '',
-                    disposition_state=row['DISPOSITION_STATE'],
-                    removed_info=row['REMOVED_INFO'],
-                    removed_date=row['REMOVED_DATE'] if row['REMOVED_DATE'] else now,
+                    note=row["NOTE"],
+                    username=row["USERNAME"].strip() if row["USERNAME"] else "",
+                    disposition_state=row["DISPOSITION_STATE"],
+                    removed_info=row["REMOVED_INFO"],
+                    removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else now,
                 )
-                messages.append('[I][Row {}] Device {} - Record set to removed: {}.'.format(idx, device, record.pk))
+                messages.append("[I][Row {}] Device {} - Record set to removed: {}.".format(idx, device, record.pk))
                 removed_devices_count += 1
             except Exception as ex:
-                messages.append('[I][Row {}] "Something bad happend:-(. Please contact your administrator. Exception: "{}"'.format(idx, ex))
+                messages.append(
+                    '[I][Row {}] "Something bad happend:-(. Please contact your administrator. Exception: "{}"'.format(
+                        idx, ex
+                    )
+                )
                 raise
 
-    messages.extend([
-        "-------------------------------------------",
-        'Errors: {}'.format(errors_count),
-        'Removed devices: {}'.format(removed_devices_count),
-        "-------------------------------------------",
-    ])
-    return '\n'.join(messages)
+    messages.extend(
+        [
+            "-------------------------------------------",
+            "Errors: {}".format(errors_count),
+            "Removed devices: {}".format(removed_devices_count),
+            "-------------------------------------------",
+        ]
+    )
+    return "\n".join(messages)
 
 
 def validate_column_headers(*, current_col_headers, expected_col_headers):
@@ -232,6 +254,7 @@ def validate_column_headers(*, current_col_headers, expected_col_headers):
 
 def create_record(*, device, record_type, record_note, room, person, username, removed_date):
     from dlcdb.core.models import InRoomRecord, LostRecord, RemovedRecord
+
     # print(f"Creating record {record_type} for {device}...")
     record_obj = None
 
@@ -249,14 +272,14 @@ def create_record(*, device, record_type, record_note, room, person, username, r
             device=device,
             room=room_obj,
             note=record_note,
-            username=username.strip() if username else '',
+            username=username.strip() if username else "",
         )
 
     elif record_type == Record.LOST:
         record_obj = LostRecord(
             device=device,
             note=record_note,
-            username=username.strip() if username else '',
+            username=username.strip() if username else "",
         )
 
     elif record_type == Record.REMOVED:
@@ -264,7 +287,7 @@ def create_record(*, device, record_type, record_note, room, person, username, r
             device=device,
             note=record_note,
             removed_date=removed_date,
-            username=username.strip() if username else '',
+            username=username.strip() if username else "",
         )
 
     return record_obj
@@ -275,9 +298,9 @@ def set_datetime_field(value):
 
     if value:
         try:
-            result_value = datetime.strptime(value, '%Y-%m-%d')
+            result_value = datetime.strptime(value, "%Y-%m-%d")
         except ValueError as value_error:
-            raise ValueError(f'{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}')
+            raise ValueError(f"{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}")
 
     return result_value
 
@@ -343,8 +366,6 @@ def create_fk_objs(fk_field, rows):
 
 
 def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, write=False):
-    from dlcdb.tenants.models import Tenant
-
     already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
 
     device_objs = []
@@ -357,10 +378,10 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
         # so we do not need to exclude the header row manually
 
         # CSV DictReader always returns an empty string. But at
-        # database level we need a Null value like None to 
+        # database level we need a Null value like None to
         # support our unique constraints for edv_id and sap_id.
-        edv_id = row['EDV_ID'] if row['EDV_ID'] else None
-        sap_id = row['SAP_ID'] if row['SAP_ID'] else None
+        edv_id = row["EDV_ID"] if row["EDV_ID"] else None
+        sap_id = row["SAP_ID"] if row["SAP_ID"] else None
 
         device_repr = f"edv_id: {edv_id or 'n/a'}; sap_id: {sap_id or 'n/a'}"
 
@@ -376,72 +397,67 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
         #     )
 
         # Booleans
-        is_lentable = True if row['IS_LENTABLE'].lower() in TRUE_VALUES else False
-        is_licence = True if row['IS_LICENCE'].lower() in TRUE_VALUES else False
+        is_lentable = True if row["IS_LENTABLE"].lower() in TRUE_VALUES else False
+        is_licence = True if row["IS_LICENCE"].lower() in TRUE_VALUES else False
 
         device_obj = Device(
             is_imported=True,
             imported_by_id=importer_inst_pk,
-
             # these fields should be mappable without further processing:
-            username=username if username else '',
-            book_value=row['BOOK_VALUE'],
-            serial_number=row['SERIAL_NUMBER'],
-            series=row['SERIES'],
-            cost_centre=row['COST_CENTRE'],
-            note=row['NOTE'],
-            mac_address=row['MAC_ADDRESS'],
-            extra_mac_addresses=row['EXTRA_MAC_ADDRESSES'],
-            nick_name=row['NICK_NAME'],
-            order_number=row['ORDER_NUMBER'],
-            
+            username=username if username else "",
+            book_value=row["BOOK_VALUE"],
+            serial_number=row["SERIAL_NUMBER"],
+            series=row["SERIES"],
+            cost_centre=row["COST_CENTRE"],
+            note=row["NOTE"],
+            mac_address=row["MAC_ADDRESS"],
+            extra_mac_addresses=row["EXTRA_MAC_ADDRESSES"],
+            nick_name=row["NICK_NAME"],
+            order_number=row["ORDER_NUMBER"],
             # These fields need some pre-processing
             edv_id=edv_id,
             sap_id=sap_id,
             tenant=tenant,
-
             # FK fields
-            manufacturer_id=set_fk_field(row, 'MANUFACTURER'),
-            device_type_id=set_fk_field(row, 'DEVICE_TYPE'),
-            supplier_id=set_fk_field(row, 'SUPPLIER'),
-
+            manufacturer_id=set_fk_field(row, "MANUFACTURER"),
+            device_type_id=set_fk_field(row, "DEVICE_TYPE"),
+            supplier_id=set_fk_field(row, "SUPPLIER"),
             # Boolean fields
             is_lentable=is_lentable,
             is_licence=is_licence,
-
             # Date fields
-            purchase_date=set_datetime_field(row['PURCHASE_DATE']),
-            warranty_expiration_date=set_datetime_field(row['WARRANTY_EXPIRATION_DATE']),
-            maintenance_contract_expiration_date=set_datetime_field(row['MAINTENANCE_CONTRACT_EXPIRATION_DATE']),
+            purchase_date=set_datetime_field(row["PURCHASE_DATE"]),
+            warranty_expiration_date=set_datetime_field(row["WARRANTY_EXPIRATION_DATE"]),
+            maintenance_contract_expiration_date=set_datetime_field(row["MAINTENANCE_CONTRACT_EXPIRATION_DATE"]),
         )
 
-        # If the sap_id already exists in our DLCDB, we skip and do not import 
+        # If the sap_id already exists in our DLCDB, we skip and do not import
         # this asset!
         if sap_id not in already_existing_sap_ids:
             device_objs.append(device_obj)
             record_objs.append(
                 create_record(
                     device=device_obj,
-                    record_type=row['RECORD_TYPE'],
-                    record_note=row['RECORD_NOTE'],
-                    room=row['ROOM'],
-                    person=row['PERSON'],
+                    record_type=row["RECORD_TYPE"],
+                    record_note=row["RECORD_NOTE"],
+                    room=row["ROOM"],
+                    person=row["PERSON"],
                     username=username,
-                    removed_date=row['REMOVED_DATE'],
+                    removed_date=row["REMOVED_DATE"],
                 )
             )
     try:
         if write:
             # As bulk_create() does not call model.save() method, we can not use it for now
             # _bulk_create_supported = True
-            # # Use bulk_create for newer versions of sqlite to avoid 
+            # # Use bulk_create for newer versions of sqlite to avoid
             # # Exception Value: bulk_create() prohibited to prevent data loss due to unsaved related object 'device'.
             # # See: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#bulk-create
             # # Changed in Django 4.0: Support for the fetching primary key attributes on SQLite 3.35+ was added.
             # if connection.vendor == 'sqlite':
             #     import sqlite3
             #     from packaging import version
-                
+
             #     installed_sqlite_version = version.parse(sqlite3.sqlite_version)
             #     requested_sqlite_version = version.parse("3.35")
 
@@ -483,22 +499,27 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
     return device_objs
 
 
-def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False):
+def import_data(
+    csvfile, tenant, username=None, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False
+):
     from ..models import ImporterList
 
     if import_format == ImporterList.ImportFormatChoices.INTERNALCSV:
         csvfile.seek(0)
-        csvfile = StringIO(csvfile.read().decode('utf-8'))
+        csvfile = StringIO(csvfile.read().decode("utf-8"))
     elif import_format == ImporterList.ImportFormatChoices.SAPCSV:
         csvfile = convert_raw_sap_export(csvfile, tenant, valid_col_headers)
     else:
         raise ValidationError("Import format not specified.")
 
-    ImporterMessages = namedtuple("ImporterMessages", [
-        "success_messages",
-        "imported_devices_count",
-        "error",
-    ])
+    ImporterMessages = namedtuple(
+        "ImporterMessages",
+        [
+            "success_messages",
+            "imported_devices_count",
+            "error",
+        ],
+    )
     success_messages = []
 
     if write:
@@ -507,11 +528,11 @@ def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_fo
         atomic_context = rollback_atomic()
 
     with atomic_context:
-        csv.register_dialect('custom_dialect', skipinitialspace=True, delimiter=',')
+        csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
         rows = csv.DictReader(
             # codecs.iterdecode(csvfile, 'utf-8'),
             csvfile,
-            dialect='custom_dialect',
+            dialect="custom_dialect",
         )
 
         validate_column_headers(current_col_headers=rows.fieldnames, expected_col_headers=valid_col_headers)
@@ -526,7 +547,9 @@ def import_data(csvfile, tenant, username=None, importer_inst_pk=None, import_fo
 
         # Second loop over rows: Creating devices
         try:
-            device_objs = create_devices(rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write)
+            device_objs = create_devices(
+                rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write
+            )
         except ValueError as value_error:
             raise ValueError(value_error)
         else:

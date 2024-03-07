@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
 # NEWS
 
 *Latest news top*

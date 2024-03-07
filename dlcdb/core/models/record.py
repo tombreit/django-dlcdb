@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import datetime
 
 from django.conf import settings
@@ -12,18 +16,18 @@ from .abstracts import AuditBaseModel
 
 
 # Whereabouts of the device after decommissioning.
-SOLD = 'SLD'
-SCRAPPED = 'SCR'
-SURRENDERED = 'SRD'
-STOLEN = 'STL'
-DUPLICATE = 'DPL'
+SOLD = "SLD"
+SCRAPPED = "SCR"
+SURRENDERED = "SRD"
+STOLEN = "STL"
+DUPLICATE = "DPL"
 
 DEVICE_DISPOSITION_CHOICES = [
-    (SOLD, _('Sold')),
-    (SCRAPPED, _('Scrapped')),
-    (SURRENDERED, _('Surrendered')),
-    (STOLEN, _('Stolen')),
-    (DUPLICATE, _('Duplicate')),
+    (SOLD, _("Sold")),
+    (SCRAPPED, _("Scrapped")),
+    (SURRENDERED, _("Surrendered")),
+    (STOLEN, _("Stolen")),
+    (DUPLICATE, _("Duplicate")),
 ]
 
 
@@ -41,32 +45,31 @@ class RecordManager(models.Manager):
 
 
 class Record(AuditBaseModel):
-
     # New record types/proxys must be added to:
     # * RECORD_TYPE_CHOICES
     # * RECORD_TYPE_CLASSES
-    ORDERED = 'ORDERED'
-    INROOM = 'INROOM'
-    LENT = 'LENT'
-    LOST = 'LOST'
-    REMOVED = 'REMOVED'
+    ORDERED = "ORDERED"
+    INROOM = "INROOM"
+    LENT = "LENT"
+    LOST = "LOST"
+    REMOVED = "REMOVED"
     RECORD_TYPE_CHOICES = [
-        (ORDERED, 'BESTELLT'),
-        (INROOM, 'LOKALISIERT'),
-        (LENT, 'VERLIEHEN'),
-        (LOST, 'NICHT AUFFINDBAR'),
-        (REMOVED, 'ENTFERNT'),
+        (ORDERED, "BESTELLT"),
+        (INROOM, "LOKALISIERT"),
+        (LENT, "VERLIEHEN"),
+        (LOST, "NICHT AUFFINDBAR"),
+        (REMOVED, "ENTFERNT"),
     ]
 
     device = models.ForeignKey(
-        'core.Device',
-        verbose_name=_('Device'),
+        "core.Device",
+        verbose_name=_("Device"),
         on_delete=models.CASCADE,
     )
     is_active = models.BooleanField(
         default=False,
         db_index=True,
-        verbose_name=_('Active'),
+        verbose_name=_("Active"),
     )
     effective_until = models.DateTimeField(
         null=True,
@@ -80,72 +83,71 @@ class Record(AuditBaseModel):
         choices=RECORD_TYPE_CHOICES,
         blank=False,
         db_index=True,
-        verbose_name=_('Record type'),
+        verbose_name=_("Record type"),
     )
     note = models.TextField(
         blank=True,
-        verbose_name=_('Record note'),
+        verbose_name=_("Record note"),
     )
     # Licences could be bound to persons or devices
     assigned_device = models.ForeignKey(
-        'core.Device',
+        "core.Device",
         null=True,
         blank=True,
-        related_name='assigned_device',
-        limit_choices_to={'is_licence': False},
+        related_name="assigned_device",
+        limit_choices_to={"is_licence": False},
         on_delete=models.CASCADE,
-        verbose_name=_('Assigned device'),
+        verbose_name=_("Assigned device"),
     )
 
     # Inventory
     inventory = models.ForeignKey(
-        'core.Inventory',
+        "core.Inventory",
         null=True,
         blank=True,
-        verbose_name=_('Inventory'),
+        verbose_name=_("Inventory"),
         on_delete=models.PROTECT,
     )
 
     # LentRecord
     person = models.ForeignKey(
-        'core.Person',
+        "core.Person",
         null=True,
         blank=True,
-        verbose_name='Person',
+        verbose_name="Person",
         on_delete=models.SET_NULL,
     )
-    lent_start_date = models.DateField(null=True, blank=True, verbose_name='Verleihbeginn')
-    lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name='Soll-Rückgabedatum')
+    lent_start_date = models.DateField(null=True, blank=True, verbose_name="Verleihbeginn")
+    lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name="Soll-Rückgabedatum")
     lent_end_date = models.DateField(
-        null=True, blank=True, verbose_name='Zurückgegeben am',
-        help_text='Mit dem Setzen ist der Verleih abgeschlossen'
+        null=True, blank=True, verbose_name="Zurückgegeben am", help_text="Mit dem Setzen ist der Verleih abgeschlossen"
     )
-    lent_note = models.TextField(blank=True, verbose_name='Interne Bemerkung (Ausleihe)')
-    lent_reason = models.TextField(blank=True, verbose_name='Ausleihgrund')
-    lent_accessories = models.TextField(blank=True, verbose_name='Zubehör')
+    lent_note = models.TextField(blank=True, verbose_name="Interne Bemerkung (Ausleihe)")
+    lent_reason = models.TextField(blank=True, verbose_name="Ausleihgrund")
+    lent_accessories = models.TextField(blank=True, verbose_name="Zubehör")
 
     # InRoomRecord
     room = models.ForeignKey(
-        'core.Room',
+        "core.Room",
         null=True,
         blank=True,
-        verbose_name=_('Room'),
+        verbose_name=_("Room"),
         on_delete=models.PROTECT,
     )
     # Bestellvorgang
-    date_of_purchase = models.DateField(null=True, blank=True, verbose_name='Bestelldatum')
+    date_of_purchase = models.DateField(null=True, blank=True, verbose_name="Bestelldatum")
 
     # REMOVED
     disposition_state = models.CharField(
         max_length=3,
         choices=DEVICE_DISPOSITION_CHOICES,
         blank=True,
-        verbose_name=_('Whereabouts after decommissioning'),
+        verbose_name=_("Whereabouts after decommissioning"),
     )
-    removed_info = models.TextField(null=True, blank=True, verbose_name='Verbleib (removed_info)')
-    removed_date = models.DateTimeField(null=True, blank=True, editable=False, verbose_name='Entfernt am')
+    removed_info = models.TextField(null=True, blank=True, verbose_name="Verbleib (removed_info)")
+    removed_date = models.DateTimeField(null=True, blank=True, editable=False, verbose_name="Entfernt am")
     attachments = models.ManyToManyField(
-        'core.Attachment',
+        "core.Attachment",
         blank=True,
     )
 
@@ -153,12 +155,16 @@ class Record(AuditBaseModel):
     objects = RecordManager()
 
     class Meta:
-        verbose_name = 'Record'
-        verbose_name_plural = 'Records'
+        verbose_name = "Record"
+        verbose_name_plural = "Records"
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_lent_desired_end_date",
-                check=Q(lent_desired_end_date__lte=datetime.datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, '%Y-%m-%d')),
+                check=Q(
+                    lent_desired_end_date__lte=datetime.datetime.strptime(
+                        settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d"
+                    )
+                ),
             )
         ]
         indexes = [
@@ -175,7 +181,9 @@ class Record(AuditBaseModel):
 
     def clean(self):
         if not self._meta.proxy:
-            raise ValidationError('Records must be created via a proxy model. Creating plain records is not allowed. Hint: Create a new record.')
+            raise ValidationError(
+                "Records must be created via a proxy model. Creating plain records is not allowed. Hint: Create a new record."
+            )
 
     def save(self, *args, **kwargs):
         """
@@ -196,7 +204,7 @@ class Record(AuditBaseModel):
                 effective_until=timezone.now(),
             )
 
-             # Set current record as active
+            # Set current record as active
             self.is_active = True
 
         super().save(*args, **kwargs)
@@ -221,15 +229,14 @@ class Record(AuditBaseModel):
         )
 
         RECORD_TYPE_CLASSES = {
-            'ORDERED': OrderedRecord,
-            'INROOM': InRoomRecord,
-            'LENT': LentRecord,
-            'LOST': LostRecord,
-            'REMOVED': RemovedRecord,
+            "ORDERED": OrderedRecord,
+            "INROOM": InRoomRecord,
+            "LENT": LentRecord,
+            "LOST": LostRecord,
+            "REMOVED": RemovedRecord,
         }
 
         return RECORD_TYPE_CLASSES[record_type]
-
 
     def get_proxy_model(self):
         return Record.get_proxy_model_by_record_type(self.record_type)
@@ -240,15 +247,13 @@ class Record(AuditBaseModel):
         Returns the admin add url. Whenever this method is called on a concrete
         proxy model it returns the add url of this proxy model.
         """
-        return reverse('admin:core_{model_name}_add'.format(
-            model_name=cls.__name__.lower()
-        ), args=[])
+        return reverse("admin:core_{model_name}_add".format(model_name=cls.__name__.lower()), args=[])
 
     def get_latest_note(self):
         """
         Returns the latest note of the related device.
         """
-        return self.device.device_notes.all().order_by('-created_at').first()
+        return self.device.device_notes.all().order_by("-created_at").first()
 
     @property
     def is_type_lent(self):

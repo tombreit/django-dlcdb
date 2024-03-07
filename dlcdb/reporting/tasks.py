@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import logging
 
 from django.conf import settings
@@ -20,22 +24,24 @@ def request_notifications(huey_interval=None):
     for notification in Notification.objects.filter(time_interval=huey_interval):
         _msg1 = f"Processing notification: {notification}"
         logger.info(_msg1)
-        report = create_report_if_needed(notification.pk, caller='huey')
+        report = create_report_if_needed(notification.pk, caller="huey")
 
         # Finally sent mail notifications
         if notification.active:
-            if notification.notify_no_updates or hasattr(report, 'record_collection.records'):
+            if notification.notify_no_updates or hasattr(report, "record_collection.records"):
                 email_objs = build_report_email(notification, report.report, report.record_collection)
                 send_email(email_objs)
 
     # Weekly overdue lending emails. Automatically use EVERY_MINUTE when in dev mode.
-    notifiy_overdue_lenders_interval =  Notification.EVERY_MINUTE if settings.DEBUG else Notification.WEEKLY
-    if all([
-        settings.REPORTING_NOTIFY_OVERDUE_LENDERS,
-        huey_interval == notifiy_overdue_lenders_interval,
-    ]):
-        print(f"11create_overdue_lenders_emails...")
-        create_overdue_lenders_emails(caller='huey')
+    notifiy_overdue_lenders_interval = Notification.EVERY_MINUTE if settings.DEBUG else Notification.WEEKLY
+    if all(
+        [
+            settings.REPORTING_NOTIFY_OVERDUE_LENDERS,
+            huey_interval == notifiy_overdue_lenders_interval,
+        ]
+    ):
+        print("11create_overdue_lenders_emails...")
+        create_overdue_lenders_emails(caller="huey")
 
 
 # Periodic tasks.
@@ -43,27 +49,31 @@ def request_notifications(huey_interval=None):
 
 if settings.DEBUG:
     # In fact, every two minutes...
-    @db_periodic_task(huey.crontab(minute='*/1'))
-    @lock_task('reports-minutely-lock')
+    @db_periodic_task(huey.crontab(minute="*/1"))
+    @lock_task("reports-minutely-lock")
     def once_a_minute():
         request_notifications(huey_interval=Notification.EVERY_MINUTE)
 
-@db_periodic_task(huey.crontab(hour='0', minute='10', day='*'))
-@lock_task('reports-daily-lock')
+
+@db_periodic_task(huey.crontab(hour="0", minute="10", day="*"))
+@lock_task("reports-daily-lock")
 def daily():
     request_notifications(huey_interval=Notification.DAILY)
 
-@db_periodic_task(huey.crontab(month='*', day='*', day_of_week='1', hour='0', minute='30'))
-@lock_task('reports-weekly-lock')
+
+@db_periodic_task(huey.crontab(month="*", day="*", day_of_week="1", hour="0", minute="30"))
+@lock_task("reports-weekly-lock")
 def weekly():
     request_notifications(huey_interval=Notification.WEEKLY)
 
-@db_periodic_task(huey.crontab(month='*', day='1', day_of_week='*', hour='0', minute='50'))
-@lock_task('reports-monthly-lock')
+
+@db_periodic_task(huey.crontab(month="*", day="1", day_of_week="*", hour="0", minute="50"))
+@lock_task("reports-monthly-lock")
 def monthly():
     request_notifications(huey_interval=Notification.MONTHLY)
 
-@db_periodic_task(huey.crontab(month='1', day='1', day_of_week='*', hour='0', minute='10'))
-@lock_task('reports-yearly-lock')
+
+@db_periodic_task(huey.crontab(month="1", day="1", day_of_week="*", hour="0", minute="10"))
+@lock_task("reports-yearly-lock")
 def yearly():
     request_notifications(huey_interval=Notification.YEARLY)

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import messages
 
 
@@ -14,9 +18,7 @@ def get_current_tenant(request):
         try:
             request_user_groups = request.user.groups.all()
             _tenant = (
-                Tenant
-                .objects
-                .filter(groups__in=request_user_groups)
+                Tenant.objects.filter(groups__in=request_user_groups)
                 # Multiple tenent matches ares possible, so we could not use .get()
                 # https://docs.djangoproject.com/en/3.2/ref/models/querysets/#get
                 .distinct()
@@ -36,7 +38,7 @@ def get_current_tenant(request):
             messages.add_message(
                 request,
                 messages.ERROR,
-                f"Could not find a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!"
+                f"Could not find a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!",
             )
         elif _tenant_count == 1:
             tenant = _tenant.get()
@@ -44,7 +46,7 @@ def get_current_tenant(request):
             messages.add_message(
                 request,
                 messages.ERROR,
-                f"Something went wrong getting a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!"
+                f"Something went wrong getting a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!",
             )
 
     return tenant

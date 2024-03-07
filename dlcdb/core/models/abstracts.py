@@ -1,7 +1,10 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 
@@ -16,15 +19,15 @@ class AuditBaseModel(models.Model):
     username = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name='Benutzername (denormalized)',
+        verbose_name="Benutzername (denormalized)",
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Erstellt',
+        verbose_name="Erstellt",
     )
     modified_at = models.DateTimeField(
         auto_now=True,
-        verbose_name='Geändert',
+        verbose_name="Geändert",
     )
 
     class Meta:
@@ -39,7 +42,7 @@ class SoftDeleteAuditBaseModelQuerySet(models.QuerySet):
 
     def delete(self):
         for obj in self:
-            obj.deleted_at=now()
+            obj.deleted_at = now()
             obj.save()
 
     def hard_delete(self):
@@ -47,7 +50,7 @@ class SoftDeleteAuditBaseModelQuerySet(models.QuerySet):
 
     def not_deleted_objects(self):
         return self.filter(deleted_at__isnull=True)
-    
+
     def with_deleted_objects(self):
         return self.filter()
 
@@ -110,10 +113,11 @@ class SoftDeleteAuditBaseModel(AuditBaseModel):
 
 
 class SingletonBaseModel(models.Model):
-
     def clean(self):
         if self.__class__.objects.exclude(id=self.id).exists():
-            raise ValidationError('There can be only one instance for this object. Instead of add a new instance, edit the already existing object.')
+            raise ValidationError(
+                "There can be only one instance for this object. Instead of add a new instance, edit the already existing object."
+            )
 
     # This approach does overwrite the first instance with a second
     # instance.

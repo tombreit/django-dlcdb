@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import json
 
 from django.conf import settings
@@ -7,17 +11,16 @@ from django.contrib import admin
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import gettext_lazy as _
 
 from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 
-from ..models import Device, Record
+from ..models import Device
 from ..utils.helpers import get_has_note_badge, get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
-from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
+from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
 
 
 # class NoteInline(admin.TabularInline):
@@ -28,35 +31,35 @@ from .base_admin import  SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMi
 
 @admin.register(Device)
 class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, ExportCsvMixin, CustomBaseModelAdmin):
-    change_form_template = 'core/device/change_form.html'
+    change_form_template = "core/device/change_form.html"
     save_as = True
     # inlines = [NoteInline]
-    ordering =  ['-modified_at']  # '-active_record__created_at'
+    ordering = ["-modified_at"]  # '-active_record__created_at'
 
     list_filter = [
-        'device_type',
-        'active_record__record_type',
-        'is_lentable',
-        'active_record__room',
-        'manufacturer',
-        'series',
-        'active_record__inventory',
+        "device_type",
+        "active_record__record_type",
+        "is_lentable",
+        "active_record__room",
+        "manufacturer",
+        "series",
+        "active_record__inventory",
         HasRecordFilter,
         DuplicateFilter,
-        'is_imported',
-        'created_at',
-        'modified_at',
+        "is_imported",
+        "created_at",
+        "modified_at",
     ]
 
     search_fields = [
-        'edv_id',
-        'sap_id',
-        'nick_name',
-        'device_type__name',
-        'manufacturer__name',
-        'series',
-        'serial_number',
-        'order_number',
+        "edv_id",
+        "sap_id",
+        "nick_name",
+        "device_type__name",
+        "manufacturer__name",
+        "series",
+        "serial_number",
+        "order_number",
     ]
 
     def get_search_fields(self, request):
@@ -66,97 +69,109 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         return search_fields
 
     autocomplete_fields = [
-        'manufacturer',
-        'device_type',
-        'supplier',
+        "manufacturer",
+        "device_type",
+        "supplier",
     ]
 
     list_display = [
-        'edv_id',
-        'sap_id',
-        'device_type',
-        'manufacturer',
-        'series',
-        'get_record_info_display',
+        "edv_id",
+        "sap_id",
+        "device_type",
+        "manufacturer",
+        "series",
+        "get_record_info_display",
     ]  # + CustomBaseModelAdmin.list_display
 
     readonly_fields = (
-        'is_imported',
-        'imported_by',
-        'get_imported_by_link',
-        'is_legacy',
-        'uuid',
-        'qrcode_display',
+        "is_imported",
+        "imported_by",
+        "get_imported_by_link",
+        "is_legacy",
+        "uuid",
+        "qrcode_display",
         # 'qrcode',
     )
 
     actions = [
-        'relocate',
-        'export_as_csv',
-        'hard_delete_action',
+        "relocate",
+        "export_as_csv",
+        "hard_delete_action",
     ]
 
     # form = DeviceAdminForm
     list_max_show_all = 5000
 
     fieldsets = (
-        (None, {
-            'fields': (
-                ('edv_id', 'sap_id'),
-                'device_type',
-                ('is_lentable', 'is_licence'),
-                'tenant',  # TODO: set this field in TenantAdmin
-            )
-        }),
-        ('Hersteller', {
-            'fields': (
-                ('manufacturer', 'series', 'serial_number')
-            ),
-        }),
-        (None, {
-            'fields': (
-                'note',
-            )
-        }),
-        ('Procurement', {
-            'classes': ('collapse',),
-            'fields': (
-                'supplier',
-                ('order_number', 'cost_centre'),
-                ('purchase_date', 'warranty_expiration_date', 'maintenance_contract_expiration_date'),
-            ),
-        }),
-        ('Nicks', {
-            'classes': ('collapse',),
-            'fields': (
-                'nick_name',
-                'mac_address',
-                'extra_mac_addresses',
-            ),
-        }),
-        ('Secrets', {
-            'classes': ('collapse',),
-            'fields': (
-                ('machine_encryption_key',),
-                ('backup_encryption_key',)
-            ),
-        }),
-        ('Informal', {
-            'classes': ('collapse',),
-            'fields': (
-                'created_at',
-                'modified_at',
-                'user',
-                'username',
-                'is_legacy',
-                'is_imported',
-                'get_imported_by_link',
-                'uuid',
-                'qrcode_display',
-                # 'qrcode',
-                ('deleted_at', 'deleted_by',),
-            )
-        })
+        (
+            None,
+            {
+                "fields": (
+                    ("edv_id", "sap_id"),
+                    "device_type",
+                    ("is_lentable", "is_licence"),
+                    "tenant",  # TODO: set this field in TenantAdmin
+                )
+            },
+        ),
+        (
+            "Hersteller",
+            {
+                "fields": (("manufacturer", "series", "serial_number")),
+            },
+        ),
+        (None, {"fields": ("note",)}),
+        (
+            "Procurement",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "supplier",
+                    ("order_number", "cost_centre"),
+                    ("purchase_date", "warranty_expiration_date", "maintenance_contract_expiration_date"),
+                ),
+            },
+        ),
+        (
+            "Nicks",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "nick_name",
+                    "mac_address",
+                    "extra_mac_addresses",
+                ),
+            },
+        ),
+        (
+            "Secrets",
+            {
+                "classes": ("collapse",),
+                "fields": (("machine_encryption_key",), ("backup_encryption_key",)),
+            },
+        ),
+        (
+            "Informal",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "created_at",
+                    "modified_at",
+                    "user",
+                    "username",
+                    "is_legacy",
+                    "is_imported",
+                    "get_imported_by_link",
+                    "uuid",
+                    "qrcode_display",
+                    # 'qrcode',
+                    (
+                        "deleted_at",
+                        "deleted_by",
+                    ),
+                ),
+            },
+        ),
     )
 
     def get_list_filter(self, request):
@@ -185,7 +200,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         if settings.DEVICE_HIDE_FIELDS:
             _new_fieldsets = json.dumps(orig_fieldsets)
             for hide_field in settings.DEVICE_HIDE_FIELDS:
-                _new_fieldsets = _new_fieldsets.replace(f'"{hide_field}",', '')
+                _new_fieldsets = _new_fieldsets.replace(f'"{hide_field}",', "")
             new_fieldsets = json.loads(_new_fieldsets)
 
             # new_fieldsets = []
@@ -224,11 +239,12 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
     def get_queryset(self, request):
         return (
-            super().get_queryset(request)
-            .select_related('active_record', 'active_record__room', 'device_type', 'manufacturer')
+            super()
+            .get_queryset(request)
+            .select_related("active_record", "active_record__room", "device_type", "manufacturer")
         )
 
-    def change_view(self, request, object_id, form_url='', extra_context=None):
+    def change_view(self, request, object_id, form_url="", extra_context=None):
         """
         Add add_links to the context in order to show a dropdown to create the records
         """
@@ -237,19 +253,24 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         obj = Device.with_softdeleted_objects.get(pk=object_id)
 
         extra_context = extra_context or {}
-        extra_context.update({
-            'has_record_notes_badge': self.has_record_notes_badge(request, object_id),
-            'inventory_status': {
-                'active_inventory': Inventory.objects.filter(is_active=True),
-                'already_inventorized': obj.get_current_inventory_record,
-                'inventorize_url': f"{reverse('inventory:search-devices')}?id={obj.pk}",
-            },
-        })
+        extra_context.update(
+            {
+                "has_record_notes_badge": self.has_record_notes_badge(request, object_id),
+                "inventory_status": {
+                    "active_inventory": Inventory.objects.filter(is_active=True),
+                    "already_inventorized": obj.get_current_inventory_record,
+                    "inventorize_url": f"{reverse('inventory:search-devices')}?id={obj.pk}",
+                },
+            }
+        )
         return super().change_view(
-            request, object_id, form_url, extra_context=extra_context,
+            request,
+            object_id,
+            form_url,
+            extra_context=extra_context,
         )
 
-    @admin.display(description='Records')
+    @admin.display(description="Records")
     def get_record_info_display(self, obj):
         try:
             # current record may be none in case this device does
@@ -259,26 +280,28 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 device_obj=obj,
                 list_view=True,
             )
-            return render_to_string('core/device/record_action_snippet.html', context)
+            return render_to_string("core/device/record_action_snippet.html", context)
         except:
             import traceback
+
             traceback.print_exc()
             raise
 
-    @admin.display(description='QR Code')
+    @admin.display(description="QR Code")
     def qrcode_display(self, obj):
-        return mark_safe('<img src="{url}" width="{width}" height="{height}">'.format(
-            url=obj.qrcode.url,
-            width=200,
-            height=200,
+        return mark_safe(
+            '<img src="{url}" width="{width}" height="{height}">'.format(
+                url=obj.qrcode.url,
+                width=200,
+                height=200,
             )
         )
 
-    @admin.display(description='Imported via')
+    @admin.display(description="Imported via")
     def get_imported_by_link(self, obj):
         return format_html(
             '<a href="{0}">{1}</a>',
-            reverse('admin:core_importerlist_change', args=(obj.imported_by.pk,)),
+            reverse("admin:core_importerlist_change", args=(obj.imported_by.pk,)),
             obj.imported_by,
         )
 
@@ -296,16 +319,19 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         Bulk relocating devices to a new room. Uses an intermediate django admin page
         for asking for new room.
         """
-        selected = queryset.values_list('pk', flat=True)
+        selected = queryset.values_list("pk", flat=True)
         ct = ContentType.objects.get_for_model(queryset.model, for_concrete_model=False)
-        return HttpResponseRedirect('/core/devices/relocate/?ct=%s&ids=%s' % (
-            ct.pk,
-            ','.join(str(pk) for pk in selected),
-        ))
+        return HttpResponseRedirect(
+            "/core/devices/relocate/?ct=%s&ids=%s"
+            % (
+                ct.pk,
+                ",".join(str(pk) for pk in selected),
+            )
+        )
 
     # django-simple-history
     # https://django-simple-history.readthedocs.io/en/latest/admin.html
-    history_list_display = ['get_changed_fields']
+    history_list_display = ["get_changed_fields"]
 
     def get_changed_fields(self, obj):
         changes = []
@@ -313,11 +339,13 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         if prev_record:
             delta = obj.diff_against(prev_record)
             for change in delta.changes:
-                changes.append({
-                    'field': change.field,
-                    'prev_value': change.old,
-                    'new_value': change.new,
-                })
+                changes.append(
+                    {
+                        "field": change.field,
+                        "prev_value": change.old,
+                        "new_value": change.new,
+                    }
+                )
 
             context = {"changes": changes}
-            return render_to_string('core/device/history_diff.html', context)
+            return render_to_string("core/device/history_diff.html", context)

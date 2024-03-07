@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import csv
 import datetime
 from django.db.models import Q
@@ -8,7 +12,6 @@ from django.utils import timezone, dateformat
 from django.db.models import Count
 from django.utils.http import urlencode
 from django.utils.html import format_html
-from django.urls import reverse
 
 from ..models import Device, Room, DeviceType, Supplier, Manufacturer, LentRecord, Record
 from ..utils.helpers import get_denormalized_user
@@ -28,7 +31,7 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
         return tuple(self.readonly_fields) + (
             "created_at",
             "modified_at",
-            "user", 
+            "user",
             "username",
         )
 
@@ -56,32 +59,32 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
 class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
-        if obj: 
+        if obj:
             print("editing an existing object")
-            readonly_fields = tuple(readonly_fields) + ('device', 'room')
+            readonly_fields = tuple(readonly_fields) + ("device", "room")
 
         return readonly_fields
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
- 
-        _device = request.GET.get('device', None)
+
+        _device = request.GET.get("device", None)
 
         if _device:
-            form.base_fields['device'].initial = _device
+            form.base_fields["device"].initial = _device
 
         if not obj:
-            form.base_fields['device'].disabled = False
+            form.base_fields["device"].disabled = False
 
         return form
 
-    def add_view(self, request, form_url='', extra_context=None):
-        device_id = request.GET.get('device')
+    def add_view(self, request, form_url="", extra_context=None):
+        device_id = request.GET.get("device")
         extra_context = extra_context or {}
 
         if device_id:
             device = Device.objects.get(id=device_id)
-            extra_context['device'] = device
+            extra_context["device"] = device
 
         return super().add_view(request, form_url, extra_context=extra_context)
 
@@ -144,7 +147,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
 
 
 class NoModificationModelAdminMixin(object):
-    ordering = ['-modified_at']
+    ordering = ["-modified_at"]
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
@@ -167,17 +170,14 @@ class RedirectToDeviceMixin(object):
 
         device_obj = Device.objects.get(id=obj.device_id)
 
-        return HttpResponseRedirect(
-            reverse('admin:core_device_change', args=[device_obj.pk])
-        )
+        return HttpResponseRedirect(reverse("admin:core_device_change", args=[device_obj.pk]))
 
 
 class ExportCsvMixin:
-
-    @admin.action(description='Export selected as CSV')
+    @admin.action(description="Export selected as CSV")
     def export_as_csv(self, request, queryset):
-        meta = self.model._meta        
-        _now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
+        meta = self.model._meta
+        _now = dateformat.format(timezone.now(), "Y-m-d_H-i-s")
         filename = f"dlcdb_export_{_now}_{meta.app_label}-{meta.model_name}.csv"
 
         fieldnames = [field.name for field in Device._meta.fields]  # .get_fields()
@@ -192,16 +192,16 @@ class ExportCsvMixin:
             export_queryset = Device.objects.filter(pk__in=device_pks)
             fieldnames.extend(["person", "lent_desired_end_date", "room", "created_at"])
 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f"attachment; filename={filename}"
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         writer = csv.DictWriter(
             response,
             fieldnames=fieldnames,
-            dialect='excel-tab',
+            dialect="excel-tab",
             # delimiter=';',
             # quotechar='"',
             quoting=csv.QUOTE_ALL,
-            extrasaction='raise',
+            extrasaction="raise",
         )
 
         writer.writeheader()
@@ -211,26 +211,26 @@ class ExportCsvMixin:
                 fieldname = field
                 fielddata = None
 
-                if field == 'active_record':
+                if field == "active_record":
                     fielddata = obj.active_record.record_type if obj.active_record else "no record set"
 
                 if field in RECORD_FIELDNAMES:
-                # elif field == 'record_created_at':
-                #     fielddata = obj.active_record.created_at if obj.active_record else "no record set"
-                # elif field == 'room':
-                #     fielddata = getattr(obj.active_record.room, "number", None) if obj.active_record else "no record set"
-                # elif field == 'person':
-                #     fielddata = obj.active_record.person if obj.active_record.person else "no person set"
+                    # elif field == 'record_created_at':
+                    #     fielddata = obj.active_record.created_at if obj.active_record else "no record set"
+                    # elif field == 'room':
+                    #     fielddata = getattr(obj.active_record.room, "number", None) if obj.active_record else "no record set"
+                    # elif field == 'person':
+                    #     fielddata = obj.active_record.person if obj.active_record.person else "no person set"
                     fielddata = getattr(obj.active_record, field)
                 else:
                     fielddata = getattr(obj, field)
 
                 if isinstance(fielddata, datetime.datetime):
-                    fielddata = (f'{fielddata:%Y-%m-%d %H:%M}')
+                    fielddata = f"{fielddata:%Y-%m-%d %H:%M}"
 
                 row_data.update({fieldname: fielddata})
-    
-            row = writer.writerow(row_data)
+
+            writer.writerow(row_data)
 
         # Does not work as we do not trigger a HttpResponseRedirect which could display that message.
         # self.message_user(request, f'Export file "{filename}" created.', messages.SUCCESS)
@@ -247,8 +247,8 @@ class DeviceCountMixin:
 
     def get_list_display(self, request):
         list_display = list(super().get_list_display(request))  # we could get lists or tuples
-        if not 'get_assets_count' in list_display:
-            list_display.append('get_assets_count')
+        if "get_assets_count" not in list_display:
+            list_display.append("get_assets_count")
         return list(list_display)
 
     def get_queryset(self, request):
@@ -256,9 +256,7 @@ class DeviceCountMixin:
 
         if self.model == Room:
             queryset = queryset.annotate(
-                _assets_count=Count("record", distinct=True,
-                    filter=Q(record__is_active=True)
-                ),
+                _assets_count=Count("record", distinct=True, filter=Q(record__is_active=True)),
             )
         else:
             queryset = queryset.annotate(
@@ -268,8 +266,8 @@ class DeviceCountMixin:
         return queryset
 
     @admin.display(
-        description='Assets',
-        ordering='-_assets_count',
+        description="Assets",
+        ordering="-_assets_count",
     )
     def get_assets_count(self, obj):
         query_key = None
@@ -282,11 +280,11 @@ class DeviceCountMixin:
             query_key = "manufacturer__id__exact"
         elif self.model == Supplier:
             query_key = "supplier__id__exact"
-            
+
         if query_key:
             result = format_html(
                 '<a class="badge badge-info" href="{url}?{query_kwargs}">{count}</a>',
-                url=reverse('admin:core_device_changelist'),
+                url=reverse("admin:core_device_changelist"),
                 query_kwargs=urlencode({query_key: obj.pk}),
                 count=obj._assets_count,
             )
@@ -297,4 +295,3 @@ class DeviceCountMixin:
             )
 
         return result
-

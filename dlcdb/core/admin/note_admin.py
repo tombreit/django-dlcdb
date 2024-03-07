@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 
 from ..models import Note
@@ -40,4 +44,4 @@ class NoteAdmin(admin.ModelAdmin):
     @admin.display(ordering="device__active_record__room")
     def get_device_room(self, obj):
         if hasattr(obj, "device") and obj.device:
-                return obj.device.active_record.room
+            return obj.device.active_record.room

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -43,20 +47,21 @@ class PersonQuerySet(models.QuerySet):
         )
 
         qs = (
-            self
-            .annotate(assigned_things_count=Count(
-                'assignedthing',
-                filter=Q(assignedthing__unassigned_at__isnull=True),
-                distinct=True,
-            ))
+            self.annotate(
+                assigned_things_count=Count(
+                    "assignedthing",
+                    filter=Q(assignedthing__unassigned_at__isnull=True),
+                    distinct=True,
+                )
+            )
             .annotate(
                 unassigned_things_count=Count(
-                    'assignedthing',
+                    "assignedthing",
                     filter=Q(assignedthing__unassigned_at__isnull=False),
                     distinct=True,
-            ))
-            .filter(has_active_contract_condition | Q(assigned_things_count__gte=1)
+                )
             )
+            .filter(has_active_contract_condition | Q(assigned_things_count__gte=1))
         )
 
         return qs
@@ -76,6 +81,7 @@ class ActiveContractObjectsBaseModel(models.Model):
     """
     https://docs.djangoproject.com/en/4.0/topics/db/managers/#custom-managers-and-model-inheritance
     """
+
     active_contract_objects = ActiveContractObjectsManager()
     smallstuff_person_objects = SmallstuffPersonObjectsManager()
 
@@ -84,16 +90,16 @@ class ActiveContractObjectsBaseModel(models.Model):
 
 
 class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
-    first_name = models.CharField(max_length=255, verbose_name='Vorname')
-    last_name = models.CharField(max_length=255, verbose_name='Nachname')
+    first_name = models.CharField(max_length=255, verbose_name="Vorname")
+    last_name = models.CharField(max_length=255, verbose_name="Nachname")
     email = models.EmailField(
         blank=False,
         null=True,
         unique=True,
-        help_text='IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht anschreiben können.',
+        help_text="IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht anschreiben können.",
     )
     organizational_unit = models.ForeignKey(
-        'core.OrganizationalUnit',
+        "core.OrganizationalUnit",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -126,10 +132,7 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         blank=True,
         null=True,
     )
-    udb_person_image = models.ImageField(
-        blank=True,
-        upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/"
-    )
+    udb_person_image = models.ImageField(blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/")
     # TODO: Use stay-dates instead of individual contract dates to avoid
     # please-return notifications if a follow up contract exists.
     udb_person_uuid = models.CharField(max_length=255, blank=True, null=True, unique=True)
@@ -141,18 +144,24 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
     udb_contract_organizational_positions = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        ordering = ['last_name', 'first_name']
-        verbose_name = 'Person'
-        verbose_name_plural = 'Personen'
+        ordering = ["last_name", "first_name"]
+        verbose_name = "Person"
+        verbose_name_plural = "Personen"
         # unique_together = ['last_name', 'first_name']
         constraints = [
-            models.UniqueConstraint(Lower('first_name'), Lower('last_name'), name='unique_dlcdb_person_name'),
-            models.UniqueConstraint(Lower('udb_person_first_name'), Lower('udb_person_last_name'), name='unique_udb_person_name'),
+            models.UniqueConstraint(Lower("first_name"), Lower("last_name"), name="unique_dlcdb_person_name"),
+            models.UniqueConstraint(
+                Lower("udb_person_first_name"), Lower("udb_person_last_name"), name="unique_udb_person_name"
+            ),
         ]
 
     def __str__(self):
-        return '{last_name}{delimiter}{first_name}'.format(first_name=self.first_name, last_name=self.last_name, delimiter=", " if self.first_name else "")
+        return "{last_name}{delimiter}{first_name}".format(
+            first_name=self.first_name, last_name=self.last_name, delimiter=", " if self.first_name else ""
+        )
 
     def clean(self):
         if Person.only_softdeleted_objects.filter(email=self.email).exists():
-            raise ValidationError('A soft-deleted person with this email address already exists. Please contact your IT;-)')
+            raise ValidationError(
+                "A soft-deleted person with this email address already exists. Please contact your IT;-)"
+            )

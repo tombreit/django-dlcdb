@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import datetime
 
 from django.core.management.base import BaseCommand
@@ -6,6 +10,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from django.urls import reverse
 from django.template.loader import get_template
+
 # from django.utils import timezone
 from django.contrib.sites.models import Site
 
@@ -31,7 +36,7 @@ class Command(BaseCommand):
     ```
     """
 
-    help = 'Send email about all overdue lented devices. Triggerd via os cron.'
+    help = "Send email about all overdue lented devices. Triggerd via os cron."
 
     def handle(self, *args, **kwargs):
         # time = timezone.now().strftime('%X')
@@ -39,48 +44,47 @@ class Command(BaseCommand):
 
         receipient_list = [settings.DEFAULT_FROM_EMAIL]
         from_email = settings.SERVER_EMAIL
-        changelist_url = reverse('admin:core_lentrecord_changelist')
-        email_template = get_template('email/notify_overdue_device.html')
+        changelist_url = reverse("admin:core_lentrecord_changelist")
+        email_template = get_template("email/notify_overdue_device.html")
         domain = Site.objects.get_current().domain
         today = datetime.date.today()
 
         overdue_records = Record.objects.filter(
-            Q(is_active=True),
-            Q(lent_desired_end_date__lte=today) & Q(lent_end_date=None)
+            Q(is_active=True), Q(lent_desired_end_date__lte=today) & Q(lent_end_date=None)
         )
         overdue_records_count = overdue_records.count()
 
         for record in overdue_records:
-
             email_context = {
-                'device': record.device,
-                'lent_url': 'https://{domain}{path}'.format(
+                "device": record.device,
+                "lent_url": "https://{domain}{path}".format(
                     domain=domain,
-                    path=reverse('admin:core_lentrecord_change', args=(record.device.id,)),
+                    path=reverse("admin:core_lentrecord_change", args=(record.device.id,)),
                 ),
-                'due_date': record.lent_desired_end_date,
-                'changelist_url': 'https://{domain}{path}'.format(
+                "due_date": record.lent_desired_end_date,
+                "changelist_url": "https://{domain}{path}".format(
                     domain=domain,
                     path=changelist_url,
                 ),
-                'overdue_records_count': overdue_records_count,
-                'lender_name': record.person,
-                'lender_email': record.person.email,
-                'lender_url': 'https://{domain}{path}'.format(
+                "overdue_records_count": overdue_records_count,
+                "lender_name": record.person,
+                "lender_email": record.person.email,
+                "lender_url": "https://{domain}{path}".format(
                     domain=domain,
-                    path=reverse('admin:core_person_change', args=(record.person.id,)),
+                    path=reverse("admin:core_person_change", args=(record.person.id,)),
                 ),
             }
 
             # Only send notification mail if overdue_trigger_date is in the past.
             # Build overdue warning trigger date:
-            overdue_trigger_date = record.lent_desired_end_date + datetime.timedelta(days=settings.LENT_OVERDUE_TOLERANCE_DAYS)
+            overdue_trigger_date = record.lent_desired_end_date + datetime.timedelta(
+                days=settings.LENT_OVERDUE_TOLERANCE_DAYS
+            )
 
             if overdue_trigger_date < today:
-
-                subject = 'DLCDB: Device {device} überfällig seit {due_date}'.format(
-                    device=email_context.get('device'),
-                    due_date=email_context.get('due_date'),
+                subject = "DLCDB: Device {device} überfällig seit {due_date}".format(
+                    device=email_context.get("device"),
+                    due_date=email_context.get("due_date"),
                 )
                 message = email_template.render(email_context)
 

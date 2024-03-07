@@ -1,7 +1,8 @@
-import pytest
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
 
-from dlcdb.core.models import Device, Room, Person, LentRecord, InRoomRecord, Record, OrderedRecord
-from dlcdb.core.tests import basetest
+import pytest
 
 
 """

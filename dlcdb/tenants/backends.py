@@ -1,8 +1,11 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib.auth.backends import ModelBackend
 
 
 class ObjectPermissionsBackend(ModelBackend):  # (object)
-
     # super implementation of has_perm:
     # def has_perm(self, user_obj, perm, obj=None):
     #     return perm in self.get_all_permissions(user_obj, obj=obj)

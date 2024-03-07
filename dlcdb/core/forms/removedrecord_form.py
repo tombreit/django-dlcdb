@@ -1,11 +1,15 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import forms
 from ..models import Record
 from .proxyrecord_admin_form import ProxyRecordAdminForm
 
-class RemovedRecordAdminForm(ProxyRecordAdminForm):
 
+class RemovedRecordAdminForm(ProxyRecordAdminForm):
     def clean(self):
-        device = self.cleaned_data['device']
+        device = self.cleaned_data["device"]
         active_record_type = device.active_record.record_type
 
         if active_record_type == Record.REMOVED:

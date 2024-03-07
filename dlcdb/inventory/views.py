@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 """
 Inventory mode.
 
@@ -32,9 +36,7 @@ from django.views import View
 from django.views.generic import DetailView, FormView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
-from django.http import (HttpResponse, HttpResponseForbidden, 
-                         HttpResponseServerError, HttpResponseRedirect,
-                         JsonResponse)
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -88,23 +90,20 @@ def inventorize_room(request, pk):
     tenant = request.tenant
     is_superuser = request.user.is_superuser
 
-    devices_in_room = (
-        Inventory
-        .objects
-        .tenant_aware_device_objects_for_room(pk, tenant=tenant, is_superuser=is_superuser)
+    devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(
+        pk, tenant=tenant, is_superuser=is_superuser
     )
 
     # Allow only adding devices which are not already present in this room:
-    add_devices_qs = (
-        Inventory
-        .objects
-        .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
-        .exclude(active_record__room=pk)
+    add_devices_qs = Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser).exclude(
+        active_record__room=pk
     )
 
     device_add_form = DeviceAddForm(
         add_devices_qs=add_devices_qs,
-        initial={"room": pk,},
+        initial={
+            "room": pk,
+        },
     )
 
     inventory_progress = current_inventory.get_inventory_progress(
@@ -216,27 +215,29 @@ def search_devices(request):
     if request.htmx:
         template = "inventory/partials/device_search_htmx.html"
     else:
-        template = 'inventory/device_search.html'
+        template = "inventory/device_search.html"
 
-    all_devices = Inventory.objects.inventory_relevant_devices(tenant=request.tenant, is_superuser=request.user.is_superuser)
+    all_devices = Inventory.objects.inventory_relevant_devices(
+        tenant=request.tenant, is_superuser=request.user.is_superuser
+    )
     filter_devices = DeviceFilter(request.GET, queryset=all_devices)
 
     # print(f"{request=}")
     # print(f"{request.GET}=")
 
     request_copy = request.GET.copy()
-    parameters = request_copy.pop('page', True) and request_copy.urlencode()
+    parameters = request_copy.pop("page", True) and request_copy.urlencode()
 
     paginator = Paginator(filter_devices.qs, 25)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     context = {
         "current_inventory": Inventory.objects.active_inventory(),
-        'page_obj': page_obj,
-        'filter_devices': filter_devices,
-        'all_devices_count': all_devices.count(),
-        'parameters': parameters,
+        "page_obj": page_obj,
+        "filter_devices": filter_devices,
+        "all_devices_count": all_devices.count(),
+        "parameters": parameters,
     }
     return TemplateResponse(request, template, context)
 
@@ -247,7 +248,9 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
     template_name = "inventory/room_qrcodes_detail.html"
 
     def get_context_data(self, **kwargs):
-        devices = Inventory.objects.devices_for_room(self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser)
+        devices = Inventory.objects.devices_for_room(
+            self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser
+        )
         context = super().get_context_data(**kwargs)
         context["devices"] = devices
         return context
@@ -288,11 +291,7 @@ def get_note_btn(request, obj_type, obj_uuid):
     elif obj_type == "room":
         obj = Inventory.objects.tenant_aware_room_objects().get(uuid=obj_uuid)
 
-    return render(
-        request,
-        "inventory/includes/note_btn.html",
-        {"obj_type": obj_type, "obj_uuid": obj_uuid, "obj": obj}
-    )
+    return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj_uuid": obj_uuid, "obj": obj})
 
 
 @login_required

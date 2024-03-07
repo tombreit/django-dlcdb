@@ -1,0 +1,48 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: django-dlcdb
+Upstream-Contact: Thomas Breitner <t.breitner@csl.mpg.de>
+Source: https://gitlab.gwdg.de/dlcdb/django-dlcdb
+
+Files: .*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: package*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: docs/*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: requirements/*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+# Files: dlcdb/*
+# Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+# License: EUPL-1.2
+
+Files: dlcdb/**/*.txt
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: EUPL-1.2
+
+Files: dlcdb/inventory/static/inventory/qr-scanner*
+Copyright: Copyright (c) 2017 Nimiq, danimoh
+License: MIT
+
+Files: dlcdb/static/branding/favicon.ico
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: dlcdb/locale/*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: dlcdb/*/migrations/*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: CC0-1.0
+
+Files: frontend/*
+Copyright: Thomas Breitner <t.breitner@csl.mpg.de>
+License: EUPL-1.2

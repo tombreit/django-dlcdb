@@ -1,10 +1,13 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.test import TestCase
 
 from dlcdb.core import models
 
 
 class InventoryTests(TestCase):
-
     def test_set_active_logic(self):
         """
         Ensure that an inventory which is saved as active sets all other inventories to
@@ -12,10 +15,10 @@ class InventoryTests(TestCase):
         :return:
         """
 
-        i1 = models.Inventory(name='2016', is_active=True)
+        i1 = models.Inventory(name="2016", is_active=True)
         i1.save()
 
-        i2 = models.Inventory(name='2017', is_active=True)
+        i2 = models.Inventory(name="2017", is_active=True)
         i2.save()
 
         # very important to requery i1 in order to get the fresh new database representation of i1.

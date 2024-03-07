@@ -186,7 +186,7 @@ make docs
 
 ### Branding
 
-Get rid of the default ACME branding: Set your organization via *> Start > Organization > Branding*
+Get rid of the default DLCDB branding: Set your organization via *> Start > Organization > Branding*
 
 ### Backup
 

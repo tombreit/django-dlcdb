@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import json
 
 from django.urls import path
@@ -10,20 +14,19 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 from .models import Notification, Report
-
-
-admin.site.register(LogEntry)
 from .utils.email import build_report_email, send_email
 from .utils.process import create_report_if_needed
 
+admin.site.register(LogEntry)
+
+
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
             path(
-                'trigger-report/<int:notification_pk>',
+                "trigger-report/<int:notification_pk>",
                 self.admin_site.admin_view(self.trigger_oneshot_reporting),
                 name="trigger-report",
             )
@@ -32,18 +35,18 @@ class NotificationAdmin(admin.ModelAdmin):
         return all_urls
 
     def trigger_oneshot_reporting(self, request, notification_pk):
-        Result = create_report_if_needed(notification_pk, caller='oneshot')
+        Result = create_report_if_needed(notification_pk, caller="oneshot")
         notification_obj = Notification.objects.get(pk=notification_pk)
 
         try:
             email_objs = build_report_email(notification_obj, Result.report, Result.record_collection)
             send_email(email_objs)
-            messages.info(request, 'Report wurde per Email versendet.')
+            messages.info(request, "Report wurde per Email versendet.")
         except BaseException as e:
-            messages.warning(request, f'Kein Report versendet: {e}')
+            messages.warning(request, f"Kein Report versendet: {e}")
 
         # TODO: redirect to change view does not refresh from db?
-        redirect_to = redirect('admin:reporting_notification_change', notification_pk)
+        redirect_to = redirect("admin:reporting_notification_change", notification_pk)
         # redirect_to = redirect('admin:reporting_notification_changelist')
         return redirect_to
 
@@ -51,24 +54,22 @@ class NotificationAdmin(admin.ModelAdmin):
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
     readonly_fields = (
-        'notification',
-        'title',
-        'body',
-        'spreadsheet', 
+        "notification",
+        "title",
+        "body",
+        "spreadsheet",
     )
 
     def changelist_view(self, request, extra_context=None):
         from ..core.models import Record
 
         _records = (
-            Record
-            .objects
+            Record.objects
             # .filter(created_at__year__gte='2019')
         )
 
         chart_data_lent = (
-            _records
-            .filter(record_type=Record.LENT)
+            _records.filter(record_type=Record.LENT)
             .annotate(date=TruncMonth("created_at"))
             .values("date")
             .annotate(y=Count("id"))
@@ -76,8 +77,7 @@ class ReportAdmin(admin.ModelAdmin):
         )
 
         chart_data_removed = (
-            _records
-            .filter(record_type=Record.REMOVED)
+            _records.filter(record_type=Record.REMOVED)
             .annotate(date=TruncMonth("created_at"))
             .values("date")
             .annotate(y=Count("id"))
@@ -85,8 +85,7 @@ class ReportAdmin(admin.ModelAdmin):
         )
 
         chart_data_inroom = (
-            _records
-            .filter(record_type=Record.INROOM)
+            _records.filter(record_type=Record.INROOM)
             .annotate(date=TruncMonth("created_at"))
             .values("date")
             .annotate(y=Count("id"))

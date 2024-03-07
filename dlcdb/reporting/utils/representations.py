@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import datetime
 
 from copy import copy
@@ -25,7 +29,7 @@ def get_record_data_row(record, event):
                 obj = getattr(obj, model_name)
             field = getattr(obj, item.get("field"))
             if isinstance(field, datetime.date):
-                field = '{:%Y-%m-%d}'.format(field)
+                field = "{:%Y-%m-%d}".format(field)
             row.append(field)
 
     return row
@@ -47,8 +51,7 @@ def get_records_as_spreadsheet(records=None, title=None, event=None):
     Return records wrapped in a spreadsheet file (xlsx).
     """
 
-    with NamedTemporaryFile(suffix='xlsx') as tmp:
-
+    with NamedTemporaryFile(suffix="xlsx") as tmp:
         # Creating xlsx via openpyxl
         workbook = Workbook()
 
@@ -56,21 +59,21 @@ def get_records_as_spreadsheet(records=None, title=None, event=None):
 
         title_style = NamedStyle(name="title_style")
         title_style.font = copy(_base_font)
-        title_style.font = Font(bold=True, color='FFFFFFFF')
-        title_style.alignment = Alignment(horizontal='left', vertical='center')
-        title_style.fill = PatternFill(fill_type='solid', bgColor='000000')
+        title_style.font = Font(bold=True, color="FFFFFFFF")
+        title_style.alignment = Alignment(horizontal="left", vertical="center")
+        title_style.fill = PatternFill(fill_type="solid", bgColor="000000")
 
         header_style = NamedStyle(name="header_style")
         header_style.font = copy(_base_font)
         header_style.font = Font(bold=True)
-        header_style.alignment = Alignment(horizontal='right', vertical='top')
+        header_style.alignment = Alignment(horizontal="right", vertical="top")
 
         body_style = NamedStyle(name="body_style")
         body_style.font = copy(_base_font)
-        body_style.alignment = Alignment(horizontal='left', vertical='top')
+        body_style.alignment = Alignment(horizontal="left", vertical="top")
 
         ws = workbook.active
-        ws.title = slugify(title) if title else ''
+        ws.title = slugify(title) if title else ""
 
         # row 1: title
         # _title = title if title else ''
@@ -83,17 +86,17 @@ def get_records_as_spreadsheet(records=None, title=None, event=None):
 
         # row 1: -blank-
         ws.append([])
-        
+
         # row 2: -blank-
         ws.append([])
-        
+
         # row 3: column names
         # ws.append(EXPOSED_FIELDS_RECORD + EXPOSED_FIELDS_DEVICE)
         col_headers_row = []
         for item in EXPOSED_FIELDS:
             if event in item.get("used_for"):
-                header_str = '{model_name}-{field}'.format(
-                    model_name=''.join(item.get("model")) if item.get("model") else 'Record',
+                header_str = "{model_name}-{field}".format(
+                    model_name="".join(item.get("model")) if item.get("model") else "Record",
                     field=item.get("field"),
                 )
                 col_headers_row.append(header_str)
@@ -119,7 +122,6 @@ def get_records_as_spreadsheet(records=None, title=None, event=None):
             for cell in row_cells:
                 cell.style = body_style
 
-
         # Optimized column widths
         # see: https://stackoverflow.com/questions/13197574/openpyxl-adjust-column-width-size
         column_widths = []
@@ -132,7 +134,7 @@ def get_records_as_spreadsheet(records=None, title=None, event=None):
                         column_widths.append(len(cell.value))
 
         for i, column_width in enumerate(column_widths):
-            ws.column_dimensions[get_column_letter(i+1)].width = column_width
+            ws.column_dimensions[get_column_letter(i + 1)].width = column_width
 
         workbook.save(tmp.name)
         content_file_obj = ContentFile(tmp.read())

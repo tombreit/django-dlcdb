@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 """
 https://fueled.com/the-cache/posts/backend/django/flexible-per-object-permission-system/
 """
@@ -68,12 +72,9 @@ from .models import Tenant
 
 
 class TenantScopedAdmin(admin.ModelAdmin):
-
     def get_readonly_fields(self, request, obj=None):
         if obj and not request.user.is_superuser:
-            return super().get_readonly_fields(request, obj) + (
-                "tenant",
-            )
+            return super().get_readonly_fields(request, obj) + ("tenant",)
         else:
             return super().get_readonly_fields(request, obj)
 
@@ -126,16 +127,16 @@ class TenantScopedAdmin(admin.ModelAdmin):
         # print(f"TenantScopedAdmin get_form: {request.tenant=}")
         # print(f"TenantScopedAdmin form.base_fields: {form.base_fields=}")
 
-        if form.base_fields.get('tenant'):
-            form.base_fields['tenant'].disabled = False if request.user.is_superuser else True
-        
+        if form.base_fields.get("tenant"):
+            form.base_fields["tenant"].disabled = False if request.user.is_superuser else True
+
         if not obj:
             if not request.user.is_superuser and request.tenant:
                 # If field value set via get_changeform_initial_data this value
                 # will not be present in the post request, so we set it
                 # in the form:
-                if form.base_fields.get('tenant'):
-                    form.base_fields['tenant'].initial = request.tenant
+                if form.base_fields.get("tenant"):
+                    form.base_fields["tenant"].initial = request.tenant
 
         return form
 
@@ -151,7 +152,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
 
 @admin.register(Tenant)
 class TenantAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
-    ordering = ('name',)
-    filter_horizontal = ('groups',)
+    list_display = ("name",)
+    search_fields = ("name",)
+    ordering = ("name",)
+    filter_horizontal = ("groups",)

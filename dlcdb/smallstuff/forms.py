@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import forms
 
 from crispy_forms.helper import FormHelper
@@ -11,18 +15,20 @@ class AssignedThingsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
-        self.helper.template_pack = 'bootstrap4'
+        self.helper.template_pack = "bootstrap4"
         self.helper.layout = Layout(
-            'thing',
-            'person',
-            HTML("""
+            "thing",
+            "person",
+            HTML(
+                """
                 <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="fas fa-plus"></i></button>
-            """),
+            """
+            ),
         )
 
     class Meta:
         model = AssignedThing
-        fields = '__all__'
+        fields = "__all__"
         widgets = {
-            'person': forms.HiddenInput(),
+            "person": forms.HiddenInput(),
         }

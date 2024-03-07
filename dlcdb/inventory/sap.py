@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import csv
 import os
 
@@ -52,7 +56,6 @@ def create_sap_list_comparison(sap_list_obj):
 
     # Ensure that no objects are created if any exception occurs during compare:
     with transaction.atomic():
-
         # the result as list of lists
         result_rows = compare_sap(sap_list_obj)
 
@@ -61,25 +64,25 @@ def create_sap_list_comparison(sap_list_obj):
         )
         comparison.save()
 
-        original_name = sap_list_obj.file.name.split('/')[-1]
-        file_name = 'result_{id}_{org_name}'.format(id=comparison.id, org_name=original_name)
+        original_name = sap_list_obj.file.name.split("/")[-1]
+        file_name = "result_{id}_{org_name}".format(id=comparison.id, org_name=original_name)
         file_path = os.path.join(settings.MEDIA_ROOT, settings.SAP_LIST_COMPARISON_RESULT_FOLDER, file_name)
 
         if not os.path.exists(os.path.dirname(file_path)):
             os.makedirs(os.path.dirname(file_path))
 
-        with open(file_path, "w", encoding='utf-16') as new_file:
+        with open(file_path, "w", encoding="utf-16") as new_file:
             fieldnames = list(k for d in result_rows for k in d)
             fieldnames = unique_seq(fieldnames)
 
             writer = csv.DictWriter(
                 new_file,
                 fieldnames=fieldnames,
-                dialect='excel-tab',
+                dialect="excel-tab",
                 # delimiter=';',
                 # quotechar='"',
                 quoting=csv.QUOTE_ALL,
-                extrasaction='raise',
+                extrasaction="raise",
             )
 
             writer.writeheader()
@@ -107,12 +110,14 @@ def compare_sap(sap_list_obj):
 
     new_rows = []
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         rows = csv.DictReader(f, delimiter=",")
 
         for row in rows:
             new_row = row
-            sap_id = get_match_for_sap_id(device_sap_ids, row['Anlage'], row['Unternummer'], return_type="device_sap_id")
+            sap_id = get_match_for_sap_id(
+                device_sap_ids, row["Anlage"], row["Unternummer"], return_type="device_sap_id"
+            )
 
             if sap_id:
                 obj = Device.objects.get(sap_id=sap_id)
@@ -121,11 +126,13 @@ def compare_sap(sap_list_obj):
 
                 if inventorized_record:
                     if inventorized_record.inventory.name != current_inventory.name:
-                        raise ValidationError(f"{inventorized_record.inventory.name=} does not match {current_inventory.name=}. Exit!")
+                        raise ValidationError(
+                            f"{inventorized_record.inventory.name=} does not match {current_inventory.name=}. Exit!"
+                        )
 
                 # Defaults
                 record_for_sap = None
-                record_inventory = 'FALSE'
+                record_inventory = "FALSE"
 
                 # Find the record to be listed in sap comparison
                 if inventorized_record and active_record and inventorized_record.id < active_record.id:
@@ -146,32 +153,34 @@ def compare_sap(sap_list_obj):
 
                 # Finally set data for sap comparison csv file
                 if record_for_sap:
-                    old_room = row['Raum']
+                    old_room = row["Raum"]
                     new_room = record_for_sap.room.number if record_for_sap.room else ""
 
-                    new_row.update({
-                        'CURRENT INVENTORY': record_inventory,
-                        'TYPE': record_for_sap.get_record_type_display(),
-                        'OLD ROOM': old_room,
-                        'NEW ROOM': new_room,
-                        'ROOM NEQ': old_room != new_room,
-                        'REC CREATED_AT': formats.date_format(record_for_sap.created_at, "SHORT_DATETIME_FORMAT"),
-                        'REC CREATED BY': record_for_sap.username,
-                    })
+                    new_row.update(
+                        {
+                            "CURRENT INVENTORY": record_inventory,
+                            "TYPE": record_for_sap.get_record_type_display(),
+                            "OLD ROOM": old_room,
+                            "NEW ROOM": new_room,
+                            "ROOM NEQ": old_room != new_room,
+                            "REC CREATED_AT": formats.date_format(record_for_sap.created_at, "SHORT_DATETIME_FORMAT"),
+                            "REC CREATED BY": record_for_sap.username,
+                        }
+                    )
                 else:
                     # there is no record for this device
-                    new_row.update({'CURRENT RECORD?': 'NO RECORD'})
+                    new_row.update({"CURRENT RECORD?": "NO RECORD"})
 
             else:
                 # SAP-ID not found in DLDB
-                new_row.update({'IN_DLCDB?': 'NOT IN DLCDB'})
+                new_row.update({"IN_DLCDB?": "NOT IN DLCDB"})
 
             # Append inventory notes for this device
             # A DLCDB inventory note could exists even if the given device does not
             # exist in the SAP file.
             if current_inventory:
                 notes = obj.device_notes.filter(inventory=current_inventory).values_list("text", flat=True)
-                new_row.update({'NOTE': "; ".join(notes)})
+                new_row.update({"NOTE": "; ".join(notes)})
 
             new_rows.append(new_row)
 

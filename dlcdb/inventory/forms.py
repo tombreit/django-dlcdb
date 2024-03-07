@@ -1,8 +1,11 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import forms
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Field
-from crispy_forms.bootstrap import FieldWithButtons, StrictButton
 
 from dlcdb.core.models import Note
 
@@ -41,13 +44,10 @@ class DeviceSearchForm(forms.Form):
 
         self.helper.layout = Layout(
             Row(
-                Column(
-                    Field('q', autofocus="on"),
-                    css_class="col-12 col-md-3"
-                ),
-                Column('device_type', css_class="col-12 col-md-3"),
-                Column('record', css_class="col-6 col-md-3"),
-                Column('not_already_inventorized', css_class="col-6 col-md-3"),
+                Column(Field("q", autofocus="on"), css_class="col-12 col-md-3"),
+                Column("device_type", css_class="col-12 col-md-3"),
+                Column("record", css_class="col-6 col-md-3"),
+                Column("not_already_inventorized", css_class="col-6 col-md-3"),
             )
         )
 

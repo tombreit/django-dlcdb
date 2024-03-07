@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Thomas Breitner
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 ;(function () {
     // document.body.addEventListener("objectListChanged", function(evt){
     //     console.log("objectListChanged was triggered!");

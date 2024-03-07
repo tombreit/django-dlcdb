@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 
 from ..models import LostRecord
@@ -8,30 +12,30 @@ from .base_admin import CustomBaseProxyModelAdmin, NoModificationModelAdminMixin
 @admin.register(LostRecord)
 class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, CustomBaseProxyModelAdmin):
     form = ProxyRecordAdminForm
-    change_form_template = 'core/lostrecord/change_form.html'
+    change_form_template = "core/lostrecord/change_form.html"
 
     list_display = [
-        'device',
-        'created_at',
-        'username',
-        'note',
+        "device",
+        "created_at",
+        "username",
+        "note",
     ]
     list_filter = [
-        'is_active',
+        "is_active",
     ]
     fields = [
-        'device',
-        'note',
+        "device",
+        "note",
     ]
     autocomplete_fields = [
-        'device',
+        "device",
     ]
 
-    def render_change_form(
-        self, request, context, add=False, change=False, form_url="", obj=None
-    ):
-        context.update({
-            'show_save_and_add_another': False,
-            'show_save_and_continue': False,
-        })
+    def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        context.update(
+            {
+                "show_save_and_add_another": False,
+                "show_save_and_continue": False,
+            }
+        )
         return super().render_change_form(request, context, add, change, form_url, obj)

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -16,10 +20,11 @@ class DeviceType(SoftDeleteAuditBaseModel):
     note = models.TextField(
         blank=True,
     )
+
     class Meta:
-        ordering = ('name',)
-        verbose_name = _('Device Type')
-        verbose_name_plural = _('Device Types')
+        ordering = ("name",)
+        verbose_name = _("Device Type")
+        verbose_name_plural = _("Device Types")
         indexes = [
             models.Index(fields=["name"]),
         ]

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 
 from ..models import DeviceType
@@ -9,41 +13,47 @@ from .filters.has_note_filter import HasNoteFilter
 @admin.register(DeviceType)
 class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     list_display = (
-        'name',
-        'prefix',
-        'has_note',
+        "name",
+        "prefix",
+        "has_note",
     ) + CustomBaseModelAdmin.list_display
 
-    list_filter = (
-        HasNoteFilter,
-    )
-    
+    list_filter = (HasNoteFilter,)
+
     search_fields = (
-        'name',
-        'prefix',
+        "name",
+        "prefix",
     )
 
     fieldsets = (
-        (None, {
-            'fields': (
-                'name',
-                'prefix',
-                'note',
-            )
-        }),
-        ('Informal', {
-            'classes': ('collapse',),
-            'fields': (
-                'created_at',
-                'modified_at',
-                'user',
-                'username',
-                ('deleted_at', 'deleted_by',),
-            )
-        })
+        (
+            None,
+            {
+                "fields": (
+                    "name",
+                    "prefix",
+                    "note",
+                )
+            },
+        ),
+        (
+            "Informal",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "created_at",
+                    "modified_at",
+                    "user",
+                    "username",
+                    (
+                        "deleted_at",
+                        "deleted_by",
+                    ),
+                ),
+            },
+        ),
     )
 
-    @admin.display(description='Has Note?')
+    @admin.display(description="Has Note?")
     def has_note(self, obj):
         return get_has_note_badge(obj_type="core.devicetype", has_note=obj.note)
-

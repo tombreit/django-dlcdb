@@ -1,8 +1,11 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import uuid
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -18,11 +21,10 @@ from .supplier import Supplier
 
 
 class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
-
     active_record = models.OneToOneField(
-        'Record',
+        "Record",
         on_delete=models.CASCADE,
-        related_name='active_device_record',
+        related_name="active_device_record",
         blank=True,
         null=True,
         db_index=True,
@@ -33,7 +35,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         unique=True,
     )
 
-    # We're keeping null=True for edv_id and sap_id to ensure uniqueness 
+    # We're keeping null=True for edv_id and sap_id to ensure uniqueness
     # checks on db level, as empty strings ('') are considered equal
     edv_id = models.CharField(
         max_length=512,
@@ -41,13 +43,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         unique=True,
         db_index=True,
-        verbose_name='EDV-Nummer',
+        verbose_name="EDV-Nummer",
     )
 
-    sap_id_validator =  RegexValidator(
-        regex='^[0-9]+-[0-9]+$',
-        message='Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden.',
-        code='invalid_sap_id'
+    sap_id_validator = RegexValidator(
+        regex="^[0-9]+-[0-9]+$",
+        message="Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden.",
+        code="invalid_sap_id",
     )
 
     sap_id = models.CharField(
@@ -56,75 +58,71 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         unique=True,
         db_index=True,
-        verbose_name=_('Inventory ID'),
-        help_text='SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.',
+        verbose_name=_("Inventory ID"),
+        help_text="SAP-Nummer. Format: `Hauptnummer-Unternummer`. Für Anlagen die ausschließlich eine Hauptnummer besitzen, ist die 0 (Null) als Unternummer einzutragen.",
         validators=[sap_id_validator],
     )
     serial_number = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        verbose_name=_('Serial number'),
+        verbose_name=_("Serial number"),
     )
     device_type = models.ForeignKey(
-        'core.DeviceType',
+        "core.DeviceType",
         null=True,
         blank=True,
-        verbose_name=_('Device type'),
+        verbose_name=_("Device type"),
         on_delete=models.PROTECT,
     )
     manufacturer = models.ForeignKey(
-        'core.Manufacturer',
+        "core.Manufacturer",
         null=True,
         blank=True,
         on_delete=models.PROTECT,
-        verbose_name=_('Manufacturer'),
+        verbose_name=_("Manufacturer"),
     )
     series = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        verbose_name=_('Model name'),
+        verbose_name=_("Model name"),
     )
-    supplier = models.ForeignKey(
-        Supplier,
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        verbose_name=_('Supplier')
-    )
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("Supplier"))
     is_licence = models.BooleanField(
         default=False,
         db_index=True,
-        verbose_name=_('Is license?'),
+        verbose_name=_("Is license?"),
     )
-    purchase_date = models.DateField(null=True, blank=True, verbose_name='Kaufdatum')
-    warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name='Garantieablaufdatum')
-    maintenance_contract_expiration_date = models.DateField(null=True, blank=True, verbose_name='Ablaufdatum Lizenz- oder Wartungsvertrag')
-    cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name=_('Cost centre'))
-    book_value = models.CharField(max_length=255, null=True, blank=True, verbose_name='Buchwert')
+    purchase_date = models.DateField(null=True, blank=True, verbose_name="Kaufdatum")
+    warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name="Garantieablaufdatum")
+    maintenance_contract_expiration_date = models.DateField(
+        null=True, blank=True, verbose_name="Ablaufdatum Lizenz- oder Wartungsvertrag"
+    )
+    cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Cost centre"))
+    book_value = models.CharField(max_length=255, null=True, blank=True, verbose_name="Buchwert")
 
-    note = models.TextField(null=True, blank=True, verbose_name='Notiz')
-    mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name='Haupt-Mac-Adresse')
-    extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name='Weitere Mac-Adressen')
-    nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name='Nickname / C-Name')
-    is_legacy = models.BooleanField(default=False, verbose_name='Legacy-Device')
+    note = models.TextField(null=True, blank=True, verbose_name="Notiz")
+    mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name="Haupt-Mac-Adresse")
+    extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name="Weitere Mac-Adressen")
+    nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Nickname / C-Name")
+    is_legacy = models.BooleanField(default=False, verbose_name="Legacy-Device")
 
     is_lentable = models.BooleanField(
         default=False,
         db_index=True,
-        verbose_name=_('Is loanable?'),
+        verbose_name=_("Is loanable?"),
     )
-    is_imported = models.BooleanField(default=False, verbose_name='Via CSV-Import angelegt?')
+    is_imported = models.BooleanField(default=False, verbose_name="Via CSV-Import angelegt?")
     imported_by = models.ForeignKey(
-        'core.ImporterList',
+        "core.ImporterList",
         null=True,
         blank=True,
-        verbose_name='Importiert via',
+        verbose_name="Importiert via",
         on_delete=models.SET_NULL,
     )
     qrcode = models.FileField(
-        upload_to=f'{settings.QRCODE_DIR}/',
+        upload_to=f"{settings.QRCODE_DIR}/",
         blank=True,
         null=True,
         storage=OverwriteStorage(),
@@ -148,9 +146,9 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     history = HistoricalRecords()
 
     class Meta:
-        verbose_name = 'Device'
-        verbose_name_plural = 'Devices'
-        ordering = ['-modified_at', 'edv_id']
+        verbose_name = "Device"
+        verbose_name_plural = "Devices"
+        ordering = ["-modified_at", "edv_id"]
         indexes = [
             models.Index(fields=["edv_id", "sap_id", "modified_at"]),
         ]
@@ -159,7 +157,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return str(self.uuid)
 
     def __str__(self):
-        identifier = 'n/a'
+        identifier = "n/a"
         if self.edv_id:
             identifier = self.edv_id
         elif self.sap_id:
@@ -168,7 +166,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def save(self, *args, **kwargs):
         if not self.qrcode:
-            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get('device'))
+            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get("device"))
             self.qrcode.save(qrcode.filename, qrcode.fileobj, save=False)
         super().save(*args, **kwargs)
 
@@ -176,20 +174,22 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         """
         Returns the latest note for this device and the current inventory.
         """
-        return self.device_notes.filter(inventory__is_active=True).order_by('-created_at').first()
+        return self.device_notes.filter(inventory__is_active=True).order_by("-created_at").first()
 
     def has_record_notes(self):
-        return self.record_set.exclude(note__isnull=True).exclude(note__exact='').exists()
+        return self.record_set.exclude(note__isnull=True).exclude(note__exact="").exists()
 
     @property
     def get_is_currently_lented(self):
         if not self.active_record:
             return False
         else:
-            return all([
-                self.active_record.is_type_lent,
-                self.active_record.lent_end_date is None,
-            ])
+            return all(
+                [
+                    self.active_record.is_type_lent,
+                    self.active_record.lent_end_date is None,
+                ]
+            )
 
     @property
     def get_lent_start_date(self):
@@ -227,9 +227,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
             # Did not use qs.last() convenience method as I want to
             # catch an exception for no matching record found.
-            already_inventorized = self.record_set.order_by("-pk").filter(
-                inventory=current_inventory,
-            )[:1].get()
+            already_inventorized = (
+                self.record_set.order_by("-pk")
+                .filter(
+                    inventory=current_inventory,
+                )[:1]
+                .get()
+            )
         except Inventory.DoesNotExist:
             already_inventorized = None
         except Record.DoesNotExist:
@@ -253,11 +257,12 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     #     return already_inventorized
 
     def get_edv_id(self):
-        return self.edv_id or '----'
-    get_edv_id.short_description = 'EDV ID'
+        return self.edv_id or "----"
+
+    get_edv_id.short_description = "EDV ID"
 
     def get_record_action_snippet(self, for_view=None):
         return UIRecordActionSnippetContext(device_obj=self, for_view=for_view)
-        
+
     def get_record_action_snippet_for_inventory_views(self):
         return self.get_record_action_snippet(for_view="inventory")

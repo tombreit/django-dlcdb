@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import uuid
 from collections import namedtuple
 from pathlib import Path
@@ -15,7 +19,6 @@ from .abstracts import SoftDeleteAuditBaseModel
 
 
 class Room(SoftDeleteAuditBaseModel):
-
     uuid = models.UUIDField(
         default=uuid.uuid4,
         editable=False,
@@ -39,34 +42,36 @@ class Room(SoftDeleteAuditBaseModel):
     )
     website = models.URLField(
         blank=True,
-        help_text=_("For example, a URL to a room plan. When available and applicable, room details are linked to this URL."),
+        help_text=_(
+            "For example, a URL to a room plan. When available and applicable, room details are linked to this URL."
+        ),
     )
     is_auto_return_room = models.BooleanField(
         default=False,
         verbose_name=_('"Auto return" room'),
-        help_text=_('Returned loaned devices are automatically assigned to this room'),
+        help_text=_("Returned loaned devices are automatically assigned to this room"),
     )
     is_external = models.BooleanField(
         default=False,
-        verbose_name=_('External/Lent Room'),
-        help_text=_('Location/room where assets are collected that cannot be located, e.g., loaned, off-site .'),
+        verbose_name=_("External/Lent Room"),
+        help_text=_("Location/room where assets are collected that cannot be located, e.g., loaned, off-site ."),
     )
     qrcode = models.FileField(
-        upload_to=f'{settings.QRCODE_DIR}/',
+        upload_to=f"{settings.QRCODE_DIR}/",
         blank=True,
         null=True,
         storage=OverwriteStorage(),
     )
 
     class Meta:
-        verbose_name = _('Room')
-        verbose_name_plural = _('Rooms')
-        ordering = ['number']
+        verbose_name = _("Room")
+        verbose_name_plural = _("Rooms")
+        ordering = ["number"]
 
     def __str__(self):
         if not self.nickname:
             return self.number
-        return '{} ({})'.format(self.number, self.nickname)
+        return "{} ({})".format(self.number, self.nickname)
 
     def save(self, *args, **kwargs):
         """
@@ -74,7 +79,7 @@ class Room(SoftDeleteAuditBaseModel):
         and for generating a qrcode.
         """
         if not self.qrcode:
-            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get('room'))
+            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get("room"))
             self.qrcode.save(qrcode.filename, qrcode.fileobj, save=False)
         super().save(*args, **kwargs)
         if self.is_auto_return_room:
@@ -85,19 +90,13 @@ class Room(SoftDeleteAuditBaseModel):
             # There is only one single is_external room allowed:
             Room.objects.all().exclude(id=self.id).update(is_external=False)
 
-
     def get_active_records(self):
         """
         Returns the active InRoomRecords of this room
         """
-        qs = (
-            self
-            .record_set
-            .filter(
-                is_active=True,
-            )
-            .order_by('device__edv_id')
-        )
+        qs = self.record_set.filter(
+            is_active=True,
+        ).order_by("device__edv_id")
         return qs
 
     def get_lent_records(self):
@@ -105,20 +104,21 @@ class Room(SoftDeleteAuditBaseModel):
         Returns the active lent records associated with this room.
         """
         from . import LentRecord
+
         return LentRecord.objects.filter(room=self, is_active=True)
 
     def get_latest_note(self):
         """
         Returns the latest note of the related room and the current inventory.
         """
-        return self.room_notes.filter(inventory__is_active=True).order_by('-created_at').first()
+        return self.room_notes.filter(inventory__is_active=True).order_by("-created_at").first()
 
     @property
     def get_inventory_status(self):
         """
         Get the inventory status for a given room.
         The inventory status is defined by the count of inroom-devices with a current
-        inventory set (see custom model manager above): 
+        inventory set (see custom model manager above):
         * outstanding: no devices with current inventory
         * inprogress: some devices with current inventory
         * completed: all devices with current inventory
@@ -126,64 +126,67 @@ class Room(SoftDeleteAuditBaseModel):
         Special case: room_devices_count < room_inventorized_devices_count
         """
 
-        inventory_status = namedtuple("inventory_status", [
-            "status_str",
-            "css_class",
-            "n_of_ns",
-        ])
+        inventory_status = namedtuple(
+            "inventory_status",
+            [
+                "status_str",
+                "css_class",
+                "n_of_ns",
+            ],
+        )
 
         n_of_ns = f"{self.room_inventorized_devices_count} / {self.room_devices_count}"
 
         if self.room_devices_count == self.room_inventorized_devices_count:
-            status_str = 'completed'
-            css_class = 'success'
+            status_str = "completed"
+            css_class = "success"
         elif self.room_devices_count == 0:
-            status_str = 'completed'
-            css_class = 'success'
+            status_str = "completed"
+            css_class = "success"
         elif self.room_devices_count and not self.room_inventorized_devices_count:
-            status_str = 'outstanding'
-            css_class = 'warning'
+            status_str = "outstanding"
+            css_class = "warning"
         elif self.room_devices_count > self.room_inventorized_devices_count:
-            status_str = 'inprogress'
-            css_class = 'primary'
+            status_str = "inprogress"
+            css_class = "primary"
         elif self.room_devices_count < self.room_inventorized_devices_count:
-            status_str = 'completed'
-            css_class = 'success'
+            status_str = "completed"
+            css_class = "success"
             n_of_ns = f"{self.room_devices_count} / {self.room_devices_count}"
         else:
-            status_str = 'FIXME'
-            css_class = 'danger'
+            status_str = "FIXME"
+            css_class = "danger"
 
         return inventory_status(status_str, css_class, n_of_ns)
 
 
 def timestamped_file_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/rooms_reconcile>/<basename>_<timestamp>.<extension>
-    now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
+    now = dateformat.format(timezone.now(), "Y-m-d_H-i-s")
     filename = Path(filename)
     new_filename = f"{slugify(filename.stem)}_{now}{filename.suffix}"
-    return f'rooms_reconcile/{new_filename}'
+    return f"rooms_reconcile/{new_filename}"
 
 
 class RoomReconcile(models.Model):
     file = models.FileField(
         upload_to=timestamped_file_path,
-        verbose_name='Datei',
+        verbose_name="Datei",
         help_text="Aktuell werden nur Archibus-CSV-Exportdateien unterstützt.",
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Erstellungsdatum',
+        verbose_name="Erstellungsdatum",
     )
     note = models.TextField(
         blank=True,
-        verbose_name='Anmerkung',
+        verbose_name="Anmerkung",
     )
 
     class Meta:
         ordering = ["created_at"]
-        verbose_name = 'Raum-Abgleich'
-        verbose_name_plural = 'Raum-Abgleich'
+        verbose_name = "Raum-Abgleich"
+        verbose_name_plural = "Raum-Abgleich"
 
     def __str__(self):
         return f"{Path(self.file.path).name}"

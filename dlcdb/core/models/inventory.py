@@ -1,9 +1,12 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import json
 from collections import namedtuple
 
 from django.db import models, transaction
 from django.db.models import Count, Q, OuterRef, Subquery, Exists
-from django.db.models import Count  # Case, When, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from dlcdb.core.utils.helpers import get_denormalized_user
 
@@ -24,17 +27,13 @@ class InventoryQuerySet(models.QuerySet):
     """
 
     def _devices_qs(self):
-        return (
-            Device
-            .objects
-            .select_related(
-                'manufacturer',
-                'active_record',
-                'active_record__room',
-                'active_record__inventory',
-                'device_type',
-                'tenant',
-            )
+        return Device.objects.select_related(
+            "manufacturer",
+            "active_record",
+            "active_record__room",
+            "active_record__inventory",
+            "device_type",
+            "tenant",
         )
 
     def _current_inventory_records(self):
@@ -46,7 +45,7 @@ class InventoryQuerySet(models.QuerySet):
             # record with a inventory stamp for the current inventory:
             # is_active=True,
         )
-    
+
     def _current_inventory_device_note(self):
         return Note.objects.filter(
             device=OuterRef("pk"),
@@ -58,7 +57,7 @@ class InventoryQuerySet(models.QuerySet):
             inventory = self.get(is_active=True)
         except Inventory.DoesNotExist:
             inventory = None
-        
+
         return inventory
 
     def tenant_unaware_device_objects(self):
@@ -80,8 +79,7 @@ class InventoryQuerySet(models.QuerySet):
         qs = Device.objects.none()
 
         devices_qs = (
-            self
-            ._devices_qs()
+            self._devices_qs()
             .filter(
                 active_record__is_active=True,
                 active_record__room__pk=room_pk,
@@ -101,84 +99,72 @@ class InventoryQuerySet(models.QuerySet):
 
     def inventory_relevant_devices(self, tenant=None, is_superuser=False):
         return (
-            Inventory
-            .objects
-            .tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+            Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
             .exclude(active_record__record_type=Record.REMOVED)
             .exclude(sap_id__isnull=True)
-            .exclude(sap_id__exact='')
+            .exclude(sap_id__exact="")
             .annotate(already_inventorized=Exists(self._current_inventory_records()))
         ).distinct()
 
     def tenant_aware_room_objects(self, tenant=None):
-
         current_inventory_room_note = Note.objects.filter(
             room=OuterRef("pk"),
             inventory=self.get(is_active=True),
         )
 
-        qs = (
-            Room
-            .objects
-            .exclude(deleted_at__isnull=False)
-            .annotate(has_inventory_note=Exists(current_inventory_room_note))
+        qs = Room.objects.exclude(deleted_at__isnull=False).annotate(
+            has_inventory_note=Exists(current_inventory_room_note)
         )
 
         # Some inventory stats done by the database.
         if tenant:
-            qs = (
-                qs
-                .annotate(
-                    room_devices_count=Count(
-                        'record',
-                        filter=Q(
-                            record__is_active=True,
-                            record__device__deleted_at__isnull=True,
-                            record__device__tenant=tenant,
-                        )
+            qs = qs.annotate(
+                room_devices_count=Count(
+                    "record",
+                    filter=Q(
+                        record__is_active=True,
+                        record__device__deleted_at__isnull=True,
+                        record__device__tenant=tenant,
                     ),
-                    room_inventorized_devices_count=Count(
-                        'record',
-                        filter=Q(
-                            Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
-                            record__device__deleted_at__isnull=True,
-                            record__inventory__is_active=True,
-                            record__device__tenant=tenant,
-                        )
+                ),
+                room_inventorized_devices_count=Count(
+                    "record",
+                    filter=Q(
+                        Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                        record__device__deleted_at__isnull=True,
+                        record__inventory__is_active=True,
+                        record__device__tenant=tenant,
                     ),
-                    # room_inventorized_devices_count=Sum(
-                    #     Case(
-                    #         When(
-                    #             record__in=inventorized_records_in_room,
-                    #             # record__is_active=True,
-                    #             then=1
-                    #         ),
-                    #         default=0,
-                    #         output_field=models.IntegerField()
-                    #     )
-                    # )
-                )
+                ),
+                # room_inventorized_devices_count=Sum(
+                #     Case(
+                #         When(
+                #             record__in=inventorized_records_in_room,
+                #             # record__is_active=True,
+                #             then=1
+                #         ),
+                #         default=0,
+                #         output_field=models.IntegerField()
+                #     )
+                # )
             )
         else:
-            qs = (
-                qs
-                .annotate(
-                    room_devices_count=Count(
-                        'record',
-                        filter=Q(
-                            record__is_active=True,
-                            record__device__deleted_at__isnull=True,
-                        )
+            qs = qs.annotate(
+                room_devices_count=Count(
+                    "record",
+                    filter=Q(
+                        record__is_active=True,
+                        record__device__deleted_at__isnull=True,
                     ),
-                    room_inventorized_devices_count=Count(
-                        'record',
-                        filter=Q(
-                            Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
-                            record__device__deleted_at__isnull=True,
-                            record__inventory__is_active=True,
-                        )
+                ),
+                room_inventorized_devices_count=Count(
+                    "record",
+                    filter=Q(
+                        Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                        record__device__deleted_at__isnull=True,
+                        record__inventory__is_active=True,
                     ),
-                )
+                ),
             )
 
         return qs.order_by("number")
@@ -198,32 +184,21 @@ class InventoryQuerySet(models.QuerySet):
             _exclude_expr = Q(already_inventorized=True)
 
         devices = (
-            Device
-            .objects
+            Device.objects
             # Testing if device has a sap_id and is currently lented
-            .exclude(
-                Q(sap_id__isnull=True) |
-                Q(sap_id__exact='') |
-                Q(active_record__person__isnull=True)
-            )
-            .annotate(
-                already_inventorized=Exists(self._current_inventory_records())
-            )
+            .exclude(Q(sap_id__isnull=True) | Q(sap_id__exact="") | Q(active_record__person__isnull=True))
+            .annotate(already_inventorized=Exists(self._current_inventory_records()))
             # Testing if device is currently not already inventorized
-            .exclude(
-                _exclude_expr
-             )
+            .exclude(_exclude_expr)
             .annotate(
                 inventory_note=Subquery(
-                    Note
-                    .objects
-                    .filter(device=OuterRef('pk'))
+                    Note.objects.filter(device=OuterRef("pk"))
                     .filter(inventory=self.active_inventory())
-                    .order_by('-pk')
-                    .values('text')
+                    .order_by("-pk")
+                    .values("text")
                 )
             )
-            .order_by('active_record__person__email')
+            .order_by("active_record__person__email")
         )
         return devices
 
@@ -234,18 +209,19 @@ class Inventory(models.Model):
     An inventory represents one real world inventory. E.g. there is may be an inventory for
     december 2018 and an inventory for january 2019.
     """
-    name = models.CharField(max_length=255, verbose_name='Name')
+
+    name = models.CharField(max_length=255, verbose_name="Name")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    is_active = models.BooleanField(default=False, verbose_name='Aktiv')
+    is_active = models.BooleanField(default=False, verbose_name="Aktiv")
 
     objects = InventoryQuerySet.as_manager()
 
     class Meta:
-        verbose_name = 'Inventur'
-        verbose_name_plural = 'Inventuren'
+        verbose_name = "Inventur"
+        verbose_name_plural = "Inventuren"
 
     def __str__(self):
-        return f'Inventur {self.name}'
+        return f"Inventur {self.name}"
 
     def save(self, *args, **kw):
         """
@@ -262,7 +238,6 @@ class Inventory(models.Model):
         """
         Get status for inventory, e.g. "5 from 10 assets already inventorized".
         """
-        from dlcdb.core.models import Record
 
         inventory_progress = namedtuple(
             "inventory_progress",
@@ -273,15 +248,12 @@ class Inventory(models.Model):
             ],
         )
 
-        _inventory_relevant_devices = (
-            Inventory
-            .objects
-            .inventory_relevant_devices(tenant=tenant, is_superuser=is_superuser)
+        _inventory_relevant_devices = Inventory.objects.inventory_relevant_devices(
+            tenant=tenant, is_superuser=is_superuser
         )
 
         inventory_relevant_devices_inventorized_count = (
-            _inventory_relevant_devices
-            .filter(already_inventorized=True)
+            _inventory_relevant_devices.filter(already_inventorized=True)
         ).count()
         inventory_relevant_devices_count = _inventory_relevant_devices.count()
 
@@ -289,7 +261,9 @@ class Inventory(models.Model):
         done_percent = (inventory_relevant_devices_inventorized_count * 100) / inventory_relevant_devices_count
         done_percent = int(round(done_percent, 0))
 
-        return inventory_progress(done_percent, inventory_relevant_devices_count, inventory_relevant_devices_inventorized_count)
+        return inventory_progress(
+            done_percent, inventory_relevant_devices_count, inventory_relevant_devices_inventorized_count
+        )
 
     @staticmethod
     @transaction.atomic
@@ -297,7 +271,7 @@ class Inventory(models.Model):
         """
         Main inventorization method: Expects a list of device uuids,
         an inventory status for each uuid and a room and sets an
-        appropriate inventory record. 
+        appropriate inventory record.
         """
 
         print(f"inventorize_uuids_for_room {uuids=}, {room_pk=}, {user=}")
@@ -305,7 +279,9 @@ class Inventory(models.Model):
         try:
             room = Room.objects.get(pk=room_pk)
         except Room.DoesNotExist:
-            raise ObjectDoesNotExist("Something went wrong. A room with pk={room_pk} does not exist. Please contact your it staff.")
+            raise ObjectDoesNotExist(
+                "Something went wrong. A room with pk={room_pk} does not exist. Please contact your it staff."
+            )
 
         try:
             external_room = Room.objects.get(is_external=True)
@@ -317,14 +293,13 @@ class Inventory(models.Model):
         uuids_states_dict = json.loads(uuids)
 
         for uuid, state in uuids_states_dict.items():
-
             try:
                 device = Device.objects.get(uuid=uuid)
             except Device.DoesNotExist as does_not_exist:
                 raise ObjectDoesNotExist(f"No device for uuid {uuid}! {does_not_exist}")
-            
+
             active_record = device.active_record
-            
+
             print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
 
             new_record = False
@@ -361,10 +336,12 @@ class Inventory(models.Model):
 
                 print(f"{state=}")
 
-                if all([
+                if all(
+                    [
                         active_record.record_type == Record.LENT,
                         active_record.room != external_room,
-                ]):
+                    ]
+                ):
                     active_record.room = external_room
                     active_record.save()
 
@@ -388,7 +365,7 @@ class Inventory(models.Model):
 
             elif state == "dev_state_unknown":
                 # This could happen if a device is added to a room via add_device
-                # but that device is not marked as "found" or "not found". 
+                # but that device is not marked as "found" or "not found".
                 # That device should be added to current room, but without
                 # an inventory record.
 

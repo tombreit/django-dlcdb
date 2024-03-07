@@ -1,14 +1,19 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+
 def get_admin_url_for_recordtype(recordtype):
     from ...core.models import Record
 
     url = None
 
     if recordtype == Record.LENT:
-        url = 'admin:core_lentrecord_changelist'
+        url = "admin:core_lentrecord_changelist"
     elif recordtype == Record.REMOVED:
-        url = 'admin:core_removedrecord_changelist'
+        url = "admin:core_removedrecord_changelist"
     else:
-        url = 'admin:core_record_changelist'
+        url = "admin:core_record_changelist"
 
     return url
 
@@ -32,7 +37,7 @@ def get_days_for_interval(interval):
 
 # def get_last_run_date(interval):
 #     """
-#     Get start date for last epoche, according to a choosen interval. 
+#     Get start date for last epoche, according to a choosen interval.
 #     Getting beginning of day, week, month or year, according to a chosen interval.
 #     """
 #     from ..core.models import DeviceType

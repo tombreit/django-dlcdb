@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from .device_admin import DeviceAdmin  # noqa
 from .record_admin import RecordAdmin  # noqa
 from .orderedrecord_admin import OrderedRecordAdmin  # noqa

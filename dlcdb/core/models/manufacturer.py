@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
 from django.db.models.functions import Lower
 from django.db.models import UniqueConstraint
@@ -9,22 +13,22 @@ class Manufacturer(models.Model):
         max_length=255,
         null=True,
         blank=True,
-        verbose_name=_('Name'),
+        verbose_name=_("Name"),
         unique=True,
     )
     note = models.TextField(
         blank=True,
-        verbose_name=_('Note'),
+        verbose_name=_("Note"),
     )
 
     class Meta:
-        verbose_name = _('Manufacturer')
-        verbose_name_plural = _('Manufacturers')
-        ordering = [Lower('name')]
+        verbose_name = _("Manufacturer")
+        verbose_name_plural = _("Manufacturers")
+        ordering = [Lower("name")]
         constraints = [
             UniqueConstraint(
-                Lower('name'),
-                name='manufacturer_name_unique',
+                Lower("name"),
+                name="manufacturer_name_unique",
             ),
         ]
         indexes = [
@@ -32,4 +36,4 @@ class Manufacturer(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.name}'
+        return f"{self.name}"

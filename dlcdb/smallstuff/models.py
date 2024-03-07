@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
@@ -26,14 +30,15 @@ class Thing(AuditBaseModel):
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(
-                Lower('name'),
-                name='unique_ou_name',
+                Lower("name"),
+                name="unique_ou_name",
             ),
             models.UniqueConstraint(
-                Lower('slug'),
-                name='unique_ou_slug',
-            )
+                Lower("slug"),
+                name="unique_ou_slug",
+            ),
         ]
+
 
 class CurrentlyAssignedThingManager(models.Manager):
     def get_queryset(self):
@@ -79,17 +84,17 @@ class AssignedThing(models.Model):
         return "{person} ↔ {thing}: {assigned} {unassigned}".format(
             person=self.person,
             thing=self.thing,
-            assigned='☑' if self.assigned_at else 'n/a',
-            unassigned='☒' if self.unassigned_at else 'n/a',
+            assigned="☑" if self.assigned_at else "n/a",
+            unassigned="☒" if self.unassigned_at else "n/a",
         )
 
     def clean(self):
         if self.unassigned_at and not self.assigned_at:
-            raise ValidationError(_('Can not be unassigned without being assigned first!'))
-        
+            raise ValidationError(_("Can not be unassigned without being assigned first!"))
+
         if self.assigned_at and self.unassigned_at:
             if self.unassigned_at < self.assigned_at:
-                raise ValidationError(_('Unassignment timestamp could not be before assignment timestamp!'))
+                raise ValidationError(_("Unassignment timestamp could not be before assignment timestamp!"))
 
     class Meta:
         verbose_name = _("Issued stuff")

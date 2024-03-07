@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db import models
 from django.db.models.functions import Lower
 
@@ -14,9 +18,9 @@ class Tenant(models.Model):
     )
 
     groups = models.ManyToManyField(
-        'auth.Group',
+        "auth.Group",
         blank=True,
-        help_text='The groups which define this tenant.',
+        help_text="The groups which define this tenant.",
     )
 
     # is_super_tenant = models.BooleanField(
@@ -46,12 +50,12 @@ class Tenant(models.Model):
         return f"{self.name}"
 
     class Meta:
-        ordering = [Lower('name')]
+        ordering = [Lower("name")]
 
 
 class TenantAwareModel(models.Model):
     tenant = models.ForeignKey(
-        'tenants.Tenant',
+        "tenants.Tenant",
         on_delete=models.SET_NULL,
         null=True,
         # blank=True,

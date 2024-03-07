@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Thomas Breitner
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 // SCANNER
 // via https://github.com/nimiq/qr-scanner
 // import QrScanner from QR_LIB_URL;

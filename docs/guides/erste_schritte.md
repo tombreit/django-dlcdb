@@ -26,7 +26,7 @@ Wenn für Ihre DLCDB die Anmeldung via LDAP konfiguriert ist, werden bestimmte L
 
 Branding-Einstellungen wie z.B. Logo und Organisationsname sind via *Start › Organization › Branding* vorzunehmen. 
 
-Werden keine Branding-Einstellungen vorgenommen, firmiert die die DLCDB als "ACME Corporation".
+Werden keine Branding-Einstellungen vorgenommen, firmiert die die DLCDB als "DLCDB Corporation".
 
 
 ## Räume anlegen

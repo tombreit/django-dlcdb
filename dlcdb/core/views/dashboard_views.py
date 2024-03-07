@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import json
 from collections import defaultdict
 from django.views.generic import TemplateView
@@ -25,12 +29,12 @@ def get_chartjs_data(request, record_type_name):
         latest_year = int(f"{latest_datetime:%Y}")
         latest_month = int(f"{latest_datetime:%m}")
 
-        for year in range(earliest_year, latest_year+1):
+        for year in range(earliest_year, latest_year + 1):
             if year == earliest_year:
                 for month in range(earliest_month, 13):
                     date_keys_dict[f"{year}-{month}"]
             elif year == latest_year:
-                for month in range(1, latest_month+1):
+                for month in range(1, latest_month + 1):
                     date_keys_dict[f"{year}-{month}"]
             else:
                 for month in range(1, 13):
@@ -46,7 +50,9 @@ def get_chartjs_data(request, record_type_name):
         date_keys_dict = _populate_date_range(earliest.created_at, latest.created_at)
 
         for record in qs:
-            valid_from_to = _populate_date_range(record.created_at, record.effective_until if record.effective_until else latest.created_at)
+            valid_from_to = _populate_date_range(
+                record.created_at, record.effective_until if record.effective_until else latest.created_at
+            )
             valid_from_to = list(valid_from_to.keys())
 
             for valid_datestamp in valid_from_to:
@@ -59,10 +65,12 @@ def get_chartjs_data(request, record_type_name):
 
         data = []
         for date, devices in date_keys_dict.items():
-            data.append({
-                "x": date,
-                "y": len(devices),
-            })
+            data.append(
+                {
+                    "x": date,
+                    "y": len(devices),
+                }
+            )
     else:
         data = None
 
@@ -71,7 +79,7 @@ def get_chartjs_data(request, record_type_name):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    template_name = 'admin/dashboard.html'
+    template_name = "admin/dashboard.html"
 
     @staticmethod
     def create_tile(*, model_name, url, chart_data_url=None):
@@ -82,7 +90,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         obj_notes_count = None
         obj_count = ModelClass.objects.all().count()
-        human_model_name = ModelClass._meta.verbose_name_plural if obj_count >=2 else ModelClass._meta.verbose_name
+        human_model_name = ModelClass._meta.verbose_name_plural if obj_count >= 2 else ModelClass._meta.verbose_name
         model_class_icon = get_icon_for_class(model_name)
 
         if hasattr(ModelClass, "note"):
@@ -95,7 +103,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         elif model_name == "core.inventory":
             obj_count = ModelClass.objects.filter(is_active=True).first()
 
-        template = 'admin/dashboard_tile.html'
+        template = "admin/dashboard_tile.html"
         context = {
             "css_classes": "btn btn-lg btn-{}".format("warning" if obj_notes_count else "primary"),
             "url": reverse_lazy(url),
@@ -108,14 +116,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "chart_data_url": chart_data_url,
         }
 
-        if not any([
-            model_name == "core.device",
-            model_name == "core.lentrecord",
-            model_name == "core.licencerecord",
-        ]):
-            context.update({
-                "badge": get_has_note_badge(obj_type=model_name, has_note=obj_notes_count) if obj_notes_count else "",
-            })
+        if not any(
+            [
+                model_name == "core.device",
+                model_name == "core.lentrecord",
+                model_name == "core.licencerecord",
+            ]
+        ):
+            context.update(
+                {
+                    "badge": get_has_note_badge(obj_type=model_name, has_note=obj_notes_count)
+                    if obj_notes_count
+                    else "",
+                }
+            )
 
         return render_to_string(template, context)
 
@@ -137,9 +151,11 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             ),
         ]
 
-        context.update(dict(
-            record_fraction_data=json.dumps(stats.get_record_fraction_data()),
-            device_type_data=json.dumps(stats.get_device_type_data()),
-            tiles=tiles,
-        ))
+        context.update(
+            dict(
+                record_fraction_data=json.dumps(stats.get_record_fraction_data()),
+                device_type_data=json.dumps(stats.get_device_type_data()),
+                tiles=tiles,
+            )
+        )
         return context

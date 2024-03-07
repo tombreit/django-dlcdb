@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Thomas Breitner
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 /* Hide initially populated device field for add_form when called with a device */
 
 document.addEventListener("DOMContentLoaded", function(event) {

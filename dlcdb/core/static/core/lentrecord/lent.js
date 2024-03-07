@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Thomas Breitner
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 document.addEventListener("DOMContentLoaded", function(event) {
 
     b = document.getElementsByTagName("body")[0]

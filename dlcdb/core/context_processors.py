@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from operator import itemgetter
 from dataclasses import dataclass
 from django.contrib import messages
@@ -18,6 +22,7 @@ def hints(request):
     @dataclass
     class StickyMessage:
         """Custom message class for our sticky messages."""
+
         level: str
         msg: str
         cta_link: str
@@ -25,19 +30,21 @@ def hints(request):
 
         def get_formatted_msg(self) -> str:
             """Build a html safe message with a call-to-action link."""
-            return format_html("{} <a href='{}'>{}</a>",
+            return format_html(
+                "{} <a href='{}'>{}</a>",
                 self.msg,
                 self.cta_link,
                 self.cta_text,
             )
 
-    rooms_changelist_url = reverse('admin:core_room_changelist')
+    rooms_changelist_url = reverse("admin:core_room_changelist")
 
-    if not any([
-        request.path_info.startswith("/admin/login/"),
-        request.path_info.startswith("/admin/logout/"),
-    ]):
-
+    if not any(
+        [
+            request.path_info.startswith("/admin/login/"),
+            request.path_info.startswith("/admin/logout/"),
+        ]
+    ):
         # Make this queryset tenant aware
         qs = Device.objects.none()
 
@@ -61,7 +68,6 @@ def hints(request):
             )
 
         if Room.objects.exists():
-
             if not Room.objects.filter(is_external=True).exists():
                 sticky_messages.append(
                     StickyMessage(
@@ -103,7 +109,7 @@ def hints(request):
 
 # https://github.com/apache/airavata-django-portal/blob/0e2736ba1e72d24fa47b1699a11cbda4dc3fcc4c/django_airavata/context_processors.py#L99
 def nav(request):
-    nav_items =[]
+    nav_items = []
     dlcdb_apps = [app for app in apps.get_app_configs()]
 
     def _get_is_active():
@@ -119,7 +125,9 @@ def nav(request):
         #             # 'active_prefixes' is optional, and if not specified, assume
         #             # current item is active
         #             nav_item['active'] = True
-        raise NotImplementedError("Function _get_is_active to retrieve the active navigation entry is not implemented (yet).")
+        raise NotImplementedError(
+            "Function _get_is_active to retrieve the active navigation entry is not implemented (yet)."
+        )
 
     def _get_has_permission(user, applabel, permission):
         if not all([user, applabel, permission]):
@@ -153,6 +161,7 @@ def nav(request):
             if show_condition:
                 if show_condition == "active_inventory_exists":
                     from dlcdb.core.models.inventory import Inventory
+
                     active_inventory_exists = Inventory.objects.active_inventory()
                     if not active_inventory_exists:
                         continue
@@ -167,5 +176,5 @@ def nav(request):
                 }
                 nav_items.append(nav_item)
 
-    nav_items = sorted(nav_items, key=itemgetter('order'))
+    nav_items = sorted(nav_items, key=itemgetter("order"))
     return {"nav_items": nav_items}

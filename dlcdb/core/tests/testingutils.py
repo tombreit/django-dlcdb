@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.test import TestCase as DjangoTestCase
 
 
@@ -16,5 +20,6 @@ class NoMigrationsTestCase(DjangoTestCase):
 
     def __init__(self, *args, **kw):
         from django.conf import settings
+
         settings.MIGRATION_MODULES = DisableMigrations()
         super(DjangoTestCase, self).__init__(*args, **kw)

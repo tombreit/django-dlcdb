@@ -1,6 +1,10 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 
-from ..models import Record, Inventory
+from ..models import Inventory
 
 
 # class RecordInline(admin.TabularInline):
@@ -14,9 +18,10 @@ from ..models import Record, Inventory
 
 class InventoryAdmin(admin.ModelAdmin):
     model = Inventory
-    list_display = ['name', 'is_active']
+    list_display = ["name", "is_active"]
     # inlines = [
     #     RecordInline,
     # ]
+
 
 admin.site.register(Inventory, InventoryAdmin)

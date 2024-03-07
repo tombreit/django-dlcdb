@@ -1,5 +1,8 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db.models import Q
-from django.db.models import Count
 
 import django_filters
 
@@ -7,14 +10,14 @@ from dlcdb.core.models import Person
 
 
 class PersonFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method='custom_user_search',label="Search")
+    search = django_filters.CharFilter(method="custom_user_search", label="Search")
 
     class Meta:
         model = Person
         fields = [
             # 'first_name',
             # 'last_name',
-            'search'
+            "search"
         ]
 
     def custom_user_search(self, queryset, name, value):
@@ -28,17 +31,13 @@ class PersonFilter(django_filters.FilterSet):
         #     .order_by("-assignments_count")  # .order_by("-assignedthing")
         # )
 
-        qs = (Person.smallstuff_person_objects.order_by("-assigned_things_count"))
+        qs = Person.smallstuff_person_objects.order_by("-assigned_things_count")
 
         if not value:
             qs = Person.objects.none()
         elif value == "*":
             qs = qs
         else:
-            qs = qs.filter(
-                Q(first_name__icontains=value) | 
-                Q(last_name__icontains=value) | 
-                Q(email__icontains=value)
-            )
+            qs = qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))
 
         return qs

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
@@ -6,8 +10,9 @@ class CustomUserQuerySet(models.QuerySet):
     # Available only on QuerySet: delete() makes no sense on manager
     def delete(self):
         for obj in self:
-            obj.is_active=False
+            obj.is_active = False
             obj.save()
+
     delete.queryset_only = True
 
 
@@ -23,7 +28,6 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractUser):
-
     # username_validator = UnicodeUsernameValidator()
     # username = models.CharField(
     #     _('username'),

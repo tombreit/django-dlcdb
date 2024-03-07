@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
@@ -8,39 +12,41 @@ from ..forms.adminactions_forms import RelocateActionForm
 from ..models import Device, InRoomRecord, Record
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class DevicesRelocateView(FormView):
-    success_url = reverse_lazy('admin:core_device_changelist')
-    template_name = 'core/actions/relocate.html'
+    success_url = reverse_lazy("admin:core_device_changelist")
+    template_name = "core/actions/relocate.html"
     form_class = RelocateActionForm
 
     def get_form_kwargs(self):
         """Added keyword 'is_superuser' for instantiating and validating the form."""
         kwargs = super().get_form_kwargs()
-        kwargs['is_superuser'] = self.request.user.is_superuser
+        kwargs["is_superuser"] = self.request.user.is_superuser
         return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
 
-        device_ids = self.request.GET.get('ids').split(",")
+        device_ids = self.request.GET.get("ids").split(",")
         devices = Device.objects.filter(pk__in=device_ids)
 
-        initial.update({
-            'user': self.request.user,
-            'device_ids': device_ids,
-            'devices': devices,
-            'ct': self.request.GET.get('ct'),
-        })
+        initial.update(
+            {
+                "user": self.request.user,
+                "device_ids": device_ids,
+                "devices": devices,
+                "ct": self.request.GET.get("ct"),
+            }
+        )
 
         return initial
 
     def form_valid(self, form):
-        selected_instances = self.get_initial().get('devices')
-        user = self.get_initial().get('user')
-        new_room = form.cleaned_data.get('new_room')
-        new_tenant = form.cleaned_data.get('new_tenant')
-        new_device_type = form.cleaned_data.get('new_device_type')
+        selected_instances = self.get_initial().get("devices")
+        user = self.get_initial().get("user")
+        new_room = form.cleaned_data.get("new_room")
+        new_tenant = form.cleaned_data.get("new_tenant")
+        new_device_type = form.cleaned_data.get("new_device_type")
 
         self.relocate_devices(selected_instances, new_room, user, new_tenant, new_device_type)
         return super().form_valid(form)
@@ -71,7 +77,9 @@ class DevicesRelocateView(FormView):
                     update_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - just updating the room for the current LENT record."
                     messages.add_message(self.request, messages.INFO, update_msg)
 
-                elif hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.REMOVED:
+                elif (
+                    hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.REMOVED
+                ):
                     error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - this device should not be here anymore. Not relocating this device!"
                     messages.add_message(self.request, messages.WARNING, error_msg)
                     continue

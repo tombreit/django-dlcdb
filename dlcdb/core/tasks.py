@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import logging
 import huey
 from huey.contrib.djhuey import db_periodic_task, lock_task

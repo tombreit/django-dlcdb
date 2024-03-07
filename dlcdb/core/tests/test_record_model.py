@@ -1,13 +1,14 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 import pytest
 from django.core.exceptions import ValidationError
-from dlcdb.core.models import (
-    Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord
-)
+from dlcdb.core.models import Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord
 
 
 @pytest.mark.django_db
 def test_is_active(room, lentable_device):
-
     assert Record.objects.filter(device=lentable_device).count() == 0
 
     # print("record: ", Record.objects.filter(device=lentable_device))
@@ -34,7 +35,6 @@ def test_is_active(room, lentable_device):
 
 @pytest.mark.django_db
 def test_get_current_record(lentable_device, room):
-
     # ein frisch angelegtes Device hat keinen Record
     assert lentable_device.active_record is None
 
@@ -46,7 +46,7 @@ def test_get_current_record(lentable_device, room):
 
     # print("current_record: ", type(current_record), current_record.__class__)
 
-    # Tests if current_record is not an interable    
+    # Tests if current_record is not an interable
     with pytest.raises(TypeError):
         iter(current_record)
 
@@ -61,7 +61,6 @@ def test_get_current_record(lentable_device, room):
 
 @pytest.mark.django_db
 def test_has_active_record_set(room, lentable_device):
-
     inroom = InRoomRecord.objects.create(device=lentable_device, room=room)
 
     assert lentable_device.active_record.pk == inroom.pk
@@ -82,15 +81,9 @@ def test_get_proxy_instance(plain_device):
     """
     record = InRoomRecord.objects.create(device=plain_device)
 
-    assert isinstance(
-        record.get_proxy_instance(),
-        InRoomRecord
-    )
+    assert isinstance(record.get_proxy_instance(), InRoomRecord)
 
-    assert not isinstance(
-        record.get_proxy_instance(),
-        LentRecord
-    )
+    assert not isinstance(record.get_proxy_instance(), LentRecord)
 
     assert record.get_proxy_instance().__class__ != Record
 
@@ -99,19 +92,17 @@ def test_get_proxy_instance(plain_device):
 @pytest.mark.skip
 @pytest.mark.django_db
 def test_is_proxy_model(plain_device):
-
     # Creating records via proxy records interface is allowed:
     proxy_record = InRoomRecord.objects.create(device=plain_device)
     assert proxy_record._meta.proxy
 
     # Creating plain record instances is not allowed:
     with pytest.raises(ValidationError):
-        Record.objects.create(device=plain_device, record_type='ORDERED')
+        Record.objects.create(device=plain_device, record_type="ORDERED")
 
 
 @pytest.mark.django_db
 def test_removed_or_lost_record_has_no_room(room, device_1):
-
     inroom = InRoomRecord.objects.create(device=device_1, room=room)
     # print(f"{device_1.active_record.room=}")
     assert inroom.room == room
@@ -119,8 +110,8 @@ def test_removed_or_lost_record_has_no_room(room, device_1):
 
     lost = LostRecord.objects.create(device=device_1)
     # print(f"{device_1.active_record.room=}")
-    assert lost.room == None
-    assert device_1.active_record.room == None
+    assert lost.room is None
+    assert device_1.active_record.room is None
 
     inroom2 = InRoomRecord.objects.create(device=device_1, room=room)
     # print(f"{device_1.active_record.room=}")
@@ -129,5 +120,5 @@ def test_removed_or_lost_record_has_no_room(room, device_1):
 
     removed = RemovedRecord.objects.create(device=device_1)
     # print(f"{device_1.active_record.room=}")
-    assert removed.room == None
-    assert device_1.active_record.room == None
+    assert removed.room is None
+    assert device_1.active_record.room is None

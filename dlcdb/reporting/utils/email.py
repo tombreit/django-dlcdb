@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from smtplib import SMTPException
 
 from django.conf import settings
@@ -15,24 +19,22 @@ def build_report_email(notification=None, report=None, record_collection=None):
     """
 
     domain = Site.objects.get_current().domain
-    email_template = get_template('reporting/email_notification_body.txt')
-    changelist_url = 'https://{}{}'.format(domain, reverse(get_admin_url_for_recordtype(notification.event)))
+    email_template = get_template("reporting/email_notification_body.txt")
+    changelist_url = "https://{}{}".format(domain, reverse(get_admin_url_for_recordtype(notification.event)))
 
     email_context = {
-        'changelist_url': changelist_url,
-        'record_collection': record_collection,
-        'notification': notification,
-        'report': report,
+        "changelist_url": changelist_url,
+        "record_collection": record_collection,
+        "notification": notification,
+        "report": report,
     }
 
     if record_collection.records:
-        subject = '[dlcdb] {}'.format(record_collection.title_repr)
+        subject = "[dlcdb] {}".format(record_collection.title_repr)
     else:
-        subject = '[dlcdb] {}: No records affected'.format(notification.__str__())
-        email_context.update(
-            {'msg': 'No records affected by this notification'}
-        )
-        
+        subject = "[dlcdb] {}: No records affected".format(notification.__str__())
+        email_context.update({"msg": "No records affected by this notification"})
+
     if settings.DEBUG:
         subject = subject.encode("ascii", "ignore")
 
@@ -45,7 +47,7 @@ def build_report_email(notification=None, report=None, record_collection=None):
         to=[notification.recipient],
         cc=[notification.recipient_cc] if notification.recipient_cc else [],
     )
-    if hasattr(report, 'spreadsheet'):
+    if hasattr(report, "spreadsheet"):
         email_obj.attach_file(report.spreadsheet.path)
 
     if email_obj:
@@ -58,8 +60,8 @@ def build_overdue_lender_email(records):
     """
     Sends out emails to individual overdue lenders.
     """
-    email_template_subject = get_template('reporting/email_overdue_lenders_subject.txt')
-    email_template_body = get_template('reporting/email_overdue_lenders_body.txt')
+    email_template_subject = get_template("reporting/email_overdue_lenders_subject.txt")
+    email_template_body = get_template("reporting/email_overdue_lenders_body.txt")
 
     person = records[0].person
 
@@ -67,14 +69,14 @@ def build_overdue_lender_email(records):
     to = settings.DEFAULT_FROM_EMAIL if settings.REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT else person.email
 
     email_context = {
-        'subject_prefix': settings.EMAIL_SUBJECT_PREFIX,
-        'records': records,
-        'person': person,
-        'records_count': len(records),
-        'contact_email': settings.DEFAULT_FROM_EMAIL,
+        "subject_prefix": settings.EMAIL_SUBJECT_PREFIX,
+        "records": records,
+        "person": person,
+        "records_count": len(records),
+        "contact_email": settings.DEFAULT_FROM_EMAIL,
     }
     subject = email_template_subject.render(email_context)
-    body = email_template_body.render(email_context) 
+    body = email_template_body.render(email_context)
 
     email_obj = mail.EmailMessage(
         subject=subject,

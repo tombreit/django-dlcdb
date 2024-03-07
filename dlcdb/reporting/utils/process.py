@@ -1,4 +1,8 @@
-import uuid 
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+import uuid
 from collections import namedtuple
 from datetime import timedelta
 
@@ -21,24 +25,27 @@ from .email import build_overdue_lender_email, send_email
 
 def get_affected_records(notification, now):
     """
-    Get all items/devices which are relevant for a new report. 
+    Get all items/devices which are relevant for a new report.
     Constraints:
         * condition must match (eg. has_sap_id)
-        * do not report records which were reported in an earlier report: 
+        * do not report records which were reported in an earlier report:
           record.created_at must be greater than current time minus interval
     """
 
     from ...core.models import Record
     from ..models import Notification
 
-    ReportRecords = namedtuple('ReportRecords', [
-        'records',
-        'text_repr',
-        'file_repr',
-        'title_repr',
-        'created_at',
-        'last_run',
-    ])
+    ReportRecords = namedtuple(
+        "ReportRecords",
+        [
+            "records",
+            "text_repr",
+            "file_repr",
+            "title_repr",
+            "created_at",
+            "last_run",
+        ],
+    )
 
     records = text_repr = file_repr = title_repr = None
     condition = notification.condition
@@ -58,58 +65,38 @@ def get_affected_records(notification, now):
         created_at__lte=now,
     )
 
-    _records = (
-        Record
-        .objects
-        .active_records()
-        .filter(
-            record_type=notification.event,
-        )
+    _records = Record.objects.active_records().filter(
+        record_type=notification.event,
     )
 
     if condition == Notification.HAS_SAP_ID:
         records = (
-            _records
-            .filter(since_last_run_filter)
+            _records.filter(since_last_run_filter)
             .exclude(device__sap_id__isnull=True)
-            .exclude(device__sap_id__exact='')
+            .exclude(device__sap_id__exact="")
         )
     elif condition == Notification.IS_PC:
-        records = (
-            _records
-            .filter(since_last_run_filter)
-            .filter(device__device_type__prefix='pc')
-        )
+        records = _records.filter(since_last_run_filter).filter(device__device_type__prefix="pc")
     elif condition == Notification.IS_NOTEBOOK:
-        records = (
-            _records
-            .filter(since_last_run_filter)
-            .filter(device__device_type__prefix='ntb')
-        )
+        records = _records.filter(since_last_run_filter).filter(device__device_type__prefix="ntb")
     elif condition == Notification.IS_PC_OR_NOTEBOOK:
-        records = (
-            _records
-            .filter(since_last_run_filter)
-            .filter(Q(device__device_type__prefix='pc') | Q(device__device_type__prefix='ntb'))
+        records = _records.filter(since_last_run_filter).filter(
+            Q(device__device_type__prefix="pc") | Q(device__device_type__prefix="ntb")
         )
     elif condition == Notification.IS_NEW_PC_OR_NOTEBOOK:
         records = (
-            _records
-            .filter(since_last_run_filter)
-            .filter(Q(device__device_type__prefix='pc') | Q(device__device_type__prefix='ntb'))
-            .exclude(device__edv_id__exact='')
-            .exclude(device__serial_number__exact='')
-            .exclude(device__mac_address__exact='')
+            _records.filter(since_last_run_filter)
+            .filter(Q(device__device_type__prefix="pc") | Q(device__device_type__prefix="ntb"))
+            .exclude(device__edv_id__exact="")
+            .exclude(device__serial_number__exact="")
+            .exclude(device__mac_address__exact="")
         )
     elif condition == Notification.LENT_IS_OVERDUE:
         records = (
-            _records
-            .filter(
-                ~Q(lent_desired_end_date__isnull=True) | Q(lent_end_date__isnull=True)
-            )
+            _records.filter(~Q(lent_desired_end_date__isnull=True) | Q(lent_end_date__isnull=True))
             .annotate(
                 lent_desired_end_date_with_tolerance=ExpressionWrapper(
-                    F('lent_desired_end_date') + timedelta(days=LENT_OVERDUE_TOLERANCE_DAYS), output_field=DateField()
+                    F("lent_desired_end_date") + timedelta(days=LENT_OVERDUE_TOLERANCE_DAYS), output_field=DateField()
                 )
             )
             .filter(
@@ -117,9 +104,9 @@ def get_affected_records(notification, now):
             )
         )
 
-    if records: 
+    if records:
         # Build a stringified title.
-        title_repr = 'DLCDB Report: from {from_date} to {to_date} for {event} ({count})'.format(
+        title_repr = "DLCDB Report: from {from_date} to {to_date} for {event} ({count})".format(
             from_date=_last_run.date(),
             to_date=now.date(),
             event=notification.event,
@@ -127,7 +114,7 @@ def get_affected_records(notification, now):
         )
 
         # title for a spreadsheet should be no more than 31 characters
-        title_repr_spreadsheet = '{event}_{from_date:%Y%m%d}-{to_date:%Y%m%d}'.format(
+        title_repr_spreadsheet = "{event}_{from_date:%Y%m%d}-{to_date:%Y%m%d}".format(
             from_date=_last_run.date(),
             to_date=now.date(),
             event=notification.event,
@@ -150,7 +137,7 @@ def get_affected_records(notification, now):
     )
 
 
-def create_report_if_needed(notification_pk, caller='huey'):
+def create_report_if_needed(notification_pk, caller="huey"):
     """
     Check if we want to create a report for this notification.
     """
@@ -161,17 +148,20 @@ def create_report_if_needed(notification_pk, caller='huey'):
     if not notification.active:
         return
 
-    Result = namedtuple('Result', [
-        'record_collection',
-        'report',
-    ])
+    Result = namedtuple(
+        "Result",
+        [
+            "record_collection",
+            "report",
+        ],
+    )
 
     _now = timezone.localtime(timezone.now())
     report = None
     record_collection = get_affected_records(notification, _now)
 
     if record_collection.records:
-        filename = '{}_{}.xlsx'.format(slugify(record_collection.title_repr), uuid.uuid1())
+        filename = "{}_{}.xlsx".format(slugify(record_collection.title_repr), uuid.uuid1())
         report = Report(
             notification=notification,
             body=record_collection.text_repr,
@@ -180,12 +170,12 @@ def create_report_if_needed(notification_pk, caller='huey'):
         )
         report.save()
 
-    if caller == 'huey':
+    if caller == "huey":
         notification.last_run = _now
 
         User = get_user_model()
         huey_user, _created = User.objects.get_or_create(
-            username='huey',
+            username="huey",
             is_active=False,
         )
 
@@ -212,21 +202,21 @@ def create_overdue_lenders_emails(*, caller=None):
     # Creating a custom notification class, as this is not implemented
     # via models and/or admins
     LenderNotification = namedtuple(
-        'LenderNotification', 
+        "LenderNotification",
         [
-            'active',
-            'recipient',
-            'recipient_cc',
-            'event',
-            'condition',
-            'last_run',
-        ]
+            "active",
+            "recipient",
+            "recipient_cc",
+            "event",
+            "condition",
+            "last_run",
+        ],
     )
 
     # ...and instanciate this class
     lender_notification = LenderNotification(
         active=settings.REPORTING_NOTIFY_OVERDUE_LENDERS,
-        recipient='',
+        recipient="",
         recipient_cc=settings.DEFAULT_FROM_EMAIL,
         event=Record.LENT,
         condition=Notification.LENT_IS_OVERDUE,
@@ -237,7 +227,7 @@ def create_overdue_lenders_emails(*, caller=None):
     lent_overdue_record_collection = get_affected_records(lender_notification, _now)
 
     # group overdue records for lender/person: get pks for persons with overdue lendings
-    lenders_pks = lent_overdue_record_collection.records.values_list('person__pk', flat=True)
+    lenders_pks = lent_overdue_record_collection.records.values_list("person__pk", flat=True)
 
     overdue_emails = []
     for lender_pk in set(lenders_pks):

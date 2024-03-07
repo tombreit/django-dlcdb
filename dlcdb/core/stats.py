@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.db.models import Count
 
 from .models.device import Device
@@ -21,17 +25,16 @@ def get_record_fraction_data():
     removed_records_count = RemovedRecord.objects.filter(is_active=True).count()
 
     record_fraction_data = dict(
-        labels=['Lokalisiert', 'Verliehen', 'Nicht auffindbar', 'Entfernt'],
+        labels=["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"],
         datasets=[
             dict(
-                label='Geräte nach Verbleib',
+                label="Geräte nach Verbleib",
                 data=[room_records_count, lent_records_count, lost_records_count, removed_records_count],
                 # backgroundColor=[
                 #     "#FFCE56",
                 #     "#FF6384",
                 #     "#36A2EB",
                 #     "red",
-
                 # ],
                 # hoverBackgroundColor=[
                 #     "#FFCE56",
@@ -40,7 +43,7 @@ def get_record_fraction_data():
                 #     "red",
                 # ]
             )
-        ]
+        ],
     )
     return record_fraction_data
 
@@ -51,26 +54,19 @@ def get_device_type_data():
     :return:
     """
 
-    device_type_data = dict(labels=[], datasets=[dict(label='Geräte nach Typ (>10)', data=[])])
+    device_type_data = dict(labels=[], datasets=[dict(label="Geräte nach Typ (>10)", data=[])])
 
     # for elem in DeviceType.objects.all():
     #     if Device.objects.filter(device_type=elem).count() > 5:
     #         device_type_data['labels'].append(elem.name)
     #         device_type_data['datasets'][0]['data'].append(Device.objects.filter(device_type=elem).count())
 
-    device_types_qs = (
-        DeviceType.objects
-        .annotate(
-            count=Count('device')
-        )
-        .exclude(count__lt=10)
-        .order_by('-count')
-    )
+    device_types_qs = DeviceType.objects.annotate(count=Count("device")).exclude(count__lt=10).order_by("-count")
 
     for dt in device_types_qs:
         # print(f"{dt.name}: {dt.count}")
-        device_type_data['labels'].append(dt.name)
-        device_type_data['datasets'][0]['data'].append(dt.count)
+        device_type_data["labels"].append(dt.name)
+        device_type_data["datasets"][0]["data"].append(dt.count)
 
     return device_type_data
 
@@ -81,9 +77,10 @@ def get_devices_by_series_data():
     :return:
     """
     from django.db.models import Count
-    qs = Device.objects.values('series').annotate(total=Count('series'))
 
-    data = dict(labels=[], datasets=[dict(label='Geräte nach Typ', data=[])])
+    qs = Device.objects.values("series").annotate(total=Count("series"))
+
+    data = dict(labels=[], datasets=[dict(label="Geräte nach Typ", data=[])])
     for elem in qs:
-        data['labels'].append(elem['series'])
-        data['datasets'][0]['data'].append(elem['count'])
+        data["labels"].append(elem["series"])
+        data["datasets"][0]["data"].append(elem["count"])

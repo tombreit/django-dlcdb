@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -11,7 +17,7 @@
 <body>
 <header>
     <img
-        src="{% if branding.organization_logo_black %}{% get_media_prefix %}{{ branding.organization_logo_black }}{% else %}{% static 'branding/logo_acme_black.svg' %}{% endif %}"
+        src="{% if branding.organization_logo_black %}{% get_media_prefix %}{{ branding.organization_logo_black }}{% else %}{% static 'branding/dlcdb_logo_black.svg' %}{% endif %}"
         alt="{{ branding.organization_abbr }}"
     >
 </header>
@@ -43,7 +49,7 @@
                 </td>
                 <td>
                     <img 
-                        src="{% if branding.organization_figurative_mark %}{% get_media_prefix %}{{ branding.organization_figurative_mark }}{% else %}{% static 'branding/logo_acme_black.svg' %}{% endif %}"
+                        src="{% if branding.organization_figurative_mark %}{% get_media_prefix %}{{ branding.organization_figurative_mark }}{% else %}{% static 'branding/dlcdb_logo_black.svg' %}{% endif %}"
                         alt=""
                     >
                 </td>

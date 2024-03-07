@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from dataclasses import dataclass, field
 
 from django.urls import reverse
@@ -14,6 +18,7 @@ class UIRecordActionSnippetContext:
     add_links: Returns a list of dicts each representing an add link in order to display
     dropdowns to create records for a given device.
     """
+
     device_obj: object
     for_view: str
     record_infos: list = field(init=False)
@@ -29,7 +34,6 @@ class UIRecordActionSnippetContext:
         record_infos = []
 
         if self.active_record:
-
             inroom_url = None
             if self.active_record.room:
                 if self.for_view == "inventory":
@@ -38,12 +42,14 @@ class UIRecordActionSnippetContext:
                     inroom_url = f"{reverse('admin:core_device_changelist')}?active_record__room__id__exact={self.active_record.room.id}"
 
             if self.active_record.room:
-                record_infos.append(dict(
-                    css_classes="btn btn-info",
-                    title="{text} {obj}".format(text=_('In room'), obj=self.active_record.room.number),
-                    url=inroom_url,
-                    label=self.active_record.room.number,
-                ))
+                record_infos.append(
+                    dict(
+                        css_classes="btn btn-info",
+                        title="{text} {obj}".format(text=_("In room"), obj=self.active_record.room.number),
+                        url=inroom_url,
+                        label=self.active_record.room.number,
+                    )
+                )
 
             # Common infos for all record types
             record_type = self.active_record.record_type
@@ -91,20 +97,20 @@ class UIRecordActionSnippetContext:
             record_infos.append(record_type_info)
 
         else:
-            record_infos.append(dict(
-                label="No current record",
-                css_classes="btn btn-warning disabled",
-            ))
+            record_infos.append(
+                dict(
+                    label="No current record",
+                    css_classes="btn btn-warning disabled",
+                )
+            )
 
         return record_infos
-
 
     def _add_links(self):
         add_links = []
 
         if self.active_record:
             for record_value, record_label in Record.RECORD_TYPE_CHOICES:
-
                 if record_value == Record.ORDERED:
                     # We do not expose this Record type for now
                     continue
@@ -129,24 +135,30 @@ class UIRecordActionSnippetContext:
                     continue
                 elif record_value == Record.LENT and self.device_obj.is_lentable:
                     # Device is available for rent
-                    add_links.append(dict(
-                        url=f"{reverse('admin:core_lentrecord_changelist')}?q={self.device_obj.uuid}",
-                        label=_('Lend'),
-                    ))
+                    add_links.append(
+                        dict(
+                            url=f"{reverse('admin:core_lentrecord_changelist')}?q={self.device_obj.uuid}",
+                            label=_("Lend"),
+                        )
+                    )
                 elif record_value == Record.LENT and not self.device_obj.is_lentable:
                     continue
                 else:
-                    add_links.append(dict(
-                        label=record_label,
-                        url=f"{Record.get_proxy_model_by_record_type(record_value).get_admin_action_url()}?device={self.device_pk}"
-                    ))
+                    add_links.append(
+                        dict(
+                            label=record_label,
+                            url=f"{Record.get_proxy_model_by_record_type(record_value).get_admin_action_url()}?device={self.device_pk}",
+                        )
+                    )
 
         else:
             # Currently no active record set (new device).
             # Only allow a first INROOM record.
-            add_links.append(dict(
-                url=f'{reverse("admin:core_inroomrecord_add")}?device={self.device_pk}',
-                label=_('Locate'),
-            ))
+            add_links.append(
+                dict(
+                    url=f'{reverse("admin:core_inroomrecord_add")}?device={self.device_pk}',
+                    label=_("Locate"),
+                )
+            )
 
         return add_links

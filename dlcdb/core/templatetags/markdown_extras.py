@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import template
 from django.template.defaultfilters import stringfilter
 
@@ -9,7 +13,6 @@ register = template.Library()
 @register.filter
 @stringfilter
 def from_markdown(value):
-
     config = {
         # 'smarty': [
         #     ('smart_angled_quotes', True),
@@ -29,9 +32,9 @@ def from_markdown(value):
 
     md = markdown.Markdown(
         extensions=[
-            'smarty',
-            'fenced_code',
-            'admonition',
+            "smarty",
+            "fenced_code",
+            "admonition",
         ],
         extension_configs=config,
     )

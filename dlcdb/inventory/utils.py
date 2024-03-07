@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from collections import namedtuple
 from io import BytesIO
 
@@ -11,12 +15,12 @@ def uuid2qrcode(uuid, infix=None):
     qrcode = namedtuple("qrcode", ["filename", "fileobj"])
 
     uuid = str(uuid)  # Ensure uuid is a string and not an instance of UUID
-    qr_text = '{prefix}{infix}{uuid}'.format(
+    qr_text = "{prefix}{infix}{uuid}".format(
         uuid=uuid,
         prefix=settings.QRCODE_PREFIX,
-        infix=infix if infix else '',
+        infix=infix if infix else "",
     )
-    qr_filename = '{0}.svg'.format(qr_text)
+    qr_filename = "{0}.svg".format(qr_text)
     qr_fileobj = segno.make(qr_text)
 
     _fileobj_io = BytesIO()

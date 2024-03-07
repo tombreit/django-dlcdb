@@ -1,4 +1,9 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import forms
+
 # from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.db import IntegrityError
@@ -7,7 +12,6 @@ from ..utils.bulk_management import import_data
 
 
 class ImporterAdminForm(forms.ModelForm):
-
     def clean(self):
         cleaned_data = super().clean()
         file = cleaned_data.get("file")

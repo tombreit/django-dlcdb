@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: CC0-1.0
+
 .PHONY: requirements tests format lint docs
 
 # include .env

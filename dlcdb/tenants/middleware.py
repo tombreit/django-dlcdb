@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.utils.deprecation import MiddlewareMixin
 
 from .shortcuts import get_current_tenant
