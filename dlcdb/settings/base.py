@@ -42,7 +42,6 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.sites",
 ]
@@ -56,6 +55,7 @@ THIRD_PARTY_APPS = [
     "django_htmx",
     "huey.contrib.djhuey",
     "simple_history",
+    "whitenoise.runserver_nostatic",
 ]
 LOCAL_APPS = [
     "dlcdb.accounts",
@@ -117,6 +117,9 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Using our customized WhiteNoiseMiddleware to serve additional static files (here: /docs/)
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    "dlcdb.core.middleware.MoreWhiteNoiseMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -249,6 +252,16 @@ STATIC_URL = "/static/"
 MEDIA_ROOT = str(MEDIA_DIR)
 MEDIA_URL = "/media/"
 
+# http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # "whitenoise.storage.CompressedStaticFilesStorage"
+    },
+}
+
 LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/admin/"
 
@@ -277,20 +290,20 @@ REST_FRAMEWORK = {
 SIMPLE_HISTORY_REVERT_DISABLED = True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
-# http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",  # "whitenoise.storage.CompressedStaticFilesStorage"
-    },
-}
 
 HUEY = SqliteHuey(
     name="dlcdb_huey",
     filename=str(DB_DIR / "huey_task_queue.sqlite3"),
 )
+
+# WhiteNoise
+WHITENOISE_INDEX_FILE = True
+
+# Add extra output directories that WhiteNoise can serve as static files
+# *outside* of `staticfiles`.
+MORE_WHITENOISE = [
+    {"directory": BASE_DIR / "run" / "docs" / "html", "prefix": "docs/"},
+]
 
 # Reporting
 REPORTING_NOTIFY_OVERDUE_LENDERS = env.bool("REPORTING_NOTIFY_OVERDUE_LENDERS", default=True)

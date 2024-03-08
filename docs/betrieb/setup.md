@@ -154,11 +154,6 @@ make docs
 <VirtualHost *:443>
     ServerName dlcdb.fqdn
 
-    Alias /docs /path/to/run/docs/html
-    <Directory /path/to/run/docs/html>
-        Require all granted
-    </Directory>
-
     Alias /media /path/to/data/media
     <Directory /path/to/data/media>
         Require all granted
@@ -197,7 +192,7 @@ Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. d
 Build (this) Documentation:
 
 ```bash
-make -C docs html
+make docs
 ```
 
 ### Localization
