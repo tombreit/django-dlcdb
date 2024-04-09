@@ -8,7 +8,7 @@ accessible-pygments==0.0.4
     # via pydata-sphinx-theme
 alabaster==0.7.16
     # via sphinx
-asgiref==3.7.2
+asgiref==3.8.1
     # via
     #   django
     #   django-htmx
@@ -19,7 +19,7 @@ babel==2.14.0
     #   sphinx
 beautifulsoup4==4.12.3
     # via pydata-sphinx-theme
-build==1.0.3
+build==1.2.1
     # via pip-tools
 certifi==2024.2.2
     # via requests
@@ -29,13 +29,13 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via pip-tools
-coverage==7.4.3
+coverage==7.4.4
     # via pytest-cov
-crispy-bootstrap4==2023.1
+crispy-bootstrap4==2024.1
     # via django-dlcdb (pyproject.toml)
 distlib==0.3.8
     # via virtualenv
-django==5.0.2
+django==5.0.4
     # via
     #   crispy-bootstrap4
     #   django-appconf
@@ -50,7 +50,7 @@ django==5.0.2
     #   djangorestframework
 django-appconf==1.0.6
     # via django-select2
-django-auth-ldap==4.6.0
+django-auth-ldap==4.8.0
     # via django-dlcdb (pyproject.toml)
 django-crispy-forms==2.1
     # via
@@ -62,15 +62,15 @@ django-environ==0.11.2
     # via django-dlcdb (pyproject.toml)
 django-extensions==3.2.3
     # via django-dlcdb (pyproject.toml)
-django-filter==23.5
+django-filter==24.2
     # via django-dlcdb (pyproject.toml)
-django-htmx==1.17.2
+django-htmx==1.17.3
     # via django-dlcdb (pyproject.toml)
 django-select2==8.1.2
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.5.0
     # via django-dlcdb (pyproject.toml)
-djangorestframework==3.14.0
+djangorestframework==3.15.1
     # via django-dlcdb (pyproject.toml)
 docutils==0.20.1
     # via
@@ -79,7 +79,7 @@ docutils==0.20.1
     #   sphinx
 et-xmlfile==1.1.0
     # via openpyxl
-filelock==3.13.1
+filelock==3.13.3
     # via virtualenv
 huey==2.5.0
     # via django-dlcdb (pyproject.toml)
@@ -95,7 +95,7 @@ jinja2==3.1.3
     # via
     #   myst-parser
     #   sphinx
-markdown==3.5.2
+markdown==3.6
     # via django-dlcdb (pyproject.toml)
 markdown-it-py==3.0.0
     # via
@@ -113,27 +113,27 @@ nodeenv==1.8.0
     # via pre-commit
 openpyxl==3.1.2
     # via django-dlcdb (pyproject.toml)
-packaging==23.2
+packaging==24.0
     # via
     #   build
     #   pydata-sphinx-theme
     #   pytest
     #   sphinx
-pillow==10.2.0
+pillow==10.3.0
     # via django-dlcdb (pyproject.toml)
-pip-tools==7.4.0
+pip-tools==7.4.1
     # via django-dlcdb (pyproject.toml)
 platformdirs==4.2.0
     # via virtualenv
 pluggy==1.4.0
     # via pytest
-pre-commit==3.6.2
+pre-commit==3.7.0
     # via django-dlcdb (pyproject.toml)
-pyasn1==0.5.1
+pyasn1==0.6.0
     # via
     #   pyasn1-modules
     #   python-ldap
-pyasn1-modules==0.3.0
+pyasn1-modules==0.4.0
     # via python-ldap
 pydata-sphinx-theme==0.15.2
     # via sphinx-book-theme
@@ -146,12 +146,12 @@ pyproject-hooks==1.0.0
     # via
     #   build
     #   pip-tools
-pytest==8.0.2
+pytest==8.1.1
     # via
     #   django-dlcdb (pyproject.toml)
     #   pytest-cov
     #   pytest-django
-pytest-cov==4.1.0
+pytest-cov==5.0.0
     # via django-dlcdb (pyproject.toml)
 pytest-django==4.8.0
     # via django-dlcdb (pyproject.toml)
@@ -159,15 +159,13 @@ python-ldap==3.4.4
     # via django-auth-ldap
 python-magic==0.4.27
     # via django-dlcdb (pyproject.toml)
-pytz==2024.1
-    # via djangorestframework
 pyyaml==6.0.1
     # via
     #   myst-parser
     #   pre-commit
 requests==2.31.0
     # via sphinx
-ruff==0.2.2
+ruff==0.3.5
     # via django-dlcdb (pyproject.toml)
 segno==1.6.1
     # via django-dlcdb (pyproject.toml)
@@ -204,13 +202,13 @@ sqlparse==0.4.4
     # via
     #   django
     #   django-debug-toolbar
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via pydata-sphinx-theme
 urllib3==2.2.1
     # via requests
 virtualenv==20.25.1
     # via pre-commit
-wheel==0.42.0
+wheel==0.43.0
     # via pip-tools
 whitenoise==6.6.0
     # via django-dlcdb (pyproject.toml)

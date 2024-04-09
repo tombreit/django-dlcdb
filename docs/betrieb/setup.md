@@ -202,3 +202,7 @@ make docs
 # ...poedit locale/de/LC_MESSAGES/django.po...
 ./manage.py compilemessages --ignore=.venv/*
 ```
+
+### Requirements
+
+(Re-)Build requirements via `make requirements`.

@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "Django==5.0.2",
+    "Django==5.0.4",
     "django-select2",
     "django-environ",
     "django-crispy-forms",
