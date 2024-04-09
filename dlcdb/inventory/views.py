@@ -90,43 +90,49 @@ def inventorize_room(request, pk):
     tenant = request.tenant
     is_superuser = request.user.is_superuser
 
-    devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(
-        pk, tenant=tenant, is_superuser=is_superuser
-    )
+    if not current_inventory:
+        context = {
+            "current_inventory": current_inventory,
+        }
 
-    # Allow only adding devices which are not already present in this room:
-    add_devices_qs = Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser).exclude(
-        active_record__room=pk
-    )
+    else:
+        devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(
+            pk, tenant=tenant, is_superuser=is_superuser
+        )
 
-    device_add_form = DeviceAddForm(
-        add_devices_qs=add_devices_qs,
-        initial={
-            "room": pk,
-        },
-    )
+        # Allow only adding devices which are not already present in this room:
+        add_devices_qs = Inventory.objects.tenant_aware_device_objects(
+            tenant=tenant, is_superuser=is_superuser
+        ).exclude(active_record__room=pk)
 
-    inventory_progress = current_inventory.get_inventory_progress(
-        tenant=tenant,
-        is_superuser=is_superuser,
-    )
+        device_add_form = DeviceAddForm(
+            add_devices_qs=add_devices_qs,
+            initial={
+                "room": pk,
+            },
+        )
 
-    context = {
-        "room": Inventory.objects.tenant_aware_room_objects(tenant=tenant).get(pk=pk),
-        "devices": devices_in_room,
-        "current_inventory": current_inventory,
-        "qrcode_prefix": settings.QRCODE_PREFIX,
-        "debug": settings.DEBUG,
-        "dev_state_unknown": "dev_state_unknown",
-        "dev_state_found": "dev_state_found",
-        # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
-        "dev_state_notfound": "dev_state_notfound",
-        "dev_state_added": "dev_state_added",
-        "form": InventorizeRoomForm(),
-        "device_add_form": device_add_form,
-        "api_token": Token.objects.first(),
-        "inventory_progress": inventory_progress,
-    }
+        inventory_progress = current_inventory.get_inventory_progress(
+            tenant=tenant,
+            is_superuser=is_superuser,
+        )
+
+        context = {
+            "room": Inventory.objects.tenant_aware_room_objects(tenant=tenant).get(pk=pk),
+            "devices": devices_in_room,
+            "current_inventory": current_inventory,
+            "qrcode_prefix": settings.QRCODE_PREFIX,
+            "debug": settings.DEBUG,
+            "dev_state_unknown": "dev_state_unknown",
+            "dev_state_found": "dev_state_found",
+            # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
+            "dev_state_notfound": "dev_state_notfound",
+            "dev_state_added": "dev_state_added",
+            "form": InventorizeRoomForm(),
+            "device_add_form": device_add_form,
+            "api_token": Token.objects.first(),
+            "inventory_progress": inventory_progress,
+        }
 
     return TemplateResponse(request, template, context)
 

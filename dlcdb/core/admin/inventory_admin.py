@@ -18,7 +18,13 @@ from ..models import Inventory
 
 class InventoryAdmin(admin.ModelAdmin):
     model = Inventory
-    list_display = ["name", "is_active"]
+    list_display = [
+        "name",
+        "is_active",
+        # "started_on",
+        # "completed_on",
+    ]
+
     # inlines = [
     #     RecordInline,
     # ]

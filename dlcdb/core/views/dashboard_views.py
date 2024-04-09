@@ -13,6 +13,7 @@ from django.utils.text import slugify
 from django.http import JsonResponse
 
 from ..utils.helpers import get_has_note_badge, get_icon_for_class
+from ..models import Inventory
 from .. import stats
 
 
@@ -143,19 +144,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.create_tile(model_name="core.devicetype", url="admin:core_devicetype_changelist"),
             self.create_tile(model_name="core.licencerecord", url="admin:core_licencerecord_changelist"),
             self.create_tile(model_name="smallstuff.assignedthing", url="smallstuff:person_search"),
-            self.create_tile(model_name="core.inventory", url="inventory:inventorize-room-list"),
             self.create_tile(
                 model_name="core.lostrecord",
                 url="admin:core_lostrecord_changelist",
                 chart_data_url=reverse_lazy("core:get_chartjs_data", args=["core.lostrecord"]),
             ),
+            self.create_tile(model_name="core.inventory", url="inventory:inventorize-room-list")
+            if Inventory.objects.filter(is_active=True)
+            else None,
         ]
 
         context.update(
             dict(
                 record_fraction_data=json.dumps(stats.get_record_fraction_data()),
                 device_type_data=json.dumps(stats.get_device_type_data()),
-                tiles=tiles,
+                tiles=filter(None, tiles),
             )
         )
         return context

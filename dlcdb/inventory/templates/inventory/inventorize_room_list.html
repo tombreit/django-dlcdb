@@ -27,6 +27,8 @@ SPDX-License-Identifier: EUPL-1.2
 
 
 {% block body %}
+{% if current_inventory %}
+
 
     {% include 'inventory/includes/qrvideo.html' %}
     {% include 'inventory/includes/inventory_progress.html' %}
@@ -118,4 +120,6 @@ SPDX-License-Identifier: EUPL-1.2
 
     {% include 'inventory/partials/bs_modal.html' %}
     {% include 'inventory/partials/bs_toast.html' %}
+
+{% endif %}{# endif for current_inventory exists #}
 {% endblock body %}

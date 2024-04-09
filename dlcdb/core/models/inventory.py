@@ -8,6 +8,8 @@ from collections import namedtuple
 from django.db import models, transaction
 from django.db.models import Count, Q, OuterRef, Subquery, Exists
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext_lazy as _
+
 from dlcdb.core.utils.helpers import get_denormalized_user
 
 from .room import Room
@@ -214,14 +216,25 @@ class Inventory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     is_active = models.BooleanField(default=False, verbose_name="Aktiv")
 
+    # started_on = models.DateField(
+    #     null=True,
+    #     blank=True,
+    #     help_text=_("Date this inventory startet. Some aspects of the system behave differently when it is in an inventory time window."),
+    # )
+    # completed_on = models.DateField(
+    #     null=True,
+    #     blank=True,
+    #     help_text=_("Date this inventory startet. Some aspects of the system behave differently when it is in an inventory time window."),
+    # )
+
     objects = InventoryQuerySet.as_manager()
 
     class Meta:
-        verbose_name = "Inventur"
-        verbose_name_plural = "Inventuren"
+        verbose_name = _("Inventory")
+        verbose_name_plural = _("Inventories")
 
     def __str__(self):
-        return f"Inventur {self.name}"
+        return f"{_('Inventory')} {self.name}"
 
     def save(self, *args, **kw):
         """
