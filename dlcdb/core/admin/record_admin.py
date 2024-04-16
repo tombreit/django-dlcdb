@@ -91,6 +91,11 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
     search_fields = [
         "device__edv_id",
         "device__sap_id",
+        "person__last_name",
+        "person__first_name",
+        "person__email",
+        "person__udb_person_last_name",
+        "person__udb_person_first_name",
     ]
     actions = [
         "set_removed_sold_record",
