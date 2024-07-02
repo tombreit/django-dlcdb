@@ -48,11 +48,11 @@ class CurrentlyAssignedThingManager(models.Manager):
 class AssignedThing(models.Model):
     person = models.ForeignKey(
         "core.Person",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     thing = models.ForeignKey(
         "smallstuff.Thing",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
     assigned_at = models.DateTimeField(
         blank=True,
