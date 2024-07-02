@@ -30,8 +30,8 @@ class AssignedThingAdmin(admin.ModelAdmin):
         "thing",
     ]
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
 
 
 @admin.register(Thing)
