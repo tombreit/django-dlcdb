@@ -10,7 +10,7 @@ SPDX-License-Identifier: CC0-1.0
 
 The DLCDB manages the life cycle of IT assets. With a little help of a [Django](https://www.djangoproject.com/) admin interface.
 
-⚡ Currently available only in German. Application and documentation are work in progress. ⚡
+⚡Not yet fully translated. Application and documentation are work in progress.⚡
 
 ## 🔥 Features
 
@@ -63,7 +63,7 @@ make tests
 DLCDB supports:
 
 - Python 3.9+
-- any Django supported database backends, runs fine with Sqlite in production
+- any Django supported database backends, runs fine with SQLite in production
 
 ## ⚖️ License
 
