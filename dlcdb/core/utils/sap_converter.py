@@ -85,7 +85,7 @@ def fix_room_notation(room: str) -> str:
     room = room.strip()
 
     try:
-        pattern = re.compile("^(\d{1,2})$")
+        pattern = re.compile(r"^(\d{1,2})$")
         room = pattern.match(room).group(1)
         room = f"{room:0>3}"
     except Exception:
