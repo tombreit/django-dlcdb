@@ -366,7 +366,7 @@ def create_fk_objs(fk_field, rows):
 
 
 def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, write=False):
-    already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
+    # already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
 
     device_objs = []
     record_objs = []
@@ -433,19 +433,22 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
 
         # If the sap_id already exists in our DLCDB, we skip and do not import
         # this asset!
-        if sap_id not in already_existing_sap_ids:
-            device_objs.append(device_obj)
-            record_objs.append(
-                create_record(
-                    device=device_obj,
-                    record_type=row["RECORD_TYPE"],
-                    record_note=row["RECORD_NOTE"],
-                    room=row["ROOM"],
-                    person=row["PERSON"],
-                    username=username,
-                    removed_date=row["REMOVED_DATE"],
-                )
+        # Not needed: if the sap_id already exists, it throws an IntegriyError anyway
+        # if sap_id and sap_id not in already_existing_sap_ids:
+
+        device_objs.append(device_obj)
+        record_objs.append(
+            create_record(
+                device=device_obj,
+                record_type=row["RECORD_TYPE"],
+                record_note=row["RECORD_NOTE"],
+                room=row["ROOM"],
+                person=row["PERSON"],
+                username=username,
+                removed_date=row["REMOVED_DATE"],
             )
+        )
+
     try:
         if write:
             # As bulk_create() does not call model.save() method, we can not use it for now
@@ -477,7 +480,7 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
                     record.save()
 
         else:
-            # In dryrun mode
+            # print("Dry run...")
             for device_obj in device_objs:
                 device_obj.save()
                 processed_devices_count += 1
