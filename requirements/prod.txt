@@ -6,13 +6,13 @@
 #
 accessible-pygments==0.0.5
     # via pydata-sphinx-theme
-alabaster==0.7.16
+alabaster==1.0.0
     # via sphinx
 asgiref==3.8.1
     # via
     #   django
     #   django-htmx
-babel==2.15.0
+babel==2.16.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
@@ -24,7 +24,7 @@ charset-normalizer==3.3.2
     # via requests
 crispy-bootstrap4==2024.1
     # via django-dlcdb (pyproject.toml)
-django==5.0.7
+django==5.0.8
     # via
     #   crispy-bootstrap4
     #   django-appconf
@@ -37,17 +37,17 @@ django==5.0.7
     #   djangorestframework
 django-appconf==1.0.6
     # via django-select2
-django-crispy-forms==2.2
+django-crispy-forms==2.3
     # via
     #   crispy-bootstrap4
     #   django-dlcdb (pyproject.toml)
 django-environ==0.11.2
     # via django-dlcdb (pyproject.toml)
-django-filter==24.2
+django-filter==24.3
     # via django-dlcdb (pyproject.toml)
-django-htmx==1.18.0
+django-htmx==1.19.0
     # via django-dlcdb (pyproject.toml)
-django-select2==8.2.0
+django-select2==8.2.1
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.7.0
     # via django-dlcdb (pyproject.toml)
@@ -62,7 +62,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 huey==2.5.1
     # via django-dlcdb (pyproject.toml)
-idna==3.7
+idna==3.8
     # via requests
 imagesize==1.4.1
     # via sphinx
@@ -70,7 +70,7 @@ jinja2==3.1.4
     # via
     #   myst-parser
     #   sphinx
-markdown==3.6
+markdown==3.7
     # via django-dlcdb (pyproject.toml)
 markdown-it-py==3.0.0
     # via
@@ -82,7 +82,7 @@ mdit-py-plugins==0.4.1
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-myst-parser==3.0.1
+myst-parser==4.0.0
     # via django-dlcdb (pyproject.toml)
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
@@ -101,7 +101,7 @@ pygments==2.18.0
     #   sphinx
 python-magic==0.4.27
     # via django-dlcdb (pyproject.toml)
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via myst-parser
 requests==2.32.3
     # via sphinx
@@ -109,9 +109,9 @@ segno==1.6.1
     # via django-dlcdb (pyproject.toml)
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.5
+soupsieve==2.6
     # via beautifulsoup4
-sphinx==7.3.7
+sphinx==8.0.2
     # via
     #   django-dlcdb (pyproject.toml)
     #   myst-parser
@@ -120,23 +120,23 @@ sphinx==7.3.7
     #   sphinx-design
 sphinx-book-theme==1.1.3
     # via django-dlcdb (pyproject.toml)
-sphinx-design==0.6.0
+sphinx-design==0.6.1
     # via django-dlcdb (pyproject.toml)
-sphinxcontrib-applehelp==1.0.8
+sphinxcontrib-applehelp==2.0.0
     # via sphinx
-sphinxcontrib-devhelp==1.0.6
+sphinxcontrib-devhelp==2.0.0
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.5
+sphinxcontrib-htmlhelp==2.1.0
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
 sphinxcontrib-mermaid==0.9.2
     # via django-dlcdb (pyproject.toml)
-sphinxcontrib-qthelp==1.0.7
+sphinxcontrib-qthelp==2.0.0
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.10
+sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.0
+sqlparse==0.5.1
     # via django
 typing-extensions==4.12.2
     # via pydata-sphinx-theme
