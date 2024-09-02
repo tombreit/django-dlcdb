@@ -1,0 +1,22 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% extends "admin/submit_line.html" %}
+{% load i18n admin_urls %}
+
+{% block submit-row %}
+
+{{ block.super }}
+
+{% if original %}
+{% if original.deleted_at %}
+<a href="{% url 'admin:activate_obj' original.pk %}" class="deletelink">Activate</a>
+{% else %}
+<a href="{% url 'admin:deactivate_obj' original.pk %}" class="deletelink">Deactivate</a>
+{% endif %}
+{% endif %}
+
+{% endblock %}

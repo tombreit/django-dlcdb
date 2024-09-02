@@ -12,6 +12,8 @@ from django.utils import timezone, dateformat
 from django.db.models import Count
 from django.utils.http import urlencode
 from django.utils.html import format_html
+from django.urls import path
+
 
 from ..models import Device, Room, DeviceType, Supplier, Manufacturer, LentRecord, Record
 from ..utils.helpers import get_denormalized_user
@@ -144,6 +146,46 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
     )
     def is_not_soft_deleted(self, obj):
         return False if obj.deleted_at else True
+
+    # Do not expose standard delete admin method, instead we offer
+    # deactivation and activation for the given object (see below).
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                "<int:object_id>/deactivate/",
+                self.admin_site.admin_view(self.deactivate_view),
+                name="deactivate_obj",
+            ),
+            path(
+                "<int:object_id>/activate/",
+                self.admin_site.admin_view(self.activate_view),
+                name="activate_obj",
+            ),
+        ]
+        return custom_urls + super().get_urls()
+
+    def _redirect_to_change_view(self, object_id):
+        opts = self.model._meta
+        return HttpResponseRedirect(reverse(f"admin:{opts.app_label}_{opts.model_name}_change", args=[object_id]))
+
+    def deactivate_view(self, request, object_id, *args, **kwargs):
+        obj = self.get_object(request, object_id)
+        obj.deleted_at = timezone.now()
+        obj.deleted_by = request.user
+        obj.save()
+        self.message_user(request, f"Object {obj} has been deactivated.")
+        return self._redirect_to_change_view(object_id)
+
+    def activate_view(self, request, object_id, *args, **kwargs):
+        obj = self.get_object(request, object_id)
+        obj.deleted_at = None
+        obj.deleted_by = None
+        obj.save()
+        self.message_user(request, f"Object {obj} has been activated.")
+        return self._redirect_to_change_view(object_id)
 
 
 class NoModificationModelAdminMixin(object):

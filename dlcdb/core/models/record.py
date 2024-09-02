@@ -116,6 +116,7 @@ class Record(AuditBaseModel):
         blank=True,
         verbose_name="Person",
         on_delete=models.SET_NULL,
+        limit_choices_to={"deleted_at__isnull": True},
     )
     lent_start_date = models.DateField(null=True, blank=True, verbose_name="Verleihbeginn")
     lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name="Soll-Rückgabedatum")
@@ -133,7 +134,7 @@ class Record(AuditBaseModel):
         blank=True,
         verbose_name=_("Room"),
         on_delete=models.PROTECT,
-        limit_choices_to={"deleted_at__isnull": False},
+        limit_choices_to={"deleted_at__isnull": True},
     )
     # Bestellvorgang
     date_of_purchase = models.DateField(null=True, blank=True, verbose_name="Bestelldatum")

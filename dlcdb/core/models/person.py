@@ -161,7 +161,18 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         )
 
     def clean(self):
-        if Person.only_softdeleted_objects.filter(email=self.email).exists():
-            raise ValidationError(
-                "A soft-deleted person with this email address already exists. Please contact your IT;-)"
-            )
+        # Prepare the queryset for soft-deleted objects with the same email
+        soft_deleted_qs = Person.only_softdeleted_objects.filter(email=self.email)
+
+        # If the instance already exists (i.e., it has a primary key), exclude it from the queryset
+        if self.pk:
+            soft_deleted_qs = soft_deleted_qs.exclude(pk=self.pk)
+
+        # Check if any such instance exists
+        if soft_deleted_qs.exists():
+            raise ValidationError("A soft-deleted person with this email address already exists.")
+
+        # if Person.only_softdeleted_objects.exclude(self).filter(email=self.email).exists():
+        #     raise ValidationError(
+        #         "A soft-deleted person with this email address already exists. Please contact your IT;-)"
+        #     )
