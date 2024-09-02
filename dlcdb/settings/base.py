@@ -245,11 +245,14 @@ SITE_ID = 1
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATICFILES_DIRS = [str(BASE_DIR / "dlcdb/static")]
-STATIC_ROOT = str(STATICFILES_DIR)
+STATICFILES_DIRS = [
+    BASE_DIR / "dlcdb" / "static",
+]
+
+STATIC_ROOT = STATICFILES_DIR
 STATIC_URL = "/static/"
 
-MEDIA_ROOT = str(MEDIA_DIR)
+MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = "/media/"
 
 # http://whitenoise.evans.io/en/latest/django.html#add-compression-and-caching-support
