@@ -56,7 +56,9 @@ class Branding(SingletonBaseModel):
         upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Logo file (white)",
-        help_text=_("Logo file. SVG, white foreground, transparent background"),
+        help_text=_(
+            "Logo file. SVG, white foreground, transparent background. Used in the main navigation bar/site header."
+        ),
     )
     organization_logo_black = models.FileField(
         null=True,
@@ -64,7 +66,7 @@ class Branding(SingletonBaseModel):
         upload_to="branding/",
         validators=[validate_logo_image_file_extension],
         verbose_name="Logo file (black)",
-        help_text=_("Logo file. SVG, white foreground, transparent background"),
+        help_text=_("Logo file. SVG, black foreground, transparent background. Used in PDF printouts."),
     )
     organization_figurative_mark = models.FileField(
         null=True,
