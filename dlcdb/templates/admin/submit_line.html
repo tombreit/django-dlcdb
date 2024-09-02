@@ -9,14 +9,12 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block submit-row %}
 
-{{ block.super }}
+  {{ block.super }}
 
-{% if original %}
-{% if original.deleted_at %}
-<a href="{% url 'admin:activate_obj' original.pk %}" class="deletelink">Activate</a>
-{% else %}
-<a href="{% url 'admin:deactivate_obj' original.pk %}" class="deletelink">Deactivate</a>
-{% endif %}
-{% endif %}
+  {% if original and original.deleted_at %}
+    <a href="{{ activate_url }}" class="deletelink">Activate</a>
+  {% else %}
+    <a href="{{ deactivate_url }}" class="deletelink">Deactivate</a>
+  {% endif %}
 
 {% endblock %}

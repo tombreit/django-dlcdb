@@ -155,16 +155,17 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
     def get_urls(self):
         custom_urls = [
             path(
-                "<int:object_id>/deactivate/",
+                "<path:object_id>/deactivate/",
                 self.admin_site.admin_view(self.deactivate_view),
-                name="deactivate_obj",
+                name=f"{self.model._meta.app_label}_{self.model._meta.model_name}_deactivate",
             ),
             path(
-                "<int:object_id>/activate/",
+                "<path:object_id>/activate/",
                 self.admin_site.admin_view(self.activate_view),
-                name="activate_obj",
+                name=f"{self.model._meta.app_label}_{self.model._meta.model_name}_activate",
             ),
         ]
+
         return custom_urls + super().get_urls()
 
     def _redirect_to_change_view(self, object_id):
@@ -176,7 +177,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         obj.deleted_at = timezone.now()
         obj.deleted_by = request.user
         obj.save()
-        self.message_user(request, f"Object {obj} has been deactivated.")
+        self.message_user(request, f"{obj._meta.verbose_name} {obj} has been deactivated.")
         return self._redirect_to_change_view(object_id)
 
     def activate_view(self, request, object_id, *args, **kwargs):
@@ -184,8 +185,20 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         obj.deleted_at = None
         obj.deleted_by = None
         obj.save()
-        self.message_user(request, f"Object {obj} has been activated.")
+        self.message_user(request, f"{obj._meta.verbose_name} {obj} has been activated.")
         return self._redirect_to_change_view(object_id)
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        opts = self.model._meta
+
+        extra_context.update(
+            {
+                "deactivate_url": reverse(f"admin:{opts.app_label}_{opts.model_name}_deactivate", args=[object_id]),
+                "activate_url": reverse(f"admin:{opts.app_label}_{opts.model_name}_activate", args=[object_id]),
+            }
+        )
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 
 class NoModificationModelAdminMixin(object):
