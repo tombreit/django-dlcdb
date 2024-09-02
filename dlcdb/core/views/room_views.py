@@ -124,35 +124,3 @@ class ReconcileRoomsView(TemplateView):
             }
         )
         return context
-
-
-# class ReconcileRoomsView(FormView):
-#     template_name = 'core/room/reconcile_rooms.html'
-#     form_class = ReconcileRoomsForm
-
-#     def get_success_url(self):
-#         return self.request.path
-
-#     def get_initial(self):
-#         initial = super().get_initial()
-#         print(f"{initial=}")
-#         # initial.update({'user_name': "bla", 'complaint': 'I am unhappy with this order!'})
-#         return initial
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         print(f"{context=}")
-#         context['pagetitle'] = 'My special Title'
-#         context['room_reconciliation'] = None
-#         return context
-
-#     def form_valid(self, form):
-#         form = super().form_valid(form)
-#         csv_file = self.request.fields['rooms_csv_file']
-#         custom_context = {
-#             "form": self.form_class,
-#             "room_reconciliation": self.get_rooms_reconcile(csv_file),
-#         }
-#         context = self.get_context_data(form=form)  # .update(custom_context_dict)
-#         context.update(custom_context)
-#         return render(self.request, self.template_name, context)
