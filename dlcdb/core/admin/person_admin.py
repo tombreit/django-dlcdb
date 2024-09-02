@@ -95,30 +95,10 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         ),
     )
 
+    @admin.display(description="Image")
     def udb_person_image_as_image(self, obj):
         return mark_safe(
             '<img src="{url}" style="max-width: 100px;">'.format(
                 url=obj.udb_person_image.url if obj.udb_person_image else "",
             )
         )
-
-    udb_person_image_as_image.short_description = "Image"
-
-
-#     def get_search_results(self, request, queryset, search_term):
-#         print("In get search results")
-#         results = super().get_search_results(request, queryset, search_term)
-#         print(results)
-#         return results
-
-#     def get_urls(self):
-#         print("get_urls...")
-#         return [
-#             path('autocomplete/', PersonAutocompleteJsonView.as_view(admin_site=self), name='customers_customer_autocomplete')
-#             if url.pattern.match('autocomplete/')
-#             else url for url in super().get_urls()
-#         ]
-
-# class PersonAutocompleteJsonView(AutocompleteJsonView):
-#     def serialize_result(self, obj, to_field_name):
-#         return super.serialize_result(obj, to_field_name) | {'notes': obj.notes}
