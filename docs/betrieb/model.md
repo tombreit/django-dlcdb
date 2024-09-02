@@ -85,7 +85,7 @@ Rooms could be compared against a CSV file (e.g. from Archibus).
 ## Tenant
 
 A tenant is kind of an organizational unit using the DLCDB, only able to
-manage his/her assets.
+manage his/her assets. DLCDB superusers are not tenant aware: they can edit devices from all tenants and can also change the tenant of a device. Standard users only have access to devices that are assigned to the user's tenant.
 
 ## SoftDelete
 

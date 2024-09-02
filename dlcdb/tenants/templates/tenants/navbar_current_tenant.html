@@ -20,12 +20,32 @@ SPDX-License-Identifier: EUPL-1.2
 </a>
 {% endif %}
 
-<button type="button" class="btn btn-warning" title="Tenant: {{ request.tenant }}">
-    {{ request.tenant|default:"No tenant set!" }}
-</button>
 
 {% if request.user.is_superuser %}
-    <button class="btn btn-danger">
-        Superuser
-    </button>
+<!-- is_superuser: tenant unaware -->
+{% elif request.tenant %}
+<span 
+    class="btn btn-warning"
+    style="cursor: default;"
+    title="Tenant: {{ request.tenant }}"
+>
+    {{ request.tenant }}
+</span>
+{% else %}
+<a 
+    href="{% url 'admin:tenants_tenant_changelist' %}"
+    class="btn btn-warning"
+    title="Tenant: {{ request.tenant }}. Superusers are not tenant aware."
+>
+    {{ "No tenant set!" }}
+</a>
+{% endif %}
+
+{% if request.user.is_superuser %}
+<button 
+    class="btn btn-danger"
+    title="Superusers are not tenant aware"
+>
+    Superuser
+</button>
 {% endif %}
