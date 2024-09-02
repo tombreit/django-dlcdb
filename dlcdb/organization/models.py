@@ -15,6 +15,11 @@ def validate_logo_image_file_extension(value):
     return FileExtensionValidator(allowed_extensions=valid_extensions)(value)
 
 
+def validate_favicon_file_extension(value):
+    valid_extensions = ["ico"]
+    return FileExtensionValidator(allowed_extensions=valid_extensions)(value)
+
+
 class Branding(SingletonBaseModel):
     organization_name_en = models.CharField(
         max_length=255,
@@ -73,7 +78,7 @@ class Branding(SingletonBaseModel):
         null=True,
         blank=True,
         upload_to="branding/",
-        validators=[validate_logo_image_file_extension],
+        validators=[validate_favicon_file_extension],
         verbose_name="Favicon file",
     )
 

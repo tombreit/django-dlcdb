@@ -6,9 +6,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path, reverse_lazy
 from django.contrib import admin
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.views.generic.base import RedirectView
 
+from dlcdb.organization import views as organization_views
 
 admin.site.site_header = "DLCDB Admin"
 admin.site.site_title = "DLCDB Admin"
@@ -24,7 +24,7 @@ urlpatterns = [
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("select2/", include("django_select2.urls")),
     path("api/v2/", include("dlcdb.api.urls")),
-    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("branding/favicon.ico"))),
+    path("favicon.ico", organization_views.favicon),
     path("admin/", admin.site.urls),
 ]
 
