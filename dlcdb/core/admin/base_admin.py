@@ -177,6 +177,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         obj.deleted_at = timezone.now()
         obj.deleted_by = request.user
         obj.save()
+        self.log_change(request, obj, "Deactivated")
         self.message_user(request, f"{obj._meta.verbose_name} {obj} has been deactivated.")
         return self._redirect_to_change_view(object_id)
 
@@ -185,6 +186,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         obj.deleted_at = None
         obj.deleted_by = None
         obj.save()
+        self.log_change(request, obj, "Activated")
         self.message_user(request, f"{obj._meta.verbose_name} {obj} has been activated.")
         return self._redirect_to_change_view(object_id)
 
