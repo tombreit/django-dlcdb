@@ -198,6 +198,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
             {
                 "deactivate_url": reverse(f"admin:{opts.app_label}_{opts.model_name}_deactivate", args=[object_id]),
                 "activate_url": reverse(f"admin:{opts.app_label}_{opts.model_name}_activate", args=[object_id]),
+                "show_activate_deactivate": True,
             }
         )
         return super().change_view(request, object_id, form_url, extra_context=extra_context)

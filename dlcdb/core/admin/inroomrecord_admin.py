@@ -51,6 +51,7 @@ class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
             {
                 "show_save_and_add_another": False,
                 "show_save_and_continue": False,
+                "show_activate_deactivate": False,
             }
         )
         return super().render_change_form(request, context, add, change, form_url, obj)

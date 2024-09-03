@@ -74,6 +74,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         verbose_name=_("Device type"),
         on_delete=models.PROTECT,
+        limit_choices_to={"deleted_at__isnull": True},
     )
     manufacturer = models.ForeignKey(
         "core.Manufacturer",
