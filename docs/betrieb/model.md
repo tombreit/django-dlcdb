@@ -25,6 +25,12 @@ Consider `Device` and `Record`. Both models represent the conjunction of
 all available device and record sub types. Instead of using multitable inherintance
 we using proxy inheritance, where each sub type is represented by one concrete proxy model.
 
+## Soft delete
+
+Some models are equipped with a soft-delete mechanism. This allows you to “hide” and then “unhide” assets. The function is labeled “Activate/Deactivate”.These assets are then no longer available for future assignments, but remain in place for existing assignments.
+
+This function is currently only available to Django admin users.
+
 ## Device
 
 The device is the central model of the dlcdb.
