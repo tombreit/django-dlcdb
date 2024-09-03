@@ -69,7 +69,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 
 {% block extra_js %}
-<script src="{% static 'dist/common/vendor/chartjs/chart.js' %}"></script>
+<script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const record_fraction_data = {{ record_fraction_data|safe }};

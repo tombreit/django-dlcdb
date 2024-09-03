@@ -10,7 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 <!-- Override extrahead to add Chart.js -->
 {% block extrahead %}
 {{ block.super }}
-<script src="{% static 'dist/common/vendor/chartjs/chart.js' %}"></script>
+<script src="{% static 'dist/common/vendor/chartjs/chart.min.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const ctx = document.getElementById('myChart').getContext('2d');
