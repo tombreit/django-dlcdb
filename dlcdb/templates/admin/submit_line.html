@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
   {{ block.super }}
 
-  {% if show_activate_deactivate %}
+  {% if request.user.is_superuser and show_activate_deactivate %}
     {% if original and original.deleted_at %}
         <a href="{{ activate_url }}" class="deletelink">Activate</a>
     {% else %}
