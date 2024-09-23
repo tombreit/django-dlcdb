@@ -2,7 +2,7 @@
 
 `````{dropdown} Warum kann ich keinen Hersteller oder Zuliefer bearbeiten oder zuordnen?
 
-Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigungen in der DLCDB. In den meisten Fällen fehlt eine entsprechende Berechtigung. Siehe [Berechtigungen](./guides/erste_schritte.md#benutzer-und-gruppen-einrichten)
+Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigungen in der DLCDB. In den meisten Fällen fehlt eine entsprechende Berechtigung. Siehe [Berechtigungen](./guides/erste_schritte.md#benutzer-gruppen-und-tenants-einrichten)
 `````
 
 `````{dropdown} No tenant set?
