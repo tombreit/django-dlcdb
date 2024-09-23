@@ -12,7 +12,7 @@ SPDX-License-Identifier: EUPL-1.2
 
     <h1>Relocate the following devices to a new room?</h1>
 
-    {% if form.initial.devices|length_is:"1" %}
+    {% if form.initial.devices|length == "1" %}
 
         <table class="table" style="width: auto;">
             {% with device=form.initial.devices.first %}
