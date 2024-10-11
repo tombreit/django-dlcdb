@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-09 11:10+0200\n"
-"PO-Revision-Date: 2024-02-27 09:06+0100\n"
+"POT-Creation-Date: 2024-10-11 10:48+0200\n"
+"PO-Revision-Date: 2024-10-11 10:50+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -15,7 +15,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4.2\n"
+"X-Generator: Poedit 3.5\n"
+
+#: dlcdb/accounts/admin.py:35
+msgid "group"
+msgstr "Gruppe"
+
+#: dlcdb/accounts/admin.py:36
+msgid "groups"
+msgstr "Gruppen"
 
 #: dlcdb/accounts/templates/accounts/logout.html:29
 msgid "Thanks for spending some quality time with the web site today."
@@ -33,7 +41,7 @@ msgstr "Lizenztyp"
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:73 dlcdb/core/models/device.py:83
+#: dlcdb/core/apps.py:73 dlcdb/core/models/device.py:84
 #: dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -110,42 +118,42 @@ msgstr "Seriennummer"
 msgid "Device type"
 msgstr "Geräteklasse"
 
-#: dlcdb/core/models/device.py:89
+#: dlcdb/core/models/device.py:90
 msgid "Model name"
 msgstr "Modellbezeichnung"
 
-#: dlcdb/core/models/device.py:91 dlcdb/core/models/supplier.py:27
+#: dlcdb/core/models/device.py:92 dlcdb/core/models/supplier.py:27
 msgid "Supplier"
 msgstr "Distributor"
 
-#: dlcdb/core/models/device.py:95
+#: dlcdb/core/models/device.py:96
 msgid "Is license?"
 msgstr "Ist Lizenz?"
 
-#: dlcdb/core/models/device.py:102
+#: dlcdb/core/models/device.py:103
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:114
+#: dlcdb/core/models/device.py:115
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:137
+#: dlcdb/core/models/device.py:138
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:138
+#: dlcdb/core/models/device.py:139
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:142
+#: dlcdb/core/models/device.py:143
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:143
+#: dlcdb/core/models/device.py:144
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -250,11 +258,11 @@ msgstr "Record Notiz"
 msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
-#: dlcdb/core/models/record.py:134 dlcdb/core/models/room.py:67
+#: dlcdb/core/models/record.py:135 dlcdb/core/models/room.py:67
 msgid "Room"
 msgstr "Raum"
 
-#: dlcdb/core/models/record.py:145
+#: dlcdb/core/models/record.py:147
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
@@ -318,6 +326,14 @@ msgstr "Alle Records anzeigen"
 msgid "Checklist & Lending configuration"
 msgstr "Checkliste & Ausleihkonfiguration"
 
+#: dlcdb/core/templates/core/room/change_list.html:15
+msgid "Room replication"
+msgstr "Raumabgleich"
+
+#: dlcdb/core/templates/core/room/change_list.html:21
+msgid "Floor plan"
+msgstr "Raumplan"
+
 #: dlcdb/core/ui_helpers.py:48
 msgid "In room"
 msgstr "In Raum"
@@ -346,24 +362,32 @@ msgstr "Ausleihen"
 msgid "Locate"
 msgstr "Lokalisieren"
 
-#: dlcdb/organization/models.py:23 dlcdb/organization/models.py:30
+#: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
 msgstr ""
 
-#: dlcdb/organization/models.py:24
+#: dlcdb/organization/models.py:29
 msgid "Company, institute, site name (english version)."
 msgstr ""
 
-#: dlcdb/organization/models.py:31
+#: dlcdb/organization/models.py:36
 msgid "Company, institute, site name (german version)."
 msgstr ""
 
-#: dlcdb/organization/models.py:38
+#: dlcdb/organization/models.py:43
 msgid "Company, institute, site abbreviation."
 msgstr ""
 
-#: dlcdb/organization/models.py:54 dlcdb/organization/models.py:62
-msgid "Logo file. SVG, white foreground, transparent background"
+#: dlcdb/organization/models.py:60
+msgid ""
+"Logo file. SVG, white foreground, transparent background. Used in the main "
+"navigation bar/site header."
+msgstr ""
+
+#: dlcdb/organization/models.py:69
+msgid ""
+"Logo file. SVG, black foreground, transparent background. Used in PDF "
+"printouts."
 msgstr ""
 
 #: dlcdb/smallstuff/models.py:93

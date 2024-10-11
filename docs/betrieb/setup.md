@@ -199,7 +199,7 @@ make docs
 
 ```bash
 ./manage.py makemessages --locale de --ignore=.venv/* 
-# ...poedit locale/de/LC_MESSAGES/django.po...
+poedit dlcdb/locale/de/LC_MESSAGES/django.po
 ./manage.py compilemessages --ignore=.venv/*
 ```
 

@@ -5,13 +5,21 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 
 {% extends "admin/change_list.html" %}
+{% load i18n %}
 
 
 {% block object-tools-items %}
     {{ block.super }}
     <li>
         <a href={% url 'admin:core_roomreconcile_changelist' %} class="addlink">
-            Abgleich
+            {% translate "Room replication" %}
         </a>
     </li>
+    {% if branding.room_plan %}
+    <li>
+        <a href="{{ branding.room_plan.url }}" class="viewsitelink">
+            {% translate "Floor plan" %}
+        </a>
+    </li>
+    {% endif %}
 {% endblock %}

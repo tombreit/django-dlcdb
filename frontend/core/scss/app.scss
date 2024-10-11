@@ -29,7 +29,8 @@ caption {
     @extend .h3;
 }
 
-.object-tools a.addlink {
+.object-tools a.addlink,
+.object-tools a.viewsitelink {
     @extend .btn;
     @extend .btn-primary;
     padding-right: 28px;
