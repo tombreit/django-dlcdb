@@ -48,13 +48,11 @@ def get_affected_records(notification, now):
     )
 
     records = text_repr = file_repr = title_repr = None
-    condition = notification.condition
 
     if notification.last_run:
         _last_run = notification.last_run
     else:
         _days = get_days_for_interval(notification.time_interval)
-        # print("_days: ", _days)
         _last_run = now - timedelta(days=_days)
 
     # print(f"_last_run: {_last_run}")
@@ -65,9 +63,12 @@ def get_affected_records(notification, now):
         created_at__lte=now,
     )
 
+    # Our base records queryset
     _records = Record.objects.active_records().filter(
         record_type=notification.event,
     )
+
+    condition = notification.condition
 
     if condition == Notification.HAS_SAP_ID:
         records = (
@@ -103,6 +104,9 @@ def get_affected_records(notification, now):
                 lent_desired_end_date_with_tolerance__lte=now,
             )
         )
+    else:
+        # Fallback if no condition is set: return the base queryset
+        records = _records.filter(since_last_run_filter)
 
     if records:
         # Build a stringified title.
