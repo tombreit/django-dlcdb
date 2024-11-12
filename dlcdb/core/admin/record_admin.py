@@ -80,6 +80,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         "record_type",
         # 'device',
         "device__device_type",
+        "device__manufacturer",
         "person",
         "room",
         "is_active",
