@@ -262,14 +262,6 @@ SPDX-License-Identifier: EUPL-1.2
     }
     document.querySelector("#search-table-input").addEventListener("keyup", filterDeviceTable);
 
-    {% include 'inventory/partials/htmx_note.js' %}
     {% include 'inventory/includes/qrtoggle.js' %}
 </script>
 {% endblock extra_js %}
-
-
-{% block extra_css %}
-    <style>
-        {% include 'inventory/partials/htmx_note.css' %}
-    </style>
-{% endblock %}

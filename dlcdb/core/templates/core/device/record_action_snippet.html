@@ -55,7 +55,7 @@ SPDX-License-Identifier: EUPL-1.2
 
     {% if device_obj.get_record_action_snippet.add_links %}
     <div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
-        <button id="newRecord" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button id="newRecord" type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-plus"></i>
         </button>
         <div class="dropdown-menu" aria-labelledby="newRecord">
@@ -76,7 +76,7 @@ SPDX-License-Identifier: EUPL-1.2
 {% comment %}
 {% if is_device_detail_page %}
     {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-    <a class="small ml-4" href="{% add_preserved_filters history_url %}" class="historylink">
+    <a class="small ms-4" href="{% add_preserved_filters history_url %}" class="historylink">
         <i class="fa fa-history"></i> {% trans "History" %}
     </a>
 {% endif %}

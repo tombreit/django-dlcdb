@@ -24,11 +24,8 @@ SPDX-License-Identifier: EUPL-1.2
         {% block body %}{% endblock body %}
     </div>
 
-    <script src="{% static 'dist/lending/js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'dist/lending/js/lending.js' %}" defer></script>
     {% django_htmx_script %}
-
-    {# <script src="{% static 'dist/lending/js/lending.js' %}"></script> #}
     {% block extra_js %}{% endblock extra_js %}
-
 </body>
 </html>

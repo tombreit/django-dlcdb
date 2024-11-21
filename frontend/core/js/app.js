@@ -1,6 +1,8 @@
-// require ../../../node_modules/popper.js/dist/umd/popper.min.js
-// require ../../../node_modules/bootstrap/dist/js/bootstrap.min.js
+import * as bootstrap from 'bootstrap'
+ 
+import htmx from "htmx.org";
 
-$(document).ready(function() {
-    console.log("[ i ] document ready")
-})
+
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("[ i ] document ready");
+});
