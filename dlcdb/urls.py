@@ -21,6 +21,7 @@ urlpatterns = [
     path("", RedirectView.as_view(url=reverse_lazy("core:core_dashboard"))),
     path("core/", include("dlcdb.core.urls")),
     path("inventory/", include("dlcdb.inventory.urls")),
+    path("licenses/", include("dlcdb.licenses.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("select2/", include("django_select2.urls")),
     path("api/v2/", include("dlcdb.api.urls")),

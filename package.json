@@ -14,7 +14,9 @@
     "lending_srcdir": "frontend/lending",
     "lending_distdir": "dlcdb/static/dist/lending",
     "common_distdir": "dlcdb/static/dist/common",
-    "docs_distdir": "docs/_static/vendor"
+    "docs_distdir": "docs/_static/vendor",
+    "theme_srcdir": "dlcdb/theme/assets",
+    "theme_distdir": "dlcdb/theme/static/theme"
   },
   "COMMENTS": [
      "SASS PINNED AT 1.64.1 FOR COMPATIBILITY WITH BS4.X"
@@ -62,7 +64,8 @@
     "lending-font:copy-fontawesome": "mkdir -p $npm_package_config_lending_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_lending_distdir/fonts/fontawesome/",
     "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/",
     "htmx:copy-htmx": "mkdir -p $npm_package_config_lending_distdir/js && cp node_modules/htmx.org/dist/htmx.min.js $npm_package_config_lending_distdir/js/",
-    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.esm.min.mjs $npm_package_config_docs_distdir/mermaid/"
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.esm.min.mjs $npm_package_config_docs_distdir/mermaid/",
+    "theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_theme_srcdir/scss:$npm_package_config_theme_distdir/css"
   },
   "repository": {
     "type": "https",

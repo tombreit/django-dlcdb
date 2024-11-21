@@ -1,0 +1,52 @@
+{% extends "theme/_base.html" %}
+{% load static crispy_forms_tags %}
+
+
+{% block body %}
+
+  <h1>
+    Licenses
+  </h1>
+  
+  <div id="licenses">
+    <div class="my-4">
+      <a 
+        class="btn btn-primary"
+        hx-get="{% url 'licenses:new' %}"
+        hx-trigger="click"
+        hx-push-url="true"
+        hx-target="body"
+      >
+        <i class="bi bi-plus-circle"></i>
+        Add license
+      </a>
+    </div>
+
+
+    <ol class="list-group list-group-numbered my-4" style="max-width: 700px;">
+      {% for license in licenses %}
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <div class="ms-2 me-auto">
+            <a class="fw-bold" href="">
+              {{ license }}
+              <i class="bi bi-box-arrow-up-right"></i>  
+            </a>
+        </div>
+          
+        <span 
+          class="btn btn-primary btn-sm"
+          hx-get="{% url 'licenses:edit' license_id=license.id %}"
+          hx-trigger="click"
+          hx-target="#licenses"
+          hx-push-url="true"
+        >
+          <i class="bi bi-pencil-square"></i>
+      </span>
+      </li>
+      {% endfor %}
+    </ol>
+
+</div>
+
+
+{% endblock body %}

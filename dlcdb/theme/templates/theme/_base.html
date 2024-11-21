@@ -1,0 +1,96 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load static %}
+{% load django_htmx %}
+
+<!doctype html>
+<html lang="en" translate="no">
+
+<head>
+  <meta charset="utf-8">
+  <title>Licenses | DLCDB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'>
+  <link rel="stylesheet" href="{% static 'theme/css/theme.css' %}">
+  {% block extra_css %}{% endblock extra_css %}
+</head>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    <div class="container">
+    
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{% url 'licenses:index' %}">
+                {# <img src="" alt=""> #}
+                Licenses
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'licenses:new' %}">
+                          Add license
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">Backend</a>
+                    </li>
+                </ul>
+
+                <ul  class="navbar-nav">
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">
+                      <i class="fa fa-user" aria-hidden="true"></i>
+                      {{ request.user.username }}
+                    </a>
+                    <div class="dropdown-menu">
+                      {% include 'logout_link.html' %}
+                      <div class="dropdown-divider"></div>
+                      <a
+                        class="dropdown-item"
+                        href="{{ branding.documentation_url }}guides/inventur.html"
+                      >
+                        <i class="fa-solid fa-book-medical"></i>
+                        Docs
+                      </a>
+                      <div class="dropdown-divider"></div>
+                      <span class="dropdown-item">
+                        <span class="custom-control custom-switch qr-toggle-swicht">
+                          <input type="checkbox" {% if request.session.qrscanner_enabled == 1 %} checked {% endif %} class="custom-control-input" id="qr-toggle">
+                          <label class="custom-control-label" for="qr-toggle" title="QR scanner">QR</label>
+                        </span>
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+            </div>
+        </nav>
+
+        {% if messages %}
+        <hr>
+        <div class="messages">
+            {% for message in messages %}
+              <div {% if message.tags %} class="py-1 my-1 alert alert-{{ message.tags }}"{% endif %}>
+                {{ message }}
+              </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <hr>
+
+        {% block body %}{% endblock body %}
+
+    </div>
+    {% django_htmx_script %}
+    {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

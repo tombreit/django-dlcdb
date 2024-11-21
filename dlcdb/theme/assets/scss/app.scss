@@ -1,0 +1,25 @@
+@import "npm:bootstrap/scss/functions";
+
+$primary: rgb(27, 54, 93);
+
+$link-decoration: underline;
+
+$web-font-path: "";
+
+
+// Bootstrap
+@import "npm:bootstrap/scss/variables";
+
+// Bootstrap: Include any default map overrides here
+
+@import "_bootstrap_components";
+
+// https://icons.getbootstrap.com/
+$bootstrap-icons-font-dir: "npm:bootstrap-icons/font/fonts";
+@import "bootstrap-icons/font/bootstrap-icons.scss";
+
+@import "npm:tom-select/dist/css/tom-select.bootstrap5.min.css";
+
+// @import "components/debug";
+@import "_screen";
+

@@ -63,10 +63,12 @@ LOCAL_APPS = [
     "dlcdb.core",
     "dlcdb.organization",
     "dlcdb.inventory",
+    "dlcdb.licenses",
     "dlcdb.reporting",
     "dlcdb.lending",
     "dlcdb.smallstuff",
     "dlcdb.api",
+    "dlcdb.theme",
 ]
 DEV_APPS = [
     "debug_toolbar",
