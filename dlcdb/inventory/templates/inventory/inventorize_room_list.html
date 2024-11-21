@@ -9,16 +9,9 @@ SPDX-License-Identifier: EUPL-1.2
 {% load crispy_forms_tags %}
 
 
-{% block extra_css %}
-    <style>
-        {% include 'inventory/partials/htmx_note.css' %}
-    </style>
-{% endblock %}
-
 {% block extra_js %}
 <script type="module">
     {% include 'inventory/includes/qrtoggle.js' %}
-    {% include 'inventory/partials/htmx_note.js' %}
 </script>
 
 {% include 'inventory/includes/inventorize-jsinit.html' %}
