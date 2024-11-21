@@ -15,7 +15,7 @@ class LicensesConfig(AppConfig):
             "order": 6,
             "label": "Licenses",
             "icon": "fa-solid fa-glasses",
-            "url": "licenses:license-list",
+            "url": "licenses:index",
             "required_permission": "true",
         },
     ]
