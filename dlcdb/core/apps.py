@@ -32,7 +32,7 @@ class CoreConfig(AppConfig):
             "order": 40,
             "label": "Lizenzen",
             "icon": "fa-solid fa-scale-balanced",
-            "url": "admin:core_licencerecord_changelist",
+            "url": "licenses:index",
             "required_permission": "view_licencerecord",
         },
         {
