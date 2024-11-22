@@ -38,7 +38,7 @@
     "select2-bootstrap-5-theme": "^1.3.0"
   },
   "scripts": {
-    "prod": "npm-run-all scss:prod scss:print js:prod common-font:copy-fontawesome common-js:copy-chartjs lending-prod inventory-prod docs:copy-mermaid",
+    "prod": "npm-run-all scss:prod scss:print js:prod common-font:copy-fontawesome common-js:copy-chartjs lending-prod theme:prod inventory-prod docs:copy-mermaid",
     "scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_core_srcdir/scss:$npm_package_config_core_distdir/css",
     "scss:print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_core_srcdir/scss/print.scss:$npm_package_config_core_distdir/css/print.css",
     "js:prod": "esbuild $npm_package_config_core_srcdir/js/app.js --bundle --sourcemap --outfile=$npm_package_config_core_distdir/js/app.js",
@@ -59,7 +59,7 @@
     "lending-scss:prod": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_lending_srcdir/scss:$npm_package_config_lending_distdir/css",
     "lending-font:copy-fontawesome": "mkdir -p $npm_package_config_lending_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_lending_distdir/fonts/fontawesome/",
     "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/",
-    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.esm.min.mjs $npm_package_config_docs_distdir/mermaid/",
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docs_distdir/mermaid/",
     "theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_theme_srcdir/scss:$npm_package_config_theme_distdir/css",
     "theme:js": "esbuild $npm_package_config_theme_srcdir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_theme_distdir/js/theme.js",
     "theme:bs-icons:copy": "mkdir -p $npm_package_config_theme_distdir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_theme_distdir/fonts/",
