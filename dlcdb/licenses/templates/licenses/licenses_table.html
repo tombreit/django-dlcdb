@@ -1,0 +1,92 @@
+
+<p class="text-muted small">
+  <i>
+    {{ licenses|length }} of {{ licences_total }} licenses.
+    {% if licenses|length != licences_total %}
+      <a href=".">Show all?</a>
+    {% endif %}
+  </i>
+</p>
+
+<table class="table table-hover table-striped">
+    <thead>
+      <tr>
+        <th>License</th>
+        <th>Purchase date</th>
+        <th>Expiry date</th>
+        <th>Subscribers</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for license in licenses %}
+    <tr class="
+    {% if license.licence_state == '90-danger' %}
+      table-danger
+    {% elif license.licence_state == '80-warning' %}
+      table-warning
+    {% endif %}
+    ">
+      <td>
+        {{ license.get_human_title }} ({{ license.device.sap_id }})
+
+        {% if license.device.note %}
+          <span>
+            <i class="bi bi-sticky"></i>
+          </span>
+          <div id="note-{{ license.device.id }}" class="font-monospace mt-1 small d-none">
+            {{ license.device.note|linebreaks }}
+          </div>
+        {% endif %}
+        <div class="small">
+        <small>
+          {{ license.device.device_type }}
+        </div>
+      </td>
+      <td>
+        {{ licence.device.purchase_date | default:"n/a" }}
+        <br>
+        <small class="text-muted">
+          Order: {{ license.order_number|default:"n/a" }}
+        </small>
+      </td>
+      <td>
+        {{ license.device.maintenance_contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
+      </td>
+      <td>
+          {% for notification in license.device.notification_set.all %}
+              {{ notification.recipient }}
+              {% if not forloop.last %}<br>{% endif %}
+          {% endfor %}
+      </td>
+      <td>
+        <span
+            {# href="{% url 'admin:core_device_change' license.device.id %}" #}
+            class="btn btn-primary btn-sm"
+
+            hx-get="{% url 'licenses:edit' license_id=license.device.id %}"
+            hx-trigger="click"
+            hx-target="#licences-content-wrapper"
+            hx-push-url="false"
+          >
+            <i class="bi bi-pencil-square"></i>
+      </span>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<script>
+const stickyIcons = document.querySelectorAll('.bi.bi-sticky');
+
+stickyIcons.forEach(function(stickyIcon) {
+  stickyIcon.addEventListener('click', function() {
+    const noteElement = this.parentElement.nextElementSibling;
+    if (noteElement) {
+      noteElement.classList.toggle('d-none');
+    }
+  });
+});
+</script>

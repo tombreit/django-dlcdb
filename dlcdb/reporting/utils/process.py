@@ -104,6 +104,8 @@ def get_affected_records(notification, now):
                 lent_desired_end_date_with_tolerance__lte=now,
             )
         )
+    elif condition == Notification.LICENCE_EXPIRES:
+        records = _records.filter(device__is_licence=True).filter(device__maintenance_contract_expiration_date__lte=now)
     else:
         # Fallback if no condition is set: return the base queryset
         records = _records.filter(since_last_run_filter)
@@ -126,7 +128,9 @@ def get_affected_records(notification, now):
         )
 
         # Build a string representation for e.g. email body
-        text_repr = get_records_as_text(records=records, title=title_repr, event=notification.event)
+        text_repr = get_records_as_text(
+            records=records, title=title_repr, event=notification.event, condition=notification.condition
+        )
 
         # Build a spreadsheet file representation of affected records.
         file_repr = get_records_as_spreadsheet(records=records, title=title_repr_spreadsheet, event=notification.event)

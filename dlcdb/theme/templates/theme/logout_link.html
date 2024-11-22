@@ -1,0 +1,34 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{# https://docs.djangoproject.com/en/5.0/releases/4.1/#log-out-via-get #}
+
+<style>
+.logout-form-link {
+  display: inline-block;
+}
+.logout-form-link button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: inherit;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+}
+</style>
+
+<form class="dropdown-item logout-form-link" method="post" action="{% url 'admin:logout' %}">
+    {% csrf_token %}
+    <button type="submit">
+      <i class="fa fa-sign-out"></i>
+      Logout
+    </button>
+</form>

@@ -25,17 +25,26 @@ def get_record_data_row(record, event):
     for item in EXPOSED_FIELDS:
         if event in item.get("used_for"):
             obj = record
+
             for model_name in item.get("model"):
                 obj = getattr(obj, model_name)
+
+            field_name = item.get("field")
+            print(f"{field_name=}")
             field = getattr(obj, item.get("field"))
-            if isinstance(field, datetime.date):
-                field = "{:%Y-%m-%d}".format(field)
+
+            if field_name == "maintenance_contract_expiration_date":
+                field = f"Expiry date: {field:%Y-%m-%d}"
+            elif isinstance(field, datetime.date):
+                field = f"{field:%Y-%m-%d}"
+
+            print(f"field: {field}")
             row.append(field)
 
     return row
 
 
-def get_records_as_text(records=None, title=None, event=None):
+def get_records_as_text(records=None, title=None, event=None, condition=None):
     """
     Build a string representation of affected records. Could be used as an email body.
     """

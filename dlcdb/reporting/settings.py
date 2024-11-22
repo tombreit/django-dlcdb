@@ -51,6 +51,11 @@ EXPOSED_FIELDS = [
         "used_for": [Record.REMOVED, Record.INROOM, Record.LENT],
     },
     {
+        "model": ["device"],
+        "field": "maintenance_contract_expiration_date",
+        "used_for": [Record.INROOM],
+    },
+    {
         "model": ["device", "manufacturer"],
         "field": "name",
         "used_for": [Record.REMOVED, Record.INROOM, Record.LENT],

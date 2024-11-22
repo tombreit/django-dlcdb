@@ -13,6 +13,7 @@ SPDX-License-Identifier: EUPL-1.2
 <head>
   <meta charset="utf-8">
   <title>Licenses | DLCDB</title>
+  <title>{% block title %}{% endblock title %} | DLCDB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'>
   <link rel="stylesheet" href="{% static 'theme/css/theme.css' %}">
@@ -25,8 +26,16 @@ SPDX-License-Identifier: EUPL-1.2
     
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{% url 'licenses:index' %}">
-                {# <img src="" alt=""> #}
-                Licenses
+                <img 
+                  src="
+                  {% if branding.licenses_logo %}
+                    {% get_media_prefix %}{{ branding.licenses_logo }}
+                  {% else %}
+                    {% static 'branding/dlcdb_logo_black.svg' %}
+                  {% endif %}"
+                  alt="{{ branding.organization_abbr }}"
+                  style="max-height: 40px;"
+                >
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,61 +44,58 @@ SPDX-License-Identifier: EUPL-1.2
             
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto">
+                    {% comment %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'licenses:new' %}">
-                          Add license
+                        <a class="nav-link" href="{% url 'nav-item-url' %}">
+                          Nav item
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin/">Backend</a>
-                    </li>
+                    {% endcomment %}
                 </ul>
 
                 <ul  class="navbar-nav">
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-user" aria-hidden="true"></i>
+                      <i class="bi bi-person"></i>
                       {{ request.user.username }}
                     </a>
                     <div class="dropdown-menu">
-                      {% include 'logout_link.html' %}
+                      {% include 'theme/logout_link.html' %}
                       <div class="dropdown-divider"></div>
                       <a
                         class="dropdown-item"
-                        href="{{ branding.documentation_url }}guides/inventur.html"
+                        href="{{ branding.documentation_url }}guides/"
                       >
-                        <i class="fa-solid fa-book-medical"></i>
+                        <i class="bi bi-life-preserver"></i>
                         Docs
                       </a>
-                      <div class="dropdown-divider"></div>
-                      <span class="dropdown-item">
-                        <span class="custom-control custom-switch qr-toggle-swicht">
-                          <input type="checkbox" {% if request.session.qrscanner_enabled == 1 %} checked {% endif %} class="custom-control-input" id="qr-toggle">
-                          <label class="custom-control-label" for="qr-toggle" title="QR scanner">QR</label>
-                        </span>
-                      </span>
-                    </div>
+                      <a class="dropdown-item" href="/admin/">
+                        <i class="bi bi-gear"></i>
+                        Backend
+                      </a>
+                    </li>
                   </li>
                 </ul>
             </div>
         </nav>
 
         {% if messages %}
-        <hr>
-        <div class="messages">
+        <div class="messages my-1">
             {% for message in messages %}
-              <div {% if message.tags %} class="py-1 my-1 alert alert-{{ message.tags }}"{% endif %}>
+              <div {% if message.tags %} class="alert-{{ message.tags }} alert alert-dismissible fade show my-1"{% endif %}>
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
             {% endfor %}
         </div>
         {% endif %}
 
-        <hr>
-
+        <main class="my-4">
         {% block body %}{% endblock body %}
+        </main>
 
     </div>
+    <script src="{% static 'theme/js/theme.js' %}"></script>
     {% django_htmx_script %}
     {% block extra_js %}{% endblock extra_js %}
 </body>

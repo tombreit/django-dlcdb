@@ -100,6 +100,14 @@ class Branding(SingletonBaseModel):
         verbose_name="IT Department Email",
     )
 
+    licenses_logo = models.FileField(
+        null=True,
+        blank=True,
+        upload_to="branding/",
+        validators=[validate_logo_image_file_extension],
+        verbose_name="Logo file for Licenses component",
+    )
+
     room_plan = models.FileField(
         blank=True,
         null=True,

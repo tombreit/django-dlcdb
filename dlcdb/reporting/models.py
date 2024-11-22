@@ -30,6 +30,7 @@ class Notification(models.Model):
     IS_NOTEBOOK = "IS_NOTEBOOK"
     HAS_SAP_ID = "HAS_SAP_ID"
     LENT_IS_OVERDUE = "LENT_IS_OVERDUE"
+    LICENCE_EXPIRES = "LICENCE_EXPIRES"
     CONDITION_CHOICES = [
         (LENT_IS_OVERDUE, "Rückgabe überfällig"),
         (IS_NEW_PC_OR_NOTEBOOK, "Ist neuer PC oder Notebook"),
@@ -37,6 +38,7 @@ class Notification(models.Model):
         (IS_PC, "Ist PC"),
         (IS_NOTEBOOK, "Ist Notebook"),
         (HAS_SAP_ID, "Hat SAP-Nummer"),
+        (LICENCE_EXPIRES, "Lizenz läuft ab"),
     ]
 
     active = models.BooleanField(
@@ -62,6 +64,13 @@ class Notification(models.Model):
         choices=CONDITION_CHOICES,
         blank=True,
         verbose_name="Bedingung",
+    )
+    device = models.ForeignKey(
+        "core.Device",
+        null=True,
+        blank=True,
+        help_text="Für Gerätebezogene Benachrichtigungen",
+        on_delete=models.SET_NULL,
     )
     time_interval = models.CharField(
         max_length=255,

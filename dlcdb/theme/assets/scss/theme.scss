@@ -1,17 +1,12 @@
 @import "bootstrap/scss/_functions";
 
 $primary: rgb(27, 54, 93);
-
 $link-decoration: underline;
-
-$web-font-path: "";
-
 
 // Bootstrap
 @import "bootstrap/scss/_variables";
 
 // Bootstrap: Include any default map overrides here
-
 @import "_bootstrap_components";
 
 // https://icons.getbootstrap.com/
@@ -22,4 +17,3 @@ $bootstrap-icons-font-dir: "../fonts";
 
 // @import "components/debug";
 @import "_screen";
-

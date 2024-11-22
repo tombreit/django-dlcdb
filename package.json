@@ -61,8 +61,9 @@
     "lending-img:copy": "mkdir -p $npm_package_config_lending_distdir/img && cp $npm_package_config_lending_srcdir/img/* $npm_package_config_lending_distdir/img/",
     "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.esm.min.mjs $npm_package_config_docs_distdir/mermaid/",
     "theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_theme_srcdir/scss:$npm_package_config_theme_distdir/css",
+    "theme:js": "esbuild $npm_package_config_theme_srcdir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_theme_distdir/js/theme.js",
     "theme:bs-icons:copy": "mkdir -p $npm_package_config_theme_distdir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_theme_distdir/fonts/",
-    "theme:prod": "npm-run-all theme:scss theme:bs-icons:copy"
+    "theme:prod": "npm-run-all theme:scss theme:js theme:bs-icons:copy"
   },
   "repository": {
     "type": "https",

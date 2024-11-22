@@ -1,0 +1,17 @@
+{% load crispy_forms_tags %}
+
+<form
+    id="license-form"
+    method="POST"
+    hx-post="{% url 'licenses:edit' license_id=license.id %}"
+>
+    {% csrf_token %}
+    {% crispy form %}
+
+    <button
+        type="submit"
+        class="my-4 btn btn-primary"
+    >
+        Submit
+    </button>
+</form>

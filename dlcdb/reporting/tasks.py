@@ -22,15 +22,26 @@ def request_notifications(huey_interval=None):
     """
 
     for notification in Notification.objects.filter(time_interval=huey_interval):
-        _msg1 = f"Processing notification: {notification}"
-        logger.info(_msg1)
-        report = create_report_if_needed(notification.pk, caller="huey")
+        if notification.device:
+            """
+            This is a special notification for a given device (esp. a license).
+            Users could have been subscribet to notifications for multiple devices.
+            """
+            _msg1 = f"Processing device notification: {notification} for device {notification.device}"
+            logger.info(_msg1)
+            print(f"{_msg1=}")
+            # TODO: Implement device notifications, eg. license expires in 30 days.
 
-        # Finally sent mail notifications
-        if notification.active:
-            if notification.notify_no_updates or hasattr(report, "record_collection.records"):
-                email_objs = build_report_email(notification, report.report, report.record_collection)
-                send_email(email_objs)
+        else:
+            _msg1 = f"Processing notification: {notification}"
+            logger.info(_msg1)
+            report = create_report_if_needed(notification.pk, caller="huey")
+
+            # Finally sent mail notifications
+            if notification.active:
+                if notification.notify_no_updates or hasattr(report, "record_collection.records"):
+                    email_objs = build_report_email(notification, report.report, report.record_collection)
+                    send_email(email_objs)
 
     # Weekly overdue lending emails. Automatically use EVERY_MINUTE when in dev mode.
     notifiy_overdue_lenders_interval = Notification.EVERY_MINUTE if settings.DEBUG else Notification.WEEKLY
@@ -40,7 +51,7 @@ def request_notifications(huey_interval=None):
             huey_interval == notifiy_overdue_lenders_interval,
         ]
     ):
-        print("11create_overdue_lenders_emails...")
+        print("Create_overdue_lenders_emails...")
         create_overdue_lenders_emails(caller="huey")
 
 
@@ -48,7 +59,7 @@ def request_notifications(huey_interval=None):
 # https://huey.readthedocs.io/en/latest/guide.html#periodic-tasks
 
 if settings.DEBUG:
-    # In fact, every two minutes...
+
     @db_periodic_task(huey.crontab(minute="*/1"))
     @lock_task("reports-minutely-lock")
     def once_a_minute():

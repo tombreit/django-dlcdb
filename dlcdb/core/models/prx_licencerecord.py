@@ -27,6 +27,9 @@ class BaseLicenceRecordManager(models.Manager):
 class LicenceRecord(Record):
     objects = BaseLicenceRecordManager()
 
+    def get_human_title(self):
+        return f"{self.device.manufacturer} - {self.device.series}"
+
     def __str__(self):
         return self.device.edv_id
 
