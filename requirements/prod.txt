@@ -20,13 +20,13 @@ beautifulsoup4==4.12.3
     # via pydata-sphinx-theme
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
-crispy-bootstrap4==2024.1
+crispy-bootstrap5==2024.10
     # via django-dlcdb (pyproject.toml)
-django==5.1.1
+django==5.1.2
     # via
-    #   crispy-bootstrap4
+    #   crispy-bootstrap5
     #   django-appconf
     #   django-crispy-forms
     #   django-dlcdb (pyproject.toml)
@@ -39,13 +39,13 @@ django-appconf==1.0.6
     # via django-select2
 django-crispy-forms==2.3
     # via
-    #   crispy-bootstrap4
+    #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
 django-environ==0.11.2
     # via django-dlcdb (pyproject.toml)
 django-filter==24.3
     # via django-dlcdb (pyproject.toml)
-django-htmx==1.19.0
+django-htmx==1.21.0
     # via django-dlcdb (pyproject.toml)
 django-select2==8.2.1
     # via django-dlcdb (pyproject.toml)
@@ -58,9 +58,9 @@ docutils==0.21.2
     #   myst-parser
     #   pydata-sphinx-theme
     #   sphinx
-et-xmlfile==1.1.0
+et-xmlfile==2.0.0
     # via openpyxl
-huey==2.5.1
+huey==2.5.2
     # via django-dlcdb (pyproject.toml)
 idna==3.10
     # via requests
@@ -76,7 +76,7 @@ markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via jinja2
 mdit-py-plugins==0.4.2
     # via myst-parser
@@ -86,13 +86,11 @@ myst-parser==4.0.0
     # via django-dlcdb (pyproject.toml)
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
-packaging==24.1
-    # via
-    #   pydata-sphinx-theme
-    #   sphinx
-pillow==10.4.0
+packaging==24.2
+    # via sphinx
+pillow==11.0.0
     # via django-dlcdb (pyproject.toml)
-pydata-sphinx-theme==0.15.4
+pydata-sphinx-theme==0.16.0
     # via sphinx-book-theme
 pygments==2.18.0
     # via
@@ -111,7 +109,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.6
     # via beautifulsoup4
-sphinx==8.0.2
+sphinx==8.1.3
     # via
     #   django-dlcdb (pyproject.toml)
     #   myst-parser
@@ -136,11 +134,11 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.1
+sqlparse==0.5.2
     # via django
 typing-extensions==4.12.2
     # via pydata-sphinx-theme
 urllib3==2.2.3
     # via requests
-whitenoise==6.7.0
+whitenoise==6.8.2
     # via django-dlcdb (pyproject.toml)
