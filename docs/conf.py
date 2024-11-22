@@ -118,13 +118,6 @@ todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
-# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
-# Use local hosted version for mermaid.js; see html_js_files
-mermaid_version = ""
-
-html_theme = "sphinx_book_theme"
-html_static_path = ["_static"]
-
 html_css_files = [
     "css/custom.css",
 ]
@@ -132,6 +125,10 @@ html_css_files = [
 html_js_files = [
     "vendor/mermaid/mermaid.min.js",
 ]
+
+html_theme = "sphinx_book_theme"
+html_static_path = ["_static"]
+
 
 html_theme_options = {
     "repository_url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb",
@@ -152,6 +149,15 @@ html_title = "♻ DLCDB Docs"
 #   'nl', 'no', 'pt', 'ro', 'r', 'sv', 'tr', 'zh'
 #
 # html_search_language = 'en'
+
+
+# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
+# Use local hosted version for mermaid.js; see html_js_files
+# Using sphinxconrib-mermaid<1.0.0, because 1.0.0 yields the following error:
+# Extension error (sphinxcontrib.mermaid):
+# Handler <function install_js at 0x7f9286281e40> for event 'html-page-context' threw an exception (exception: Invalid version: '')
+mermaid_version = ""
+
 
 myst_enable_extensions = ["colon_fence"]
 myst_heading_anchors = 6
