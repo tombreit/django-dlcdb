@@ -43,13 +43,6 @@ dependencies = [
     "sphinx-design",
 ]
 
-[project.urls]
-Homepage = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
-Documentation = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/tree/main/docs"
-Repository = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
-Issues = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
-
-
 [project.optional-dependencies]
 ldap = [
     "django-auth-ldap",
@@ -69,6 +62,12 @@ dev = [
     # "Werkzeug==0.16.1",
     # "pyOpenSSL",
 ]
+
+[project.urls]
+Homepage = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+Documentation = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/tree/main/docs"
+Repository = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+Issues = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
 
 [build-system]
 requires = [
