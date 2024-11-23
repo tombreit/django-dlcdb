@@ -341,14 +341,14 @@ class DeviceCountMixin:
 
         if query_key:
             result = format_html(
-                '<a class="badge badge-info" href="{url}?{query_kwargs}">{count}</a>',
+                '<a class="badge text-bg-info" href="{url}?{query_kwargs}">{count}</a>',
                 url=reverse("admin:core_device_changelist"),
                 query_kwargs=urlencode({query_key: obj.pk}),
                 count=obj._assets_count,
             )
         else:
             result = format_html(
-                '<span class="badge badge-info">{count}</span>',
+                '<span class="badge text-bg-info">{count}</span>',
                 count=obj._assets_count,
             )
 

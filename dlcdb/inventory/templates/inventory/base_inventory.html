@@ -30,12 +30,12 @@ SPDX-License-Identifier: EUPL-1.2
             </a>
 
             {% if current_inventory %}
-              <span class="badge badge-primary">
+              <span class="badge text-bg-primary">
                   <img src="{% static 'admin/img/icon-yes.svg' %}" alt="">
                   {{ current_inventory.name }}
               </span>
             {% else %}
-              <span class="badge badge-danger">
+              <span class="badge text-bg-danger">
                 No active inventory
               </span>
             {% endif %}

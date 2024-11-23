@@ -33,12 +33,12 @@ SPDX-License-Identifier: EUPL-1.2
                 - {{ person.organizational_unit.name }}
             </h4>
             <span 
-                class="badge badge-warning text-dark"
+                class="badge text-bg-warning"
             >
                 ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
             </span>
             <span 
-                class="badge badge-secondary"
+                class="badge text-bg-secondary"
             >
                 ☆ {{ person.unassigned_things_count }} thing{{ person.unassigned_things_count|pluralize }} returned
             </span>
@@ -50,7 +50,7 @@ SPDX-License-Identifier: EUPL-1.2
             </h4>
 
             <a 
-                class="badge badge-warning text-dark"
+                class="badge text-bg-warning"
                 role="button"
                 hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
                 hx-target="#assignements"
@@ -58,7 +58,7 @@ SPDX-License-Identifier: EUPL-1.2
                 ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
             </a>
             <a 
-                class="badge badge-secondary"
+                class="badge text-bg-secondary"
                 role="button"
                 hx-get="{% url 'smallstuff:get_assignements' person.id 'returned' %}"
                 hx-target="#assignements"

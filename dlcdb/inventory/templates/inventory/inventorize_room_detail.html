@@ -145,11 +145,11 @@ SPDX-License-Identifier: EUPL-1.2
                     </strong>
                 </td>
                 <td>
-                    <span class="badge badge-info small">
+                    <span class="badge text-bg-info small">
                         {{ device.device_type.name }}
                     </span>
                     <br>
-                    <span class="badge badge-success small text-left text-wrap {# text-break #}">
+                    <span class="badge text-bg-success small text-left text-wrap {# text-break #}">
                         {% if device.active_record.is_type_lent %}
                             {{ device.active_record.get_record_type_display }} an 
                             <br>
@@ -183,7 +183,7 @@ SPDX-License-Identifier: EUPL-1.2
                 <td>
                     <small>
                         {% if device.already_inventorized %}
-                            <span class="badge badge-success">
+                            <span class="badge text-bg-success">
                                 {{ current_inventory.name }}
                             </span>
                             <br>

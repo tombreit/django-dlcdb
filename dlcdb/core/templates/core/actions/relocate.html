@@ -40,7 +40,7 @@ SPDX-License-Identifier: EUPL-1.2
                 <tr>
                     <th>Current record</th>
                     <td>
-                        <span class="badge {% if device.active_record.record_type == 'REMOVED' %} badge-danger {% else %} badge-info {% endif %}">
+                        <span class="badge {% if device.active_record.record_type == 'REMOVED' %} text-bg-danger {% else %} text-bg-info {% endif %}">
                             {{ device.active_record.record_type }}
                         </span>
                     </td>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: EUPL-1.2
                 <td>{{ device.tenant }}</td>
                 <td>{{ device.active_record.room }}</td>
                 <td>
-                    <span class="badge {% if device.active_record.record_type == 'REMOVED' %} badge-danger {% else %} badge-info {% endif %}">
+                    <span class="badge {% if device.active_record.record_type == 'REMOVED' %} text-bg-danger {% else %} text-bg-info {% endif %}">
                         {{ device.active_record.record_type }}
                     </span>
                 </td>

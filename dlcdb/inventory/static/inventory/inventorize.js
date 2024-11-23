@@ -115,7 +115,7 @@ function deviceRowTemplate(device){
             <td>
                 ${device.edv_id}
                 <br>
-                <span class="badge badge-pill badge-warning small">
+                <span class="badge rounded-pill text-bg-warning small">
                     ADDED
                 </span>
             </td>
@@ -133,7 +133,7 @@ function deviceRowTemplate(device){
             </td>
             <td>
                 Current:
-                <span class="badge badge-pill badge-warning small">
+                <span class="badge rounded-pill text-bg-warning small">
                     ${device.record_type} ${device.room ? device.room : ''}
                 </span>
             </td>

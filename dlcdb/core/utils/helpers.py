@@ -115,7 +115,7 @@ def get_has_note_badge(*, obj_type, has_note):
 
     return format_html(
         (
-            '<span title="{text}" class="ms-2 p-1 badge badge-{level}"><i class="me-2 fa-lg {type_icon}"></i><i'
+            '<span title="{text}" class="ms-2 p-1 badge text-bg-{level}"><i class="me-2 fa-lg {type_icon}"></i><i'
             ' class="fa-lg {note_icon}"></i></span>'
         ),
         type_icon=type_icon,
