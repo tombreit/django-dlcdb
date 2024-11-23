@@ -384,7 +384,7 @@ THEME = {
         "COLOR": "",
     },
     "smallstuff.assignedthing": {
-        "ICON": "fa-solid fa-stapler",
+        "ICON": "bi bi-handbag",
         "COLOR": "",
     },
 }

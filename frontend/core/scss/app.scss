@@ -15,6 +15,10 @@ $code-color: gray;
 @import "bootstrap/scss/bootstrap";
 @import "../../common/_fontawesome";
 
+// https://icons.getbootstrap.com/
+$bootstrap-icons-font-dir: "../../../theme/fonts";
+@import "bootstrap-icons/font/bootstrap-icons.scss";
+
 
 /* DjangoAdmin Bootstrap resets and fixes: */
 caption {

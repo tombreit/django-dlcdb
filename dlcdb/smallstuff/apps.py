@@ -14,7 +14,7 @@ class SmallstuffConfig(AppConfig):
             "slot": "nav_main",
             "order": 30,
             "label": "Kleinkram",
-            "icon": "fa-solid fa-stapler",
+            "icon": "bi bi-handbag",
             "url": "smallstuff:person_search",
             "required_permission": "view_assignedthing",
         },
