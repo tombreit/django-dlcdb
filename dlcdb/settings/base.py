@@ -155,6 +155,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "dlcdb.core.context_processors.hints",
                 "dlcdb.core.context_processors.nav",
+                "dlcdb.theme.context_processors.navigation",
                 "dlcdb.organization.context_processors.branding",
             ],
         },

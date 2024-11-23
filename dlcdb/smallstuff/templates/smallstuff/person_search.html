@@ -4,7 +4,11 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-{% extends 'frontend/base_frontend.html' %}
+{% extends 'theme/_base.html' %}
+
+{% block title %}
+Kleinkram
+{% endblock title %}
 
 
 {% block body %}
@@ -20,23 +24,15 @@ SPDX-License-Identifier: EUPL-1.2
                 </span> 
             </h1>
         </div>
-        <div class="p-2">
-            <a href="{% url 'admin:core_device_changelist' %}" class="btn btn-primary" title="Backend Home">
-                <i class="fa-solid fa-house-chimney"></i>
-            </a>
-            <a href="{% url 'admin:smallstuff_thing_changelist' %}" class="btn btn-primary" title="Backend Smallstuff">
-                <i class="fa-solid fa-gear"></i>
-            </a>
-        </div>
     </div>
     
     <form
         hx-post="{% url 'smallstuff:person_search' %}"
         hx-target="#search-results"
     >
-        <div class="input-group mb-3">
+        <div class="input-group input-group-lg mb-3">
             <input 
-                type="text"
+                type="search"
                 name="search" 
                 class="form-control"
                 placeholder="Tippe halt mal was, oder einfach *" 
@@ -47,13 +43,12 @@ SPDX-License-Identifier: EUPL-1.2
                 hx-target="#search-results"
             >
 
-            <div class="input-group-append">
-                <span class="input-group-text">
-                    <span id="results-count">0</span> 
-                </span>
-                <button class="btn btn-success" type="search">Search</button>
-                <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
-            </div>
+            <span class="input-group-text">
+                <span id="results-count">0</span> 
+            </span>
+            {# <button class="btn btn-success" type="search">Search</button> #}
+            <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
+
         </div>
     </form>
 

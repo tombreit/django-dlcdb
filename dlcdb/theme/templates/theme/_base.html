@@ -12,7 +12,6 @@ SPDX-License-Identifier: EUPL-1.2
 
 <head>
   <meta charset="utf-8">
-  <title>Licenses | DLCDB</title>
   <title>{% block title %}{% endblock title %} | DLCDB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   {# <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'> #}
@@ -25,17 +24,14 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="container">
     
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{% url 'licenses:index' %}">
+            <a class="navbar-brand" href="{{ navigation.home_url }}">
                 <img 
-                  src="
-                  {% if branding.licenses_logo %}
-                    {% get_media_prefix %}{{ branding.licenses_logo }}
-                  {% else %}
-                    {% static 'branding/dlcdb_logo_black.svg' %}
-                  {% endif %}"
+                  src="{% if branding.organization_logo_black %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_black.svg' %}{% endif %}"
                   alt="{{ branding.organization_abbr }}"
-                  style="max-height: 40px;"
-                >
+                  style="max-height: 30px;"
+                  >
+                <i class="{{ navigation.app_icon_class }}"></i>
+                {{ navigation.app_label }}
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,13 +40,17 @@ SPDX-License-Identifier: EUPL-1.2
             
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto">
-                    {% comment %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'nav-item-url' %}">
-                          Nav item
+
+                  {% if navigation.navbar %}
+                    {% for item in navigation.navbar %}
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ item.url }}">
+                          <i class="{{ item.icon_class }}"></i>
+                          {{ item.label }}
                         </a>
-                    </li>
-                    {% endcomment %}
+                      </li>
+                    {% endfor %}
+                  {% endif %}
                 </ul>
 
                 <ul  class="navbar-nav">
@@ -62,18 +62,16 @@ SPDX-License-Identifier: EUPL-1.2
                     <div class="dropdown-menu">
                       {% include 'theme/logout_link.html' %}
                       <div class="dropdown-divider"></div>
-                      <a
-                        class="dropdown-item"
-                        href="{{ branding.documentation_url }}guides/"
-                      >
-                        <i class="bi bi-life-preserver"></i>
-                        Docs
-                      </a>
-                      <a class="dropdown-item" href="/admin/">
-                        <i class="bi bi-gear"></i>
-                        Backend
-                      </a>
-                    </li>
+
+                      {% if navigation.userdropdown %}
+                        {% for item in navigation.userdropdown %}
+                          <a class="dropdown-item" href="{{ item.url }}">
+                            <i class="{{ item.icon_class }}"></i>
+                            {{ item.label }}
+                          </a>
+                        {% endfor %}
+                      {% endif %}
+                    </div>
                   </li>
                 </ul>
             </div>

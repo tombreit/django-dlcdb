@@ -22,7 +22,6 @@ def person_search(request):
     template = "smallstuff/person_search.html"
     context = {"filter": filter}
 
-    print(f"{request.htmx=}")
     if request.htmx:
         template = "smallstuff/person_search_results.html"
 
