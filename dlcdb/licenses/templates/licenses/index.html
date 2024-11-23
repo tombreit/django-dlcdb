@@ -15,15 +15,12 @@
   {% endif %}
 </h1>
 
-<div id="licences-content-wrapper">
+<div id="licenses-content-wrapper">
 
 <div class="d-flex">
 
     <div class="search flex-grow-1 me-4">
-      <form 
-        {# action="{% url 'licenses:index' %}" #}
-        class="form"
-      >
+      <form>
         <div class="input-group mb-3">
           <span class="input-group-text">
             <i class="bi bi-search"></i>
@@ -45,19 +42,16 @@
     </div>
 
     <div id="add-license">
-        <a 
-          href="{% url 'admin:core_device_add' %}"
+        <span 
+          {# href="{% url 'admin:core_device_add' %} #}
           class="btn btn-primary"
-          {% comment %}
           hx-get="{% url 'licenses:new' %}"
           hx-trigger="click"
-          hx-push-url="true"
-          hx-target="body"
-          {% endcomment %}
+          hx-target="#licenses-content-wrapper"
         >
           <i class="bi bi-plus-circle"></i>
           Add license
-        </a>
+        </span>
     </div>
 </div>
   

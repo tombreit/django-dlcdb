@@ -56,6 +56,11 @@ class Room(SoftDeleteAuditBaseModel):
         verbose_name=_("External/Lent Room"),
         help_text=_("Location/room where assets are collected that cannot be located, e.g., loaned, off-site ."),
     )
+    is_default_license_room = models.BooleanField(
+        default=False,
+        verbose_name=_("Default license room"),
+        help_text=_("Room or location where the license information is stored."),
+    )
     qrcode = models.FileField(
         upload_to=f"{settings.QRCODE_DIR}/",
         blank=True,

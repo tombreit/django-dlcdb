@@ -35,6 +35,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     list_filter = [
         "is_auto_return_room",
         "is_external",
+        "is_default_license_room",
         HasNoteFilter,
     ]
     search_fields = [
@@ -62,6 +63,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
                     "note",
                     "is_auto_return_room",
                     "is_external",
+                    "is_default_license_room",
                 )
             },
         ),

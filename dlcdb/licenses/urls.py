@@ -9,6 +9,6 @@ app_name = "licenses"
 
 urlpatterns = [
     path("<int:license_id>/edit/", views.edit, name="edit"),
-    path("new/", views.index, name="new"),
+    path("new/", views.new, name="new"),
     path("", views.index, name="index"),
 ]

@@ -3,8 +3,8 @@ from dlcdb.reporting.models import Notification
 
 def manage_subscribers(device, subscribers):
     # Remove all nofifications for this device
-    deleted_notifications = Notification.objects.filter(device=device).delete()
-    print(f"{deleted_notifications=}")
+    _deleted_notifications = Notification.objects.filter(device=device).delete()
+    # print(f"{_deleted_notifications=}")
 
     # Set new notifications for each subscriber
     if subscribers:

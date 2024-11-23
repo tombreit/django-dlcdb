@@ -40,7 +40,7 @@
         {% endif %}
         <div>
           <span class="badge text-bg-secondary">
-            {{ license.device.device_type }}
+            {{ license.device.device_type|default:"n/a" }}
           </span>
         </div>
       </td>
@@ -67,7 +67,7 @@
 
             hx-get="{% url 'licenses:edit' license_id=license.device.id %}"
             hx-trigger="click"
-            hx-target="#licences-content-wrapper"
+            hx-target="#licenses-content-wrapper"
             hx-push-url="false"
           >
             <i class="bi bi-pencil-square"></i>

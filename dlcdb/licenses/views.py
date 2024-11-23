@@ -5,8 +5,9 @@ from django.db.models import Q, Case, CharField, Value, When
 from django.shortcuts import redirect, get_object_or_404
 from django.http.response import HttpResponseRedirectBase
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 
-from dlcdb.core.models import LicenceRecord, Device
+from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
 from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
 from .subscribers import manage_subscribers
@@ -66,12 +67,6 @@ def index(request):
 
 
 @login_required
-def new(request):
-    # TODO: Implement this view
-    return TemplateResponse(request, "", {})
-
-
-@login_required
 def edit(request, license_id):
     if request.htmx:
         template = "licenses/form.html"
@@ -84,19 +79,14 @@ def edit(request, license_id):
         form = LicenseForm(
             request.POST,
             instance=license,
-            initial={
-                "user": request.user,
-            },
         )
 
         if form.is_valid():
             device = form.save(commit=False)
-            device.user = request.user
+            device.save()
 
             subscribers = form.cleaned_data["subscribers"]
             manage_subscribers(device, subscribers)
-
-            device.save()
 
             # messages.success(
             #     request,
@@ -123,5 +113,58 @@ def edit(request, license_id):
             "license": license,
             "template": template,
             "title": "Edit license",
+        },
+    )
+
+
+@login_required
+def new(request):
+    print("new licencse view...")
+    if request.htmx:
+        template = "licenses/form.html"
+    else:
+        raise NotImplementedError("Non HTMX requests not implemented")
+
+    if request.method == "POST":
+        form = LicenseForm(
+            request.POST,
+        )
+
+        if form.is_valid():
+            device = form.save(commit=False)
+
+            # Set device properties
+            device.is_licence = True
+            device.save()
+
+            # Set record for device
+            try:
+                room = Room.objects.get(is_default_license_room=True)
+            except Room.DoesNotExist:
+                # TODO: Emit a human readable error message instead of a 500
+                raise ValidationError("No license room/location defined. Define a license room first.")
+
+            record = InRoomRecord(
+                device=device,
+                room=room,
+                user=request.user,
+                username=request.user.username,
+            )
+            record.save()
+
+            subscribers = form.cleaned_data["subscribers"]
+            manage_subscribers(device, subscribers)
+
+            return redirect("licenses:index")
+    else:
+        form = LicenseForm()
+
+    return TemplateResponse(
+        request,
+        template,
+        {
+            "form": form,
+            "template": template,
+            "title": "New license",
         },
     )

@@ -1,9 +1,19 @@
 {% load crispy_forms_tags %}
 
+<h2>{{ title }}</h2>
+
+<pre>license_id: {{ license_id }}</pre>
+
 <form
     id="license-form"
     method="POST"
-    hx-post="{% url 'licenses:edit' license_id=license.id %}"
+    hx-post="
+    {% if license %}
+        {% url 'licenses:edit' license_id=license.id %}
+    {% else %}
+        {% url 'licenses:new' %}
+    {% endif %}
+    "
 >
     {% csrf_token %}
     {% crispy form %}
