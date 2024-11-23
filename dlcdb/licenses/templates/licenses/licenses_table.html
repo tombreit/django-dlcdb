@@ -80,14 +80,15 @@
 
 
 <script>
-const stickyIcons = document.querySelectorAll('.bi.bi-sticky');
-
-stickyIcons.forEach(function(stickyIcon) {
-  stickyIcon.addEventListener('click', function() {
-    const noteElement = this.parentElement.nextElementSibling;
-    if (noteElement) {
-      noteElement.classList.toggle('d-none');
-    }
-  });
+document.querySelectorAll('.bi.bi-sticky').forEach(function(stickyIcon) {
+  if (!stickyIcon.hasListener) {
+    stickyIcon.addEventListener('click', function() {
+      let noteElement = this.parentElement.nextElementSibling;
+      if (noteElement) {
+        noteElement.classList.toggle('d-none');
+      }
+    });
+    stickyIcon.hasListener = true;
+  }
 });
 </script>
