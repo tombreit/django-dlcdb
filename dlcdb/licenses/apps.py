@@ -7,7 +7,7 @@ from django.apps import AppConfig
 
 class LicensesConfig(AppConfig):
     name = "dlcdb.licenses"
-    verbose_name = "DLCDB License Management"
+    verbose_name = "License Management"
 
     nav_entries = [
         {
