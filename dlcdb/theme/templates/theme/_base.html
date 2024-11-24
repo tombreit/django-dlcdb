@@ -23,15 +23,17 @@ SPDX-License-Identifier: EUPL-1.2
 
     <div class="container">
     
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{{ navigation.home_url }}">
+        <nav class="navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
+            <a class="navbar-brand ms-2" href="{{ navigation.home_url }}">
                 <img 
-                  src="{% if branding.organization_logo_black %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_black.svg' %}{% endif %}"
+                  src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
                   alt="{{ branding.organization_abbr }}"
                   style="max-height: 30px;"
-                  >
-                <i class="{{ navigation.app_icon_class }}"></i>
-                {{ navigation.app_label }}
+                >
+                <span class="ms-4">
+                  <i class="{{ navigation.app_icon_class }}"></i>
+                  {{ navigation.app_label }}
+                </span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
