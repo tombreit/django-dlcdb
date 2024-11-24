@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from django.template.response import TemplateResponse
 from django.db.models import Q, Case, CharField, Value, When
 from django.shortcuts import redirect, get_object_or_404
-from django.http.response import HttpResponseRedirectBase
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 
@@ -11,10 +10,7 @@ from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
 from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
 from .subscribers import manage_subscribers
-
-
-class HttpResponseSeeOther(HttpResponseRedirectBase):
-    status_code = 303
+from .decorators import htmx_permission_required
 
 
 @login_required
@@ -67,6 +63,7 @@ def index(request):
 
 
 @login_required
+@htmx_permission_required("core.change_licencerecord")
 def edit(request, license_id):
     if request.htmx:
         template = "licenses/form.html"
@@ -118,8 +115,8 @@ def edit(request, license_id):
 
 
 @login_required
+@htmx_permission_required("core.change_licencerecord")
 def new(request):
-    print("new licencse view...")
     if request.htmx:
         template = "licenses/form.html"
     else:
