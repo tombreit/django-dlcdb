@@ -7,7 +7,7 @@
     {% if licenses|length != licences_total %}
       <a href=".">
         {% translate "Show all?" %}
-      </a>
+      </a>ms-2
     {% endif %}
   </i>
 </p>
@@ -43,8 +43,8 @@
         {{ license.get_human_title }} ({{ license.device.sap_id }})
 
         {% if license.device.note %}
-          <span>
-            <i class="bi bi-sticky"></i>
+          <span class="text-primary">
+            <i class="px-2 bi bi-chat-fill"></i>
           </span>
           <div id="note-{{ license.device.id }}" class="font-monospace mt-1 small d-none">
             {{ license.device.note|linebreaks }}
@@ -92,7 +92,7 @@
 
 
 <script>
-document.querySelectorAll('.bi.bi-sticky').forEach(function(stickyIcon) {
+document.querySelectorAll('.bi.bi-chat-fill').forEach(function(stickyIcon) {
   if (!stickyIcon.hasListener) {
     stickyIcon.addEventListener('click', function() {
       let noteElement = this.parentElement.nextElementSibling;
