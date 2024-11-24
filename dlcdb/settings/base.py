@@ -4,6 +4,7 @@
 
 from pathlib import Path
 from email.utils import getaddresses
+from django.contrib import messages
 import environ
 from huey import SqliteHuey
 
@@ -270,6 +271,15 @@ STORAGES = {
 
 LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "/admin/"
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: "info",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
+}
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
 
