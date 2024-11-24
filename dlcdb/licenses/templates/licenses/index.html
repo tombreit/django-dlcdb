@@ -8,11 +8,7 @@
 {% block body %}
 
 <h1>
-  {% if title %}
-    {{ title }}
-  {% else %}
-    {% translate "Licenses" %}
-  {% endif %}
+  {% translate "Licenses" %}
 </h1>
 
 <div id="licenses-content-wrapper">
@@ -54,7 +50,6 @@
         </span>
     </div>
 </div>
-  
 
 <div
   id="licenses-list"
