@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-11 10:48+0200\n"
-"PO-Revision-Date: 2024-10-11 10:50+0200\n"
+"POT-Creation-Date: 2024-11-24 17:15+0100\n"
+"PO-Revision-Date: 2024-11-24 17:16+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -37,7 +37,7 @@ msgstr "Erneut anmelden"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:65 dlcdb/core/models/room.py:68
+#: dlcdb/core/apps.py:65 dlcdb/core/models/room.py:73
 msgid "Rooms"
 msgstr "Räume"
 
@@ -258,7 +258,7 @@ msgstr "Record Notiz"
 msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
-#: dlcdb/core/models/record.py:135 dlcdb/core/models/room.py:67
+#: dlcdb/core/models/record.py:135 dlcdb/core/models/room.py:72
 msgid "Room"
 msgstr "Raum"
 
@@ -293,6 +293,14 @@ msgid ""
 msgstr ""
 "Location/Raum, in dem Assets gesammelt werden, die nicht lokalisierbar sind, "
 "z.B. verliehen, außer Haus ."
+
+#: dlcdb/core/models/room.py:61
+msgid "Default license room"
+msgstr "Standard Lizenz Location"
+
+#: dlcdb/core/models/room.py:62
+msgid "Room or location where the license information is stored."
+msgstr "Raum oder Location wo die Lizenz aufbewahrt wird."
 
 #: dlcdb/core/models/supplier.py:20
 msgid ""
@@ -362,6 +370,51 @@ msgstr "Ausleihen"
 msgid "Locate"
 msgstr "Lokalisieren"
 
+#: dlcdb/licenses/apps.py:11
+msgid "License Management"
+msgstr "Lizenzmanagement"
+
+#: dlcdb/licenses/templates/licenses/index.html:5
+#: dlcdb/licenses/templates/licenses/index.html:14
+msgid "Licenses"
+msgstr "Lizenzen"
+
+#: dlcdb/licenses/templates/licenses/index.html:33
+msgid "Search licenses"
+msgstr "Lizenz suchen"
+
+#: dlcdb/licenses/templates/licenses/index.html:53
+msgid "Add license"
+msgstr "Neue Lizenz"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:6
+msgid "of"
+msgstr "von"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:6
+msgid "licences"
+msgstr "Lizenzen"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:9
+msgid "Show all?"
+msgstr "Zeige alle?"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:19
+msgid "License"
+msgstr "Lizenz"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:22
+msgid "Purchase date"
+msgstr "Kaufdatum"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:25
+msgid "Expiry date"
+msgstr "Ablaufdatum"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:28
+msgid "Subscribers"
+msgstr "Abonnenten"
+
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
 msgstr ""
@@ -390,6 +443,10 @@ msgid ""
 "printouts."
 msgstr ""
 
+#: dlcdb/smallstuff/apps.py:12
+msgid "Smallstuff"
+msgstr "Kleinkram"
+
 #: dlcdb/smallstuff/models.py:93
 msgid "Can not be unassigned without being assigned first!"
 msgstr ""
@@ -401,6 +458,10 @@ msgstr ""
 #: dlcdb/smallstuff/models.py:100 dlcdb/smallstuff/models.py:101
 msgid "Issued stuff"
 msgstr "Ausgegebener Kleinkram"
+
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:21
+msgid "Smallstuff Person Search"
+msgstr "Kleinkram Personen Suche"
 
 #: dlcdb/templates/admin/base_site.html:25
 #: dlcdb/templates/admin/dashboard.html:14

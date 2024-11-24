@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 
 <nav class="navbar-main navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
     <a class="navbar-brand ms-2" href="{{ navigation.home_url }}">
@@ -9,7 +9,7 @@
         >
         <span class="ms-4">
           <i class="{{ navigation.app_icon_class }}"></i>
-          {{ navigation.app_label }}
+          {% translate navigation.app_label %}
         </span>
     </a>
 

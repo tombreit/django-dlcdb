@@ -1,9 +1,13 @@
+{% load i18n %}
+
 
 <p class="text-muted small">
   <i>
-    {{ licenses|length }} of {{ licences_total }} licenses.
+    {{ licenses|length }} {% translate "of" %} {{ licences_total }} {% translate "licences" %}.
     {% if licenses|length != licences_total %}
-      <a href=".">Show all?</a>
+      <a href=".">
+        {% translate "Show all?" %}
+      </a>
     {% endif %}
   </i>
 </p>
@@ -11,10 +15,18 @@
 <table class="table table-hover table-striped">
     <thead>
       <tr>
-        <th>License</th>
-        <th>Purchase date</th>
-        <th>Expiry date</th>
-        <th>Subscribers</th>
+        <th>
+          {% translate "License" %}
+        </th>
+        <th>
+          {% translate "Purchase date" %}
+        </th>
+        <th>
+          {% translate "Expiry date" %}
+        </th>
+        <th>
+          {% translate "Subscribers" %}
+        </th>
         <th></th>
       </tr>
     </thead>

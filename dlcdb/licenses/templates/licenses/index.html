@@ -1,8 +1,8 @@
 {% extends "theme/_base.html" %}
-{% load static crispy_forms_tags %}
+{% load static i18n crispy_forms_tags %}
 
 {% block title %}
-  Licenses
+  {% translate "Licenses" %}
 {% endblock title %}
 
 {% block body %}
@@ -11,7 +11,7 @@
   {% if title %}
     {{ title }}
   {% else %}
-    Licenses
+    {% translate "Licenses" %}
   {% endif %}
 </h1>
 
@@ -30,7 +30,7 @@
             class="form-control"
             name="q"
             value="{{ request.GET.q }}"
-            placeholder="Search licenses"
+            placeholder="{% translate 'Search licenses' %}"
             hx-get="{% url 'licenses:index' %}"
             {# hx-trigger="keyup changed delay:500ms" #}
             hx-trigger="keyup changed delay:250ms, search, load"
@@ -50,7 +50,7 @@
           hx-target="#licenses-content-wrapper"
         >
           <i class="bi bi-plus-circle"></i>
-          Add license
+          {% translate "Add license" %}
         </span>
     </div>
 </div>
