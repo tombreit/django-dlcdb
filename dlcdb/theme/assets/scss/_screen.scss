@@ -3,6 +3,15 @@ html {
     scroll-behavior: smooth;
 }
 
+.navbar-main {
+    background-color: var(--primary);
+
+    .nav-link {
+        color: white;
+        text-decoration: none;
+    }
+}
+
 #logout-form {
     display: inline;
 }

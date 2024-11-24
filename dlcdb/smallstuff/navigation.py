@@ -9,7 +9,7 @@ navigation = {
     "home_url": reverse("smallstuff:person_search"),
     "app_icon_class": "bi bi-handbag",
     "navbar": [],
-    "userdropdown": [
+    "navbar_secondary": [
         {
             "label": "Backend",
             "url": reverse("admin:smallstuff_thing_changelist"),

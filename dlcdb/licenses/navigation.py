@@ -9,7 +9,7 @@ navigation = {
     "home_url": reverse("licenses:index"),
     "app_icon_class": "bi bi-c-circle",
     "navbar": [],
-    "userdropdown": [
+    "navbar_secondary": [
         {
             "label": "Backend",
             "url": reverse("admin:index"),
@@ -17,7 +17,7 @@ navigation = {
         },
         {
             "label": "Docs",
-            "url": "/docs/guides/licenses.html",
+            "url": "/docs/guides/lizenzen.html",
             "icon_class": "bi bi-life-preserver",
         },
     ],

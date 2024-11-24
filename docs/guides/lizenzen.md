@@ -1,11 +1,16 @@
 # Lizenzen
 
-*Quick and dirty Lizenzverwaltung:*  [Datenhaltung > Lizenzen](https://fqdn/admin/core/licencerecord/)
+*Lizenzverwaltung:  [Lizenzen](https://fqdn/licenses/)*
 
 Damit ein Device eine Lizenz ist/wird:
 
 - Ein Device muss das Häkchen bei *Ist Lizenz?* haben
 - Ein Device muss einen Record (z.B. *Lokalisiert im Lizenzraum*) haben
+- Diese Eigenschaften werden beim Eintrag über die Lizenzverwaltung automatisch gesetzt.
+
+Eine Lizenz kann:
+
+- Eine Liste von Emailadressen (getrennt durch Komma) haben, die zum aktuellen Stand (Lizenz ist eingetragen, Lizenz läuft bald ab, Lizenz ist abgelaufen) automatisch benachrichtigt werden.
 
 Eine Lizenz sollte:
 

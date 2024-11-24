@@ -1,0 +1,69 @@
+{% load static %}
+
+<nav class="navbar-main navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
+    <a class="navbar-brand ms-2" href="{{ navigation.home_url }}">
+        <img 
+          src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
+          alt="{{ branding.organization_abbr }}"
+          style="max-height: 30px;"
+        >
+        <span class="ms-4">
+          <i class="{{ navigation.app_icon_class }}"></i>
+          {{ navigation.app_label }}
+        </span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto">
+          {% if navigation.navbar %}
+            {% for item in navigation.navbar %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ item.url }}">
+                  <i class="{{ item.icon_class }}"></i>
+                  {{ item.label }}
+                </a>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+
+        <ul  class="navbar-nav">
+
+        {% if navigation.navbar_secondary %}
+            {% for item in navigation.navbar_secondary %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ item.url }}">
+                <i class="{{ item.icon_class }}"></i>
+                {{ item.label }}
+                </a>
+            </li>
+            {% endfor %}
+        {% endif %}
+            
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person"></i>
+              {{ request.user.username }}
+            </a>
+            <div class="dropdown-menu">
+              {% include 'theme/logout_link.html' %}
+
+              {% if navigation.userdropdown %}
+              <div class="dropdown-divider"></div>
+                {% for item in navigation.userdropdown %}
+                  <a class="dropdown-item" href="{{ item.url }}">
+                    <i class="{{ item.icon_class }}"></i>
+                    {{ item.label }}
+                  </a>
+                {% endfor %}
+              {% endif %}
+
+            </div>
+          </li>
+        </ul>
+    </div>
+</nav>
