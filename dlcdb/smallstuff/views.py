@@ -5,17 +5,17 @@
 # from datetime import datetime
 
 from django.shortcuts import render
-from django.utils.timezone import now
 from django.utils import timezone
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required, permission_required
 
 from dlcdb.core.models import Person
-
 from .models import AssignedThing
 from .filters import PersonFilter
 from .forms import AssignedThingsForm
 
 
+@login_required
 def person_search(request):
     # query = request.GET.get("q")
     filter = PersonFilter(request.POST)
@@ -28,6 +28,8 @@ def person_search(request):
     return render(request, template, context)
 
 
+@login_required
+@permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def person_detail(request, person_id):
     try:
         person = Person.smallstuff_person_objects.get(id=person_id)
@@ -44,6 +46,8 @@ def person_detail(request, person_id):
     return render(request, template, context)
 
 
+@login_required
+@permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def get_assignements(request, person_id, state):
     if state == "issued":
         assignments = AssignedThing.currently_assigned_objects.filter(person=person_id)
@@ -57,9 +61,9 @@ def get_assignements(request, person_id, state):
     return render(request, template, context)
 
 
+@login_required
+@permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def remove_assignement(request, assignment_id):
-    print(f"{now()=}")
-    print(f"{timezone.localtime(timezone.now())=}")
     to_unassign_assignment = AssignedThing.currently_assigned_objects.get(id=assignment_id)
     to_unassign_assignment.unassigned_at = timezone.localtime(timezone.now())  # datetime.now()
     to_unassign_assignment.unassigned_by = request.user
@@ -71,6 +75,8 @@ def remove_assignement(request, assignment_id):
     return response
 
 
+@login_required
+@permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def add_assignement(request, person_id):
     if request.method == "POST":
         print("add_assignement POST")
