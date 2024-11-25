@@ -133,6 +133,7 @@ def edit(request, license_id):
             "license": license,
             "template": template,
             "title": "Edit license",
+            "obj_admin_url": reverse("admin:core_device_change", args=[license.id]),
         },
     )
 
