@@ -13,9 +13,9 @@ class LicensesConfig(AppConfig):
     nav_entries = [
         {
             "slot": "nav_main",
-            "order": 6,
-            "label": "Licenses",
-            "icon": "fa-solid fa-glasses",
+            "order": 40,
+            "label": _("Licenses"),
+            "icon": "fa-solid fa-scale-balanced",
             "url": "licenses:index",
             "required_permission": "true",
         },

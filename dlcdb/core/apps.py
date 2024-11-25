@@ -14,7 +14,7 @@ class CoreConfig(AppConfig):
         {
             "slot": "nav_main",
             "order": 10,
-            "label": "Verleih",
+            "label": _("Lending"),
             "icon": "fa-solid fa-arrow-right-arrow-left",
             "url": "admin:core_lentrecord_changelist",
             "required_permission": "view_lentrecord",
@@ -22,23 +22,24 @@ class CoreConfig(AppConfig):
         {
             "slot": "nav_main",
             "order": 20,
-            "label": "Devices",
+            "label": _("Devices"),
             "icon": "fa-solid fa-barcode",
             "url": "admin:core_device_changelist",
             "required_permission": "view_device",
         },
-        {
-            "slot": "nav_main",
-            "order": 40,
-            "label": "Lizenzen",
-            "icon": "fa-solid fa-scale-balanced",
-            "url": "licenses:index",
-            "required_permission": "view_licencerecord",
-        },
+        # This slot is set in the app licenses.navigation module
+        # {
+        #     "slot": "nav_main",
+        #     "order": 40,
+        #     "label": _("Licenses"),
+        #     "icon": "fa-solid fa-scale-balanced",
+        #     "url": "licenses:index",
+        #     "required_permission": "view_licencerecord",
+        # },
         {
             "slot": "nav_processes",
             "order": 10,
-            "label": "Beschaffen",
+            "label": _("Procurement"),
             "icon": "",
             "url": "admin:core_orderedrecord_changelist",
             "required_permission": "view_orderedrecord",
@@ -46,7 +47,7 @@ class CoreConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 20,
-            "label": "Bulk-Import",
+            "label": _("Bulk Import"),
             "icon": "",
             "url": "admin:core_importerlist_changelist",
             "required_permission": "view_importerlist",
@@ -54,7 +55,7 @@ class CoreConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 30,
-            "label": "Bulk-Ausmustern",
+            "label": _("Bulk Decommissioning"),
             "icon": "",
             "url": "admin:core_removerlist_changelist",
             "required_permission": "view_removerlist",

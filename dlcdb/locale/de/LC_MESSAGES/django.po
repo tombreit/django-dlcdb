@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-24 17:15+0100\n"
-"PO-Revision-Date: 2024-11-24 17:16+0100\n"
+"POT-Creation-Date: 2024-11-25 11:07+0100\n"
+"PO-Revision-Date: 2024-11-25 11:07+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -37,40 +37,60 @@ msgstr "Erneut anmelden"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:65 dlcdb/core/models/room.py:73
+#: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:101
+msgid "Lending"
+msgstr "Ausleihe"
+
+#: dlcdb/core/apps.py:25
+msgid "Devices"
+msgstr "Gerät"
+
+#: dlcdb/core/apps.py:42
+msgid "Procurement"
+msgstr "Beschaffung"
+
+#: dlcdb/core/apps.py:50
+msgid "Bulk Import"
+msgstr "Bulk Import"
+
+#: dlcdb/core/apps.py:58
+msgid "Bulk Decommissioning"
+msgstr "Bulk Ausmusterung"
+
+#: dlcdb/core/apps.py:66 dlcdb/core/models/room.py:73
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:73 dlcdb/core/models/device.py:84
+#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:84
 #: dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
 
-#: dlcdb/core/apps.py:81
+#: dlcdb/core/apps.py:82
 msgid "Distributor"
 msgstr "Zulieferer"
 
-#: dlcdb/core/apps.py:89
+#: dlcdb/core/apps.py:90
 msgid "Device types"
 msgstr "Geräteklassen"
 
-#: dlcdb/core/apps.py:97
+#: dlcdb/core/apps.py:98
 msgid "People"
 msgstr "Personen"
 
-#: dlcdb/core/apps.py:105
+#: dlcdb/core/apps.py:106
 msgid "Records"
 msgstr "Records"
 
-#: dlcdb/core/apps.py:113
+#: dlcdb/core/apps.py:114
 msgid "Removed records"
 msgstr "Entfernt-Records"
 
-#: dlcdb/core/apps.py:121 dlcdb/core/models/inventory.py:234
+#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:234
 msgid "Inventories"
 msgstr "Inventuren"
 
-#: dlcdb/core/apps.py:129
+#: dlcdb/core/apps.py:130
 msgid "Notes"
 msgstr "Notizen"
 
@@ -197,10 +217,6 @@ msgid ""
 msgstr ""
 "Das Verleihende (lend_desired_end_date) kann nicht nach {settings."
 "MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
-
-#: dlcdb/core/models/prx_lentrecord.py:101
-msgid "Lending"
-msgstr "Ausleihe"
 
 #: dlcdb/core/models/prx_lentrecord.py:102
 msgid "Lendings"
@@ -374,44 +390,44 @@ msgstr "Lokalisieren"
 msgid "License Management"
 msgstr "Lizenzmanagement"
 
-#: dlcdb/licenses/templates/licenses/index.html:5
-#: dlcdb/licenses/templates/licenses/index.html:14
+#: dlcdb/licenses/apps.py:17 dlcdb/licenses/templates/licenses/index.html:5
+#: dlcdb/licenses/templates/licenses/index.html:11
 msgid "Licenses"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/index.html:33
+#: dlcdb/licenses/templates/licenses/index.html:29
 msgid "Search licenses"
 msgstr "Lizenz suchen"
 
-#: dlcdb/licenses/templates/licenses/index.html:53
+#: dlcdb/licenses/templates/licenses/index.html:49
 msgid "Add license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:6
+#: dlcdb/licenses/templates/licenses/index.html:57
 msgid "of"
 msgstr "von"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:6
+#: dlcdb/licenses/templates/licenses/index.html:57
 msgid "licences"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:9
+#: dlcdb/licenses/templates/licenses/index.html:60
 msgid "Show all?"
 msgstr "Zeige alle?"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:19
+#: dlcdb/licenses/templates/licenses/licenses_table.html:8
 msgid "License"
 msgstr "Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:22
+#: dlcdb/licenses/templates/licenses/licenses_table.html:11
 msgid "Purchase date"
 msgstr "Kaufdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:25
+#: dlcdb/licenses/templates/licenses/licenses_table.html:14
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:28
+#: dlcdb/licenses/templates/licenses/licenses_table.html:17
 msgid "Subscribers"
 msgstr "Abonnenten"
 
@@ -443,7 +459,7 @@ msgid ""
 "printouts."
 msgstr ""
 
-#: dlcdb/smallstuff/apps.py:12
+#: dlcdb/smallstuff/apps.py:12 dlcdb/smallstuff/apps.py:18
 msgid "Smallstuff"
 msgstr "Kleinkram"
 
@@ -476,6 +492,14 @@ msgstr "Django Verwaltung"
 #, python-format
 msgid " By %(filter_title)s "
 msgstr ""
+
+#: dlcdb/templates/admin/navbar.html:31
+msgid "Processes"
+msgstr "Prozesse"
+
+#: dlcdb/templates/admin/navbar.html:40
+msgid "Data management"
+msgstr "Datenhaltung"
 
 #: dlcdb/templates/simple_history/_object_history_list.html:19
 msgid "Date/time"

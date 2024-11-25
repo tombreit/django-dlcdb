@@ -15,10 +15,9 @@ class SmallstuffConfig(AppConfig):
         {
             "slot": "nav_main",
             "order": 30,
-            "label": "Kleinkram",
+            "label": _("Smallstuff"),
             "icon": "bi bi-handbag",
             "url": "smallstuff:person_search",
             "required_permission": "view_assignedthing",
         },
-        # ... additional entries as needed
     ]

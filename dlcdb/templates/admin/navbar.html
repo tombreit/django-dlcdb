@@ -28,7 +28,7 @@ SPDX-License-Identifier: EUPL-1.2
         
         <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Prozesse
+            {% translate "Processes" %}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
             {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_processes" only %}
@@ -37,7 +37,7 @@ SPDX-License-Identifier: EUPL-1.2
 
         <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDataDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Datenhaltung
+            {% translate "Data management" %}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDataDropdown">
             {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_masterdata" only %}
