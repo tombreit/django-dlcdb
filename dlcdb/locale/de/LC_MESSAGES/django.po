@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-25 11:07+0100\n"
-"PO-Revision-Date: 2024-11-25 11:07+0100\n"
+"POT-Creation-Date: 2024-11-25 23:18+0100\n"
+"PO-Revision-Date: 2024-11-25 23:19+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -395,39 +395,51 @@ msgstr "Lizenzmanagement"
 msgid "Licenses"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/index.html:29
+#: dlcdb/licenses/templates/licenses/form.html:40
+msgid "Save"
+msgstr "Speichern"
+
+#: dlcdb/licenses/templates/licenses/form.html:47
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: dlcdb/licenses/templates/licenses/index.html:34
 msgid "Search licenses"
 msgstr "Lizenz suchen"
 
-#: dlcdb/licenses/templates/licenses/index.html:49
+#: dlcdb/licenses/templates/licenses/index.html:38
+msgid "License type"
+msgstr "Lizenztyp"
+
+#: dlcdb/licenses/templates/licenses/index.html:57
 msgid "Add license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/templates/licenses/index.html:57
+#: dlcdb/licenses/templates/licenses/licenses_table.html:5
 msgid "of"
 msgstr "von"
 
-#: dlcdb/licenses/templates/licenses/index.html:57
+#: dlcdb/licenses/templates/licenses/licenses_table.html:5
 msgid "licences"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/index.html:60
+#: dlcdb/licenses/templates/licenses/licenses_table.html:9
 msgid "Show all?"
 msgstr "Zeige alle?"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:8
+#: dlcdb/licenses/templates/licenses/licenses_table.html:19
 msgid "License"
 msgstr "Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:11
+#: dlcdb/licenses/templates/licenses/licenses_table.html:22
 msgid "Purchase date"
 msgstr "Kaufdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:14
+#: dlcdb/licenses/templates/licenses/licenses_table.html:25
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:17
+#: dlcdb/licenses/templates/licenses/licenses_table.html:28
 msgid "Subscribers"
 msgstr "Abonnenten"
 
