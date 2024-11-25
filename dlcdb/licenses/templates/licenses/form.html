@@ -12,6 +12,7 @@
         {% url 'licenses:new' %}
     {% endif %}
     "
+    hx-target="#licenses-content-wrapper"
 >
     {% csrf_token %}
     {% crispy form %}
