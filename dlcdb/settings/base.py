@@ -322,6 +322,8 @@ MORE_WHITENOISE = [
     {"directory": BASE_DIR / "run" / "docs" / "html", "prefix": "docs/"},
 ]
 
+DLCDB_BASE_URL = env("DLCDB_BASE_URL", default="http://127.0.0.1:8000")
+
 # Reporting
 REPORTING_NOTIFY_OVERDUE_LENDERS = env.bool("REPORTING_NOTIFY_OVERDUE_LENDERS", default=True)
 REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool("REPORTING_NOTIFY_OVERDUE_LENDERS", default=True)

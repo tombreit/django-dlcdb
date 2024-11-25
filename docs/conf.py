@@ -3,6 +3,7 @@
 import os
 import sys
 import django
+from django.conf import settings
 
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -16,47 +17,6 @@ sys.path.insert(0, os.path.abspath(".."))
 os.environ["DJANGO_SETTINGS_MODULE"] = "dlcdb.settings.base"
 django.setup()
 
-
-# -- Expose UDB settings ----------------------------------------------
-
-# Expose django settings in Sphinx MyST doc as substitution vars
-# Usage in docs:
-# ```md
-# Debug Mode: {sub}`debug_mode`
-# ```
-# TODO:
-# * Do not expose sensible data (eg. passwords)
-# * Get base url/fqdn of instance
-
-# import environ
-# from django.conf import settings
-
-# env = environ.Env(
-#     SETTINGS_MODE=(str, "dev"),
-#     DJANGO_DEBUG=(bool, True),
-#     AUTH_LDAP=(bool, False),
-#     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!"),
-#     ADMINS=(str, ""),
-# )
-# environ.Env.read_env(settings.BASE_DIR / ".env")
-
-# myst_substitutions_django_settings = {}
-
-# serialized_setting_types = [
-#     str,
-#     bool,
-#     int,
-# ]
-
-# for setting in dir(settings):
-#     if setting.isupper():
-#         value = getattr(settings, setting)
-#         if type(value) in serialized_setting_types:
-#             myst_substitutions_django_settings.update({
-#                 setting: value
-#             })
-
-# myst_substitutions = myst_substitutions_django_settings
 
 # -- General configuration ------------------------------------------------
 
@@ -142,6 +102,12 @@ html_title = "♻ DLCDB Docs"
 # html_logo = "path/to/logo.png"
 # html_favicon = "path/to/favicon.ico"
 
+base_url = getattr(settings, "DLCDB_BASE_URL")
+myst_substitutions = {
+    "base_url": base_url,
+    "licenses_fe_link": f"[Lizenzen]({base_url}/lizenzen/)",
+}
+
 
 # Language to be used for generating the HTML full-text search index.
 # Sphinx supports the following languages:
@@ -159,5 +125,5 @@ html_title = "♻ DLCDB Docs"
 mermaid_version = ""
 
 
-myst_enable_extensions = ["colon_fence"]
+myst_enable_extensions = ["colon_fence", "substitution"]
 myst_heading_anchors = 6

@@ -1,6 +1,9 @@
 # Lizenzen
 
-*Lizenzverwaltung:  [Lizenzen](https://fqdn/licenses/)*
+- Lizenzverwaltung:  {{ licenses_fe_link }}
+- Hat eine Lizenz eine Notiz, wird ein Sprechblasenicon angezeigt. Klicken auf das Sprechblasenicon zeigt oder versteckt die Notiz.
+
+---
 
 Damit ein Device eine Lizenz ist/wird:
 
