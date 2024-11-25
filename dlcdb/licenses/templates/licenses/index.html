@@ -32,6 +32,7 @@
             name="q"
             value="{{ request.GET.q }}"
             placeholder="{% translate 'Search licenses' %}"
+            style="flex-grow: 3;"
           >
           <select class="form-select" name="license-type-select" id="license-type-select">
             <option value=0 selected>{% translate "License type" %}...</option>

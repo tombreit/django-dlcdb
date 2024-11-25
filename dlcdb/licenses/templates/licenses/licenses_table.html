@@ -4,7 +4,8 @@
   <i>
     {{ licenses_filtered }} {% translate "of" %} {{ licenses_total }} {% translate "licences" %}.
     {% if licenses_filtered != licenses_total %}
-      <a class="ms-1" href=".">
+      <a class="ms-1 badge text-bg-warning" href=".">
+        <i class="bi bi-x-circle-fill"></i>
         {% translate "Show all?" %}
       </a>
     {% endif %}
