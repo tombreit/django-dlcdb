@@ -43,9 +43,9 @@
   <i>
     {{ licenses|length }} {% translate "of" %} {{ licences_total }} {% translate "licences" %}.
     {% if licenses|length != licences_total %}
-      <a href=".">
+      <a class="ms-1" href=".">
         {% translate "Show all?" %}
-      </a>ms-2
+      </a>
     {% endif %}
   </i>
 </p>
