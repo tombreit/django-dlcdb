@@ -58,6 +58,11 @@ class LicenseForm(forms.ModelForm):
 
         return subscribers
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if not any(cleaned_data.values()):
+            raise ValidationError("At least one field must be filled.")
+
     class Meta:
         model = Device
         fields = [
