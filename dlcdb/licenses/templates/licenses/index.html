@@ -13,6 +13,56 @@
 
 <div id="licenses-content-wrapper">
 
+  <div class="d-flex">
+
+    <div class="search flex-grow-1 me-4">
+      <form>
+        <div class="input-group mb-3">
+          <span class="input-group-text">
+            <i class="bi bi-search"></i>
+          </span>
+          <input
+            type="search"
+            class="form-control"
+            name="q"
+            value="{{ request.GET.q }}"
+            placeholder="{% translate 'Search licenses' %}"
+            hx-get="{% url 'licenses:index' %}"
+            {# hx-trigger="keyup changed delay:500ms" #}
+            hx-trigger="keyup changed delay:250ms, search"
+            hx-target="#licenses-list"
+            hx-push-url="true"
+          >
+        </div>
+      </form>
+    </div>
+  
+    <div id="add-license">
+        <span 
+          {# href="{% url 'admin:core_device_add' %} #}
+          class="btn btn-primary"
+          hx-get="{% url 'licenses:new' %}"
+          hx-trigger="click"
+          hx-target="#licenses-content-wrapper"
+        >
+          <i class="bi bi-plus-circle"></i>
+          {% translate "Add license" %}
+        </span>
+    </div>
+    
+  </div>
+  
+  <p class="text-muted small">
+    <i>
+      {{ licenses|length }} {% translate "of" %} {{ licences_total }} {% translate "licences" %}.
+      {% if licenses|length != licences_total %}
+        <a class="ms-1" href=".">
+          {% translate "Show all?" %}
+        </a>
+      {% endif %}
+    </i>
+  </p>
+
 <div
   id="licenses-list"
 
