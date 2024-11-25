@@ -11,7 +11,7 @@ from django.urls import reverse
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
+from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room, DeviceType
 from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
 from .subscribers import manage_subscribers
@@ -21,6 +21,7 @@ from .decorators import htmx_permission_required
 @login_required
 def index(request):
     q = request.GET.get("q")
+    license_type = request.GET.get("license-type-select")
 
     if request.htmx:
         template = "licenses/licenses_table.html"
@@ -28,7 +29,7 @@ def index(request):
         template = "licenses/index.html"
 
     now = datetime.today().date()
-    threshold = now + timedelta(days=60)  # now plus two months
+    threshold = now + timedelta(days=30)  # now plus one months
 
     base_qs = (
         LicenceRecord.objects.select_related("device", "device__manufacturer", "device__device_type")
@@ -51,6 +52,12 @@ def index(request):
         .order_by("-licence_state", "device__maintenance_contract_expiration_date")
     )
 
+    # Limit device-type choices to "License-type" choices
+    license_type_choices = DeviceType.objects.filter(
+        Q(name__startswith="Lizenz::") | Q(name__startswith="License::") | Q(name__startswith="Licence::")
+    )
+
+    # Filtering the queryset
     if q:
         search_filter = (
             Q(device__manufacturer__name__icontains=q) | Q(device__series__icontains=q) | Q(device__sap_id__icontains=q)
@@ -59,9 +66,14 @@ def index(request):
     else:
         qs = base_qs
 
+    if license_type and license_type != "0":
+        qs = qs.filter(device__device_type=license_type)
+
     context = {
         "licenses": qs,
-        "licences_total": base_qs.count(),
+        "licenses_filtered": qs.count(),
+        "licenses_total": base_qs.count(),
+        "license_type_choices": license_type_choices,
     }
 
     return TemplateResponse(request, template, context)

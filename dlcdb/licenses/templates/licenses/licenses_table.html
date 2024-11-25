@@ -1,5 +1,15 @@
 {% load i18n %}
 
+<p class="text-muted small">
+  <i>
+    {{ licenses_filtered }} {% translate "of" %} {{ licenses_total }} {% translate "licences" %}.
+    {% if licenses_filtered != licenses_total %}
+      <a class="ms-1" href=".">
+        {% translate "Show all?" %}
+      </a>
+    {% endif %}
+  </i>
+</p>
 
 <table class="table table-hover table-striped">
     <thead>

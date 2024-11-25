@@ -16,7 +16,12 @@
   <div class="d-flex">
 
     <div class="search flex-grow-1 me-4">
-      <form>
+      <form
+        hx-get="{% url 'licenses:index' %}"
+        hx-target="#licenses-list"
+        hx-push-url="true"
+        hx-trigger="keyup changed delay:250ms, search, change"
+        >
         <div class="input-group mb-3">
           <span class="input-group-text">
             <i class="bi bi-search"></i>
@@ -27,12 +32,14 @@
             name="q"
             value="{{ request.GET.q }}"
             placeholder="{% translate 'Search licenses' %}"
-            hx-get="{% url 'licenses:index' %}"
-            {# hx-trigger="keyup changed delay:500ms" #}
-            hx-trigger="keyup changed delay:250ms, search"
-            hx-target="#licenses-list"
-            hx-push-url="true"
           >
+          <select class="form-select" name="license-type-select" id="license-type-select">
+            <option value=0 selected>{% translate "License type" %}...</option>
+            {% for license_type in license_type_choices %}
+              <option value="{{ license_type.id }}">{{ license_type.name }}</option>
+            {% endfor %}
+          </select>
+        
         </div>
       </form>
     </div>
@@ -49,31 +56,18 @@
           {% translate "Add license" %}
         </span>
     </div>
-    
+
   </div>
-  
-  <p class="text-muted small">
-    <i>
-      {{ licenses|length }} {% translate "of" %} {{ licences_total }} {% translate "licences" %}.
-      {% if licenses|length != licences_total %}
-        <a class="ms-1" href=".">
-          {% translate "Show all?" %}
-        </a>
-      {% endif %}
-    </i>
-  </p>
 
-<div
-  id="licenses-list"
-
-  hx-trigger="load"
-  hx-get="{% url 'licenses:index' %}"
-
->
-  <div class="spinner-border" role="status">
-    <span class="visually-hidden">Loading...</span>
+  <div
+    id="licenses-list"
+    hx-trigger="load"
+    hx-get="{% url 'licenses:index' %}?{{ request.GET.urlencode|safe }}"
+  >
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
-</div>
 
 </div>
 
