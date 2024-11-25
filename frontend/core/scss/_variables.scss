@@ -1,0 +1,15 @@
+$web-font-path: "";
+$bootstrap-icons-font-dir: "../../../theme/fonts";
+
+$font-family-sans-serif: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
+$font-size-base: 0.875rem;
+$code-font-size: 1rem;
+$code-color: gray;
+
+$dlcdb-color-primary: rgb(0, 85, 85);
+$dlcdb-color-primary-light: rgb(0, 108, 102);
+$primary: $dlcdb-color-primary;
+
+:root {
+    --dlcdb-color-primary-light: #{$dlcdb-color-primary-light};
+}

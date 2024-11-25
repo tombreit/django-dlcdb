@@ -44,7 +44,7 @@ class UIRecordActionSnippetContext:
             if self.active_record.room:
                 record_infos.append(
                     dict(
-                        css_classes="btn btn-info",
+                        css_classes="btn btn-primary",
                         title="{text} {obj}".format(text=_("In room"), obj=self.active_record.room.number),
                         url=inroom_url,
                         label=self.active_record.room.number,

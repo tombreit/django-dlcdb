@@ -6,7 +6,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% load i18n admin_urls %}
 
-<div class="btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
+<div class="record-action-btn-group btn-group btn-group{% if not is_device_detail_page %}-sm{% endif %}" role="group">
 
     {# FIXME: This if-for-view-eq-inventory-else should never have seen the light of day. #}
     {% if for_view == "inventory" %}

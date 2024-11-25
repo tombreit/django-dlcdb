@@ -1,23 +1,10 @@
-$dlcdb-color-primary: rgb(0, 68, 95);
+@import "bootstrap/scss/functions";
 
-$web-font-path: "";
-$font-family-sans-serif: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
-
-/*
-   Django admin uses 14px as body font-size, which can't be used with
-   Bootstrap 4, which expects a rem unit:
-*/
-$font-size-base: 0.875rem;
-$code-font-size: 1rem;
-$code-color: gray;
-
+@import "_variables";
 
 @import "bootstrap/scss/bootstrap";
-@import "../../common/_fontawesome";
-
-// https://icons.getbootstrap.com/
-$bootstrap-icons-font-dir: "../../../theme/fonts";
 @import "bootstrap-icons/font/bootstrap-icons.scss";
+@import "../../common/_fontawesome";
 
 
 /* DjangoAdmin Bootstrap resets and fixes: */
@@ -26,7 +13,37 @@ caption {
 }
 
 #header {
-    background-color: $dlcdb-color-primary;
+    background-color: $dlcdb-color-primary-light;
+    overflow: visible;
+
+    .navbar-brand img {
+        max-height: 40px;
+    }
+
+    .nav-item {
+        list-style: none;
+    }
+
+    .dropdown-menu {
+        a {
+            color: $dropdown-link-color;
+        }
+    }
+}
+
+// Remove django admin branding from most pages, as we use 
+// the bootstrap branding...
+#branding { display: none; }
+
+// ...but re-enable django admin branding for login and logout pages
+body.login #branding,
+body.logout #branding { 
+    display: block; 
+}
+
+// Ensure BS dropdowns are not cut off:
+body #changelist-form .results {
+    overflow-x: visible;
 }
 
 #content h1 {
@@ -84,6 +101,13 @@ a.text-bg-info {
     @extend .text-bg-info
 }
 
+.record-action-btn-group .btn-info {
+    @extend .btn-info;
+    background-color: var(--dlcdb-color-primary-light);
+    border-color: var(--dlcdb-color-primary-light);
+    color: white;
+}
+
 fieldset.collapse:not(.show), 
 fieldset.collapsed:not(.show) {
     display: block;
@@ -99,40 +123,6 @@ fieldset.collapsed:not(.show) {
 .inline-group .tabular td.original p {
     height: auto;
 }
-
-#header {
-    overflow: visible;
-
-    .navbar-brand img {
-        max-height: 40px;
-    }
-
-    .nav-item {
-        list-style: none;
-    }
-
-    .dropdown-menu {
-        a {
-            color: $dropdown-link-color;
-        }
-    }
-}
-
-// Remove django admin branding from most pages, as we use 
-// the bootstrap branding...
-#branding { display: none; }
-
-// ...but re-enable django admin branding for login and logout pages
-body.login #branding,
-body.logout #branding { 
-    display: block; 
-}
-
-// Ensure BS dropdowns are not cut off:
-body #changelist-form .results {
-    overflow-x: visible;
-}
-
 
 .alert-90-danger,
 tr.lent-state-10-unknown {
