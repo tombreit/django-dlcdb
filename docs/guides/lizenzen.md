@@ -3,7 +3,14 @@
 - Lizenzverwaltung:  {{ licenses_fe_link }}
 - Hat eine Lizenz eine Notiz, wird ein Sprechblasenicon angezeigt. Klicken auf das Sprechblasenicon zeigt oder versteckt die Notiz.
 
----
+## Bedienung
+
+(subscribers)=
+### Subscribers
+
+Als "Subscriber" oder Abonnenten können beliebige Emailadressen (kommagetrennt) eingegeben werden. Diese Abonnenten werden über bestimmte Zustände der entsprechenden Lizenz - z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* - via Email benachrichtigt.
+
+## Definitionen
 
 Damit ein Device eine Lizenz ist/wird:
 
