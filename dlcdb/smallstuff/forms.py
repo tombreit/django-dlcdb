@@ -15,13 +15,12 @@ class AssignedThingsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
-        self.helper.template_pack = "bootstrap4"
         self.helper.layout = Layout(
             "thing",
             "person",
             HTML(
                 """
-                <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="fas fa-plus"></i></button>
+                <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="bi bi-plus-circle-fill"></i></button>
             """
             ),
         )
