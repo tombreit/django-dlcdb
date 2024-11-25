@@ -18,25 +18,25 @@ babel==2.16.0
     #   sphinx
 beautifulsoup4==4.12.3
     # via pydata-sphinx-theme
-build==1.2.2
+build==1.2.2.post1
     # via pip-tools
 certifi==2024.8.30
     # via requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 click==8.1.7
     # via pip-tools
-coverage==7.6.1
+coverage==7.6.8
     # via pytest-cov
-crispy-bootstrap4==2024.1
+crispy-bootstrap5==2024.10
     # via django-dlcdb (pyproject.toml)
-distlib==0.3.8
+distlib==0.3.9
     # via virtualenv
-django==5.1.1
+django==5.1.2
     # via
-    #   crispy-bootstrap4
+    #   crispy-bootstrap5
     #   django-appconf
     #   django-auth-ldap
     #   django-crispy-forms
@@ -50,11 +50,11 @@ django==5.1.1
     #   djangorestframework
 django-appconf==1.0.6
     # via django-select2
-django-auth-ldap==4.8.0
+django-auth-ldap==5.1.0
     # via django-dlcdb (pyproject.toml)
 django-crispy-forms==2.3
     # via
-    #   crispy-bootstrap4
+    #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
 django-debug-toolbar==4.4.6
     # via django-dlcdb (pyproject.toml)
@@ -64,7 +64,7 @@ django-extensions==3.2.3
     # via django-dlcdb (pyproject.toml)
 django-filter==24.3
     # via django-dlcdb (pyproject.toml)
-django-htmx==1.19.0
+django-htmx==1.21.0
     # via django-dlcdb (pyproject.toml)
 django-select2==8.2.1
     # via django-dlcdb (pyproject.toml)
@@ -77,13 +77,13 @@ docutils==0.21.2
     #   myst-parser
     #   pydata-sphinx-theme
     #   sphinx
-et-xmlfile==1.1.0
+et-xmlfile==2.0.0
     # via openpyxl
 filelock==3.16.1
     # via virtualenv
-huey==2.5.1
+huey==2.5.2
     # via django-dlcdb (pyproject.toml)
-identify==2.6.1
+identify==2.6.2
     # via pre-commit
 idna==3.10
     # via requests
@@ -101,7 +101,7 @@ markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==2.1.5
+markupsafe==3.0.2
     # via jinja2
 mdit-py-plugins==0.4.2
     # via myst-parser
@@ -113,13 +113,12 @@ nodeenv==1.9.1
     # via pre-commit
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
-packaging==24.1
+packaging==24.2
     # via
     #   build
-    #   pydata-sphinx-theme
     #   pytest
     #   sphinx
-pillow==10.4.0
+pillow==11.0.0
     # via django-dlcdb (pyproject.toml)
 pip-tools==7.4.1
     # via django-dlcdb (pyproject.toml)
@@ -127,7 +126,7 @@ platformdirs==4.3.6
     # via virtualenv
 pluggy==1.5.0
     # via pytest
-pre-commit==3.8.0
+pre-commit==4.0.1
     # via django-dlcdb (pyproject.toml)
 pyasn1==0.6.1
     # via
@@ -135,14 +134,14 @@ pyasn1==0.6.1
     #   python-ldap
 pyasn1-modules==0.4.1
     # via python-ldap
-pydata-sphinx-theme==0.15.4
+pydata-sphinx-theme==0.16.0
     # via sphinx-book-theme
 pygments==2.18.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
-pyproject-hooks==1.1.0
+pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
@@ -151,7 +150,7 @@ pytest==8.3.3
     #   django-dlcdb (pyproject.toml)
     #   pytest-cov
     #   pytest-django
-pytest-cov==5.0.0
+pytest-cov==6.0.0
     # via django-dlcdb (pyproject.toml)
 pytest-django==4.9.0
     # via django-dlcdb (pyproject.toml)
@@ -165,7 +164,7 @@ pyyaml==6.0.2
     #   pre-commit
 requests==2.32.3
     # via sphinx
-ruff==0.6.7
+ruff==0.8.0
     # via django-dlcdb (pyproject.toml)
 segno==1.6.1
     # via django-dlcdb (pyproject.toml)
@@ -173,7 +172,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.6
     # via beautifulsoup4
-sphinx==8.0.2
+sphinx==8.1.3
     # via
     #   django-dlcdb (pyproject.toml)
     #   myst-parser
@@ -198,7 +197,7 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.1
+sqlparse==0.5.2
     # via
     #   django
     #   django-debug-toolbar
@@ -206,11 +205,11 @@ typing-extensions==4.12.2
     # via pydata-sphinx-theme
 urllib3==2.2.3
     # via requests
-virtualenv==20.26.5
+virtualenv==20.27.1
     # via pre-commit
-wheel==0.44.0
+wheel==0.45.1
     # via pip-tools
-whitenoise==6.7.0
+whitenoise==6.8.2
     # via django-dlcdb (pyproject.toml)
 
 # The following packages are considered to be unsafe in a requirements file:
