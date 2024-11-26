@@ -28,6 +28,11 @@ class LicenseForm(forms.ModelForm):
             ),
             FloatingField("subscribers"),
             Row(
+                Column(FloatingField("supplier"), css_class="col-md-6"),
+                Column(FloatingField("order_number"), css_class="col-md-3"),
+                Column(FloatingField("book_value"), css_class="col-md-3"),
+            ),
+            Row(
                 Column(FloatingField("maintenance_contract_expiration_date"), css_class="col-md-6"),
                 Column(FloatingField("device_type"), css_class="col-md-6"),
             ),
@@ -67,6 +72,9 @@ class LicenseForm(forms.ModelForm):
         model = Device
         fields = [
             "sap_id",
+            "supplier",
+            "order_number",
+            "book_value",
             "manufacturer",
             "series",
             "maintenance_contract_expiration_date",
