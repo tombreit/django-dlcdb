@@ -8,6 +8,7 @@
         </h2>
     </div>
     <div>
+        {% if license %}
         <a
             href="{{ obj_admin_url }}"
             class="btn text-bg-warning btn-sm"
@@ -15,6 +16,7 @@
             <i class="bi bi-box-arrow-up-right"></i>
             Admin view
         </a>
+        {% endif %}
     </div>
 </div>
 
