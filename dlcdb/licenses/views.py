@@ -34,7 +34,8 @@ def index(request):
         Q(name__startswith="Lizenz::") | Q(name__startswith="License::") | Q(name__startswith="Licence::")
     )
 
-    supplier_choices = Supplier.objects.all()
+    # TODO: Additionally allow to set a new supplier for a license
+    supplier_choices = Supplier.objects.filter(device__is_licence=True, device__isnull=False).distinct()
 
     # Filtering the queryset
     if q:
