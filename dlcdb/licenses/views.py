@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
-
 from django.template.response import TemplateResponse
-from django.db.models import Q, Case, CharField, Value, When
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -28,29 +26,7 @@ def index(request):
     else:
         template = "licenses/index.html"
 
-    now = datetime.today().date()
-    threshold = now + timedelta(days=30)  # now plus one months
-
-    base_qs = (
-        LicenceRecord.objects.select_related("device", "device__manufacturer", "device__device_type")
-        .prefetch_related("device__notification_set")
-        .annotate(
-            licence_state=Case(
-                When(
-                    device__maintenance_contract_expiration_date__lte=now,
-                    then=Value("90-danger"),
-                ),
-                When(
-                    device__maintenance_contract_expiration_date__gt=now,
-                    device__maintenance_contract_expiration_date__lte=threshold,
-                    then=Value("80-warning"),
-                ),
-                default=Value("10-unknown"),
-                output_field=CharField(),
-            )
-        )
-        .order_by("-licence_state", "device__maintenance_contract_expiration_date")
-    )
+    base_qs = LicenceRecord.objects.all()
 
     # Limit device-type choices to "License-type" choices
     license_type_choices = DeviceType.objects.filter(

@@ -2,14 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import datetime, timedelta
-
 from django import forms
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.formats import date_format
-from django.db.models import Case, CharField, Value, When
 
 from ..models import LicenceRecord
 from .base_admin import CustomBaseModelAdmin
@@ -118,30 +115,6 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-    def get_queryset(self, request):
-        now = datetime.today().date()
-        threshold = now + timedelta(days=60)  # now plus two months
-
-        queryset = super().get_queryset(request)
-        # see: https://docs.djangoproject.com/en/3.0/ref/models/conditional-expressions/#django.db.models.expressions.Case
-        queryset = queryset.annotate(
-            licence_state=Case(
-                When(
-                    device__maintenance_contract_expiration_date__lte=now,
-                    then=Value("90-danger"),
-                ),
-                When(
-                    device__maintenance_contract_expiration_date__gt=now,
-                    device__maintenance_contract_expiration_date__lte=threshold,
-                    then=Value("80-warning"),
-                ),
-                default=Value("10-unknown"),
-                output_field=CharField(),
-            )
-        ).order_by("-licence_state", "device__maintenance_contract_expiration_date")
-
-        return queryset
 
     def save_model(self, request, obj, form, change):
         # Save related device note
