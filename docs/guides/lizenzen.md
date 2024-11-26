@@ -6,7 +6,7 @@
 ## Bedienung
 
 (subscribers)=
-### Subscribers
+### Subscribers / Abonnenten
 
 Als "Subscriber" oder Abonnenten können beliebige Emailadressen (kommagetrennt) eingegeben werden. Diese Abonnenten werden über bestimmte Zustände der entsprechenden Lizenz - z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* - via Email benachrichtigt.
 
