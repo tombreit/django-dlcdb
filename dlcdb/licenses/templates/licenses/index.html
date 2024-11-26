@@ -26,6 +26,7 @@
           <span class="input-group-text">
             <i class="bi bi-search"></i>
           </span>
+
           <input
             type="search"
             class="form-control"
@@ -34,13 +35,21 @@
             placeholder="{% translate 'Search licenses' %}"
             style="flex-grow: 3;"
           >
+
           <select class="form-select" name="license-type-select" id="license-type-select">
             <option value=0 selected>{% translate "License type" %}...</option>
             {% for license_type in license_type_choices %}
               <option value="{{ license_type.id }}">{{ license_type.name }}</option>
             {% endfor %}
           </select>
-        
+
+          <select class="form-select" name="supplier-select" id="supplier-select">
+            <option value=0 selected>{% translate "Supplier" %}...</option>
+            {% for supplier in supplier_choices %}
+              <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+            {% endfor %}
+          </select>
+
         </div>
       </form>
     </div>

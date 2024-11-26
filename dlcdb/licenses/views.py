@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room, DeviceType
+from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room, DeviceType, Supplier
 from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
 from .subscribers import manage_subscribers
@@ -20,6 +20,7 @@ from .decorators import htmx_permission_required
 def index(request):
     q = request.GET.get("q")
     license_type = request.GET.get("license-type-select")
+    supplier_select = request.GET.get("supplier-select")
 
     if request.htmx:
         template = "licenses/licenses_table.html"
@@ -33,6 +34,8 @@ def index(request):
         Q(name__startswith="Lizenz::") | Q(name__startswith="License::") | Q(name__startswith="Licence::")
     )
 
+    supplier_choices = Supplier.objects.all()
+
     # Filtering the queryset
     if q:
         search_filter = (
@@ -45,11 +48,15 @@ def index(request):
     if license_type and license_type != "0":
         qs = qs.filter(device__device_type=license_type)
 
+    if supplier_select and supplier_select != "0":
+        qs = qs.filter(device__supplier=supplier_select)
+
     context = {
         "licenses": qs,
         "licenses_filtered": qs.count(),
         "licenses_total": base_qs.count(),
         "license_type_choices": license_type_choices,
+        "supplier_choices": supplier_choices,
     }
 
     return TemplateResponse(request, template, context)
