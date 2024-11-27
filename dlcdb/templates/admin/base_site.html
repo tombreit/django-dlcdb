@@ -8,9 +8,12 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% load static %}
 
+{% comment %}
 {% block dark-mode-vars %}
     {# disable django admin builtin dark mode as our bootstrap usage does not provide a dark mode (yet) #}
 {% endblock %}
+{% endcomment %}
+
 
 {% block extrahead %}
     {{ block.super }}

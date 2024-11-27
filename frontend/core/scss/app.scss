@@ -8,6 +8,12 @@
 
 @import "./django_admin_overrides";
 
+body {
+    background: var(--body-bg);
+    color: var(--body-fg);
+}
+
+
 /* DjangoAdmin Bootstrap resets and fixes: */
 /* This fixed the caption alignment in the admin list view */
 caption {
@@ -127,25 +133,39 @@ fieldset.collapsed:not(.show) {
 
 .alert-90-danger,
 tr.lent-state-10-unknown {
-    @extend .bg-danger;
+    @extend .text-bg-danger;
 }
 
 .alert-80-warning,
 tr.lent-state-20-overdue {
-    @extend .bg-warning;
+    @extend .text-bg-warning;
 }
 
-tr.licence-state-30-available,
-tr.lent-state-30-available {
-    @extend .bg-white;
-}
+// tr.licence-state-30-available,
+// tr.lent-state-30-available {
+//     @extend .bg-white;
+// }
 
 tr.licence-state-40-lent,
 tr.lent-state-40-lent {
-    @extend .text-muted;
-    @extend .bg-light;
+    // @extend .text-muted;
+    @extend .text-bg-light;
 }
 
 ul.messagelist li {
     margin: 0;
+}
+
+
+/* select2 dark mode fixes */
+body .select2-dropdown {
+    background-color: var(--body-bg);
+    color: var(--body-fg);
+}
+
+body .select2-container--default .select2-selection--single,
+body .select2-container--default .select2-results__option[aria-selected="true"],
+body .select2-container--default .select2-selection--single .select2-selection__rendered {
+    background-color: var(--dlcdb-color-primary-light);
+    color: white;
 }
