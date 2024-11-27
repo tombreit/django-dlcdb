@@ -14,7 +14,7 @@
     "common_distdir": "dlcdb/static/dist/common",
     "docs_distdir": "docs/_static/vendor",
     "theme_srcdir": "dlcdb/theme/assets",
-    "theme_distdir": "dlcdb/theme/static/theme"
+    "theme_distdir": "dlcdb/theme/static/theme/dist"
   },
   "COMMENTS": [
     "SASS PINNED AT 1.77.4 FOR COMPATIBILITY WITH BS5.X"

@@ -34,6 +34,7 @@ node_modules/
 /run/
 /data/
 /dlcdb/static/dist/
+/dlcdb/theme/static/theme/dist
 /temp
 /.env
 
