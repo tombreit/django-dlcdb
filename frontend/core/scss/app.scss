@@ -1,19 +1,20 @@
 @import "bootstrap/scss/functions";
 
-@import "_variables";
+@import "./_variables";
 
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap-icons/font/bootstrap-icons.scss";
 @import "../../common/_fontawesome";
 
+@import "./django_admin_overrides";
 
 /* DjangoAdmin Bootstrap resets and fixes: */
+/* This fixed the caption alignment in the admin list view */
 caption {
     caption-side: top;
 }
 
 #header {
-    background-color: $dlcdb-color-primary-light;
     overflow: visible;
 
     .navbar-brand img {

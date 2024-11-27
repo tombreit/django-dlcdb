@@ -11,5 +11,6 @@ $dlcdb-color-primary-light: rgb(0, 108, 102);
 $primary: $dlcdb-color-primary;
 
 :root {
+    --primary: #{$dlcdb-color-primary};
     --dlcdb-color-primary-light: #{$dlcdb-color-primary-light};
 }
