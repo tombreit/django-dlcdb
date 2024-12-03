@@ -20,6 +20,10 @@
     </div>
 </div>
 
+{% if license %}
+    {% include 'licenses/timeline.html' with events=license.get_timeline %}
+{% endif %}
+
 <form
     id="license-form"
     method="POST"

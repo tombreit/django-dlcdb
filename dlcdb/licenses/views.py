@@ -27,7 +27,7 @@ def index(request):
     else:
         template = "licenses/index.html"
 
-    base_qs = LicenceRecord.objects.all()
+    base_qs = LicenceRecord.objects.all().order_by("-device__modified_at")
 
     # Limit device-type choices to "License-type" choices
     license_type_choices = DeviceType.objects.filter(

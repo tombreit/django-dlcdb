@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import uuid
+from dataclasses import dataclass
 
 from django.conf import settings
 from django.db import models
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from simple_history.models import HistoricalRecords
 
@@ -271,6 +273,76 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     #     except Inventory.DoesNotExist:
     #         return False
     #     return already_inventorized
+
+    def get_timeline(self):
+        """
+        Returns the license timeline as a list of tuples.
+        """
+        # timeline = [
+        #     (
+        #         self.created_at,
+        #         self.contract_start_date,
+        #         self.contract_expiration_date,
+        #         self.contract_termination_date,
+        #     )
+        # ]
+        timeline = []
+
+        # Get total timespan
+        added_date = self.created_at.date()
+        start_date = self.contract_start_date
+        end_date = self.contract_expiration_date
+        today = timezone.now().date()
+
+        if not end_date:
+            return timeline
+
+        total_days = (end_date - added_date).days
+        if total_days <= 0:
+            return timeline
+
+        @dataclass
+        class TimelineEvent:
+            event_type: str
+            percentage: int
+            date: object  # date object
+            description: str
+            bg: str = "#ff0000"
+
+        # Calculate percentages for each point
+        timeline.extend(
+            [
+                TimelineEvent(event_type="added", percentage=0, date=added_date, description="Added"),
+                TimelineEvent(
+                    event_type="start",
+                    percentage=round(((start_date - added_date).days / total_days) * 100),
+                    date=start_date,
+                    description="Start date",
+                    bg="#00ff00",
+                ),
+                TimelineEvent(event_type="end", percentage=100, date=end_date, description="Expiry date"),
+                TimelineEvent(
+                    event_type="today",
+                    percentage=round(((today - added_date).days / total_days) * 100),
+                    date=today,
+                    description="Today",
+                ),
+            ]
+        )
+
+        if self.contract_termination_date:
+            timeline.append(
+                TimelineEvent(
+                    event_type="termination",
+                    percentage=((self.contract_termination_date - added_date).days / total_days) * 100,
+                    date=self.contract_termination_date,
+                    description="Termination date",
+                )
+            )
+
+        # Sort timeline events by percentage chronologically
+        timeline.sort(key=lambda x: x.percentage)
+        return timeline
 
     def get_edv_id(self):
         return self.edv_id or "----"

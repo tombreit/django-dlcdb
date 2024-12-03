@@ -1,0 +1,34 @@
+<style>
+    .timeline {
+        position: relative;
+        width: 100%;
+        height: auto;
+        display: grid;
+        grid-auto-flow: column;
+    }
+    .timeline-label {
+        border-left: 2px solid white;
+        padding-left: 4px;
+    }
+    .timeline .timeline-point:first-child .timeline-label {
+        border-left-width: 0;
+    }
+</style>
+
+<div class="timeline rounded text-bg-secondary my-4">
+{% for event in events %}
+    <div class="timeline-point" style="grid-column: {{ event.percentage }} / 100;">
+        <div 
+            class="
+                timeline-label small 
+                {% if event.event_type == 'today' %} fw-bold bg-success {% endif %}
+            "
+            style="{% if event.event_type == 'today' %} height: 70px; {% endif %}"
+        >
+            {{ event.date }}
+            <br>
+            {{ event.description }}
+        </div>
+    </div>
+{% endfor %}
+</div>
