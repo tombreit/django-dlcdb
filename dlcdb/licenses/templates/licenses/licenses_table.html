@@ -36,14 +36,16 @@
     <tbody>
     {% for license in licenses %}
     <tr class="
-    {% if license.licence_state == '90-danger' %}
+    {% if license.license_state == '90-danger' %}
       table-danger
-    {% elif license.licence_state == '80-warning' %}
+    {% elif license.license_state == '80-warning' %}
       table-warning
     {% endif %}
     ">
       <td>
         {{ license.get_human_title }} ({{ license.device.sap_id }})
+
+        <pre>license_state: {{ license.license_state }}</pre>
 
         {% if license.device.note %}
           <span class="text-primary">

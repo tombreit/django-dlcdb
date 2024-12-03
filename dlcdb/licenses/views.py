@@ -100,6 +100,7 @@ def edit(request, license_id):
             return response
 
     else:
+        # TODO: Move subscribers to the form
         subscribers = Notification.objects.filter(device=license).values_list("recipient", flat=True)
 
         form = LicenseForm(

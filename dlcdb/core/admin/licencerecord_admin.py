@@ -202,17 +202,17 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
     def get_contract_expiration_date(self, obj):
         _title = ""
-        if obj.licence_state == "80-warning":
+        if obj.license_state == "80-warning":
             _title = "Läuft in weniger als 60 Tagen ab!"
-        elif obj.licence_state == "90-danger":
+        elif obj.license_state == "90-danger":
             _title = "Ist schon abgelaufen!"
 
         return format_html(
-            '<span title="{title}" class="licence-state alert-{licence_state}">{contract_expiration_date}</span>',
+            '<span title="{title}" class="licence-state alert-{license_state}">{contract_expiration_date}</span>',
             contract_expiration_date=date_format(obj.device.contract_expiration_date, format="DATE_FORMAT")
             if obj.device.contract_expiration_date
             else "-",
-            licence_state=obj.licence_state,
+            license_state=obj.license_state,
             title=_title,
         )
 

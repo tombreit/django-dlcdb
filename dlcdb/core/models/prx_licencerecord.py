@@ -30,28 +30,53 @@ class BaseLicenceRecordManager(models.Manager):
         now = datetime.today().date()
 
         # TODO: make threshold configurable
-        threshold = now + timedelta(days=30)
+        expiration_warning_threshold = now + timedelta(days=93)
 
         # TODO: use descriptive license_state wording like "expires_soon", "expired" instead of "80-warning"
         qs = (
             qs.select_related("device", "device__manufacturer", "device__device_type")
             .prefetch_related("device__notification_set")
             .annotate(
-                licence_state=Case(
+                license_state=Case(
+                    # Ordering matters: the first When() condition that is met will be used.
+                    When(
+                        device__contract_termination_date__isnull=False,
+                        then=Value("terminated"),
+                    ),
+                    When(
+                        device__contract_start_date__lte=now,
+                        device__contract_expiration_date__gt=now,
+                        device__contract_expiration_date__lte=expiration_warning_threshold,
+                        then=Value("expiring"),
+                    ),
+                    When(
+                        device__created_at__date__lte=now,
+                        device__contract_start_date__gt=now,
+                        then=Value("ordered"),
+                    ),
                     When(
                         device__contract_expiration_date__lte=now,
-                        then=Value("90-danger"),
+                        then=Value("expired"),
                     ),
                     When(
+                        device__contract_start_date__lte=now,
                         device__contract_expiration_date__gt=now,
-                        device__contract_expiration_date__lte=threshold,
-                        then=Value("80-warning"),
+                        then=Value("active"),
                     ),
+                    # When(
+                    #     device__contract_expiration_date__lte=now,
+                    #     then=Value("90-danger"),
+                    # ),
+                    # When(
+                    #     device__contract_expiration_date__gt=now,
+                    #     device__contract_expiration_date__lte=expiration_warning_threshold,
+                    #     then=Value("80-warning"),
+                    # ),
                     default=Value("10-unknown"),
                     output_field=CharField(),
                 )
             )
-            .order_by("-licence_state", "device__contract_expiration_date")
+            .order_by("-license_state", "device__contract_expiration_date")
         )
 
         return qs

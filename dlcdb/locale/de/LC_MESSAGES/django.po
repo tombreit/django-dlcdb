@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-03 12:18+0100\n"
-"PO-Revision-Date: 2024-12-03 12:18+0100\n"
+"POT-Creation-Date: 2024-12-03 20:33+0100\n"
+"PO-Revision-Date: 2024-12-03 20:35+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -168,22 +168,34 @@ msgid "Warranty expiry date"
 msgstr "Garantieablaufdatum"
 
 #: dlcdb/core/models/device.py:101
+msgid "Start date of licence or maintenance contract"
+msgstr "Startdatum Lizenz- oder Wartungsvertrag"
+
+#: dlcdb/core/models/device.py:104
 msgid "Expiry date licence or maintenance contract"
 msgstr "Ablaufdatum Lizenz- oder Wartungsvertrag"
 
-#: dlcdb/core/models/device.py:103
+#: dlcdb/core/models/device.py:109
+msgid "Contract termination date"
+msgstr "Kündigungsdatum Vertrag"
+
+#: dlcdb/core/models/device.py:110
+msgid "Date of termination of the contract."
+msgstr "Datum der Vertragskündigung"
+
+#: dlcdb/core/models/device.py:112
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:104
+#: dlcdb/core/models/device.py:113
 msgid "Book value"
 msgstr "Buchwert"
 
-#: dlcdb/core/models/device.py:108
+#: dlcdb/core/models/device.py:117
 msgid "Procurement note"
 msgstr "Beschaffungsnotiz"
 
-#: dlcdb/core/models/device.py:109
+#: dlcdb/core/models/device.py:118
 msgid ""
 "Information such as unique selling points, possible suppliers for "
 "comparative offers, etc."
@@ -191,54 +203,54 @@ msgstr ""
 "Informationen wie Alleinstellungsmerkmale, mögliche Lieferanten für "
 "Vergleichsangebote usw."
 
-#: dlcdb/core/models/device.py:112 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/core/models/device.py:121 dlcdb/core/models/manufacturer.py:21
 msgid "Note"
 msgstr "Notiz"
 
-#: dlcdb/core/models/device.py:113
+#: dlcdb/core/models/device.py:122
 msgid "Main MAC address"
 msgstr "MAC-Adresse"
 
-#: dlcdb/core/models/device.py:114
+#: dlcdb/core/models/device.py:123
 msgid "Further MAC addresses"
 msgstr "Weiter MAC Adressen"
 
-#: dlcdb/core/models/device.py:115
+#: dlcdb/core/models/device.py:124
 msgid "Nickname / C-Name"
 msgstr "Nickname / C-Name"
 
-#: dlcdb/core/models/device.py:116
+#: dlcdb/core/models/device.py:125
 msgid "Legacy device"
 msgstr "Legacy Gerät"
 
-#: dlcdb/core/models/device.py:121
+#: dlcdb/core/models/device.py:130
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:123
+#: dlcdb/core/models/device.py:132
 msgid "Added via CSV import?"
 msgstr "Via CSV-Import angelegt?"
 
-#: dlcdb/core/models/device.py:140
+#: dlcdb/core/models/device.py:149
 msgid "Order number"
 msgstr "Bestellnummer"
 
-#: dlcdb/core/models/device.py:144
+#: dlcdb/core/models/device.py:153
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:145
+#: dlcdb/core/models/device.py:154
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:149
+#: dlcdb/core/models/device.py:158
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:150
+#: dlcdb/core/models/device.py:159
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -262,7 +274,7 @@ msgstr "SAP (CSV)"
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/manufacturer.py:16
+#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:126
 msgid "Name"
 msgstr "Name"
 
@@ -456,6 +468,32 @@ msgstr "Lizenzmanagement"
 msgid "Licenses"
 msgstr "Lizenzen"
 
+#: dlcdb/licenses/forms.py:64
+msgid "Enter email addresses separated by comma."
+msgstr "Eingabe mehrerer E-Mail-Adressen durch Komma getrennt."
+
+#: dlcdb/licenses/forms.py:70
+msgid "Check this box if the contract has been terminated."
+msgstr "Anhaken, wenn Vertrag gekündigt ist."
+
+#: dlcdb/licenses/forms.py:84
+#, python-format
+msgid "Invalid email address: %(email)s"
+msgstr "Ungültige Email-Adresse: %(email)s"
+
+#: dlcdb/licenses/forms.py:91
+msgid "At least one field must be filled."
+msgstr "Mindestens ein Feld muss ausgefüllt sein."
+
+#: dlcdb/licenses/forms.py:124
+#: dlcdb/licenses/templates/licenses/licenses_table.html:28
+msgid "Subscribers"
+msgstr "Abonnenten"
+
+#: dlcdb/licenses/forms.py:125
+msgid "Type"
+msgstr "Typ"
+
 #: dlcdb/licenses/templates/licenses/form.html:42
 msgid "Save"
 msgstr "Speichern"
@@ -499,10 +537,6 @@ msgstr "Kaufdatum"
 #: dlcdb/licenses/templates/licenses/licenses_table.html:25
 msgid "Expiry date"
 msgstr "Ablaufdatum"
-
-#: dlcdb/licenses/templates/licenses/licenses_table.html:28
-msgid "Subscribers"
-msgstr "Abonnenten"
 
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
