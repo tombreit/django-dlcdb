@@ -101,6 +101,7 @@ class LicenseForm(forms.ModelForm):
             instance.contract_termination_date = None
         if commit:
             instance.save()
+            self.save_m2m()
         return instance
 
     class Meta:
@@ -126,8 +127,10 @@ class LicenseForm(forms.ModelForm):
             "series": _("Name"),
         }
         widgets = {
-            "contract_expiration_date": forms.DateInput(attrs={"type": "date"}),
-            "contract_start_date": forms.DateInput(attrs={"type": "date"}),
+            # Must set the date format, otherwise the date input field
+            # is not populated from the model instance.
+            "contract_expiration_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
+            "contract_start_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
         }
