@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-25 23:18+0100\n"
-"PO-Revision-Date: 2024-11-25 23:19+0100\n"
+"POT-Creation-Date: 2024-12-03 12:18+0100\n"
+"PO-Revision-Date: 2024-12-03 12:18+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -27,7 +27,7 @@ msgstr "Gruppen"
 
 #: dlcdb/accounts/templates/accounts/logout.html:29
 msgid "Thanks for spending some quality time with the web site today."
-msgstr ""
+msgstr "Danke für die Zeit, die Sie heute mit Ihrer DLCDB verbracht haben."
 
 #: dlcdb/accounts/templates/accounts/logout.html:30
 msgid "Log in again"
@@ -126,6 +126,14 @@ msgstr "Bisher wurden keine Räume  eingegeben."
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
+#: dlcdb/core/models/device.py:46
+msgid "IT ID"
+msgstr "IT ID"
+
+#: dlcdb/core/models/device.py:51
+msgid "Inventory number must be entered as the main number-sub-number."
+msgstr "Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden."
+
 #: dlcdb/core/models/device.py:61
 msgid "Inventory ID"
 msgstr "Inventarnummer"
@@ -143,6 +151,7 @@ msgid "Model name"
 msgstr "Modellbezeichnung"
 
 #: dlcdb/core/models/device.py:92 dlcdb/core/models/supplier.py:27
+#: dlcdb/licenses/templates/licenses/index.html:47
 msgid "Supplier"
 msgstr "Distributor"
 
@@ -150,30 +159,86 @@ msgstr "Distributor"
 msgid "Is license?"
 msgstr "Ist Lizenz?"
 
+#: dlcdb/core/models/device.py:98
+msgid "Date of purchase"
+msgstr "Kaufdatum"
+
+#: dlcdb/core/models/device.py:99
+msgid "Warranty expiry date"
+msgstr "Garantieablaufdatum"
+
+#: dlcdb/core/models/device.py:101
+msgid "Expiry date licence or maintenance contract"
+msgstr "Ablaufdatum Lizenz- oder Wartungsvertrag"
+
 #: dlcdb/core/models/device.py:103
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
+#: dlcdb/core/models/device.py:104
+msgid "Book value"
+msgstr "Buchwert"
+
+#: dlcdb/core/models/device.py:108
+msgid "Procurement note"
+msgstr "Beschaffungsnotiz"
+
+#: dlcdb/core/models/device.py:109
+msgid ""
+"Information such as unique selling points, possible suppliers for "
+"comparative offers, etc."
+msgstr ""
+"Informationen wie Alleinstellungsmerkmale, mögliche Lieferanten für "
+"Vergleichsangebote usw."
+
+#: dlcdb/core/models/device.py:112 dlcdb/core/models/manufacturer.py:21
+msgid "Note"
+msgstr "Notiz"
+
+#: dlcdb/core/models/device.py:113
+msgid "Main MAC address"
+msgstr "MAC-Adresse"
+
+#: dlcdb/core/models/device.py:114
+msgid "Further MAC addresses"
+msgstr "Weiter MAC Adressen"
+
 #: dlcdb/core/models/device.py:115
+msgid "Nickname / C-Name"
+msgstr "Nickname / C-Name"
+
+#: dlcdb/core/models/device.py:116
+msgid "Legacy device"
+msgstr "Legacy Gerät"
+
+#: dlcdb/core/models/device.py:121
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:138
+#: dlcdb/core/models/device.py:123
+msgid "Added via CSV import?"
+msgstr "Via CSV-Import angelegt?"
+
+#: dlcdb/core/models/device.py:140
+msgid "Order number"
+msgstr "Bestellnummer"
+
+#: dlcdb/core/models/device.py:144
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:139
+#: dlcdb/core/models/device.py:145
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:143
+#: dlcdb/core/models/device.py:149
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:144
+#: dlcdb/core/models/device.py:150
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -187,11 +252,11 @@ msgstr "Geräteklassen"
 
 #: dlcdb/core/models/importer.py:38
 msgid "Internal (CSV)"
-msgstr ""
+msgstr "Internal (CSV)"
 
 #: dlcdb/core/models/importer.py:39
 msgid "SAP (CSV)"
-msgstr ""
+msgstr "SAP (CSV)"
 
 #: dlcdb/core/models/inventory.py:233 dlcdb/core/models/record.py:108
 msgid "Inventory"
@@ -200,10 +265,6 @@ msgstr "Inventur"
 #: dlcdb/core/models/manufacturer.py:16
 msgid "Name"
 msgstr "Name"
-
-#: dlcdb/core/models/manufacturer.py:21
-msgid "Note"
-msgstr "Notiz"
 
 #: dlcdb/core/models/manufacturer.py:26
 msgid "Manufacturers"
@@ -395,23 +456,23 @@ msgstr "Lizenzmanagement"
 msgid "Licenses"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/form.html:40
+#: dlcdb/licenses/templates/licenses/form.html:42
 msgid "Save"
 msgstr "Speichern"
 
-#: dlcdb/licenses/templates/licenses/form.html:47
+#: dlcdb/licenses/templates/licenses/form.html:49
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: dlcdb/licenses/templates/licenses/index.html:34
+#: dlcdb/licenses/templates/licenses/index.html:35
 msgid "Search licenses"
 msgstr "Lizenz suchen"
 
-#: dlcdb/licenses/templates/licenses/index.html:38
+#: dlcdb/licenses/templates/licenses/index.html:40
 msgid "License type"
 msgstr "Lizenztyp"
 
-#: dlcdb/licenses/templates/licenses/index.html:57
+#: dlcdb/licenses/templates/licenses/index.html:66
 msgid "Add license"
 msgstr "Neue Lizenz"
 
@@ -491,12 +552,12 @@ msgstr "Ausgegebener Kleinkram"
 msgid "Smallstuff Person Search"
 msgstr "Kleinkram Personen Suche"
 
-#: dlcdb/templates/admin/base_site.html:25
+#: dlcdb/templates/admin/base_site.html:28
 #: dlcdb/templates/admin/dashboard.html:14
 msgid "Django site admin"
 msgstr "Django Site-Verwaltung"
 
-#: dlcdb/templates/admin/base_site.html:31
+#: dlcdb/templates/admin/base_site.html:34
 msgid "Django administration"
 msgstr "Django Verwaltung"
 

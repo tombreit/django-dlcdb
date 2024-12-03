@@ -40,7 +40,10 @@ class LicenseForm(forms.ModelForm):
                 Column(FloatingField("manufacturer"), css_class="col-md-6"),
                 Column(FloatingField("series"), css_class="col-md-6"),
             ),
-            Row(Column("note", css_class="col-md-6")),
+            Row(
+                Column("note", css_class="col-md-6"),
+                Column("procurement_note", css_class="col-md-6"),
+            ),
         )
 
     subscribers = forms.CharField(
@@ -78,6 +81,7 @@ class LicenseForm(forms.ModelForm):
             "manufacturer",
             "series",
             "maintenance_contract_expiration_date",
+            "procurement_note",
             "note",
             "device_type",
             "subscribers",

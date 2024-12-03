@@ -128,7 +128,9 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 "fields": (
                     "supplier",
                     ("order_number", "cost_centre"),
-                    ("purchase_date", "warranty_expiration_date", "maintenance_contract_expiration_date"),
+                    ("purchase_date", "warranty_expiration_date"),
+                    ("contract_start_date", "maintenance_contract_expiration_date"),
+                    "procurement_note",
                 ),
             },
         ),

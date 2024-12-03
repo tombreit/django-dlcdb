@@ -43,12 +43,12 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         blank=True,
         unique=True,
         db_index=True,
-        verbose_name="EDV-Nummer",
+        verbose_name=_("IT ID"),
     )
 
     sap_id_validator = RegexValidator(
         regex="^[0-9]+-[0-9]+$",
-        message="Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden.",
+        message=_("Inventory number must be entered as the main number-sub-number."),
         code="invalid_sap_id",
     )
 
@@ -95,26 +95,35 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         db_index=True,
         verbose_name=_("Is license?"),
     )
-    purchase_date = models.DateField(null=True, blank=True, verbose_name="Kaufdatum")
-    warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name="Garantieablaufdatum")
+    purchase_date = models.DateField(null=True, blank=True, verbose_name=_("Date of purchase"))
+    warranty_expiration_date = models.DateField(null=True, blank=True, verbose_name=_("Warranty expiry date"))
+    contract_start_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Start date of licence or maintenance contract")
+    )
     maintenance_contract_expiration_date = models.DateField(
-        null=True, blank=True, verbose_name="Ablaufdatum Lizenz- oder Wartungsvertrag"
+        null=True, blank=True, verbose_name=_("Expiry date licence or maintenance contract")
     )
     cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Cost centre"))
-    book_value = models.CharField(max_length=255, null=True, blank=True, verbose_name="Buchwert")
+    book_value = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Book value"))
+    procurement_note = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Procurement note"),
+        help_text=_("Information such as unique selling points, possible suppliers for comparative offers, etc."),
+    )
 
-    note = models.TextField(null=True, blank=True, verbose_name="Notiz")
-    mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name="Haupt-Mac-Adresse")
-    extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name="Weitere Mac-Adressen")
-    nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Nickname / C-Name")
-    is_legacy = models.BooleanField(default=False, verbose_name="Legacy-Device")
+    note = models.TextField(null=True, blank=True, verbose_name=_("Note"))
+    mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Main MAC address"))
+    extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name=_("Further MAC addresses"))
+    nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Nickname / C-Name"))
+    is_legacy = models.BooleanField(default=False, verbose_name=_("Legacy device"))
 
     is_lentable = models.BooleanField(
         default=False,
         db_index=True,
         verbose_name=_("Is loanable?"),
     )
-    is_imported = models.BooleanField(default=False, verbose_name="Via CSV-Import angelegt?")
+    is_imported = models.BooleanField(default=False, verbose_name=_("Added via CSV import?"))
     imported_by = models.ForeignKey(
         "core.ImporterList",
         null=True,
@@ -131,7 +140,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     order_number = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="Bestellnummer (SAP)",
+        verbose_name=_("Order number"),
     )
     machine_encryption_key = models.TextField(
         blank=True,
