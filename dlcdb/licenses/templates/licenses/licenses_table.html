@@ -55,14 +55,12 @@
             <img
               src='data:image/svg+xml;charset=utf-8,{% include 'licenses/traffic-light.svg' with state=license.license_state %}'
               alt="{{ license.license_state }}"
-              title="{{ license.license_state }}"
+              title="{{ license.get_license_state_label }}"
             >
           </div>
         </td>
       <td>
         {{ license.get_human_title }} ({{ license.device.sap_id }})
-
-        <pre>license_state: {{ license.license_state }}</pre>
 
         {% if license.device.note %}
           <span class="text-primary">

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 from django.db import models
 from django.db.models import Q, Case, CharField, Value, When
+from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
@@ -87,6 +88,27 @@ class LicenceRecord(Record):
 
     def get_human_title(self):
         return f"{self.device.manufacturer} - {self.device.series}"
+
+    def get_license_state_label(self):
+        """
+        Provide human labels for the license queryset annotations.
+        """
+
+        state = self.license_state
+        label = _("Unknown")
+
+        if state == "ordered":
+            label = _("Ordered")
+        elif state == "active":
+            label = _("Active")
+        elif state == "expiring":
+            label = _("Expiring")
+        elif state == "expired":
+            label = _("Expired")
+        elif state == "terminated":
+            label
+
+        return label
 
     def __str__(self):
         return self.device.edv_id
