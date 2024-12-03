@@ -162,7 +162,7 @@ class Record(AuditBaseModel):
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_lent_desired_end_date",
-                check=Q(
+                condition=Q(
                     lent_desired_end_date__lte=datetime.datetime.strptime(
                         settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d"
                     )

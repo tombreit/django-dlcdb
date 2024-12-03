@@ -412,6 +412,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='record',
-            constraint=models.CheckConstraint(check=models.Q(('lent_desired_end_date__lte', datetime.datetime(2099, 12, 31, 0, 0))), name='core_record_valid_lent_desired_end_date'),
+            constraint=models.CheckConstraint(condition=models.Q(('lent_desired_end_date__lte', datetime.datetime(2099, 12, 31, 0, 0))), name='core_record_valid_lent_desired_end_date'),
         ),
     ]
