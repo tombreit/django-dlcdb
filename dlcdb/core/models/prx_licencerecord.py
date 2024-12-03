@@ -27,10 +27,10 @@ class BaseLicenceRecordManager(models.Manager):
         )
 
         # Annotate with licence state
-        now = datetime.today().date()
+        today = datetime.today().date()
 
         # TODO: make threshold configurable
-        expiration_warning_threshold = now + timedelta(days=93)
+        expiration_warning_threshold = today + timedelta(days=93)
 
         # TODO: use descriptive license_state wording like "expires_soon", "expired" instead of "80-warning"
         qs = (
@@ -44,23 +44,23 @@ class BaseLicenceRecordManager(models.Manager):
                         then=Value("terminated"),
                     ),
                     When(
-                        device__contract_start_date__lte=now,
-                        device__contract_expiration_date__gt=now,
+                        device__contract_start_date__lte=today,
+                        device__contract_expiration_date__gt=today,
                         device__contract_expiration_date__lte=expiration_warning_threshold,
                         then=Value("expiring"),
                     ),
                     When(
-                        device__created_at__date__lte=now,
-                        device__contract_start_date__gt=now,
-                        then=Value("ordered"),
-                    ),
-                    When(
-                        device__contract_expiration_date__lte=now,
+                        device__contract_expiration_date__lte=today,
                         then=Value("expired"),
                     ),
                     When(
-                        device__contract_start_date__lte=now,
-                        device__contract_expiration_date__gt=now,
+                        device__created_at__date__lte=today,
+                        device__contract_start_date__gt=today,
+                        then=Value("ordered"),
+                    ),
+                    When(
+                        device__contract_start_date__lte=today,
+                        device__contract_expiration_date__gt=today,
                         then=Value("active"),
                     ),
                     # When(
