@@ -290,7 +290,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
         # Get total timespan
         added_date = self.created_at.date()
-        start_date = self.contralicense.get_license_state_labelct_start_date
+        start_date = self.contract_start_date
         end_date = self.contract_expiration_date
         today = timezone.now().date()
 
