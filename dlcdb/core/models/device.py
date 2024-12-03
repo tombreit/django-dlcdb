@@ -278,23 +278,15 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         """
         Returns the license timelicense.get_license_state_labelline as a list of tuples.
         """
-        # timeline = [
-        #     (
-        #         self.created_at,
-        #         self.contract_start_date,
-        #         self.contract_expiration_date,
-        #         self.contract_termination_date,
-        #     )
-        # ]
         timeline = []
 
-        # Get total timespan
         added_date = self.created_at.date()
         start_date = self.contract_start_date
         end_date = self.contract_expiration_date
         today = timezone.now().date()
 
-        if not end_date:
+        # Return early
+        if not start_date or not end_date:
             return timeline
 
         total_days = (end_date - added_date).days
