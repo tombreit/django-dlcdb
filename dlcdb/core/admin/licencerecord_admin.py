@@ -52,7 +52,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
         "get_series",
         "person",
         "assigned_device",
-        "get_maintenance_contract_expiration_date",
+        "get_contract_expiration_date",
         "is_assigned",
     ]
 
@@ -73,7 +73,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
         "get_manufacturer",
         "get_series",
         "get_serial_number",
-        "get_maintenance_contract_expiration_date",
+        "get_contract_expiration_date",
     ]
 
     autocomplete_fields = [
@@ -103,7 +103,7 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
                         "assigned_device",
                     ),
                     # 'room',
-                    ("get_maintenance_contract_expiration_date",),
+                    ("get_contract_expiration_date",),
                 )
             },
         ),
@@ -196,11 +196,11 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
     get_device_human_readable.short_description = "Bezeichnung"
 
-    # def get_maintenance_contract_expiration_date(self, obj):
-    #     return obj.device.maintenance_contract_expiration_date
-    # get_maintenance_contract_expiration_date.short_description = 'Licence expiry date'
+    # def get_contract_expiration_date(self, obj):
+    #     return obj.device.contract_expiration_date
+    # get_contract_expiration_date.short_description = 'Licence expiry date'
 
-    def get_maintenance_contract_expiration_date(self, obj):
+    def get_contract_expiration_date(self, obj):
         _title = ""
         if obj.licence_state == "80-warning":
             _title = "Läuft in weniger als 60 Tagen ab!"
@@ -208,18 +208,16 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
             _title = "Ist schon abgelaufen!"
 
         return format_html(
-            '<span title="{title}" class="licence-state alert-{licence_state}">{maintenance_contract_expiration_date}</span>',
-            maintenance_contract_expiration_date=date_format(
-                obj.device.maintenance_contract_expiration_date, format="DATE_FORMAT"
-            )
-            if obj.device.maintenance_contract_expiration_date
+            '<span title="{title}" class="licence-state alert-{licence_state}">{contract_expiration_date}</span>',
+            contract_expiration_date=date_format(obj.device.contract_expiration_date, format="DATE_FORMAT")
+            if obj.device.contract_expiration_date
             else "-",
             licence_state=obj.licence_state,
             title=_title,
         )
 
-    get_maintenance_contract_expiration_date.short_description = "Licence expiry date"
-    # get_maintenance_contract_expiration_date.admin_order_field = 'obj.device.maintenance_contract_expiration_date'
+    get_contract_expiration_date.short_description = "Licence expiry date"
+    # get_contract_expiration_date.admin_order_field = 'obj.device.contract_expiration_date'
 
     class Media:
         js = ("core/licencerecord/licence.js",)

@@ -33,7 +33,7 @@ def get_record_data_row(record, event):
             print(f"{field_name=}")
             field = getattr(obj, item.get("field"))
 
-            if field_name == "maintenance_contract_expiration_date":
+            if field_name == "contract_expiration_date":
                 field = f"Expiry date: {field:%Y-%m-%d}"
             elif isinstance(field, datetime.date):
                 field = f"{field:%Y-%m-%d}"

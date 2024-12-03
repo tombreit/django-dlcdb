@@ -33,7 +33,7 @@ class LicenseForm(forms.ModelForm):
                 Column(FloatingField("book_value"), css_class="col-md-3"),
             ),
             Row(
-                Column(FloatingField("maintenance_contract_expiration_date"), css_class="col-md-6"),
+                Column(FloatingField("contract_expiration_date"), css_class="col-md-6"),
                 Column(FloatingField("device_type"), css_class="col-md-6"),
             ),
             Row(
@@ -80,13 +80,13 @@ class LicenseForm(forms.ModelForm):
             "book_value",
             "manufacturer",
             "series",
-            "maintenance_contract_expiration_date",
+            "contract_expiration_date",
             "procurement_note",
             "note",
             "device_type",
             "subscribers",
         ]
         widgets = {
-            "maintenance_contract_expiration_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_expiration_date": forms.DateInput(attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 6}),
         }

@@ -428,7 +428,7 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
             # Date fields
             purchase_date=set_datetime_field(row["PURCHASE_DATE"]),
             warranty_expiration_date=set_datetime_field(row["WARRANTY_EXPIRATION_DATE"]),
-            maintenance_contract_expiration_date=set_datetime_field(row["MAINTENANCE_CONTRACT_EXPIRATION_DATE"]),
+            contract_expiration_date=set_datetime_field(row["CONTRACT_EXPIRATION_DATE"]),
         )
 
         # If the sap_id already exists in our DLCDB, we skip and do not import

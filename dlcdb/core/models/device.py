@@ -100,7 +100,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     contract_start_date = models.DateField(
         null=True, blank=True, verbose_name=_("Start date of licence or maintenance contract")
     )
-    maintenance_contract_expiration_date = models.DateField(
+    contract_expiration_date = models.DateField(
         null=True, blank=True, verbose_name=_("Expiry date licence or maintenance contract")
     )
     cost_centre = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Cost centre"))

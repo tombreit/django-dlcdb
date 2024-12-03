@@ -67,7 +67,7 @@
         </small>
       </td>
       <td>
-        {{ license.device.maintenance_contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
+        {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
       </td>
       <td>
           {% for notification in license.device.notification_set.all %}

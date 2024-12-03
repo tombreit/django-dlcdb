@@ -39,19 +39,19 @@ class BaseLicenceRecordManager(models.Manager):
             .annotate(
                 licence_state=Case(
                     When(
-                        device__maintenance_contract_expiration_date__lte=now,
+                        device__contract_expiration_date__lte=now,
                         then=Value("90-danger"),
                     ),
                     When(
-                        device__maintenance_contract_expiration_date__gt=now,
-                        device__maintenance_contract_expiration_date__lte=threshold,
+                        device__contract_expiration_date__gt=now,
+                        device__contract_expiration_date__lte=threshold,
                         then=Value("80-warning"),
                     ),
                     default=Value("10-unknown"),
                     output_field=CharField(),
                 )
             )
-            .order_by("-licence_state", "device__maintenance_contract_expiration_date")
+            .order_by("-licence_state", "device__contract_expiration_date")
         )
 
         return qs

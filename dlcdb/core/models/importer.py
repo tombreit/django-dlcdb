@@ -18,7 +18,7 @@ class ImporterList(models.Model):
         "SUPPLIER",
         "PURCHASE_DATE",
         "WARRANTY_EXPIRATION_DATE",
-        "MAINTENANCE_CONTRACT_EXPIRATION_DATE",
+        "CONTRACT_EXPIRATION_DATE",
         "COST_CENTRE",
         "BOOK_VALUE",
         "NOTE",

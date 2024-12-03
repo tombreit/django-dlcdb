@@ -105,7 +105,7 @@ def get_affected_records(notification, now):
             )
         )
     elif condition == Notification.LICENCE_EXPIRES:
-        records = _records.filter(device__is_licence=True).filter(device__maintenance_contract_expiration_date__lte=now)
+        records = _records.filter(device__is_licence=True).filter(device__contract_expiration_date__lte=now)
     else:
         # Fallback if no condition is set: return the base queryset
         records = _records.filter(since_last_run_filter)

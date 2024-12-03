@@ -19,7 +19,7 @@ class ImporterListAdmin(admin.ModelAdmin):
     DATE_FIELDS = [
         "PURCHASE_DATE",
         "WARRANTY_EXPIRATION_DATE",
-        "MAINTENANCE_CONTRACT_EXPIRATION_DATE",
+        "CONTRACT_EXPIRATION_DATE",
     ]
 
     fieldsets = (
