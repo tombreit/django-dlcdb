@@ -89,26 +89,23 @@ class LicenceRecord(Record):
     def get_human_title(self):
         return f"{self.device.manufacturer} - {self.device.series}"
 
-    def get_license_state_label(self):
+    @staticmethod
+    def get_localized_license_state_label(for_state=None):
         """
         Provide human labels for the license queryset annotations.
         """
-
-        state = self.license_state
-        label = _("Unknown")
-
-        if state == "ordered":
-            label = _("Ordered")
-        elif state == "active":
-            label = _("Active")
-        elif state == "expiring":
-            label = _("Expiring")
-        elif state == "expired":
-            label = _("Expired")
-        elif state == "terminated":
-            label
-
+        LICENSE_STATE_LABELS = {
+            "ordered": _("Ordered"),
+            "active": _("Active"),
+            "expiring": _("Expiring"),
+            "expired": _("Expired"),
+            "terminated": _("Terminated"),
+        }
+        label = LICENSE_STATE_LABELS.get(for_state, _("Unknown"))
         return label
+
+    def get_license_state_label(self):
+        return self.get_localized_license_state_label(for_state=self.license_state)
 
     def __str__(self):
         return self.device.edv_id

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 00:12+0100\n"
-"PO-Revision-Date: 2024-12-04 00:13+0100\n"
+"POT-Creation-Date: 2024-12-04 10:24+0100\n"
+"PO-Revision-Date: 2024-12-04 10:25+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -151,7 +151,7 @@ msgid "Model name"
 msgstr "Modellbezeichnung"
 
 #: dlcdb/core/models/device.py:94 dlcdb/core/models/supplier.py:27
-#: dlcdb/licenses/templates/licenses/index.html:47
+#: dlcdb/licenses/templates/licenses/filters.html:42
 msgid "Supplier"
 msgstr "Distributor"
 
@@ -314,6 +314,10 @@ msgstr "Läuft bald ab"
 #: dlcdb/core/models/prx_licencerecord.py:107
 msgid "Expired"
 msgstr "Abgelaufen"
+
+#: dlcdb/core/models/prx_licencerecord.py:109
+msgid "Terminated"
+msgstr "Gekündigt"
 
 #: dlcdb/core/models/prx_lostrecord.py:31
 msgid "Record of type 'Lost'"
@@ -502,13 +506,25 @@ msgid "At least one field must be filled."
 msgstr "Mindestens ein Feld muss ausgefüllt sein."
 
 #: dlcdb/licenses/forms.py:125
-#: dlcdb/licenses/templates/licenses/licenses_table.html:37
+#: dlcdb/licenses/templates/licenses/licenses_table.html:38
 msgid "Subscribers"
 msgstr "Abonnenten"
 
 #: dlcdb/licenses/forms.py:126
 msgid "Type"
 msgstr "Typ"
+
+#: dlcdb/licenses/templates/licenses/filters.html:20
+msgid "Search licenses"
+msgstr "Lizenz suchen"
+
+#: dlcdb/licenses/templates/licenses/filters.html:30
+msgid "License type"
+msgstr "Lizenztyp"
+
+#: dlcdb/licenses/templates/licenses/filters.html:54
+msgid "State"
+msgstr "Status"
 
 #: dlcdb/licenses/templates/licenses/form.html:46
 msgid "Save"
@@ -518,39 +534,31 @@ msgstr "Speichern"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: dlcdb/licenses/templates/licenses/index.html:35
-msgid "Search licenses"
-msgstr "Lizenz suchen"
-
-#: dlcdb/licenses/templates/licenses/index.html:40
-msgid "License type"
-msgstr "Lizenztyp"
-
-#: dlcdb/licenses/templates/licenses/index.html:66
+#: dlcdb/licenses/templates/licenses/index.html:28
 msgid "Add license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:11
+#: dlcdb/licenses/templates/licenses/licenses_table.html:12
 msgid "of"
 msgstr "von"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:11
+#: dlcdb/licenses/templates/licenses/licenses_table.html:12
 msgid "licences"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:15
+#: dlcdb/licenses/templates/licenses/licenses_table.html:16
 msgid "Show all?"
 msgstr "Zeige alle?"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:28
+#: dlcdb/licenses/templates/licenses/licenses_table.html:29
 msgid "License"
 msgstr "Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:31
+#: dlcdb/licenses/templates/licenses/licenses_table.html:32
 msgid "Start date"
 msgstr "Startdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:34
+#: dlcdb/licenses/templates/licenses/licenses_table.html:35
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
@@ -639,9 +647,6 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:43
 msgid "None"
 msgstr "None"
-
-#~ msgid "terminated"
-#~ msgstr "gekündigt"
 
 #~ msgid "active"
 #~ msgstr "Aktiv"

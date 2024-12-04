@@ -1,8 +1,0 @@
-<svg width="110" height="310" viewBox="0 0 29.104 82.021" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(44.946 -95.762)">
-    <rect x="-43.623" y="97.084" width="26.458" height="79.375" rx="10" ry="10" style="fill:lightgray;fill-opacity:1;stroke-width:0;stroke-dasharray:none"/>
-    <circle r="10.583" fill="{% if state == "expired" %}%23ff0000{% else %}%23808080{% endif %}"  cx="-30.394" cy="110.314" style="stroke-width:.264583"/>
-    <circle r="10.583" fill="{% if state == "expiring" %}%23ffff00{% else %}%23808080{% endif %}" cx="-30.394" cy="136.772" style="stroke-width:.264583"/>
-    <circle r="10.583" fill="{% if state == "active" %}%2300ff00{% else %}%23808080{% endif %}"   cx="-30.394" cy="163.23" style="stroke-width:.264583"/>
-  </g>
-</svg>

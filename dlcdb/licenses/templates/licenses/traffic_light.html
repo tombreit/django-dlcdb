@@ -1,0 +1,7 @@
+<div class="license-state license-state-{{ license.license_state }}">
+    <img
+      src='data:image/svg+xml;charset=utf-8,{% include 'licenses/traffic_light.svg' with state=license.license_state %}'
+      alt="{{ license.license_state }}"
+      title="{{ license.get_license_state_label }}"
+    >
+  </div>

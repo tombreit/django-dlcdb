@@ -1,5 +1,4 @@
 from django.template.response import TemplateResponse
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -9,55 +8,28 @@ from django.urls import reverse
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room, DeviceType, Supplier
+from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
 from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
 from .subscribers import manage_subscribers
 from .decorators import htmx_permission_required
+from .filters import LicenceRecordFilter
 
 
 @login_required
 def index(request):
-    q = request.GET.get("q")
-    license_type = request.GET.get("license-type-select")
-    supplier_select = request.GET.get("supplier-select")
-
     if request.htmx:
         template = "licenses/licenses_table.html"
     else:
         template = "licenses/index.html"
 
     base_qs = LicenceRecord.objects.all().order_by("-device__modified_at")
-
-    # Limit device-type choices to "License-type" choices
-    license_type_choices = DeviceType.objects.filter(
-        Q(name__startswith="Lizenz::") | Q(name__startswith="License::") | Q(name__startswith="Licence::")
-    )
-
-    # TODO: Additionally allow to set a new supplier for a license
-    supplier_choices = Supplier.objects.filter(device__is_licence=True, device__isnull=False).distinct()
-
-    # Filtering the queryset
-    if q:
-        search_filter = (
-            Q(device__manufacturer__name__icontains=q) | Q(device__series__icontains=q) | Q(device__sap_id__icontains=q)
-        )
-        qs = base_qs.filter(search_filter)
-    else:
-        qs = base_qs
-
-    if license_type and license_type != "0":
-        qs = qs.filter(device__device_type=license_type)
-
-    if supplier_select and supplier_select != "0":
-        qs = qs.filter(device__supplier=supplier_select)
+    license_record_filter = LicenceRecordFilter(request.GET, queryset=base_qs)
 
     context = {
-        "licenses": qs,
-        "licenses_filtered": qs.count(),
+        "licenses_filtered": license_record_filter.qs.count(),
         "licenses_total": base_qs.count(),
-        "license_type_choices": license_type_choices,
-        "supplier_choices": supplier_choices,
+        "license_record_filter": license_record_filter,
     }
 
     return TemplateResponse(request, template, context)

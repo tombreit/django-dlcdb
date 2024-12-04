@@ -1,0 +1,64 @@
+{% load i18n %}
+
+<div class="search flex-grow-1 me-4">
+  <form
+    hx-get="{% url 'licenses:index' %}"
+    hx-target="#licenses-list"
+    hx-push-url="true"
+    hx-trigger="keyup changed delay:250ms, search, change"
+    >
+    <div class="input-group mb-3">
+
+      <span class="input-group-text">
+        <i class="bi bi-search"></i>
+      </span>
+
+      <input
+          type="search"
+          class="form-control"
+          style="flex-grow: 3;"
+          placeholder="{% translate 'Search licenses' %}"
+          name="{{ license_record_filter.form.search.html_name }}"
+          id="{{ license_record_filter.form.search.id_for_label }}"
+          value="{{ license_record_filter.form.search.value|default:"" }}"
+      >
+
+      <select class="form-select" name="device__device_type">
+        {% for choice in license_record_filter.form.device__device_type.field.choices %}
+        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.device__supplier.value %}selected{% endif %}>
+            {% if choice.0 == "" %}
+                {% translate "License type" %}...
+            {% else %}
+                {{ choice.1 }}
+            {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+
+      <select class="form-select" name="device__supplier">
+        {% for choice in license_record_filter.form.device__supplier.field.choices %}
+        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.device__supplier.value %}selected{% endif %}>
+            {% if choice.0 == "" %}
+                {% translate "Supplier" %}...
+            {% else %}
+                {{ choice.1 }}
+            {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+
+      <select class="form-select" name="license_state">
+        {% for choice in license_record_filter.form.license_state.field.choices %}
+        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.license_state.value %}selected{% endif %}>
+            {% if choice.0 == "" %}
+                {% translate "State" %}...
+            {% else %}
+                {{ choice.1 }}
+            {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+
+    </div>
+  </form>
+</div>

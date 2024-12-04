@@ -6,6 +6,7 @@
   }
 </style>
 
+
 <p class="text-muted small">
   <i>
     {{ licenses_filtered }} {% translate "of" %} {{ licenses_total }} {% translate "licences" %}.
@@ -43,7 +44,8 @@
       </tr>
     </thead>
     <tbody>
-    {% for license in licenses %}
+
+    {% for license in license_record_filter.qs %}
     <tr class="
     {% if license.license_state == 'expired' %}
     {% elif license.license_state == 'expiring' %}
@@ -51,13 +53,7 @@
     {% endif %}
     ">
         <td style="vertical-align: top;">
-          <div class="license-state license-state-{{ license.license_state }}">
-            <img
-              src='data:image/svg+xml;charset=utf-8,{% include 'licenses/traffic-light.svg' with state=license.license_state %}'
-              alt="{{ license.license_state }}"
-              title="{{ license.get_license_state_label }}"
-            >
-          </div>
+          {% include "licenses/traffic_light.html" %}
         </td>
       <td>
         {{ license.get_human_title }} ({{ license.device.sap_id }})

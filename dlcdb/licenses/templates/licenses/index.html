@@ -14,46 +14,8 @@
 <div id="licenses-content-wrapper">
 
   <div class="d-flex">
+    {% include "licenses/filters.html" %}
 
-    <div class="search flex-grow-1 me-4">
-      <form
-        hx-get="{% url 'licenses:index' %}"
-        hx-target="#licenses-list"
-        hx-push-url="true"
-        hx-trigger="keyup changed delay:250ms, search, change"
-        >
-        <div class="input-group mb-3">
-          <span class="input-group-text">
-            <i class="bi bi-search"></i>
-          </span>
-
-          <input
-            type="search"
-            class="form-control"
-            name="q"
-            value="{{ request.GET.q }}"
-            placeholder="{% translate 'Search licenses' %}"
-            style="flex-grow: 3;"
-          >
-
-          <select class="form-select" name="license-type-select" id="license-type-select">
-            <option value=0 selected>{% translate "License type" %}...</option>
-            {% for license_type in license_type_choices %}
-              <option value="{{ license_type.id }}">{{ license_type.name }}</option>
-            {% endfor %}
-          </select>
-
-          <select class="form-select" name="supplier-select" id="supplier-select">
-            <option value=0 selected>{% translate "Supplier" %}...</option>
-            {% for supplier in supplier_choices %}
-              <option value="{{ supplier.id }}">{{ supplier.name }}</option>
-            {% endfor %}
-          </select>
-
-        </div>
-      </form>
-    </div>
-  
     <div id="add-license">
         <span 
           {# href="{% url 'admin:core_device_add' %} #}
