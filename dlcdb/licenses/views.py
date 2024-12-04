@@ -1,10 +1,11 @@
 from django.template.response import TemplateResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from django_htmx.http import HttpResponseClientRedirect
 
@@ -39,9 +40,10 @@ def index(request):
 @htmx_permission_required("core.change_licencerecord")
 def edit(request, license_id):
     if request.htmx:
-        template = "licenses/form.html"
+        template = "licenses/form_partial.html"
     else:
-        raise NotImplementedError("Non HTMX requests not implemented")
+        # raise NotImplementedError("Non HTMX requests not implemented")
+        template = "licenses/form.html"
 
     license = get_object_or_404(Device, id=license_id)
 
@@ -67,9 +69,12 @@ def edit(request, license_id):
             # return redirect("licenses:index")
             # This redirect is also available in the Django HTMX package:
             # return HttpResponseClientRedirect(redirect_url)
-            response = HttpResponse(status=204)
-            response["HX-Redirect"] = reverse("licenses:index")
-            return response
+            if request.htmx:
+                response = HttpResponse(status=204)
+                response["HX-Redirect"] = reverse("licenses:index")
+                return response
+            else:
+                return redirect("licenses:index")
 
     else:
         # TODO: Move subscribers to the form
@@ -89,7 +94,7 @@ def edit(request, license_id):
             "form": form,
             "license": license,
             "template": template,
-            "title": "Edit license",
+            "title": _("Edit license"),
             "obj_admin_url": reverse("admin:core_device_change", args=[license.id]),
         },
     )
@@ -99,7 +104,7 @@ def edit(request, license_id):
 @htmx_permission_required("core.change_licencerecord")
 def new(request):
     if request.htmx:
-        template = "licenses/form.html"
+        template = "licenses/form_partial.html"
     else:
         raise NotImplementedError("Non HTMX requests not implemented")
 
@@ -152,6 +157,6 @@ def new(request):
         {
             "form": form,
             "template": template,
-            "title": "New license",
+            "title": _("New license"),
         },
     )

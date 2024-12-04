@@ -1,55 +1,7 @@
-{% load i18n crispy_forms_tags %}
+{% extends "theme/_base.html" %}
+{% load static i18n crispy_forms_tags %}
 
-
-<div class="d-flex align-items-center mb-4">
-    <div>
-        <h2 class="mb-0 me-4">
-            {{ title }}
-        </h2>
-    </div>
-    <div>
-        {% if license %}
-        <a
-            href="{{ obj_admin_url }}"
-            class="btn text-bg-warning btn-sm"
-        >
-            <i class="bi bi-box-arrow-up-right"></i>
-            Admin view
-        </a>
-        {% endif %}
-    </div>
-</div>
-
-{% if license %}
-    {% include 'licenses/timeline.html' with events=license.get_timeline %}
-{% endif %}
-
-<form
-    id="license-form"
-    method="POST"
-    hx-post="
-    {% if license %}
-        {% url 'licenses:edit' license_id=license.id %}
-    {% else %}
-        {% url 'licenses:new' %}
-    {% endif %}
-    "
-    hx-target="#licenses-content-wrapper"
->
-    {% csrf_token %}
-    {% crispy form %}
-
-    <button
-        type="submit"
-        class="my-4 btn btn-primary"
-    >
-        {% translate "Save" %}
-    </button>
-    <span
-        class="my-4 btn btn-secondary ms-2"
-        hx-get="{% url 'licenses:index' %}"
-        hx-target="#licenses-content-wrapper"
-    >
-        {% translate "Cancel" %}
-    </span>
-</form>
+{% block body %}
+    <h1>{% translate "Licenses" %}</h1>
+    {% include "licenses/form_partial.html" %}
+{% endblock body %}
