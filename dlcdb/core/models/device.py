@@ -301,39 +301,52 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             description: str
             bg: str = "#ff0000"
 
-        # Calculate percentages for each point
-        timeline.extend(
-            [
-                TimelineEvent(event_type="added", percentage=0, date=added_date, description="Added"),
+        # Calculate durations between events and convert to percentages
+        events = [
+            (added_date, "added", "Added", "#ff0000"),
+            (start_date, "start", "Start date", "#00ff00"),
+            (today, "today", "Today", "#ff0000"),
+            (end_date, "end", "Expiry date", "#ff0000"),
+        ]
+        events.sort()  # Sort events chronologically
+
+        # Calculate percentages based on duration between events
+        running_percentage = 0
+        for i in range(len(events) - 1):
+            current_date, event_type, description, bg = events[i]
+            duration = (events[i + 1][0] - current_date).days
+            percentage = int((duration / total_days) * 100)
+
+            timeline.append(
                 TimelineEvent(
-                    event_type="start",
-                    percentage=round(((start_date - added_date).days / total_days) * 100),
-                    date=start_date,
-                    description="Start date",
-                    bg="#00ff00",
-                ),
-                TimelineEvent(event_type="end", percentage=100, date=end_date, description="Expiry date"),
-                TimelineEvent(
-                    event_type="today",
-                    percentage=round(((today - added_date).days / total_days) * 100),
-                    date=today,
-                    description="Today",
-                ),
-            ]
+                    event_type=event_type, percentage=percentage, date=current_date, description=description, bg=bg
+                )
+            )
+            running_percentage += percentage
+
+        # Add final event
+        timeline.append(
+            TimelineEvent(
+                event_type=events[-1][1],
+                percentage=int(100 - running_percentage),
+                date=events[-1][0],
+                description=events[-1][2],
+                bg=events[-1][3],
+            )
         )
 
         if self.contract_termination_date:
             timeline.append(
                 TimelineEvent(
                     event_type="termination",
-                    percentage=((self.contract_termination_date - added_date).days / total_days) * 100,
+                    percentage=int(((self.contract_termination_date - added_date).days / total_days) * 100),
                     date=self.contract_termination_date,
                     description="Termination date",
                 )
             )
 
         # Sort timeline events by percentage chronologically
-        timeline.sort(key=lambda x: x.percentage)
+        timeline.sort(key=lambda x: x.date)
         return timeline
 
     def get_edv_id(self):

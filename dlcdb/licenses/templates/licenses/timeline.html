@@ -1,10 +1,13 @@
 <style>
-    .timeline {
+    .timeline-row {
         position: relative;
         width: 100%;
         height: auto;
-        display: grid;
-        grid-auto-flow: column;
+        display: flex;
+    }
+    .timeline-column {
+        min-width: fit-content;
+        padding: 0 2em 0 1em
     }
     .timeline-label {
         border-left: 2px solid white;
@@ -15,9 +18,9 @@
     }
 </style>
 
-<div class="timeline rounded text-bg-secondary my-4">
+<div class="timeline-row rounded text-bg-secondary my-4">
 {% for event in events %}
-    <div class="timeline-point" style="grid-column: {{ event.percentage }} / 100;">
+    <div class="timeline-column timeline-point" style="width: {{ event.percentage }}%;">
         <div 
             class="
                 timeline-label small 
