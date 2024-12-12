@@ -6,8 +6,104 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+# from django.db.models import Max
 
 from ..core.models import Record
+
+
+class Subscription(models.Model):
+    class NotificationEventChoices(models.TextChoices):
+        # License related
+        CONTRACT_ADDED = "CONTRACT_ADDED", "Contract Added"
+        CONTRACT_EXPIRES_SOON = "CONTRACT_EXPIRES_SOON", "Contract Expires Soon"
+        CONTRACT_EXPIRED = "CONTRACT_EXPIRED", "Contract Expired"
+        # Location related
+        MOVED = "MOVED", "Moved"
+        # Device related
+        DEVICE_DECOMMISSIONED = "DEVICE_DECOMMISSIONED", "Device decommissioned"
+
+    event = models.CharField(
+        max_length=255,
+        choices=NotificationEventChoices.choices,
+        blank=False,
+        verbose_name=_("Type of event"),
+    )
+
+    class NotificationIntervalChoices(models.TextChoices):
+        IMMEDIATELY = "immediately", "Immediately"
+        HOURLY = "hourly", "Every Hour"
+        DAILY = "daily", "Every Day"
+        WEEKLY = "weekly", "Every Week"
+        MONTHLY = "monthly", "Every Month"
+        YEARLY = "yearly", "Every Year"
+
+    interval = models.CharField(
+        max_length=255,
+        blank=False,
+        choices=NotificationIntervalChoices.choices,
+        verbose_name=_("Interval Name"),
+    )
+
+    subscriber = models.ForeignKey("core.Person", on_delete=models.PROTECT)
+    device = models.ForeignKey("core.Device", on_delete=models.PROTECT, null=True, blank=True)
+    # last_sent = models.DateTimeField(null=True, blank=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    # @property
+    # def last_sent(self):
+    #     """Calculate last sent time from messages"""
+    #     return self.message_set.filter(status="sent").aggregate(Max("sent_at"))["sent_at__max"]
+
+    def __str__(self):
+        return "{id} {active} | {event} → {interval} → {subscriber}".format(
+            id=self.id,
+            active="✓" if self.is_active else "✗",
+            event=self.event,
+            interval=self.interval,
+            subscriber=self.subscriber,
+        )
+
+
+class Message(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("sent", "Sent"),
+        ("failed", "Failed"),
+    ]
+
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    error_message = models.TextField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification to {self.subscription.user.username} about {self.subscription.event.name}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    # def send(self):
+    #     try:
+    #         send_mail(
+    #             subject=self.template.subject,
+    #             message=self.template.body,
+    #             from_email=settings.DEFAULT_FROM_EMAIL,
+    #             recipient_list=[self.recipient_email],
+    #             fail_silently=False,
+    #         )
+    #         self.status = 'sent'
+    #         self.sent_at = timezone.now()
+    #     except Exception as e:
+    #         self.status = 'failed'
+    #         self.error_message = str(e)
+    #     self.save()
+
+
+# Legacy notification implementation
+# TODO: Migrate to new implementation
 
 
 class Notification(models.Model):

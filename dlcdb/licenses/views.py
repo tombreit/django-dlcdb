@@ -10,9 +10,7 @@ from django.utils.translation import gettext as _
 from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
-from dlcdb.reporting.models import Notification
 from .forms import LicenseForm
-from .subscribers import manage_subscribers
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
 
@@ -54,11 +52,8 @@ def edit(request, license_id):
         )
 
         if form.is_valid():
-            device = form.save(commit=False)
+            device = form.save(commit=True)
             device.save()
-
-            subscribers = form.cleaned_data["subscribers"]
-            manage_subscribers(device, subscribers)
 
             messages.success(
                 request,
@@ -77,14 +72,8 @@ def edit(request, license_id):
                 return redirect("licenses:index")
 
     else:
-        # TODO: Move subscribers to the form
-        subscribers = Notification.objects.filter(device=license).values_list("recipient", flat=True)
-
         form = LicenseForm(
             instance=license,
-            initial={
-                "subscribers": ", ".join(subscribers),
-            },
         )
 
     return TemplateResponse(
@@ -137,9 +126,6 @@ def new(request):
                 username=request.user.username,
             )
             record.save()
-
-            subscribers = form.cleaned_data["subscribers"]
-            manage_subscribers(device, subscribers)
 
             messages.success(
                 request,

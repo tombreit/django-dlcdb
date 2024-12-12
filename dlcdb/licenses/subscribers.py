@@ -1,20 +1,24 @@
-from dlcdb.reporting.models import Notification
+from dlcdb.reporting.models import Subscription
 
 
-def manage_subscribers(device, subscribers):
-    # Remove all nofifications for this device
-    _deleted_notifications = Notification.objects.filter(device=device).delete()
-    # print(f"{_deleted_notifications=}")
+def manage_subscribers(device, new_subscribers, previous_subscribers):
+    new_subscribers_ids = set(new_subscribers.values_list("id", flat=True))
+    previous_subscribers_ids = set(previous_subscribers)
 
-    # Set new notifications for each subscriber
-    if subscribers:
-        for subscriber in subscribers:
-            notification = Notification(
-                recipient=subscriber,
-                event=Notification.LICENCE_EXPIRES,
+    _unchanged_subscribers = previous_subscribers_ids & new_subscribers_ids
+    deleted_subscribers = previous_subscribers_ids - new_subscribers_ids
+    new_subscribers = new_subscribers_ids - previous_subscribers_ids
+
+    # Todo: set correct subscription status
+    if deleted_subscribers:
+        Subscription.objects.filter(
+            device=device,
+            subscriber__id__in=deleted_subscribers,
+        ).delete()
+
+    if new_subscribers:
+        for subscriber_id in new_subscribers:
+            Subscription.objects.get_or_create(
+                subscriber_id=subscriber_id,
                 device=device,
-                time_interval=Notification.WEEKLY,
             )
-            notification.save()
-
-    return

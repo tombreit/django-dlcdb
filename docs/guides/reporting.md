@@ -1,5 +1,22 @@
 # Reporting
 
+## User stories
+
+User Mary:
+
+- Mary (*Subscriber*) möchte informiert (*Notification*) werden, wenn ein Gerät seinen Standort ändert (*NotificationEvent*)
+- Mary möchte jeden ersten des Monats über alle Standortveränderungen informiert werden. Sie bekommt einen *Report*
+- Mary möchte informiert werden, wenn ein Gerät ausgemustert wird.
+- Mary möchte informiert werden, wenn eine Lizenz bald abläuft
+  - Mary möchte aber nur einmal über dieses Ereignis informiert werden.
+- Mary kann Benachrichtigungen für solche Ereignisse abonnieren.
+- Mary could have multiple *Subscriptions*
+
+System:
+
+- Manages NotificationEvents in a queue.
+- Regulary processes this queue and send pending Notifications and stores a return value
+
 ## Prosa
 
 Die DLCDB kann über bestimmte Bestandsveränderungen Email-Benachrichtigungen verschicken.

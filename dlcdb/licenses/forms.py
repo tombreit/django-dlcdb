@@ -1,15 +1,17 @@
 from django import forms
 from django.db.models import Q
-from django.core.validators import validate_email
+from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+# from django.core.validators import validate_email
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Div
+from crispy_forms.layout import Layout, Row, Column, Div, HTML
 from crispy_bootstrap5.bootstrap5 import FloatingField
 
-from dlcdb.core.models import Device, DeviceType
-from django.utils import timezone
+from dlcdb.core.models import Device, DeviceType, Person
+from .subscribers import manage_subscribers
 
 
 class LicenseForm(forms.ModelForm):
@@ -26,15 +28,22 @@ class LicenseForm(forms.ModelForm):
         # Set initial value for contract_termination checkbox
         self.fields["contract_termination"].initial = bool(self.instance.contract_termination_date)
 
+        if self.is_edit:
+            # Get current subscribers
+            # Todo: whats the difference between self.fields[field].initial and self.initial?
+            # self.fields["subscribers"].initial = self.instance.subscription_set.all().values_list("subscriber", flat=True)
+            self.initial["subscribers"] = self.instance.subscription_set.all().values_list("subscriber", flat=True)
+
         # Crispy forms
         self.helper = FormHelper()
         self.helper.form_tag = False
 
         self.helper.layout = Layout(
             Row(
-                Column(FloatingField("sap_id"), css_class="col-md-4"),
-                Column(FloatingField("subscribers"), css_class="col-md-8"),
+                Column("sap_id", css_class="col-md-4"),
+                Column("subscribers", css_class="col-md-8"),
             ),
+            Div(HTML("<hr>")),
             Row(
                 Column(FloatingField("manufacturer"), css_class="col-md-4"),
                 Column(FloatingField("series"), css_class="col-md-6"),
@@ -59,9 +68,11 @@ class LicenseForm(forms.ModelForm):
             ),
         )
 
-    subscribers = forms.CharField(
+    subscribers = forms.ModelMultipleChoiceField(
+        queryset=Person.objects.all(),
         required=False,
-        help_text=_("Enter email addresses separated by comma."),
+        help_text=_("Select one or more subscribers."),
+        widget=forms.SelectMultiple(attrs={"class": "is-tom-select"}),
     )
 
     contract_termination = forms.BooleanField(
@@ -70,20 +81,20 @@ class LicenseForm(forms.ModelForm):
         help_text=_("Check this box if the contract has been terminated."),
     )
 
-    def clean_subscribers(self):
-        subscribers = self.cleaned_data["subscribers"]
+    # def clean_subscribers(self):
+    #     subscribers = self.cleaned_data["subscribers"]
 
-        if subscribers:
-            subscribers = subscribers.split(",")
-            subscribers = [email.strip() for email in subscribers]
+    #     if subscribers:
+    #         subscribers = subscribers.split(",")
+    #         subscribers = [email.strip() for email in subscribers]
 
-            for email in subscribers:
-                try:
-                    validate_email(email)
-                except ValidationError:
-                    raise ValidationError(_("Invalid email address: %(email)s") % {"email": email})
+    #         for email in subscribers:
+    #             try:
+    #                 validate_email(email)
+    #             except ValidationError:
+    #                 raise ValidationError(_("Invalid email address: %(email)s") % {"email": email})
 
-        return subscribers
+    #     return subscribers
 
     def clean(self):
         cleaned_data = super().clean()
@@ -99,9 +110,17 @@ class LicenseForm(forms.ModelForm):
             instance.contract_termination_date = timezone.now()
         else:
             instance.contract_termination_date = None
+
         if commit:
-            instance.save()
-            self.save_m2m()
+            print("DEBUG: Form if commit block")
+            with transaction.atomic():
+                instance.save()
+                self.save_m2m()
+
+                previous_subscribers = self.initial.get("subscribers")
+                new_subscribers = self.cleaned_data["subscribers"]
+                manage_subscribers(instance, new_subscribers, previous_subscribers)
+
         return instance
 
     class Meta:
