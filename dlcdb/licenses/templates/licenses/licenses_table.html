@@ -82,8 +82,8 @@
       <td>
         {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
       </td>
-      <td>
-        {{ license.device.get_subscribers }}
+      <td class="small">
+        {{ license.device.get_subscribers|join:"<br>" }}
       </td>
       <td>
         <span

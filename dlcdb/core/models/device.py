@@ -358,7 +358,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             Person.objects.filter(id__in=subscriber_ids).exclude(email__isnull=True).exclude(email="")
         ).values_list("email", flat=True)
 
-        return ", ".join(subscribers_emails)
+        return subscribers_emails
 
     def get_edv_id(self):
         return self.edv_id or "----"
