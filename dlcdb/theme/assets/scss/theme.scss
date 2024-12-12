@@ -13,5 +13,7 @@ $link-decoration: underline;
 $bootstrap-icons-font-dir: "../fonts";
 @import "bootstrap-icons/font/bootstrap-icons.scss";
 
+@import "tom-select/dist/css/tom-select.bootstrap5.min";
+
 // @import "components/debug";
 @import "_screen";
