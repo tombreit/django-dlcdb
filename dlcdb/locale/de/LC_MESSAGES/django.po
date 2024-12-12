@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-04 10:24+0100\n"
-"PO-Revision-Date: 2024-12-04 10:25+0100\n"
+"POT-Creation-Date: 2024-12-12 12:22+0100\n"
+"PO-Revision-Date: 2024-12-12 12:42+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -274,7 +274,7 @@ msgstr "SAP (CSV)"
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:127
+#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:146
 msgid "Name"
 msgstr "Name"
 
@@ -285,39 +285,39 @@ msgstr "Hersteller"
 #: dlcdb/core/models/prx_lentrecord.py:70
 #, python-brace-format
 msgid ""
-"The end date (lend_desired_end_date) cannot be after {settings."
-"MAX_FUTURE_LENT_DESIRED_END_DATE}!"
+"The end date (lend_desired_end_date) cannot be after "
+"{settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!"
 msgstr ""
-"Das Verleihende (lend_desired_end_date) kann nicht nach {settings."
-"MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
+"Das Verleihende (lend_desired_end_date) kann nicht nach "
+"{settings.MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
 
 #: dlcdb/core/models/prx_lentrecord.py:102
 msgid "Lendings"
 msgstr "Ausleihen"
 
 #: dlcdb/core/models/prx_licencerecord.py:98
-msgid "Unknown"
-msgstr "Unbekannt"
-
-#: dlcdb/core/models/prx_licencerecord.py:101
 msgid "Ordered"
 msgstr "Bestellt"
 
-#: dlcdb/core/models/prx_licencerecord.py:103 dlcdb/core/models/record.py:72
+#: dlcdb/core/models/prx_licencerecord.py:99 dlcdb/core/models/record.py:72
 msgid "Active"
 msgstr "Aktiv"
 
-#: dlcdb/core/models/prx_licencerecord.py:105
+#: dlcdb/core/models/prx_licencerecord.py:100
 msgid "Expiring"
 msgstr "Läuft bald ab"
 
-#: dlcdb/core/models/prx_licencerecord.py:107
+#: dlcdb/core/models/prx_licencerecord.py:101
 msgid "Expired"
 msgstr "Abgelaufen"
 
-#: dlcdb/core/models/prx_licencerecord.py:109
+#: dlcdb/core/models/prx_licencerecord.py:102
 msgid "Terminated"
 msgstr "Gekündigt"
+
+#: dlcdb/core/models/prx_licencerecord.py:104
+msgid "Unknown"
+msgstr "Unbekannt"
 
 #: dlcdb/core/models/prx_lostrecord.py:31
 msgid "Record of type 'Lost'"
@@ -483,36 +483,40 @@ msgstr "Lokalisieren"
 msgid "License Management"
 msgstr "Lizenzmanagement"
 
-#: dlcdb/licenses/apps.py:17 dlcdb/licenses/templates/licenses/index.html:5
+#: dlcdb/licenses/apps.py:17 dlcdb/licenses/templates/licenses/form.html:5
+#: dlcdb/licenses/templates/licenses/index.html:5
 #: dlcdb/licenses/templates/licenses/index.html:11
 msgid "Licenses"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/forms.py:64
-msgid "Enter email addresses separated by comma."
-msgstr "Eingabe mehrerer E-Mail-Adressen durch Komma getrennt."
+#: dlcdb/licenses/forms.py:74
+msgid "Select one or more subscribers."
+msgstr "Es können mehrere Abonnenten angegeben werden."
 
-#: dlcdb/licenses/forms.py:70
+#: dlcdb/licenses/forms.py:81
 msgid "Check this box if the contract has been terminated."
 msgstr "Anhaken, wenn Vertrag gekündigt ist."
 
-#: dlcdb/licenses/forms.py:84
-#, python-format
-msgid "Invalid email address: %(email)s"
-msgstr "Ungültige Email-Adresse: %(email)s"
-
-#: dlcdb/licenses/forms.py:91
+#: dlcdb/licenses/forms.py:102
 msgid "At least one field must be filled."
 msgstr "Mindestens ein Feld muss ausgefüllt sein."
 
-#: dlcdb/licenses/forms.py:125
+#: dlcdb/licenses/forms.py:144
 #: dlcdb/licenses/templates/licenses/licenses_table.html:38
 msgid "Subscribers"
 msgstr "Abonnenten"
 
-#: dlcdb/licenses/forms.py:126
+#: dlcdb/licenses/forms.py:145
 msgid "Type"
 msgstr "Typ"
+
+#: dlcdb/licenses/forms.py:147
+msgid "Start Date"
+msgstr "Startdatum"
+
+#: dlcdb/licenses/forms.py:148
+msgid "Expiration Date"
+msgstr "Ablaufdatum"
 
 #: dlcdb/licenses/templates/licenses/filters.html:20
 msgid "Search licenses"
@@ -526,11 +530,11 @@ msgstr "Lizenztyp"
 msgid "State"
 msgstr "Status"
 
-#: dlcdb/licenses/templates/licenses/form.html:46
+#: dlcdb/licenses/templates/licenses/form_partial.html:54
 msgid "Save"
 msgstr "Speichern"
 
-#: dlcdb/licenses/templates/licenses/form.html:53
+#: dlcdb/licenses/templates/licenses/form_partial.html:61
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -562,6 +566,14 @@ msgstr "Startdatum"
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
+#: dlcdb/licenses/views.py:86
+msgid "Edit license"
+msgstr "Lizenz bearbeiten"
+
+#: dlcdb/licenses/views.py:146
+msgid "New license"
+msgstr "Neue Lizenz"
+
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
 msgstr ""
@@ -588,6 +600,14 @@ msgstr ""
 msgid ""
 "Logo file. SVG, black foreground, transparent background. Used in PDF "
 "printouts."
+msgstr ""
+
+#: dlcdb/reporting/models.py:30
+msgid "Type of event"
+msgstr ""
+
+#: dlcdb/reporting/models.py:45
+msgid "Interval Name"
 msgstr ""
 
 #: dlcdb/smallstuff/apps.py:12 dlcdb/smallstuff/apps.py:18
@@ -647,6 +667,13 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:43
 msgid "None"
 msgstr "None"
+
+#~ msgid "Enter email addresses separated by comma."
+#~ msgstr "Eingabe mehrerer E-Mail-Adressen durch Komma getrennt."
+
+#, python-format
+#~ msgid "Invalid email address: %(email)s"
+#~ msgstr "Ungültige Email-Adresse: %(email)s"
 
 #~ msgid "active"
 #~ msgstr "Aktiv"

@@ -144,6 +144,8 @@ class LicenseForm(forms.ModelForm):
             "subscribers": _("Subscribers"),
             "device_type": _("Type"),
             "series": _("Name"),
+            "contract_start_date": _("Start Date"),
+            "contract_expiration_date": _("Expiration Date"),
         }
         widgets = {
             # Must set the date format, otherwise the date input field
