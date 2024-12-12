@@ -75,7 +75,7 @@ class BaseLicenceRecordManager(models.Manager):
                     # ),
                     default=Value("10-unknown"),
                     output_field=CharField(),
-                )
+                ),
             )
             .order_by("-license_state", "device__contract_expiration_date")
         )

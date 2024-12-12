@@ -83,10 +83,7 @@
         {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
       </td>
       <td>
-          {% for notification in license.device.notification_set.all %}
-              {{ notification.recipient }}
-              {% if not forloop.last %}<br>{% endif %}
-          {% endfor %}
+        {{ license.device.get_subscribers }}
       </td>
       <td>
         <span

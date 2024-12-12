@@ -112,7 +112,6 @@ class LicenseForm(forms.ModelForm):
             instance.contract_termination_date = None
 
         if commit:
-            print("DEBUG: Form if commit block")
             with transaction.atomic():
                 instance.save()
                 self.save_m2m()
