@@ -16,6 +16,7 @@ from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
 from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
+from .models import LicensesConfiguration
 
 
 @login_required
@@ -138,7 +139,9 @@ def new(request):
             redirect_url = reverse("licenses:index")
             return HttpResponseClientRedirect(redirect_url)
     else:
-        form = LicenseForm()
+        # Set default subscribers
+        default_subscribers = LicensesConfiguration.load().default_subscribers.all()
+        form = LicenseForm(initial={"subscribers": default_subscribers})
 
     return TemplateResponse(
         request,
