@@ -8,7 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Documentation served via WhiteNoise from `/docs/`
+* New license management module
+* Documentation served via WhiteNoise from `/docs/`, no custom webserver configs necessary for the `/docs/` endpoint
 * Lending: TOS or regulations could be added to the lent sheet
 * New room attribute: "website", an optional link to external space management systems
 * Some tests!
