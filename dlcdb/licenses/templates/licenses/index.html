@@ -5,6 +5,7 @@
   {% translate "Licenses" %}
 {% endblock title %}
 
+
 {% block body %}
 
 <h1>
@@ -39,6 +40,9 @@
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
+    {% comment %}
+      {% include "licenses/licenses_table.html" %}
+    {% endcomment %}
   </div>
 
 </div>

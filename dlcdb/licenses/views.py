@@ -20,6 +20,17 @@ from .models import LicensesConfiguration
 
 
 @login_required
+def _playground(request):
+    """
+    Just a temporary playground view.
+    """
+    template = "licenses/playground.html"
+    context = {}
+
+    return TemplateResponse(request, template, context)
+
+
+@login_required
 def index(request):
     if request.htmx:
         template = "licenses/licenses_table.html"

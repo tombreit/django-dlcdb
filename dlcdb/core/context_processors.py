@@ -37,14 +37,14 @@ def hints(request):
                 self.cta_text,
             )
 
-    rooms_changelist_url = reverse("admin:core_room_changelist")
-
     if not any(
         [
             request.path_info.startswith("/admin/login/"),
             request.path_info.startswith("/admin/logout/"),
         ]
     ):
+        rooms_changelist_url = reverse("admin:core_room_changelist")
+
         # Make this queryset tenant aware
         qs = Device.objects.none()
 

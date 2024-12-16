@@ -313,6 +313,9 @@ HUEY = SqliteHuey(
     filename=str(DB_DIR / "huey_task_queue.sqlite3"),
 )
 
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
+
 # WhiteNoise
 WHITENOISE_INDEX_FILE = True
 

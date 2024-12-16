@@ -67,16 +67,28 @@
             <i class="bi bi-clock-history"></i>
         </a>
 
-        {% if license.device.note %}
+        {% if license.device.note or license.device.procurement_note %}
           <span class="text-primary">
             <i class="px-2 bi bi-chat-fill"></i>
           </span>
-          <div id="note-{{ license.device.id }}" class="font-monospace mt-1 small d-none">
-            {{ license.device.note|linebreaks }}
+          <div id="note-{{ license.device.id }}" class="bg-white border rounded p-2 font-monospace mt-1 small d-none">
+            {% if license.device.procurement_note %}
+              <strong>{% translate "Procurement note" %}:</strong>
+              {{ license.device.procurement_note|linebreaks }}
+            {% endif %}
+
+            {% if license.device.note and license.device.procurement_note %}
+            <hr>
+            {% endif %}
+
+            {% if license.device.note %}
+              <strong>{% translate "Note" %}:</strong>
+              {{ license.device.note|linebreaks }}
+            {% endif %}
           </div>
         {% endif %}
         <div>
-          <span class="badge text-bg-secondary">
+          <span class="badge text-bg-secondary" title="{% translate 'License type' %}">
             {{ license.device.device_type|default:"n/a" }}
           </span>
         </div>
@@ -92,7 +104,7 @@
         {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
       </td>
       <td class="small">
-        {{ license.device.get_subscribers|join:"<br>" }}
+        {{ license.get_subscribers|default:""|linebreaksbr }}
       </td>
       <td>
         <a
@@ -108,6 +120,14 @@
         >
             <i class="bi bi-pencil-square"></i>
         </a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="6" class="text-center">
+        <i>
+          {% translate "No licenses found." %}
+        </i>
       </td>
     </tr>
     {% endfor %}
