@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-12 12:22+0100\n"
-"PO-Revision-Date: 2024-12-12 12:42+0100\n"
+"POT-Creation-Date: 2024-12-16 10:54+0100\n"
+"PO-Revision-Date: 2024-12-16 10:55+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -61,7 +61,7 @@ msgstr "Bulk Ausmusterung"
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:86
+#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:87
 #: dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -126,76 +126,76 @@ msgstr "Bisher wurden keine Räume  eingegeben."
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
-#: dlcdb/core/models/device.py:48
+#: dlcdb/core/models/device.py:49
 msgid "IT ID"
 msgstr "IT ID"
 
-#: dlcdb/core/models/device.py:53
+#: dlcdb/core/models/device.py:54
 msgid "Inventory number must be entered as the main number-sub-number."
 msgstr "Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden."
 
-#: dlcdb/core/models/device.py:63
+#: dlcdb/core/models/device.py:64
 msgid "Inventory ID"
 msgstr "Inventarnummer"
 
-#: dlcdb/core/models/device.py:71
+#: dlcdb/core/models/device.py:72
 msgid "Serial number"
 msgstr "Seriennummer"
 
-#: dlcdb/core/models/device.py:77
+#: dlcdb/core/models/device.py:78
 msgid "Device type"
 msgstr "Geräteklasse"
 
-#: dlcdb/core/models/device.py:92
+#: dlcdb/core/models/device.py:93
 msgid "Model name"
 msgstr "Modellbezeichnung"
 
-#: dlcdb/core/models/device.py:94 dlcdb/core/models/supplier.py:27
+#: dlcdb/core/models/device.py:95 dlcdb/core/models/supplier.py:27
 #: dlcdb/licenses/templates/licenses/filters.html:42
 msgid "Supplier"
 msgstr "Distributor"
 
-#: dlcdb/core/models/device.py:98
+#: dlcdb/core/models/device.py:99
 msgid "Is license?"
 msgstr "Ist Lizenz?"
 
-#: dlcdb/core/models/device.py:100
+#: dlcdb/core/models/device.py:101
 msgid "Date of purchase"
 msgstr "Kaufdatum"
 
-#: dlcdb/core/models/device.py:101
+#: dlcdb/core/models/device.py:102
 msgid "Warranty expiry date"
 msgstr "Garantieablaufdatum"
 
-#: dlcdb/core/models/device.py:103
+#: dlcdb/core/models/device.py:104
 msgid "Start date of licence or maintenance contract"
 msgstr "Startdatum Lizenz- oder Wartungsvertrag"
 
-#: dlcdb/core/models/device.py:106
+#: dlcdb/core/models/device.py:107
 msgid "Expiry date licence or maintenance contract"
 msgstr "Ablaufdatum Lizenz- oder Wartungsvertrag"
 
-#: dlcdb/core/models/device.py:111
+#: dlcdb/core/models/device.py:112
 msgid "Contract termination date"
 msgstr "Kündigungsdatum Vertrag"
 
-#: dlcdb/core/models/device.py:112
+#: dlcdb/core/models/device.py:113
 msgid "Date of termination of the contract."
 msgstr "Datum der Vertragskündigung."
 
-#: dlcdb/core/models/device.py:114
+#: dlcdb/core/models/device.py:115
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:115
+#: dlcdb/core/models/device.py:116
 msgid "Book value"
 msgstr "Buchwert"
 
-#: dlcdb/core/models/device.py:119
+#: dlcdb/core/models/device.py:120
 msgid "Procurement note"
 msgstr "Beschaffungsnotiz"
 
-#: dlcdb/core/models/device.py:120
+#: dlcdb/core/models/device.py:121
 msgid ""
 "Information such as unique selling points, possible suppliers for "
 "comparative offers, etc."
@@ -203,54 +203,54 @@ msgstr ""
 "Informationen wie Alleinstellungsmerkmale, mögliche Lieferanten für "
 "Vergleichsangebote usw."
 
-#: dlcdb/core/models/device.py:123 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/core/models/device.py:124 dlcdb/core/models/manufacturer.py:21
 msgid "Note"
 msgstr "Notiz"
 
-#: dlcdb/core/models/device.py:124
+#: dlcdb/core/models/device.py:125
 msgid "Main MAC address"
 msgstr "MAC-Adresse"
 
-#: dlcdb/core/models/device.py:125
+#: dlcdb/core/models/device.py:126
 msgid "Further MAC addresses"
 msgstr "Weiter MAC Adressen"
 
-#: dlcdb/core/models/device.py:126
+#: dlcdb/core/models/device.py:127
 msgid "Nickname / C-Name"
 msgstr "Nickname / C-Name"
 
-#: dlcdb/core/models/device.py:127
+#: dlcdb/core/models/device.py:128
 msgid "Legacy device"
 msgstr "Legacy Gerät"
 
-#: dlcdb/core/models/device.py:132
+#: dlcdb/core/models/device.py:133
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:134
+#: dlcdb/core/models/device.py:135
 msgid "Added via CSV import?"
 msgstr "Via CSV-Import angelegt?"
 
-#: dlcdb/core/models/device.py:151
+#: dlcdb/core/models/device.py:152
 msgid "Order number"
 msgstr "Bestellnummer"
 
-#: dlcdb/core/models/device.py:155
+#: dlcdb/core/models/device.py:156
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:156
+#: dlcdb/core/models/device.py:157
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:160
+#: dlcdb/core/models/device.py:161
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:161
+#: dlcdb/core/models/device.py:162
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -274,7 +274,7 @@ msgstr "SAP (CSV)"
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:146
+#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:133
 msgid "Name"
 msgstr "Name"
 
@@ -489,32 +489,32 @@ msgstr "Lizenzmanagement"
 msgid "Licenses"
 msgstr "Lizenzen"
 
-#: dlcdb/licenses/forms.py:74
-msgid "Select one or more subscribers."
-msgstr "Es können mehrere Abonnenten angegeben werden."
-
-#: dlcdb/licenses/forms.py:81
+#: dlcdb/licenses/forms.py:20
 msgid "Check this box if the contract has been terminated."
 msgstr "Anhaken, wenn Vertrag gekündigt ist."
 
-#: dlcdb/licenses/forms.py:102
+#: dlcdb/licenses/forms.py:45
+msgid "Select one or more subscribers."
+msgstr "Es können mehrere Abonnenten angegeben werden."
+
+#: dlcdb/licenses/forms.py:94
 msgid "At least one field must be filled."
 msgstr "Mindestens ein Feld muss ausgefüllt sein."
 
-#: dlcdb/licenses/forms.py:144
+#: dlcdb/licenses/forms.py:131
 #: dlcdb/licenses/templates/licenses/licenses_table.html:38
 msgid "Subscribers"
 msgstr "Abonnenten"
 
-#: dlcdb/licenses/forms.py:145
+#: dlcdb/licenses/forms.py:132
 msgid "Type"
 msgstr "Typ"
 
-#: dlcdb/licenses/forms.py:147
+#: dlcdb/licenses/forms.py:134
 msgid "Start Date"
 msgstr "Startdatum"
 
-#: dlcdb/licenses/forms.py:148
+#: dlcdb/licenses/forms.py:135
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
@@ -530,11 +530,20 @@ msgstr "Lizenztyp"
 msgid "State"
 msgstr "Status"
 
-#: dlcdb/licenses/templates/licenses/form_partial.html:54
+#: dlcdb/licenses/templates/licenses/form_partial.html:18
+msgid "Admin view"
+msgstr "Admin Ansicht"
+
+#: dlcdb/licenses/templates/licenses/form_partial.html:28
+#: dlcdb/licenses/templates/licenses/licenses_table.html:64
+msgid "Show history"
+msgstr "Zeige Historie"
+
+#: dlcdb/licenses/templates/licenses/form_partial.html:65
 msgid "Save"
 msgstr "Speichern"
 
-#: dlcdb/licenses/templates/licenses/form_partial.html:61
+#: dlcdb/licenses/templates/licenses/form_partial.html:72
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -566,13 +575,17 @@ msgstr "Startdatum"
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
-#: dlcdb/licenses/views.py:86
+#: dlcdb/licenses/views.py:90
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
-#: dlcdb/licenses/views.py:146
+#: dlcdb/licenses/views.py:149
 msgid "New license"
 msgstr "Neue Lizenz"
+
+#: dlcdb/licenses/views.py:231
+msgid "License History"
+msgstr "Lizenz Historie"
 
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
@@ -602,13 +615,13 @@ msgid ""
 "printouts."
 msgstr ""
 
-#: dlcdb/reporting/models.py:30
+#: dlcdb/reporting/models.py:74
 msgid "Type of event"
-msgstr ""
+msgstr "Art des Ereignisses"
 
-#: dlcdb/reporting/models.py:45
+#: dlcdb/reporting/models.py:95
 msgid "Interval Name"
-msgstr ""
+msgstr "Bezeichnung Interval"
 
 #: dlcdb/smallstuff/apps.py:12 dlcdb/smallstuff/apps.py:18
 msgid "Smallstuff"

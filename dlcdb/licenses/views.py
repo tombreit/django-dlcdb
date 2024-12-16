@@ -1,3 +1,6 @@
+from itertools import chain
+from operator import attrgetter
+
 from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -52,7 +55,7 @@ def edit(request, license_id):
         )
 
         if form.is_valid():
-            device = form.save(commit=True)
+            device = form.save(commit=False)
             device.save()
 
             messages.success(
@@ -72,6 +75,7 @@ def edit(request, license_id):
                 return redirect("licenses:index")
 
     else:
+        # GET request
         form = LicenseForm(
             instance=license,
         )
@@ -102,7 +106,6 @@ def new(request):
             request.POST,
         )
 
-        # TODO: As we have only optional fields, check if at least one field is filled
         if form.is_valid():
             # The form.is_valid() call will trigger the custom validation
             # defined in your LicenseForm class's clean() method
@@ -144,5 +147,60 @@ def new(request):
             "form": form,
             "template": template,
             "title": _("New license"),
+        },
+    )
+
+
+@login_required
+@htmx_permission_required("core.change_licencerecord")
+def history(request, license_id):
+    device = get_object_or_404(Device, id=license_id)
+    device_history = device.history.all()
+
+    # subscription_model = device.subscription_set.model
+    # deleted_subscription_history = subscription_model.history.filter(device_id=device.id)
+    # Currently we do not need the combined history of multiple models
+    # as the subscribers changes are tracked manually with the
+    # update_change_reason function.
+    combined_history = sorted(chain(device_history), key=attrgetter("history_date"), reverse=True)
+
+    # Use a generator function to yield history entries with diffs
+    def get_history_with_diffs():
+        history_list = list(combined_history)
+        for i in range(len(history_list) - 1):
+            record = history_list[i]
+            next_record = history_list[i + 1]
+
+            # Check if both records are from the same model
+            if isinstance(record.instance, type(next_record.instance)):
+                # They are the same model; compute the diff
+                delta = record.diff_against(
+                    next_record, foreign_keys_are_objs=True, excluded_fields=["id", "active_record", "subscriber"]
+                )
+                # Skip if no changes detected
+                if not delta.changes and not record.history_change_reason:
+                    continue
+            else:
+                # Different models; cannot compute diff
+                # delta = None
+                if not record.history_change_reason:
+                    continue
+
+            yield (record, delta)
+
+        # Handle the last record
+        if history_list and history_list[-1].history_change_reason:
+            yield (history_list[-1], None)
+        # Handle the last record
+        if history_list:
+            yield (history_list[-1], None)
+
+    return TemplateResponse(
+        request,
+        "licenses/history.html",
+        {
+            "history": get_history_with_diffs(),
+            "license": device,
+            "title": _("License History"),
         },
     )

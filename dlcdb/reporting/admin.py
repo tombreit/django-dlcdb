@@ -13,6 +13,8 @@ from django.contrib.admin.models import LogEntry
 from django.contrib import messages
 from django.shortcuts import redirect
 
+from simple_history.admin import SimpleHistoryAdmin
+
 from .models import Subscription, Message
 from .models import Notification, Report
 from .utils.email import build_report_email, send_email
@@ -20,7 +22,7 @@ from .utils.process import create_report_if_needed
 
 
 @admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
+class SubscriptionAdmin(SimpleHistoryAdmin):
     list_display = ["id", "event", "interval", "subscriber", "device", "subscribed_at", "is_active"]
 
 

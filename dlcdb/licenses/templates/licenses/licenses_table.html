@@ -58,6 +58,15 @@
       <td>
         {{ license.get_human_title }} ({{ license.device.sap_id }})
 
+
+        <a
+            href="{% url 'licenses:history' license.device.id %}"
+            title="{% translate 'Show history' %}"
+            class="mx-2"
+        >
+            <i class="bi bi-clock-history"></i>
+        </a>
+
         {% if license.device.note %}
           <span class="text-primary">
             <i class="px-2 bi bi-chat-fill"></i>
@@ -86,17 +95,19 @@
         {{ license.device.get_subscribers|join:"<br>" }}
       </td>
       <td>
-        <span
-            {# href="{% url 'admin:core_device_change' license.device.id %}" #}
+        <a
+            href="{% url 'licenses:edit' license_id=license.device.id %}"
             class="btn btn-primary btn-sm"
 
+            {% comment %}
             hx-get="{% url 'licenses:edit' license_id=license.device.id %}"
             hx-trigger="click"
             hx-target="#licenses-content-wrapper"
             hx-push-url="true"
-          >
+            {% endcomment %}
+        >
             <i class="bi bi-pencil-square"></i>
-      </span>
+        </a>
       </td>
     </tr>
     {% endfor %}

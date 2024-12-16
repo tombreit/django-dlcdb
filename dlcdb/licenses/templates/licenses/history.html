@@ -1,0 +1,101 @@
+{% extends "theme/_base.html" %}
+
+{% block title %}
+    History for {{ license }}
+{% endblock %}
+
+
+{% block body %}
+
+<div class="d-flex align-items-center mb-4">
+  <div>
+      <h2 class="mb-0 me-4">
+        History for {{ license }}
+      </h2>
+  </div>
+  <div>
+    <a
+        href="{% url 'licenses:edit' license.id %}"
+        class="btn text-bg-warning btn-sm"
+    >
+        <i class="bi bi-pencil-square"></i>
+        Edit
+    </a>
+  </div>
+</div>
+
+
+
+<ul>
+    {% for entry, delta in history %}
+        <li class="rounded border p-3 mb-3">
+            <div class="row">
+                <div class="col-4">
+
+                    <strong>
+                        <span class="me-2">
+                          {{ entry.history_date }}
+                        </span>
+                        <br>
+                        <span class="badge text-bg-secondary">
+                          <i class="bi bi-person-fill"></i> 
+                          {{ entry.history_user }} 
+                        </span>
+                        <i class="fw-normal ms-4">
+                          {% if entry.history_type == '+' %}
+                          <i class="bi bi-plus-circle-fill text-success"></i>
+                          {% elif entry.history_type == '~' %}
+                          <i class="bi bi-pencil-fill text-warning"></i>
+                          {% elif entry.history_type == '-' %}
+                          <i class="bi bi-dash-circle-fill text-danger"></i>
+                          {% else %}
+                          <i class="bi bi-circle-fill text-secondary"></i>
+                          {% endif %}
+                          {{ entry.get_history_type_display }}
+                        </i>
+
+                    </strong>
+                    <p class="small">
+                        <!-- {{ entry.history_id }}:  -->
+                        <!-- {{ entry.history_object }} -->
+                    </p>
+                </div>
+                <div class="col-8">
+
+                  {% if entry.history_change_reason %}
+                    <p>
+                      {{ entry.history_change_reason }}
+                    </p>
+                  {% endif %} 
+                    {% if delta.changes %}
+                    <small>
+                        <table class="table table-sm">
+                          <thead class="table-light">
+                            <tr>
+                              <th>Field</th>
+                              <th>From</th>
+                              <th>To</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+          
+                        {% for change in delta.changes %}
+                        <tr>
+                          <td>{{ change.field }}</td>
+                          <td>{{ change.old }}</td>
+                          <td>{{ change.new }}</td>
+                        </tr>
+                        {% empty %}
+                            <p>No history for this item has been logged yet.</p>
+                        {% endfor %}
+                        </tbody>
+                        </table>
+                      </small>
+                    {% endif %}
+
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -9,10 +9,54 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 # from django.db.models import Max
 
+from simple_history.models import HistoricalRecords
+
 from ..core.models import Record
 
 
+class SubscriptionManager(models.Manager):
+    def get_or_create_license_subscription(self, subscriber, device):
+        result = []
+
+        for license_event in Subscription.LICENSE_EVENTS:
+            subscription, created = self.get_or_create(
+                event=license_event,
+                subscriber=subscriber,
+                device=device,
+                interval=Subscription.NotificationIntervalChoices.IMMEDIATELY,
+            )
+            result.append(
+                {
+                    "subscription": subscription,
+                    "created": created,
+                }
+            )
+
+        return result
+
+    def delete_license_subscriptions(self, subscriber, device):
+        result = []
+        for license_event in Subscription.LICENSE_EVENTS:
+            subscription = self.filter(
+                event=license_event,
+                subscriber=subscriber,
+                device=device,
+            ).delete()
+
+            result.append(
+                {
+                    "subscription": subscription,
+                    "deleted": True,
+                }
+            )
+
+        return result
+
+
 class Subscription(models.Model):
+    history = HistoricalRecords()
+    custom_objects = SubscriptionManager()
+
     class NotificationEventChoices(models.TextChoices):
         # License related
         CONTRACT_ADDED = "CONTRACT_ADDED", "Contract Added"
@@ -26,9 +70,15 @@ class Subscription(models.Model):
     event = models.CharField(
         max_length=255,
         choices=NotificationEventChoices.choices,
-        blank=False,
+        blank=True,
         verbose_name=_("Type of event"),
     )
+
+    LICENSE_EVENTS = [
+        NotificationEventChoices.CONTRACT_ADDED,
+        NotificationEventChoices.CONTRACT_EXPIRES_SOON,
+        NotificationEventChoices.CONTRACT_EXPIRED,
+    ]
 
     class NotificationIntervalChoices(models.TextChoices):
         IMMEDIATELY = "immediately", "Immediately"
@@ -40,12 +90,12 @@ class Subscription(models.Model):
 
     interval = models.CharField(
         max_length=255,
-        blank=False,
+        blank=True,
         choices=NotificationIntervalChoices.choices,
         verbose_name=_("Interval Name"),
     )
 
-    subscriber = models.ForeignKey("core.Person", on_delete=models.PROTECT)
+    subscriber = models.ForeignKey("core.Person", on_delete=models.PROTECT, blank=True, null=True)
     device = models.ForeignKey("core.Device", on_delete=models.PROTECT, null=True, blank=True)
     # last_sent = models.DateTimeField(null=True, blank=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)

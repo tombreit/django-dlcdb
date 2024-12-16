@@ -25,34 +25,20 @@ function initTomSelect(el) {
     initializedElements.add(el);
 }
 
-function initTomSelects() {
-    // Initialize existing elements
-    document.querySelectorAll('.is-tom-select').forEach(initTomSelect);
-
-    // Observe DOM changes for dynamically added elements
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    if (node.matches('.is-tom-select')) {
-                        initTomSelect(node);
-                    }
-                    node.querySelectorAll('.is-tom-select').forEach(initTomSelect);
-                }
-            });
-        });
-    });
-
-    // Start observing the document body
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
+function initTomSelects(rootElement) {
+    rootElement.querySelectorAll('.is-tom-select').forEach(initTomSelect);
 }
 
-// Initialize on DOMContentLoaded or immediately if the document is already ready
+// Initialize existing elements on DOMContentLoaded
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTomSelects);
+    document.addEventListener('DOMContentLoaded', function() {
+        initTomSelects(document);
+    });
 } else {
-    initTomSelects();
+    initTomSelects(document);
 }
+
+// Listen for HTMX afterSwap events
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    initTomSelects(event.target);
+});

@@ -1,6 +1,5 @@
 from django import forms
 from django.db.models import Q
-from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -15,6 +14,12 @@ from .subscribers import manage_subscribers
 
 
 class LicenseForm(forms.ModelForm):
+    contract_termination = forms.BooleanField(
+        required=False,
+        # The initial value will be set in the __init__ method
+        help_text=_("Check this box if the contract has been terminated."),
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -28,11 +33,26 @@ class LicenseForm(forms.ModelForm):
         # Set initial value for contract_termination checkbox
         self.fields["contract_termination"].initial = bool(self.instance.contract_termination_date)
 
-        if self.is_edit:
-            # Get current subscribers
-            # Todo: whats the difference between self.fields[field].initial and self.initial?
-            # self.fields["subscribers"].initial = self.instance.subscription_set.all().values_list("subscriber", flat=True)
-            self.initial["subscribers"] = self.instance.subscription_set.all().values_list("subscriber", flat=True)
+        # Dynamically set initial subscribers
+        # if self.is_edit:
+        #     current_subscribers = self.instance.subscription_set.values_list("subscriber_id", flat=True)
+        #     self.fields["subscribers"].initial = current_subscribers
+
+        # Reset queryset each time to avoid caching
+        self.fields["subscribers"] = forms.ModelMultipleChoiceField(
+            queryset=Person.objects.filter(email__isnull=False),
+            required=False,
+            help_text=_("Select one or more subscribers."),
+            widget=forms.SelectMultiple(
+                attrs={
+                    "class": "is-tom-select",
+                    # "data-placeholder": "-----",
+                }
+            ),
+            initial=self.instance.subscription_set.values_list("subscriber_id", flat=True)
+            if self.instance.pk
+            else None,
+        )
 
         # Crispy forms
         self.helper = FormHelper()
@@ -68,34 +88,6 @@ class LicenseForm(forms.ModelForm):
             ),
         )
 
-    subscribers = forms.ModelMultipleChoiceField(
-        queryset=Person.objects.all(),
-        required=False,
-        help_text=_("Select one or more subscribers."),
-        widget=forms.SelectMultiple(attrs={"class": "is-tom-select"}),
-    )
-
-    contract_termination = forms.BooleanField(
-        required=False,
-        # The initial value will be set in the __init__ method
-        help_text=_("Check this box if the contract has been terminated."),
-    )
-
-    # def clean_subscribers(self):
-    #     subscribers = self.cleaned_data["subscribers"]
-
-    #     if subscribers:
-    #         subscribers = subscribers.split(",")
-    #         subscribers = [email.strip() for email in subscribers]
-
-    #         for email in subscribers:
-    #             try:
-    #                 validate_email(email)
-    #             except ValidationError:
-    #                 raise ValidationError(_("Invalid email address: %(email)s") % {"email": email})
-
-    #     return subscribers
-
     def clean(self):
         cleaned_data = super().clean()
         if not any(cleaned_data.values()):
@@ -111,14 +103,11 @@ class LicenseForm(forms.ModelForm):
         else:
             instance.contract_termination_date = None
 
-        if commit:
-            with transaction.atomic():
-                instance.save()
-                self.save_m2m()
+        instance.save()
+        self.save_m2m()
 
-                previous_subscribers = self.initial.get("subscribers")
-                new_subscribers = self.cleaned_data["subscribers"]
-                manage_subscribers(instance, new_subscribers, previous_subscribers)
+        subscribers = self.cleaned_data.get("subscribers")
+        manage_subscribers(instance, subscribers)
 
         return instance
 
@@ -136,7 +125,6 @@ class LicenseForm(forms.ModelForm):
             "procurement_note",
             "note",
             "device_type",
-            "subscribers",
             "contract_termination",
         ]
         labels = {

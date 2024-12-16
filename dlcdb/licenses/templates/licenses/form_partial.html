@@ -9,12 +9,23 @@
     </div>
     <div>
         {% if license %}
+            {% if request.user.is_staff %}
+            <a
+                href="{{ obj_admin_url }}"
+                class="btn text-bg-warning btn-sm"
+            >
+                <i class="bi bi-box-arrow-up-right"></i>
+                {% translate 'Admin view' %}
+            </a>
+            {% endif %}
+
+
         <a
-            href="{{ obj_admin_url }}"
+            href="{% url 'licenses:history' license.id %}"
             class="btn text-bg-warning btn-sm"
         >
-            <i class="bi bi-box-arrow-up-right"></i>
-            Admin view
+            <i class="bi bi-clock-history"></i>
+            {% translate 'Show history' %}
         </a>
         {% endif %}
     </div>
