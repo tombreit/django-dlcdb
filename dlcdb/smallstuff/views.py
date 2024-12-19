@@ -79,20 +79,24 @@ def remove_assignement(request, assignment_id):
 @permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def add_assignement(request, person_id):
     if request.method == "POST":
-        print("add_assignement POST")
         form = AssignedThingsForm(request.POST)
         if form.is_valid():
-            # print(f"{form.cleaned_data=}")
             form.instance.assigned_at = timezone.localtime(timezone.now())
             form.instance.assigned_by = request.user
             form.save()
-            response = HttpResponse(status=204)
+
+            # Reload the form for the next assignment
+            person = Person.objects.get(id=person_id)
+            context = {
+                "person": person,
+                "form": AssignedThingsForm(initial={"person": person}),
+            }
+            response = render(request, "smallstuff/includes/add_assignement.html", context)
             response["HX-Trigger"] = "newAssignment"
+
             return response
 
     else:
-        print("add_assignement GET")
-
         person = Person.objects.get(id=person_id)
         form = AssignedThingsForm(initial={"person": person})
 

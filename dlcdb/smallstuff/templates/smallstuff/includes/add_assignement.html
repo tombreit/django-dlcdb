@@ -9,8 +9,7 @@ SPDX-License-Identifier: EUPL-1.2
 <form 
     hx-post="{% url 'smallstuff:add_assignement' person.id %}"
     method="post" 
-    class="form-inline"
+    class="row row-cols-lg-auto"
 >
-    {# {{ form.as_p }} #}
     {% crispy form %}
 </form>

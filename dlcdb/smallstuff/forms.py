@@ -14,13 +14,17 @@ class AssignedThingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.form_show_labels = False
+        self.helper.field_template = "bootstrap5/layout/inline_field.html"
         self.helper.layout = Layout(
-            "thing",
             "person",
+            "thing",
             HTML(
                 """
-                <button type="submit" name="submit" class="btn btn-danger ml-1 mb-2"><i class="bi bi-plus-circle-fill"></i></button>
+                  <button type="submit" name="submit" class="btn btn-danger ml-1">
+                    <i class="bi bi-plus-circle-fill"></i>
+                  </button>
             """
             ),
         )

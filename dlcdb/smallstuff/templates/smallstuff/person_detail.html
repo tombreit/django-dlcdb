@@ -35,16 +35,12 @@ SPDX-License-Identifier: EUPL-1.2
                 </h4>
             </div>
             <div class="p-2">
-                <span id="add-thing-button-or-form">
-                    <a 
-                        class="btn btn-danger text-left"
-                        id="add-thing"
-                        hx-trigger="click"
-                        hx-target="#add-thing-button-or-form"
-                        hx-get="{% url 'smallstuff:add_assignement' person.id %}"
-                    >
-                        <i class="bi bi-plus-circle-fill"></i>
-                    </a>
+                <span 
+                    id="add-thing-button-or-form"
+                    hx-trigger="load"
+                    hx-target="#add-thing-button-or-form"
+                    hx-get="{% url 'smallstuff:add_assignement' person.id %}"
+                >
                 </span>
 
             </div>
