@@ -24,38 +24,20 @@
       >
 
       <select class="form-select" name="device__device_type">
-        {% for choice in license_record_filter.form.device__device_type.field.choices %}
-        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.device__supplier.value %}selected{% endif %}>
-            {% if choice.0 == "" %}
-                {% translate "License type" %}...
-            {% else %}
-                {{ choice.1 }}
-            {% endif %}
-        </option>
+        {% for choice in license_record_filter.form.device__device_type %}
+          {{ choice }}
         {% endfor %}
       </select>
 
       <select class="form-select" name="device__supplier">
-        {% for choice in license_record_filter.form.device__supplier.field.choices %}
-        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.device__supplier.value %}selected{% endif %}>
-            {% if choice.0 == "" %}
-                {% translate "Supplier" %}...
-            {% else %}
-                {{ choice.1 }}
-            {% endif %}
-        </option>
+        {% for choice in license_record_filter.form.device__supplier %}
+          {{ choice }}
         {% endfor %}
       </select>
 
       <select class="form-select" name="license_state">
-        {% for choice in license_record_filter.form.license_state.field.choices.all %}
-        <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.license_state.value %}selected{% endif %}>
-            {{ choice.1 }}
-        </option>
-        {% empty %}
-          <option value="" selected>
-            {% translate "State" %}...
-          </option>
+        {% for choice in license_record_filter.form.license_state %}
+          {{ choice }}
         {% endfor %}
       </select>
     </div>
