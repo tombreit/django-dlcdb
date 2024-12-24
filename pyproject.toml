@@ -5,11 +5,11 @@
 [project]
 name = "django-dlcdb"
 # dynamic = ["version"]
-version = "0"
-# description = "Device Live Cycle Database"
-# authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
-# license = {file = "LICENSE"}
-# readme = "README.md"
+version = "0.9.0"
+description = "Device Live Cycle Database"
+authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
+license = {file = "LICENSE"}
+readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [
     "Framework :: Django",
@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "Django==5.1.2",
+    "Django==5.1.4",
     "django-select2",
     "django-environ",
     "django-crispy-forms",

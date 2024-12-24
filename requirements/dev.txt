@@ -26,7 +26,7 @@ cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.4.0
     # via requests
-click==8.1.7
+click==8.1.8
     # via pip-tools
 coverage==7.6.9
     # via pytest-cov
@@ -91,7 +91,7 @@ imagesize==1.4.1
     # via sphinx
 iniconfig==2.0.0
     # via pytest
-jinja2==3.1.4
+jinja2==3.1.5
     # via
     #   myst-parser
     #   sphinx
@@ -164,7 +164,7 @@ pyyaml==6.0.2
     #   pre-commit
 requests==2.32.3
     # via sphinx
-ruff==0.8.3
+ruff==0.8.4
     # via django-dlcdb (pyproject.toml)
 segno==1.6.1
     # via django-dlcdb (pyproject.toml)
@@ -203,7 +203,7 @@ sqlparse==0.5.3
     #   django-debug-toolbar
 typing-extensions==4.12.2
     # via pydata-sphinx-theme
-urllib3==2.2.3
+urllib3==2.3.0
     # via requests
 virtualenv==20.28.0
     # via pre-commit
