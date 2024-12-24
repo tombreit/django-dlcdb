@@ -127,6 +127,9 @@
       <td colspan="6" class="text-center">
         <i>
           {% translate "No licenses found." %}
+          {% if licenses_total == 0 %}
+            {% include "licenses/includes/add_button.html" with style="btn" %}
+          {% endif %}
         </i>
       </td>
     </tr>

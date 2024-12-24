@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<span 
+    class="{{ style }}"
+    hx-get="{% url 'licenses:new' %}"
+    hx-trigger="click"
+    hx-target="#licenses-content-wrapper"
+>
+    <i class="bi bi-plus-circle"></i>
+    {% translate "Add license" %}
+</span>

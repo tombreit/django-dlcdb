@@ -48,17 +48,16 @@
       </select>
 
       <select class="form-select" name="license_state">
-        {% for choice in license_record_filter.form.license_state.field.choices %}
+        {% for choice in license_record_filter.form.license_state.field.choices.all %}
         <option value="{{ choice.0 }}" {% if choice.0 == license_record_filter.form.license_state.value %}selected{% endif %}>
-            {% if choice.0 == "" %}
-                {% translate "State" %}...
-            {% else %}
-                {{ choice.1 }}
-            {% endif %}
+            {{ choice.1 }}
         </option>
+        {% empty %}
+          <option value="" selected>
+            {% translate "State" %}...
+          </option>
         {% endfor %}
       </select>
-
     </div>
   </form>
 </div>

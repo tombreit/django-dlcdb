@@ -18,16 +18,7 @@
     {% include "licenses/filters.html" %}
 
     <div id="add-license">
-        <span 
-          {# href="{% url 'admin:core_device_add' %} #}
-          class="btn btn-primary"
-          hx-get="{% url 'licenses:new' %}"
-          hx-trigger="click"
-          hx-target="#licenses-content-wrapper"
-        >
-          <i class="bi bi-plus-circle"></i>
-          {% translate "Add license" %}
-        </span>
+      {% include "licenses/includes/add_button.html" with style="btn btn-primary" %}
     </div>
 
   </div>

@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -119,33 +120,46 @@ def new(request):
         )
 
         if form.is_valid():
-            # The form.is_valid() call will trigger the custom validation
-            # defined in your LicenseForm class's clean() method
-            device = form.save(commit=False)
+            errors = []
 
-            # Set device properties
-            device.is_licence = True
-            device.save()
-
-            # Set record for device
             try:
-                room = Room.objects.get(is_default_license_room=True)
+                with transaction.atomic():
+                    # The form.is_valid() call will trigger the custom validation
+                    # defined in your LicenseForm class's clean() method
+                    device = form.save(commit=False)
+
+                    # Set device properties
+                    device.is_licence = True
+                    device.save()
+
+                    # Set record and room for device
+                    room = Room.objects.get(is_default_license_room=True)
+
+                    record = InRoomRecord(
+                        device=device,
+                        room=room,
+                        user=request.user,
+                        username=request.user.username,
+                    )
+                    record.save()
+
             except Room.DoesNotExist:
-                # TODO: Emit a human readable error message instead of a 500
-                raise ValidationError("No license room/location defined. Define a license room first.")
+                errors.append("No license room/location defined. Define a license room first.")
+            except ValidationError as e:
+                errors.append(str(e))
+            except IntegrityError as e:
+                errors.append(f"Database error: Could not save the license. Please try again. Error: {e}")
+            except Exception as e:
+                errors.append(f"An error occurred while saving: {e}")
 
-            record = InRoomRecord(
-                device=device,
-                room=room,
-                user=request.user,
-                username=request.user.username,
-            )
-            record.save()
-
-            messages.success(
-                request,
-                f"License {device.sap_id} added.",
-            )
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+            else:
+                messages.success(
+                    request,
+                    f"License {device.sap_id} added.",
+                )
 
             redirect_url = reverse("licenses:index")
             return HttpResponseClientRedirect(redirect_url)

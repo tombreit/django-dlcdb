@@ -26,18 +26,17 @@ class LicenceRecordFilter(django_filters.FilterSet):
     )
 
     # license_state = django_filters.CharFilter(field_name="license_state")
-    license_state = django_filters.ChoiceFilter(
-        choices=(
-            lambda: [
-                (state, LicenceRecord.get_localized_license_state_label(for_state=state))
-                for state in LicenceRecord.objects.values_list("license_state", flat=True)
-                .exclude(license_state__isnull=True)
-                .exclude(license_state__exact="")
-                .distinct()
-                .order_by("license_state")
-            ]
-        )()
-    )
+    def get_license_state_choices(self):
+        return [
+            (state, LicenceRecord.get_localized_license_state_label(for_state=state))
+            for state in LicenceRecord.objects.values_list("license_state", flat=True)
+            .exclude(license_state__isnull=True)
+            .exclude(license_state__exact="")
+            .distinct()
+            .order_by("license_state")
+        ]
+
+    license_state = django_filters.ChoiceFilter(choices=get_license_state_choices)
 
     class Meta:
         model = LicenceRecord
