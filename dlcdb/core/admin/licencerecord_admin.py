@@ -41,8 +41,6 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
         "person__first_name",
         "person__last_name",
         "person__email",
-        "lent_accessories",
-        "lent_note",
     ]
 
     list_display = [
