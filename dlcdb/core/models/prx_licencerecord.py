@@ -125,7 +125,7 @@ class LicenceRecord(Record):
         return self.get_localized_license_state_label(for_state=self.license_state)
 
     def __str__(self):
-        return self.device.edv_id
+        return f"{self.pk}"
 
     class Meta:
         proxy = True
