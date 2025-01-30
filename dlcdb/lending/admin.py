@@ -25,6 +25,7 @@ class LendingConfigurationAdmin(admin.ModelAdmin):
     }
 
     fieldsets = (
+        (None, {"fields": ("admin_mark_overdue",)}),
         (
             "Printouts",
             {

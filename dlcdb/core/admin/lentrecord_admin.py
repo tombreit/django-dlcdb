@@ -14,6 +14,7 @@ from django.utils.formats import date_format
 from django.contrib import messages
 
 from dlcdb.tenants.admin import TenantScopedAdmin
+from dlcdb.lending.models import LendingConfiguration
 from ..models import LentRecord, InRoomRecord, Room, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
@@ -129,13 +130,24 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
+        lending_configuration = LendingConfiguration.load()
+        admin_mark_overdue = lending_configuration.admin_mark_overdue
 
         # see: https://docs.djangoproject.com/en/3.0/ref/models/conditional-expressions/#django.db.models.expressions.Case
-        queryset = queryset.annotate(
-            lent_state=Case(
-                When(lent_desired_end_date__lte=datetime.today().date(), then=Value("20-overdue")),
+        when_clauses = []
+        if admin_mark_overdue:
+            when_clauses.append(When(lent_desired_end_date__lte=datetime.today().date(), then=Value("20-overdue")))
+
+        when_clauses.extend(
+            [
                 When(record_type=Record.INROOM, then=Value("30-available")),
                 When(record_type=Record.LENT, then=Value("40-lent")),
+            ]
+        )
+
+        queryset = queryset.annotate(
+            lent_state=Case(
+                *when_clauses,
                 default=Value("10-unknown"),
                 output_field=CharField(),
             )

@@ -28,6 +28,10 @@ class LendingConfiguration(SingletonBaseModel):
         through="lending.LendingConfigurationRegulation",
         related_name="+",
     )
+    admin_mark_overdue = models.BooleanField(
+        default=True,
+        help_text="If checked, the admin listing highlights overdue devices.",
+    )
 
     def __str__(self):
         return "Lending Configuration"
