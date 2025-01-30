@@ -20,11 +20,11 @@ beautifulsoup4==4.12.3
     # via pydata-sphinx-theme
 certifi==2024.12.14
     # via requests
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
 crispy-bootstrap5==2024.10
     # via django-dlcdb (pyproject.toml)
-django==5.1.4
+django==5.1.5
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -44,7 +44,7 @@ django-crispy-forms==2.3
     # via
     #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
-django-environ==0.11.2
+django-environ==0.12.0
     # via django-dlcdb (pyproject.toml)
 django-filter==24.3
     # via django-dlcdb (pyproject.toml)
@@ -52,7 +52,7 @@ django-htmx==1.21.0
     # via django-dlcdb (pyproject.toml)
 django-select2==8.2.3
     # via django-dlcdb (pyproject.toml)
-django-simple-history==3.7.0
+django-simple-history==3.8.0
     # via django-dlcdb (pyproject.toml)
 djangorestframework==3.15.2
     # via django-dlcdb (pyproject.toml)
@@ -91,7 +91,7 @@ openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
 packaging==24.2
     # via sphinx
-pillow==11.0.0
+pillow==11.1.0
     # via django-dlcdb (pyproject.toml)
 pyasn1==0.6.1
     # via
@@ -101,7 +101,7 @@ pyasn1-modules==0.4.1
     # via python-ldap
 pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
-pygments==2.18.0
+pygments==2.19.1
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
