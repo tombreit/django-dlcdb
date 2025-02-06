@@ -17,10 +17,10 @@ class InventorizeRoomForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "class": "form-control form-control-sm",
+                "readonly": "readonly",  # This makes the field read-only but still included in POST
             }
         ),
-    )  # do not set disabled/readonly=True, as these fields will not appear in POST
-    # room = forms.CharField(widget=forms.HiddenInput())
+    )
 
 
 class DeviceAddForm(forms.Form):
@@ -29,7 +29,10 @@ class DeviceAddForm(forms.Form):
         device_choices = [("", "Add device")]
         device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in add_devices_qs]
         super().__init__(*args, **kwargs)
-        self.fields["device"] = forms.ChoiceField(choices=device_choices)
+        self.fields["device"] = forms.ChoiceField(
+            choices=device_choices,
+            widget=forms.Select(attrs={"class": "form-control"}),
+        )
 
     room = forms.CharField(widget=forms.HiddenInput())
 

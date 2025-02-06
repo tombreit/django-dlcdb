@@ -166,7 +166,9 @@ async function addNewDeviceRow(device) {
     // console.log("stateButton: ", stateButton)
     stateButton.addEventListener('click', btnClick, false);
 
-    $('#id_device').val(null).trigger('change');
+    const deviceSelect = document.getElementById('id_device');
+    deviceSelect.value = '';
+    deviceSelect.dispatchEvent(new Event('change'));
 
     manageUuid({uuid: device.uuid, state: DEVICE_STATE_UNKNOWN});
 
@@ -230,16 +232,17 @@ async function handleRoomScan(uuid){
     roomModalElem.dataset.uuid = uuid;
     roomNumberElem.textContent = roomObj.number;
 
-    $('#switch_room_modal').modal('show');
+    document.getElementById('switch_room_modal').modal('show');
 
-    $('#switch_room_modal .modal-footer button').on('click', function (event) {
-        let clicked_button = $(event.target);
-        let parent = clicked_button.closest(".modal")
-        let uuid = parent[0].dataset.uuid
+    document.querySelector('#switch_room_modal .modal-footer button')
+        .addEventListener('click', function(event) {
+            let clickedButton = event.target;
+            let parentModal = clickedButton.closest(".modal");
+            let uuid = parentModal.dataset.uuid;
 
-        if (clicked_button[0].id === "change_room") {
-            location = `room/${roomObj.pk}`;
-        }
+            if (clickedButton.id === "change_room") {
+                    location = `room/${roomObj.pk}`;
+            }
     });
 }
 
@@ -257,7 +260,7 @@ const addDeviceButton = document.querySelector("#add-device-button");
 
 if (addDeviceButton){
     addDeviceButton.addEventListener("click", function(event) {
-        let select2SelectedOption = $('#id_device').select2('data')[0].id;
+        let select2SelectedOption = document.getElementById('id_device').value;
         console.log("[addDeviceButton] adding device: ", select2SelectedOption)
         handleDeviceScan(select2SelectedOption);
         event.preventDefault();

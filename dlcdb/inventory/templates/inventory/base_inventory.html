@@ -20,7 +20,10 @@ SPDX-License-Identifier: EUPL-1.2
   <script defer src="{% static 'dist/inventory/js/app.js' %}"></script>
 </head>
 
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body
+  data-page="{% block data_page %}{% endblock data_page %}"
+  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+>
 
     <div class="container">
     
