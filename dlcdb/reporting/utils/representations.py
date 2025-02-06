@@ -29,17 +29,17 @@ def get_record_data_row(record, event):
             for model_name in item.get("model"):
                 obj = getattr(obj, model_name)
 
-            field_name = item.get("field")
-            print(f"{field_name=}")
-            field = getattr(obj, item.get("field"))
+            if obj:
+                field_name = item.get("field")
+                field = getattr(obj, item.get("field"))
 
-            if field_name == "contract_expiration_date":
-                field = f"Expiry date: {field:%Y-%m-%d}"
-            elif isinstance(field, datetime.date):
-                field = f"{field:%Y-%m-%d}"
+                if field:
+                    if field_name == "contract_expiration_date":
+                        field = f"Expiry date: {field:%Y-%m-%d}"
+                    elif isinstance(field, datetime.date):
+                        field = f"{field:%Y-%m-%d}"
 
-            print(f"field: {field}")
-            row.append(field)
+                    row.append(field)
 
     return row
 
