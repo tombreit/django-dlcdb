@@ -20,7 +20,7 @@ def navigation(request):
         module = __import__(f"dlcdb.{app_name}.navigation", fromlist=["navigation"])
         navigation_dict = getattr(module, "navigation", {})
     except ImportError as _import_error:
-        print(f"{_import_error=}. Ignoring navigation for {app_name=}")
+        # print(f"{_import_error=}. Ignoring navigation for {app_name=}")
         pass
 
     navigation_dict["app_label"] = app_label
