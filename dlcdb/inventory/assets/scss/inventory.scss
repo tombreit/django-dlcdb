@@ -1,5 +1,5 @@
 // $brand-primary: rgb(16,66,122);
-// // $brand-primary-light: lighten( $brand-primary, 50% );
+// $brand-primary-light: lighten( $brand-primary, 50% );
 // $brand-primary-light: rgba( $brand-primary, .15 );
 
 
@@ -16,25 +16,12 @@ $font-size-base:  0.75rem;
 /* todo: only include used bootstrap components */
 @import "bootstrap/scss/bootstrap";
 
-@import "select2/dist/css/select2.min";
-@import "select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min";
-
 @import "tom-select/dist/css/tom-select.bootstrap5.min";
 
-@import "components/_fontawesome";
-@import "components/_helpers";
-@import "components/_layout";
+@import "_fontawesome";
+@import "_helpers";
+@import "_layout";
 
-
-.input-group > .select2-container--bootstrap4 {
-    width: auto !important;
-    flex: 1 1 auto;
-}
-
-.input-group > .select2-container--bootstrap4 .select2-selection--single {
-    height: 100%;
-    line-height: inherit;
-}
 
 .tr-note td {
     border-top: 0;

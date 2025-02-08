@@ -10,18 +10,6 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block data_page %}inventorize-room-list{% endblock data_page %}
 
-{% block extra_css %}
-
-{% block extra_js %}
-<script type="module">
-    {% include 'inventory/includes/qrtoggle.js' %}
-</script>
-
-{% include 'inventory/includes/inventorize-jsinit.html' %}
-
-{% endblock extra_js %}
-
-
 {% block body %}
 {% if current_inventory %}
 
@@ -56,11 +44,9 @@ SPDX-License-Identifier: EUPL-1.2
                             hx-push-url="true"
                             hx-get="."
                         >
-                        <span class="input-group-append">
-                                <button class="btn btn-sm btn btn-outline-primary" type="submit">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </span>
+                        <button class="btn btn-sm btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
                     </div>
                </div>
             </form>

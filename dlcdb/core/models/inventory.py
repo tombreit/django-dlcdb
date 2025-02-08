@@ -287,7 +287,7 @@ class Inventory(models.Model):
         appropriate inventory record.
         """
 
-        print(f"inventorize_uuids_for_room {uuids=}, {room_pk=}, {user=}")
+        # print(f"inventorize_uuids_for_room {uuids=}, {room_pk=}, {user=}")
 
         try:
             room = Room.objects.get(pk=room_pk)
@@ -313,7 +313,7 @@ class Inventory(models.Model):
 
             active_record = device.active_record
 
-            print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
+            # print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
 
             new_record = False
 
@@ -321,7 +321,6 @@ class Inventory(models.Model):
             # model
 
             if state == "dev_state_found":
-                print(f"{state=}")
                 new_record = active_record
                 new_record.room = room
                 new_record.inventory = current_inventory
@@ -346,8 +345,6 @@ class Inventory(models.Model):
                 # to check if it is currently lended. When lended, we do not
                 # set this device as "not found", but instead move it to an
                 # "external room".
-
-                print(f"{state=}")
 
                 if all(
                     [
@@ -381,27 +378,37 @@ class Inventory(models.Model):
                 # but that device is not marked as "found" or "not found".
                 # That device should be added to current room, but without
                 # an inventory record.
+                # Or if an already inventorized device is marked as "unknown", for
+                # whatever reason.
 
-                print(f"{state=}")
                 new_record = active_record
-                # Keeping the current inventory value
-                # new_record.inventory = None
                 new_record.room = room
                 new_record.user = user
                 new_record.username = username
+                new_record_note = "Marked as 'unknown state' during inventory."
+
+                # How to handle devices which already have an inventory record
+                # but are marked as "unknown" during inventory?
+                # Keeping the current inventory value vs. removing the inventory
+                # As we count a device as inventorized if we have any record with
+                # a inventory stamp for the current inventory, the UI will still
+                # show this device as inventorized.
+                new_record.inventory = None
 
                 # As we copied a previous record, we need to do some
                 # cleanup in fields which doest not match the new
                 # record type:
                 if new_record.record_type == Record.LOST:
                     new_record.record_type = Record.INROOM
-                    new_record.note = ""
+                    new_record.note = new_record_note
                 elif new_record.record_type == Record.REMOVED:
                     new_record.record_type = Record.INROOM
                     new_record.disposition_state = ""
                     new_record.removed_info = ""
-                    new_record.note = ""
+                    new_record.note = new_record_note
                     new_record.removed_date = None
+                elif new_record.record_type == Record.INROOM:
+                    new_record.note = new_record_note
 
             else:
                 msg = f"This should never happen: given state `{state}` not recognized! Raising 500."

@@ -5,7 +5,7 @@
 """
 Inventory mode.
 
-Goal: Verifiy all devices are "findable". 
+Goal: Verifiy all devices are "findable".
 
 Subgoals:
 * Room inventory should always be "saveable", even when not all devices are verified
@@ -15,7 +15,7 @@ Procedure:
 * Go in room
 * Check if expected device is in room
 * Cases:
-  * [FOUND]     Expected device is in room: confirm device 
+  * [FOUND]     Expected device is in room: confirm device
   * [NOT FOUND] Expected device is not in room: disprove device
   * [FOUND]     Not expected device is in room: add device to room and confirm device
 * Room is finished, when all devices got their inventory stamp
@@ -65,6 +65,33 @@ def update_session_qrtoggle(request):
         return JsonResponse(data)
     else:
         return HttpResponse("")
+
+
+def get_js_vars(request):
+    """
+    Expose some Django settings and other variables to the frontend.
+    Will be consumed via:
+
+    ```html
+    {{ js_vars|json_script:"js_vars" }}
+    ```
+
+    ```javascript
+    const jsVars = JSON.parse(document.getElementById('js_vars').textContent);
+    const qrToggleUrl = jsVars.qrToggleUrl;
+    ```
+    """
+
+    js_vars = {
+        "qrcode-prefix": settings.QRCODE_PREFIX,
+        "djangoDebug": settings.DEBUG,
+        "apiBaseUrl": f"{request.scheme}://{request.get_host()}/api/v2",
+        "apiToken": Token.objects.first().key,
+        "qrToggleUrl": reverse("inventory:update-qrtoggle"),
+        "qrScannerEnabled": bool(request.session.get("qrscanner_enabled")),
+    }
+
+    return js_vars
 
 
 class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
@@ -121,8 +148,6 @@ def inventorize_room(request, pk):
             "room": Inventory.objects.tenant_aware_room_objects(tenant=tenant).get(pk=pk),
             "devices": devices_in_room,
             "current_inventory": current_inventory,
-            "qrcode_prefix": settings.QRCODE_PREFIX,
-            "debug": settings.DEBUG,
             "dev_state_unknown": "dev_state_unknown",
             "dev_state_found": "dev_state_found",
             # 'dev_state_found_unexpected': 'dev_state_found_unexpected',
@@ -130,8 +155,9 @@ def inventorize_room(request, pk):
             "dev_state_added": "dev_state_added",
             "form": InventorizeRoomForm(),
             "device_add_form": device_add_form,
-            "api_token": Token.objects.first(),
             "inventory_progress": inventory_progress,
+            "debug": settings.DEBUG,
+            "js_vars": get_js_vars(request),
         }
 
     return TemplateResponse(request, template, context)
@@ -199,10 +225,8 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
             {
                 "current_inventory": current_inventory,
                 "parameters": parameters,
-                "qrcode_prefix": settings.QRCODE_PREFIX,
-                "debug": settings.DEBUG,
-                "api_token": Token.objects.first(),
                 "inventory_progress": inventory_progress,
+                "js_vars": get_js_vars(self.request),
             }
         )
         return context
@@ -227,9 +251,6 @@ def search_devices(request):
         tenant=request.tenant, is_superuser=request.user.is_superuser
     )
     filter_devices = DeviceFilter(request.GET, queryset=all_devices)
-
-    # print(f"{request=}")
-    # print(f"{request.GET}=")
 
     request_copy = request.GET.copy()
     parameters = request_copy.pop("page", True) and request_copy.urlencode()

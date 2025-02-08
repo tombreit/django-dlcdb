@@ -15,9 +15,9 @@ SPDX-License-Identifier: EUPL-1.2
   <title>Inventur | DLCDB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'>
-  <link rel="stylesheet" href="{% static 'dist/inventory/css/inventory2.css' %}">
+  <link rel="stylesheet" href="{% static 'inventory/dist/inventory.css' %}">
   {% block extra_css %}{% endblock extra_css %}
-  <script defer src="{% static 'dist/inventory/js/app.js' %}"></script>
+  <script defer src="{% static 'inventory/dist/inventory.js' %}"></script>
 </head>
 
 <body
@@ -25,11 +25,13 @@ SPDX-License-Identifier: EUPL-1.2
   hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
 >
 
+    {{ js_vars|json_script:"js_vars" }}
+
     <div class="container">
     
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="{% url 'inventory:inventorize-room-list' %}" title="To room list">
-                <img src="{% static 'dist/inventory/img/dlcdb-inventory-logo.svg' %}" alt="DLCDB Inventory room list">
+                <img src="{% static 'inventory/dlcdb-inventory-logo.svg' %}" alt="DLCDB Inventory room list">
             </a>
 
             {% if current_inventory %}
@@ -96,10 +98,23 @@ SPDX-License-Identifier: EUPL-1.2
                       </a>
                       <div class="dropdown-divider"></div>
                       <span class="dropdown-item">
-                        <span class="custom-control custom-switch qr-toggle-swicht">
-                          <input type="checkbox" {% if request.session.qrscanner_enabled == 1 %} checked {% endif %} class="custom-control-input" id="qr-toggle">
-                          <label class="custom-control-label" for="qr-toggle" title="QR scanner">QR</label>
-                        </span>
+                        <div class="form-check form-switch">
+                          <input
+                            id="qr-toggle"
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            {% if request.session.qrscanner_enabled == 1 %} checked {% endif %}
+                          >
+                          <label
+                            class="form-check-label"
+                            for="qr-toggle"
+                            title="QR scanner"
+                          >
+                            QR
+                          </label>
+                        </div>
+                        
                       </span>
                     </div>
                   </li>

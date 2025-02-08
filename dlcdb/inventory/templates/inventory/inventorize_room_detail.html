@@ -8,7 +8,6 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block data_page %}inventorize-room-detail{% endblock data_page %}
 
-
 {% block body %}
 {% if current_inventory %}
 
@@ -141,6 +140,11 @@ SPDX-License-Identifier: EUPL-1.2
                         {% endif %}
                     </a>
                     </strong>
+                    {% if debug %}
+                        <div class="text-monospace">
+                            <code>{{ device.uuid }}</code>
+                        </div>
+                    {% endif %}
                 </td>
                 <td>
                     <span class="badge text-bg-info small">
@@ -220,50 +224,3 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% endif %}{# endif for current_inventory exists #}
 {% endblock body %}
-
-
-{% block extra_js %}
-
-{% include 'inventory/includes/inventorize-jsinit.html' %}
-
-<script type="module">
-    // // $('#id_uuids').attr('readonly', true);
-
-    // // $('#id_device').select2({
-    // //     theme: 'bootstrap4',
-    // // });
-
-    // document.getElementById('id_uuids').setAttribute('readonly', true);
-
-    // new TomSelect(document.getElementById('id_device'), {create:false});
-
-    // const devicesTable = document.querySelector("#devices-table tbody");
-    // const devicesTableSearchInput = document.querySelector("#search-table-input");
-
-    // function filterDeviceTable(){
-    //     const query = devicesTableSearchInput.value.toLowerCase();
-    //     const rows = devicesTable.rows;
-
-    //     for (const row of rows) {
-    //         let matchInRow = false;
-
-    //         for (const cell of row.cells) {
-    //             let cellContent = cell.textContent || cell.innerText;
-    //             cellContent = cellContent.toLowerCase();
-    //             if (cellContent.includes(query)) {
-    //                 matchInRow = true;
-    //             }
-    //         }
-
-    //         if (matchInRow) {
-    //             row.style.display = "table-row";
-    //         } else {
-    //             row.style.display = "none";
-    //         }
-    //     }
-    // }
-    // document.querySelector("#search-table-input").addEventListener("keyup", filterDeviceTable);
-
-    {% include 'inventory/includes/qrtoggle.js' %}
-</script>
-{% endblock extra_js %}
