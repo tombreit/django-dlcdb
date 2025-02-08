@@ -12,7 +12,7 @@ COPY ./package-lock.json ./package.json ./
 RUN npm install
 COPY ./frontend ./frontend
 RUN mkdir -p /stagenpm/dlcdb/static/dist
-RUN npm run prod
+RUN npm run build
 
 ######################################################################
 ### STAGE PYTHON

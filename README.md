@@ -30,7 +30,7 @@ To get started using the DLCDB, run the following in a virtual python environmen
 
 ```bash
 npm install
-npm run prod
+npm run build
 pip install -r requirements/dev.txt
 python manage.py migrate
 python manage.py createsuperuser

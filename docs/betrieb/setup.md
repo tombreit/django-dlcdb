@@ -69,7 +69,7 @@ cp env.template .env
 
 ```bash
 npm install
-npm run prod
+npm run build
 ```
 
 **Run this project**
