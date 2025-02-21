@@ -172,6 +172,7 @@ SPDX-License-Identifier: EUPL-1.2
                         type="button"
                         class="state-trigger btn btn-outline-secondary" 
                         id="state-btn-{{ device.uuid }}"
+                        data-already-inventorized="{{ device.already_inventorized }}"
                     >
                         <i class="
                             {% if device.already_inventorized %}

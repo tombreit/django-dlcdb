@@ -68,41 +68,44 @@ async function getRoomByUuid(uuid) {
 // }
 
 function btnClick() {
-  console.log('=== btnClick =========')
-  let this_btn = this
+  let inventorizeStateBtn = this
 
   // If the clicked element doesn't have the right selector, bail
-  if (!this_btn.classList.contains('state-trigger')) return
-  event.preventDefault()
+  if (!inventorizeStateBtn.classList.contains('state-trigger')) return
+  // event.preventDefault()
 
-  let this_btn_iconelem = this_btn.querySelector('.fas')
-  let uuid = this_btn.id.replace(STATE_BUTTON_PREFIX, '')
-  let row = this_btn.closest('.inventory_row')
-
-  console.log('this_btn.id: ' + uuid)
+  let inventorizeStateBtnIconElem = inventorizeStateBtn.querySelector('.fas')
+  let uuid = inventorizeStateBtn.id.replace(STATE_BUTTON_PREFIX, '')
+  let row = inventorizeStateBtn.closest('.inventory_row')
+  let deviceAlreadyInventorized = inventorizeStateBtn.dataset.alreadyInventorized
+  console.info(`device ${uuid}: ${deviceAlreadyInventorized}`)
 
   if (row.classList.contains(DEVICE_STATE_ADDED)) {
     row.classList.remove(DEVICE_STATE_ADDED, 'table-info')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    this_btn_iconelem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND_UNEXPECTED })
   }
   else if (row.classList.contains(DEVICE_STATE_UNKNOWN)) {
     row.classList.remove(DEVICE_STATE_UNKNOWN, 'table-default')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    this_btn_iconelem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
   }
   else if (row.classList.contains(DEVICE_STATE_FOUND)) {
     row.classList.remove(DEVICE_STATE_FOUND, 'table-success')
     row.classList.add(DEVICE_STATE_NOTFOUND, 'table-danger')
-    this_btn_iconelem.className = 'fas fa-times-circle'
+    inventorizeStateBtnIconElem.className = 'fas fa-times-circle'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_NOTFOUND })
   }
   else if (row.classList.contains(DEVICE_STATE_NOTFOUND)) {
+    if (deviceAlreadyInventorized === 'True') {
+      alert('This device is already inventorized. Changing the state to "unknown" does not remove the current iventorized status. Please contact your IT for any questions.')
+    }
+
     row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
     row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
-    this_btn_iconelem.className = 'fas fa-question-circle'
+    inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
   }
   else {
@@ -220,11 +223,11 @@ export async function handleDeviceScan(uuid) {
   if (matchedRow) {
     console.log('matchedRow: ', matchedRow)
     const row = matchedRow
-    const this_btn_iconelem = row.querySelector('.fas')
+    const inventorizeStateBtnIconElem = row.querySelector('.fas')
 
     row.classList.remove(DEVICE_STATE_UNKNOWN, 'table-default')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    this_btn_iconelem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
   }
   else {
