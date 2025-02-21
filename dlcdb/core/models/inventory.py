@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.inventory.utils import update_inventory_note
 
 from .room import Room
 from .device import Device
@@ -394,6 +395,27 @@ class Inventory(models.Model):
                 # a inventory stamp for the current inventory, the UI will still
                 # show this device as inventorized.
                 new_record.inventory = None
+
+                already_inventorized_records = device.get_current_inventory_records
+                if already_inventorized_records:
+                    # The device was already inventorized, but is now marked as "unknown".
+                    # This could happen if a user previously falsely marked a device as "inventorized"
+                    # and now wants to remove this inventory stamp.
+
+                    # Not using batch update mode here, as we need to be sure that
+                    # the models save() method is called.
+                    # already_inventorized_records.update(inventory=None)
+                    for _record in already_inventorized_records:
+                        _record.inventory = None
+                        _record.save()
+
+                    # ...and add an audit trail inventory note
+                    msg = f"Device marked as 'unknown state' during inventory by {user}. Removed existing inventory stamp."
+                    _inventory_note_obj = update_inventory_note(
+                        inventory=current_inventory,
+                        device=device,
+                        msg=msg,
+                    )
 
                 # As we copied a previous record, we need to do some
                 # cleanup in fields which doest not match the new

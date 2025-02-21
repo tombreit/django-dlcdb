@@ -100,13 +100,26 @@ function btnClick() {
   }
   else if (row.classList.contains(DEVICE_STATE_NOTFOUND)) {
     if (deviceAlreadyInventorized === 'True') {
-      alert('This device is already inventorized. Changing the state to "unknown" does not remove the current iventorized status. Please contact your IT for any questions.')
+      if (confirm('This device is already inventorized. Changing the state to "unknown" will remove the current inventorized status!')) {
+        row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
+        row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
+        inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
+        manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
+      }
+      else {
+        row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
+        row.classList.add(DEVICE_STATE_FOUND, 'table-success')
+        inventorizeStateBtnIconElem.className = 'fas fa-check-square'
+        // We are ignoring this state change
+        // manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
+      }
     }
-
-    row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
-    row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
-    inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
-    manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
+    else {
+      row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
+      row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
+      inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
+      manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
+    }
   }
   else {
     let msg = `[btnClick] This should never happen! Please get in touch with your IT. uuid: ${uuid}`

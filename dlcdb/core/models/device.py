@@ -234,7 +234,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return self.active_record.room
 
     @property
-    def get_current_inventory_record(self):
+    def get_current_inventory_records(self):
         """
         Try to get the latest record which has an inventory stamp attached.
         """
@@ -243,15 +243,17 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         try:
             current_inventory = Inventory.objects.get(is_active=True)
 
+            already_inventorized = self.record_set.order_by("pk").filter(
+                inventory=current_inventory,
+            )
+
             # Did not use qs.last() convenience method as I want to
             # catch an exception for no matching record found.
-            already_inventorized = (
-                self.record_set.order_by("-pk")
-                .filter(
-                    inventory=current_inventory,
-                )[:1]
-                .get()
-            )
+            # already_inventorized = already_inventorized[:1].get()
+
+            # We are more flexibble if returning the queryset with matched
+            # inventorized records.
+
         except Inventory.DoesNotExist:
             already_inventorized = None
         except Record.DoesNotExist:
@@ -260,19 +262,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             raise Exception(f"Exception: {e=}")
 
         return already_inventorized
-
-    # @property
-    # def get_is_already_inventorized(self):
-    #     from ..models import Inventory, Record
-    #     try:
-    #         current_inventory = Inventory.objects.get(is_active=True)
-    #         already_inventorized = self.record_set.filter(
-    #             Q(Q(record_type=Record.INROOM) | Q(record_type=Record.LENT)),
-    #             inventory=current_inventory,
-    #         ).exists()
-    #     except Inventory.DoesNotExist:
-    #         return False
-    #     return already_inventorized
 
     def get_timeline(self):
         """

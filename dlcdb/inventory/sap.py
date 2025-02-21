@@ -122,7 +122,7 @@ def compare_sap(sap_list_obj):
             if sap_id:
                 obj = Device.objects.get(sap_id=sap_id)
                 active_record = obj.active_record
-                inventorized_record = obj.get_current_inventory_record
+                inventorized_record = obj.get_current_inventory_records
 
                 if inventorized_record:
                     if inventorized_record.inventory.name != current_inventory.name:

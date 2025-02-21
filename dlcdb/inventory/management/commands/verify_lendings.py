@@ -13,7 +13,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.template.loader import get_template
 # from django.utils import timezone
 
-from dlcdb.core.models import Inventory, Person, Note
+from dlcdb.core.models import Inventory, Person
+from dlcdb.inventory.utils import update_inventory_note
 
 
 class Command(BaseCommand):
@@ -144,25 +145,20 @@ class Command(BaseCommand):
 
         return recipient
 
-    def update_inventory_note(self, devices, inventory):
+    def lender_update_inventory_note(self, devices, inventory):
         """
         If a lender get an email, remember this via an inventory note.
         """
-        print(f"{devices=}")
         lender_contacted_msg = (
             "Lender was contacted via email about the location of the device, so far without feedback."
         )
 
         for device in devices:
-            inventory_note_obj, inventory_note_obj_created = Note.objects.get_or_create(
+            _inventory_note = update_inventory_note(
                 inventory=inventory,
                 device=device,
+                msg=lender_contacted_msg,
             )
-            # Append lender contacted msg to inventory note:
-            inventory_note_obj.text = (
-                f"{inventory_note_obj.text}{'; ' if inventory_note_obj.text else ''}{lender_contacted_msg}"
-            )
-            inventory_note_obj.save()
 
     def handle(self, *args, **options):
         # Command line args
@@ -205,7 +201,7 @@ class Command(BaseCommand):
 
                 self.stdout.write("Add or update inventory notes...")
                 current_inventory = Inventory.objects.active_inventory()
-                self.update_inventory_note(mail_devices, current_inventory)
+                self.lender_update_inventory_note(mail_devices, current_inventory)
             else:
                 self.stdout.write("+++ No `--mail_addr` given, only report mailings +++")
                 self.stdout.write(f"Count lenders/emails: {self.get_lenders_qs(mail_devices).count()}")
