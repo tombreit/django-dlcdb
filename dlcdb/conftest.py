@@ -20,6 +20,7 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 
 import pytest
 
+from dlcdb.accounts.models import CustomUser
 from dlcdb.core.models import Device, Room, Inventory
 from dlcdb.tenants.models import Tenant
 
@@ -32,6 +33,11 @@ def tenant():
 @pytest.fixture
 def room():
     return Room.objects.create(number=88887676777, nickname="Bar")
+
+
+@pytest.fixture
+def user():
+    return CustomUser.objects.create(username="testuser")
 
 
 @pytest.fixture
@@ -77,3 +83,8 @@ def room_1(db) -> Room:
 @pytest.fixture
 def room_2(db) -> Room:
     return Room.objects.create(number="789")
+
+
+@pytest.fixture
+def external_room(db) -> Room:
+    return Room.objects.create(number="External", is_external=True)

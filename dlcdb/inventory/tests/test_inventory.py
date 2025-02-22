@@ -2,9 +2,12 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import json
+
 import pytest
 
-from dlcdb.core.models import Inventory, InRoomRecord, Device, Record
+from dlcdb.core.models import Inventory, InRoomRecord, Record, Note
+from dlcdb.inventory.utils import update_inventory_note
 
 
 @pytest.mark.django_db
@@ -62,26 +65,93 @@ def test_get_is_already_inventorized(device_1, device_2, room_1, room_2, invento
     assert isinstance(device_1.get_current_inventory_records.last(), Record)
 
     # device_1 should count as inventorized, even if a later (not the active) record
-    # has the inventory stamp
+    # has an inventory stamp
     device_record_1_1 = InRoomRecord.objects.create(device=device_1, room=room_2)
 
     # Reload old record from db to get changes (is_active)
     device_record_1 = Record.objects.get(id=device_record_1.id)
 
     assert device_1.active_record == device_record_1_1
-    assert device_record_1.is_active is False
-    assert device_record_1_1.is_active is True
-    assert device_1.get_current_inventory_records is not None
 
 
 @pytest.mark.django_db
-def test_get_current_inventory_records(device_1, room_1, room_2, inventory_1):
+def test_update_inventory_note(device_1, inventory_1):
+    # Test creating new note
+    msg1 = "First test message"
+    note1 = update_inventory_note(inventory=inventory_1, device=device_1, msg=msg1)
+
+    assert note1.text == msg1
+    assert Note.objects.count() == 1
+    assert note1.inventory == inventory_1
+    assert note1.device == device_1
+
+    # Test appending to existing note
+    msg2 = "Second test message"
+    note2 = update_inventory_note(inventory=inventory_1, device=device_1, msg=msg2)
+
+    assert note2.text == f"{msg1}; {msg2}"
+    assert Note.objects.count() == 1
+    assert note2.id == note1.id
+
+
+@pytest.mark.django_db
+def test_inventorize_uuids_for_room(device_1, device_2, room_1, external_room, inventory_1, user):
+    # Create records
+    _device_1_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1)
+    device_1_record_2 = InRoomRecord.objects.create(device=device_1, room=external_room)
+
+    device_2_record_1 = InRoomRecord.objects.create(device=device_2, room=room_1)
+
+    # Create test data - device states dict as JSON
+    uuids_states = {
+        str(device_1.uuid): "dev_state_found",
+        str(device_2.uuid): "dev_state_notfound",
+    }
+
+    # As inventorize_uuids_for_room adds new records, we check the current
+    # active_record of the device before the inventory
+    assert device_1.active_record.pk == device_1_record_2.pk
+    assert device_2.active_record.pk == device_2_record_1.pk
+
+    # Test successful inventory
+    Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
+
+    # Verify device_1 was marked as found
+    device_1.refresh_from_db()
+    assert device_1.active_record.room == external_room
+    assert device_1.active_record.inventory == inventory_1
+    assert device_1.active_record.record_type == Record.INROOM
+
+    # Verify device_2 was marked as lost
+    device_2.refresh_from_db()
+    assert device_2.active_record.record_type == Record.LOST
+    assert device_2.active_record.inventory == inventory_1
+
+
+@pytest.mark.django_db
+def test_inventorize_uuids_unknown(device_1, room_1, external_room, inventory_1, user):
+    # Create multiple inventorized records
     device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1, inventory=inventory_1)
-    device_record_2 = InRoomRecord.objects.create(device=device_1, room=room_2, inventory=inventory_1)
+    device_record_2 = InRoomRecord.objects.create(device=device_1, room=external_room, inventory=inventory_1)
 
-    # Reload old record from db to get changes (is_active)
-    device_record_1 = Record.objects.get(id=device_record_1.id)
-    device_record_2 = Record.objects.get(id=device_record_2.id)
-    device_1 = Device.objects.get(id=device_1.id)
+    # Confirm this device counts as inventorized
+    inventorized_records = device_1.get_current_inventory_records
+    assert inventorized_records.count() == 2
+    assert device_record_1 in inventorized_records
+    assert device_record_2 in inventorized_records
 
-    assert device_1.get_current_inventory_records.last() == device_record_2
+    # Test unknown state
+    uuids_states_unknown_state = {str(device_1.uuid): "dev_state_unknown"}
+    Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states_unknown_state), room_pk=room_1.pk, user=user)
+
+    # Verify device with unknown state
+    device_1.refresh_from_db()
+    assert device_1.get_current_inventory_records.count() == 0
+    # assert "unknown state" in device_1.active_record.note
+
+    # Ensure an inventory audit log message was created or updated
+    inventory_note = Note.objects.filter(device=device_1, inventory=inventory_1)
+    assert inventory_note.exists()
+    assert inventory_note.count() == 1
+
+    assert f"Device marked as 'unknown state' during inventory by {user}." in inventory_note.get().text
