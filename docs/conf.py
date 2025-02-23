@@ -125,5 +125,5 @@ myst_substitutions = {
 mermaid_version = ""
 
 
-myst_enable_extensions = ["colon_fence", "substitution"]
+myst_enable_extensions = ["colon_fence", "substitution", "attrs_inline", "html_image"]
 myst_heading_anchors = 6

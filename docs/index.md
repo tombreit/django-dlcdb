@@ -36,8 +36,6 @@ Verbesserungsvorschläge, Fehler gefunden, Kommentare?
 
 ::::
 
-
-
 `````{dropdown} Inhaltsverzeichnis
 :icon: book
 :color: light
@@ -51,3 +49,5 @@ faq
 ```
 
 `````
+
+![Admin dashboard](/_static/dashboard-admin.webp){.sd-card}

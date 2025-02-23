@@ -3,6 +3,16 @@
 - Lizenzverwaltung:  {{ licenses_fe_link }}
 - Hat eine Lizenz eine Notiz, wird ein Sprechblasenicon angezeigt. Klicken auf das Sprechblasenicon zeigt oder versteckt die Notiz.
 
+## Screenshots
+
+### Lizenzen Übersicht
+
+![Licenses dashboard](/_static/licenses-dashboard.webp)
+
+### Lizenz Detailseite
+
+![Licenses detail page](/_static/licenses-detail.webp)
+
 ## Bedienung
 
 (subscribers)=

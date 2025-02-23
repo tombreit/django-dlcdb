@@ -2,6 +2,15 @@
 
 Inventur-Ansicht: *Prozesse > Inventur*
 
+## Screenshots
+
+### Raum Übersicht
+
+![Inventorize rooms](/_static/inventorize-rooms.webp){w=400px}
+
+### Raum inventarisieren
+
+![Inventorize room](/_static/inventorize-room.webp){w=400px}
 
 ## Inventur Prozess
 
