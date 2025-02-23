@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
 
 
 class InventoryConfig(AppConfig):
@@ -13,7 +14,7 @@ class InventoryConfig(AppConfig):
         {
             "slot": "nav_main",
             "order": 5,
-            "label": "Inventarisieren",
+            "label": _("Inventorize"),
             "icon": "fa-solid fa-glasses",
             "url": "inventory:inventorize-room-list",
             "required_permission": "true",
@@ -22,7 +23,7 @@ class InventoryConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 40,
-            "label": "Inventarisieren",
+            "label": _("Inventorize"),
             "icon": "fa-solid fa-glasses",
             "url": "inventory:inventorize-room-list",
             "required_permission": "true",
@@ -30,7 +31,7 @@ class InventoryConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 50,
-            "label": "SAP Abgleich",
+            "label": _("SAP comparison"),
             "icon": "",
             "url": "admin:inventory_saplist_changelist",
             "required_permission": "true",

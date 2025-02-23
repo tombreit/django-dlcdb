@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 10:54+0100\n"
-"PO-Revision-Date: 2024-12-16 10:55+0100\n"
+"POT-Creation-Date: 2025-02-23 23:50+0100\n"
+"PO-Revision-Date: 2025-02-23 23:52+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -61,7 +61,7 @@ msgstr "Bulk Ausmusterung"
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:87
+#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:86
 #: dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -86,21 +86,13 @@ msgstr "Records"
 msgid "Removed records"
 msgstr "Entfernt-Records"
 
-#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:234
+#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:235
 msgid "Inventories"
 msgstr "Inventuren"
 
 #: dlcdb/core/apps.py:130
 msgid "Notes"
 msgstr "Notizen"
-
-#: dlcdb/core/context_processors.py:64
-msgid ""
-"{recordless_devices_count} Device{pluralize(recordless_devices_count)} "
-"without record!"
-msgstr ""
-"{recordless_devices_count} Device{pluralize(recordless_devices_count)} ohne "
-"Record!"
 
 #: dlcdb/core/context_processors.py:66
 msgid "Add proper record?"
@@ -126,76 +118,76 @@ msgstr "Bisher wurden keine Räume  eingegeben."
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
-#: dlcdb/core/models/device.py:49
+#: dlcdb/core/models/device.py:48
 msgid "IT ID"
 msgstr "IT ID"
 
-#: dlcdb/core/models/device.py:54
+#: dlcdb/core/models/device.py:53
 msgid "Inventory number must be entered as the main number-sub-number."
 msgstr "Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden."
 
-#: dlcdb/core/models/device.py:64
+#: dlcdb/core/models/device.py:63
 msgid "Inventory ID"
 msgstr "Inventarnummer"
 
-#: dlcdb/core/models/device.py:72
+#: dlcdb/core/models/device.py:71
 msgid "Serial number"
 msgstr "Seriennummer"
 
-#: dlcdb/core/models/device.py:78
+#: dlcdb/core/models/device.py:77
 msgid "Device type"
 msgstr "Geräteklasse"
 
-#: dlcdb/core/models/device.py:93
+#: dlcdb/core/models/device.py:92
 msgid "Model name"
 msgstr "Modellbezeichnung"
 
-#: dlcdb/core/models/device.py:95 dlcdb/core/models/supplier.py:27
-#: dlcdb/licenses/templates/licenses/filters.html:42
+#: dlcdb/core/models/device.py:94 dlcdb/core/models/supplier.py:27
 msgid "Supplier"
 msgstr "Distributor"
 
-#: dlcdb/core/models/device.py:99
+#: dlcdb/core/models/device.py:98
 msgid "Is license?"
 msgstr "Ist Lizenz?"
 
-#: dlcdb/core/models/device.py:101
+#: dlcdb/core/models/device.py:100
 msgid "Date of purchase"
 msgstr "Kaufdatum"
 
-#: dlcdb/core/models/device.py:102
+#: dlcdb/core/models/device.py:101
 msgid "Warranty expiry date"
 msgstr "Garantieablaufdatum"
 
-#: dlcdb/core/models/device.py:104
+#: dlcdb/core/models/device.py:103
 msgid "Start date of licence or maintenance contract"
 msgstr "Startdatum Lizenz- oder Wartungsvertrag"
 
-#: dlcdb/core/models/device.py:107
+#: dlcdb/core/models/device.py:106
 msgid "Expiry date licence or maintenance contract"
 msgstr "Ablaufdatum Lizenz- oder Wartungsvertrag"
 
-#: dlcdb/core/models/device.py:112
+#: dlcdb/core/models/device.py:111
 msgid "Contract termination date"
 msgstr "Kündigungsdatum Vertrag"
 
-#: dlcdb/core/models/device.py:113
+#: dlcdb/core/models/device.py:112
 msgid "Date of termination of the contract."
 msgstr "Datum der Vertragskündigung."
 
-#: dlcdb/core/models/device.py:115
+#: dlcdb/core/models/device.py:114
 msgid "Cost centre"
 msgstr "Kostenstelle"
 
-#: dlcdb/core/models/device.py:116
+#: dlcdb/core/models/device.py:115
 msgid "Book value"
 msgstr "Buchwert"
 
-#: dlcdb/core/models/device.py:120
+#: dlcdb/core/models/device.py:119
+#: dlcdb/licenses/templates/licenses/licenses_table.html:76
 msgid "Procurement note"
 msgstr "Beschaffungsnotiz"
 
-#: dlcdb/core/models/device.py:121
+#: dlcdb/core/models/device.py:120
 msgid ""
 "Information such as unique selling points, possible suppliers for "
 "comparative offers, etc."
@@ -203,54 +195,55 @@ msgstr ""
 "Informationen wie Alleinstellungsmerkmale, mögliche Lieferanten für "
 "Vergleichsangebote usw."
 
-#: dlcdb/core/models/device.py:124 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/core/models/device.py:123 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/licenses/templates/licenses/licenses_table.html:85
 msgid "Note"
 msgstr "Notiz"
 
-#: dlcdb/core/models/device.py:125
+#: dlcdb/core/models/device.py:124
 msgid "Main MAC address"
 msgstr "MAC-Adresse"
 
-#: dlcdb/core/models/device.py:126
+#: dlcdb/core/models/device.py:125
 msgid "Further MAC addresses"
 msgstr "Weiter MAC Adressen"
 
-#: dlcdb/core/models/device.py:127
+#: dlcdb/core/models/device.py:126
 msgid "Nickname / C-Name"
 msgstr "Nickname / C-Name"
 
-#: dlcdb/core/models/device.py:128
+#: dlcdb/core/models/device.py:127
 msgid "Legacy device"
 msgstr "Legacy Gerät"
 
-#: dlcdb/core/models/device.py:133
+#: dlcdb/core/models/device.py:132
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:135
+#: dlcdb/core/models/device.py:134
 msgid "Added via CSV import?"
 msgstr "Via CSV-Import angelegt?"
 
-#: dlcdb/core/models/device.py:152
+#: dlcdb/core/models/device.py:151
 msgid "Order number"
 msgstr "Bestellnummer"
 
-#: dlcdb/core/models/device.py:156
+#: dlcdb/core/models/device.py:155
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:157
+#: dlcdb/core/models/device.py:156
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:161
+#: dlcdb/core/models/device.py:160
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:162
+#: dlcdb/core/models/device.py:161
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
@@ -270,7 +263,8 @@ msgstr "Internal (CSV)"
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
 
-#: dlcdb/core/models/inventory.py:233 dlcdb/core/models/record.py:108
+#: dlcdb/core/models/inventory.py:234 dlcdb/core/models/inventory.py:238
+#: dlcdb/core/models/record.py:108
 msgid "Inventory"
 msgstr "Inventur"
 
@@ -282,42 +276,45 @@ msgstr "Name"
 msgid "Manufacturers"
 msgstr "Hersteller"
 
-#: dlcdb/core/models/prx_lentrecord.py:70
-#, python-brace-format
-msgid ""
-"The end date (lend_desired_end_date) cannot be after "
-"{settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!"
-msgstr ""
-"Das Verleihende (lend_desired_end_date) kann nicht nach "
-"{settings.MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
-
 #: dlcdb/core/models/prx_lentrecord.py:102
 msgid "Lendings"
 msgstr "Ausleihen"
 
-#: dlcdb/core/models/prx_licencerecord.py:98
+#: dlcdb/core/models/prx_licencerecord.py:115
 msgid "Ordered"
 msgstr "Bestellt"
 
-#: dlcdb/core/models/prx_licencerecord.py:99 dlcdb/core/models/record.py:72
+#: dlcdb/core/models/prx_licencerecord.py:116 dlcdb/core/models/record.py:72
 msgid "Active"
 msgstr "Aktiv"
 
-#: dlcdb/core/models/prx_licencerecord.py:100
+#: dlcdb/core/models/prx_licencerecord.py:117
 msgid "Expiring"
 msgstr "Läuft bald ab"
 
-#: dlcdb/core/models/prx_licencerecord.py:101
+#: dlcdb/core/models/prx_licencerecord.py:118
 msgid "Expired"
 msgstr "Abgelaufen"
 
-#: dlcdb/core/models/prx_licencerecord.py:102
+#: dlcdb/core/models/prx_licencerecord.py:119
 msgid "Terminated"
 msgstr "Gekündigt"
 
-#: dlcdb/core/models/prx_licencerecord.py:104
+#: dlcdb/core/models/prx_licencerecord.py:121
 msgid "Unknown"
 msgstr "Unbekannt"
+
+#: dlcdb/core/models/prx_licencerecord.py:132
+#: dlcdb/licenses/templates/licenses/licenses_table.html:29
+msgid "License"
+msgstr "Lizenz"
+
+#: dlcdb/core/models/prx_licencerecord.py:133 dlcdb/licenses/apps.py:17
+#: dlcdb/licenses/templates/licenses/form.html:5
+#: dlcdb/licenses/templates/licenses/index.html:5
+#: dlcdb/licenses/templates/licenses/index.html:12
+msgid "Licenses"
+msgstr "Lizenzen"
 
 #: dlcdb/core/models/prx_lostrecord.py:31
 msgid "Record of type 'Lost'"
@@ -479,15 +476,29 @@ msgstr "Ausleihen"
 msgid "Locate"
 msgstr "Lokalisieren"
 
+#: dlcdb/inventory/apps.py:17 dlcdb/inventory/apps.py:26
+msgid "Inventorize"
+msgstr "Inventarisieren"
+
+#: dlcdb/inventory/apps.py:34
+msgid "SAP comparison"
+msgstr "SAP-Abgleich"
+
 #: dlcdb/licenses/apps.py:11
 msgid "License Management"
 msgstr "Lizenzmanagement"
 
-#: dlcdb/licenses/apps.py:17 dlcdb/licenses/templates/licenses/form.html:5
-#: dlcdb/licenses/templates/licenses/index.html:5
-#: dlcdb/licenses/templates/licenses/index.html:11
-msgid "Licenses"
-msgstr "Lizenzen"
+#: dlcdb/licenses/filters.py:25
+msgid "License type..."
+msgstr "Lizenztyp..."
+
+#: dlcdb/licenses/filters.py:30
+msgid "Supplier..."
+msgstr "Distributor..."
+
+#: dlcdb/licenses/filters.py:46
+msgid "License state..."
+msgstr "Lizenzstatus..."
 
 #: dlcdb/licenses/forms.py:20
 msgid "Check this box if the contract has been terminated."
@@ -518,17 +529,17 @@ msgstr "Startdatum"
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
+#: dlcdb/licenses/models.py:16
+msgid "These subscribers will be added to all new licenses by default."
+msgstr ""
+
+#: dlcdb/licenses/models.py:23 dlcdb/licenses/models.py:24
+msgid "Licenses configuration"
+msgstr "Lizenzmodul Konfiguration"
+
 #: dlcdb/licenses/templates/licenses/filters.html:20
 msgid "Search licenses"
 msgstr "Lizenz suchen"
-
-#: dlcdb/licenses/templates/licenses/filters.html:30
-msgid "License type"
-msgstr "Lizenztyp"
-
-#: dlcdb/licenses/templates/licenses/filters.html:54
-msgid "State"
-msgstr "Status"
 
 #: dlcdb/licenses/templates/licenses/form_partial.html:18
 msgid "Admin view"
@@ -547,7 +558,7 @@ msgstr "Speichern"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: dlcdb/licenses/templates/licenses/index.html:28
+#: dlcdb/licenses/templates/licenses/includes/add_button.html:10
 msgid "Add license"
 msgstr "Neue Lizenz"
 
@@ -563,10 +574,6 @@ msgstr "Lizenzen"
 msgid "Show all?"
 msgstr "Zeige alle?"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:29
-msgid "License"
-msgstr "Lizenz"
-
 #: dlcdb/licenses/templates/licenses/licenses_table.html:32
 msgid "Start date"
 msgstr "Startdatum"
@@ -575,15 +582,28 @@ msgstr "Startdatum"
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
-#: dlcdb/licenses/views.py:90
+#: dlcdb/licenses/templates/licenses/licenses_table.html:91
+msgid "License type"
+msgstr "Lizenztyp"
+
+#: dlcdb/licenses/templates/licenses/licenses_table.html:130
+msgid "No licenses found."
+msgstr "Keine Lizenz gefunden."
+
+#: dlcdb/licenses/templates/licenses/playground.html:5
+#: dlcdb/licenses/templates/licenses/playground.html:11
+msgid "Playground"
+msgstr ""
+
+#: dlcdb/licenses/views.py:103
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
-#: dlcdb/licenses/views.py:149
+#: dlcdb/licenses/views.py:177
 msgid "New license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/views.py:231
+#: dlcdb/licenses/views.py:232
 msgid "License History"
 msgstr "Lizenz Historie"
 
@@ -680,6 +700,24 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:43
 msgid "None"
 msgstr "None"
+
+#~ msgid ""
+#~ "{recordless_devices_count} Device{pluralize(recordless_devices_count)} "
+#~ "without record!"
+#~ msgstr ""
+#~ "{recordless_devices_count} Device{pluralize(recordless_devices_count)} "
+#~ "ohne Record!"
+
+#, python-brace-format
+#~ msgid ""
+#~ "The end date (lend_desired_end_date) cannot be after "
+#~ "{settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!"
+#~ msgstr ""
+#~ "Das Verleihende (lend_desired_end_date) kann nicht nach "
+#~ "{settings.MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
+
+#~ msgid "State"
+#~ msgstr "Status"
 
 #~ msgid "Enter email addresses separated by comma."
 #~ msgstr "Eingabe mehrerer E-Mail-Adressen durch Komma getrennt."
