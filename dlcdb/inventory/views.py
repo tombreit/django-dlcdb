@@ -275,7 +275,7 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
     template_name = "inventory/room_qrcodes_detail.html"
 
     def get_context_data(self, **kwargs):
-        devices = Inventory.objects.devices_for_room(
+        devices = Inventory.objects.tenant_aware_device_objects_for_room(
             self.object.pk, tenant=self.request.tenant, is_superuser=self.request.user.is_superuser
         )
         context = super().get_context_data(**kwargs)
