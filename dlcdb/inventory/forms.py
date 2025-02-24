@@ -13,7 +13,7 @@ from dlcdb.core.models import Note
 class InventorizeRoomForm(forms.Form):
     uuids = forms.CharField(
         required=False,
-        label="Found UUIDs",
+        label="UUIDs state",
         widget=forms.TextInput(
             attrs={
                 "class": "form-control form-control-sm",

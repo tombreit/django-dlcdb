@@ -1,0 +1,15 @@
+<small
+    class="badge text-bg-warning"
+    title="Current record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago"
+>
+    {% if device.already_inventorized %}
+        <span >
+            {{ current_inventory.name }}
+        </span>
+        <br>
+    {% endif %}
+
+    <span>
+        {{ device.active_record.created_at|date:"Y-m-d" }}
+    </span>
+</small>

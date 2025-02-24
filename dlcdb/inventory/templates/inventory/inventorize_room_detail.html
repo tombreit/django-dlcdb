@@ -103,10 +103,10 @@ SPDX-License-Identifier: EUPL-1.2
     <table id="devices-table" class="table table-sm table-hover">
         <thead>
             <tr>
+                <th>State</th>
                 <th>Device</th>
                 <th>Description</th>
-                <th>State</th>
-                <th>Record</th>
+                <th class="d-none d-md-table-cell">Record</th>
                 <th>Note</th>
             </tr>
         </thead>
@@ -125,49 +125,7 @@ SPDX-License-Identifier: EUPL-1.2
                     {% endif %}
                 "
             >
-                <td>
-                    <strong>
-                    <a class="d-block rounded bg-light p-1" href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
-                        {% if device.edv_id %}
-                            <div class="">
-                                <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
-                            </div>
-                        {% endif %}
-                        {% if device.sap_id %}
-                            <div class="">
-                                <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
-                            </div>
-                        {% endif %}
-                    </a>
-                    </strong>
-                    {% if debug %}
-                        <div class="text-monospace">
-                            <code>{{ device.uuid }}</code>
-                        </div>
-                    {% endif %}
-                </td>
-                <td>
-                    <span class="badge text-bg-info small">
-                        {{ device.device_type.name }}
-                    </span>
-                    <br>
-                    <span class="badge text-bg-success small text-left text-wrap {# text-break #}">
-                        {% if device.active_record.is_type_lent %}
-                            {{ device.active_record.get_record_type_display }} an 
-                            <br>
-                            {{ device.active_record.person }}
-                        {% else %}
-                            {{ device.active_record.get_record_type_display }}
-                        {% endif %}
-                    </span>
-
-                    <br>
-                    {% if device.manufacturer or device.series %}
-                    {{ device.manufacturer|default:'' }} {{ device.series|default:'' }}
-                    <br>
-                    {% endif %}
-                </td>
-                <td>
+                <td class="pe-2">
                     <button 
                         type="button"
                         class="state-trigger btn btn-outline-secondary" 
@@ -184,20 +142,53 @@ SPDX-License-Identifier: EUPL-1.2
                     </button>
                 </td>
                 <td>
-                    <small>
-                        {% if device.already_inventorized %}
-                            <span class="badge text-bg-success">
-                                {{ current_inventory.name }}
-                            </span>
-                            <br>
+                    <strong>
+                    <a
+                        class="d-inline-block rounded bg-light p-1"
+                        href="{% url 'admin:core_device_change' device.pk %}"
+                        title="Device UUID: {{ device.uuid }}"
+                    >{# ?_popup=1 #}
+                        {% if device.edv_id %}
+                            <div class="">
+                                <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
+                            </div>
                         {% endif %}
+                        {% if device.sap_id %}
+                            <div class="">
+                                <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
+                            </div>
+                        {% endif %}
+                    </a>
+                    </strong>
+                    {% if device.manufacturer or device.series %}
+                    <p>
+                        {{ device.manufacturer|default:'' }} {{ device.series|default:'' }}
+                    </p>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge text-bg-info small d-inline-block my-1">
+                        {{ device.device_type.name }}
+                    </span>
+                    <br>
+                    <span class="d-inline-block my-1 badge text-bg-success small text-left text-wrap {# text-break #}">
+                        {% if device.active_record.is_type_lent %}
+                            {{ device.active_record.get_record_type_display }} an 
+                            <br>
+                            {{ device.active_record.person }}
+                        {% else %}
+                            {{ device.active_record.get_record_type_display }}
+                        {% endif %}
+                    </span>
 
-                        <span 
-                            title="Record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago"
-                        >
-                            {{ device.active_record.created_at|date:"Y-m-d" }}
-                        </span>
-                    </small>
+                    <span class="my-1d-block d-md-none">
+                        <br>
+                        {% include 'inventory/includes/record_info.html' %}
+                    </span>
+
+                </td>
+                <td class="d-none d-md-table-cell">
+                    {% include 'inventory/includes/record_info.html' %}
                 </td>
                 <td>
                     <div hx-trigger="objectListChanged from:body" hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}" hx-swap="innerHTML">
