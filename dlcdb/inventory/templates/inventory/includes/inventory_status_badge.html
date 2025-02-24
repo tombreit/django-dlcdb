@@ -10,9 +10,9 @@ SPDX-License-Identifier: EUPL-1.2
     </span>
 {% else %}
     <span class="btn btn-sm btn-{{ room.get_inventory_status.css_class }}">
-        {{ room.get_inventory_status.status_str }} 
         <span class="badge text-bg-light">
             {{ room.get_inventory_status.n_of_ns }}
         </span>
+        {{ room.get_inventory_status.status_str }}
     </span>
 {% endif %}
