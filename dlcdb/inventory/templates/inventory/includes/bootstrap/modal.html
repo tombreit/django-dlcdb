@@ -4,29 +4,48 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-<!-- Modal -->
-<div class="modal fade" id="{{ modal_id }}" tabindex="-1" role="dialog" aria-hidden="true" data-uuid>
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">
-              {{ modal_title }}
-          </h5>
-          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
+{# https://getbootstrap.com/docs/5.3/components/modal/ #}
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1" data-uuid>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5
+          class="modal-title"
+          id="exampleModalLabel"
+        >
+            {{ modal_title }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        >
+        </button>
+      </div>
+      <div class="modal-body">
+        <div>
           {{ modal_body }}
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-danger" id="{{ modal_proceed_id }}">
-              {{ modal_proceed_text }} 
-              <i class="fa-solid fa-door-open"></i>
-              <span id="modal-to-room-number"></span>
-          </button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn-swich-room btn btn-danger"
+          id="{{ modal_proceed_id }}"
+        >
+            {{ modal_proceed_text }} 
+            <i class="fa-solid fa-door-open"></i>
+            <span id="modal-to-room-number"></span>
+        </button>
       </div>
     </div>
   </div>
+</div>

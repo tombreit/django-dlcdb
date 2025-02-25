@@ -83,7 +83,7 @@ def get_js_vars(request):
     """
 
     js_vars = {
-        "qrcode-prefix": settings.QRCODE_PREFIX,
+        "qrCodePrefix": settings.QRCODE_PREFIX,
         "djangoDebug": settings.DEBUG,
         "apiBaseUrl": f"{request.scheme}://{request.get_host()}/api/v2",
         "apiToken": Token.objects.first().key,

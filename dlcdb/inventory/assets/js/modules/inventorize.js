@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
+import { Modal } from 'bootstrap'
+
 // Constants from backend
 const jsVars = JSON.parse(document.getElementById('js_vars').textContent)
 const djangoDebug = jsVars.djangoDebug
@@ -261,18 +263,23 @@ export async function handleRoomScan(uuid) {
   roomModalElem.dataset.uuid = uuid
   roomNumberElem.textContent = roomObj.number
 
-  document.getElementById('switch_room_modal').modal('show')
+  const modalEl = document.getElementById('switch_room_modal')
+  const modalObject = new Modal(modalEl)
 
-  document.querySelector('#switch_room_modal .modal-footer button')
-    .addEventListener('click', function (event) {
-      let clickedButton = event.target
-      // let parentModal = clickedButton.closest(".modal");
-      // let uuid = parentModal.dataset.uuid;
+  // Listen for the modal to be fully shown
+  modalEl.addEventListener('shown.bs.modal', function () {
+    const changeRoomButton = document.querySelector('.btn-swich-room')
+    if (changeRoomButton) {
+      changeRoomButton.addEventListener('click', function (event) {
+        const clickedButton = event.target
+        if (clickedButton.id === 'change_room') {
+          location = `room/${roomObj.pk}`
+        }
+      })
+    }
+  })
 
-      if (clickedButton.id === 'change_room') {
-        location = `room/${roomObj.pk}`
-      }
-    })
+  modalObject.show()
 }
 
 export function initInventorize() {
