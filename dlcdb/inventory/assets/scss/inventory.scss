@@ -19,9 +19,22 @@ $font-size-base:  0.75rem;
 @import "tom-select/dist/css/tom-select.bootstrap5.min";
 
 @import "_fontawesome";
-@import "_helpers";
-@import "_layout";
 
+
+html {
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+}
+
+
+.blink {
+    animation: blinker .25s step-start 10;
+}
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
 
 .tr-note td {
     border-top: 0;

@@ -29,9 +29,11 @@ class DeviceAddForm(forms.Form):
         device_choices = [("", "Add device")]
         device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in add_devices_qs]
         super().__init__(*args, **kwargs)
+
         self.fields["device"] = forms.ChoiceField(
             choices=device_choices,
-            widget=forms.Select(attrs={"class": "form-control"}),
+            # The BS5 .form-control class is applied via TomSelect
+            # widget=forms.Select(attrs={"class": "form-control"}),
         )
 
     room = forms.CharField(widget=forms.HiddenInput())
