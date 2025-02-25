@@ -25,39 +25,18 @@ const DEVICE_STATE_FOUND_UNEXPECTED = 'dev_state_found_unexpected'
 
 const uuids_states_map = new Map()
 
-async function getDeviceByUuid(uuid) {
-  // console.log("getDeviceByUuid")
+const getRowUuidSelector = uuid => `${ROW_UUID_PREFIX}${uuid}`
 
+
+async function getDeviceByUuid(uuid) {
   const apiDeviceQuery = `${apiBaseUrl}/devices/${uuid}/`
   const response = await fetch(apiDeviceQuery, { headers: { Authorization: `Token ${apiToken}` } })
   const deviceData = await response.json()
   return deviceData
-
-  // fetch(apiDeviceQuery, {
-  //     headers: {Authorization: `Token ${apiToken}`}
-  // })
-  // .then((response) => {
-  //     if (!response.ok) {
-  //         throw new Error(`Network response was not OK, got: ${response.status}`);
-  //     }
-  //     return response.json();
-  // })
-  // .then((data) => {
-  //     console.log("fetch(apiDeviceQuery): ", data);
-  //     addNewDeviceRow(data)
-  //     // We do not trigger dev_state_found automatically, user must push button manually
-  //     // manageUuid({uuid: uuid, state: DEVICE_STATE_ADDED});
-  // })
-  // .catch(function(error) {
-  //     alert("fetch error: " + error)
-  //     console.warn(error);
-  // })
 }
 
 async function getRoomByUuid(uuid) {
-  console.log('getRoomByUuid')
   const apiRoomQuery = `${apiBaseUrl}/rooms/${uuid}/`
-  // console.log("apiRoomQuery: ", apiRoomQuery)
   const response = await fetch(apiRoomQuery, { headers: { Authorization: `Token ${apiToken}` } })
   const roomData = await response.json()
   return roomData
@@ -131,18 +110,9 @@ function btnClick() {
 }
 
 function deviceRowTemplate(device) {
+  /* Keep the row html template in sync with the backend template! */
   return `
-        <tr id="${ROW_UUID_PREFIX}${device.uuid}" class="inventory_row ${DEVICE_STATE_UNKNOWN} table-info">
-            <td>
-                ${device.edv_id}
-                <br>
-                <span class="badge rounded-pill text-bg-warning small">
-                    ADDED
-                </span>
-            </td>
-            <td>
-                ${device.manufacturer}, ${device.series}
-            </td>
+        <tr id="${getRowUuidSelector(device.uuid)}" class="inventory_row ${DEVICE_STATE_UNKNOWN} table-info">
             <td>
                 <button 
                     type="button"
@@ -153,6 +123,23 @@ function deviceRowTemplate(device) {
                 </button>
             </td>
             <td>
+                ${device.edv_id}
+                <br>
+                <span class="badge rounded-pill text-bg-warning small">
+                    ADDED
+                </span>
+            </td>
+            <td>
+                ${device.manufacturer}, ${device.series}
+
+                  <span class="my-1d-block d-md-none">
+                    Current:
+                    <span class="badge rounded-pill text-bg-warning small">
+                        ${device.record_type} ${device.room ? device.room : ''}
+                    </span>
+                  </span>
+            </td>
+            <td class="d-none d-md-table-cell">
                 Current:
                 <span class="badge rounded-pill text-bg-warning small">
                     ${device.record_type} ${device.room ? device.room : ''}
@@ -166,7 +153,7 @@ function deviceRowTemplate(device) {
 }
 
 async function addNewDeviceRow(device) {
-  console.log('[addNewDeviceRow] for device: ', device)
+  console.info('[addNewDeviceRow] for device: ', device)
   // console.log(typeof device)
   // console.log(device.length)
   // console.info("device: ", device)
@@ -174,6 +161,11 @@ async function addNewDeviceRow(device) {
   // If no device is selected, do nothing
   if (device.length) {
     alert('Select device first...')
+    return
+  }
+
+  if (document.querySelector(`#${getRowUuidSelector(device.uuid)}`)) {
+    console.info('Device already exists in current room table...')
     return
   }
 
@@ -196,8 +188,8 @@ async function addNewDeviceRow(device) {
 }
 
 function manageUuid({ uuid, state }) {
-  console.log('uuidFormField: ' + uuidFormField.getAttribute('value'))
-  console.log('manageUuid: uuid: ' + uuid + ' state: ' + state)
+  console.info('uuidFormField: ' + uuidFormField.getAttribute('value'))
+  console.info('manageUuid: uuid: ' + uuid + ' state: ' + state)
 
   if ((state == DEVICE_STATE_FOUND) || (state == DEVICE_STATE_NOTFOUND) || (state == DEVICE_STATE_UNKNOWN)) {
     uuids_states_map.set(uuid, state)
@@ -218,7 +210,7 @@ const addDeviceButton = document.querySelector('#add-device-button')
 if (addDeviceButton) {
   addDeviceButton.addEventListener('click', function (event) {
     let selectedDeviceOption = document.getElementById('id_device').value
-    console.log('[addDeviceButton] adding device: ', selectedDeviceOption)
+    console.info('[addDeviceButton] adding device: ', selectedDeviceOption)
     handleDeviceScan(selectedDeviceOption)
     event.preventDefault()
   }, false)
@@ -232,11 +224,11 @@ export async function handleDeviceScan(uuid) {
 
   // const _myuuid = "e65b4119-2147-4ff7-9d8a-754995c62d9c"
   const rowID = `tr-uuid-${uuid}`
-  console.log('rowID: ', rowID)
+  console.info('rowID: ', rowID)
   const matchedRow = document.getElementById(rowID)
 
   if (matchedRow) {
-    console.log('matchedRow: ', matchedRow)
+    console.info('matchedRow: ', matchedRow)
     const row = matchedRow
     const inventorizeStateBtnIconElem = row.querySelector('.fas')
 

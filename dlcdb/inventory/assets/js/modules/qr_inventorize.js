@@ -37,24 +37,18 @@ class QrCode {
 }
 
 function getUnprefixedUuid(uuid) {
-  // console.log("getUnprefixedUuid")
   let re = new RegExp('^' + qrCodePrefix + '[RD]')
   let result = uuid.replace(re, '')
-  // console.log("getUnprefixedUuid: " + result)
   return result
 }
 
 function getInfix(qrstring) {
-  // console.log("getInfix")
   let len_prefix = qrCodePrefix.length
-  // console.log("len_prefix: " + len_prefix)
   let infix = qrstring.substring(len_prefix, len_prefix + 1)
-  // console.log("infix: ", infix)
   return infix
 }
 
 function setResult(label, result) {
-  console.log(result.data)
   label.textContent = result.data
   camQrResultTimestamp.textContent = new Date().toString()
   label.style.color = 'teal'
