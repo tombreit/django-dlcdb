@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -7,21 +7,19 @@ Importer für Device-Listen im CSV-Format
 """
 
 import csv
-import io
-from io import StringIO
-import codecs
-import magic
 import string
 import logging
+from io import StringIO
 from collections import namedtuple
 
 from datetime import datetime
 
 from django.db.transaction import atomic
-from django.db import IntegrityError, transaction
+from django.db import IntegrityError
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.apps import apps
+from django.contrib.auth import get_user_model
 
 from ..models import Device, Room, Record
 from .helpers import rollback_atomic
@@ -44,152 +42,76 @@ logger = logging.getLogger(__name__)
 TRUE_VALUES = ("yes", "ja", "true", "1")
 
 
-def validate_csv(csvfile, valid_col_headers=None, date_fields=None, bulk_mode=None):
-    """
-    Validate CSV file object.
-    """
-    print("[validate_csv] Processing CSV file:", csvfile)
-
-    # Error dict, gets updated with the errors found
-    error_list = []
-
-    ALLOWED_CONTENT_TYPES = [
-        "text/plain",
-        "text/csv",
-        "application/csv",
-    ]
-
-    # Validating file type
-    csvfile.seek(0, 0)
-    _content_type = magic.from_buffer(csvfile.read(), mime=True)
-    _file_suffix = csvfile.path.lower()
-
-    print(_content_type)
-
-    if (_content_type not in ALLOWED_CONTENT_TYPES) or (not _file_suffix.endswith("csv")):
-        raise ValidationError(
-            'Datei scheint keine CSV-Datei zu sein. Got: content_type: "{}", suffix: "{}"'.format(
-                _content_type,
-                _file_suffix,
-            )
-        )
-
-    csvfile.seek(0, 0)
-    decoded_file = csvfile.read().decode("utf-8")
-    io_string = io.StringIO(decoded_file)
-    # print(io_string.getvalue())
-
-    csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
-    rows = csv.DictReader(
-        io_string,
-        dialect="custom_dialect",
-    )
-
-    # Validating column headers
-    current_col_headers = set(rows.fieldnames)
-    expected_col_headers = set(valid_col_headers)
-
-    if not expected_col_headers.issubset(current_col_headers):
-        missing_col_headers = expected_col_headers.difference(current_col_headers)
-        error_list.append(
-            ValidationError(
-                'Erwartete Spaltenköpfe nicht in CSV-Datei gefunden [no subset]! Expected: "{}", got: "{}". Missing headers: "{}"'.format(
-                    expected_col_headers,
-                    current_col_headers,
-                    missing_col_headers,
-                )
-            )
-        )
-
-    for idx, row in enumerate(rows, start=1):
-        # Validating items without EDV_ID or SAP_ID
-        if (not row["EDV_ID"]) and (not row["SAP_ID"]):
-            error_list.append(ValidationError(f"Item in row {idx} without EDV_ID and SAP_ID! Row raw data: {row}"))
-
-        if bulk_mode == "import_devices":
-            # Validating clash with already existing Devices
-            if row["EDV_ID"].strip() and Device.objects.filter(edv_id=row["EDV_ID"]).exists():
-                error_list.append(ValidationError("Device with this EDV_ID already exists: {}".format(row["EDV_ID"])))
-
-            if row["SAP_ID"].strip() and Device.objects.filter(sap_id=row["SAP_ID"]).exists():
-                error_list.append(ValidationError("Device with this SAP_ID already exists: {}".format(row["SAP_ID"])))
-
-        if date_fields:
-            for key, value in row.items():
-                # Validating date format for DateFields
-                if key in date_fields:
-                    # print(key, value)
-                    if value != "":
-                        try:
-                            datetime.strptime(value, "%Y-%m-%d")
-                        except ValueError:
-                            error_list.append(
-                                ValidationError(
-                                    "Incorrect date format, should be YYYY-MM-DD: {}: {}".format(key, value)
-                                )
-                            )
-
-    if error_list:
-        raise ValidationError(error_list)
-
-
-def set_removed_record(fileobj):
+def set_removed_record(csvfile, username=None, write=False):
     """
     Mark a device as "removed".
     * Identify device given in CSV, via EDV_ID or SAP_ID or both
     * Search active record for given device
     * Create a new removed-record with attributes given in CSV
     """
-    print("[set_removed_record]...")
-    now = datetime.now()
 
-    messages = []
-    errors_count = 0
+    RemovedMessages = namedtuple(
+        "RemovedMessages",
+        [
+            "success_messages",
+            "removed_devices_count",
+            "error",
+        ],
+    )
+    success_messages = []
     removed_devices_count = 0
 
-    messages.append("[I] Starting set_removed_record...")
+    csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
 
-    with transaction.atomic():
-        csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
-        rows = csv.DictReader(
-            codecs.iterdecode(fileobj, "utf-8"),
-            dialect="custom_dialect",
-        )
+    # Read and decode the file content
+    try:
+        csvfile.seek(0)  # Reset file pointer to the beginning
+        decoded_content = csvfile.read().decode("utf-8")
+    except UnicodeDecodeError as e:
+        raise ValidationError(f"Error decoding CSV file: {e}")
 
+    # Use StringIO to create a text-based file-like object
+    csvfile_text = StringIO(decoded_content)
+
+    print(f"{csvfile_text=}")
+
+    rows = csv.DictReader(
+        csvfile_text,  # Pass the text-based file-like object
+        dialect="custom_dialect",
+    )
+
+    if write:
+        atomic_context = atomic()
+    else:
+        atomic_context = rollback_atomic()
+
+    with atomic_context:
         for idx, row in enumerate(rows, start=1):
-            # header row is not included in rows (it is in rows.fieldnames),
-            # so we do not need to exclude the header row manually
+            try:
+                user_model = get_user_model()
+                user = user_model.objects.get(username=username)
+            except user_model.DoesNotExist as user_does_not_exist_error:
+                raise user_model.DoesNotExist(
+                    f'[E][Row {idx}] User "{username}" not found! ({user_does_not_exist_error})'
+                )
 
-            EDV_ID = row["EDV_ID"].strip()
-            SAP_ID = row["SAP_ID"].strip()
+            EDV_ID = row.get("EDV_ID", "").strip()
+            SAP_ID = row.get("SAP_ID", "").strip()
 
-            _message = ""
-            device = None
+            if not (SAP_ID or EDV_ID):
+                raise Device.DoesNotExist(f"No device identifiers provided: empty SAP_ID and EDV_ID (row {idx})")
 
             try:
                 if SAP_ID and EDV_ID:
                     device = Device.objects.get(edv_id=EDV_ID, sap_id=SAP_ID)
-                elif EDV_ID and not SAP_ID:
+                elif EDV_ID:
                     device = Device.objects.get(edv_id=EDV_ID)
-                elif SAP_ID and not EDV_ID:
+                elif SAP_ID:
                     device = Device.objects.get(sap_id=SAP_ID)
             except Device.DoesNotExist as does_not_exist_error:
-                logger.error(does_not_exist_error)
+                raise Device.DoesNotExist(f"Device {SAP_ID=} or {EDV_ID=} does not exist. {does_not_exist_error}")
 
-            if not device:
-                messages.append(
-                    '[E][Row {}] Device not found: EDV_ID "{}", SAP_ID "{}"! Ignoring this device!'.format(
-                        idx, EDV_ID, SAP_ID
-                    )
-                )
-                errors_count += 1
-                continue
-
-            # Check for other errors which may occured in get_device()
-            if _message:
-                messages.append(_message)
-                errors_count += 1
-                continue
+            print(f"{device=}")
 
             # Check if the current record for this device is already a 'removed' record
             _already_removed_record = Record.objects.filter(
@@ -199,12 +121,9 @@ def set_removed_record(fileobj):
             ).first()
 
             if _already_removed_record:
-                messages.append(
-                    '[I][Row {}] Device already "removed": EDV_ID "{}", SAP_ID "{}", Record PK: "{}". Ignoring this device.'.format(
-                        idx, EDV_ID, SAP_ID, _already_removed_record.pk
-                    )
+                raise ValidationError(
+                    f'[Row {idx}] Device already "removed": {EDV_ID=}, {SAP_ID=}, Record PK: "{_already_removed_record.pk}".'
                 )
-                continue
 
             # Create new record for this device
             try:
@@ -212,30 +131,27 @@ def set_removed_record(fileobj):
                     device=device,
                     record_type=Record.REMOVED,
                     note=row["NOTE"],
-                    username=row["USERNAME"].strip() if row["USERNAME"] else "",
+                    username=username,
+                    user=user,
                     disposition_state=row["DISPOSITION_STATE"],
                     removed_info=row["REMOVED_INFO"],
-                    removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else now,
+                    removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else datetime.now(),
                 )
-                messages.append("[I][Row {}] Device {} - Record set to removed: {}.".format(idx, device, record.pk))
-                removed_devices_count += 1
+            except KeyError as key_error:
+                raise KeyError(f"KeyError {key_error} for {device}")
             except Exception as ex:
-                messages.append(
-                    '[I][Row {}] "Something bad happend:-(. Please contact your administrator. Exception: "{}"'.format(
-                        idx, ex
-                    )
-                )
-                raise
+                raise Exception(f"Error creating record for {device}: {ex}")
+            else:
+                removed_devices_count += 1
+                success_messages.append(f"Device {device} removed. New REMOVED record: {record.pk}.")
 
-    messages.extend(
-        [
-            "-------------------------------------------",
-            "Errors: {}".format(errors_count),
-            "Removed devices: {}".format(removed_devices_count),
-            "-------------------------------------------",
-        ]
-    )
-    return "\n".join(messages)
+            result = RemovedMessages(
+                success_messages,
+                f"Removed devices: {removed_devices_count}",
+                error=False,
+            )
+
+    return result
 
 
 def validate_column_headers(*, current_col_headers, expected_col_headers):
@@ -497,7 +413,7 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
     except ValueError as value_error:
         raise ValueError(f"ValueError {value_error} for {device_repr}")
     except Exception as base_exception:
-        raise IntegrityError(f"Exception {base_exception} for {device_repr}")
+        raise Exception(f"Exception {base_exception}") from base_exception
 
     return device_objs
 
@@ -532,9 +448,19 @@ def import_data(
 
     with atomic_context:
         csv.register_dialect("custom_dialect", skipinitialspace=True, delimiter=",")
+
+        # Read and decode the file content
+        try:
+            csvfile.seek(0)  # Reset file pointer to the beginning
+            decoded_content = csvfile.read().decode("utf-8")
+        except UnicodeDecodeError as e:
+            raise ValidationError(f"Error decoding CSV file: {e}")
+
+        # Use StringIO to create a text-based file-like object
+        csvfile_text = StringIO(decoded_content)
+
         rows = csv.DictReader(
-            # codecs.iterdecode(csvfile, 'utf-8'),
-            csvfile,
+            csvfile_text,  # Pass the text-based file-like object
             dialect="custom_dialect",
         )
 
