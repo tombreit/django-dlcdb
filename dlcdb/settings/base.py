@@ -66,6 +66,7 @@ LOCAL_APPS = [
     "dlcdb.inventory",
     "dlcdb.licenses",
     "dlcdb.reporting",
+    "dlcdb.notifications",
     "dlcdb.lending",
     "dlcdb.smallstuff",
     "dlcdb.api",
@@ -315,6 +316,7 @@ HUEY = SqliteHuey(
 
 if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
+    SHELL_PLUS = "ipython"
 
 # WhiteNoise
 WHITENOISE_INDEX_FILE = True

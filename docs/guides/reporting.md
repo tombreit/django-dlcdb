@@ -4,13 +4,14 @@
 
 User Mary:
 
-- Mary (*Subscriber*) möchte informiert (*Notification*) werden, wenn ein Gerät seinen Standort ändert (*NotificationEvent*)
+- Mary (*Subscriber*) möchte informiert (*Subscription*) werden, wenn ein Gerät seinen Standort ändert (*Event*) durch eine Nachricht (*Message*).
 - Mary möchte jeden ersten des Monats über alle Standortveränderungen informiert werden. Sie bekommt einen *Report*
 - Mary möchte informiert werden, wenn ein Gerät ausgemustert wird.
-- Mary möchte informiert werden, wenn eine Lizenz bald abläuft
+- Mary möchte informiert werden, wenn eine Lizenz bald abläuft.
   - Mary möchte aber nur einmal über dieses Ereignis informiert werden.
 - Mary kann Benachrichtigungen für solche Ereignisse abonnieren.
 - Mary could have multiple *Subscriptions*
+- Mary kann ihre *Subscriptions* einsehen und verwalten.
 
 System:
 
@@ -21,15 +22,13 @@ System:
 
 Die DLCDB kann über bestimmte Bestandsveränderungen Email-Benachrichtigungen verschicken.
 
-Es existieren zwei Modi:
-
-- "Abo-Modell interne Adressaten": User können sich für bestimmte Zeitintervalle zu bestimmten Ereignissen bei bestimmten Bedingungen Emails schicken lassen.
+- "Intervall-basiert/Abo-Modell": User können sich für bestimmte Zeitintervalle zu bestimmten Ereignissen bei bestimmten Bedingungen Emails schicken lassen.
 
   *Beispiel:*
 
-  Die Verwaltung (*Empfänger* oder *Abonnent*) will jeden Monat (*Zeitintervall*) über deinventarisierte (*Ereignis*) Devices mit einer SAP-Nummer (*Bedingung*) informiert werden.
+  Die Verwaltung (*Subscriber*) will jeden Monat (*Zeitintervall*) über deinventarisierte (*Event*) Devices mit einer SAP-Nummer (*Condition*) informiert werden.
 
-- "Benachrichtigung externer Adressaten": Personen (`class Person`) können automatisiert und zeitgesteuert (cron-like) via Email benachrichtigt werden; z.B. über überfällige Ausleihen.
+- "Trigger-basiert": Personen (`class Person`) können automatisiert via Email benachrichtigt bei Eintreten von bestimmten Bedingungen benachrichtigt werden; z.B. über überfällige Ausleihen.
 
 ## Implementation
 

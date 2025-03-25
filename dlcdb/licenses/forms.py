@@ -94,22 +94,24 @@ class LicenseForm(forms.ModelForm):
             raise ValidationError(_("At least one field must be filled."))
 
     def save(self, commit=True):
-        instance = super().save(commit=False)
+        device = super().save(commit=False)
 
         # The database field is a DateTimeField, so we cast the BoolenField to
         # a DateTimeField.
         if self.cleaned_data.get("contract_termination"):
-            instance.contract_termination_date = timezone.now()
+            device.contract_termination_date = timezone.now()
         else:
-            instance.contract_termination_date = None
+            device.contract_termination_date = None
 
-        instance.save()
+        device.save()
         self.save_m2m()
 
-        subscribers = self.cleaned_data.get("subscribers")
-        manage_subscribers(instance, subscribers)
+        print(f"licence form: {device=}, class={type(device)}")
 
-        return instance
+        subscribers = self.cleaned_data.get("subscribers")
+        manage_subscribers(device, subscribers)
+
+        return device
 
     class Meta:
         model = Device

@@ -18,6 +18,7 @@ from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
 from .models import LicensesConfiguration
+import traceback
 
 
 @login_required
@@ -150,7 +151,8 @@ def new(request):
             except IntegrityError as e:
                 errors.append(f"Database error: Could not save the license. Please try again. Error: {e}")
             except Exception as e:
-                errors.append(f"An error occurred while saving: {e}")
+                stacktrace = traceback.format_exc()
+                errors.append(f"An error occurred while saving: {e}\n{stacktrace}")
 
             if errors:
                 for error in errors:

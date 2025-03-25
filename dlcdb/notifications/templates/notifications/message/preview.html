@@ -1,0 +1,80 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .email-preview {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  .email-subject {
+    padding: 10px;
+    background-color: #e9e9e9;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+  .email-body {
+    white-space: pre-wrap;
+    font-family: monospace;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  .meta-info {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #eef8ff;
+    border-radius: 5px;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> &rsaquo;
+  <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst }}</a> &rsaquo;
+  <a href="{% url 'admin:notifications_message_changelist' %}">Messages</a> &rsaquo;
+  <a href="{% url 'admin:notifications_message_change' object_id=message.pk %}">Message {{ message.pk }}</a> &rsaquo;
+  {% trans 'Preview' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>Message Preview</h1>
+
+<div class="meta-info">
+  <strong>ID:</strong> {{ message.pk }}<br>
+  <strong>Status:</strong> {{ message.get_status_display }}<br>
+  {% if message.sent_at %}
+  <strong>Sent at:</strong> {{ message.sent_at }}<br>
+  {% endif %}
+  <strong>Created:</strong> {{ message.created_at }}<br>
+  <strong>Subscription:</strong> {{ message.subscription }}<br>
+  <strong>Event:</strong> {{ message.subscription.get_event_display }}<br>
+  <strong>Subscriber:</strong> {{ message.subscription.subscriber.email }}<br>
+</div>
+
+<div class="email-preview">
+  <div class="email-subject">
+    Subject: {{ subject }}
+  </div>
+  <pre>{{ body }}</pre>
+</div>
+
+<div class="submit-row">
+  <a href="{% url 'admin:notifications_message_change' object_id=message.pk %}" class="button">Back to Message</a>
+  {% if message.status == 'pending' or message.status == 'failed' %}
+  <form method="post" action="{% url 'admin:notifications_message_change' object_id=message.pk %}">
+    {% csrf_token %}
+    <input type="hidden" name="_send_now" value="1">
+    <input type="submit" value="Send Now" class="default">
+  </form>
+  {% endif %}
+</div>
+
+{% endblock %}

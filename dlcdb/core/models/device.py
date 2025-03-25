@@ -175,12 +175,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return str(self.uuid)
 
     def __str__(self):
-        identifier = "n/a"
-        if self.edv_id:
-            identifier = self.edv_id
-        elif self.sap_id:
-            identifier = self.sap_id
-        return str(identifier)
+        return self.edv_id or self.sap_id or str(self.uuid)
 
     def save(self, *args, **kwargs):
         if not self.qrcode:
@@ -358,3 +353,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def get_record_action_snippet_for_inventory_views(self):
         return self.get_record_action_snippet(for_view="inventory")
+
+    def get_human_readable_str(self):
+        humand_readable_str = str(self.uuid)
+
+        if self.manufacturer or self.series or self.device_type:
+            humand_readable_str = f"{self.manufacturer or ''} {self.series or ''} {self.device_type or ''}"
+
+        return humand_readable_str.strip()

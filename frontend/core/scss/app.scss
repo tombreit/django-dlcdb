@@ -50,9 +50,9 @@ body.logout #branding {
 }
 
 // Ensure BS dropdowns are not cut off:
-body #changelist-form .results {
-    overflow-x: visible;
-}
+// body #changelist-form .results {
+//     overflow-x: visible;
+// }
 
 #content h1 {
     @extend .h3;

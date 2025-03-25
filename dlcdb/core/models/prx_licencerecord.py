@@ -47,7 +47,7 @@ class BaseLicenceRecordManager(models.Manager):
             FROM (
                 SELECT DISTINCT p.email as distinct_email
                 FROM core_person p
-                INNER JOIN reporting_subscription s ON s.subscriber_id = p.id
+                INNER JOIN notifications_subscription s ON s.subscriber_id = p.id
                 WHERE s.device_id = core_device.id
                 AND p.email IS NOT NULL
                 ORDER BY p.email

@@ -1,0 +1,8 @@
+Event:      {{ subscription.event}}
+
+License:    {{ device.manufacturer|default:"" }}{% if device.manufacturer and device.series %} / {% endif %}{{ device.series|default:"" }}
+License ID: {{ device }}
+URL:        {{ license_url }}
+
+Contract started at: {{ device.contract_start_date|date:"Y-m-d" }}
+Contract expires at: {{ device.contract_expiration_date|date:"Y-m-d" }}

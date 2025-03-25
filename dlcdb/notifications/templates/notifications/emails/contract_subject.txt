@@ -1,0 +1,1 @@
+{{ subject_prefix }}License: {{ device.get_human_readable_str }} → Event: {{ subscription.event}}
