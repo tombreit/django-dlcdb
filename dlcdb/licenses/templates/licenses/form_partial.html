@@ -28,6 +28,15 @@
             {% translate 'Show history' %}
         </a>
         {% endif %}
+        {% if calendar_url %}
+        <a
+            href="{{ calendar_url }}"
+            class="btn text-bg-secondary btn-sm"
+        >
+            <i class="bi bi-calendar-plus"></i> 
+            iCal
+        </a>
+        {% endif %}
     </div>
 </div>
 

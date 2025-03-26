@@ -94,6 +94,11 @@ def edit(request, license_id):
             instance=license,
         )
 
+    # Determine if calendar URL should be shown (check for relevant dates)
+    calendar_url = False
+    if license.contract_start_date or license.contract_expiration_date:
+        calendar_url = reverse("licenses:license_calendar", args=[license.uuid])
+
     return TemplateResponse(
         request,
         template,
@@ -103,6 +108,7 @@ def edit(request, license_id):
             "template": template,
             "title": _("Edit license"),
             "obj_admin_url": reverse("admin:core_device_change", args=[license.id]),
+            "calendar_url": calendar_url,
         },
     )
 

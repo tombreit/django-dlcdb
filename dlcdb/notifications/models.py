@@ -2,8 +2,6 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.urls import reverse
-from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 
 from simple_history.models import HistoricalRecords
@@ -217,13 +215,6 @@ class Message(models.Model):
             "device": subscription.device,
             "subject_prefix": settings.EMAIL_SUBJECT_PREFIX if hasattr(settings, "EMAIL_SUBJECT_PREFIX") else "",
         }
-
-        # Add event-specific data to context
-        if subscription.event in subscription.LICENSE_EVENTS and subscription.device:
-            # For license events, include contract details
-            domain = Site.objects.get_current().domain
-            url_path = reverse("licenses:edit", args=[subscription.device.id])
-            context["license_url"] = f"https://{domain}{url_path}"
 
         # Render the templates
         self.subject = render_to_string(template_data["subject"], context).strip()

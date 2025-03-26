@@ -20,6 +20,8 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 
 import pytest
 
+from django.contrib.sites.models import Site
+
 from dlcdb.accounts.models import CustomUser
 from dlcdb.core.models import Device, Room, Inventory
 from dlcdb.tenants.models import Tenant
@@ -88,3 +90,32 @@ def room_2(db) -> Room:
 @pytest.fixture
 def external_room(db) -> Room:
     return Room.objects.create(number="External", is_external=True)
+
+
+@pytest.fixture
+def test_site(db):
+    """Create a test site for URL testing"""
+    # Keep a reference to the original site
+    original_site = None
+    if Site.objects.exists():
+        try:
+            original_site = Site.objects.get_current()
+        except Site.DoesNotExist:
+            pass
+
+    # Create our test site
+    test_site = Site.objects.create(domain="dlcdb.test", name="DLCDB Test Site")
+
+    # Set the SITE_ID
+    from django.conf import settings
+
+    settings.SITE_ID = test_site.id
+
+    yield test_site
+
+    # Clean up: restore original site if it existed
+    if original_site:
+        settings.SITE_ID = original_site.id
+    else:
+        # Delete our test site to leave a clean state
+        test_site.delete()

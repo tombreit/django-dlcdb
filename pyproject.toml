@@ -36,6 +36,7 @@ dependencies = [
     "segno",
     "djangorestframework",
     "django-filter",
+    "icalendar",
     "Sphinx",
     "sphinx-book-theme",
     "sphinxcontrib-mermaid==0.9.2",

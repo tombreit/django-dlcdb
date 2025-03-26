@@ -10,6 +10,8 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.urls import reverse
+from django.contrib.sites.models import Site
 
 from simple_history.models import HistoricalRecords
 
@@ -361,3 +363,14 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             humand_readable_str = f"{self.manufacturer or ''} {self.series or ''} {self.device_type or ''}"
 
         return humand_readable_str.strip()
+
+    def get_absolute_url(self):
+        if self.is_licence:
+            absolute_url = reverse("licenses:edit", kwargs={"license_id": self.pk})
+        else:
+            absolute_url = reverse("admin:core_device_change", kwargs={"object_id": self.pk})
+
+        return absolute_url
+
+    def get_fqdn_url(self):
+        return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
