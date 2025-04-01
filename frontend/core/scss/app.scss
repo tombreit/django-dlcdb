@@ -54,6 +54,10 @@ body.logout #branding {
 //     overflow-x: visible;
 // }
 
+body.model-device #changelist-form .results {
+    padding-bottom: 5rem;
+}
+
 #content h1 {
     @extend .h3;
 }
