@@ -246,6 +246,19 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             .select_related("active_record", "active_record__room", "device_type", "manufacturer")
         )
 
+    def get_view_on_site_url(self, obj=None):
+        """
+        Returns the URL to view this object on the site.
+        This is used by the "View on site" link in the admin.
+        If the objects get_absolute_url() method does not return a URL,
+        the view_on_site link will not be shown.
+        """
+        if obj is None or not self.view_on_site:
+            return None
+
+        if hasattr(obj, "get_absolute_url"):
+            return obj.get_absolute_url()
+
     def change_view(self, request, object_id, form_url="", extra_context=None):
         """
         Add add_links to the context in order to show a dropdown to create the records

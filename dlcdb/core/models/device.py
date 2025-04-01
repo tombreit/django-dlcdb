@@ -367,10 +367,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     def get_absolute_url(self):
         if self.is_licence:
             absolute_url = reverse("licenses:edit", kwargs={"license_id": self.pk})
-        else:
-            absolute_url = reverse("admin:core_device_change", kwargs={"object_id": self.pk})
-
-        return absolute_url
+            return absolute_url
 
     def get_fqdn_url(self):
         return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
