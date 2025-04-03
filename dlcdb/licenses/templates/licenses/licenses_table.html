@@ -88,17 +88,23 @@
           </div>
         {% endif %}
         <div>
+
+          {% if license.device.device_type %}
           <span class="badge text-bg-secondary" title="{% translate 'License type' %}">
-            {{ license.device.device_type|default:"n/a" }}
+            {{ license.device.device_type }}
           </span>
+          {% endif %}
+
+          {% if license.device.order_number %}
+          <small class="text-muted">
+            Order: {{ license.device.order_number }}
+          </small>
+          {% endif %}
+
         </div>
       </td>
       <td>
         {{ license.device.contract_start_date | default:"n/a" }}
-        <br>
-        <small class="text-muted">
-          Order: {{ license.order_number|default:"n/a" }}
-        </small>
       </td>
       <td>
         {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
