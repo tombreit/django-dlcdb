@@ -142,7 +142,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             self.create_tile(model_name="core.lentrecord", url="admin:core_lentrecord_changelist"),
             self.create_tile(model_name="core.room", url="admin:core_room_changelist"),
             self.create_tile(model_name="core.devicetype", url="admin:core_devicetype_changelist"),
-            self.create_tile(model_name="core.licencerecord", url="admin:core_licencerecord_changelist"),
+            self.create_tile(model_name="core.licencerecord", url="licenses:index"),
             self.create_tile(model_name="smallstuff.assignedthing", url="smallstuff:person_search"),
             self.create_tile(
                 model_name="core.lostrecord",
