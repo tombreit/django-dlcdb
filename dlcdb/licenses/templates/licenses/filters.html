@@ -1,13 +1,13 @@
 {% load i18n %}
 
-<div class="search flex-grow-1 me-4">
+<div class="search">
   <form
     hx-get="{% url 'licenses:index' %}"
     hx-target="#licenses-list"
     hx-push-url="true"
     hx-trigger="keyup changed delay:250ms, search, change"
     >
-    <div class="input-group mb-3">
+    <div class="input-group flex-wrap mb-3">
 
       <span class="input-group-text">
         <i class="bi bi-search"></i>
