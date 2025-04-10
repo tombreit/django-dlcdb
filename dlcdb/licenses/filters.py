@@ -16,6 +16,7 @@ class LicenceRecordFilter(django_filters.FilterSet):
             Q(device__manufacturer__name__icontains=value)
             | Q(device__series__icontains=value)
             | Q(device__sap_id__icontains=value)
+            | Q(device__supplier__name__icontains=value)
         )
 
     _license_type_prefixes = ["Lizenz::", "License::", "Licence::"]
