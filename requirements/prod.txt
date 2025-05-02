@@ -16,9 +16,9 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via pydata-sphinx-theme
-certifi==2025.1.31
+certifi==2025.4.26
     # via requests
 charset-normalizer==3.4.1
     # via requests
@@ -37,7 +37,7 @@ django==5.2
     #   djangorestframework
 django-appconf==1.1.0
     # via django-select2
-django-crispy-forms==2.3
+django-crispy-forms==2.4
     # via
     #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
@@ -72,7 +72,7 @@ jinja2==3.1.6
     # via
     #   myst-parser
     #   sphinx
-markdown==3.7
+markdown==3.8
     # via django-dlcdb (pyproject.toml)
 markdown-it-py==3.0.0
     # via
@@ -88,11 +88,11 @@ myst-parser==4.0.1
     # via django-dlcdb (pyproject.toml)
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
-packaging==24.2
+packaging==25.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-pillow==11.1.0
+pillow==11.2.1
     # via django-dlcdb (pyproject.toml)
 pydata-sphinx-theme==0.15.4
     # via sphinx-book-theme
@@ -117,7 +117,7 @@ six==1.17.0
     # via python-dateutil
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.6
+soupsieve==2.7
     # via beautifulsoup4
 sphinx==8.2.3
     # via
@@ -146,13 +146,13 @@ sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
 sqlparse==0.5.3
     # via django
-typing-extensions==4.13.1
+typing-extensions==4.13.2
     # via
     #   beautifulsoup4
     #   pydata-sphinx-theme
 tzdata==2025.2
     # via icalendar
-urllib3==2.3.0
+urllib3==2.4.0
     # via requests
 whitenoise==6.9.0
     # via django-dlcdb (pyproject.toml)
