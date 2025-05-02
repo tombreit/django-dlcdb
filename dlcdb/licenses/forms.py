@@ -60,8 +60,9 @@ class LicenseForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             Row(
-                Column("sap_id", css_class="col-md-4"),
-                Column("subscribers", css_class="col-md-8"),
+                Column("sap_id", css_class="col-md-3"),
+                Column("subscribers", css_class="col-md-5"),
+                Column("contact_person_internal", css_class="col-md-4"),
             ),
             Div(HTML("<hr>")),
             Row(
@@ -128,6 +129,7 @@ class LicenseForm(forms.ModelForm):
             "note",
             "device_type",
             "contract_termination",
+            "contact_person_internal",
         ]
         labels = {
             "subscribers": _("Subscribers"),
@@ -143,4 +145,9 @@ class LicenseForm(forms.ModelForm):
             "contract_start_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
+            "contact_person_internal": forms.Select(
+                attrs={
+                    "class": "is-tom-select",
+                }
+            ),
         }

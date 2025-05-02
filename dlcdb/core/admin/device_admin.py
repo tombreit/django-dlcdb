@@ -72,6 +72,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "manufacturer",
         "device_type",
         "supplier",
+        "contact_person_internal",
     ]
 
     list_display = [
@@ -131,6 +132,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     ("purchase_date", "warranty_expiration_date"),
                     ("contract_start_date", "contract_expiration_date", "contract_termination_date"),
                     "procurement_note",
+                    "contact_person_internal",
                 ),
             },
         ),

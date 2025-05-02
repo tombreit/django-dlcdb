@@ -122,6 +122,15 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         help_text=_("Information such as unique selling points, possible suppliers for comparative offers, etc."),
     )
 
+    contact_person_internal = models.ForeignKey(
+        "core.Person",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="device_contact_internal",
+        verbose_name=_("Contact (internal)"),
+    )
+
     note = models.TextField(null=True, blank=True, verbose_name=_("Note"))
     mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Main MAC address"))
     extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name=_("Further MAC addresses"))
