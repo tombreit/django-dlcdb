@@ -12,7 +12,7 @@ def manage_subscribers(device, subscribers):
     """
     TODO: subscriber management should be done int the Subscription model
     """
-    print(f"MANAGE_SUBSCRIBERS {device=}, class={type(device)}, {subscribers=}")
+    # print(f"MANAGE_SUBSCRIBERS {device=}, class={type(device)}, {subscribers=}")
 
     if subscribers is None:
         return
@@ -32,7 +32,7 @@ def manage_subscribers(device, subscribers):
     subscribers_added = new_subscribers_ids - previous_subscribers_ids
 
     if subscribers_removed:
-        print(f"MANAGE_SUBSCRIBERS Deleting {subscribers_removed=}")
+        # print(f"MANAGE_SUBSCRIBERS Deleting {subscribers_removed=}")
         _subscribers_removed = []
         for subscriber_id in subscribers_removed:
             person = Person.objects.get(id=subscriber_id)
@@ -43,7 +43,7 @@ def manage_subscribers(device, subscribers):
         change_reasons.append(f"Removed subscribers: {', '.join(_subscribers_removed)}")
 
     if subscribers_added:
-        print(f"MANAGE_SUBSCRIBERS Adding {subscribers_added=}")
+        # print(f"MANAGE_SUBSCRIBERS Adding {subscribers_added=}")
         _subscribers_added = []
 
         # Create scheduled_times dict based on license data
@@ -66,7 +66,7 @@ def manage_subscribers(device, subscribers):
 
         for subscriber_id in subscribers_added:
             person = Person.objects.get(id=subscriber_id)
-            print(f"manage_subscribers: {device=}/{type(device)=}, {person=}, {scheduled_times=}")
+            # print(f"MANAGE_SUBSCRIBERS: {device=}/{type(device)=}, {person=}, {scheduled_times=}")
             create_license_subscriptions(
                 subscriber=person,
                 device=device,
@@ -78,7 +78,6 @@ def manage_subscribers(device, subscribers):
         _subscribers_added = [person.email for person in _subscribers_added]
         change_reasons.append(f"Added subscribers: {', '.join(_subscribers_added)}")
 
-    print(f"{change_reasons=}")
     if change_reasons:
         # Update the last history record with the change reason
         update_change_reason(device, "; ".join(change_reasons))

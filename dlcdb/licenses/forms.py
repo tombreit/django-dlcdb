@@ -107,8 +107,6 @@ class LicenseForm(forms.ModelForm):
         device.save()
         self.save_m2m()
 
-        print(f"licence form: {device=}, class={type(device)}")
-
         subscribers = self.cleaned_data.get("subscribers")
         manage_subscribers(device, subscribers)
 
