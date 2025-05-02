@@ -373,6 +373,20 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
         return humand_readable_str.strip()
 
+    def get_human_title(self):
+        if any(
+            [
+                self.manufacturer,
+                self.supplier,
+                self.series,
+            ]
+        ):
+            human_title = f"{self.manufacturer or self.supplier or ''} {self.series or ''}"
+        else:
+            human_title = f"{self.uuid}"
+
+        return human_title
+
     def get_absolute_url(self):
         if self.is_licence:
             absolute_url = reverse("licenses:edit", kwargs={"license_id": self.pk})

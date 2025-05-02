@@ -74,7 +74,7 @@ def edit(request, license_id):
 
             messages.success(
                 request,
-                f"License {device.sap_id} saved.",
+                f"License {device.get_human_title()} saved.",
             )
 
             # The plain return redirect() behaves differently than the HX-Redirect header

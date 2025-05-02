@@ -103,20 +103,6 @@ class BaseLicenceRecordManager(models.Manager):
 class LicenceRecord(Record):
     objects = BaseLicenceRecordManager()
 
-    def get_human_title(self):
-        if any(
-            [
-                self.device.manufacturer,
-                self.device.supplier,
-                self.device.series,
-            ]
-        ):
-            human_title = f"{self.device.manufacturer or self.device.supplier or ''} {self.device.series or ''}"
-        else:
-            human_title = f"{self.device.uuid}"
-
-        return human_title
-
     @staticmethod
     def get_localized_license_state_label(for_state=None):
         """
