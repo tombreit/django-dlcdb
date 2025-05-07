@@ -393,4 +393,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             return absolute_url
 
     def get_fqdn_url(self):
-        return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
+        if self.get_absolute_url():
+            return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
+        return None

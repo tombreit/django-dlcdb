@@ -1,0 +1,4 @@
+Anlage,Unternummer,Anlagenbezeichnung,Aktivierung am,Zugangsjahr,      AnschWert,      kumul AfA,       Buchwert,Währung,Buchungskreis,Deaktivierung am,Raum,Kreditor,Kostenstelle,PSP-Element (Kosten),Serialnummer,Hersteller der Anlage,Typenbezeichnung
+400001,0,Asset 1,04.12.2000,,,,,,,,100,,,,,,Notebook
+400002,0,Asset 2,29.12.2000,,,,,,,,101,,,,,,Notebook
+400003,0,Asset 3,09.05.2000,,,,,,,31.12.2001,102,,,,,,Notebook

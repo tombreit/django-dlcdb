@@ -9,6 +9,8 @@ Importer für Device-Listen im CSV-Format
 import csv
 import string
 import logging
+import secrets
+from dataclasses import dataclass
 from io import StringIO
 from collections import namedtuple
 
@@ -20,6 +22,7 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.apps import apps
 from django.contrib.auth import get_user_model
+from django.utils.timezone import make_aware
 
 from ..models import Device, Room, Record
 from .helpers import rollback_atomic
@@ -215,6 +218,7 @@ def set_datetime_field(value):
     if value:
         try:
             result_value = datetime.strptime(value, "%Y-%m-%d")
+            result_value = make_aware(result_value)
         except ValueError as value_error:
             raise ValueError(f"{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}")
 
@@ -281,15 +285,82 @@ def create_fk_objs(fk_field, rows):
     return
 
 
-def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, write=False):
-    # already_existing_sap_ids = Device.objects.all().values_list("sap_id", flat=True)
-
-    device_objs = []
-    record_objs = []
+def _import_transaction(import_objs, import_format, device_objs, tenant=None):
     processed_devices_count = 0
     processed_records_count = 0
+    import_msg = ""
+
+    if import_format == "SAPCSV":
+        for import_obj in import_objs:
+            print(80 * "=")
+            device_obj = import_obj.device
+            record_obj = import_obj.record
+
+            # Cases for SAP import:
+            # - sap_id already exists in other tenant -> do nothing, DLCDB data is the leading system
+            # - sap_id does not exist -> create new device for tenant "Foo" and set new record
+            # - sap_id already exists in tenant "Foo" -> update room only (if not already set)
+            # - sap_id exists but deactivated -> set new RemovedRecord (if not already set)
+
+            already_existing_device = Device.objects.filter(sap_id=device_obj.sap_id).first()
+
+            if already_existing_device and all(
+                [
+                    already_existing_device.tenant.name == tenant.name,
+                    record_obj,
+                ]
+            ):
+                print(f"Device {device_obj} already exists in tenant {tenant}. Updating record only.")
+                record_obj.device = already_existing_device
+                record_obj.save()
+                processed_records_count += 1
+
+            elif not already_existing_device:
+                print(f"Device {device_obj} does not exist. Creating new device.")
+
+                if Device.objects.filter(edv_id=device_obj.edv_id).exists():
+                    print(f"Device with edv_id {device_obj.edv_id} already exists. Adding random suffix.")
+                    device_obj.edv_id = f"{device_obj.edv_id}-UNIQ{secrets.token_hex(4)}"
+
+                device_obj.save()
+                processed_devices_count += 1
+                device_objs.append(device_obj)
+
+                if record_obj:
+                    record_obj.save()
+                    processed_records_count += 1
+
+    else:
+        for import_obj in import_objs:
+            import_obj.device.save()
+            device_objs.append(import_obj.device)
+            processed_devices_count += 1
+
+            if import_obj.record:
+                import_obj.record.save()
+                processed_records_count += 1
+
+    import_msg = f"Processed devices: {processed_devices_count}, processed records: {processed_records_count}"
+
+    return device_objs, import_msg
+
+
+@dataclass
+class ImportObject:
+    """
+    An ImportObject is defined by a device and a related record (if available).
+    """
+
+    device: Device
+    record: Record | None
+
+
+def create_devices(rows, importer_inst_pk=None, import_format=None, tenant=None, username=None, write=False):
+    import_objs = []
+    device_objs = []
 
     for idx, row in enumerate(rows, start=1):
+        # print(f"{row=}")
         # Header row is not included in rows (it is in rows.fieldnames),
         # so we do not need to exclude the header row manually
 
@@ -300,17 +371,7 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
         sap_id = row["SAP_ID"] if row["SAP_ID"] else None
 
         device_repr = f"edv_id: {edv_id or 'n/a'}; sap_id: {sap_id or 'n/a'}"
-
-        # try:
-        #     tenant = Tenant.objects.get(name=row['TENANT'])
-        # except KeyError as tenant_key_error:
-        #     raise ValidationError(
-        #         '[Row {}] Device: "{}" NOT imported: TENANT not available in import file! ({})'.format(idx, device_repr, tenant_key_error)
-        #     )
-        # except ObjectDoesNotExist as tenant_does_not_exists:
-        #     raise ValidationError(
-        #         '[Row {}] Device: "{}" NOT imported: TENANT "{}" does not exist! ({})'.format(idx, device_repr, row['TENANT'], tenant_does_not_exists)
-        #     )
+        print(f"Processing device {device_repr} ...")
 
         # Booleans
         is_lentable = True if row["IS_LENTABLE"].lower() in TRUE_VALUES else False
@@ -319,7 +380,7 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
         device_obj = Device(
             is_imported=True,
             imported_by_id=importer_inst_pk,
-            # these fields should be mappable without further processing:
+            # These fields should be mappable without further processing:
             username=username if username else "",
             book_value=row["BOOK_VALUE"],
             serial_number=row["SERIAL_NUMBER"],
@@ -347,67 +408,40 @@ def create_devices(rows, importer_inst_pk=None, tenant=None, username=None, writ
             contract_expiration_date=set_datetime_field(row["CONTRACT_EXPIRATION_DATE"]),
         )
 
-        # If the sap_id already exists in our DLCDB, we skip and do not import
-        # this asset!
-        # Not needed: if the sap_id already exists, it throws an IntegriyError anyway
-        # if sap_id and sap_id not in already_existing_sap_ids:
-
-        device_objs.append(device_obj)
-        record_objs.append(
-            create_record(
-                device=device_obj,
-                record_type=row["RECORD_TYPE"],
-                record_note=row["RECORD_NOTE"],
-                room=row["ROOM"],
-                person=row["PERSON"],
-                username=username,
-                removed_date=row["REMOVED_DATE"],
-            )
+        record_obj = create_record(
+            device=device_obj,
+            record_type=row["RECORD_TYPE"],
+            record_note=row["RECORD_NOTE"],
+            room=row["ROOM"],
+            person=row["PERSON"],
+            username=username,
+            removed_date=set_datetime_field(row["REMOVED_DATE"]),
         )
+
+        import_objs.append(ImportObject(device=device_obj, record=record_obj))
 
     try:
         if write:
-            # As bulk_create() does not call model.save() method, we can not use it for now
-            # _bulk_create_supported = True
-            # # Use bulk_create for newer versions of sqlite to avoid
-            # # Exception Value: bulk_create() prohibited to prevent data loss due to unsaved related object 'device'.
-            # # See: https://docs.djangoproject.com/en/4.1/ref/models/querysets/#bulk-create
-            # # Changed in Django 4.0: Support for the fetching primary key attributes on SQLite 3.35+ was added.
-            # if connection.vendor == 'sqlite':
-            #     import sqlite3
-            #     from packaging import version
+            # As bulk_create() does not call model.save() method, we do not use it for now
+            print("Write transaction...")
 
-            #     installed_sqlite_version = version.parse(sqlite3.sqlite_version)
-            #     requested_sqlite_version = version.parse("3.35")
-
-            #     if installed_sqlite_version < requested_sqlite_version:
-            #         _bulk_create_supported = False
-
-            # if _bulk_create_supported:
-            #     Device.objects.bulk_create(device_objs)
-            #     Record.objects.bulk_create([record for record in record_objs if record is not None])
-            # else:
-
-            for device in device_objs:
-                device.save()
-
-            for record in record_objs:
-                if record:
-                    record.save()
+            device_objs = _import_transaction(
+                import_objs=import_objs,
+                import_format=import_format,
+                device_objs=device_objs,
+                tenant=tenant,
+            )
 
         else:
-            # print("Dry run...")
-            for device_obj in device_objs:
-                device_obj.save()
-                processed_devices_count += 1
+            print("Simulate transaction...")
 
-            for record_obj in record_objs:
-                if record_obj:
-                    record_obj.save()
-                    processed_records_count += 1
+            device_objs = _import_transaction(
+                import_objs=import_objs,
+                import_format=import_format,
+                device_objs=device_objs,
+                tenant=tenant,
+            )
 
-        # print(f"Created {processed_devices_count} devices.")
-        # print(f"Created {processed_records_count} records.")
     except IntegrityError as integrity_error:
         raise IntegrityError(f"IntegrityError {integrity_error} for {device_repr}")
     except ValueError as value_error:
@@ -452,9 +486,16 @@ def import_data(
         # Read and decode the file content
         try:
             csvfile.seek(0)  # Reset file pointer to the beginning
-            decoded_content = csvfile.read().decode("utf-8")
+            content = csvfile.read()
+            if isinstance(content, bytes):
+                decoded_content = content.decode("utf-8")
+            else:
+                # Assume it's already a string (decoded)
+                decoded_content = content
         except UnicodeDecodeError as e:
             raise ValidationError(f"Error decoding CSV file: {e}")
+        except AttributeError as e:
+            raise AttributeError(f"Error reading or processing CSV file: {e}")
 
         # Use StringIO to create a text-based file-like object
         csvfile_text = StringIO(decoded_content)
@@ -476,15 +517,20 @@ def import_data(
 
         # Second loop over rows: Creating devices
         try:
-            device_objs = create_devices(
-                rows, importer_inst_pk=importer_inst_pk, tenant=tenant, username=username, write=write
+            device_objs, import_msg = create_devices(
+                rows,
+                importer_inst_pk=importer_inst_pk,
+                import_format=import_format,
+                tenant=tenant,
+                username=username,
+                write=write,
             )
         except ValueError as value_error:
             raise ValueError(value_error)
         else:
             result = ImporterMessages(
                 success_messages,
-                f"Imported devices: {len(device_objs)}",
+                f"Imported devices: {len(device_objs)}. {import_msg}",
                 error=False,
             )
     return result
