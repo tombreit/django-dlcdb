@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from django.core.exceptions import ValidationError
 
+from dlcdb.tenants.models import Tenant
 from ..utils.bulk_management import import_data
 from ..models import ImporterList, InRoomRecord, Device, Room, RemovedRecord
 
@@ -155,3 +156,31 @@ def test_bulk_import_csv_sap_update(tenant):
 
     device_to_remove.refresh_from_db()
     assert device_to_remove.active_record.record_type == RemovedRecord.REMOVED
+
+    # Check that a device in another tenant is not affected by the same device in the import CSV
+    new_tenant = Tenant.objects.create(
+        name="TestTenant2",
+    )
+    new_tenant.save()
+
+    device_in_another_tenant = device
+    device_in_another_tenant.tenant = new_tenant
+    device_in_another_tenant.save()
+    device_in_another_tenant_modified_at = device_in_another_tenant.modified_at
+
+    device_in_another_tenant.refresh_from_db()
+    assert device_in_another_tenant.tenant == new_tenant
+
+    with open(csv_path, "rb") as csv_file:
+        assert import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.SAPCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=True,
+        )
+
+    device_in_another_tenant.refresh_from_db()
+    assert device_in_another_tenant.modified_at == device_in_another_tenant_modified_at
