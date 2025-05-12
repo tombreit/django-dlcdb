@@ -10,6 +10,8 @@ from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.db.models import OuterRef, Subquery
+
 
 from django_htmx.http import HttpResponseClientRedirect
 
@@ -39,7 +41,9 @@ def index(request):
     else:
         template = "licenses/index.html"
 
-    base_qs = LicenceRecord.objects.all().order_by("-device__modified_at")
+    base_qs = LicenceRecord.objects.annotate(
+        device_human_title=Subquery(Device.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
+    ).order_by("-device__modified_at")
     license_record_filter = LicenceRecordFilter(request.GET, queryset=base_qs)
 
     context = {
@@ -74,7 +78,7 @@ def edit(request, license_id):
 
             messages.success(
                 request,
-                f"License {device.get_human_title()} saved.",
+                f"License {device.human_title} saved.",
             )
 
             # The plain return redirect() behaves differently than the HX-Redirect header

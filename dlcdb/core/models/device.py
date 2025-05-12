@@ -7,6 +7,8 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Case, When, F, Value, CharField
+from django.db.models.functions import Concat, Cast, Coalesce, Trim
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -24,7 +26,49 @@ from .abstracts import SoftDeleteAuditBaseModel
 from .supplier import Supplier
 
 
+class DeviceManager(models.Manager):
+    def get_queryset(self):
+        base_qs = super().get_queryset()
+
+        annotated_qs = base_qs.annotate(
+            human_title=Case(
+                When(
+                    (models.Q(manufacturer__name__isnull=False) & ~models.Q(manufacturer__name__exact=""))
+                    | (models.Q(supplier__name__isnull=False) & ~models.Q(supplier__name__exact=""))
+                    | (models.Q(series__isnull=False) & ~models.Q(series__exact="")),
+                    then=Trim(
+                        Concat(
+                            Coalesce(F("manufacturer__name"), F("supplier__name"), Value("")),
+                            Value(" "),
+                            Case(
+                                When(series__isnull=False, series__gt="", then=F("series")),
+                                default=Value(""),
+                                output_field=CharField(),
+                            ),
+                            Case(
+                                When(
+                                    sap_id__isnull=False,
+                                    sap_id__gt="",
+                                    then=Concat(Value(" ("), F("sap_id"), Value(")")),
+                                ),
+                                default=Value(""),
+                                output_field=CharField(),
+                            ),
+                            output_field=CharField(),
+                        )
+                    ),
+                ),
+                default=Cast("uuid", output_field=CharField()),
+                output_field=CharField(),
+            )
+        )
+
+        return annotated_qs
+
+
 class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
+    objects = DeviceManager()
+
     active_record = models.OneToOneField(
         "Record",
         on_delete=models.CASCADE,
@@ -364,28 +408,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def get_record_action_snippet_for_inventory_views(self):
         return self.get_record_action_snippet(for_view="inventory")
-
-    def get_human_readable_str(self):
-        humand_readable_str = str(self.uuid)
-
-        if self.manufacturer or self.series or self.device_type:
-            humand_readable_str = f"{self.manufacturer or ''} {self.series or ''} {self.device_type or ''}"
-
-        return humand_readable_str.strip()
-
-    def get_human_title(self):
-        if any(
-            [
-                self.manufacturer,
-                self.supplier,
-                self.series,
-            ]
-        ):
-            human_title = f"{self.manufacturer or self.supplier or ''} {self.series or ''}"
-        else:
-            human_title = f"{self.uuid}"
-
-        return human_title
 
     def get_absolute_url(self):
         if self.is_licence:
