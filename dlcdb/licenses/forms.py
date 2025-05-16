@@ -62,7 +62,7 @@ class LicenseForm(forms.ModelForm):
             Row(
                 Column("sap_id", css_class="col-md-3"),
                 Column("subscribers", css_class="col-md-5"),
-                Column("contact_person_internal", css_class="col-md-4"),
+                # Column("contact_person_internal", css_class="col-md-4"),
             ),
             Div(HTML("<hr>")),
             Row(
@@ -127,7 +127,7 @@ class LicenseForm(forms.ModelForm):
             "note",
             "device_type",
             "contract_termination",
-            "contact_person_internal",
+            # "contact_person_internal",  # better: use the existing note fields
         ]
         labels = {
             "subscribers": _("Subscribers"),
