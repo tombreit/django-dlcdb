@@ -71,7 +71,7 @@ def create_sap_list_comparison(sap_list_obj):
         if not os.path.exists(os.path.dirname(file_path)):
             os.makedirs(os.path.dirname(file_path))
 
-        with open(file_path, "w", encoding="utf-16") as new_file:
+        with open(file_path, "w", encoding="utf-8") as new_file:
             fieldnames = list(k for d in result_rows for k in d)
             fieldnames = unique_seq(fieldnames)
 
