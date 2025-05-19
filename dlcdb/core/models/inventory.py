@@ -318,8 +318,12 @@ class Inventory(models.Model):
 
             new_record = False
 
-            # TODO: Refactor these inventory actions to be part of the Inventory
-            # model
+            # TODO: Refactor these inventory actions to be part of the Inventory model
+            # WARNING: As "cloning" an instance with "new_obj = old_obj" does not
+            # automatically set m2m related fields, we need to ensure these related
+            # fields are set correctly (if any on Record). Also check unique constraints
+            # for OneToOne relations manually.
+            # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
 
             if state == "dev_state_found":
                 new_record = active_record
@@ -333,13 +337,13 @@ class Inventory(models.Model):
                 # record type:
                 if new_record.record_type == Record.LOST:
                     new_record.record_type = Record.INROOM
-                    new_record.note = ""
+                    new_record.note = "Was: LOST, now: INROOM, cause: INVENTORY"
                 elif new_record.record_type == Record.REMOVED:
                     new_record.record_type = Record.INROOM
                     new_record.disposition_state = ""
                     new_record.removed_info = ""
-                    new_record.note = ""
                     new_record.removed_date = None
+                    new_record.note = "Was: REMOVED, now: INROOM, cause: INVENTORY"
 
             elif state == "dev_state_notfound":
                 # If an expected device is not found in a given room, we need
@@ -441,5 +445,6 @@ class Inventory(models.Model):
                 # Copying model instances
                 # https://docs.djangoproject.com/en/4.2/topics/db/queries/#copying-model-instances
                 new_record.pk = None
+                new_record.id = None
                 new_record._state.adding = True
                 new_record.save()

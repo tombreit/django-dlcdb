@@ -292,7 +292,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
         try:
             current_inventory = Inventory.objects.get(is_active=True)
-
             already_inventorized = self.record_set.order_by("pk").filter(
                 inventory=current_inventory,
             )

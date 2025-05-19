@@ -121,11 +121,15 @@ def compare_sap(sap_list_obj):
 
             if sap_id:
                 obj = Device.objects.get(sap_id=sap_id)
+                inventorized_records = obj.get_current_inventory_records
                 active_record = obj.active_record
-                inventorized_record = obj.get_current_inventory_records
+
+                # inventorized_records is a queryset off all inventorized records
+                # for this device. We need to check if the latest inventorized record.
+                inventorized_record = inventorized_records.last() if inventorized_records else None
 
                 if inventorized_record:
-                    if inventorized_record.inventory.name != current_inventory.name:
+                    if inventorized_record.inventory != current_inventory:
                         raise ValidationError(
                             f"{inventorized_record.inventory.name=} does not match {current_inventory.name=}. Exit!"
                         )
@@ -135,7 +139,7 @@ def compare_sap(sap_list_obj):
                 record_inventory = "FALSE"
 
                 # Find the record to be listed in sap comparison
-                if inventorized_record and active_record and inventorized_record.id < active_record.id:
+                if inventorized_records and active_record and inventorized_record.id < active_record.id:
                     # This device has an inventorized record but newer records
                     # exist so we pick the newest (active) record for sap
                     # compare sheet.
