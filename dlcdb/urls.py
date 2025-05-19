@@ -8,12 +8,14 @@ from django.urls import include, path, reverse_lazy
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 
+from dlcdb.accounts.forms import EmailAuthenticationForm
 from dlcdb.organization import views as organization_views
 
 admin.site.site_header = "DLCDB Admin"
 admin.site.site_title = "DLCDB Admin"
 admin.site.index_title = "DLCDB Administration"
 admin.site.enable_nav_sidebar = False
+admin.site.login_form = EmailAuthenticationForm
 admin.site.logout_template = "accounts/logout.html"
 
 

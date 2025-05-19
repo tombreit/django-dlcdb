@@ -96,13 +96,15 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 # https://docs.djangoproject.com/en/dev/ref/settings/#internal-ips
 INTERNAL_IPS = ["127.0.0.1"] if DEBUG else []
 
+AUTH_USER_MODEL = "accounts.CustomUser"
+LOGIN_FIELD = "email"
 AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
+    # "django.contrib.auth.backends.ModelBackend",
+    "dlcdb.accounts.auth_backends.EmailModelBackend",
 ]
 
-SITE_ID = 1
 
-AUTH_USER_MODEL = "accounts.CustomUser"
+SITE_ID = 1
 
 # Email these people full exception information
 # https://docs.djangoproject.com/en/1.9/ref/settings/#admins

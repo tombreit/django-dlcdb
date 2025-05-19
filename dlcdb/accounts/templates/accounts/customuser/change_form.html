@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block submit_buttons_bottom %}
+    {{ block.super }}
+    {% if has_delete_permission %}
+        <div class="submit-row">
+            <a href="{% url 'admin:accounts_customuser_hard_delete' original.pk %}" 
+               class="deletelink" 
+        >
+                {% trans "Hard Delete" %}
+            </a>
+        </div>
+    {% endif %}
+{% endblock %}
