@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-.PHONY: requirements tests format lint docs
+.PHONY: requirements tests format lint docs assets
 
 # include .env
 
@@ -13,6 +13,7 @@ help:
 	@echo "format - enforce a consistent code style across the codebase and sort python files with isort"
 	@echo "test - run test suite"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
+	@echo "assets - build static assets with npm"
 
 requirements:
 	mkdir -p requirements
@@ -28,3 +29,8 @@ tests:
 docs:
 	make --directory=docs clean
 	make --directory=docs html
+
+assets:
+	@command -v npm >/dev/null 2>&1 || (echo "npm is not installed. Please install npm." && exit 1)
+	npm install
+	npm run build --loglevel=error

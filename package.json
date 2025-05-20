@@ -1,18 +1,18 @@
 {
-  "name": "django-dlcdb",
-  "version": "2.0.0",
+  "name": "dlcdb",
+  "version": "2.0.1",
   "description": "Django Device Lifecycle Database",
   "directories": {
     "doc": "docs"
   },
   "config": {
-    "core_srcdir": "frontend/core",
-    "core_distdir": "dlcdb/static/dist/core",
-    "inventory_srcdir": "dlcdb/inventory/assets",
-    "inventory_distdir": "dlcdb/inventory/static/inventory/dist",
-    "theme_srcdir": "dlcdb/theme/assets",
-    "theme_distdir": "dlcdb/theme/static/theme/dist",
-    "docs_distdir": "docs/_static/vendor"
+    "coreSrcDir": "frontend/core",
+    "coreDistDir": "dlcdb/static/dist/core",
+    "inventorySrcDir": "dlcdb/inventory/assets",
+    "inventoryDistDir": "dlcdb/inventory/static/inventory/dist",
+    "themeSrcDir": "dlcdb/theme/assets",
+    "themeDistDir": "dlcdb/theme/static/theme/dist",
+    "docsDistDir": "docs/_static/vendor"
   },
   "COMMENTS": [
     "SASS PINNED AT 1.77.6 FOR COMPATIBILITY WITH BS5.X"
@@ -25,11 +25,11 @@
     "bootstrap": "latest-5",
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^3.9.1",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.25.4",
     "eslint": "^9.25.1",
     "htmx.org": "^2.0.4",
     "jquery": "^3.7.1",
-    "mermaid": "^10.9.3",
+    "mermaid": "^11.6.0",
     "npm-run-all": "^4.1.5",
     "qr-scanner": "^1.4.2",
     "sass": "1.77.6",
@@ -38,24 +38,25 @@
     "tom-select": "^2.4.3"
   },
   "scripts": {
+    "debug": "echo $npm_package_config_coreSrcDir",
     "build": "npm-run-all build:core:* build:theme:* build:inventory:* docs:copy-mermaid",
     "build:core": "npm-run-all build:core:*",
-    "build:core:scss": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_core_srcdir/scss:$npm_package_config_core_distdir/css",
-    "build:core:scss-print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_core_srcdir/scss/print.scss:$npm_package_config_core_distdir/css/print.css",
-    "build:core:js": "esbuild $npm_package_config_core_srcdir/js/app.js --bundle --sourcemap --outfile=$npm_package_config_core_distdir/js/app.js",
-    "build:core:copy-fontawesome": "mkdir -p $npm_package_config_core_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_core_distdir/fonts/fontawesome",
-    "build:core:copy-chartjs": "mkdir -p $npm_package_config_core_distdir/vendor/chartjs && cp -r node_modules/chart.js/dist/* $npm_package_config_core_distdir/vendor/chartjs/",
-    "build:inventory:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_inventory_srcdir/scss:$npm_package_config_inventory_distdir",
-    "build:inventory:js": "esbuild $npm_package_config_inventory_srcdir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventory_distdir/inventory.js",
-    "build:inventory:copy-fontawesome": "mkdir -p $npm_package_config_inventory_distdir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_inventory_distdir/fonts/fontawesome/",
+    "build:core:scss": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_coreSrcDir/scss:${npm_package_config_coreDistDir}/css",
+    "build:core:scss-print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_coreSrcDir/scss/print.scss:$npm_package_config_coreDistDir/css/print.css",
+    "build:core:js": "esbuild $npm_package_config_coreSrcDir/js/app.js --bundle --sourcemap --outfile=$npm_package_config_coreDistDir/js/app.js",
+    "build:core:copy-fontawesome": "mkdir -p $npm_package_config_coreDistDir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_coreDistDir/fonts/fontawesome",
+    "build:core:copy-chartjs": "mkdir -p $npm_package_config_coreDistDir/vendor/chartjs && cp -r node_modules/chart.js/dist/* $npm_package_config_coreDistDir/vendor/chartjs/",
+    "build:inventory:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_inventorySrcDir/scss:$npm_package_config_inventoryDistDir",
+    "build:inventory:js": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js",
+    "build:inventory:copy-fontawesome": "mkdir -p $npm_package_config_inventoryDistDir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_inventoryDistDir/fonts/fontawesome/",
     "build:inventory": "npm-run-all build:inventory:*",
-    "watch:js:inventory": "esbuild $npm_package_config_inventory_srcdir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventory_distdir/inventory.js --watch",
-    "lint:inventory": "eslint $npm_package_config_inventory_srcdir/js/**/*.js",
-    "build:theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_theme_srcdir/scss:$npm_package_config_theme_distdir/css",
-    "build:theme:js": "esbuild $npm_package_config_theme_srcdir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_theme_distdir/js/theme.js",
-    "build:theme:bs-icons": "mkdir -p $npm_package_config_theme_distdir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_theme_distdir/fonts/",
+    "watch:js:inventory": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js --watch",
+    "lint:inventory": "eslint $npm_package_config_inventorySrcDir/js/**/*.js",
+    "build:theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_themeSrcDir/scss:$npm_package_config_themeDistDir/css",
+    "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_themeDistDir/js/theme.js",
+    "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",
     "build:theme": "npm-run-all build:theme:*",
-    "docs:copy-mermaid": "mkdir -p $npm_package_config_docs_distdir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docs_distdir/mermaid/"
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docsDistDir/mermaid/"
   },
   "repository": {
     "type": "https",
