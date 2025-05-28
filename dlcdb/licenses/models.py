@@ -6,6 +6,17 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from ..core.models.abstracts import SingletonBaseModel
+from ..core.models import Device
+
+
+class LicenseAsset(Device):
+    """
+    Proxy model for Device to represent a license asset. Used to assign
+    dedicated permissions for "license-management-only users".
+    """
+
+    class Meta:
+        proxy = True
 
 
 class LicensesConfiguration(SingletonBaseModel):

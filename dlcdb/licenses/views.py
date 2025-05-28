@@ -15,11 +15,11 @@ from django.db.models import OuterRef, Subquery
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, Device, InRoomRecord, Room
+from dlcdb.core.models import LicenceRecord, InRoomRecord, Room
 from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
-from .models import LicensesConfiguration
+from .models import LicensesConfiguration, LicenseAsset
 import traceback
 
 
@@ -42,7 +42,7 @@ def index(request):
         template = "licenses/index.html"
 
     base_qs = LicenceRecord.objects.annotate(
-        device_human_title=Subquery(Device.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
+        device_human_title=Subquery(LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
     ).order_by("-device__modified_at")
     license_record_filter = LicenceRecordFilter(request.GET, queryset=base_qs)
 
@@ -64,7 +64,7 @@ def edit(request, license_id):
         # raise NotImplementedError("Non HTMX requests not implemented")
         template = "licenses/form.html"
 
-    license = get_object_or_404(Device, id=license_id)
+    license = get_object_or_404(LicenseAsset, id=license_id)
 
     if request.method == "POST":
         form = LicenseForm(
@@ -194,7 +194,7 @@ def new(request):
 @login_required
 @htmx_permission_required("core.change_licencerecord")
 def history(request, license_id):
-    device = get_object_or_404(Device, id=license_id)
+    device = get_object_or_404(LicenseAsset, id=license_id)
     device_history = device.history.all()
 
     # subscription_model = device.subscription_set.model

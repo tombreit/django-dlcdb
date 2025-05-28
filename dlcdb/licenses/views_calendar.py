@@ -8,8 +8,8 @@ from django.http import Http404
 import icalendar
 from icalendar import Calendar, Event
 
-from dlcdb.core.models import Device
 from dlcdb.notifications.models import Subscription
+from .models import LicenseAsset
 
 
 def _add_license_ical_event(cal, device, date, event_type, prefix=None, add_alarm=False):
@@ -111,7 +111,7 @@ def _get_notification_content_for_event(device, event_type):
 @login_required
 def license_calendar(request, license_uuid):
     """Generate an iCal file for a specific license"""
-    device = get_object_or_404(Device, uuid=license_uuid)
+    device = get_object_or_404(LicenseAsset, uuid=license_uuid)
 
     # Check if there are any events to show
     if not device.contract_start_date and not device.contract_expiration_date:
