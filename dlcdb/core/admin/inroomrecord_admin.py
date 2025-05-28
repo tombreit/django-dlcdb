@@ -33,8 +33,8 @@ class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
         "room",
     ]
 
-    def has_add_permission(self, request):
-        return True
+    # def has_add_permission(self, request):
+    #     return True
 
     def response_add(self, request, obj, post_url_continue=None):
         if "_save" in request.POST:
