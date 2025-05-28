@@ -26,9 +26,9 @@ cfgv==3.4.0
     # via pre-commit
 charset-normalizer==3.4.2
     # via requests
-click==8.2.0
+click==8.2.1
     # via pip-tools
-coverage==7.8.0
+coverage==7.8.2
     # via pytest-cov
 crispy-bootstrap5==2025.4
     # via django-dlcdb (pyproject.toml)
@@ -66,7 +66,7 @@ django-filter==25.1
     # via django-dlcdb (pyproject.toml)
 django-htmx==1.23.0
     # via django-dlcdb (pyproject.toml)
-django-select2==8.4.0
+django-select2==8.4.1
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.8.0
     # via django-dlcdb (pyproject.toml)
@@ -83,9 +83,9 @@ filelock==3.18.0
     # via virtualenv
 huey==2.5.3
     # via django-dlcdb (pyproject.toml)
-icalendar==6.2.0
+icalendar==6.3.1
     # via django-dlcdb (pyproject.toml)
-identify==2.6.10
+identify==2.6.12
     # via pre-commit
 idna==3.10
     # via requests
@@ -127,7 +127,7 @@ pip-tools==7.4.1
     # via django-dlcdb (pyproject.toml)
 platformdirs==4.3.8
     # via virtualenv
-pluggy==1.5.0
+pluggy==1.6.0
     # via pytest
 pre-commit==4.2.0
     # via django-dlcdb (pyproject.toml)
@@ -171,7 +171,7 @@ requests==2.32.3
     # via sphinx
 roman-numerals-py==3.1.0
     # via sphinx
-ruff==0.11.9
+ruff==0.11.11
     # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
