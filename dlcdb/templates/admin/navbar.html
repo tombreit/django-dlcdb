@@ -24,25 +24,29 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <div class="navbar-nav me-auto">
 
-        {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_main" only %}
+        {% include 'admin/includes/nav_item.html' with nav_items=nav_items_main only %}
         
+        {% if nav_items_processes %}
         <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {% translate "Processes" %}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
-            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_processes" only %}
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items_processes only %}
           </div>
         </div>
+        {% endif %}
 
+        {% if nav_items_masterdata %}
         <div class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDataDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {% translate "Data management" %}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDataDropdown">
-            {% include 'admin/includes/nav_item.html' with nav_items=nav_items slot="nav_masterdata" only %}
+            {% include 'admin/includes/nav_item.html' with nav_items=nav_items_masterdata only %}
           </div>
         </div>
+        {% endif %}
 
       </div>
       

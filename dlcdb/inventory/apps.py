@@ -17,7 +17,7 @@ class InventoryConfig(AppConfig):
             "label": _("Inventorize"),
             "icon": "fa-solid fa-glasses",
             "url": "inventory:inventorize-room-list",
-            "required_permission": "true",
+            "required_permission": "view_inventory",
             "show_condition": "active_inventory_exists",
         },
         {
@@ -26,7 +26,8 @@ class InventoryConfig(AppConfig):
             "label": _("Inventorize"),
             "icon": "fa-solid fa-glasses",
             "url": "inventory:inventorize-room-list",
-            "required_permission": "true",
+            "required_permission": "view_inventory",
+            "show_condition": "active_inventory_exists",
         },
         {
             "slot": "nav_processes",
@@ -34,6 +35,7 @@ class InventoryConfig(AppConfig):
             "label": _("SAP comparison"),
             "icon": "",
             "url": "admin:inventory_saplist_changelist",
-            "required_permission": "true",
+            "required_permission": "view_inventory",
+            "show_condition": "active_inventory_exists",
         },
     ]

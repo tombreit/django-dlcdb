@@ -166,7 +166,7 @@ def nav(request):
                     if not active_inventory_exists:
                         continue
 
-            if has_permission:
+            if has_permission or request.user.is_superuser:
                 nav_item = {
                     "label": nav_entry.get("label"),
                     "icon": nav_entry.get("icon"),
@@ -177,4 +177,8 @@ def nav(request):
                 nav_items.append(nav_item)
 
     nav_items = sorted(nav_items, key=itemgetter("order"))
-    return {"nav_items": nav_items}
+    return {
+        "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
+        "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
+        "nav_items_processes": [item for item in nav_items if item["slot"] == "nav_processes"],
+    }

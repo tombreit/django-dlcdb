@@ -35,11 +35,15 @@ def get_current_tenant(request):
                 f"Expected one matched tenant, but got mulitple: '{_tenant}'. Tenant-scoped querysets will not return any objects!",
             )
         elif _tenant_count == 0:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                f"Could not find a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!",
-            )
+            # Check if this message already exists to avoid duplicates
+            error_msg = f"Could not find a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!"
+            existing_messages = [str(msg) for msg in messages.get_messages(request)]
+            if error_msg not in existing_messages:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    error_msg,
+                )
         elif _tenant_count == 1:
             tenant = _tenant.get()
         else:

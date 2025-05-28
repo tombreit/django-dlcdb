@@ -272,8 +272,9 @@ STORAGES = {
     },
 }
 
-LOGIN_URL = "/admin/login/"
-LOGIN_REDIRECT_URL = "/admin/"
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "logout"
 
 
 MESSAGE_TAGS = {

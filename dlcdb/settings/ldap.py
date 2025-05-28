@@ -32,7 +32,6 @@ AUTH_LDAP_BIND_PASSWORD = env.str("AUTH_LDAP_BIND_PASSWORD")
 AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 
 # First check ModelBackend than LDAPBackend
-# AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ["django_auth_ldap.backend.LDAPBackend"]
 AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ["dlcdb.accounts.auth_backends.EmailLDAPBackend"]
 
 
@@ -57,16 +56,17 @@ AUTH_LDAP_USER_ATTR_MAP = {
 }
 
 # https://django-auth-ldap.readthedocs.io/en/latest/groups.html#limiting-access
-AUTH_LDAP_REQUIRE_GROUP = LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS")) | LDAPGroupQuery(
-    env.str("AUTH_LDAP_GROUP_STAFF")
+AUTH_LDAP_REQUIRE_GROUP = (
+    LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS"))
+    | LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF"))
+    | LDAPGroupQuery(env.str("AUTH_LDAP_REQUIRE_GROUP"))
 )
 
 AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    "is_active": (
-        LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS")) | LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF"))
-    ),
-    "is_staff": (LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF"))),
-    "is_superuser": (LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS"))),
+    "is_active": AUTH_LDAP_REQUIRE_GROUP,
+    "is_staff": LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS"))
+    | LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF")),
+    "is_superuser": LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS")),
 }
 
 # Tweak some settings in DEV mode

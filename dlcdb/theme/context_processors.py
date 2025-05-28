@@ -9,6 +9,7 @@ def navigation(request):
     navigation_dict = {}
 
     app_name = request.resolver_match.app_name
+    app_label = None
 
     try:
         app_config = apps.get_app_config(app_name)
@@ -23,7 +24,8 @@ def navigation(request):
         # print(f"{_import_error=}. Ignoring navigation for {app_name=}")
         pass
 
-    navigation_dict["app_label"] = app_label
+    if app_label:
+        navigation_dict["app_label"] = app_label
 
     return {
         "navigation": navigation_dict,

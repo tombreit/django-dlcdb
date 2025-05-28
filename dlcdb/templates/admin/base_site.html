@@ -43,7 +43,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block nav-global %}
     {% if not is_popup %}
-        {% if user.is_authenticated and user.is_staff %}
+        {% if user.is_authenticated %}
             {% include 'admin/navbar.html' %}
         {% endif %}
     {% endif %}

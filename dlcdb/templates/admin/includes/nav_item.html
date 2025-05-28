@@ -4,8 +4,9 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
+{% load i18n static %}
+
 {% for nav_item in nav_items %}
-    {% if nav_item.slot == slot %}
     <a 
         class="nav-link" 
         href="{% url nav_item.url %}"
@@ -15,5 +16,4 @@ SPDX-License-Identifier: EUPL-1.2
         {% endif %}
         {{ nav_item.label }}
     </a>
-    {% endif %}
 {% endfor %}

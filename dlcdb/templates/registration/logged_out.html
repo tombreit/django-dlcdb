@@ -1,0 +1,12 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block body %}
+
+<p>{% translate "Thanks for spending some quality time with the DLCDB today." %}</p>
+
+<p>
+    <a class="btn btn-primary" href="{% url 'dashboard' %}">{% translate 'Log in again' %}</a>
+</p>
+
+{% endblock body %}
