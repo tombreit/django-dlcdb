@@ -44,22 +44,29 @@ class RecordManager(models.Manager):
         return self.get_queryset().active_records()
 
 
+# Moved the RECORD_TYPE_LIST to module level to have them available
+# in the CheckContraints.
+RECORD_TYPE_LIST = [
+    ("ORDERED", "BESTELLT"),
+    ("INROOM", "LOKALISIERT"),
+    ("LENT", "VERLIEHEN"),
+    ("LOST", "NICHT AUFFINDBAR"),
+    ("REMOVED", "ENTFERNT"),
+]
+RECORD_TYPE_KEYS = [choice[0] for choice in RECORD_TYPE_LIST]
+
+
 class Record(AuditBaseModel):
     # New record types/proxys must be added to:
-    # * RECORD_TYPE_CHOICES
+    # * RECORD_TYPE_LIST
     # * RECORD_TYPE_CLASSES
     ORDERED = "ORDERED"
     INROOM = "INROOM"
     LENT = "LENT"
     LOST = "LOST"
     REMOVED = "REMOVED"
-    RECORD_TYPE_CHOICES = [
-        (ORDERED, "BESTELLT"),
-        (INROOM, "LOKALISIERT"),
-        (LENT, "VERLIEHEN"),
-        (LOST, "NICHT AUFFINDBAR"),
-        (REMOVED, "ENTFERNT"),
-    ]
+
+    RECORD_TYPE_CHOICES = RECORD_TYPE_LIST
 
     device = models.ForeignKey(
         "core.Device",
@@ -167,7 +174,11 @@ class Record(AuditBaseModel):
                         settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d"
                     )
                 ),
-            )
+            ),
+            models.CheckConstraint(
+                name="%(app_label)s_%(class)s_valid_record_type_required",
+                condition=~Q(record_type="") & Q(record_type__in=RECORD_TYPE_KEYS),
+            ),
         ]
         indexes = [
             models.Index(fields=["is_active", "record_type", "inventory"]),
