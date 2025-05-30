@@ -66,13 +66,13 @@ class UIRecordActionSnippetContext:
                 record_type_info = dict(
                     css_classes="btn btn-info",
                     url=reverse("admin:core_lentrecord_change", args=[self.active_record]),
-                    label=f"an {self.active_record.person }",
+                    label=f"an {self.active_record.person}",
                     title=_("Edit lending"),
                 )
             elif record_type == Record.ORDERED:
                 record_type_info = dict(
                     css_classes="btn btn-info",
-                    label=self.device_obj.get_record_type_display,
+                    label=self.active_record.get_record_type_display,
                 )
             elif record_type == Record.REMOVED:
                 record_type_info = dict(
@@ -90,7 +90,7 @@ class UIRecordActionSnippetContext:
             else:
                 record_type_info = dict(
                     css_classes="btn btn-danger",
-                    url=f'{reverse("admin:core_record_changelist")}?device__id__exact={self.device_pk}',
+                    url=f"{reverse('admin:core_record_changelist')}?device__id__exact={self.device_pk}",
                     label=_("Unknown record type! Contact your administrator!"),
                 )
 
@@ -156,7 +156,7 @@ class UIRecordActionSnippetContext:
             # Only allow a first INROOM record.
             add_links.append(
                 dict(
-                    url=f'{reverse("admin:core_inroomrecord_add")}?device={self.device_pk}',
+                    url=f"{reverse('admin:core_inroomrecord_add')}?device={self.device_pk}",
                     label=_("Locate"),
                 )
             )
