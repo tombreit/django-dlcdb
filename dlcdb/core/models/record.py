@@ -68,6 +68,16 @@ class Record(AuditBaseModel):
 
     RECORD_TYPE_CHOICES = RECORD_TYPE_LIST
 
+    # (current_state: [allowed_next_states])
+    STATE_TRANSITIONS = {
+        None: [INROOM],
+        # ORDERED: [INROOM],
+        INROOM: [INROOM, LENT, LOST, REMOVED],
+        LENT: [INROOM, LOST],
+        LOST: [INROOM, REMOVED],
+        REMOVED: [None],
+    }
+
     device = models.ForeignKey(
         "core.Device",
         verbose_name=_("Device"),
@@ -271,3 +281,18 @@ class Record(AuditBaseModel):
     @property
     def is_type_lent(self):
         return self.record_type == Record.LENT
+
+    def get_current_state(self):
+        """
+        Returns the current state based on the record_type.
+        Could be as simple as returning self.record_type,
+        or more complex if states are different from record_types.
+        """
+        return self.record_type
+
+    def get_allowed_next_states(self):
+        """
+        Returns a list of record_types (states) this record can transition to.
+        """
+        current_state = self.get_current_state()
+        return self.STATE_TRANSITIONS.get(current_state, [])

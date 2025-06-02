@@ -38,12 +38,14 @@ from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
+from django.template.loader import render_to_string
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.html import format_html
 
 from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
@@ -258,6 +260,18 @@ def search_devices(request):
     paginator = Paginator(filter_devices.qs, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
+    # Add a custom attribute to each device in the current page
+    for device in page_obj:
+        device.state_data_rendered = format_html(
+            render_to_string(
+                "core/device/state_btn_group.html",
+                {
+                    "state_data": device.get_state_data(user=request.user, app_name="inventory"),
+                    "size": "sm",
+                },
+            )
+        )
 
     context = {
         "current_inventory": Inventory.objects.active_inventory(),

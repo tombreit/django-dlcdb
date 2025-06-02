@@ -20,7 +20,7 @@ from simple_history.models import HistoricalRecords
 from dlcdb.inventory.utils import uuid2qrcode
 from dlcdb.tenants.models import TenantAwareModel
 
-from ..ui_helpers import UIRecordActionSnippetContext
+from ..utils.device_methods import get_device_state_data
 from ..storage import OverwriteStorage
 from .abstracts import SoftDeleteAuditBaseModel
 from .supplier import Supplier
@@ -402,12 +402,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     get_edv_id.short_description = "EDV ID"
 
-    def get_record_action_snippet(self, for_view=None):
-        return UIRecordActionSnippetContext(device_obj=self, for_view=for_view)
-
-    def get_record_action_snippet_for_inventory_views(self):
-        return self.get_record_action_snippet(for_view="inventory")
-
     def get_absolute_url(self):
         if self.is_licence:
             absolute_url = reverse("licenses:edit", kwargs={"license_id": self.pk})
@@ -417,3 +411,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         if self.get_absolute_url():
             return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
         return None
+
+    def get_state_data(self, *, user=None, app_name=None):
+        return get_device_state_data(self, user=user, app_name=app_name)

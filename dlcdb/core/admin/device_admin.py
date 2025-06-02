@@ -81,7 +81,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "device_type",
         "manufacturer",
         "series",
-        "get_record_info_display",
+        "get_device_actions",
     ]  # + CustomBaseModelAdmin.list_display
 
     readonly_fields = (
@@ -187,6 +187,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         Return a sequence containing the fields to be displayed on the
         changelist.
         """
+        self.request = request
+
         list_display = super().get_list_display(request)
         if settings.DEVICE_HIDE_FIELDS:
             list_display = list(list_display)
@@ -206,36 +208,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             for hide_field in settings.DEVICE_HIDE_FIELDS:
                 _new_fieldsets = _new_fieldsets.replace(f'"{hide_field}",', "")
             new_fieldsets = json.loads(_new_fieldsets)
-
-            # new_fieldsets = []
-            # for fieldset in orig_fieldsets:
-            #     fieldset = list(fieldset)
-            #     print(f"{fieldset=}")
-            #     print(f"{type(fieldset)=}")
-            #     orig_fields = list(fieldset[1].get('fields'))
-            #     print(f"{orig_fields=}")
-            #     print(f"{type(orig_fields)=}")
-
-            #     new_fields =[]
-
-            #     for entry in orig_fields:
-            #         print(f"{entry=}")
-            #         print(f"{type(entry)=}")
-            #         if isinstance(entry, str) and not entry in settings.DEVICE_HIDE_FIELDS:
-            #             new_fields.append(entry)
-            #         elif isinstance(entry, tuple):
-            #             new_subentry = []
-            #             for subentry in entry:
-            #                 if isinstance(subentry, str) and not subentry in settings.DEVICE_HIDE_FIELDS:
-            #                     new_subentry.append(subentry)
-
-            # for  group in get_field_set_groups: #logic to  get the field set group
-            #      fields = []
-            #     for field in  get_group_fields: #logic to get the  group fields
-            #          fields.append(field)
-            #      fieldset_values = {"fields":  tuple(fields), "classes": ['collapse']}
-            #      fieldsets.append((group,  fieldset_values))
-
             fieldsets = tuple(new_fieldsets)
         else:
             fieldsets = orig_fieldsets
@@ -278,6 +250,9 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     "already_inventorized": obj.get_current_inventory_records.last(),
                     "inventorize_url": f"{reverse('inventory:search-devices')}?id={obj.pk}",
                 },
+                "state_data_rendered": render_to_string(
+                    "core/device/state_btn_group.html", {"state_data": obj.get_state_data(user=request.user)}
+                ),
             }
         )
         return super().change_view(
@@ -287,22 +262,14 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             extra_context=extra_context,
         )
 
-    @admin.display(description="Records")
-    def get_record_info_display(self, obj):
-        try:
-            # current record may be none in case this device does
-            # not have any records yet.
-            context = dict(
-                # active_record=obj.active_record,
-                device_obj=obj,
-                list_view=True,
-            )
-            return render_to_string("core/device/record_action_snippet.html", context)
-        except:
-            import traceback
+    @admin.display(description="Actions")
+    def get_device_actions(self, obj):
+        context = {
+            "state_data": obj.get_state_data(user=self.request.user),
+            "size": "sm",
+        }
 
-            traceback.print_exc()
-            raise
+        return render_to_string("core/device/state_btn_group.html", context)
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):

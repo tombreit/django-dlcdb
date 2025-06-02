@@ -1,0 +1,45 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+
+<div
+    class="btn-group {% if size %} btn-group-{{ size }} {% endif %}"
+    role="group"
+    aria-label="Button group with nested dropdown"
+>
+
+  <a
+    href="{{ state_data.url }}"
+    class="{{ state_data.css_classes }} text-nowrap"
+    title="{{ state_data.title }}"
+  >
+    {{ state_data.label|title }}
+  </a>
+
+  <div
+    class="btn-group {% if size %} btn-group-{{ size }} {% endif %}"
+    role="group"
+  >
+    <button
+        type="button"
+        class="btn btn-secondary dropdown-toggle"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+    >
+      <i class="fa fa-plus"></i>
+    </button>
+    <div class="dropdown-menu">
+        {% for action in state_data.actions %}
+        <a
+            class="dropdown-item"
+            href="{{ action.url }}"
+        >
+            {{ action.label|title }}
+        </a>
+        {% endfor %}
+    </div>
+  </div>
+</div>

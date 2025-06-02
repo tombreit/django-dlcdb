@@ -77,7 +77,7 @@ SPDX-License-Identifier: EUPL-1.2
         <td>
 
             <div class="small">
-                {% include "core/device/record_action_snippet.html" with device_obj=device for_view="inventory" %}
+                {{ device.state_data_rendered }}
             </div>
 
             <span 
