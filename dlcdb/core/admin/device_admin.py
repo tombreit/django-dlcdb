@@ -6,7 +6,7 @@ import json
 
 from django.conf import settings
 from django.urls import reverse
-from django.utils.html import mark_safe, format_html
+from django.utils.html import format_html
 from django.contrib import admin
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
@@ -273,12 +273,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):
-        return mark_safe(
-            '<img src="{url}" width="{width}" height="{height}">'.format(
-                url=obj.qrcode.url,
-                width=200,
-                height=200,
-            )
+        return format_html(
+            '<img src="{url}" width="{width}" height="{height}">',
+            url=obj.qrcode.url,
+            width=200,
+            height=200,
         )
 
     @admin.display(description="Imported via")
