@@ -137,9 +137,13 @@ def nav(request):
             # The string "true" is currently used to disable permission checking
             return True
 
-        requested_permission = f"{applabel}.{permission}"
+        if "." in permission:
+            # It seems the persmission is already in the format "app_label.permission_name"
+            requested_permission = permission
+        else:
+            requested_permission = f"{applabel}.{permission}"
+
         user_permissions = user.get_all_permissions()
-        # print(user_permissions)
         return requested_permission in user_permissions
 
     for app in dlcdb_apps:
