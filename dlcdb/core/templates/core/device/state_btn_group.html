@@ -19,6 +19,7 @@ SPDX-License-Identifier: EUPL-1.2
     {{ state_data.label|title }}
   </a>
 
+  {% if state_data.actions %}
   <div
     class="btn-group {% if size %} btn-group-{{ size }} {% endif %}"
     role="group"
@@ -42,4 +43,6 @@ SPDX-License-Identifier: EUPL-1.2
         {% endfor %}
     </div>
   </div>
+  {% endif %}
+
 </div>
