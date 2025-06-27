@@ -233,6 +233,9 @@ class Inventory(models.Model):
     class Meta:
         verbose_name = _("Inventory")
         verbose_name_plural = _("Inventories")
+        permissions = [
+            ("can_inventorize", "Can inventorize devices"),
+        ]
 
     def __str__(self):
         return f"{_('Inventory')} {self.name}"

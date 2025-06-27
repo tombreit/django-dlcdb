@@ -40,7 +40,9 @@ from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerE
 from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
@@ -113,6 +115,7 @@ class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
 
 
 @login_required
+@permission_required("core.can_inventorize", raise_exception=True)
 def inventorize_room(request, pk):
     template = "inventory/inventorize_room_detail.html"
     current_inventory = Inventory.objects.active_inventory()
@@ -165,7 +168,10 @@ def inventorize_room(request, pk):
     return TemplateResponse(request, template, context)
 
 
-class InventorizeRoomView(LoginRequiredMixin, View):
+class InventorizeRoomView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    permission_required = "core.can_inventorize"
+    raise_exception = True
+
     def get(self, request, *args, **kwargs):
         return inventorize_room(request, *args, **kwargs)
 
@@ -188,10 +194,12 @@ class InventorizeRoomView(LoginRequiredMixin, View):
         return view(request, *args, **kwargs)
 
 
-class InventorizeRoomListView(LoginRequiredMixin, FilterView):
+class InventorizeRoomListView(LoginRequiredMixin, PermissionRequiredMixin, FilterView):
     model = Room
     context_object_name = "rooms"
     filterset_class = RoomFilter
+    permission_required = "core.can_inventorize"
+    raise_exception = True
 
     def get_queryset(self):
         try:
@@ -243,6 +251,7 @@ class InventorizeRoomListView(LoginRequiredMixin, FilterView):
 
 
 @login_required
+@permission_required("core.can_inventorize", raise_exception=True)
 def search_devices(request):
     if request.htmx:
         template = "inventory/partials/device_search_htmx.html"

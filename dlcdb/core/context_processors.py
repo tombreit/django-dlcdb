@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 from django.utils.html import format_html
 from django.urls import reverse
 from django.template.defaultfilters import pluralize
+from django.conf import settings
 
 from dlcdb.core.models import Room, Device
 
@@ -185,4 +186,15 @@ def nav(request):
         "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
         "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
         "nav_items_processes": [item for item in nav_items if item["slot"] == "nav_processes"],
+    }
+
+
+def django_settings(request):
+    """
+    Expose some cherry picked Django settings to the templates.
+    """
+    return {
+        "django_settings": {
+            "DEFAULT_FROM_EMAIL": settings.DEFAULT_FROM_EMAIL,
+        }
     }

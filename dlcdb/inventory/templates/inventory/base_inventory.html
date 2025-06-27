@@ -60,10 +60,12 @@ SPDX-License-Identifier: EUPL-1.2
                       <a class="nav-link" href="{% url 'inventory:search-devices' %}">
                         Devices
                       </a>
-                  </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Backend</a>
                     </li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                      <a class="nav-link" href="/">Backend</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarReportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                           Misc

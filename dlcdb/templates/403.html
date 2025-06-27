@@ -1,0 +1,35 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% extends "theme/_base.html" %}
+
+{% load i18n %}
+
+{% block title %}
+403 Forbidden
+{% endblock title %}
+
+
+{% block body %}
+
+<h1 class="display-5 mb-4">
+    403 Forbidden
+</h1>
+
+<p>
+{% translate "You do not have permission to access this page or perform this action." %}
+<br>
+{% blocktrans with email=django_settings.DEFAULT_FROM_EMAIL %}If you believe this is an error, please contact <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktrans %}
+</p>
+
+{% if not request.user.is_authenticated %}
+<p>
+{% trans "If you are not logged in, please log in:" %}
+<br>
+<a href="{% url 'login' %}">{% translate "Log in" %}</a>
+</p>
+{% endif %}
+{% endblock body %}
