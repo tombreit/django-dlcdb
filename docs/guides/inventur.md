@@ -59,7 +59,7 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ### Nacharbeiten
 
-- SAP-Ableich (*Prozesse > SAP-Abgleich*)
+- [SAP-Ableich (*Prozesse > SAP-Abgleich*)](#sap-abgleich)
 
 ## Geräte-Übersicht
 
