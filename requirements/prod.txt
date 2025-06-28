@@ -58,6 +58,7 @@ docutils==0.21.2
     #   myst-parser
     #   pydata-sphinx-theme
     #   sphinx
+    #   sphinx-togglebutton
 et-xmlfile==2.0.0
     # via openpyxl
 huey==2.5.3
@@ -126,9 +127,12 @@ sphinx==8.2.3
     #   pydata-sphinx-theme
     #   sphinx-book-theme
     #   sphinx-design
+    #   sphinx-togglebutton
 sphinx-book-theme==1.1.4
     # via django-dlcdb (pyproject.toml)
 sphinx-design==0.6.1
+    # via django-dlcdb (pyproject.toml)
+sphinx-togglebutton==0.3.2
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -154,5 +158,10 @@ tzdata==2025.2
     # via icalendar
 urllib3==2.5.0
     # via requests
+wheel==0.45.1
+    # via sphinx-togglebutton
 whitenoise==6.9.0
     # via django-dlcdb (pyproject.toml)
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

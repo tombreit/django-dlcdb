@@ -77,6 +77,7 @@ docutils==0.21.2
     #   myst-parser
     #   pydata-sphinx-theme
     #   sphinx
+    #   sphinx-togglebutton
 et-xmlfile==2.0.0
     # via openpyxl
 filelock==3.18.0
@@ -191,9 +192,12 @@ sphinx==8.2.3
     #   pydata-sphinx-theme
     #   sphinx-book-theme
     #   sphinx-design
+    #   sphinx-togglebutton
 sphinx-book-theme==1.1.4
     # via django-dlcdb (pyproject.toml)
 sphinx-design==0.6.1
+    # via django-dlcdb (pyproject.toml)
+sphinx-togglebutton==0.3.2
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -224,7 +228,9 @@ urllib3==2.5.0
 virtualenv==20.31.2
     # via pre-commit
 wheel==0.45.1
-    # via pip-tools
+    # via
+    #   pip-tools
+    #   sphinx-togglebutton
 whitenoise==6.9.0
     # via django-dlcdb (pyproject.toml)
 

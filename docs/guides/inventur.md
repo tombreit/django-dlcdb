@@ -4,6 +4,8 @@ Inventur-Ansicht: *Prozesse > Inventur*
 
 ## Screenshots
 
+```{toggle}
+
 ### Raum Übersicht
 
 ![Inventorize rooms](/_static/inventorize-rooms.webp){w=400px}
@@ -12,39 +14,45 @@ Inventur-Ansicht: *Prozesse > Inventur*
 
 ![Inventorize room](/_static/inventorize-room.webp){w=400px}
 
+```
+
 ## Inventur Prozess
 
-1. Voraussetzungen
+### Voraussetzungen
 
-   - Zugriff auf die DLCDB
-   - Endgerät mit aktuellem Mozilla Firefox oder Google Chrome Browser
-   - Hinweis: Inventur ist auch via Smartphone möglich
-   - Aktuelle Inventur angelegt  markiert
-   - Inventur (*Datenhaltung > Inventuren*, *Aktiv*) und Berechtigungen werden in DLCDB-Verwaltung angelegt
+- Zugriff auf die DLCDB, Berechtigung zum Inventarisieren
+- Endgerät (Smartphone, Tablet, Notebook) mit aktuellem Mozilla Firefox oder Google Chrome Browser
+- Aktuelle Inventur (*Datenhaltung > Inventuren*, *Aktiv*) angelegt
 
-1. Inventur
+### Vorgehen
 
-   - Inventur-Ansicht aufrufen: <https://fqdn/inventory/> (*Prozesse > Inventur*)
-   - Raum auswählen
-   - Geräteliste abarbeiten
-   
-     Via Button `State` können die drei Status eines Devices durchgewechselt und aktiviert werden:
+- Inventur-Modus aufrufen: {{ inventorize_fe_link }}
+- Raum auswählen
+- Geräteliste abarbeiten
 
-     - "?": Status unklar/aktuell nicht bearbeitet/hat keinen aktuellen Inventurstempel
-     - "✔": Device gefunden/ist in diesem Raum
-     - "❌": Device ist nicht in diesem Raum
+  Via Button `State` können die drei Status eines Devices durchgewechselt und aktiviert werden:
 
-   - Gerät ist aktuell verliehen: siehe [Hinweise Verleihgeräte](#verleihgeraete-target)
-   - Gerät in Raum gefunden, welches nicht in der Liste ist: via "Add device" hinzufügen und Status setzen
-   - Es können Inventurnotizen zu jedem Gerät und/oder zu jedem Raum angegeben werden
-   - Rauminventur speichern
-   - Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht. Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant eingeschränkt. 
+    - ![Button Unknown](/_static/inventorize-status-btn-unknown.webp){w=30px}: Status unklar/aktuell nicht bearbeitet/hat keinen aktuellen Inventurstempel
+    - ![Button Found](/_static/inventorize-status-btn-found.webp){w=30px}: Device gefunden/ist in diesem Raum
+    - ![Button Not Found](/_static/inventorize-status-btn-notfound.webp){w=30px}: Device ist nicht in diesem Raum
 
-1. Nacharbeiten
+- Gerät ist aktuell verliehen: siehe [Hinweise Verleihgeräte](#verleihgeräte)
+- Gerät in Raum gefunden, welches nicht in der Liste ist: via "Add device" hinzufügen und Status setzen
+- Es können Inventurnotizen zu jedem Gerät und/oder zu jedem Raum angegeben werden
+- Rauminventur speichern
 
-   - SAP-Ableich (*Prozesse > SAP-Abgleich*)
+### Nacharbeiten
 
-(verleihgeraete-target)=
+- SAP-Ableich (*Prozesse > SAP-Abgleich*)
+
+## Geräte-Übersicht
+
+Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht (*Hauptnavigation > Devices*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant/Kunde eingeschränkt.
+
+Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurstatus ausstehend etc.).
+
+![Inventorize devices overview](/_static/inventorize-devices.webp){w=400px}
+
 ## Verleihgeräte
 
 - Wird bei einem verliehenen Gerät auf "Ist nicht da ist" geklickt wird, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.

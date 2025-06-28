@@ -33,6 +33,7 @@ extensions = [
     "myst_parser",
     "sphinx_design",
     # 'linkify',
+    "sphinx_togglebutton",
 ]
 
 autosectionlabel_prefix_document = True
@@ -106,6 +107,7 @@ base_url = getattr(settings, "DLCDB_BASE_URL")
 myst_substitutions = {
     "base_url": base_url,
     "licenses_fe_link": f"[Lizenzen]({base_url}/lizenzen/)",
+    "inventorize_fe_link": f"[Inventarisieren]({base_url}/inventory/)",
 }
 
 
