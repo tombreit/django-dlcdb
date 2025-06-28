@@ -1,8 +1,8 @@
 # API
 
-*All endpoints are readonly*
+## Endpoints
 
-## API v2
+*All endpoints are readonly.*
 
 ```{list-table}
    :widths: 20 50 30
@@ -12,22 +12,22 @@
      - Endpoint
      - Note
    * - Root
-     - https://fqdn/api/v2/
+     - {{ api_base_url }}
      -
    * - Devices
-     - https://fqdn/api/v2/devices/
+     - {{ api_devices_url }}
      -
    * - Device by ``pk``
-     - https://fqdn/api/v2/devices/1689/
+     - {{ api_device_by_pk_url }}
      -
    * - Filter Devices by EDV-ID
-     - https://fqdn/api/v2/devices/?edv_id=NTB1146
+     - {{ api_device_by_id_url }}
      - *Note: Filter string must be an exact match.*
    * - Search Devices
-     - https://fqdn/api/v2/devices/?search=ntb1146
+     - {{ api_device_search_url }}
      -
    * - Persons with devices lent
-     - https://fqdn/api/v2/persons/
+     - {{ api_persons_with_devices }}
      - Filterable via ``?first_name=&last_name=&email=``
 ```
 

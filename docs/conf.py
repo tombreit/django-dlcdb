@@ -108,6 +108,12 @@ myst_substitutions = {
     "base_url": base_url,
     "licenses_fe_link": f"[Lizenzen]({base_url}/lizenzen/)",
     "inventorize_fe_link": f"[Inventarisieren]({base_url}/inventory/)",
+    "api_base_url": f"[{base_url}/api/v2/]({base_url}/api/v2/)",
+    "api_devices_url": f"[{base_url}/api/v2/devices/]({base_url}/api/v2/devices/)",
+    "api_device_by_pk_url": f"[{base_url}/api/v2/devices/1689/]({base_url}/api/v2/devices/1689/)",
+    "api_device_by_id_url": f"[{base_url}/api/v2/devices/devices/?edv_id=NTB1146/]({base_url}/api/v2/devices/devices/?edv_id=NTB1146)",
+    "api_device_search_url": f"[{base_url}/api/v2/devices/?search=ntb1146]({base_url}/api/v2/devices/?search=ntb1146)",
+    "api_persons_with_devices": f"[{base_url}/api/v2/persons/]({base_url}/api/v2/persons/)",
 }
 
 
