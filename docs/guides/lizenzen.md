@@ -1,6 +1,6 @@
 # Lizenzen
 
-- Lizenzverwaltung:  {{ licenses_fe_link }}
+- Lizenzverwaltung: {{ licenses_fe_link }}
 - Hat eine Lizenz eine Notiz, wird ein Sprechblasenicon angezeigt. Klicken auf das Sprechblasenicon zeigt oder versteckt die Notiz.
 
 ## Screenshots
