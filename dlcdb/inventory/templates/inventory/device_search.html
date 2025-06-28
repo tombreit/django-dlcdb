@@ -22,7 +22,7 @@ SPDX-License-Identifier: EUPL-1.2
             <form
                 id="id-search-form"
                 autocomplete="off"
-                hx-trigger="keyup, change, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
+                hx-trigger="keyup, change, input, keyup[target.value.length < 3] from:#id_q changed delay:500ms"
                 hx-get
                 hx-push-url="false"
             >

@@ -39,6 +39,10 @@ class DeviceAddForm(forms.Form):
     room = forms.CharField(widget=forms.HiddenInput())
 
 
+class SearchInput(forms.TextInput):
+    input_type = "search"
+
+
 class DeviceSearchForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,9 +50,10 @@ class DeviceSearchForm(forms.Form):
         self.form_tag = False
         self.helper.disable_csrf = True
 
+        self.fields["q"].widget = SearchInput(attrs={"autofocus": "on"})
         self.helper.layout = Layout(
             Row(
-                Column(Field("q", autofocus="on"), css_class="col-12 col-md-3"),
+                Column(Field("q"), css_class="col-12 col-md-3"),
                 Column("device_type", css_class="col-12 col-md-3"),
                 Column("record", css_class="col-6 col-md-3"),
                 Column("not_already_inventorized", css_class="col-6 col-md-3"),

@@ -33,13 +33,13 @@ SPDX-License-Identifier: EUPL-1.2
                 <div class="form-group">
                     <div class="input-group ">
                         <input 
-                            type="text"
+                            type="search"
                             name="q"
                             class="textinput form-control"
                             id="id_q"
                             autofocus
                             placeholder="Search rooms..."
-                            hx-trigger="keyup changed delay:500ms"
+                            hx-trigger="input, keyup changed delay:500ms"
                             hx-target="#room-list-body"
                             hx-push-url="true"
                             hx-get="."
