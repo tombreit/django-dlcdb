@@ -3,16 +3,26 @@
 ## Benutzer, Gruppen und Tenants einrichten
 
 1. Gruppen anlegen
+
    Via: *Start › Authentifizierung und Autorisierung › Gruppen*. Es empfieht sich, für Alltagsaufgaben eine Gruppe mit eingeschränkten Rechten zu verwenden.
+
 1. Permissions für Gruppen vergeben
+
    Für jedes Model/View lassen sich einer Gruppe Berechtigungen/Permissions zuordnen. Es stehen für fast alle Models/Views die folgenden Berechtigungen zur Verfügung:
+
    * *Can add*
    * *Can change*
    * *Can delete*
    * *Can view*
+
+   Zudem existieren spezielle Berechtigungen, z.B. zum Durchführen von Inventuren (*Can inventorize*)
+
 1. User einrichten + Gruppen zuordnen
+
    Via: *Start › Accounts › Benutzer*.
+
 1. Tenant einrichten
+
    Via: *Home/Start > Tenants > Add Tenant* einen Tenant anlegen und dem Tenant eine Gruppe zuordnen.
 
 :::{admonition} **LDAP**
