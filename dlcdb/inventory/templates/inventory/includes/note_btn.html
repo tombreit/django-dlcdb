@@ -4,13 +4,8 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-{# <pre>{{ obj_type }} / {{ obj }} / {{ obj.uuid }}</pre> #}
 <button 
-    {% if obj_type == "device" %}
-        hx-get="{% url 'inventory:note-update' obj_type=obj_type obj_uuid=obj_uuid %}"
-    {% else %}
-        hx-get="{% url 'inventory:note-update' obj_type=obj_type obj_uuid=obj.uuid %}"
-    {% endif %}
+    hx-get="{% url 'inventory:note-update' obj_type=obj_type obj_uuid=obj.uuid %}"
     hx-target="#dialog"
     class="note-btn btn btn-sm btn-outline-primary"
 >

@@ -370,7 +370,7 @@ class Inventory(models.Model):
                     note_obj, note_obj_created = Note.objects.get_or_create(
                         inventory=current_inventory,
                         device=active_record.device,
-                        room=external_room,
+                        # room=external_room,
                     )
                     note_obj.text = f"{note_obj.text} *** {lent_not_found_msg}"
                     note_obj.save()

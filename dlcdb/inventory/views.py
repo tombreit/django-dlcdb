@@ -341,7 +341,7 @@ def get_note_btn(request, obj_type, obj_uuid):
     elif obj_type == "room":
         obj = Inventory.objects.tenant_aware_room_objects().get(uuid=obj_uuid)
 
-    return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj_uuid": obj_uuid, "obj": obj})
+    return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj": obj})
 
 
 @login_required
