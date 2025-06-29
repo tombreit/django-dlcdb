@@ -1,6 +1,7 @@
 {% load static i18n %}
 
 <nav class="navbar-main navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
+  <div class="container-fluid">
     <a class="navbar-brand ms-2" href="{{ navigation.home_url }}">
         <img 
           src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
@@ -42,6 +43,13 @@
                 </a>
             </li>
             {% endfor %}
+          {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/docs/">
+                  <i class="bi bi-life-preserver"></i>
+                  Docs
+                </a>
+              </li>
         {% endif %}
           
           {% if request.user.is_authenticated or navigation.userdropdown %}
@@ -70,4 +78,5 @@
 
         </ul>
     </div>
+  </div>
 </nav>
