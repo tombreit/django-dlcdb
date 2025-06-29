@@ -38,8 +38,15 @@ Inventur-Ansicht: *Prozesse > Inventur*
 
 - Gerät ist aktuell verliehen: siehe [Hinweise Verleihgeräte](#verleihgeräte)
 - Gerät in Raum gefunden, welches nicht in der Liste ist: via "Add device" hinzufügen und Status setzen
-- Es können Inventurnotizen zu jedem Gerät und/oder zu jedem Raum angegeben werden
+- Es können [Inventurnotizen](#notizen) zu jedem Gerät und/oder zu jedem Raum angegeben werden
 - Rauminventur speichern
+- Das wars, nächster Raum
+
+### Notizen
+
+Für Geräte wie auch für Räume können Inventurnotizen <img alt="Note icon" src="../_static/fa-comment-alt.svg" class="fa-svg inline" /> angelegt werden. Das Icon <img alt="Note icon" src="../_static/fa-comment-alt-solid.svg" class="fa-svg inline" /> signalisiert eine vorhandene Inventurnotiz.
+
+Geräte-Inventurnotizen erscheinen auch im [SAP-Abgleich](#sap-abgleich).
 
 ### Sonderfälle
 
