@@ -191,7 +191,11 @@ SPDX-License-Identifier: EUPL-1.2
                     {% include 'inventory/includes/record_info.html' %}
                 </td>
                 <td>
-                    <div hx-trigger="objectListChanged from:body" hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}" hx-swap="innerHTML">
+                    <div
+                        hx-trigger="objectListChanged from:body"
+                        hx-get="{% url 'inventory:get_note_btn' obj_type='device' obj_uuid=device.uuid %}"
+                        hx-swap="innerHTML"
+                    >
                         {% include 'inventory/includes/note_btn.html' with obj_type="device" obj=device %}
                     </div>
                 </td>
