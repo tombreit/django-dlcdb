@@ -4,10 +4,11 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-<button 
+<button
+    type="button"  {# type="button" needed to prevent behaving as a submit button #}
+    class="note-btn btn btn-sm btn-outline-primary"
     hx-get="{% url 'inventory:note-update' obj_type=obj_type obj_uuid=obj.uuid %}"
     hx-target="#dialog"
-    class="note-btn btn btn-sm btn-outline-primary"
 >
     {% if obj.has_inventory_note %}
         <i class="fas fa-comment-alt"></i>
