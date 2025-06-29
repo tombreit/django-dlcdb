@@ -360,12 +360,13 @@ class Inventory(models.Model):
                         active_record.room != external_room,
                     ]
                 ):
+                    previous_room = active_record.room
                     active_record.room = external_room
                     active_record.save()
 
                     # Set inventory note
                     # TODO: Fix multiple injections of same note string
-                    lent_not_found_msg = f"Lented asset not found in expected location `{active_record.room}`."
+                    lent_not_found_msg = f"Lented asset not found in expected location `{previous_room}. Changed to `{active_record.room}`."
                     note_obj, note_obj_created = Note.objects.get_or_create(
                         inventory=current_inventory,
                         device=active_record.device,
