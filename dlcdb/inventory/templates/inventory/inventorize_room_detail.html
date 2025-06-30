@@ -143,6 +143,7 @@ SPDX-License-Identifier: EUPL-1.2
                 </td>
                 <td>
                     <strong>
+                    {% if request.user.is_staff %}
                     <a
                         class="d-inline-block rounded bg-light p-1"
                         href="{% url 'admin:core_device_change' device.pk %}"
@@ -159,6 +160,23 @@ SPDX-License-Identifier: EUPL-1.2
                             </div>
                         {% endif %}
                     </a>
+                    {% else %}
+                    <span
+                        class="d-inline-block rounded bg-light p-1"
+                        title="Device UUID: {{ device.uuid }}"
+                    >{# ?_popup=1 #}
+                        {% if device.edv_id %}
+                            <div class="">
+                                <small>EDV-ID:</small> <span class="text-monospace">{{ device }}</span>
+                            </div>
+                        {% endif %}
+                        {% if device.sap_id %}
+                            <div class="">
+                                <small>SAP-ID:</small> <span class="text-monospace">{{ device.sap_id }}</span>
+                            </div>
+                        {% endif %}
+                    </span>
+                    {% endif %}
                     </strong>
                     {% if device.manufacturer or device.series %}
                     <p>
