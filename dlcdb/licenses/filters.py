@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from functools import reduce
 from operator import or_
 

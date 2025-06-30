@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render, get_object_or_404

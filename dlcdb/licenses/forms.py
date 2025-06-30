@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django import forms
 from django.db.models import Q
 from django.core.exceptions import ValidationError

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.utils.translation import gettext_lazy as _
 import datetime
 import huey

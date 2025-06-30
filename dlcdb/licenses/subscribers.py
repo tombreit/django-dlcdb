@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from simple_history.utils import update_change_reason
 from django.utils import timezone
 from datetime import timedelta

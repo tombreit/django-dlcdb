@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from django.contrib import messages
 from django_htmx.http import HttpResponseClientRefresh
 from django.contrib.auth.models import Permission

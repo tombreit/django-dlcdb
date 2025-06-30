@@ -1,0 +1,70 @@
+version = 1
+SPDX-PackageName = "django-dlcdb"
+SPDX-PackageSupplier = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-PackageDownloadLocation = "https://gitlab.gwdg.de/dlcdb/django-dlcdb"
+
+[[annotations]]
+path = "**/templates/**/*.html"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "EUPL-1.2"
+
+[[annotations]]
+path = "package**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "docs/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "requirements/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "dlcdb/**/**.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "EUPL-1.2"
+
+[[annotations]]
+path = "dlcdb/inventory/static/inventory/qr-scanner**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (c) 2017 Nimiq, danimoh"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "dlcdb/static/branding/favicon.ico"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "dlcdb/core/tests/test_data/devices-sap.correct.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "dlcdb/locale/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "dlcdb/**/migrations/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "frontend/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "EUPL-1.2"

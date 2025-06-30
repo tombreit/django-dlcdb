@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
 from datetime import timedelta
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404

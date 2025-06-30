@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Thomas Breitner
+//
+// SPDX-License-Identifier: EUPL-1.2
+
 import { initModal, initToast } from './modules/ui.js'
 import { initInventorizeRoomDetail } from './modules/inventorize_room_detail.js'
 import { initQrToggle } from './modules/qrtoggle.js'
