@@ -17,8 +17,24 @@ export function initInventorizeRoomDetail() {
     // Filter table functionality
     const devicesTable = document.querySelector('#devices-table tbody')
     const devicesTableSearchInput = document.querySelector('#search-table-input')
+    const devicesTableSearchButton = document.getElementById('search-table-button')
 
-    if (devicesTable && devicesTableSearchInput) {
+    // Display current device count in the search button
+    function updateDeviceTableCounter() {
+      if (!devicesTableSearchButton || !devicesTable) return
+      const rows = Array.from(devicesTable.rows)
+      const visibleRows = rows.filter(row => row.style.display !== 'none')
+      // Find the <i> inside the button and set the counter as a badge
+      let counterSpan = devicesTableSearchButton.querySelector('.table-counter-badge')
+      if (!counterSpan) {
+        counterSpan = document.createElement('span')
+        counterSpan.className = 'table-counter-badge badge bg-secondary ms-2'
+        devicesTableSearchButton.appendChild(counterSpan)
+      }
+      counterSpan.textContent = visibleRows.length
+    }
+
+    if (devicesTable && devicesTableSearchInput && devicesTableSearchButton) {
       function filterDeviceTable() {
         const query = devicesTableSearchInput.value.toLowerCase()
         const rows = devicesTable.rows
@@ -35,8 +51,11 @@ export function initInventorizeRoomDetail() {
           }
           row.style.display = matchInRow ? 'table-row' : 'none'
         }
+        updateDeviceTableCounter()
       }
       devicesTableSearchInput.addEventListener('keyup', filterDeviceTable)
+      // Initial counter update
+      updateDeviceTableCounter()
     }
   }
 
