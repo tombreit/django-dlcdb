@@ -34,9 +34,9 @@ SPDX-License-Identifier: EUPL-1.2
             class="small"
             href="{{ inventory_status.inventorize_url }}"
             {% if inventory_status.already_inventorized %}
-                style="background-color: var(--success)"
+                style="color: black; background-color: var(--message-success-bg)"
             {% else %}
-                style="background-color: var(--danger)"
+                style="color: black; background-color: var(--message-warning-bg)"
             {% endif %}
         >
             <i class="fa-solid fa-glasses"></i> 
