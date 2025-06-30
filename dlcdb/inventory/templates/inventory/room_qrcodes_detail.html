@@ -51,9 +51,13 @@ SPDX-License-Identifier: EUPL-1.2
     {% for device in devices %}
         <tr>
             <td>
+                {% if request.user.is_staff %}
                 <a href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
                     {{ device }}
                 </a>
+                {% else %}
+                    {{ device }}
+                {% endif %}
             </td>
             <td>
                 {% if device.manufacturer or device.series %}
