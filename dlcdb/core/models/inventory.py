@@ -101,9 +101,15 @@ class InventoryQuerySet(models.QuerySet):
         return qs
 
     def inventory_relevant_devices(self, tenant=None, is_superuser=False):
+        device_search_tenant_aware = self.active_inventory().device_search_tenant_aware
+
+        if device_search_tenant_aware:
+            qs = Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+        else:
+            qs = Inventory.objects.tenant_unaware_device_objects()
+
         return (
-            Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
-            .exclude(active_record__record_type=Record.REMOVED)
+            qs.exclude(active_record__record_type=Record.REMOVED)
             .exclude(sap_id__isnull=True)
             .exclude(sap_id__exact="")
             .annotate(already_inventorized=Exists(self._current_inventory_records()))
@@ -216,6 +222,11 @@ class Inventory(models.Model):
     name = models.CharField(max_length=255, verbose_name="Name")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     is_active = models.BooleanField(default=False, verbose_name="Aktiv")
+    device_search_tenant_aware = models.BooleanField(
+        default=True,
+        verbose_name=_("Device search tenant aware"),
+        help_text=_("If set, the device search will only return devices for the current tenant."),
+    )
 
     # started_on = models.DateField(
     #     null=True,
