@@ -90,7 +90,7 @@
     </div>
 </div>
 
-<form method="post">
+<form method="post" id="inventory-save-form-alt-s">
     {% csrf_token %}
 
     <div class="table-responsive">
@@ -216,7 +216,11 @@
     </table>
     </div>
 
-    <button type="submit" class="btn btn-danger btn-lg btn-block">
+    <button
+        type="submit"
+        class="btn btn-danger btn-lg btn-block"
+        accesskey="s"
+    >
         Save inventory for room {{ room }}
     </button>
 

@@ -61,6 +61,25 @@ export function initInventorizeRoomDetail() {
       // Initial counter update
       updateDeviceTableCounter()
     }
+
+    // Keyboard shortcut: Ctrl+Alt+S to submit the inventory form
+    const inventoryForm = document.getElementById('inventory-save-form-alt-s')
+    if (inventoryForm) {
+      document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.altKey && (e.key === 's' || e.key === 'S')) {
+          // Only trigger if the form is visible and not in a modal/hidden
+          if (document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault()
+            if (inventoryForm.requestSubmit) {
+              inventoryForm.requestSubmit()
+            }
+            else {
+              inventoryForm.submit()
+            }
+          }
+        }
+      })
+    }
   }
 
   // Check if we're on the inventorize_room_detail page via a data attribute
