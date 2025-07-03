@@ -56,6 +56,8 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         "removed_info",
         "removed_date",
         "get_attachments",
+        "effective_until",
+        "assigned_device",
         # These fields are already set via get_readonly_fields() in CustomBaseModelAdmin
         # 'user',
         # 'username',
