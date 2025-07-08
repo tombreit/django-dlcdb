@@ -16,7 +16,9 @@
     <span>
         {{ device.active_record.created_at|date:"Y-m-d" }}
         {% if device.get_current_inventory_records.last.record_type == "LOST" %}
-        <br>Not found
+            <br>Not found
+        {% else %}
+            <br>{{ device.get_current_inventory_records.last.room }}
         {% endif %}
     </span>
 </small>
