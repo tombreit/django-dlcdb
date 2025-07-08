@@ -1,5 +1,9 @@
 <small
-    class="badge text-bg-warning"
+    class="badge {% if device.get_current_inventory_records.last.record_type == "LOST" %}
+        text-bg-danger
+    {% else %}
+        text-bg-warning
+    {% endif %}"
     title="Current record created at {{ device.active_record.created_at|date:"Y-m-d" }}, {{ device.active_record.created_at|timesince }} ago"
 >
     {% if device.already_inventorized %}
@@ -11,5 +15,8 @@
 
     <span>
         {{ device.active_record.created_at|date:"Y-m-d" }}
+        {% if device.get_current_inventory_records.last.record_type == "LOST" %}
+        <br>Not found
+        {% endif %}
     </span>
 </small>

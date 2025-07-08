@@ -82,10 +82,7 @@
             
             {% if device.already_inventorized %}
                 <br>
-                <span class="badge text-bg-success" title="Inventory: {{ device.active_record.inventory.name }}">
-                    {{ current_inventory.name }}
-                </span>
-                <br>
+                {% include 'inventory/includes/record_info.html' %}
             {% endif %}
         </td>
         <td>
