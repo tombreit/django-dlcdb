@@ -55,8 +55,9 @@ class DeviceSearchForm(forms.Form):
             Row(
                 Column(Field("q"), css_class="col-12 col-md-3"),
                 Column("device_type", css_class="col-12 col-md-3"),
-                Column("record", css_class="col-6 col-md-3"),
-                Column("not_already_inventorized", css_class="col-6 col-md-3"),
+                Column("record", css_class="col-6 col-md-2"),
+                Column("not_already_inventorized", css_class="col-6 col-md-2"),
+                Column("tenant", css_class="col-12 col-md-2"),
             )
         )
 

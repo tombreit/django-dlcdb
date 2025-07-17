@@ -71,4 +71,5 @@ class DeviceFilter(django_filters.FilterSet):
         fields = [
             "not_already_inventorized",
             "id",
+            "tenant",
         ]
