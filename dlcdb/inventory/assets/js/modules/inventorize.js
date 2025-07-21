@@ -29,14 +29,14 @@ const getRowUuidSelector = uuid => `${ROW_UUID_PREFIX}${uuid}`
 
 
 async function getDeviceByUuid(uuid) {
-  const apiDeviceQuery = `${apiBaseUrl}/devices/${uuid}/`
+  const apiDeviceQuery = `${apiBaseUrl}devices/${uuid}/`
   const response = await fetch(apiDeviceQuery, { headers: { Authorization: `Token ${apiToken}` } })
   const deviceData = await response.json()
   return deviceData
 }
 
 async function getRoomByUuid(uuid) {
-  const apiRoomQuery = `${apiBaseUrl}/rooms/${uuid}/`
+  const apiRoomQuery = `${apiBaseUrl}rooms/${uuid}/`
   const response = await fetch(apiRoomQuery, { headers: { Authorization: `Token ${apiToken}` } })
   const roomData = await response.json()
   return roomData

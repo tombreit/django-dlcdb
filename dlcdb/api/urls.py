@@ -15,5 +15,6 @@ router.register(r"persons", views.PersonViewSet)
 router.register(r"rooms", views.RoomViewSet)
 
 urlpatterns = [
+    path("", views.api_root, name="api-v2-root"),
     path("", include(router.urls)),
 ]

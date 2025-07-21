@@ -89,7 +89,7 @@ def get_js_vars(request):
     js_vars = {
         "qrCodePrefix": settings.QRCODE_PREFIX,
         "djangoDebug": settings.DEBUG,
-        "apiBaseUrl": f"{request.scheme}://{request.get_host()}/api/v2",
+        "apiBaseUrl": request.build_absolute_uri(reverse("api-v2-root")),
         "apiToken": Token.objects.first().key,
         "qrToggleUrl": reverse("inventory:update-qrtoggle"),
         "qrScannerEnabled": bool(request.session.get("qrscanner_enabled")),
