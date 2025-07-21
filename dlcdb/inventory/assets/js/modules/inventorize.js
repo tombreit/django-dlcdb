@@ -30,7 +30,12 @@ const getRowUuidSelector = uuid => `${ROW_UUID_PREFIX}${uuid}`
 
 async function getDeviceByUuid(uuid) {
   const apiDeviceQuery = `${apiBaseUrl}devices/${uuid}/`
-  const response = await fetch(apiDeviceQuery, { headers: { Authorization: `Token ${apiToken}` } })
+  const response = await fetch(
+    apiDeviceQuery, {
+      credentials: 'include',
+      headers: { Authorization: `Token ${apiToken}` },
+    },
+  )
   const deviceData = await response.json()
   return deviceData
 }
