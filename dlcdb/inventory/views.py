@@ -52,7 +52,7 @@ from django.utils.html import format_html
 from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
-from dlcdb.core.models import Room, Device, Inventory
+from dlcdb.core.models import Room, Device, Inventory, Note
 from dlcdb.core.utils.helpers import get_user_email
 
 from .sap import create_sap_list_comparison
@@ -416,9 +416,39 @@ def update_note_view(request, obj_type, obj_uuid):
 
     context = {
         "note_object": obj,
+        "note_pk": note.pk if note else None,
         "hx_post_url": hx_post_url,
         "form": form,
     }
     template = "inventory/includes/note_form.html"
 
     return render(request, template, context)
+
+
+@login_required
+def delete_note_view(request, pk):
+    if request.method == "POST":
+        note = Note.objects.filter(pk=pk)
+        if note.exists():
+            note.delete()
+            msg = f"Note (pk={pk}) deleted successfully."
+            messages.success(request, msg)
+        else:
+            msg = f"No note found for pk={pk}."
+            messages.warning(request, msg)
+
+        headers = {
+            "HX-Trigger": json.dumps(
+                {
+                    "objectListChanged": None,
+                    "showMessage": msg,
+                }
+            ),
+        }
+
+        return HttpResponse(
+            status=204,
+            headers=headers,
+        )
+    else:
+        return HttpResponseForbidden()

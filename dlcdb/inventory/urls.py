@@ -12,6 +12,7 @@ urlpatterns = [
     path("room/<int:pk>/qrs/", views.QrCodesForRoomDetailView.as_view(), name="qr-room-printout"),
     path("room/<int:pk>/", views.InventorizeRoomView.as_view(), name="inventorize-room"),
     path("note-btn/<str:obj_type>/<uuid:obj_uuid>/", views.get_note_btn, name="get_note_btn"),
+    path("note/<int:pk>/delete/", views.delete_note_view, name="note-delete"),
     path("note/<str:obj_type>/<uuid:obj_uuid>/", views.update_note_view, name="note-update"),
     path("misc/inventory_lending_report/", views.InventoryReportView.as_view(), name="inventory-lending-report"),
     path("devices/", views.search_devices, name="search-devices"),
