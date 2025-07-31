@@ -84,6 +84,14 @@ def manage_subscribers(device, subscribers):
 
     if change_reasons:
         # Update the last history record with the change reason
-        update_change_reason(device, "; ".join(change_reasons))
+        # The 'device' object passed in will be a Device instance and not
+        # the proxy model LicenseAsset.
+        try:
+            update_change_reason(device, "; ".join(change_reasons))
+        except Exception as e:
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to update change reason: {e}")
 
     return

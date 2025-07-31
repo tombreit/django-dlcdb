@@ -20,7 +20,7 @@ from django.db.models import OuterRef, Subquery
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, InRoomRecord, Room
+from dlcdb.core.models import LicenceRecord, InRoomRecord, Room, Device
 from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
@@ -68,12 +68,14 @@ def edit(request, license_id):
         # raise NotImplementedError("Non HTMX requests not implemented")
         template = "licenses/form.html"
 
-    license = get_object_or_404(LicenseAsset, id=license_id)
+    # Fetch the concrete Device model directly, as django-simple-history
+    # does not support proxy models for the history.
+    device = get_object_or_404(Device, id=license_id)
 
     if request.method == "POST":
         form = LicenseForm(
             request.POST,
-            instance=license,
+            instance=device,
         )
 
         if form.is_valid():
@@ -99,23 +101,23 @@ def edit(request, license_id):
     else:
         # GET request
         form = LicenseForm(
-            instance=license,
+            instance=device,
         )
 
     # Determine if calendar URL should be shown (check for relevant dates)
     calendar_url = False
-    if license.contract_start_date or license.contract_expiration_date:
-        calendar_url = reverse("licenses:license_calendar", args=[license.uuid])
+    if device.contract_start_date or device.contract_expiration_date:
+        calendar_url = reverse("licenses:license_calendar", args=[device.uuid])
 
     return TemplateResponse(
         request,
         template,
         {
             "form": form,
-            "license": license,
+            "license": device,
             "template": template,
             "title": _("Edit license"),
-            "obj_admin_url": reverse("admin:core_device_change", args=[license.id]),
+            "obj_admin_url": reverse("admin:core_device_change", args=[device.id]),
             "calendar_url": calendar_url,
         },
     )
