@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import traceback
+
 from itertools import chain
 from operator import attrgetter
 
@@ -16,7 +18,6 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.db.models import OuterRef, Subquery
 
-
 from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core.models import LicenceRecord, InRoomRecord, Room
@@ -24,7 +25,6 @@ from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
 from .models import LicensesConfiguration, LicenseAsset
-import traceback
 
 
 @login_required
