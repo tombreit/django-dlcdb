@@ -47,7 +47,7 @@ class EmailChannel(NotificationChannel):
             subscription = message.subscription
             subject, body = message.get_content()
 
-            subject = f"[{settings.EMAIL_SUBJECT_PREFIX}] {subject}"
+            subject = f"{settings.EMAIL_SUBJECT_PREFIX} {subject}"
 
             send_mail(
                 subject=subject,

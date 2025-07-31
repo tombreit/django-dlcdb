@@ -217,7 +217,7 @@ class Message(models.Model):
             "subscription": subscription,
             "subscriber": subscription.subscriber,
             "device": subscription.device,
-            "subject_prefix": settings.EMAIL_SUBJECT_PREFIX if hasattr(settings, "EMAIL_SUBJECT_PREFIX") else "",
+            "subject_prefix": settings.EMAIL_SUBJECT_PREFIX,
         }
 
         # Render the templates
