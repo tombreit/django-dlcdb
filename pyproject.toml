@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "Django==5.2.3",
+    "Django==5.2.4",
     "django-select2",
     "django-environ",
     "django-crispy-forms",
@@ -57,7 +57,7 @@ dev = [
     "pytest-cov",
     "pip-tools",
     "django-auth-ldap",
-    "django-debug-toolbar",
+    "django-debug-toolbar<6",  # As v6 introduced a db migration: https://github.com/django-commons/django-debug-toolbar/issues/2168
     "django_extensions",
     # for js qr scanner https connections on localhost runserver:
     # see: https://github.com/django-extensions/django-extensions/issues/1475

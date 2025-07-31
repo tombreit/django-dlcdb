@@ -8,7 +8,7 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-asgiref==3.8.1
+asgiref==3.9.1
     # via
     #   django
     #   django-htmx
@@ -20,7 +20,7 @@ beautifulsoup4==4.13.4
     # via pydata-sphinx-theme
 build==1.2.2.post1
     # via pip-tools
-certifi==2025.6.15
+certifi==2025.7.14
     # via requests
 cfgv==3.4.0
     # via pre-commit
@@ -28,13 +28,13 @@ charset-normalizer==3.4.2
     # via requests
 click==8.2.1
     # via pip-tools
-coverage==7.9.1
+coverage==7.10.1
     # via pytest-cov
 crispy-bootstrap5==2025.6
     # via django-dlcdb (pyproject.toml)
-distlib==0.3.9
+distlib==0.4.0
     # via virtualenv
-django==5.2.3
+django==5.2.4
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -122,7 +122,7 @@ packaging==25.0
     #   pydata-sphinx-theme
     #   pytest
     #   sphinx
-pillow==11.2.1
+pillow==11.3.0
     # via django-dlcdb (pyproject.toml)
 pip-tools==7.4.1
     # via django-dlcdb (pyproject.toml)
@@ -175,7 +175,7 @@ requests==2.32.4
     # via sphinx
 roman-numerals-py==3.1.0
     # via sphinx
-ruff==0.12.1
+ruff==0.12.7
     # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
@@ -217,7 +217,7 @@ sqlparse==0.5.3
     # via
     #   django
     #   django-debug-toolbar
-typing-extensions==4.14.0
+typing-extensions==4.14.1
     # via
     #   beautifulsoup4
     #   pydata-sphinx-theme
@@ -225,7 +225,7 @@ tzdata==2025.2
     # via icalendar
 urllib3==2.5.0
     # via requests
-virtualenv==20.31.2
+virtualenv==20.32.0
     # via pre-commit
 wheel==0.45.1
     # via
