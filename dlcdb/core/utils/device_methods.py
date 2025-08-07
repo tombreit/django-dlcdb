@@ -65,9 +65,14 @@ def get_device_state_data(device, *, user=None, app_name=None):
             label = f"{active_record.room.number} {label}"
         elif active_record.record_type == Record.INROOM:
             url = f"{reverse('admin:core_record_changelist')}?device__id__exact={device.pk}"
-            label = "Room not set!"
-            if hasattr(active_record, "room") and active_record.room:
+
+            if hasattr(active_record, "room") and hasattr(active_record.room, "number"):
                 label = f"{active_record.room.number} {label}"
+            else:
+                # This should not happen for an INROOM record, but some
+                # legacy or imported records might not have a room set.
+                label = "Room not set!"
+
             title = _("Previous records for this device")
         elif active_record.record_type == Record.LENT:
             url = reverse("admin:core_lentrecord_change", args=[active_record])
