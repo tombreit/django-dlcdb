@@ -15,10 +15,13 @@ from django.template.loader import get_template
 
 from dlcdb.core.models import Inventory, Person
 from dlcdb.inventory.utils import update_inventory_note
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Send emails (TO: lender, BCC: it-support) about all lented devices without an current inventory stamp or generate a report file."
+    help = f"Send emails (TO: lender, BCC: {settings.DEFAULT_FROM_EMAIL}) about all lented devices without an current inventory stamp or generate a report file."
 
     MAILTO_KEYWORD_LENDER = "to_lender"
     SEPARATOR = 80 * "*"
@@ -27,14 +30,14 @@ class Command(BaseCommand):
         parser.add_argument(
             "--send_mails",
             action="store_true",
-            help="Send mails. Defaults to False. If send_mails is true but no --mailto_addr is given, emails only get reported via console.",
+            help="Send mails. If send_mails is given but no --mailto_addr is given, emails only get reported to console.",
         )
         parser.add_argument(
             "--mailto_addr",
             required=False,
             type=str,
             # default=settings.DEFAULT_FROM_EMAIL,
-            help=f'Send verification emails to given email address. Defaults to `{settings.DEFAULT_FROM_EMAIL}`. Set to value `{self.MAILTO_KEYWORD_LENDER}` to mail actual lenders; or Set to value to a single email addr to send all emails to this given addr; or give a list of email addrs (format: `"receipient1@fqdn, receipient2@fqdn,...")` to only notifiy this given email addresses. Processed only when --send_mails is set.',
+            help=f'Send verification emails to given email address. Defaults to `{settings.DEFAULT_FROM_EMAIL}`. Set to value `{self.MAILTO_KEYWORD_LENDER}` to mail actual lenders; or set to value to a single email addr to send all emails to this given addr; or give a list of email addrs (format: `"receipient1@fqdn, receipient2@fqdn,...")` to only notifiy this given email addresses. Processed only when --send_mails is set.',
         )
         parser.add_argument(
             "--deadline_days_from_now",
@@ -53,6 +56,7 @@ class Command(BaseCommand):
         deadline = now + timedelta(days=deadline_days)
 
         for lender in self.get_lenders_qs(devices):
+            logger.debug(f"Processing lender: {lender}")
             lent_devices = devices.filter(active_record__person=lender).order_by("device_type")
 
             lender_email = None
@@ -189,6 +193,7 @@ class Command(BaseCommand):
             mail_devices = Inventory.objects.lent_devices(
                 exclude_already_inventorized=True,
             )
+            logger.debug(f"Found {mail_devices.count()} devices to verify.")
 
             if mailto_addr_arg:
                 self.stdout.write("Will send mails...")
@@ -206,3 +211,6 @@ class Command(BaseCommand):
                 self.stdout.write("+++ No `--mail_addr` given, only report mailings +++")
                 self.stdout.write(f"Count lenders/emails: {self.get_lenders_qs(mail_devices).count()}")
                 self.stdout.write(f"Count devices:        {mail_devices.count()}")
+                self.stdout.write(
+                    "\n".join(f"{idx:>5}. {lender}" for idx, lender in enumerate(self.get_lenders_qs(mail_devices), 1))
+                )
