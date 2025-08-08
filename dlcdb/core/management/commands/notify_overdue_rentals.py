@@ -24,7 +24,7 @@ class Command(BaseCommand):
     - cron calls this management command
     - search for all lented devices which are overdue
     - collect some stats for all devices
-    - send an email for each overdue device to it-support
+    - send an email for each overdue device to DEFAULT_FROM_EMAIL
 
     Hints:
 
