@@ -38,5 +38,5 @@ Equipment that you confirm to be in your possession may need to be submitted for
 
 Please reply to this email by {{ deadline|date:"m-d-Y" }}. Use the "Reply" function to respond and leave the subject line unchanged.
 
-Best wishes,
+Kind regards,
 {{ contact_email }}
