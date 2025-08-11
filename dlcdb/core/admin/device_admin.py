@@ -17,6 +17,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device
+from ..models import Record
 from ..utils.helpers import get_has_note_badge, get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
@@ -93,6 +94,13 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "qrcode_display",
         # 'qrcode',
     )
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if obj and obj.active_record and obj.active_record.record_type == Record.LENT:
+            if "is_lentable" not in readonly:
+                readonly.append("is_lentable")
+        return readonly
 
     actions = [
         "relocate",
