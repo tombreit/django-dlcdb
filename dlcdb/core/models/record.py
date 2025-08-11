@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import datetime
+from typing import Optional
+from datetime import datetime
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -180,9 +181,7 @@ class Record(AuditBaseModel):
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_lent_desired_end_date",
                 condition=Q(
-                    lent_desired_end_date__lte=datetime.datetime.strptime(
-                        settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d"
-                    )
+                    lent_desired_end_date__lte=datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d")
                 ),
             ),
             models.CheckConstraint(
@@ -296,3 +295,16 @@ class Record(AuditBaseModel):
         """
         current_state = self.get_current_state()
         return self.STATE_TRANSITIONS.get(current_state, [])
+
+    def get_last_found(self) -> Optional[datetime]:
+        RECORD_TYPES_FOUND = [Record.INROOM, Record.LENT]
+
+        found_records_for_device = self.device.record_set.filter(
+            record_type__in=RECORD_TYPES_FOUND,
+        )
+
+        last_found_record = found_records_for_device.last()
+        if last_found_record and getattr(last_found_record, "created_at", None):
+            return last_found_record.created_at
+
+        return None

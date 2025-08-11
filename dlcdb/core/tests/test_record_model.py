@@ -4,7 +4,8 @@
 
 import pytest
 from django.core.exceptions import ValidationError
-from dlcdb.core.models import Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord
+from dlcdb.core.models import Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord, Person, Device
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -122,3 +123,53 @@ def test_removed_or_lost_record_has_no_room(room, device_1):
     # print(f"{device_1.active_record.room=}")
     assert removed.room is None
     assert device_1.active_record.room is None
+
+
+@pytest.mark.django_db
+def test_get_last_found_returns_latest_found_record():
+    # Create a device
+    device = Device.objects.create(sap_id="12345", series="A")
+
+    # Create a person for lending
+    person = Person.objects.create(first_name="John", last_name="Doe", email="john@example.com")
+
+    _now = timezone.now()
+    old_timestamp = _now - timezone.timedelta(days=60)
+    recent_timestamp = _now - timezone.timedelta(days=30)
+    most_recent_timestamp = _now - timezone.timedelta(days=1)
+
+    # Create two found records: one INROOM, one LENT
+    # As the `creatd_at` field is set to auto_now, we need to overwrite
+    # it manually
+    inroom_record = InRoomRecord.objects.create(
+        device=device,
+    )
+    inroom_record.created_at = old_timestamp
+    inroom_record.save(update_fields=["created_at"])
+
+    lent_record = LentRecord.objects.create(
+        device=device,
+        person=person,
+    )
+    lent_record.created_at = recent_timestamp
+    lent_record.save(update_fields=["created_at"])
+
+    # The lent_record should be the most recent one
+    assert recent_timestamp == device.active_record.get_last_found()
+
+    _lost_record = LostRecord.objects.create(
+        device=device,
+    )
+
+    # Even after setting the device as lost, the last lent_record
+    # should still be the most recent round record
+    assert recent_timestamp == device.active_record.get_last_found()
+
+    inroom_record = InRoomRecord.objects.create(
+        device=device,
+    )
+    inroom_record.created_at = most_recent_timestamp
+    inroom_record.save(update_fields=["created_at"])
+
+    # Now the inroom_record should be the most recent found record
+    assert most_recent_timestamp == device.active_record.get_last_found()

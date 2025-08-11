@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -7,7 +7,6 @@ import os
 
 from django.conf import settings
 from django.db import transaction
-from django.utils import formats
 from django.core.exceptions import ValidationError
 
 from .utils import unique_seq
@@ -159,16 +158,18 @@ def compare_sap(sap_list_obj):
                 if record_for_sap:
                     old_room = row["Raum"]
                     new_room = record_for_sap.room.number if record_for_sap.room else ""
+                    last_found = record_for_sap.get_last_found()
 
                     new_row.update(
                         {
                             "TENANT": record_for_sap.device.tenant,
                             "CURRENT INVENTORY": record_inventory,
                             "TYPE": record_for_sap.get_record_type_display(),
+                            "LAST_FOUND": f"{last_found:%Y-%m-%d}",
                             "OLD ROOM": old_room,
                             "NEW ROOM": new_room,
                             "ROOM NEQ": old_room != new_room,
-                            "REC CREATED_AT": formats.date_format(record_for_sap.created_at, "SHORT_DATETIME_FORMAT"),
+                            "REC CREATED_AT": f"{record_for_sap.created_at:%Y-%m-%d}",
                             "REC CREATED BY": record_for_sap.username,
                         }
                     )
