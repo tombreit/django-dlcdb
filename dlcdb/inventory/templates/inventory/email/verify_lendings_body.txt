@@ -3,7 +3,7 @@ Sehr geehrte*r {{ person.first_name }} {{ person.last_name }},
 wir führen gerade die regelmäßige Inventur aller Geräte durch.
 Hierfür benötigen wir Ihre Mithilfe:
 
-Bitte bestätigen Sie durch eine Antwortemail, ob sich die folgenden Geräte in Ihrem Besitz befinden:
+Bitte bestätigen Sie durch eine Antwortemail, ob sich die folgenden Geräte in Ihrem Besitz befinden (z.B.: "Ja, die aufgeführten Geräte befinden sich in meinem Besitz."):
 
 ------------------------------------------------------------------------------- 
 {% for d in devices %}{% spaceless %}
@@ -14,7 +14,7 @@ Bitte bestätigen Sie durch eine Antwortemail, ob sich die folgenden Geräte in 
 Ihre verbindliche Aussage geht in die Ergebnisse der Inventur des Instituts ein.
 Bestätigte Geräte müssen bei einer Revisionsprüfung gegebenenfalls vorgelegt werden.
 
-Bitte schicken Sie uns Ihre Antwort bis zum {{ deadline|date:"d.m.Y" }}
+Bitte schicken Sie uns Ihre Antwort bis zum {{ deadline|date:"d.m.Y" }}. Nutzen Sie zum Antworten die "Antworten"-Funktion und belassen Sie den Betreff unverändert.
 
 Mit freundlichen Grüßen,
 {{ contact_email }}
@@ -25,7 +25,7 @@ Dear {{ person.first_name }} {{ person.last_name }},
 
 We are currently conducting an inventory of all IT Department equipment and kindly ask that you assist us in this task.
 
-By replying directly to this email, please confirm whether the following devices are in your possession:
+By replying directly to this email, please confirm whether the following devices are in your possession (Example: "Yes, I have the devices listed."):
 
 -------------------------------------------------------------------------------
 {% for d in devices %}{% spaceless %}
@@ -36,7 +36,7 @@ By replying directly to this email, please confirm whether the following devices
 Please note that it is essential that you reply to this email.
 Equipment that you confirm to be in your possession may need to be submitted for audit at a later date.
 
-Please reply to this email by {{ deadline|date:"m-d-Y" }}.
+Please reply to this email by {{ deadline|date:"m-d-Y" }}. Use the "Reply" function to respond and leave the subject line unchanged.
 
 Best wishes,
 {{ contact_email }}
