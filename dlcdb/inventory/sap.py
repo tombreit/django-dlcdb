@@ -162,6 +162,7 @@ def compare_sap(sap_list_obj):
 
                     new_row.update(
                         {
+                            "TENANT": record_for_sap.device.tenant,
                             "CURRENT INVENTORY": record_inventory,
                             "TYPE": record_for_sap.get_record_type_display(),
                             "OLD ROOM": old_room,
