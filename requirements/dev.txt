@@ -18,23 +18,23 @@ babel==2.17.0
     #   sphinx
 beautifulsoup4==4.13.4
     # via pydata-sphinx-theme
-build==1.2.2.post1
+build==1.3.0
     # via pip-tools
-certifi==2025.7.14
+certifi==2025.8.3
     # via requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.4.2
+charset-normalizer==3.4.3
     # via requests
 click==8.2.1
     # via pip-tools
-coverage==7.10.1
+coverage==7.10.3
     # via pytest-cov
 crispy-bootstrap5==2025.6
     # via django-dlcdb (pyproject.toml)
 distlib==0.4.0
     # via virtualenv
-django==5.2.4
+django==5.2.5
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -70,7 +70,7 @@ django-select2==8.4.1
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.10.1
     # via django-dlcdb (pyproject.toml)
-djangorestframework==3.16.0
+djangorestframework==3.16.1
     # via django-dlcdb (pyproject.toml)
 docutils==0.21.2
     # via
@@ -86,7 +86,7 @@ huey==2.5.3
     # via django-dlcdb (pyproject.toml)
 icalendar==6.3.1
     # via django-dlcdb (pyproject.toml)
-identify==2.6.12
+identify==2.6.13
     # via pre-commit
 idna==3.10
     # via requests
@@ -106,7 +106,7 @@ markdown-it-py==3.0.0
     #   myst-parser
 markupsafe==3.0.2
     # via jinja2
-mdit-py-plugins==0.4.2
+mdit-py-plugins==0.5.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
@@ -124,7 +124,7 @@ packaging==25.0
     #   sphinx
 pillow==11.3.0
     # via django-dlcdb (pyproject.toml)
-pip-tools==7.4.1
+pip-tools==7.5.0
     # via django-dlcdb (pyproject.toml)
 platformdirs==4.3.8
     # via virtualenv
@@ -132,7 +132,7 @@ pluggy==1.6.0
     # via
     #   pytest
     #   pytest-cov
-pre-commit==4.2.0
+pre-commit==4.3.0
     # via django-dlcdb (pyproject.toml)
 pyasn1==0.6.1
     # via
@@ -175,7 +175,7 @@ requests==2.32.4
     # via sphinx
 roman-numerals-py==3.1.0
     # via sphinx
-ruff==0.12.7
+ruff==0.12.8
     # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
@@ -225,7 +225,7 @@ tzdata==2025.2
     # via icalendar
 urllib3==2.5.0
     # via requests
-virtualenv==20.32.0
+virtualenv==20.33.1
     # via pre-commit
 wheel==0.45.1
     # via
