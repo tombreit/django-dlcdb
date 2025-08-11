@@ -59,15 +59,7 @@ class Command(BaseCommand):
             logger.debug(f"Processing lender: {lender}")
             lent_devices = devices.filter(active_record__person=lender).order_by("device_type")
 
-            lender_email = None
-
-            if lender.udb_person_email_internal_business:
-                lender_email = lender.udb_person_email_internal_business
-            elif lender.email:
-                lender_email = lender.email
-            elif lender.udb_person_email_private:
-                lender_email = lender.udb_person_email_private
-
+            lender_email = lender.get_email
             if not lender_email:
                 raise CommandError(f"No email address found for user {lender}. No emails sent. Exit!")
 
@@ -103,6 +95,7 @@ class Command(BaseCommand):
             "subject_prefix": settings.EMAIL_SUBJECT_PREFIX,
             "devices": devices,
             "person": person,
+            "lender_email": person.get_email,
             "deadline": deadline,
             "contact_email": settings.DEFAULT_FROM_EMAIL,
         }

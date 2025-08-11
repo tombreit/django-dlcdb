@@ -176,3 +176,16 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         #     raise ValidationError(
         #         "A soft-deleted person with this email address already exists. Please contact your IT;-)"
         #     )
+
+    @property
+    def get_email(self):
+        email = None
+
+        if self.udb_person_email_internal_business:
+            email = self.udb_person_email_internal_business
+        elif self.email:
+            email = self.email
+        elif self.udb_person_email_private:
+            email = self.udb_person_email_private
+
+        return email
