@@ -6,18 +6,20 @@ import json
 
 from django.conf import settings
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.contrib import admin
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
 from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 
-from ..models import Device
-from ..models import Record
+from ..models import Device, Record, LostRecord
 from ..utils.helpers import get_has_note_badge, get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
@@ -64,7 +66,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     ]
 
     def get_search_fields(self, request):
-        search_fields = self.search_fields
+        search_fields = list(self.search_fields)
         if request.user.is_superuser:
             search_fields.append("uuid")
         return search_fields
@@ -106,7 +108,15 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "relocate",
         "export_as_csv",
         "hard_delete_action",
+        "restore_removed_to_lost",
     ]
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser:
+            # Remove the restore_to_inroom action for non-superusers
+            actions.pop("restore_removed_to_lost", None)
+        return actions
 
     # form = DeviceAdminForm
     list_max_show_all = 5000
@@ -305,6 +315,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
     # Custom Django admin actions
     # https://docs.djangoproject.com/en/3.2/ref/contrib/admin/actions/
+
+    @admin.action(description=_("Relocate selected devices"))
     def relocate(self, request, queryset):
         """
         Bulk relocating devices to a new room. Uses an intermediate django admin page
@@ -319,6 +331,47 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                 ",".join(str(pk) for pk in selected),
             )
         )
+
+    @admin.action(description=_("Restore devices from REMOVED to LOST"))
+    def restore_removed_to_lost(self, request, queryset):
+        """
+        Restore devices from REMOVED to LOST. Only for superusers.
+        LOST was choosen as the target state because it is has the fewest attributes.
+        The user should then be able to add the desiered record.
+        """
+        if not request.user.is_superuser:
+            self.message_user(request, "Only superusers may restore removed devices.", level=messages.ERROR)
+            return
+
+        restored_devices = []
+        with transaction.atomic():
+            for device in queryset.select_for_update():
+                active = getattr(device, "active_record", None)
+                if active and active.record_type == Record.REMOVED:
+                    LostRecord.objects.create(
+                        device=device,
+                        note=f"Restored from REMOVED by {request.user.username}",
+                        record_type=Record.LOST,
+                    )
+                    restored_devices.append(device)
+
+        if restored_devices:
+            links = format_html_join(
+                ", ",
+                '<a href="{}">{}</a>',
+                ((reverse("admin:core_device_change", args=(d.pk,)), str(d)) for d in restored_devices),
+            )
+            self.message_user(
+                request,
+                format_html(
+                    "Restored {} device(s) to LOST: {}.",
+                    len(restored_devices),
+                    links,
+                ),
+                level=messages.SUCCESS,
+            )
+        else:
+            self.message_user(request, "No selected devices were in REMOVED state.", level=messages.INFO)
 
     # django-simple-history
     # https://django-simple-history.readthedocs.io/en/latest/admin.html

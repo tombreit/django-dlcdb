@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-28 00:08+0200\n"
-"PO-Revision-Date: 2025-06-28 00:08+0200\n"
+"POT-Creation-Date: 2025-08-20 17:37+0200\n"
+"PO-Revision-Date: 2025-08-20 17:39+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -64,6 +64,14 @@ msgstr "Danke für die Zeit, die Sie heute mit Ihrer DLCDB verbracht haben."
 msgid "Log in again"
 msgstr "Erneut anmelden"
 
+#: dlcdb/core/admin/device_admin.py:319
+msgid "Relocate selected devices"
+msgstr "Ausgewählte Geräte umziehen"
+
+#: dlcdb/core/admin/device_admin.py:335
+msgid "Restore devices from REMOVED to LOST"
+msgstr "Wiederherstellung von REMOVED auf LOST"
+
 #: dlcdb/core/admin/filters/licence_filters.py:34
 msgid "Licence type"
 msgstr "Lizenztyp"
@@ -117,7 +125,7 @@ msgstr "Records"
 msgid "Removed records"
 msgstr "Entfernt-Records"
 
-#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:235
+#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:246
 msgid "Inventories"
 msgstr "Inventuren"
 
@@ -298,12 +306,21 @@ msgstr "Internal (CSV)"
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
 
-#: dlcdb/core/models/inventory.py:234 dlcdb/core/models/inventory.py:241
-#: dlcdb/core/models/record.py:125
+#: dlcdb/core/models/inventory.py:227
+msgid "Device search tenant aware"
+msgstr ""
+
+#: dlcdb/core/models/inventory.py:228
+msgid ""
+"If set, the device search will only return devices for the current tenant."
+msgstr ""
+
+#: dlcdb/core/models/inventory.py:245 dlcdb/core/models/inventory.py:252
+#: dlcdb/core/models/record.py:126
 msgid "Inventory"
 msgstr "Inventur"
 
-#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:135
+#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:139
 msgid "Name"
 msgstr "Name"
 
@@ -319,7 +336,7 @@ msgstr "Ausleihen"
 msgid "Ordered"
 msgstr "Bestellt"
 
-#: dlcdb/core/models/prx_licencerecord.py:113 dlcdb/core/models/record.py:89
+#: dlcdb/core/models/prx_licencerecord.py:113 dlcdb/core/models/record.py:90
 msgid "Active"
 msgstr "Aktiv"
 
@@ -359,51 +376,51 @@ msgstr "Record vom Typ \"Nicht auffindbar\""
 msgid "Records of type 'Lost'"
 msgstr "Records vom Typ \"Nicht auffindbar\""
 
-#: dlcdb/core/models/record.py:26
+#: dlcdb/core/models/record.py:27
 msgid "Sold"
 msgstr "Verkauft"
 
-#: dlcdb/core/models/record.py:27
+#: dlcdb/core/models/record.py:28
 msgid "Scrapped"
 msgstr "Verschrottet"
 
-#: dlcdb/core/models/record.py:28
+#: dlcdb/core/models/record.py:29
 msgid "Surrendered"
 msgstr "Abgegeben"
 
-#: dlcdb/core/models/record.py:29
+#: dlcdb/core/models/record.py:30
 msgid "Stolen"
 msgstr "Gestohlen"
 
-#: dlcdb/core/models/record.py:30
+#: dlcdb/core/models/record.py:31
 msgid "Duplicate"
 msgstr "Duplikat"
 
-#: dlcdb/core/models/record.py:83
+#: dlcdb/core/models/record.py:84
 msgid "Device"
 msgstr "Gerät"
 
-#: dlcdb/core/models/record.py:94
+#: dlcdb/core/models/record.py:95
 msgid "Replaced by the next record at this timestamp."
 msgstr ""
 
-#: dlcdb/core/models/record.py:103
+#: dlcdb/core/models/record.py:104
 msgid "Record type"
 msgstr "Record Typ"
 
-#: dlcdb/core/models/record.py:107
+#: dlcdb/core/models/record.py:108
 msgid "Record note"
 msgstr "Record Notiz"
 
-#: dlcdb/core/models/record.py:117
+#: dlcdb/core/models/record.py:118
 msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
-#: dlcdb/core/models/record.py:152 dlcdb/core/models/room.py:72
+#: dlcdb/core/models/record.py:153 dlcdb/core/models/room.py:72
 msgid "Room"
 msgstr "Raum"
 
-#: dlcdb/core/models/record.py:164
+#: dlcdb/core/models/record.py:165
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
@@ -483,19 +500,19 @@ msgstr "Raumabgleich"
 msgid "Floor plan"
 msgstr "Raumplan"
 
-#: dlcdb/core/utils/device_methods.py:65 dlcdb/core/utils/device_methods.py:78
+#: dlcdb/core/utils/device_methods.py:76 dlcdb/core/utils/device_methods.py:89
 msgid "Previous records for this device"
 msgstr "Frühere Records dieses Devices"
 
-#: dlcdb/core/utils/device_methods.py:69
+#: dlcdb/core/utils/device_methods.py:80
 msgid "Edit lending"
 msgstr "Verleih bearbeiten"
 
-#: dlcdb/core/utils/device_methods.py:73
+#: dlcdb/core/utils/device_methods.py:84
 msgid "Show removal record"
 msgstr "Zeige Entfernt-Record"
 
-#: dlcdb/core/utils/device_methods.py:106
+#: dlcdb/core/utils/device_methods.py:117
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -511,44 +528,44 @@ msgstr "SAP-Abgleich"
 msgid "License Management"
 msgstr "Lizenzmanagement"
 
-#: dlcdb/licenses/filters.py:27
+#: dlcdb/licenses/filters.py:31
 msgid "License type..."
 msgstr "Lizenztyp..."
 
-#: dlcdb/licenses/filters.py:32
+#: dlcdb/licenses/filters.py:36
 msgid "Supplier..."
 msgstr "Distributor..."
 
-#: dlcdb/licenses/filters.py:48
+#: dlcdb/licenses/filters.py:52
 msgid "License state..."
 msgstr "Lizenzstatus..."
 
-#: dlcdb/licenses/forms.py:20
+#: dlcdb/licenses/forms.py:24
 msgid "Check this box if the contract has been terminated."
 msgstr "Anhaken, wenn Vertrag gekündigt ist."
 
-#: dlcdb/licenses/forms.py:45
+#: dlcdb/licenses/forms.py:49
 msgid "Select one or more subscribers."
 msgstr "Es können mehrere Abonnenten angegeben werden."
 
-#: dlcdb/licenses/forms.py:95
+#: dlcdb/licenses/forms.py:99
 msgid "At least one field must be filled."
 msgstr "Mindestens ein Feld muss ausgefüllt sein."
 
-#: dlcdb/licenses/forms.py:133
+#: dlcdb/licenses/forms.py:137
 #: dlcdb/licenses/templates/licenses/licenses_table.html:38
 msgid "Subscribers"
 msgstr "Abonnenten"
 
-#: dlcdb/licenses/forms.py:134
+#: dlcdb/licenses/forms.py:138
 msgid "Type"
 msgstr "Typ"
 
-#: dlcdb/licenses/forms.py:136
+#: dlcdb/licenses/forms.py:140
 msgid "Start Date"
 msgstr "Startdatum"
 
-#: dlcdb/licenses/forms.py:137
+#: dlcdb/licenses/forms.py:141
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
@@ -618,15 +635,15 @@ msgstr "Keine Lizenz gefunden."
 msgid "Playground"
 msgstr ""
 
-#: dlcdb/licenses/views.py:113
+#: dlcdb/licenses/views.py:119
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
-#: dlcdb/licenses/views.py:189
+#: dlcdb/licenses/views.py:195
 msgid "New license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/views.py:244
+#: dlcdb/licenses/views.py:250
 msgid "License History"
 msgstr "Lizenz Historie"
 
@@ -638,43 +655,43 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:22
+#: dlcdb/notifications/intervals.py:26
 msgid "Specific Date/Time"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:30
+#: dlcdb/notifications/intervals.py:34
 msgid "Immediately"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:36
+#: dlcdb/notifications/intervals.py:40
 msgid "Every Hour"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:42
+#: dlcdb/notifications/intervals.py:46
 msgid "Every Day"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:48
+#: dlcdb/notifications/intervals.py:52
 msgid "Every Week"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:56
+#: dlcdb/notifications/intervals.py:60
 msgid "Every Month"
 msgstr ""
 
-#: dlcdb/notifications/intervals.py:62
+#: dlcdb/notifications/intervals.py:66
 msgid "Every Year"
 msgstr ""
 
-#: dlcdb/notifications/models.py:70
+#: dlcdb/notifications/models.py:74
 msgid "Type of event"
 msgstr "Art des Ereignisses"
 
-#: dlcdb/notifications/models.py:83
+#: dlcdb/notifications/models.py:87
 msgid "Interval Name"
 msgstr "Bezeichnung Interval"
 
-#: dlcdb/notifications/models.py:96
+#: dlcdb/notifications/models.py:100
 msgid ""
 "When the next message should be sent. Based on the interval setting. "
 "Subscriptions with a date/time in the past are due for processing."
@@ -686,7 +703,7 @@ msgstr ""
 
 #: dlcdb/notifications/templates/notifications/message/preview.html:43
 msgid "Preview"
-msgstr ""
+msgstr "Vorschau"
 
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
@@ -811,9 +828,6 @@ msgstr "None"
 
 #~ msgid "In room"
 #~ msgstr "In Raum"
-
-#~ msgid "Relocate device"
-#~ msgstr "Gerät umziehen"
 
 #~ msgid "Unknown record type! Contact your administrator!"
 #~ msgstr ""
