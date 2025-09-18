@@ -303,6 +303,12 @@ LOGGING = {
             "level": "DEBUG" if DEBUG else "WARNING",
             "propagate": False,
         },
+        # Suppress noisy Huey INFO messages (only WARNING+ will be emitted)
+        "huey": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
     },
 }
 
