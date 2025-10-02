@@ -12,6 +12,7 @@ class NoteAdmin(admin.ModelAdmin):
     list_display = [
         "text",
         "device",
+        "device__sap_id",
         "get_device_room",
         "inventory",
         "room",
@@ -21,6 +22,7 @@ class NoteAdmin(admin.ModelAdmin):
         "inventory",
         # TODO: Filter got same filter title as the next filter: room
         # "device__active_record__room",
+        "device",
         "room",
         "updated_at",
     ]
