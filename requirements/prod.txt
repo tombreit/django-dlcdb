@@ -8,7 +8,7 @@ accessible-pygments==0.0.5
     # via pydata-sphinx-theme
 alabaster==1.0.0
     # via sphinx
-asgiref==3.9.1
+asgiref==3.9.2
     # via
     #   django
     #   django-htmx
@@ -16,7 +16,7 @@ babel==2.17.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-beautifulsoup4==4.13.5
+beautifulsoup4==4.14.2
     # via pydata-sphinx-theme
 certifi==2025.8.3
     # via requests
@@ -24,7 +24,7 @@ charset-normalizer==3.4.3
     # via requests
 crispy-bootstrap5==2025.6
     # via django-dlcdb (pyproject.toml)
-django==5.2.6
+django==5.2.7
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -45,7 +45,7 @@ django-environ==0.12.0
     # via django-dlcdb (pyproject.toml)
 django-filter==25.1
     # via django-dlcdb (pyproject.toml)
-django-htmx==1.25.0
+django-htmx==1.26.0
     # via django-dlcdb (pyproject.toml)
 django-select2==8.4.1
     # via django-dlcdb (pyproject.toml)
@@ -79,7 +79,7 @@ markdown-it-py==3.0.0
     # via
     #   mdit-py-plugins
     #   myst-parser
-markupsafe==3.0.2
+markupsafe==3.0.3
     # via jinja2
 mdit-py-plugins==0.5.0
     # via myst-parser
@@ -106,7 +106,7 @@ python-dateutil==2.9.0.post0
     # via icalendar
 python-magic==0.4.27
     # via django-dlcdb (pyproject.toml)
-pyyaml==6.0.2
+pyyaml==6.0.3
     # via myst-parser
 requests==2.32.5
     # via sphinx
