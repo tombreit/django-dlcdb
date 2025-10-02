@@ -47,3 +47,14 @@ class NoteAdmin(admin.ModelAdmin):
     def get_device_room(self, obj):
         if hasattr(obj, "device") and obj.device:
             return obj.device.active_record.room
+
+    def changelist_view(self, request, extra_context=None):
+        if extra_context is None:
+            extra_context = {}
+        # Use the current items of search_fields as they are
+        fields = [str(f) for f in self.search_fields]
+        extra_context.setdefault(
+            "search_help",
+            f"Searches: {', '.join(fields)}.",
+        )
+        return super().changelist_view(request, extra_context=extra_context)
