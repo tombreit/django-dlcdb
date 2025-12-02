@@ -299,6 +299,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             # Did not use qs.last() convenience method as I want to
             # catch an exception for no matching record found.
             # already_inventorized = already_inventorized[:1].get()
+            # Use get_current_inventory_record property to get the latest record
 
             # We are more flexibble if returning the queryset with matched
             # inventorized records.
@@ -311,6 +312,22 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             raise Exception(f"Exception: {e=}")
 
         return already_inventorized
+
+    @property
+    def get_current_inventory_record(self):
+        """
+        Convenience method to get the latest record which has an inventory stamp attached.
+        """
+
+        current_inventory_record = None
+        try:
+            current_inventory_record = self.get_current_inventory_records.last()
+        except AttributeError:
+            pass
+        except Exception:
+            pass
+
+        return current_inventory_record
 
     def get_timeline(self):
         """

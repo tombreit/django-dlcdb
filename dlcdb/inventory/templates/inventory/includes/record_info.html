@@ -1,5 +1,5 @@
 <small
-    class="badge {% if device.get_current_inventory_records.last.record_type == "LOST" %}
+    class="badge {% if device.get_current_inventory_record.record_type == "LOST" %}
         text-bg-danger
     {% else %}
         text-bg-warning
@@ -15,10 +15,10 @@
 
     <span>
         {{ device.active_record.created_at|date:"Y-m-d" }}
-        {% if device.get_current_inventory_records.last.record_type == "LOST" %}
+        {% if device.get_current_inventory_record.record_type == "LOST" %}
             <br>Not found
         {% else %}
-            <br>{{ device.get_current_inventory_records.last.room }}
+            <br>{{ device.get_current_inventory_record.room }}
         {% endif %}
     </span>
 </small>

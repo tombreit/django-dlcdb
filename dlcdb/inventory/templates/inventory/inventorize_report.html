@@ -86,7 +86,7 @@
                 {{ d.manufacturer }} {{ d.series }}
             </td>
             <td>
-                {{ d.get_current_inventory_records.last.room.number }}
+                {{ d.get_current_inventory_record.room.number }}
             </td>
             <td>
                 {{ d.purchase_date|date:"Y" }}
@@ -101,9 +101,9 @@
                 {% endcomment %}
 
                 {% if d.get_current_inventory_records %}
-                    {{ d.get_current_inventory_records.last.inventory }} -
-                    {{ d.get_current_inventory_records.last.record_type }} -
-                    {{ d.get_current_inventory_records.last.user.username }}
+                    {{ d.get_current_inventory_record.inventory }} -
+                    {{ d.get_current_inventory_record.record_type }} -
+                    {{ d.get_current_inventory_record.user.username }}
                 {% else %}
                     <i> no current inventory record</i>
                 {% endif %}

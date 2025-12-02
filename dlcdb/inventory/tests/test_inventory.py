@@ -57,12 +57,12 @@ def test_if_device_counts_as_inventorized(device_1, device_2, room_1, room_2, in
 
 @pytest.mark.django_db
 def test_get_is_already_inventorized(device_1, device_2, room_1, room_2, inventory_1):
-    assert device_2.get_current_inventory_records.last() is None
+    assert device_2.get_current_inventory_record is None
 
     device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1, inventory=inventory_1)
     assert device_1.active_record.inventory == inventory_1
-    assert device_1.get_current_inventory_records.last() is not None
-    assert isinstance(device_1.get_current_inventory_records.last(), Record)
+    assert device_1.get_current_inventory_record is not None
+    assert isinstance(device_1.get_current_inventory_record, Record)
 
     # device_1 should count as inventorized, even if a later (not the active) record
     # has an inventory stamp
