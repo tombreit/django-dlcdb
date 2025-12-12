@@ -20,11 +20,13 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@mermaid-js/layout-elk": "^0.2.0",
     "@popperjs/core": "^2.11.8",
     "@stylistic/eslint-plugin": "^3.1.0",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
     "chart.js": "^3.9.1",
+    "d3": "^7.9.0",
     "esbuild": "^0.25.8",
     "eslint": "^9.32.0",
     "htmx.org": "^2.0.6",
@@ -56,7 +58,7 @@
     "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_themeDistDir/js/theme.js",
     "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",
     "build:theme": "npm-run-all build:theme:*",
-    "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js $npm_package_config_docsDistDir/mermaid/"
+    "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs node_modules/d3/dist/d3.min.js $npm_package_config_docsDistDir/mermaid/"
   },
   "repository": {
     "type": "https",

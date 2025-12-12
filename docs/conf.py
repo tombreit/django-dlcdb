@@ -79,6 +79,13 @@ todo_include_todos = True
 
 # -- Options for HTML output ----------------------------------------------
 
+# Language to be used for generating the HTML full-text search index.
+# Sphinx supports the following languages:
+#   'da', 'de', 'en', 'es', 'fi', 'fr', 'h', 'it', 'ja'
+#   'nl', 'no', 'pt', 'ro', 'r', 'sv', 'tr', 'zh'
+#
+# html_search_language = 'en'
+
 html_css_files = [
     "css/custom.css",
 ]
@@ -115,23 +122,10 @@ myst_substitutions = {
     "api_device_search_url": f"[{base_url}/api/v2/devices/?search=ntb1146]({base_url}/api/v2/devices/?search=ntb1146)",
     "api_persons_with_devices": f"[{base_url}/api/v2/persons/]({base_url}/api/v2/persons/)",
 }
-
-
-# Language to be used for generating the HTML full-text search index.
-# Sphinx supports the following languages:
-#   'da', 'de', 'en', 'es', 'fi', 'fr', 'h', 'it', 'ja'
-#   'nl', 'no', 'pt', 'ro', 'r', 'sv', 'tr', 'zh'
-#
-# html_search_language = 'en'
-
-
-# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
-# Use local hosted version for mermaid.js; see html_js_files
-# Using sphinxconrib-mermaid<1.0.0, because 1.0.0 yields the following error:
-# Extension error (sphinxcontrib.mermaid):
-# Handler <function install_js at 0x7f9286281e40> for event 'html-page-context' threw an exception (exception: Invalid version: '')
-mermaid_version = ""
-
-
 myst_enable_extensions = ["colon_fence", "substitution", "attrs_inline", "html_image"]
 myst_heading_anchors = 6
+
+# https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
+mermaid_use_local = "staticfiles/vendor/mermaid/mermaid.min.js"
+mermaid_elk_use_local = "staticfiles/vendor/mermaid/mermaid-layout-elk.esm.min.mjs"
+mermaid_d3_use_local = "staticfiles/vendor/mermaid/d3.min.mjs"
