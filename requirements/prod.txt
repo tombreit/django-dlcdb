@@ -24,7 +24,7 @@ charset-normalizer==3.4.4
     # via requests
 crispy-bootstrap5==2025.6
     # via django-dlcdb (pyproject.toml)
-django==5.2.8
+django==5.2.9
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -49,7 +49,7 @@ django-htmx==1.27.0
     # via django-dlcdb (pyproject.toml)
 django-select2==8.4.3
     # via django-dlcdb (pyproject.toml)
-django-simple-history==3.10.1
+django-simple-history==3.11.0
     # via django-dlcdb (pyproject.toml)
 djangorestframework==3.16.1
     # via django-dlcdb (pyproject.toml)
@@ -61,7 +61,7 @@ docutils==0.21.2
     #   sphinx-togglebutton
 et-xmlfile==2.0.0
     # via openpyxl
-huey==2.5.4
+huey==2.5.5
     # via django-dlcdb (pyproject.toml)
 icalendar==6.3.2
     # via django-dlcdb (pyproject.toml)
@@ -156,7 +156,7 @@ typing-extensions==4.15.0
     #   pydata-sphinx-theme
 tzdata==2025.2
     # via icalendar
-urllib3==2.5.0
+urllib3==2.6.2
     # via requests
 wheel==0.45.1
     # via sphinx-togglebutton
