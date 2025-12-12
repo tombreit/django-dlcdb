@@ -55,11 +55,10 @@ class MessageAdmin(SimpleHistoryAdmin):
 
     show_facets = admin.ShowFacets.NEVER
 
+    @admin.display(description="Preview")
     def preview_link(self, obj):
         """Add a link to preview the message"""
         return format_html('<a href="{}">Preview</a>', f"preview/{obj.pk}/")
-
-    preview_link.short_description = "Preview"
 
     def get_urls(self):
         """Add custom URL patterns for the admin"""

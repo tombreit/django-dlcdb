@@ -37,10 +37,9 @@ class RemoverListAdmin(admin.ModelAdmin):
         "note",
     ]
 
+    @admin.display(description="CSV-Datei")
     def get_change_link_display(self, obj):
         return "{label}".format(label=obj.file)
-
-    get_change_link_display.short_description = "CSV-Datei"
 
     def get_form(self, request, obj=None, **kwargs):
         """

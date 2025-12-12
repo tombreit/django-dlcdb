@@ -22,6 +22,7 @@ from django.contrib import messages
 from .models import CustomUser
 
 
+@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = UserAdmin.list_display + ("is_active",)
@@ -83,9 +84,6 @@ class CustomUserAdmin(UserAdmin):
 
     class Media:
         js = ("accounts/js/defaultsorting.js",)
-
-
-admin.site.register(CustomUser, CustomUserAdmin)
 
 
 # Move the Django upstream "Group" admin in our "Account" admin section

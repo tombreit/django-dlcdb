@@ -13,6 +13,7 @@ from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin
 
 
 class CustomRecordModelAdmin(CustomBaseModelAdmin):
+    @admin.display(description="Get Attachments")
     def get_attachments(self, obj):
         qs = obj.attachments.all()
 
@@ -24,8 +25,6 @@ class CustomRecordModelAdmin(CustomBaseModelAdmin):
                     f'<a href="{attachment.file.url}">{attachment.title}</a><br>',
                 )
         return format_html("".join(attachment_links))
-
-    get_attachments.short_description = "Get Attachments"
 
 
 @admin.register(Record)

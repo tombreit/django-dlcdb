@@ -17,9 +17,8 @@ class OrderedRecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
     list_display = ["get_device_link", "date_of_purchase"]
     fields = ["device"]
 
+    @admin.display(description="Gerät")
     def get_device_link(self, obj):
         return Template('<a href="{{url}}">{{label}}</a>').render(
             Context(dict(url=reverse("admin:core_device_change", args=[obj.device.id]), label=obj.device))
         )
-
-    get_device_link.short_description = "Gerät"

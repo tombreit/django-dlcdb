@@ -131,22 +131,20 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
 
         super().save_model(request, obj, form, change)
 
+    @admin.display(boolean=True)
     def is_assigned(self, obj):
         if obj.person or obj.assigned_device:
             return True
 
-    is_assigned.boolean = True
-
+    @admin.display(description="Lizenz")
     def get_device(self, obj):
         return obj.device
 
-    get_device.short_description = "Lizenz"
-
+    @admin.display(description="Typ")
     def get_device_type(self, obj):
         return obj.device.device_type
 
-    get_device_type.short_description = "Typ"
-
+    @admin.display(description="EDV ID")
     def get_edv_id(self, obj):
         return format_html(
             '<a href="{0}" target="_blank"><strong>{1}</strong></a>',
@@ -154,13 +152,11 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
             obj.device.edv_id,
         )
 
-    get_edv_id.short_description = "EDV ID"
-
+    @admin.display(description="SAP ID")
     def get_sap_id(self, obj):
         return obj.device.sap_id
 
-    get_sap_id.short_description = "SAP ID"
-
+    @admin.display(description="IDs")
     def get_device_ids(self, obj):
         return format_html(
             '<a href="{0}" target="_blank"><strong>EDV ID: <code>{1}</code> / Inventarnummer: <code>{2}</code></strong></a>',
@@ -169,35 +165,30 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
             obj.device.sap_id,
         )
 
-    get_device_ids.short_description = "IDs"
-
+    @admin.display(description="Hersteller")
     def get_manufacturer(self, obj):
         return obj.device.manufacturer
 
-    get_manufacturer.short_description = "Hersteller"
-
+    @admin.display(description="Model")
     def get_series(self, obj):
         return obj.device.series
 
-    get_series.short_description = "Model"
-
+    @admin.display(description="Serial nr.")
     def get_serial_number(self, obj):
         return obj.device.serial_number
 
-    get_serial_number.short_description = "Serial nr."
-
+    @admin.display(description="Bezeichnung")
     def get_device_human_readable(self, obj):
         return "{} - {}".format(
             obj.device.manufacturer,
             obj.device.series,
         )
 
-    get_device_human_readable.short_description = "Bezeichnung"
-
     # def get_contract_expiration_date(self, obj):
     #     return obj.device.contract_expiration_date
     # get_contract_expiration_date.short_description = 'Licence expiry date'
 
+    @admin.display(description="Licence expiry date")
     def get_contract_expiration_date(self, obj):
         _title = ""
         if obj.license_state == "80-warning":
@@ -214,7 +205,6 @@ class LicenceRecordAdmin(CustomBaseModelAdmin):
             title=_title,
         )
 
-    get_contract_expiration_date.short_description = "Licence expiry date"
     # get_contract_expiration_date.admin_order_field = 'obj.device.contract_expiration_date'
 
     class Media:

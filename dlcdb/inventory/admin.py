@@ -17,17 +17,15 @@ class SapListAdmin(admin.ModelAdmin):
         "note",
     ]
 
+    @admin.display(description="Datei")
     def get_change_link_display(self, obj):
         return "{label} öffnen".format(label=obj.get_file_name())
 
-    get_change_link_display.short_description = "Datei"
-
+    @admin.display(description="Abgleich")
     def get_compare_button_display(self, obj):
         return Template(
             '<div class="bt"><a class="btn btn-primary" href="{{url}}"><i class="fa fa-angle-right"></i> Abgleichen</a></div>'
         ).render(Context(dict(url=reverse("inventory:compare-sap-list", kwargs=dict(pk=obj.id)))))
-
-    get_compare_button_display.short_description = "Abgleich"
 
 
 # TODO: remove this admin after refactoring

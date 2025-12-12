@@ -10,6 +10,7 @@ from ..models import Attachment, Link
 from .base_admin import CustomBaseModelAdmin
 
 
+@admin.register(Attachment)
 class AttachmentAdmin(CustomBaseModelAdmin):
     fields = (
         "title",
@@ -54,9 +55,6 @@ class AttachmentAdmin(CustomBaseModelAdmin):
                 )
 
             return format_html("".join(record_links))
-
-
-admin.site.register(Attachment, AttachmentAdmin)
 
 
 @admin.register(Link)

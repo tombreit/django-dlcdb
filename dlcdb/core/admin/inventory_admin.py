@@ -16,6 +16,7 @@ from ..models import Inventory
 #         return super().get_queryset(request).filter(is_active=True)
 
 
+@admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
     model = Inventory
     list_display = [
@@ -28,6 +29,3 @@ class InventoryAdmin(admin.ModelAdmin):
     # inlines = [
     #     RecordInline,
     # ]
-
-
-admin.site.register(Inventory, InventoryAdmin)
