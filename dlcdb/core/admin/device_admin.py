@@ -99,9 +99,10 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
 
     def get_readonly_fields(self, request, obj=None):
         readonly = list(super().get_readonly_fields(request, obj))
-        if obj and obj.active_record and obj.active_record.record_type == Record.LENT:
-            if "is_lentable" not in readonly:
-                readonly.append("is_lentable")
+        if not request.user.is_superuser:
+            if obj and obj.active_record and obj.active_record.record_type == Record.LENT:
+                if "is_lentable" not in readonly:
+                    readonly.append("is_lentable")
         return readonly
 
     actions = [
