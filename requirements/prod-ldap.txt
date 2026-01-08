@@ -123,12 +123,10 @@ pyyaml==6.0.3
     #   sphinxcontrib-mermaid
 requests==2.32.5
     # via sphinx
-roman-numerals==4.1.0
+roman-numerals-py==3.1.0
     # via
-    #   roman-numerals-py
+    #   django-dlcdb (pyproject.toml)
     #   sphinx
-roman-numerals-py==4.1.0
-    # via sphinx
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
 six==1.17.0

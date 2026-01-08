@@ -43,6 +43,7 @@ dependencies = [
     "myst_parser",  # currently not working: myst_parser[linkify]
     "sphinx-design",
     "sphinx-togglebutton",
+    "roman-numerals-py==3.1",
 ]
 
 [project.optional-dependencies]
