@@ -18,7 +18,7 @@ babel==2.17.0
     #   sphinx
 beautifulsoup4==4.14.3
     # via pydata-sphinx-theme
-certifi==2025.11.12
+certifi==2026.1.4
     # via requests
 charset-normalizer==3.4.4
     # via requests
@@ -47,7 +47,7 @@ django-filter==25.2
     # via django-dlcdb (pyproject.toml)
 django-htmx==1.27.0
     # via django-dlcdb (pyproject.toml)
-django-select2==8.4.3
+django-select2==8.4.8
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.11.0
     # via django-dlcdb (pyproject.toml)
@@ -61,7 +61,7 @@ docutils==0.21.2
     #   sphinx-togglebutton
 et-xmlfile==2.0.0
     # via openpyxl
-huey==2.5.5
+huey==2.6.0
     # via django-dlcdb (pyproject.toml)
 icalendar==6.3.2
     # via django-dlcdb (pyproject.toml)
@@ -93,7 +93,7 @@ packaging==25.0
     # via
     #   pydata-sphinx-theme
     #   sphinx
-pillow==12.0.0
+pillow==12.1.0
     # via django-dlcdb (pyproject.toml)
 pydata-sphinx-theme==0.15.4
     # via sphinx-book-theme
@@ -112,7 +112,11 @@ pyyaml==6.0.3
     #   sphinxcontrib-mermaid
 requests==2.32.5
     # via sphinx
-roman-numerals-py==3.1.0
+roman-numerals==4.1.0
+    # via
+    #   roman-numerals-py
+    #   sphinx
+roman-numerals-py==4.1.0
     # via sphinx
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
@@ -120,7 +124,7 @@ six==1.17.0
     # via python-dateutil
 snowballstemmer==3.0.1
     # via sphinx
-soupsieve==2.8
+soupsieve==2.8.1
     # via beautifulsoup4
 sphinx==8.2.3
     # via
@@ -151,15 +155,15 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.4
+sqlparse==0.5.5
     # via django
 typing-extensions==4.15.0
     # via
     #   beautifulsoup4
     #   pydata-sphinx-theme
-tzdata==2025.2
+tzdata==2025.3
     # via icalendar
-urllib3==2.6.2
+urllib3==2.6.3
     # via requests
 wheel==0.45.1
     # via sphinx-togglebutton
