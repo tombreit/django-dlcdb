@@ -10,7 +10,7 @@ description = "Device Live Cycle Database"
 authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
 license = {file = "LICENSE"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 classifiers = [
     "Framework :: Django",
     "Topic :: Documentation",

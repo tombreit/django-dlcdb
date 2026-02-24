@@ -4,7 +4,7 @@
 
 pages:
   stage: deploy
-  image: python:3.11-slim
+  image: python:3.13-slim
   before_script:
   - apt-get --assume-yes update && apt-get --assume-yes --no-install-recommends install libmagic1
   script:
