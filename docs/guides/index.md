@@ -12,5 +12,4 @@ kleinkram
 inventur
 lizenzen
 reporting
-notifications
 ```
