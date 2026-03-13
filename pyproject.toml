@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "Django==6.0.2",
+    "Django==6.0.3",
     "django-select2",
     "django-environ",
     "django-crispy-forms",
@@ -43,7 +43,7 @@ dependencies = [
     "myst_parser",  # currently not working: myst_parser[linkify]
     "sphinx-design",
     "sphinx-togglebutton",
-    "roman-numerals-py==3.1",
+    # "roman-numerals-py",
 ]
 
 [project.optional-dependencies]
@@ -58,7 +58,8 @@ dev = [
     "pytest-cov",
     "pip-tools",
     "django-auth-ldap",
-    "django-debug-toolbar<6",  # As v6 introduced a db migration: https://github.com/django-commons/django-debug-toolbar/issues/2168
+    # "django-debug-toolbar<6",  # As v6 introduced a db migration: https://github.com/django-commons/django-debug-toolbar/issues/2168
+    "django-debug-toolbar",
     "django_extensions",
     "django-upgrade",
     # for js qr scanner https connections on localhost runserver:

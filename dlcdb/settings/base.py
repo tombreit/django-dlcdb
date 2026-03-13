@@ -355,6 +355,7 @@ HUEY = SqliteHuey(
 
 if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
+    MIGRATION_MODULES = {"debug_toolbar": None}
     SHELL_PLUS = "ipython"
 
 # WhiteNoise

@@ -18,13 +18,13 @@ babel==2.18.0
     #   sphinx
 beautifulsoup4==4.14.3
     # via pydata-sphinx-theme
-certifi==2026.1.4
+certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.4
+charset-normalizer==3.4.5
     # via requests
-crispy-bootstrap5==2025.6
+crispy-bootstrap5==2026.3
     # via django-dlcdb (pyproject.toml)
-django==6.0.2
+django==6.0.3
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -40,7 +40,7 @@ django-appconf==1.2.0
     # via django-select2
 django-auth-ldap==5.3.0
     # via django-dlcdb (pyproject.toml)
-django-crispy-forms==2.5
+django-crispy-forms==2.6
     # via
     #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
@@ -66,11 +66,11 @@ et-xmlfile==2.0.0
     # via openpyxl
 huey==2.6.0
     # via django-dlcdb (pyproject.toml)
-icalendar==7.0.1
+icalendar==7.0.3
     # via django-dlcdb (pyproject.toml)
 idna==3.11
     # via requests
-imagesize==1.4.1
+imagesize==2.0.0
     # via sphinx
 jinja2==3.1.6
     # via
@@ -95,7 +95,6 @@ openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
 packaging==26.0
     # via
-    #   pydata-sphinx-theme
     #   sphinx
     #   wheel
 pillow==12.1.1
@@ -106,7 +105,7 @@ pyasn1==0.6.2
     #   python-ldap
 pyasn1-modules==0.4.2
     # via python-ldap
-pydata-sphinx-theme==0.15.4
+pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
 pygments==2.19.2
     # via
@@ -127,8 +126,6 @@ requests==2.32.5
     # via sphinx
 roman-numerals==4.1.0
     # via sphinx
-roman-numerals-py==3.1.0
-    # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
 six==1.17.0
@@ -146,7 +143,7 @@ sphinx==9.1.0
     #   sphinx-design
     #   sphinx-togglebutton
     #   sphinxcontrib-mermaid
-sphinx-book-theme==1.1.4
+sphinx-book-theme==1.2.0
     # via django-dlcdb (pyproject.toml)
 sphinx-design==0.7.0
     # via django-dlcdb (pyproject.toml)
@@ -160,7 +157,7 @@ sphinxcontrib-htmlhelp==2.1.0
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-mermaid==2.0.0
+sphinxcontrib-mermaid==2.0.1
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-qthelp==2.0.0
     # via sphinx
@@ -178,7 +175,7 @@ urllib3==2.6.3
     # via requests
 wheel==0.46.3
     # via sphinx-togglebutton
-whitenoise==6.11.0
+whitenoise==6.12.0
     # via django-dlcdb (pyproject.toml)
 
 # The following packages are considered to be unsafe in a requirements file:
