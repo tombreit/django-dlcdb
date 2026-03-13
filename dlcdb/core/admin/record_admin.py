@@ -127,14 +127,14 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             )
         )
 
-    def lookup_allowed(self, key, value):
+    def lookup_allowed(self, lookup, value, request):
         """
         DisallowedModelAdminLookup at /admin/core/record/
         Filtering by device__id__exact not allowed
         """
-        if key in ["device__id__exact"]:
+        if lookup in ["device__id__exact"]:
             return True
-        return super().lookup_allowed(key, value)
+        return super().lookup_allowed(lookup, value, request)
 
     @admin.display(description="Has Note?")
     def has_note(self, obj):
