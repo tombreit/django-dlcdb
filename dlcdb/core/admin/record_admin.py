@@ -5,7 +5,7 @@
 from django.contrib import admin
 from django.template import Template, Context
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import format_html_join
 
 from ..utils.helpers import get_has_note_badge
 from ..models import Record
@@ -17,14 +17,11 @@ class CustomRecordModelAdmin(CustomBaseModelAdmin):
     def get_attachments(self, obj):
         qs = obj.attachments.all()
 
-        attachment_links = []
-        for idx, attachment in enumerate(qs):
-            if attachment.file:
-                # print(f"{idx}: {attachment.title}; {attachment.file.url}")
-                attachment_links.append(
-                    f'<a href="{attachment.file.url}">{attachment.title}</a><br>',
-                )
-        return format_html("".join(attachment_links))
+        return format_html_join(
+            "",
+            '<a href="{}">{}</a><br>',
+            ((attachment.file.url, attachment.title) for attachment in qs if attachment.file),
+        )
 
 
 @admin.register(Record)
