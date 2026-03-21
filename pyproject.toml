@@ -37,6 +37,7 @@ dependencies = [
     "djangorestframework",
     "django-filter",
     "icalendar",
+    "plotly",
     "Sphinx",
     "sphinx-book-theme",
     "sphinxcontrib-mermaid",

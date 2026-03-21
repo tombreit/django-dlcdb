@@ -8,6 +8,11 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% load static %}
 
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'dist/core/vendor/plotlyjs/plotly-basic.min.js' %}"></script>
+{% endblock %}
+
 {% block bodyclass %} dashboard-index {% endblock %}
 
 {% block title %}
@@ -43,7 +48,7 @@ SPDX-License-Identifier: EUPL-1.2
         text-align: center;
       }
       .grid-container > div > p {
-        display: block; 
+        display: block;
       }
     </style>
 
@@ -58,43 +63,13 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="row row-stats">
         <div class="col-md-4">
             <h4>Geräte nach Verbleib</h4>
-            <canvas id="device-location-chart" style="max-height: 300px;"></canvas>
+            {{ record_fraction_html|safe }}
         </div>
         <div class="col-md-8">
             <h4>Geräte nach Typ</h4>
-            <canvas id="device-type-chart" style="max-height: 300px;"></canvas>
+            {{ device_type_html|safe }}
         </div>
     </div>
 {% endblock %}
 
 
-{% block extra_js %}
-<script src="{% static 'dist/core/vendor/chartjs/chart.min.js' %}"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const record_fraction_data = {{ record_fraction_data|safe }};
-    const device_type_data = {{ device_type_data|safe }};
-
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {display: false}
-        }
-    }
-
-    const deviceLocationChart = new Chart(
-        document.getElementById("device-location-chart"), {
-            type: 'bar',
-            data: record_fraction_data,
-            options: options,
-    });
-
-    const deviceTypeChart = new Chart(
-        document.getElementById("device-type-chart"), {
-            type: 'bar',
-            data: device_type_data,
-            options: options,
-    })
-});
-</script>
-{% endblock extra_js %}

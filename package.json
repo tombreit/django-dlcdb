@@ -15,7 +15,8 @@
     "docsDistDir": "docs/_static/vendor"
   },
   "COMMENTS": [
-    "SASS PINNED AT 1.77.6 FOR COMPATIBILITY WITH BS5.X"
+    "SASS PINNED AT 1.77.6 FOR COMPATIBILITY WITH BS5.X",
+    "D3 IS ONLY USED AS A MERMAID DEPENDENCY FOR DOCS, NOT IN THE APP"
   ],
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -25,7 +26,7 @@
     "@stylistic/eslint-plugin": "^3.1.0",
     "bootstrap": "^5.3.7",
     "bootstrap-icons": "^1.13.1",
-    "chart.js": "^3.9.1",
+    "plotly.js-basic-dist-min": "^3.0.0",
     "d3": "^7.9.0",
     "esbuild": "^0.25.8",
     "eslint": "^10.0.2",
@@ -41,12 +42,12 @@
   "scripts": {
     "debug": "echo $npm_package_config_coreSrcDir",
     "build": "npm run build:core && npm run build:theme && npm run build:inventory && npm run docs:copy-mermaid",
-    "build:core": "npm run build:core:scss && npm run build:core:scss-print && npm run build:core:js && npm run build:core:copy-fontawesome && npm run build:core:copy-chartjs",
+    "build:core": "npm run build:core:scss && npm run build:core:scss-print && npm run build:core:js && npm run build:core:copy-fontawesome && npm run build:core:copy-plotlyjs",
     "build:core:scss": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_coreSrcDir/scss:${npm_package_config_coreDistDir}/css",
     "build:core:scss-print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_coreSrcDir/scss/print.scss:$npm_package_config_coreDistDir/css/print.css",
     "build:core:js": "esbuild $npm_package_config_coreSrcDir/js/app.js --bundle --sourcemap --outfile=$npm_package_config_coreDistDir/js/app.js",
     "build:core:copy-fontawesome": "mkdir -p $npm_package_config_coreDistDir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_coreDistDir/fonts/fontawesome",
-    "build:core:copy-chartjs": "mkdir -p $npm_package_config_coreDistDir/vendor/chartjs && cp -r node_modules/chart.js/dist/* $npm_package_config_coreDistDir/vendor/chartjs/",
+    "build:core:copy-plotlyjs": "mkdir -p $npm_package_config_coreDistDir/vendor/plotlyjs && cp node_modules/plotly.js-basic-dist-min/plotly-basic.min.js $npm_package_config_coreDistDir/vendor/plotlyjs/",
     "build:inventory:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_inventorySrcDir/scss:$npm_package_config_inventoryDistDir",
     "build:inventory:js": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js",
     "build:inventory:copy-fontawesome": "mkdir -p $npm_package_config_inventoryDistDir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_inventoryDistDir/fonts/fontawesome/",
