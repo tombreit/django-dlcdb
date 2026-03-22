@@ -1,0 +1,21 @@
+<!--
+SPDX-FileCopyrightText: 2024 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% extends "print_base.html" %}
+
+{% block print_extra_css %}
+{% block extra_css %}{% endblock %}
+{% endblock %}
+
+{% block main %}
+    {% block sheet_content %}{% endblock %}
+
+    {% include 'core/lentrecord/includes/interleaf.html' %}
+
+    {% block sheet_content_copy %}{% endblock %}
+
+    {% block checklist %}{% endblock %}
+{% endblock %}
