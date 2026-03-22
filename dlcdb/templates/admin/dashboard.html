@@ -58,18 +58,55 @@ SPDX-License-Identifier: EUPL-1.2
         {% endfor %}
     </div>
 
-    <hr class="mt-4">
+    <style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-top: 1.5rem;
+    }
+    .stats-col {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .stats-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.08);
+        border-radius: 10px;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stats-card h4 {
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin: 0 0 0.75rem 0;
+    }
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: 1fr; }
+    }
+    </style>
 
-    <div class="row row-stats">
-        <div class="col-md-4">
-            <h4>Geräte nach Verbleib</h4>
-            {{ record_fraction_html|safe }}
+    <div class="stats-grid">
+        <div class="stats-col">
+            <div class="stats-card">
+                <h4>Geräte nach Verbleib</h4>
+                {{ record_fraction_html|safe }}
+            </div>
+            <div class="stats-card">
+                <h4>Geräte-Verlauf</h4>
+                {{ record_timeline_html|safe }}
+            </div>
         </div>
-        <div class="col-md-8">
-            <h4>Geräte nach Typ</h4>
-            {{ device_type_html|safe }}
+        <div class="stats-col">
+            <div class="stats-card">
+                <h4>Geräte nach Typ</h4>
+                {{ device_type_html|safe }}
+            </div>
         </div>
     </div>
 {% endblock %}
-
-

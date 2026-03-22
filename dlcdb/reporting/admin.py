@@ -8,7 +8,6 @@ from django.contrib.admin.models import LogEntry
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from ..core import stats
 from .models import Notification, Report
 from .utils.email import build_report_email, send_email
 from .utils.process import create_report_if_needed
@@ -56,8 +55,3 @@ class ReportAdmin(admin.ModelAdmin):
         "body",
         "spreadsheet",
     )
-
-    def changelist_view(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["chart_html"] = stats.get_record_timeline_html()
-        return super().changelist_view(request, extra_context=extra_context)

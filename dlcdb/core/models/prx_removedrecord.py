@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
@@ -21,8 +22,8 @@ class RemovedRecordManager(models.Manager):
 class RemovedRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = "Entfernt-Record"
-        verbose_name_plural = "Entfernt-Records"
+        verbose_name = _("Removed")
+        verbose_name_plural = _("Removed")
 
     objects = RemovedRecordManager()
 

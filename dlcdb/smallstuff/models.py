@@ -97,6 +97,6 @@ class AssignedThing(models.Model):
                 raise ValidationError(_("Unassignment timestamp could not be before assignment timestamp!"))
 
     class Meta:
-        verbose_name = _("Issued stuff")
-        verbose_name_plural = _("Issued stuff")
+        verbose_name = _("Stuff")
+        verbose_name_plural = _("Stuff")
         ordering = ["person__last_name"]

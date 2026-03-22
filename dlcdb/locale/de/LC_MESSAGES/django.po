@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 17:37+0200\n"
-"PO-Revision-Date: 2025-08-20 17:39+0200\n"
+"POT-Creation-Date: 2026-03-22 14:10+0100\n"
+"PO-Revision-Date: 2026-03-22 14:11+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -15,23 +15,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.9\n"
 
-#: dlcdb/accounts/admin.py:63
+#: dlcdb/accounts/admin.py:64
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was permanently deleted."
 msgstr ""
 
-#: dlcdb/accounts/admin.py:76
+#: dlcdb/accounts/admin.py:77
 #, python-format
 msgid "Permanently delete %s"
 msgstr ""
 
-#: dlcdb/accounts/admin.py:101
+#: dlcdb/accounts/admin.py:99
 msgid "group"
 msgstr "Gruppe"
 
-#: dlcdb/accounts/admin.py:102
+#: dlcdb/accounts/admin.py:100
 msgid "groups"
 msgstr "Gruppen"
 
@@ -64,11 +64,11 @@ msgstr "Danke für die Zeit, die Sie heute mit Ihrer DLCDB verbracht haben."
 msgid "Log in again"
 msgstr "Erneut anmelden"
 
-#: dlcdb/core/admin/device_admin.py:319
+#: dlcdb/core/admin/device_admin.py:320
 msgid "Relocate selected devices"
 msgstr "Ausgewählte Geräte umziehen"
 
-#: dlcdb/core/admin/device_admin.py:335
+#: dlcdb/core/admin/device_admin.py:336
 msgid "Restore devices from REMOVED to LOST"
 msgstr "Wiederherstellung von REMOVED auf LOST"
 
@@ -369,12 +369,14 @@ msgid "Licenses"
 msgstr "Lizenzen"
 
 #: dlcdb/core/models/prx_lostrecord.py:31
-msgid "Record of type 'Lost'"
-msgstr "Record vom Typ \"Nicht auffindbar\""
-
 #: dlcdb/core/models/prx_lostrecord.py:32
-msgid "Records of type 'Lost'"
-msgstr "Records vom Typ \"Nicht auffindbar\""
+msgid "Lost"
+msgstr "Unauffindbar"
+
+#: dlcdb/core/models/prx_removedrecord.py:25
+#: dlcdb/core/models/prx_removedrecord.py:26
+msgid "Removed"
+msgstr "Entfernt"
 
 #: dlcdb/core/models/record.py:27
 msgid "Sold"
@@ -649,11 +651,11 @@ msgstr "Lizenz Historie"
 
 #: dlcdb/notifications/apps.py:11
 msgid "Notification"
-msgstr ""
+msgstr "Benachrichtigung"
 
 #: dlcdb/notifications/apps.py:12
 msgid "Notifications"
-msgstr ""
+msgstr "Benachrichtigungen"
 
 #: dlcdb/notifications/intervals.py:26
 msgid "Specific Date/Time"
@@ -746,8 +748,8 @@ msgid "Unassignment timestamp could not be before assignment timestamp!"
 msgstr ""
 
 #: dlcdb/smallstuff/models.py:100 dlcdb/smallstuff/models.py:101
-msgid "Issued stuff"
-msgstr "Ausgegebener Kleinkram"
+msgid "Stuff"
+msgstr "Kleinkram"
 
 #: dlcdb/smallstuff/templates/smallstuff/person_search.html:21
 msgid "Smallstuff Person Search"
@@ -777,7 +779,7 @@ msgid "Log in"
 msgstr "Anmelden"
 
 #: dlcdb/templates/admin/base_site.html:28
-#: dlcdb/templates/admin/dashboard.html:14
+#: dlcdb/templates/admin/dashboard.html:19
 msgid "Django site admin"
 msgstr "Django Site-Verwaltung"
 
@@ -825,6 +827,15 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:43
 msgid "None"
 msgstr "None"
+
+#~ msgid "Record of type 'Lost'"
+#~ msgstr "Record vom Typ \"Nicht auffindbar\""
+
+#~ msgid "Records of type 'Lost'"
+#~ msgstr "Records vom Typ \"Nicht auffindbar\""
+
+#~ msgid "Issued stuff"
+#~ msgstr "Ausgegebener Kleinkram"
 
 #~ msgid "In room"
 #~ msgstr "In Raum"

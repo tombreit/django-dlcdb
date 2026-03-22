@@ -4,7 +4,7 @@
 
 from collections import defaultdict
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 
 import plotly.graph_objects as go
@@ -20,44 +20,108 @@ from .models.prx_lostrecord import LostRecord
 from .models.prx_removedrecord import RemovedRecord
 
 
-def get_record_fraction_html():
+# Shared plotly config: hide modebar entirely
+PLOTLY_CONFIG = {"displayModeBar": False}
+
+# Shared layout defaults
+PLOTLY_LAYOUT = dict(
+    font=dict(family="Roboto, sans-serif"),
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
+)
+
+# Color palette for bar charts
+COLORS = {
+    "primary": "#5b69bc",
+    "primary_light": "#8b96d4",
+    "accent": "#e8634a",
+    "accent_light": "#f09a88",
+    "muted": "#9e9e9e",
+}
+
+
+def _to_html(fig):
+    """Render a plotly figure to HTML with shared config."""
+    return pio.to_html(fig, full_html=False, include_plotlyjs=False, config=PLOTLY_CONFIG)
+
+
+def get_record_fraction_html(tenant=None):
     """
     Returns a plotly HTML div showing the fraction of active records by type.
     """
     labels = ["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"]
+    filter_kwargs = {"is_active": True}
+    if tenant:
+        filter_kwargs["device__tenant"] = tenant
     counts = [
-        InRoomRecord.objects.filter(is_active=True).count(),
-        LentRecord.objects.filter(is_active=True).count(),
-        LostRecord.objects.filter(is_active=True).count(),
-        RemovedRecord.objects.filter(is_active=True).count(),
+        InRoomRecord.objects.filter(**filter_kwargs).count(),
+        LentRecord.objects.filter(**filter_kwargs).count(),
+        LostRecord.objects.filter(**filter_kwargs).count(),
+        RemovedRecord.objects.filter(**filter_kwargs).count(),
     ]
 
-    fig = go.Figure(go.Bar(x=counts, y=labels, orientation="h"))
-    fig.update_layout(
-        height=250,
-        margin=dict(l=10, r=10, t=10, b=10),
+    colors = [COLORS["primary"], COLORS["accent"], COLORS["muted"], COLORS["accent_light"]]
+    fig = go.Figure(
+        go.Bar(
+            x=counts,
+            y=labels,
+            orientation="h",
+            marker=dict(color=colors, cornerradius=4),
+            text=counts,
+            textposition="auto",
+            textfont=dict(color="white", size=13),
+        )
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    fig.update_layout(
+        **PLOTLY_LAYOUT,
+        height=250,
+        margin=dict(l=10, r=30, t=10, b=10),
+        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+        yaxis=dict(showgrid=False),
+        bargap=0.3,
+    )
+    return _to_html(fig)
 
 
-def get_device_type_html():
+def get_device_type_html(tenant=None):
     """
     Returns a plotly HTML div showing device counts by type (>10 devices).
     """
-    device_types_qs = DeviceType.objects.annotate(count=Count("device")).exclude(count__lt=10).order_by("count")
+    count_filter = Q(device__tenant=tenant) if tenant else Q()
+    device_types_qs = (
+        DeviceType.objects.annotate(count=Count("device", filter=count_filter)).exclude(count__lt=10).order_by("count")
+    )
 
     labels = [dt.name for dt in device_types_qs]
     counts = [dt.count for dt in device_types_qs]
 
-    fig = go.Figure(go.Bar(x=counts, y=labels, orientation="h"))
-    fig.update_layout(
-        height=max(250, len(labels) * 25),
-        margin=dict(l=10, r=10, t=10, b=10),
+    fig = go.Figure(
+        go.Bar(
+            x=counts,
+            y=labels,
+            orientation="h",
+            marker=dict(
+                color=counts,
+                colorscale=[[0, COLORS["primary_light"]], [1, COLORS["primary"]]],
+                cornerradius=4,
+            ),
+            text=counts,
+            textposition="outside",
+            textfont=dict(size=11),
+        )
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    fig.update_layout(
+        **PLOTLY_LAYOUT,
+        height=max(300, len(labels) * 28),
+        margin=dict(l=10, r=50, t=10, b=10),
+        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
+        yaxis=dict(showgrid=False, tickfont=dict(size=11)),
+        bargap=0.2,
+    )
+    return _to_html(fig)
 
 
-def get_record_timeline_html():
+def get_record_timeline_html(tenant=None):
     """
     Returns a plotly HTML div showing the number of devices with each record
     type (LENT, INROOM, REMOVED) active per month over time.
@@ -68,11 +132,14 @@ def get_record_timeline_html():
     Record.save() overwriting it on ALL previous records).
     """
     now = timezone.now()
-    chart_types = [Record.LENT, Record.INROOM, Record.REMOVED]
+    chart_types = [Record.LENT, Record.INROOM, Record.LOST, Record.REMOVED]
 
     # Fetch ALL record types — we need ORDERED/LOST too to know when
     # an INROOM/LENT period ends.
-    records = Record.objects.order_by("device_id", "created_at").values_list("device_id", "record_type", "created_at")
+    qs = Record.objects.all()
+    if tenant:
+        qs = qs.filter(device__tenant=tenant)
+    records = qs.order_by("device_id", "created_at").values_list("device_id", "record_type", "created_at")
 
     # Group records by device, derive active periods from consecutive records
     # {record_type: {month_key: set(device_ids)}}
@@ -89,7 +156,7 @@ def get_record_timeline_html():
                 type_month_devices[rtype][month_key].add(device_id)
                 continue
 
-            if rtype not in (Record.LENT, Record.INROOM):
+            if rtype not in (Record.LENT, Record.INROOM, Record.LOST):
                 continue
 
             # Determine end month (inclusive) for this record's active period.
@@ -130,7 +197,17 @@ def get_record_timeline_html():
     type_labels = {
         Record.LENT: "Verliehen",
         Record.INROOM: "Lokalisiert",
+        Record.LOST: "Nicht auffindbar",
         Record.REMOVED: "Entfernt",
+    }
+
+    trace_styles = {
+        Record.LENT: dict(line=dict(color=COLORS["accent"], width=2.5)),
+        Record.INROOM: dict(
+            line=dict(color=COLORS["primary"], width=2.5), fill="tozeroy", fillcolor="rgba(91,105,188,0.12)"
+        ),
+        Record.LOST: dict(line=dict(color=COLORS["accent_light"], width=2.5)),
+        Record.REMOVED: dict(marker=dict(color=COLORS["muted"], cornerradius=3, opacity=0.6)),
     }
 
     fig = go.Figure()
@@ -139,31 +216,50 @@ def get_record_timeline_html():
         months = sorted(month_devices.keys())
         counts = [len(month_devices[m]) for m in months]
         if rtype == Record.REMOVED:
-            fig.add_trace(go.Bar(x=months, y=counts, name=type_labels[rtype]))
+            fig.add_trace(go.Bar(x=months, y=counts, name=type_labels[rtype], **trace_styles[rtype]))
         else:
-            fig.add_trace(go.Scatter(x=months, y=counts, mode="lines", name=type_labels[rtype]))
+            fig.add_trace(go.Scatter(x=months, y=counts, mode="lines", name=type_labels[rtype], **trace_styles[rtype]))
 
     fig.update_layout(
+        **PLOTLY_LAYOUT,
         xaxis_title="Monat",
         yaxis_title="Anzahl Geräte",
-        height=400,
-        margin=dict(l=40, r=20, t=30, b=40),
+        height=350,
+        margin=dict(l=50, r=20, t=10, b=40),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(gridcolor="rgba(0,0,0,0.06)", zeroline=False),
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return _to_html(fig)
 
 
-def get_devices_by_series_data():
+def get_devices_by_series_data(tenant=None):
     """
     Returns a plotly HTML div showing device counts by series.
     """
-    qs = Device.objects.values("series").annotate(total=Count("series"))
+    qs = Device.objects.all()
+    if tenant:
+        qs = qs.filter(tenant=tenant)
+    qs = qs.values("series").annotate(total=Count("series"))
 
     labels = [elem["series"] for elem in qs]
     counts = [elem["total"] for elem in qs]
 
-    fig = go.Figure(go.Bar(x=counts, y=labels, orientation="h"))
+    fig = go.Figure(
+        go.Bar(
+            x=counts,
+            y=labels,
+            orientation="h",
+            marker=dict(
+                color=counts,
+                colorscale=[[0, COLORS["primary_light"]], [1, COLORS["primary"]]],
+                cornerradius=4,
+            ),
+        )
+    )
     fig.update_layout(
+        **PLOTLY_LAYOUT,
         height=max(250, len(labels) * 25),
         margin=dict(l=10, r=10, t=10, b=10),
     )
-    return pio.to_html(fig, full_html=False, include_plotlyjs=False)
+    return _to_html(fig)

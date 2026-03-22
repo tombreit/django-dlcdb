@@ -19,11 +19,12 @@ SPDX-License-Identifier: EUPL-1.2
         </div>
     {% endif %}
 
+    <i class="{{ model_class_icon }}"></i> {{ text }}
+
     {% if badge %}
+        <br>
         {{ badge }}
-    {% else %}
-        <i class="{{ model_class_icon }}"></i>
     {% endif %}
-    {{ text }}
+
     </div>
 </a>
