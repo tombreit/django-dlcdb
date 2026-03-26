@@ -6,9 +6,9 @@ from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from django_filters import rest_framework as filters
-from django_filters.rest_framework import DjangoFilterBackend
 
 from django.db.models import Prefetch
 
@@ -16,11 +16,22 @@ from ..core.models import Device, Person, LentRecord, Room
 from . import serializers
 
 
+@extend_schema(exclude=True)
 @api_view(["GET"])
 def api_root(request):
     return Response({"message": "DLCDB API v2 root"})
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="search",
+            description="Search devices by EDV-ID or SAP-ID (inventar number) or series.",
+            required=False,
+            type=str,
+        ),
+    ]
+)
 class DeviceViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows devices to be viewed.
@@ -34,18 +45,39 @@ class DeviceViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = serializers.DeviceSerializer
     lookup_field = "uuid"
-    search_fields = ["edv_id", "sap_id"]
+    search_fields = ["edv_id", "sap_id", "series"]
     filter_backends = [SearchFilter, filters.DjangoFilterBackend]
-    filterset_fields = ["edv_id", "uuid", "device_type__prefix", "active_record__record_type"]
+    filterset_fields = {
+        "edv_id": ["exact"],
+        "uuid": ["exact"],
+        "device_type__prefix": ["exact"],
+        "manufacturer__name": ["iexact"],
+        "active_record__record_type": ["exact"],
+    }
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="search",
+            description="Search by device series, EDV-ID, or person last name.",
+            required=False,
+            type=str,
+        ),
+    ]
+)
 class LentRecordViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows active lendings to be viewed.
     """
 
-    queryset = LentRecord.objects.filter(is_active=True)
+    queryset = LentRecord.objects.filter(is_active=True).select_related(
+        "device",
+        "person",
+    )
     serializer_class = serializers.LentRecordSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ["device__series", "device__edv_id", "person__last_name"]
 
 
 class RoomViewSet(viewsets.ReadOnlyModelViewSet):
@@ -65,7 +97,7 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     serializer_class = serializers.PersonSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [filters.DjangoFilterBackend]
     filterset_fields = [
         "first_name",
         "last_name",
@@ -75,7 +107,7 @@ class PersonViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Person.objects.all().prefetch_related(
         Prefetch(
             "record_set",
-            queryset=LentRecord.objects.all(),
+            queryset=LentRecord.objects.filter(is_active=True),
             to_attr="lent_records",
         ),
     )

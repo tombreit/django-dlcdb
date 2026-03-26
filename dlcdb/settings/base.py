@@ -50,6 +50,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
+    "drf_spectacular",
     "crispy_forms",
     "crispy_bootstrap5",
     "django_select2",
@@ -344,7 +345,15 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # 'PAGE_SIZE': 10,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "DLCDB API",
+    "DESCRIPTION": "Device Life Cycle Database API",
+    "VERSION": "2.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 # https://django-simple-history.readthedocs.io/en/latest/admin.html#disabling-the-option-to-revert-an-object

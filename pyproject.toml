@@ -35,6 +35,7 @@ dependencies = [
     "Pillow",
     "segno",
     "djangorestframework",
+    "drf-spectacular",
     "django-filter",
     "icalendar",
     "plotly",

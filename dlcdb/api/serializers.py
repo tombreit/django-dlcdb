@@ -17,8 +17,10 @@ class DeviceSerializer(serializers.HyperlinkedModelSerializer):
     room_nickname = serializers.StringRelatedField(
         source="active_record.room.nickname",
     )
-    lender = serializers.StringRelatedField(
+    lender = serializers.HyperlinkedRelatedField(
         source="active_record.person",
+        view_name="person-detail",
+        read_only=True,
     )
     url = serializers.HyperlinkedIdentityField(view_name="device-detail", lookup_field="uuid")
     device_type_name = serializers.StringRelatedField(
