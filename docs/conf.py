@@ -121,6 +121,7 @@ myst_substitutions = {
     "api_device_by_id_url": f"[{base_url}/api/v2/devices/devices/?edv_id=NTB1146/]({base_url}/api/v2/devices/devices/?edv_id=NTB1146)",
     "api_device_search_url": f"[{base_url}/api/v2/devices/?search=ntb1146]({base_url}/api/v2/devices/?search=ntb1146)",
     "api_persons_with_devices": f"[{base_url}/api/v2/persons/]({base_url}/api/v2/persons/)",
+    "api_swagger_url": f"[{base_url}/api/v2/schema/swagger-ui/]({base_url}/api/v2/schema/swagger-ui/)",
 }
 myst_enable_extensions = ["colon_fence", "substitution", "attrs_inline", "html_image"]
 myst_heading_anchors = 6

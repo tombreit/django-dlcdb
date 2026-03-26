@@ -1,5 +1,8 @@
 # API
 
+An interactive Swagger-UI is available at:  
+{{ api_swagger_url }}
+
 ## Endpoints
 
 *All endpoints are readonly.*
