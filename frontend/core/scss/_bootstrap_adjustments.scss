@@ -1,0 +1,76 @@
+#content h1 {
+    @extend .h3;
+}
+
+.object-tools a.addlink,
+.object-tools a.viewsitelink {
+    @extend .btn;
+    @extend .btn-primary;
+    padding-right: 28px;
+}
+
+input.btn, 
+a.btn {
+    @extend .btn;
+}
+input.btn-primary,
+a.btn-primary {
+    @extend .btn-primary;
+}
+input.btn-secondary,
+a.btn-secondary {
+    @extend .btn-secondary;
+}
+input.btn-info,
+a.btn-info {
+    @extend .btn-info;
+}
+input.btn-warning,
+a.btn-warning {
+    @extend .btn-warning;
+}
+input.btn-success,
+a.btn-success {
+    @extend .btn-success;
+}
+input.btn-light,
+a.btn-light {
+    @extend .btn-light;
+}
+input.btn-danger,
+a.btn-danger {
+    @extend .btn-danger;
+}
+
+a.text-bg-info {
+    @extend .text-bg-info
+}
+
+.record-action-btn-group .btn-info {
+    @extend .btn-info;
+    background-color: var(--dlcdb-color-primary-light);
+    border-color: var(--dlcdb-color-primary-light);
+    color: white;
+}
+
+
+.alert-90-danger,
+tr.lent-state-10-unknown {
+    @extend .text-bg-danger;
+}
+
+.alert-80-warning,
+tr.lent-state-20-overdue {
+    @extend .text-bg-warning;
+}
+
+// tr.licence-state-30-available,
+// tr.lent-state-30-available {
+//     @extend .bg-white;
+// }
+
+tr.licence-state-40-lent,
+tr.lent-state-40-lent {
+    // @extend .text-muted;
+    @extend .text-bg-light;
+}

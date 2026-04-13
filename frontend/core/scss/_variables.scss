@@ -10,6 +10,8 @@ $dlcdb-color-primary: rgb(0, 85, 85);
 $dlcdb-color-primary-light: rgb(0, 108, 102);
 $primary: $dlcdb-color-primary;
 
+$dropdown-link-color: var(--dlcdb-color-primary-light);
+
 :root {
     --primary: #{$dlcdb-color-primary};
     --dlcdb-color-primary-light: #{$dlcdb-color-primary-light};

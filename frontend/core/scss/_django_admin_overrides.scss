@@ -32,3 +32,51 @@ html[data-theme="dark"] {
 
     color-scheme: dark;
 }
+
+.submit-row {
+    .closelink,
+    .deletelink {
+        box-sizing: content-box;
+    }
+}
+
+.form-row {
+  legend {
+      width: inherit;
+      margin-bottom: 0;
+      font-size: inherit;
+  }
+
+  @media (min-width: 1200px) {
+      legend {
+          font-size: inherit;
+      }
+  }
+
+  legend,
+  label {
+      font-weight: normal;
+      color: var(--body-quiet-color);
+      font-size: 0.8125rem;
+      box-sizing: content-box;
+  }
+  legend + * {
+    clear: inherit;
+  }
+}
+
+.aligned legend {
+  float: inline-start;
+}
+
+fieldset .fieldset-heading,
+fieldset .inline-heading,
+:not(.inline-related) .collapse summary {
+  border-radius: 4px;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  border-radius: 4px 4px 0 0;
+}
