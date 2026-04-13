@@ -22,15 +22,15 @@ babel==2.18.0
     #   sphinx
 beautifulsoup4==4.14.3
     # via pydata-sphinx-theme
-build==1.4.2
+build==1.4.3
     # via pip-tools
 certifi==2026.2.25
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.3.2
     # via pip-tools
 coverage==7.13.5
     # via pytest-cov
@@ -38,7 +38,7 @@ crispy-bootstrap5==2026.3
     # via django-dlcdb (pyproject.toml)
 distlib==0.4.0
     # via virtualenv
-django==6.0.3
+django==6.0.4
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -61,7 +61,7 @@ django-crispy-forms==2.6
     # via
     #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
-django-debug-toolbar==6.2.0
+django-debug-toolbar==6.3.0
     # via django-dlcdb (pyproject.toml)
 django-environ==0.13.0
     # via django-dlcdb (pyproject.toml)
@@ -132,7 +132,7 @@ mdurl==0.1.2
     # via markdown-it-py
 myst-parser==5.0.0
     # via django-dlcdb (pyproject.toml)
-narwhals==2.18.1
+narwhals==2.19.0
     # via plotly
 nodeenv==1.10.0
     # via pre-commit
@@ -145,15 +145,15 @@ packaging==26.0
     #   pytest
     #   sphinx
     #   wheel
-pillow==12.1.1
+pillow==12.2.0
     # via django-dlcdb (pyproject.toml)
 pip-tools==7.5.3
     # via django-dlcdb (pyproject.toml)
-platformdirs==4.9.4
+platformdirs==4.9.6
     # via
     #   python-discovery
     #   virtualenv
-plotly==6.6.0
+plotly==6.7.0
     # via django-dlcdb (pyproject.toml)
 pluggy==1.6.0
     # via
@@ -169,7 +169,7 @@ pyasn1-modules==0.4.2
     # via python-ldap
 pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
@@ -179,7 +179,7 @@ pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   django-dlcdb (pyproject.toml)
     #   pytest-cov
@@ -190,7 +190,7 @@ pytest-django==4.12.0
     # via django-dlcdb (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via icalendar
-python-discovery==1.2.0
+python-discovery==1.2.2
     # via virtualenv
 python-ldap==3.4.5
     # via django-auth-ldap
@@ -206,7 +206,7 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.33.0
+requests==2.33.1
     # via sphinx
 roman-numerals==4.1.0
     # via sphinx
@@ -214,7 +214,7 @@ rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
-ruff==0.15.7
+ruff==0.15.10
     # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
@@ -237,7 +237,7 @@ sphinx-book-theme==1.2.0
     # via django-dlcdb (pyproject.toml)
 sphinx-design==0.7.0
     # via django-dlcdb (pyproject.toml)
-sphinx-togglebutton==0.4.4
+sphinx-togglebutton==0.4.5
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -263,13 +263,13 @@ typing-extensions==4.15.0
     # via
     #   beautifulsoup4
     #   pydata-sphinx-theme
-tzdata==2025.3
+tzdata==2026.1
     # via icalendar
 uritemplate==4.2.0
     # via drf-spectacular
 urllib3==2.6.3
     # via requests
-virtualenv==21.2.0
+virtualenv==21.2.1
     # via pre-commit
 wheel==0.46.3
     # via

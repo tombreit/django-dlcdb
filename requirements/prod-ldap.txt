@@ -24,11 +24,11 @@ beautifulsoup4==4.14.3
     # via pydata-sphinx-theme
 certifi==2026.2.25
     # via requests
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
 crispy-bootstrap5==2026.3
     # via django-dlcdb (pyproject.toml)
-django==6.0.3
+django==6.0.4
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -106,7 +106,7 @@ mdurl==0.1.2
     # via markdown-it-py
 myst-parser==5.0.0
     # via django-dlcdb (pyproject.toml)
-narwhals==2.18.1
+narwhals==2.19.0
     # via plotly
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
@@ -115,9 +115,9 @@ packaging==26.0
     #   plotly
     #   sphinx
     #   wheel
-pillow==12.1.1
+pillow==12.2.0
     # via django-dlcdb (pyproject.toml)
-plotly==6.6.0
+plotly==6.7.0
     # via django-dlcdb (pyproject.toml)
 pyasn1==0.6.3
     # via
@@ -127,7 +127,7 @@ pyasn1-modules==0.4.2
     # via python-ldap
 pydata-sphinx-theme==0.16.1
     # via sphinx-book-theme
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
@@ -147,7 +147,7 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.33.0
+requests==2.33.1
     # via sphinx
 roman-numerals==4.1.0
     # via sphinx
@@ -176,7 +176,7 @@ sphinx-book-theme==1.2.0
     # via django-dlcdb (pyproject.toml)
 sphinx-design==0.7.0
     # via django-dlcdb (pyproject.toml)
-sphinx-togglebutton==0.4.4
+sphinx-togglebutton==0.4.5
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via sphinx
@@ -198,7 +198,7 @@ typing-extensions==4.15.0
     # via
     #   beautifulsoup4
     #   pydata-sphinx-theme
-tzdata==2025.3
+tzdata==2026.1
     # via icalendar
 uritemplate==4.2.0
     # via drf-spectacular
