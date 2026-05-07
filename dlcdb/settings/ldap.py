@@ -8,9 +8,11 @@
 import logging
 import ldap
 
+from django.core.exceptions import ImproperlyConfigured
 from django_auth_ldap.config import (
     LDAPSearch,
     ActiveDirectoryGroupType,
+    PosixGroupType,
     LDAPGroupQuery,
 )
 
@@ -35,7 +37,18 @@ AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ["dlcdb.accounts.auth_backends.EmailLDAPBackend"]
 
 
-AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
+LDAP_VARIANT = env.str("LDAP_VARIANT", default="msad").lower()
+_LDAP_GROUP_TYPES = {
+    "msad": ActiveDirectoryGroupType,
+    "openldap": PosixGroupType,
+}
+try:
+    AUTH_LDAP_GROUP_TYPE = _LDAP_GROUP_TYPES[LDAP_VARIANT]()
+except KeyError:
+    raise ImproperlyConfigured(
+        f"Unsupported LDAP_VARIANT={LDAP_VARIANT!r}. Expected one of: {sorted(_LDAP_GROUP_TYPES)}"
+    )
+
 AUTH_LDAP_FIND_GROUP_PERMS = True
 AUTH_LDAP_ALWAYS_UPDATE_USER = True
 AUTH_LDAP_CACHE_TIMEOUT = 0  # 60 * 60

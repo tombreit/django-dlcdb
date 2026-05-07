@@ -65,6 +65,13 @@ cp env.template .env
 **Permissions** should be assigned to Django groups. Only LDAP groups listet in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups.
 :::
 
+:::{note}
+**LDAP variant.** Set `LDAP_VARIANT` in `.env` to match your directory:
+`msad` (default) for Microsoft Active Directory, or `openldap` for
+OpenLDAP-based directories (e.g. Univention Corporate Server). This selects
+the appropriate group type (`ActiveDirectoryGroupType` vs. `PosixGroupType`).
+:::
+
 **Build frontend assets**
 
 ```bash
