@@ -7,7 +7,6 @@ import uuid
 import pytest
 
 from django.urls import reverse
-from django.contrib import admin
 from django.contrib.auth import get_user_model
 
 
@@ -17,13 +16,21 @@ def test_password():
 
 
 @pytest.fixture
-def admin_login_url():
-    return reverse("admin:login")
+def login_url():
+    # /admin/login/ is redirected to the project login view (see dlcdb/urls.py),
+    # so authentication happens at reverse("login") == /accounts/login/.
+    return reverse("login")
 
 
 @pytest.fixture
 def create_user(db, django_user_model, test_password, settings):
     settings.AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+    # The login template references collected static assets (theme.css) via the
+    # manifest storage; use the plain storage so it renders without collectstatic.
+    settings.STORAGES = {
+        **settings.STORAGES,
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
 
     def make_user(**kwargs):
         kwargs["password"] = test_password
@@ -35,42 +42,38 @@ def create_user(db, django_user_model, test_password, settings):
 
 
 @pytest.mark.django_db
-def test_staff_login_to_admin_with_email(client, create_user, test_password, admin_login_url):
-    """Test that a staff user can login to the Django admin"""
+def test_staff_login_to_admin_with_email(client, create_user, test_password, login_url):
+    """Test that a staff user can login with their email address"""
     user = create_user(is_staff=True)
 
     # Attempt login with email as username (since USERNAME_FIELD = 'email')
-    response = client.post(admin_login_url, {"username": user.email, "password": test_password}, follow=False)
+    response = client.post(login_url, {"username": user.email, "password": test_password}, follow=False)
 
-    # For successful login, Django should redirect to the admin index
+    # For a successful login, Django redirects to LOGIN_REDIRECT_URL ("dashboard" == "/")
     assert response.status_code == 302
-    assert response.url.startswith(reverse("admin:index"))
+    assert response.url == reverse("dashboard")
+    assert "_auth_user_id" in client.session
 
-    # If you want to follow the redirect and check the admin page content
-    response = client.post(admin_login_url, {"username": user.email, "password": test_password}, follow=True)
+    # Following the redirect should land on a working page
+    response = client.post(login_url, {"username": user.email, "password": test_password}, follow=True)
     assert response.status_code == 200
-    # Dynamically get the index_title
-    assert admin.site.index_title.encode() in response.content
 
 
 @pytest.mark.django_db
-def test_staff_login_to_admin_with_username(client, create_user, test_password, admin_login_url):
-    """Test that a staff user with only username cannot login to the Django admin"""
+def test_staff_login_to_admin_with_username(client, create_user, test_password, login_url):
+    """Test that a staff user cannot login with their (legacy) username instead of email"""
     user = create_user(is_staff=True, username="testuser")
 
-    response = client.post(admin_login_url, {"username": user.username, "password": test_password}, follow=False)
+    response = client.post(login_url, {"username": user.username, "password": test_password}, follow=False)
 
-    # Login should fail - check that we're still on the login page with status 200
+    # Login should fail - we stay on the login page (status 200) with the error alert rendered
     assert response.status_code == 200
-
-    # Check we're not redirected to admin index
-    assert "admin:index" not in response.url if hasattr(response, "url") else True
-    assert b"id_username_error" in response.content
+    assert b"alert-danger" in response.content
     assert "_auth_user_id" not in client.session
 
 
 @pytest.mark.django_db
-def test_legacy_user_login_with_email_and_username_migration(client, test_password, admin_login_url):
+def test_legacy_user_login_with_email_and_username_migration(client, test_password, login_url):
     """
     Test that a legacy user with username can login with email and username is migrated.
     This basically also tests our custom accounts.auth_backends.EmailModelBackend.
@@ -86,11 +89,11 @@ def test_legacy_user_login_with_email_and_username_migration(client, test_passwo
     print(f"{user.username=}, {user.email=}")
 
     # 2. Attempt login with email
-    response = client.post(admin_login_url, {"username": email, "password": test_password}, follow=False)
+    response = client.post(login_url, {"username": email, "password": test_password}, follow=False)
 
     # 3. Verify login succeeds
     assert response.status_code == 302
-    assert response.url.startswith(reverse("admin:index"))
+    assert response.url == reverse("dashboard")
     assert "_auth_user_id" in client.session
 
     # 4. Verify username field has been updated to email
@@ -101,5 +104,5 @@ def test_legacy_user_login_with_email_and_username_migration(client, test_passwo
 
     # Additional verification - can still login with updated username
     client.logout()
-    response = client.post(admin_login_url, {"username": user.username, "password": test_password})
+    response = client.post(login_url, {"username": user.username, "password": test_password})
     assert response.status_code == 302
