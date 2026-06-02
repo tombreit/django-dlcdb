@@ -34,7 +34,6 @@ class ImporterListAdmin(admin.ModelAdmin):
         (
             "Import (specified)",
             {
-                "classes": ("collapse",),
                 "fields": (
                     "import_format",
                     "tenant",
@@ -42,13 +41,14 @@ class ImporterListAdmin(admin.ModelAdmin):
             },
         ),
         (
-            None,
+            "Metadata",
             {
+                "classes": ("collapse",),
                 "fields": (
                     "messages",
                     "created_at",
                     "modified_at",
-                )
+                ),
             },
         ),
     )
