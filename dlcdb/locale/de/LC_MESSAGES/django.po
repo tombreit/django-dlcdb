@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-22 14:10+0100\n"
-"PO-Revision-Date: 2026-03-22 14:11+0100\n"
+"POT-Creation-Date: 2026-06-02 12:29+0200\n"
+"PO-Revision-Date: 2026-06-02 12:28+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -37,7 +37,7 @@ msgstr "Gruppen"
 
 #: dlcdb/accounts/models.py:44
 msgid "The Email must be set"
-msgstr ""
+msgstr "Email muss angegeben sein"
 
 #: dlcdb/accounts/models.py:60
 msgid "Superuser must have is_staff=True."
@@ -88,48 +88,40 @@ msgstr "Gerät"
 msgid "Procurement"
 msgstr "Beschaffung"
 
-#: dlcdb/core/apps.py:50
-msgid "Bulk Import"
-msgstr "Bulk Import"
-
-#: dlcdb/core/apps.py:58
-msgid "Bulk Decommissioning"
-msgstr "Bulk Ausmusterung"
-
-#: dlcdb/core/apps.py:66 dlcdb/core/models/room.py:73
+#: dlcdb/core/apps.py:50 dlcdb/core/models/room.py:73
 msgid "Rooms"
 msgstr "Räume"
 
-#: dlcdb/core/apps.py:74 dlcdb/core/models/device.py:132
+#: dlcdb/core/apps.py:58 dlcdb/core/models/device.py:132
 #: dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
 
-#: dlcdb/core/apps.py:82
+#: dlcdb/core/apps.py:66
 msgid "Distributor"
 msgstr "Zulieferer"
 
-#: dlcdb/core/apps.py:90
+#: dlcdb/core/apps.py:74
 msgid "Device types"
 msgstr "Geräteklassen"
 
-#: dlcdb/core/apps.py:98
+#: dlcdb/core/apps.py:82
 msgid "People"
 msgstr "Personen"
 
-#: dlcdb/core/apps.py:106
+#: dlcdb/core/apps.py:90
 msgid "Records"
 msgstr "Records"
 
-#: dlcdb/core/apps.py:114
+#: dlcdb/core/apps.py:98
 msgid "Removed records"
 msgstr "Entfernt-Records"
 
-#: dlcdb/core/apps.py:122 dlcdb/core/models/inventory.py:246
+#: dlcdb/core/apps.py:106 dlcdb/core/models/inventory.py:246
 msgid "Inventories"
 msgstr "Inventuren"
 
-#: dlcdb/core/apps.py:130
+#: dlcdb/core/apps.py:114
 msgid "Notes"
 msgstr "Notizen"
 
@@ -298,17 +290,9 @@ msgstr "Geräteklasse"
 msgid "Device Types"
 msgstr "Geräteklassen"
 
-#: dlcdb/core/models/importer.py:38
-msgid "Internal (CSV)"
-msgstr "Internal (CSV)"
-
-#: dlcdb/core/models/importer.py:39
-msgid "SAP (CSV)"
-msgstr "SAP (CSV)"
-
 #: dlcdb/core/models/inventory.py:227
 msgid "Device search tenant aware"
-msgstr ""
+msgstr "Geräte-Suche ist Tenant-spezifisch"
 
 #: dlcdb/core/models/inventory.py:228
 msgid ""
@@ -517,6 +501,37 @@ msgstr "Zeige Entfernt-Record"
 #: dlcdb/core/utils/device_methods.py:117
 msgid "Lend"
 msgstr "Ausleihen"
+
+#: dlcdb/dataexchange/apps.py:12
+#, fuzzy
+#| msgid "Data management"
+msgid "Data exchange"
+msgstr "Datenhaltung"
+
+#: dlcdb/dataexchange/apps.py:18
+msgid "Bulk Import"
+msgstr "Bulk Import"
+
+#: dlcdb/dataexchange/apps.py:26
+msgid "Bulk Decommissioning"
+msgstr "Bulk Ausmusterung"
+
+#: dlcdb/dataexchange/models.py:48
+msgid "Internal (CSV)"
+msgstr "Internal (CSV)"
+
+#: dlcdb/dataexchange/models.py:49
+msgid "SAP (CSV)"
+msgstr "SAP (CSV)"
+
+#: dlcdb/dataexchange/validators.py:20
+#, python-format
+msgid ""
+"The CSV file is missing required column headers. Missing column(s): "
+"%(missing)s. Expected all of: %(expected)s."
+msgstr ""
+"Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende Spalte(n): "
+"%(missing)s. Erwartet werden: %(expected)s."
 
 #: dlcdb/inventory/apps.py:17 dlcdb/inventory/apps.py:26
 msgid "Inventorize"
@@ -793,7 +808,7 @@ msgstr "Historie"
 
 #: dlcdb/templates/admin/change_form_object_tools.html:11
 msgid "View on site"
-msgstr ""
+msgstr "Seite anzeigen"
 
 #: dlcdb/templates/admin/filter.html:12
 #, python-format
@@ -827,15 +842,6 @@ msgstr "Geändert von"
 #: dlcdb/templates/simple_history/_object_history_list.html:43
 msgid "None"
 msgstr "None"
-
-#: dlcdb/dataexchange/validators.py:19
-#, python-format
-msgid ""
-"The CSV file is missing required column headers. Missing column(s): "
-"%(missing)s. Expected all of: %(expected)s."
-msgstr ""
-"Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende "
-"Spalte(n): %(missing)s. Erwartet werden: %(expected)s."
 
 #~ msgid "Record of type 'Lost'"
 #~ msgstr "Record vom Typ \"Nicht auffindbar\""
