@@ -37,7 +37,8 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
     if import_format == "SAPCSV":
         for import_obj in import_objs:
             device_obj = import_obj.device
-            record_obj = import_obj.record
+            # SAP imports never produce LENT rows, so records holds 0 or 1 record.
+            records = import_obj.records
 
             # Cases for SAP import:
             # - sap_id already exists in other tenant -> do nothing, DLCDB data is the leading system
@@ -47,10 +48,11 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
 
             already_existing_device = Device.objects.filter(sap_id=device_obj.sap_id).first()
 
-            if already_existing_device and all([already_existing_device.tenant.name == tenant.name, record_obj]):
+            if already_existing_device and all([already_existing_device.tenant.name == tenant.name, records]):
                 logger.debug("Device %s already exists in tenant %s. Updating record only.", device_obj, tenant)
-                record_obj.device = already_existing_device
-                record_obj.save()
+                for record_obj in records:
+                    record_obj.device = already_existing_device
+                    record_obj.save()
                 report.add(
                     row=import_obj.row,
                     identifier=import_obj.identifier,
@@ -70,7 +72,7 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
 
                 device_obj.save()
                 device_objs.append(device_obj)
-                if record_obj:
+                for record_obj in records:
                     record_obj.save()
                 report.add(
                     row=import_obj.row,
@@ -97,8 +99,10 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
         for import_obj in import_objs:
             import_obj.device.save()
             device_objs.append(import_obj.device)
-            if import_obj.record:
-                import_obj.record.save()
+            # Save records in order; the last one saved becomes the active record
+            # (e.g. for a completed loan: LENT first, then the active INROOM).
+            for record_obj in import_obj.records:
+                record_obj.save()
             report.add(row=import_obj.row, identifier=import_obj.identifier, outcome=Outcome.CREATED)
 
     return device_objs
@@ -107,12 +111,17 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
 @dataclass
 class ImportObject:
     """
-    An ImportObject is defined by a device and a related record (if available),
+    An ImportObject is defined by a device and its related records (if any),
     plus its originating CSV row number and a human-readable identifier.
+
+    A single CSV row usually maps to one record, but a completed loan (a LENT
+    row with a lent_end_date) maps to two ordered records: the LENT record
+    followed by an INROOM record. Records are saved in list order; the last
+    one saved becomes the device's active record.
     """
 
     device: Device
-    record: Record | None
+    records: list[Record]
     row: int
     identifier: str
 
@@ -169,7 +178,7 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             contract_expiration_date=set_datetime_field(row["CONTRACT_EXPIRATION_DATE"]),
         )
 
-        record_obj = create_record(
+        record_objs = create_record(
             device=device_obj,
             record_type=row["RECORD_TYPE"],
             record_note=row["RECORD_NOTE"],
@@ -188,7 +197,7 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             lent_accessories=row["LENT_ACCESSORIES"],
         )
 
-        import_objs.append(ImportObject(device=device_obj, record=record_obj, row=idx, identifier=identifier))
+        import_objs.append(ImportObject(device=device_obj, records=record_objs, row=idx, identifier=identifier))
 
     try:
         # As bulk_create() does not call model.save() method, we do not use it for now

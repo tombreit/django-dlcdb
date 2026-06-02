@@ -58,6 +58,17 @@ def test_bulk_import_csv(tenant):
     assert person.last_name == "Lovelace"
     assert person.organizational_unit == OrganizationalUnit.objects.get(name="Mathematics")
 
+    # A completed loan (LENT_END_DATE set) produces two sequential records: the
+    # historical LENT record followed by the now-active INROOM record.
+    returned_device = Device.objects.get(edv_id="NTB9002")
+    assert returned_device.active_record.record_type == Record.INROOM
+    assert returned_device.active_record.room.number == "355"
+
+    historical_lent = returned_device.record_set.get(record_type=Record.LENT)
+    assert historical_lent.is_active is False
+    assert str(historical_lent.lent_end_date) == "2024-04-20"
+    assert historical_lent.person.email == "alan.turing@example.com"
+
 
 @pytest.mark.django_db
 def test_get_or_create_person_lowercases_and_dedups():

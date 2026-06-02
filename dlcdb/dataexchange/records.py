@@ -35,7 +35,13 @@ def create_record(
     from dlcdb.core.models import InRoomRecord, LentRecord, LostRecord, RemovedRecord
 
     # print(f"Creating record {record_type} for {device}...")
-    record_obj = None
+    # A single CSV row may yield more than one record: a completed loan
+    # (LENT with a lent_end_date) produces a LENT record followed by an
+    # INROOM record (the device is back). Records are returned in the order
+    # they must be saved; the last one saved becomes the active record.
+    records = []
+
+    username = username.strip() if username else ""
 
     if record_type == Record.INROOM:
         if not room:
@@ -47,26 +53,32 @@ def create_record(
         # )
         room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
 
-        record_obj = InRoomRecord(
-            device=device,
-            room=room_obj,
-            note=record_note,
-            username=username.strip() if username else "",
+        records.append(
+            InRoomRecord(
+                device=device,
+                room=room_obj,
+                note=record_note,
+                username=username,
+            )
         )
 
     elif record_type == Record.LOST:
-        record_obj = LostRecord(
-            device=device,
-            note=record_note,
-            username=username.strip() if username else "",
+        records.append(
+            LostRecord(
+                device=device,
+                note=record_note,
+                username=username,
+            )
         )
 
     elif record_type == Record.REMOVED:
-        record_obj = RemovedRecord(
-            device=device,
-            note=record_note,
-            removed_date=removed_date,
-            username=username.strip() if username else "",
+        records.append(
+            RemovedRecord(
+                device=device,
+                note=record_note,
+                removed_date=removed_date,
+                username=username,
+            )
         )
 
     elif record_type == Record.LENT:
@@ -86,18 +98,33 @@ def create_record(
             organizational_unit=ou_obj,
         )
 
-        record_obj = LentRecord(
-            device=device,
-            room=room_obj,
-            person=person_obj,
-            lent_start_date=lent_start_date,
-            lent_desired_end_date=lent_desired_end_date,
-            lent_end_date=lent_end_date,
-            lent_note=lent_note,
-            lent_reason=lent_reason,
-            lent_accessories=lent_accessories,
-            note=record_note,
-            username=username.strip() if username else "",
+        records.append(
+            LentRecord(
+                device=device,
+                room=room_obj,
+                person=person_obj,
+                lent_start_date=lent_start_date,
+                lent_desired_end_date=lent_desired_end_date,
+                lent_end_date=lent_end_date,
+                lent_note=lent_note,
+                lent_reason=lent_reason,
+                lent_accessories=lent_accessories,
+                note=record_note,
+                username=username,
+            )
         )
 
-    return record_obj
+        # A returned loan (lent_end_date set) is already finished: the device
+        # is back in its room, so follow the LENT record with an INROOM record
+        # that becomes the active record.
+        if lent_end_date:
+            records.append(
+                InRoomRecord(
+                    device=device,
+                    room=room_obj,
+                    note="",
+                    username=username,
+                )
+            )
+
+    return records
