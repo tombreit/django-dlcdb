@@ -12,7 +12,7 @@ from datetime import datetime
 
 from django.apps import apps
 from django.db import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.timezone import make_aware
 
 
@@ -27,6 +27,12 @@ def set_datetime_field(value):
             raise ValueError(f"{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}")
 
     return result_value
+
+
+def set_date_field(value):
+    """Parse a CSV date cell (YYYY-MM-DD) into a `date` for DateField columns."""
+    result_value = set_datetime_field(value)
+    return result_value.date() if result_value else None
 
 
 def set_fk_field(row, key):
@@ -87,3 +93,37 @@ def create_fk_objs(fk_field, rows):
         create_fk_obj(model_class=model_class, instance_key="name", instance_value=row[fk_field])
 
     return
+
+
+def get_or_create_person(*, first_name, last_name, email, organizational_unit=None):
+    """
+    Get or create a core.Person keyed on their (unique) email address.
+
+    The email is normalized to lowercase before lookup and storage. As Person
+    is a soft-delete model, the lookup uses the soft-delete-aware manager and
+    undeletes a previously soft-deleted match to avoid a unique-email
+    IntegrityError.
+    """
+    from dlcdb.core.models import Person
+
+    email = (email or "").strip().lower()
+    if not email:
+        raise ValidationError("A LENDER_EMAIL is required to import a LENT record.")
+
+    person, created = Person.with_softdeleted_objects.get_or_create(
+        email__iexact=email,
+        defaults={
+            "first_name": (first_name or "").strip(),
+            "last_name": (last_name or "").strip(),
+            "email": email,
+            "organizational_unit": organizational_unit,
+        },
+    )
+
+    # Ensure a previously soft-deleted person gets undeleted:
+    if person.deleted_at or person.deleted_by:
+        person.deleted_at = None
+        person.deleted_by = None
+        person.save()
+
+    return person

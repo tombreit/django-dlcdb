@@ -23,7 +23,7 @@ from .models import ImporterList
 from .reporting import OperationReport, Outcome
 from .sap_converter import convert_raw_sap_export
 from .validators import validate_column_headers
-from .fields import set_fk_field, set_datetime_field, create_fk_objs
+from .fields import set_fk_field, set_datetime_field, set_date_field, create_fk_objs
 from .records import create_record
 
 
@@ -174,9 +174,18 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             record_type=row["RECORD_TYPE"],
             record_note=row["RECORD_NOTE"],
             room=row["ROOM"],
-            person=row["PERSON"],
             username=username,
             removed_date=set_datetime_field(row["REMOVED_DATE"]),
+            lender_first_name=row["LENDER_FIRST_NAME"],
+            lender_last_name=row["LENDER_LAST_NAME"],
+            lender_email=row["LENDER_EMAIL"],
+            lender_ou=row["LENDER_OU"],
+            lent_start_date=set_date_field(row["LENT_START_DATE"]),
+            lent_desired_end_date=set_date_field(row["LENT_DESIRED_END_DATE"]),
+            lent_end_date=set_date_field(row["LENT_END_DATE"]),
+            lent_note=row["LENT_NOTE"],
+            lent_reason=row["LENT_REASON"],
+            lent_accessories=row["LENT_ACCESSORIES"],
         )
 
         import_objs.append(ImportObject(device=device_obj, record=record_obj, row=idx, identifier=identifier))

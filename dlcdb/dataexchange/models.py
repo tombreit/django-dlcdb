@@ -29,9 +29,19 @@ class ImporterList(models.Model):
         "IS_LICENCE",
         "RECORD_TYPE",
         "RECORD_NOTE",
-        "PERSON",
         "REMOVED_DATE",
         "ORDER_NUMBER",
+        # LENT record columns:
+        "LENDER_FIRST_NAME",
+        "LENDER_LAST_NAME",
+        "LENDER_EMAIL",
+        "LENDER_OU",
+        "LENT_START_DATE",
+        "LENT_DESIRED_END_DATE",
+        "LENT_END_DATE",
+        "LENT_NOTE",
+        "LENT_REASON",
+        "LENT_ACCESSORIES",
     ]
 
     class ImportFormatChoices(models.TextChoices):

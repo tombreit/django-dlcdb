@@ -8,7 +8,15 @@ from django.core.exceptions import ValidationError
 from django.utils import translation
 
 from dlcdb.tenants.models import Tenant
-from dlcdb.core.models import InRoomRecord, Device, Room, RemovedRecord
+from dlcdb.core.models import (
+    InRoomRecord,
+    Device,
+    Room,
+    RemovedRecord,
+    Record,
+    Person,
+    OrganizationalUnit,
+)
 from dlcdb.dataexchange.importer import import_data
 from dlcdb.dataexchange.models import ImporterList
 
@@ -29,6 +37,59 @@ def test_bulk_import_csv(tenant):
             username="pytestuser",
             write=True,
         )
+
+    # The CSV contains a LENT row: a LentRecord, the lender Person (matched by a
+    # lowercased email) and its OrganizationalUnit must have been created.
+    lent_device = Device.objects.get(edv_id="NTB9001")
+    lent_record = lent_device.active_record
+    assert lent_record.record_type == Record.LENT
+    assert lent_record.room.number == "355"
+    assert str(lent_record.lent_start_date) == "2024-01-15"
+    assert str(lent_record.lent_desired_end_date) == "2024-06-15"
+    assert lent_record.lent_end_date is None
+    assert lent_record.lent_reason == "Home office"
+    assert lent_record.lent_accessories == "Charger, bag"
+
+    person = lent_record.person
+    assert person is not None
+    # Incoming email "Ada.Lovelace@Example.COM" is normalized to lowercase:
+    assert person.email == "ada.lovelace@example.com"
+    assert person.first_name == "Ada"
+    assert person.last_name == "Lovelace"
+    assert person.organizational_unit == OrganizationalUnit.objects.get(name="Mathematics")
+
+
+@pytest.mark.django_db
+def test_get_or_create_person_lowercases_and_dedups():
+    from dlcdb.dataexchange.fields import get_or_create_person
+
+    ou = OrganizationalUnit.objects.create(name="Physics")
+
+    person = get_or_create_person(
+        first_name="Grace",
+        last_name="Hopper",
+        email="Grace.Hopper@Example.COM",
+        organizational_unit=ou,
+    )
+    # Email is normalized to lowercase on import:
+    assert person.email == "grace.hopper@example.com"
+
+    # A second call with a differently-cased email reuses the same Person:
+    same_person = get_or_create_person(
+        first_name="Grace",
+        last_name="Hopper",
+        email="grace.hopper@EXAMPLE.com",
+    )
+    assert same_person.pk == person.pk
+    assert Person.objects.filter(email="grace.hopper@example.com").count() == 1
+
+
+@pytest.mark.django_db
+def test_get_or_create_person_requires_email():
+    from dlcdb.dataexchange.fields import get_or_create_person
+
+    with pytest.raises(ValidationError):
+        get_or_create_person(first_name="No", last_name="Email", email="")
 
 
 @pytest.mark.django_db

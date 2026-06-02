@@ -26,11 +26,21 @@ SAP_COL_ADD = [
     "NOTE",
     "NICK_NAME",
     "EXTRA_MAC_ADDRESSES",
-    "PERSON",
     "SUPPLIER",
     "IS_LICENCE",
     "MAC_ADDRESS",
     "ORDER_NUMBER",
+    # LENT record columns (unused by SAP, kept empty to satisfy header validation):
+    "LENDER_FIRST_NAME",
+    "LENDER_LAST_NAME",
+    "LENDER_EMAIL",
+    "LENDER_OU",
+    "LENT_START_DATE",
+    "LENT_DESIRED_END_DATE",
+    "LENT_END_DATE",
+    "LENT_NOTE",
+    "LENT_REASON",
+    "LENT_ACCESSORIES",
 ]
 
 SAP_COL_MAP = {
