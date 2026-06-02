@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Dedicated `dataexchange` app with a rewritten CSV-based importer that now also supports `LENT` records
 * New license management module
 * Documentation served via WhiteNoise from `/docs/`, no custom webserver configs necessary for the `/docs/` endpoint
 * Lending: TOS or regulations could be added to the lent sheet
