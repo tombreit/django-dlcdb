@@ -7,6 +7,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.utils import translation
 
+from dlcdb.accounts.models import CustomUser
 from dlcdb.tenants.models import Tenant
 from dlcdb.core.models import (
     InRoomRecord,
@@ -21,6 +22,16 @@ from dlcdb.dataexchange.importer import import_data
 from dlcdb.dataexchange.models import ImporterList
 
 TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
+
+
+@pytest.fixture(autouse=True)
+def import_user(db):
+    """
+    The importer resolves the audit `user` FK from the passed username via a
+    hard lookup, so the importing user must exist. All tests in this module
+    import as "pytestuser".
+    """
+    return CustomUser.objects.create(username="pytestuser")
 
 
 @pytest.mark.django_db
@@ -68,6 +79,39 @@ def test_bulk_import_csv(tenant):
     assert historical_lent.is_active is False
     assert str(historical_lent.lent_end_date) == "2024-04-20"
     assert historical_lent.person.email == "alan.turing@example.com"
+
+
+@pytest.mark.django_db
+def test_bulk_import_sets_audit_user(tenant, import_user):
+    """The importer sets the audit `user` FK (not just the `username` string)."""
+    csv_path = TEST_DATA_DIR / "devices.correct.csv"
+
+    with open(csv_path, "rb") as csv_file:
+        import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=True,
+        )
+
+    device = Device.objects.get(edv_id="NTB1282")
+    assert device.user == import_user
+    assert device.username == "pytestuser"
+
+    record = device.active_record
+    assert record.user == import_user
+    assert record.username == "pytestuser"
+
+    # A completed loan creates two records (LENT + INROOM); BOTH must carry the
+    # audit user/username, not just the last (active) one.
+    returned_device = Device.objects.get(edv_id="NTB9002")
+    assert returned_device.record_set.count() == 2
+    for rec in returned_device.record_set.all():
+        assert rec.user == import_user, f"{rec.record_type} record missing audit user"
+        assert rec.username == "pytestuser", f"{rec.record_type} record missing username"
 
 
 @pytest.mark.django_db

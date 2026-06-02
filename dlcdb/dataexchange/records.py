@@ -21,6 +21,7 @@ def create_record(
     room,
     username,
     removed_date,
+    user=None,
     lender_first_name=None,
     lender_last_name=None,
     lender_email=None,
@@ -41,45 +42,27 @@ def create_record(
     # they must be saved; the last one saved becomes the active record.
     records = []
 
-    username = username.strip() if username else ""
+    # Fields shared by every record type. Type-specific fields (room, person,
+    # lent_*, removed_date, ...) are added per branch.
+    common = {
+        "device": device,
+        "username": username.strip() if username else "",
+        "user": user,
+        "note": record_note,
+    }
 
     if record_type == Record.INROOM:
         if not room:
             raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
 
-        # room_obj, created = Room.objects.get_or_create(
-        #     number__iexact=room,
-        #     defaults={'number': room},
-        # )
         room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
-
-        records.append(
-            InRoomRecord(
-                device=device,
-                room=room_obj,
-                note=record_note,
-                username=username,
-            )
-        )
+        records.append(InRoomRecord(**common, room=room_obj))
 
     elif record_type == Record.LOST:
-        records.append(
-            LostRecord(
-                device=device,
-                note=record_note,
-                username=username,
-            )
-        )
+        records.append(LostRecord(**common))
 
     elif record_type == Record.REMOVED:
-        records.append(
-            RemovedRecord(
-                device=device,
-                note=record_note,
-                removed_date=removed_date,
-                username=username,
-            )
-        )
+        records.append(RemovedRecord(**common, removed_date=removed_date))
 
     elif record_type == Record.LENT:
         if not room:
@@ -100,7 +83,7 @@ def create_record(
 
         records.append(
             LentRecord(
-                device=device,
+                **common,
                 room=room_obj,
                 person=person_obj,
                 lent_start_date=lent_start_date,
@@ -109,8 +92,6 @@ def create_record(
                 lent_note=lent_note,
                 lent_reason=lent_reason,
                 lent_accessories=lent_accessories,
-                note=record_note,
-                username=username,
             )
         )
 
@@ -118,13 +99,6 @@ def create_record(
         # is back in its room, so follow the LENT record with an INROOM record
         # that becomes the active record.
         if lent_end_date:
-            records.append(
-                InRoomRecord(
-                    device=device,
-                    room=room_obj,
-                    note="",
-                    username=username,
-                )
-            )
+            records.append(InRoomRecord(**common, room=room_obj))
 
     return records

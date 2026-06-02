@@ -12,6 +12,7 @@ import secrets
 from dataclasses import dataclass
 from io import StringIO
 
+from django.contrib.auth import get_user_model
 from django.db.transaction import atomic
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
@@ -130,6 +131,17 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
     import_objs = []
     device_objs = []
 
+    # Resolve the importing user once for the audit `user` FK (the denormalized
+    # `username` string is set separately). Hard lookup like remover.py: an
+    # import must be attributable to a real user.
+    user_obj = None
+    if username:
+        user_model = get_user_model()
+        try:
+            user_obj = user_model.objects.get(username=username)
+        except user_model.DoesNotExist as user_does_not_exist_error:
+            raise user_model.DoesNotExist(f'User "{username}" not found! ({user_does_not_exist_error})')
+
     for idx, row in enumerate(rows, start=1):
         # Header row is not included in rows (it is in rows.fieldnames),
         # so we do not need to exclude the header row manually
@@ -151,6 +163,7 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             is_imported=True,
             imported_by_id=importer_inst_pk,
             # These fields should be mappable without further processing:
+            user=user_obj,
             username=username if username else "",
             book_value=row["BOOK_VALUE"],
             serial_number=row["SERIAL_NUMBER"],
@@ -184,6 +197,7 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             record_note=row["RECORD_NOTE"],
             room=row["ROOM"],
             username=username,
+            user=user_obj,
             removed_date=set_datetime_field(row["REMOVED_DATE"]),
             lender_first_name=row["LENDER_FIRST_NAME"],
             lender_last_name=row["LENDER_LAST_NAME"],

@@ -94,6 +94,9 @@ def _import_sap(csv_file, tenant):
 
 @pytest.mark.django_db
 def test_importer_reports_created_updated_skipped(tenant):
+    # The importer resolves the audit `user` FK from the username (hard lookup).
+    CustomUser.objects.create(username="pytestuser")
+
     csv_path = TEST_DATA_DIR / "devices-sap.correct.csv"
 
     # First import: nothing exists yet -> all created, no skips.
