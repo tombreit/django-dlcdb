@@ -89,17 +89,19 @@ def test_get_proxy_instance(plain_device):
     assert record.get_proxy_instance().__class__ != Record
 
 
-# rewrite test to capture the ValidationError in the model.clean() method (and not in the model.save() method)
-@pytest.mark.skip
 @pytest.mark.django_db
-def test_is_proxy_model(plain_device):
-    # Creating records via proxy records interface is allowed:
-    proxy_record = InRoomRecord.objects.create(device=plain_device)
+def test_is_proxy_model(plain_device, room):
+    # Creating records via the proxy records interface is allowed; clean() passes:
+    proxy_record = InRoomRecord.objects.create(device=plain_device, room=room)
     assert proxy_record._meta.proxy
+    proxy_record.clean()  # must not raise
 
-    # Creating plain record instances is not allowed:
+    # Creating plain (non-proxy) record instances is not allowed. The guard lives
+    # in Record.clean(), which save()/objects.create() does not invoke on its own.
+    plain_record = Record(device=plain_device, record_type=Record.ORDERED)
+    assert not plain_record._meta.proxy
     with pytest.raises(ValidationError):
-        Record.objects.create(device=plain_device, record_type="ORDERED")
+        plain_record.clean()
 
 
 @pytest.mark.django_db
