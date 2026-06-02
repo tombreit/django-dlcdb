@@ -12,6 +12,11 @@ Hinweis, dass dem aktuell angemeldeten Benutzer noch kein Tenant zugeordnet ist.
 Siehe [Tenant anlegen](./guides/erste_schritte.md#benutzer-gruppen-und-tenants-einrichten), [Tenant Model](./betrieb/model.md#tenant)
 `````
 
+`````{dropdown} Wo finde ich weiter Django-Admin Module?
+
+Die Django-Admin Auflistung der verfügbaren Module ist unter https://fqdn/admin/ abrufbar.
+`````
+
 `````{dropdown} Wo ist die Historie eines Devices?
 
 *Coming soon*
