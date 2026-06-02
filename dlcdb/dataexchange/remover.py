@@ -9,8 +9,7 @@ Bulk decommissioning: mark devices as "removed" from a CSV list.
 import csv
 import logging
 from io import StringIO
-from datetime import datetime
-
+from django.utils import timezone
 from django.db.transaction import atomic
 from django.db.models import Q
 from django.core.exceptions import ValidationError
@@ -113,7 +112,7 @@ def set_removed_record(csvfile, *, username=None, write=False):
                     user=user,
                     disposition_state=row["DISPOSITION_STATE"],
                     removed_info=row["REMOVED_INFO"],
-                    removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else datetime.now(),
+                    removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else timezone.now(),
                 )
             except KeyError as key_error:
                 raise KeyError(f"KeyError {key_error} for {device}")
