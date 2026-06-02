@@ -135,3 +135,10 @@ msgstr ""
 #: dlcdb/templates/simple_history/_object_history_list.html:37
 msgid "None"
 msgstr ""
+
+#: dlcdb/dataexchange/validators.py:19
+#, python-format
+msgid ""
+"The CSV file is missing required column headers. Missing column(s): "
+"%(missing)s. Expected all of: %(expected)s."
+msgstr ""

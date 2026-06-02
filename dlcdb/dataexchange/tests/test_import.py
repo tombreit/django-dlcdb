@@ -5,15 +5,19 @@
 from pathlib import Path
 import pytest
 from django.core.exceptions import ValidationError
+from django.utils import translation
 
 from dlcdb.tenants.models import Tenant
-from ..utils.bulk_management import import_data
-from ..models import ImporterList, InRoomRecord, Device, Room, RemovedRecord
+from dlcdb.core.models import InRoomRecord, Device, Room, RemovedRecord
+from dlcdb.dataexchange.importer import import_data
+from dlcdb.dataexchange.models import ImporterList
+
+TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
 
 
 @pytest.mark.django_db
 def test_bulk_import_csv(tenant):
-    csv_path = Path("dlcdb/core/tests/test_data/devices.correct.csv")
+    csv_path = TEST_DATA_DIR / "devices.correct.csv"
 
     with open(csv_path, "rb") as csv_file:
         assert import_data(
@@ -30,7 +34,7 @@ def test_bulk_import_csv(tenant):
 @pytest.mark.django_db
 def test_bulk_import_csv_wrongdate(tenant):
     with pytest.raises(ValueError):
-        csv_path = Path("dlcdb/core/tests/test_data/devices.wrongdateformat.csv")
+        csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
 
         with open(csv_path, "rb") as csv_file:
             assert import_data(
@@ -46,24 +50,30 @@ def test_bulk_import_csv_wrongdate(tenant):
 
 @pytest.mark.django_db
 def test_bulk_import_csv_incomplete_rowheader(tenant):
-    with pytest.raises(ValidationError):
-        csv_path = Path("dlcdb/core/tests/test_data/devices.incompleterowheader.csv")
+    csv_path = TEST_DATA_DIR / "devices.incompleterowheader.csv"
 
-        with open(csv_path, "rb") as csv_file:
-            assert import_data(
-                csv_file,
-                importer_inst_pk=None,
-                valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                tenant=tenant,
-                username="pytestuser",
-                write=True,
-            )
+    # Read the (lazy) message inside the override so it resolves under "en".
+    with translation.override("en"):
+        with pytest.raises(ValidationError) as excinfo:
+            with open(csv_path, "rb") as csv_file:
+                import_data(
+                    csv_file,
+                    importer_inst_pk=None,
+                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                    tenant=tenant,
+                    username="pytestuser",
+                    write=True,
+                )
+        # Friendly, human-readable message (no raw Python set-reprs).
+        message = excinfo.value.messages[0]
+    assert "Missing column(s):" in message
+    assert "{'" not in message
 
 
 @pytest.mark.django_db
 def test_bulk_import_csv_sap(tenant):
-    csv_path = Path("dlcdb/core/tests/test_data/devices-sap.correct.csv")
+    csv_path = TEST_DATA_DIR / "devices-sap.correct.csv"
 
     with open(csv_path, "rb") as csv_file:
         assert import_data(
@@ -82,7 +92,7 @@ def test_bulk_import_csv_sap_update(tenant):
     """
     TODO: DRY the repeated import_data calls and perhaps create the CSV on the fly
     """
-    csv_path = Path("dlcdb/core/tests/test_data/devices-sap.correct.csv")
+    csv_path = TEST_DATA_DIR / "devices-sap.correct.csv"
 
     # Initially import data
     with open(csv_path, "rb") as csv_file:

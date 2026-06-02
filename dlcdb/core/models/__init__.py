@@ -10,8 +10,6 @@ from .person import Person, OrganizationalUnit  # noqa
 from .record import Record  # noqa
 from .room import Room  # noqa
 from .supplier import Supplier  # noqa
-from .importer import ImporterList  # noqa
-from .remover import RemoverList  # noqa
 from .misc import Attachment, Link  # noqa
 from .manufacturer import Manufacturer  # noqa
 

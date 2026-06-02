@@ -45,22 +45,6 @@ class CoreConfig(AppConfig):
             "required_permission": "view_orderedrecord",
         },
         {
-            "slot": "nav_processes",
-            "order": 20,
-            "label": _("Bulk Import"),
-            "icon": "",
-            "url": "admin:core_importerlist_changelist",
-            "required_permission": "view_importerlist",
-        },
-        {
-            "slot": "nav_processes",
-            "order": 30,
-            "label": _("Bulk Decommissioning"),
-            "icon": "",
-            "url": "admin:core_removerlist_changelist",
-            "required_permission": "view_removerlist",
-        },
-        {
             "slot": "nav_masterdata",
             "order": 10,
             "label": _("Rooms"),

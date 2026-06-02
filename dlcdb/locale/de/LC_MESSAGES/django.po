@@ -828,6 +828,15 @@ msgstr "Geändert von"
 msgid "None"
 msgstr "None"
 
+#: dlcdb/dataexchange/validators.py:19
+#, python-format
+msgid ""
+"The CSV file is missing required column headers. Missing column(s): "
+"%(missing)s. Expected all of: %(expected)s."
+msgstr ""
+"Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende "
+"Spalte(n): %(missing)s. Erwartet werden: %(expected)s."
+
 #~ msgid "Record of type 'Lost'"
 #~ msgstr "Record vom Typ \"Nicht auffindbar\""
 

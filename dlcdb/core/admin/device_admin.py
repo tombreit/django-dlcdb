@@ -303,7 +303,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     def get_imported_by_link(self, obj):
         return format_html(
             '<a href="{0}">{1}</a>',
-            reverse("admin:core_importerlist_change", args=(obj.imported_by.pk,)),
+            reverse("admin:dataexchange_importerlist_change", args=(obj.imported_by.pk,)),
             obj.imported_by,
         )
 

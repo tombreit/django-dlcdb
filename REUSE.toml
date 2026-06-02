@@ -46,12 +46,6 @@ SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
-path = "dlcdb/core/tests/test_data/devices-sap.correct.csv"
-precedence = "aggregate"
-SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
-SPDX-License-Identifier = "CC0-1.0"
-
-[[annotations]]
 path = "dlcdb/locale/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
@@ -68,3 +62,9 @@ path = "frontend/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
 SPDX-License-Identifier = "EUPL-1.2"
+
+[[annotations]]
+path = "dlcdb/*/tests/test_data/*.csv"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
+SPDX-License-Identifier = "CC0-1.0"

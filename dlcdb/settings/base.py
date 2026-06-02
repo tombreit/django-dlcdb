@@ -63,6 +63,7 @@ LOCAL_APPS = [
     "dlcdb.accounts",
     "dlcdb.tenants",
     "dlcdb.core",
+    "dlcdb.dataexchange",
     "dlcdb.organization",
     "dlcdb.inventory",
     "dlcdb.licenses",

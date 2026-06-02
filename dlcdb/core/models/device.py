@@ -188,7 +188,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     )
     is_imported = models.BooleanField(default=False, verbose_name=_("Added via CSV import?"))
     imported_by = models.ForeignKey(
-        "core.ImporterList",
+        "dataexchange.ImporterList",
         null=True,
         blank=True,
         verbose_name="Importiert via",
