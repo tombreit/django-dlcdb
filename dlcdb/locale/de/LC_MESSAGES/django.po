@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 12:29+0200\n"
-"PO-Revision-Date: 2026-06-02 12:28+0200\n"
+"POT-Creation-Date: 2026-06-22 17:28+0200\n"
+"PO-Revision-Date: 2026-06-22 17:30+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -503,24 +503,26 @@ msgid "Lend"
 msgstr "Ausleihen"
 
 #: dlcdb/dataexchange/apps.py:12
-#, fuzzy
-#| msgid "Data management"
 msgid "Data exchange"
 msgstr "Datenhaltung"
 
 #: dlcdb/dataexchange/apps.py:18
-msgid "Bulk Import"
+msgid "Bulk import"
 msgstr "Bulk Import"
 
 #: dlcdb/dataexchange/apps.py:26
-msgid "Bulk Decommissioning"
+msgid "Bulk decommissioning"
 msgstr "Bulk Ausmusterung"
 
-#: dlcdb/dataexchange/models.py:48
+#: dlcdb/dataexchange/apps.py:34
+msgid "UDB sync configuration"
+msgstr "UDB Sync Konfiguration"
+
+#: dlcdb/dataexchange/models.py:51
 msgid "Internal (CSV)"
 msgstr "Internal (CSV)"
 
-#: dlcdb/dataexchange/models.py:49
+#: dlcdb/dataexchange/models.py:52
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
 
@@ -541,9 +543,22 @@ msgstr "Inventarisieren"
 msgid "SAP comparison"
 msgstr "SAP-Abgleich"
 
+#: dlcdb/lending/apps.py:17
+msgid "Lending configuration"
+msgstr "Ausleihe Konfiguration"
+
+#: dlcdb/lending/apps.py:25
+msgid "Lending profiles"
+msgstr "Ausleih-Profile"
+
 #: dlcdb/licenses/apps.py:11
 msgid "License Management"
 msgstr "Lizenzmanagement"
+
+#: dlcdb/licenses/apps.py:25 dlcdb/licenses/models.py:34
+#: dlcdb/licenses/models.py:35
+msgid "Licenses configuration"
+msgstr "Lizenzmodul Konfiguration"
 
 #: dlcdb/licenses/filters.py:31
 msgid "License type..."
@@ -589,10 +604,6 @@ msgstr "Ablaufdatum"
 #: dlcdb/licenses/models.py:27
 msgid "These subscribers will be added to all new licenses by default."
 msgstr ""
-
-#: dlcdb/licenses/models.py:34 dlcdb/licenses/models.py:35
-msgid "Licenses configuration"
-msgstr "Lizenzmodul Konfiguration"
 
 #: dlcdb/licenses/templates/licenses/filters.html:20
 msgid "Search licenses"
@@ -722,6 +733,10 @@ msgstr ""
 msgid "Preview"
 msgstr "Vorschau"
 
+#: dlcdb/organization/apps.py:17
+msgid "Branding"
+msgstr "Branding"
+
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
 msgstr ""
@@ -822,6 +837,10 @@ msgstr "Prozesse"
 #: dlcdb/templates/admin/navbar.html:43
 msgid "Data management"
 msgstr "Datenhaltung"
+
+#: dlcdb/templates/admin/navbar.html:73
+msgid "Settings"
+msgstr "Einstellungen"
 
 #: dlcdb/templates/registration/logged_out.html:6
 msgid "Thanks for spending some quality time with the DLCDB today."

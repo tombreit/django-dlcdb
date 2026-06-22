@@ -15,7 +15,7 @@ class DataexchangeConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 20,
-            "label": _("Bulk Import"),
+            "label": _("Bulk import"),
             "icon": "",
             "url": "admin:dataexchange_importerlist_changelist",
             "required_permission": "view_importerlist",
@@ -23,9 +23,17 @@ class DataexchangeConfig(AppConfig):
         {
             "slot": "nav_processes",
             "order": 30,
-            "label": _("Bulk Decommissioning"),
+            "label": _("Bulk decommissioning"),
             "icon": "",
             "url": "admin:dataexchange_removerlist_changelist",
             "required_permission": "view_removerlist",
+        },
+        {
+            "slot": "nav_settings",
+            "order": 40,
+            "label": _("UDB sync configuration"),
+            "icon": "fa-solid fa-rotate",
+            "url": "admin:dataexchange_udbsyncconfiguration_changelist",
+            "required_permission": "view_udbsyncconfiguration",
         },
     ]

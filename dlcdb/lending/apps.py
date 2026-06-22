@@ -3,8 +3,28 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
 
 
 class LendingConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.lending"
+
+    nav_entries = [
+        {
+            "slot": "nav_settings",
+            "order": 20,
+            "label": _("Lending configuration"),
+            "icon": "fa-solid fa-arrow-right-arrow-left",
+            "url": "admin:lending_lendingconfiguration_changelist",
+            "required_permission": "view_lendingconfiguration",
+        },
+        {
+            "slot": "nav_settings",
+            "order": 25,
+            "label": _("Lending profiles"),
+            "icon": "fa-solid fa-clipboard-list",
+            "url": "admin:lending_lendingprofile_changelist",
+            "required_permission": "view_lendingprofile",
+        },
+    ]

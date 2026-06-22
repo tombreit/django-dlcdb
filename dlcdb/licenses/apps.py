@@ -19,4 +19,12 @@ class LicensesConfig(AppConfig):
             "url": "licenses:index",
             "required_permission": "true",
         },
+        {
+            "slot": "nav_settings",
+            "order": 30,
+            "label": _("Licenses configuration"),
+            "icon": "fa-solid fa-scale-balanced",
+            "url": "admin:licenses_licensesconfiguration_changelist",
+            "required_permission": "view_licensesconfiguration",
+        },
     ]

@@ -4,25 +4,8 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-{% if branding.documentation_url %}
-<a
-    class="btn btn-primary"
-    href="{{ branding.documentation_url }}"
->
-    <i class="fa-solid fa-book"></i> Docs
-</a>
-{% else %}
-<a
-    href="{% url 'admin:organization_branding_changelist' %}"
-    class="btn btn-danger"
->
-    <i class="fa-solid fa-book"></i> Documentation URL not set in Organization Branding!
-</a>
-{% endif %}
-
-
 {% if request.user.is_superuser %}
-<!-- is_superuser: tenant unaware -->
+{# is_superuser: tenant unaware #}
 {% elif request.tenant %}
 <span 
     class="btn btn-secondary"
