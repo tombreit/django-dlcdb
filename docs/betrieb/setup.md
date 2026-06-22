@@ -205,7 +205,7 @@ make docs
 ### Localization
 
 ```bash
-./manage.py makemessages --locale de --ignore=.venv/* 
+./manage.py makemessages --locale de --ignore=.venv/*
 poedit dlcdb/locale/de/LC_MESSAGES/django.po
 ./manage.py compilemessages --ignore=.venv/*
 ```
