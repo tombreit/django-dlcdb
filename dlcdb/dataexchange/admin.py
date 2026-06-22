@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from django import forms
 from django.contrib import admin
 from django.contrib import messages
 
-from .models import ImporterList, RemoverList
+from .models import ImporterList, RemoverList, UdbSyncConfiguration
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import import_data
 from .remover import set_removed_record
@@ -95,6 +96,38 @@ class ImporterListAdmin(admin.ModelAdmin):
         obj.messages = report.detailed()
         obj.save()
         getattr(messages, report.level)(request, report.short_html())
+
+
+class UdbSyncConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = UdbSyncConfiguration
+        fields = "__all__"
+        widgets = {
+            # Mask the token in the admin form. `render_value` keeps the stored
+            # value on edit so saving the form does not wipe it.
+            "api_token": forms.PasswordInput(render_value=True),
+        }
+
+
+@admin.register(UdbSyncConfiguration)
+class UdbSyncConfigurationAdmin(admin.ModelAdmin):
+    form = UdbSyncConfigurationForm
+    actions = ["sync_now"]
+
+    def has_add_permission(self, request):
+        return not UdbSyncConfiguration.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.action(description="Run UDB sync now")
+    def sync_now(self, request, queryset):
+        # Enqueue the relocated huey task; imported lazily to avoid loading the
+        # task module (and huey) at admin import time.
+        from .tasks import task_import_udb_persons
+
+        task_import_udb_persons()
+        messages.info(request, "UDB sync has been enqueued. Check the logs / configuration for results.")
 
 
 @admin.register(RemoverList)

@@ -37,6 +37,16 @@ Für diese use cases müssen die folgenden Informationen aus der UDB in der DLCD
 - Vertragsende
 - Vertragstyp und Position (z.B. zur Einschätzung welche Geräteklassen verliehen werden)
 
+## Konfiguration
+
+Die UDB-Integration wird im Django-Admin konfiguriert: *Data exchange › UDB Sync Configuration* (Singleton).
+
+- **enabled** – aktiviert Cronjob und Management-Command.
+- **url** – die vollständige URL ohne Query-String: entweder der UDB-API-Endpunkt (z.B. `https://udb.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
+- **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert).
+
+Request-Filter (nur aktive Verträge, keine Testdaten) und abgefragte Felder sind bewusst im Code verankert (`dlcdb/dataexchange/udb_sync.py`), nicht konfigurierbar.
+
 ## Scheduler
 
-Sofern die UDB-Integration aktiviert und konfiguriert ist (siehe `env.template`) werden die Personendaten alle 10 Minuten in der DLCDB mit den Daten aus der UDB aktualisiert.
+Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen (huey-Task `task_import_udb_persons`). Manueller Anstoß per `./manage.py import_udb_persons` oder im Admin über die Aktion „Run UDB sync now“.

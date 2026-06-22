@@ -2,8 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from ..core.models.abstracts import SingletonBaseModel
 
 
 class ImporterList(models.Model):
@@ -131,3 +134,51 @@ class RemoverList(models.Model):
 
     def __str__(self):
         return "{}".format(self.file)
+
+
+class UdbSyncConfiguration(SingletonBaseModel):
+    """
+    Admin-managed configuration for the periodic UDB person sync.
+
+    Operators own the source URL and the API token here (no redeploy needed).
+    The request *filters* and *fields* (``contract-fields`` / ``person-fields``)
+    are intentionally NOT configurable: they are stable business rules and the
+    sync code reads a fixed set of keys, so both live in code (see
+    ``udb_sync.UDB_SYNC_FILTERS`` / ``UDB_SYNC_CONTRACT_FIELDS`` / ``UDB_SYNC_PERSON_FIELDS``). ``clean()``
+    keeps the admin-owned ``url`` from colliding with that code-owned query.
+    """
+
+    enabled = models.BooleanField(
+        default=False,
+        help_text="If unchecked, the periodic sync and the management command exit immediately.",
+    )
+    url = models.URLField(
+        blank=True,
+        verbose_name="UDB URL",
+        help_text=(
+            "Complete URL of the UDB contracts API endpoint or a ready-made JSON dump, "
+            "without a query string — e.g. "
+            "<code>https://udb.example.org/api/external_interface/contracts/</code>. "
+            "Filters and requested fields are appended by the code (a static JSON file simply ignores them)."
+        ),
+    )
+    api_token = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="UDB API token",
+        help_text="Sent as the <code>X-API-KEY</code> header. Stored in plaintext in the database.",
+    )
+
+    class Meta:
+        verbose_name = "UDB Sync Configuration"
+        verbose_name_plural = "UDB Sync Configuration"
+
+    def __str__(self):
+        return "UDB Sync Configuration"
+
+    def clean(self):
+        super().clean()
+        if "?" in self.url:
+            raise ValidationError(
+                {"url": "Provide the URL without a query string ('?...'). The query is appended by the code."}
+            )

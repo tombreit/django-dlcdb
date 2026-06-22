@@ -4,7 +4,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
-from dlcdb.core.utils.udb import import_udb_persons
+from dlcdb.dataexchange.udb_sync import import_udb_persons
 
 
 class Command(BaseCommand):
@@ -12,8 +12,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         try:
-            import_udb_persons()
+            report = import_udb_persons()
         except Exception as exc:
             # Detailed diagnostics are already logged by import_udb_persons();
             # surface a clean non-zero exit instead of a raw traceback.
             raise CommandError(f"UDB person import failed: {exc}") from exc
+
+        if report is None:
+            self.stdout.write("UDB sync is disabled (UdbSyncConfiguration.enabled is False).")
+        else:
+            self.stdout.write(report.detailed())

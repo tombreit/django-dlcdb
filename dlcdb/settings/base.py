@@ -404,9 +404,8 @@ QRCODE_INFIXES = {
 SAP_LIST_COMPARISON_RESULT_FOLDER = "sap_list_comparison_results"
 MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
 
-UDB_INTEGRATION = env.bool("UDB_INTEGRATION", default=False)
-UDB_JSON_URL = env("UDB_JSON_URL", default=None)
-UDB_API_TOKEN = env("UDB_API_TOKEN", default=None)
+# UDB integration is configured at runtime via the admin-managed
+# `dlcdb.dataexchange.models.UdbSyncConfiguration` singleton, not via env/settings.
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
