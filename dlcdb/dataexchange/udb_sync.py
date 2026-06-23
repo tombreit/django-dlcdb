@@ -50,7 +50,9 @@ UDB_SYNC_CONTRACT_FIELDS = (
     "person,contract_planned_checkin,contract_planned_checkout,"
     "contract_organization_unit,contract_contract_type,contract_organizational_positions"
 )
-UDB_SYNC_PERSON_FIELDS = "person_first_name,person_last_name,person_email_internal_business,person_email_private,id"
+UDB_SYNC_PERSON_FIELDS = (
+    "person_first_name,person_last_name,person_email_internal_business,person_email_private,id,person_image"
+)
 
 
 def build_request_url(config):
