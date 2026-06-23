@@ -9,7 +9,50 @@ from django.utils.translation import gettext_lazy as _
 from ..core.models.abstracts import SingletonBaseModel
 
 
-class ImporterList(models.Model):
+class OperationLogBase(models.Model):
+    """Shared persistence for an operation's result log.
+
+    Holds the human-readable per-row log produced by ``OperationReport`` plus a
+    severity and a one-line counts summary, so any import/sync workflow can store
+    its outcome the same way (see ``OperationReport.persist``).
+    """
+
+    class Status(models.TextChoices):
+        SUCCESS = "success", "Success"
+        WARNING = "warning", "Warning"
+        ERROR = "error", "Error"
+
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        blank=True,
+        verbose_name="Status",
+    )
+    summary = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Zusammenfassung",
+    )
+    messages = models.TextField(
+        blank=True,
+        editable=False,
+        verbose_name="DLCDB-Ausgaben",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Erstellt",
+    )
+    modified_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Geändert",
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ["-created_at"]
+
+
+class ImporterList(OperationLogBase):
     VALID_COL_HEADERS = [
         "SAP_ID",
         "ROOM",
@@ -70,19 +113,6 @@ class ImporterList(models.Model):
     tenant = models.ForeignKey(
         "tenants.tenant", null=True, on_delete=models.SET_NULL, help_text="Import as given tenant."
     )
-    messages = models.TextField(
-        blank=True,
-        verbose_name="DLCDB-Ausgaben zu diesem Import",
-        editable=False,
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Erstellt",
-    )
-    modified_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Geändert",
-    )
 
     class Meta:
         verbose_name = "Import-Datei"
@@ -93,7 +123,7 @@ class ImporterList(models.Model):
         return "{}".format(self.file)
 
 
-class RemoverList(models.Model):
+class RemoverList(OperationLogBase):
     VALID_COL_HEADERS = [
         "SAP_ID",
         "EDV_ID",
@@ -112,19 +142,6 @@ class RemoverList(models.Model):
     note = models.TextField(
         blank=True,
         verbose_name="Anmerkung",
-    )
-    messages = models.TextField(
-        blank=True,
-        verbose_name="DLCDB-Ausgaben zu diesem Vorgang",
-        editable=False,
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Erstellt",
-    )
-    modified_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Geändert",
     )
 
     class Meta:
@@ -182,3 +199,21 @@ class UdbSyncConfiguration(SingletonBaseModel):
             raise ValidationError(
                 {"url": "Provide the URL without a query string ('?...'). The query is appended by the code."}
             )
+
+
+class UdbSyncRun(OperationLogBase):
+    """One stored result per UDB sync run.
+
+    The sync runs headless (periodic huey task / admin action), so there is no
+    uploaded file row to hang the log on like the import/remove workflows have.
+    Each run — successful or failed — gets its own row here, keeping a short
+    history so a transient failure is not lost on the next run.
+    """
+
+    class Meta:
+        verbose_name = "UDB Sync Run"
+        verbose_name_plural = "UDB Sync Runs"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"UDB Sync Run {self.created_at:%Y-%m-%d %H:%M} ({self.status or 'pending'})"

@@ -133,6 +133,10 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         null=True,
     )
     udb_person_image = models.ImageField(blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/")
+    # md5 of the source base64 last imported from UDB. Lets the sync skip rewriting
+    # an unchanged image and detect an actual image change (the file path alone is
+    # deterministic and never reflects a content change).
+    udb_person_image_hash = models.CharField(max_length=32, blank=True, editable=False)
     # TODO: Use stay-dates instead of individual contract dates to avoid
     # please-return notifications if a follow up contract exists.
     udb_person_uuid = models.CharField(max_length=255, blank=True, null=True, unique=True)

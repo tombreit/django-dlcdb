@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-22 17:28+0200\n"
-"PO-Revision-Date: 2026-06-22 17:30+0200\n"
+"POT-Creation-Date: 2026-06-23 11:43+0200\n"
+"PO-Revision-Date: 2026-06-23 11:44+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -504,7 +504,7 @@ msgstr "Ausleihen"
 
 #: dlcdb/dataexchange/apps.py:12
 msgid "Data exchange"
-msgstr "Datenhaltung"
+msgstr "Datenaustausch"
 
 #: dlcdb/dataexchange/apps.py:18
 msgid "Bulk import"
@@ -518,11 +518,11 @@ msgstr "Bulk Ausmusterung"
 msgid "UDB sync configuration"
 msgstr "UDB Sync Konfiguration"
 
-#: dlcdb/dataexchange/models.py:51
+#: dlcdb/dataexchange/models.py:94
 msgid "Internal (CSV)"
 msgstr "Internal (CSV)"
 
-#: dlcdb/dataexchange/models.py:52
+#: dlcdb/dataexchange/models.py:95
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
 

@@ -16,19 +16,22 @@ ERROR row in the returned ``OperationReport`` and the loop continues, instead of
 aborting the whole run.
 """
 
+import hashlib
 import json
 import logging
 import urllib.error
 import urllib.request
 
 from django.conf import settings
-from django.db import IntegrityError
+from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 from django.utils.timezone import now
 
 from dlcdb.core.models import OrganizationalUnit, Person
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
 
-from .models import UdbSyncConfiguration
+from .models import UdbSyncConfiguration, UdbSyncRun
 from .reporting import OperationReport, Outcome
 
 logger = logging.getLogger(__name__)
@@ -36,6 +39,10 @@ logger = logging.getLogger(__name__)
 # Seconds to wait for the UDB server to respond before giving up. Prevents a
 # hung UDB instance from blocking the periodic huey task indefinitely.
 UDB_REQUEST_TIMEOUT = 30
+
+# How many UdbSyncRun rows to keep. The periodic task runs every 10 minutes, so
+# without pruning the table would grow ~144 rows/day.
+MAX_STORED_SYNC_RUNS = 50
 
 # Code-owned request filters. These are stable business rules, not per-deploy
 # config: only contracts in an active/checked-out state, and never test-data
@@ -52,6 +59,29 @@ UDB_SYNC_CONTRACT_FIELDS = (
 )
 UDB_SYNC_PERSON_FIELDS = (
     "person_first_name,person_last_name,person_email_internal_business,person_email_private,id,person_image"
+)
+
+# Person fields a contract can change. Compared before/after the upsert to tell a
+# real UPDATED from an UNCHANGED row. `udb_data_updated_at` is deliberately absent:
+# it is stamped on every run and would make every row look changed.
+COMPARED_PERSON_FIELDS = (
+    "first_name",
+    "last_name",
+    "email",
+    "udb_person_uuid",
+    "udb_person_first_name",
+    "udb_person_last_name",
+    "udb_person_email_internal_business",
+    "udb_contract_planned_checkin",
+    "udb_contract_planned_checkout",
+    "udb_contract_contract_type",
+    "udb_contract_organization_unit",
+    "udb_contract_organizational_positions",
+    "udb_person_image",
+    "udb_person_image_hash",
+    "organizational_unit",
+    "deleted_at",
+    "deleted_by",
 )
 
 
@@ -83,38 +113,66 @@ def import_udb_persons():
         logger.info("[UDB] UDB integration disabled in UdbSyncConfiguration. Exit.")
         return None
 
-    if not config.url:
-        msg = "UDB integration is enabled but `url` is not set in UdbSyncConfiguration."
-        logger.error(msg)
-        raise ValueError(msg)
-
-    request_url = build_request_url(config)
-    headers = {"X-API-KEY": config.api_token} if config.api_token else {}
-    url_request = urllib.request.Request(request_url, headers=headers)
-
-    thumbnail_size = 400, 300
-    person_images_dir = settings.MEDIA_DIR / settings.PERSON_IMAGE_UPLOAD_DIR
-    person_images_dir.mkdir(parents=True, exist_ok=True)
-
-    contracts = _fetch_contracts(url_request)
-
     report = OperationReport(operation="UDB person sync", context=config.url)
-    for index, contract in enumerate(contracts, start=1):
-        identifier = _contract_identifier(contract)
-        try:
-            outcome, detail = _process_contract(
-                contract,
-                person_images_dir=person_images_dir,
-                thumbnail_size=thumbnail_size,
-            )
-            report.add(row=index, identifier=identifier, outcome=outcome, detail=detail)
-        except Exception as exc:
-            # One bad contract must not abort the whole run.
-            logger.error(f"Failed to import UDB contract {identifier}: {exc}")
-            report.add(row=index, identifier=identifier, outcome=Outcome.ERROR, detail=str(exc))
+    try:
+        if not config.url:
+            raise ValueError("UDB integration is enabled but `url` is not set in UdbSyncConfiguration.")
 
-    logger.info(f"[UDB] {report._counts_summary()}")
+        request_url = build_request_url(config)
+        headers = {"X-API-KEY": config.api_token} if config.api_token else {}
+        url_request = urllib.request.Request(request_url, headers=headers)
+
+        thumbnail_size = 400, 300
+        person_images_dir = settings.MEDIA_DIR / settings.PERSON_IMAGE_UPLOAD_DIR
+        person_images_dir.mkdir(parents=True, exist_ok=True)
+
+        contracts = _fetch_contracts(url_request)
+
+        # Background sync has no request user; attribute the Person upserts to a
+        # dedicated "udb-sync" actor so they show up in the admin History tab like
+        # manual edits do. Keyed on email (the unique USERNAME_FIELD on CustomUser)
+        # so it never collides with another blank-email service user.
+        log_user, _ = get_user_model().objects.get_or_create(
+            email="udb-sync@dlcdb.invalid",
+            defaults={"username": "udb-sync", "is_active": False},
+        )
+
+        for index, contract in enumerate(contracts, start=1):
+            identifier = _contract_identifier(contract)
+            try:
+                # Each contract gets its own savepoint: a failed DB write (e.g. a
+                # name-uniqueness collision) is rolled back in isolation so it does
+                # not poison the transaction for the contracts that follow.
+                with transaction.atomic():
+                    outcome, detail = _process_contract(
+                        contract,
+                        person_images_dir=person_images_dir,
+                        thumbnail_size=thumbnail_size,
+                        log_user_id=log_user.pk,
+                    )
+                report.add(row=index, identifier=identifier, outcome=outcome, detail=detail)
+            except Exception as exc:
+                # One bad contract must not abort the whole run.
+                logger.error(f"Failed to import UDB contract {identifier}: {exc}")
+                report.add(row=index, identifier=identifier, outcome=Outcome.ERROR, detail=str(exc))
+    except Exception as exc:
+        # A run-level failure (no url, unreachable server, bad JSON). Record it as
+        # a failed run so the reason survives, then re-raise for the caller.
+        logger.error(f"[UDB] sync failed: {exc}")
+        report.add(row=0, identifier="<sync>", outcome=Outcome.ERROR, detail=str(exc))
+        _store_run(report)
+        raise
+
+    logger.info(f"[UDB] {report.counts_summary()}")
+    _store_run(report)
     return report
+
+
+def _store_run(report):
+    """Persist the report as a UdbSyncRun and prune to the most recent runs."""
+    report.persist(UdbSyncRun())
+    stale_run_ids = list(UdbSyncRun.objects.values_list("pk", flat=True)[MAX_STORED_SYNC_RUNS:])
+    UdbSyncRun.objects.filter(pk__in=stale_run_ids).delete()
 
 
 def _fetch_contracts(url_request):
@@ -169,7 +227,44 @@ def _contract_identifier(contract):
     return f"uuid={uuid} {last_name}/{first_name}"
 
 
-def _process_contract(contract, *, person_images_dir, thumbnail_size):
+def _match_person(udb_person_uuid, first_name, last_name, claim_emails):
+    """Find the local Person a UDB contract refers to, most-reliable key first.
+
+    1. Stable remote id (``udb_person_uuid``) — survives name changes.
+    2. Claim an un-synced local person (``udb_person_uuid IS NULL``) by email.
+    3. Claim an un-synced local person (``udb_person_uuid IS NULL``) by name (iexact).
+
+    Tiers 2/3 are restricted to rows WITHOUT a uuid so we never steal a uuid that
+    already belongs to a different UDB person — that reassignment is what produced
+    the ``UNIQUE(udb_person_uuid)`` failures. Soft-deleted rows are included so a
+    returning person is restored (the upsert defaults reset deleted_at/deleted_by).
+    """
+    qs = Person.with_softdeleted_objects
+
+    person = qs.filter(udb_person_uuid=udb_person_uuid).first()
+    if person:
+        return person
+
+    unsynced = qs.filter(udb_person_uuid__isnull=True)
+    if claim_emails:
+        person = unsynced.filter(email__in=claim_emails).first()
+        if person:
+            return person
+
+    return unsynced.filter(first_name__iexact=first_name, last_name__iexact=last_name).first()
+
+
+def _log_admin_history(person, *, log_user_id, action_flag, message):
+    """Record a row in the admin History (LogEntry) for a sync-driven change.
+
+    The admin History tab normally only reflects changes made through the admin;
+    writing a LogEntry here makes UDB sync edits visible there too, attributed to
+    the background "udb-sync" actor.
+    """
+    LogEntry.objects.log_actions(log_user_id, [person], action_flag, change_message=message, single_object=True)
+
+
+def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_id):
     """Upsert a single Person from one UDB contract.
 
     Required keys are accessed by subscript (a missing one raises and is reported
@@ -186,6 +281,7 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size):
 
     # Optional fields — tolerate absence/None.
     udb_person_email_internal_business = person.get("person_email_internal_business", "")
+    udb_person_email_private = person.get("person_email_private", "")
     udb_contract_organization_unit = (contract.get("contract_organization_unit") or {}).get("name", "")
     udb_contract_contract_type = (contract.get("contract_contract_type") or {}).get("name", "")
 
@@ -201,19 +297,47 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size):
     if udb_contract_organization_unit:
         udb_organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
 
-    udb_person_image_path_relative = ""
+    # Match by stable remote id first, then claim an un-synced local person by
+    # email, then by name (empty emails are dropped so they never match a
+    # NULL/empty local email).
+    claim_emails = [e for e in (udb_person_email_internal_business, udb_person_email_private) if e]
+    existing = _match_person(udb_person_uuid, udb_person_first_name, udb_person_last_name, claim_emails)
+
+    # Snapshot the compared fields before the upsert (None for a new person).
+    # `.values()` returns DB-typed values (foreign keys as ids), so comparing it
+    # against the post-save snapshot below is apples-to-apples.
+    values_before = (
+        Person.with_softdeleted_objects.filter(pk=existing.pk).values(*COMPARED_PERSON_FIELDS).first()
+        if existing
+        else None
+    )
+
+    # The image file path is deterministic (`{uuid}.jpg`), so it never reflects a
+    # content change on its own. Hash the source base64 instead: it is both the
+    # change signal and the gate that lets us skip rewriting an unchanged image.
     udb_person_image = person.get("person_image")
-    if udb_person_image:
+    udb_person_image_hash = (
+        hashlib.md5(udb_person_image.encode("utf-8"), usedforsecurity=False).hexdigest() if udb_person_image else ""
+    )
+    udb_person_image_path_relative = (
+        f"{settings.PERSON_IMAGE_UPLOAD_DIR}/{udb_person_uuid}.jpg" if udb_person_image else ""
+    )
+
+    image_changed = udb_person_image and (
+        values_before is None or values_before["udb_person_image_hash"] != udb_person_image_hash
+    )
+    if image_changed:
         logger.debug(f"Converting image for {udb_person_uuid}...")
-        udb_person_image_path_absolute = f"{person_images_dir}/{udb_person_uuid}.jpg"
-        udb_person_image_path_relative = f"{settings.PERSON_IMAGE_UPLOAD_DIR}/{udb_person_uuid}.jpg"
         save_base64img_as_fileimg(
             base64string=udb_person_image,
-            to_filepath=udb_person_image_path_absolute,
+            to_filepath=f"{person_images_dir}/{udb_person_uuid}.jpg",
             thumbnail_size=thumbnail_size,
         )
 
     defaults = dict(
+        # Follow UDB: the local name tracks the current UDB name.
+        first_name=udb_person_first_name,
+        last_name=udb_person_last_name,
         udb_person_uuid=udb_person_uuid,
         udb_person_first_name=udb_person_first_name,
         udb_person_last_name=udb_person_last_name,
@@ -225,22 +349,63 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size):
         udb_contract_organizational_positions=positions,
         udb_data_updated_at=now(),
         udb_person_image=udb_person_image_path_relative,
+        udb_person_image_hash=udb_person_image_hash,
         organizational_unit=udb_organizational_unit,
         deleted_at=None,
         deleted_by=None,
     )
 
+    # Backfill the local email from UDB only when ours is empty, so a person we
+    # can actually contact gets an address — but never overwrite a manually
+    # maintained local address. The unique constraint still applies; a clash is
+    # caught per-contract and reported.
+    if udb_person_email_internal_business and (existing is None or not existing.email):
+        defaults["email"] = udb_person_email_internal_business
+
     try:
-        # Match by firstname/lastname combination (email matching disabled).
-        _person, created = Person.with_softdeleted_objects.update_or_create(
-            last_name=udb_person_last_name,
-            first_name=udb_person_first_name,
-            defaults=defaults,
-        )
+        if existing is None:
+            existing = Person.with_softdeleted_objects.create(**defaults)
+            created = True
+        else:
+            for field, value in defaults.items():
+                setattr(existing, field, value)
+            existing.save()
+            created = False
     except IntegrityError as integrity_error:
+        # With uuid-first matching a uuid is never reassigned, so the remaining
+        # collision is two distinct people sharing a name (a known limitation of
+        # the unique_dlcdb_person_name / unique_udb_person_name constraints).
         raise IntegrityError(
             f"Integrity error for {udb_person_last_name}/{udb_person_first_name}: {integrity_error}. "
-            "Hint: first_name/last_name may have changed in UDB."
+            "Hint: another local person already uses this name "
+            "(unique_dlcdb_person_name / unique_udb_person_name)."
         ) from integrity_error
 
-    return (Outcome.CREATED if created else Outcome.UPDATED), ""
+    if created:
+        _log_admin_history(existing, log_user_id=log_user_id, action_flag=ADDITION, message="Added by UDB sync.")
+        return Outcome.CREATED, ""
+
+    values_after = Person.with_softdeleted_objects.filter(pk=existing.pk).values(*COMPARED_PERSON_FIELDS).first()
+    changes = [
+        (field, values_before[field], values_after[field])
+        for field in COMPARED_PERSON_FIELDS
+        if values_before[field] != values_after[field]
+    ]
+
+    if not changes:
+        return Outcome.UNCHANGED, ""
+
+    # Build an `old -> new` summary so the admin History tab shows what actually
+    # changed, not just which fields. repr() keeps empty/None vs a value
+    # unambiguous (e.g. `email: '' -> 'ada@example.org'`).
+    change_summary = ", ".join(f"{field}: {old!r} -> {new!r}" for field, old, new in changes)
+    _log_admin_history(
+        existing,
+        log_user_id=log_user_id,
+        action_flag=CHANGE,
+        message=f"Changed by UDB sync: {change_summary}",
+    )
+
+    # The detailed diff is only useful for debugging, so keep it out of routine logs.
+    detail = change_summary if settings.DEBUG else ""
+    return Outcome.UPDATED, detail

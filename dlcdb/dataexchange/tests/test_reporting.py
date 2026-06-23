@@ -71,6 +71,21 @@ def test_detailed_and_short_html_content():
     assert "See the saved log" in short
 
 
+def test_detailed_verbose_controls_unchanged_rows():
+    report = OperationReport(operation="UDB person sync")
+    report.add(row=1, identifier="uuid-1", outcome=Outcome.UPDATED, detail="email")
+    report.add(row=2, identifier="uuid-2", outcome=Outcome.UNCHANGED)
+
+    # The counts line always reflects every row, so totals stay honest.
+    concise = report.detailed(verbose=False)
+    assert "Unchanged: 1" in concise
+    assert "uuid-1" in concise
+    assert "uuid-2" not in concise  # UNCHANGED row omitted
+
+    verbose = report.detailed(verbose=True)
+    assert "uuid-2" in verbose  # UNCHANGED row listed
+
+
 def test_short_html_dry_run_prefix():
     report = OperationReport(operation="Import", dry_run=True)
     report.add(row=1, identifier="EDV_ID=A", outcome=Outcome.CREATED)

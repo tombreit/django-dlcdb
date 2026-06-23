@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib import messages
 
-from .models import ImporterList, RemoverList, UdbSyncConfiguration
+from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import import_data
 from .remover import set_removed_record
@@ -93,8 +93,7 @@ class ImporterListAdmin(admin.ModelAdmin):
             username=request.user.username,
             write=True,
         )
-        obj.messages = report.detailed()
-        obj.save()
+        report.persist(obj)
         getattr(messages, report.level)(request, report.short_html())
 
 
@@ -127,7 +126,18 @@ class UdbSyncConfigurationAdmin(admin.ModelAdmin):
         from .tasks import task_import_udb_persons
 
         task_import_udb_persons()
-        messages.info(request, "UDB sync has been enqueued. Check the logs / configuration for results.")
+        messages.info(request, "UDB sync has been enqueued. See the 'UDB Sync Runs' list for the result.")
+
+
+@admin.register(UdbSyncRun)
+class UdbSyncRunAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "status", "summary"]
+    list_filter = ["status"]
+    readonly_fields = ["status", "summary", "messages", "created_at", "modified_at"]
+
+    def has_add_permission(self, request):
+        # Runs are created by the sync, never by hand.
+        return False
 
 
 @admin.register(RemoverList)
@@ -177,6 +187,5 @@ class RemoverListAdmin(admin.ModelAdmin):
             username=request.user.username,
             write=True,
         )
-        obj.messages = report.detailed()
-        obj.save()
+        report.persist(obj)
         getattr(messages, report.level)(request, report.short_html())
