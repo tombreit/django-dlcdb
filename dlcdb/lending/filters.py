@@ -115,3 +115,38 @@ class LendingPersonFilter(django_filters.FilterSet):
         if value == "*":
             return qs
         return qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))
+
+
+class LendingDeviceFilter(django_filters.FilterSet):
+    """
+    Live-search filter backing the device picker in the quick-lend assistant.
+    Operates on the available-devices queryset passed in by the view (already
+    INROOM- and tenant-scoped); an empty query returns nothing and "*" returns
+    all available devices.
+    """
+
+    # Uses "q" (not "search") so two pickers can coexist in one <form> on the
+    # quick-lend page without HTMX mixing their query terms.
+    q = django_filters.CharFilter(method="search_method", label=_("Search"))
+
+    class Meta:
+        model = LentRecord
+        fields = ["q"]
+
+    @property
+    def qs(self):
+        # django-filter skips empty filter values, which would return the whole
+        # (tenant-scoped) base queryset; a blank search box must yield nothing.
+        if not self.data.get("q"):
+            return self.queryset.none()
+        return super().qs
+
+    def search_method(self, queryset, name, value):
+        if value == "*":
+            return queryset.order_by("device__edv_id")
+        return queryset.filter(
+            Q(device__edv_id__icontains=value)
+            | Q(device__sap_id__icontains=value)
+            | Q(device__manufacturer__name__icontains=value)
+            | Q(device__series__icontains=value)
+        ).order_by("device__edv_id")

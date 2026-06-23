@@ -16,7 +16,7 @@ class LentingForm(forms.ModelForm):
     lending detail view. Replaces ``LentRecordAdminForm``.
 
     The ``person`` field is a hidden input driven by the HTMX live-search
-    person picker (see ``lending_detail.js``); ``record_type`` carries the
+    person picker (see ``lending_picker.js``); ``record_type`` carries the
     device's current state so ``clean()`` can block lending a "lost" device,
     mirroring ``LentRecordAdminForm``.
     """

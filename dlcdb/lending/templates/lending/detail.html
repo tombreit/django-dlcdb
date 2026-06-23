@@ -11,7 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block extra_css %}
 <style>
-  #person-results .person-option:hover { background-color: var(--bs-tertiary-bg); }
+  .picker-option:hover { background-color: var(--bs-tertiary-bg); }
 </style>
 {% endblock extra_css %}
 
@@ -80,50 +80,8 @@ SPDX-License-Identifier: EUPL-1.2
     </div>
     <div class="card-body">
 
-      <div class="mb-3" id="person-picker"
-           data-search-url="{% url 'lending:person_search' %}"
-           data-person-locked="{% if is_return_flow %}1{% else %}0{% endif %}"
-           data-change-label="{% translate 'Change' %}">
-        <label class="form-label fw-semibold">
-          {% translate "Person" %}
-          {% if is_lend_flow %}<span class="text-danger">*</span>{% endif %}
-        </label>
-
-        {% if form.person.errors %}
-          <div class="text-danger small mb-2">{{ form.person.errors }}</div>
-        {% endif %}
-
-        {# Selected-person slot #}
-        <div id="person-selected">
-          {% if selected_person %}
-            {% include "lending/includes/_person_list_item.html" with person=selected_person selectable=False locked=is_return_flow %}
-          {% endif %}
-        </div>
-
-        {# Search box + live results (hidden once a person is selected) #}
-        <div id="person-search-wrap" class="position-relative {% if selected_person %}d-none{% endif %}">
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input
-              type="search"
-              name="search"
-              id="person-search-input"
-              class="form-control"
-              placeholder="{% translate 'Search person by name or e-mail, or “*” for all…' %}"
-              autocomplete="off"
-              hx-post="{% url 'lending:person_search' %}"
-              hx-target="#person-results"
-              hx-trigger="keyup changed delay:250ms, search"
-              hx-indicator=".htmx-indicator"
-            >
-            <span class="input-group-text htmx-indicator">
-              <span class="spinner-border spinner-border-sm" role="status"></span>
-            </span>
-          </div>
-          {# Dropdown panel; the inner styled box is rendered by the partial only when there is content. #}
-          <div id="person-results" class="position-absolute start-0 end-0 z-3"></div>
-        </div>
-      </div>
+      {% url 'lending:person_search' as person_search_url %}
+      {% include "lending/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_return_flow fill_date_target=form.lent_desired_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
 
       <div class="row g-3">
         <div class="col-md-6">
@@ -246,5 +204,5 @@ SPDX-License-Identifier: EUPL-1.2
 {% endblock body %}
 
 {% block extra_js %}
-  <script src="{% static 'lending/lending_detail.js' %}"></script>
+  <script src="{% static 'lending/lending_picker.js' %}"></script>
 {% endblock extra_js %}

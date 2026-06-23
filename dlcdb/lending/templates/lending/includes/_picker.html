@@ -1,0 +1,80 @@
+<!--
+SPDX-FileCopyrightText: 2026 Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+Reusable live-search picker (person or device), driven by lending_picker.js.
+
+Parameters (via {% include ... with %}):
+  picker_id           unique slug; all element ids derive from it
+  field_id            id of the hidden form field this picker writes into
+  search_url          HTMX endpoint returning the result options
+  label               visible field label
+  placeholder         search input placeholder
+  required            show the red required marker
+  locked              disable selecting/changing (read-only)
+  fill_date_target    (optional) id of a date input to prefill from the option's
+                      data-contract-end
+  errors              (optional) bound-field errors to render
+  search_name         (optional) name of the search input (default "search"); use
+                      a distinct value when two pickers share one <form> so HTMX
+                      does not mix their query terms
+  has_selected        truthy when a card is pre-selected (collapses the search)
+  selected_item_template (optional) template path rendering the pre-selected card
+                      (the object it expects must be passed in too, e.g. person=…)
+{% endcomment %}
+
+<div class="mb-3"
+     data-picker
+     data-picker-id="{{ picker_id }}"
+     data-field-id="{{ field_id }}"
+     data-locked="{% if locked %}1{% else %}0{% endif %}"
+     data-change-label="{% translate 'Change' %}"
+     {% if fill_date_target %}data-fill-date-target="{{ fill_date_target }}"{% endif %}
+     id="{{ picker_id }}-picker">
+
+  {% if label %}
+    <label class="form-label fw-semibold">
+      {{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}
+    </label>
+  {% endif %}
+
+  {% if errors %}
+    <div class="text-danger small mb-2">{{ errors }}</div>
+  {% endif %}
+
+  {# Selected-option slot #}
+  <div id="{{ picker_id }}-selected">
+    {% if has_selected and selected_item_template %}
+      {% include selected_item_template %}
+    {% endif %}
+  </div>
+
+  {# Search box + live results (hidden once an option is selected) #}
+  <div id="{{ picker_id }}-search-wrap" class="position-relative {% if has_selected %}d-none{% endif %}">
+    <div class="input-group">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input
+        type="search"
+        name="{{ search_name|default:'search' }}"
+        id="{{ picker_id }}-search-input"
+        class="form-control"
+        placeholder="{{ placeholder }}"
+        autocomplete="off"
+        hx-post="{{ search_url }}"
+        hx-target="#{{ picker_id }}-results"
+        hx-trigger="keyup changed delay:250ms, search"
+        hx-indicator=".htmx-indicator"
+      >
+      <span class="input-group-text htmx-indicator">
+        <span class="spinner-border spinner-border-sm" role="status"></span>
+      </span>
+    </div>
+    {# Dropdown panel; the inner styled box is rendered by the partial only when there is content. #}
+    <div id="{{ picker_id }}-results" class="position-absolute start-0 end-0 z-3"></div>
+  </div>
+</div>

@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import BooleanField, Case, CharField, Count, IntegerField, Q, Value, When
+from django.db.models import BooleanField, Case, CharField, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -20,7 +20,14 @@ from dlcdb.core.models import InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.utils.helpers import get_denormalized_user
 
 from .decorators import htmx_permission_required
-from .filters import LendingPersonFilter, LentRecordFilter, STATE_OVERDUE, STATE_LENT, STATE_AVAILABLE
+from .filters import (
+    LendingDeviceFilter,
+    LendingPersonFilter,
+    LentRecordFilter,
+    STATE_OVERDUE,
+    STATE_LENT,
+    STATE_AVAILABLE,
+)
 from .forms import LentingForm
 from .models import LendingConfiguration, LendingProfile
 
@@ -190,6 +197,35 @@ def _apply_state_machine(record, form, user, username):
         raise ValidationError(_("Lent state unknown - please report this issue!"))
 
 
+def _save_lending(request, record, form):
+    """
+    Run the soft warnings and the lend/return/edit state machine in one
+    transaction. Returns True on success (caller should redirect) or False if a
+    form error was added (caller should re-render). Shared by ``detail`` and
+    ``quick_lend``.
+    """
+    user, username = get_denormalized_user(request.user)
+    _lending_soft_warnings(request, form)
+    try:
+        with transaction.atomic():
+            _apply_state_machine(record, form, user, username)
+    except Room.DoesNotExist as exc:
+        messages.error(request, _("Configuration error: %(err)s") % {"err": exc})
+        return False
+    except ValidationError as exc:
+        form.add_error(None, exc)
+        return False
+
+    if record.record_type == Record.INROOM:
+        msg = _("Device “%(device)s” lent to “%(person)s”.")
+    elif record.lent_end_date or form.cleaned_data.get("lent_end_date"):
+        msg = _("Return of “%(device)s” from “%(person)s” acknowledged.")
+    else:
+        msg = _("Lending of “%(device)s” to “%(person)s” saved.")
+    messages.success(request, msg % {"device": record.device, "person": form.cleaned_data.get("person")})
+    return True
+
+
 @login_required
 @htmx_permission_required("core.change_lentrecord")
 def detail(request, pk):
@@ -206,25 +242,8 @@ def detail(request, pk):
 
     if request.method == "POST":
         form = LentingForm(request.POST, instance=record, record_type=record.record_type)
-        if form.is_valid():
-            user, username = get_denormalized_user(request.user)
-            _lending_soft_warnings(request, form)
-            try:
-                with transaction.atomic():
-                    _apply_state_machine(record, form, user, username)
-            except Room.DoesNotExist as exc:
-                messages.error(request, _("Configuration error: %(err)s") % {"err": exc})
-            except ValidationError as exc:
-                form.add_error(None, exc)
-            else:
-                if record.record_type == Record.INROOM:
-                    msg = _("Device “%(device)s” lent to “%(person)s”.")
-                elif record.lent_end_date or form.cleaned_data.get("lent_end_date"):
-                    msg = _("Return of “%(device)s” from “%(person)s” acknowledged.")
-                else:
-                    msg = _("Lending of “%(device)s” to “%(person)s” saved.")
-                messages.success(request, msg % {"device": device, "person": form.cleaned_data.get("person")})
-                return redirect("lending:index")
+        if form.is_valid() and _save_lending(request, record, form):
+            return redirect("lending:index")
     else:
         form = LentingForm(instance=record, record_type=record.record_type)
 
@@ -262,6 +281,78 @@ def person_search(request):
         "lending/includes/_person_search_results.html",
         {"filter": person_filter},
     )
+
+
+def _available_devices(request):
+    """Tenant-scoped queryset of available (INROOM), lentable devices to lend.
+
+    Annotates ``has_lending_profile`` so the device picker can tell whether an
+    Ausleihzettel (lending slip) can be printed for the device.
+    """
+    return _tenant_scoped(
+        LentRecord.objects.filter(record_type=Record.INROOM)
+        .select_related("device__manufacturer", "room")
+        .annotate(
+            has_lending_profile=Exists(LendingProfile.objects.filter(device_type=OuterRef("device__device_type")))
+        ),
+        request,
+    )
+
+
+@login_required
+@htmx_permission_required("core.change_lentrecord")
+def device_search(request):
+    """HTMX live-search backing the device picker in the quick-lend assistant."""
+    device_filter = LendingDeviceFilter(request.POST or None, queryset=_available_devices(request))
+    return TemplateResponse(
+        request,
+        "lending/includes/_device_search_results.html",
+        {"filter": device_filter},
+    )
+
+
+@login_required
+@htmx_permission_required("core.change_lentrecord")
+def quick_lend(request):
+    """
+    One-screen "shortcut lending" assistant: pick an available device and a
+    person (either order), a room, and create the lending in a single submit.
+    Reuses the same lend path as the detail view via ``_save_lending``.
+    """
+    selected_device = None
+    selected_person = None
+
+    if request.method == "POST":
+        record_pk = request.POST.get("device_record")
+        if not record_pk:
+            messages.error(request, _("Please select a device to lend."))
+            return redirect("lending:quick_lend")
+
+        record = _get_scoped_record(request, record_pk)
+        if record.record_type != Record.INROOM:
+            messages.error(request, _("This device is no longer available for lending."))
+            return redirect("lending:quick_lend")
+
+        form = LentingForm(request.POST, instance=record, record_type=record.record_type)
+        if form.is_valid() and _save_lending(request, record, form):
+            return redirect("lending:index")
+
+        # Validation failed: keep the picked device/person cards on re-render
+        # (they otherwise live only in the hidden fields).
+        selected_device = record
+        person_id = request.POST.get("person")
+        if person_id:
+            selected_person = Person.objects.filter(pk=person_id).first()
+    else:
+        form = LentingForm(record_type=Record.INROOM)
+
+    context = {
+        "form": form,
+        "title": _("Quick lend"),
+        "selected_device": selected_device,
+        "selected_person": selected_person,
+    }
+    return TemplateResponse(request, "lending/quick_lend.html", context)
 
 
 def _build_unsaved_lentrecord(device, form):

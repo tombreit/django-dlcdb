@@ -371,3 +371,179 @@ class LendingPrintSheetTests(BaseTest):
         LendingProfile.objects.all().delete()
         response = self.client.post(self.url, self._payload())
         self.assertEqual(response.status_code, 404)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class LendingDeviceSearchTests(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls.room = Room.objects.create(number="A1.23")
+
+        # Available (InRoom) lentable device -> must be searchable.
+        cls.available_device = cls()._create_device(edv_id="EDV-AVAIL", sap_id="1-1")
+        cls.available_device.is_lentable = True
+        cls.available_device.save()
+        InRoomRecord.objects.create(device=cls.available_device, room=cls.room)
+
+        # Currently lent device -> must NOT appear (not available).
+        cls.lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
+        cls.lent_device.is_lentable = True
+        cls.lent_device.save()
+        LentRecord.objects.create(
+            device=cls.lent_device,
+            person=Person.objects.create(first_name="Max", last_name="Mustermann"),
+            room=cls.room,
+            lent_start_date=datetime.date(2026, 1, 1),
+            lent_desired_end_date=datetime.date(2099, 1, 1),
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.url = reverse("lending:device_search")
+
+    def test_empty_search_returns_no_devices(self):
+        response = self.client.post(self.url, {"q": ""})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "EDV-AVAIL")
+
+    def test_wildcard_returns_all_available(self):
+        response = self.client.post(self.url, {"q": "*"})
+        self.assertContains(response, "EDV-AVAIL")
+        self.assertNotContains(response, "EDV-LENT")
+
+    def test_search_matches_edv(self):
+        response = self.client.post(self.url, {"q": "AVAIL"})
+        self.assertContains(response, "EDV-AVAIL")
+
+    def test_lent_device_not_searchable(self):
+        response = self.client.post(self.url, {"q": "LENT"})
+        self.assertNotContains(response, "EDV-LENT")
+
+    def test_device_search_uses_q_not_search(self):
+        # On the quick-lend page both pickers sit in one <form>; HTMX includes a
+        # stray (empty) "search" from the person picker. Device search must key
+        # off "q" only, so the stray param does not blank the results.
+        response = self.client.post(self.url, {"q": "*", "search": ""})
+        self.assertContains(response, "EDV-AVAIL")
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class QuickLendViewTests(BaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+
+        cls.room = Room.objects.create(number="A1.23", nickname="Theke")
+        cls.auto_return_room = Room.objects.create(number="RETURN", is_auto_return_room=True)
+        cls.external_room = Room.objects.create(number="EXTERN", is_external=True)
+
+        cls.person = Person.objects.create(first_name="Max", last_name="Mustermann", email="max@example.com")
+
+        cls.available_device = cls()._create_device(edv_id="EDV-AVAIL", sap_id="1-1")
+        cls.available_device.is_lentable = True
+        cls.available_device.save()
+        cls.available_record = InRoomRecord.objects.create(device=cls.available_device, room=cls.room)
+
+        cls.lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
+        cls.lent_device.is_lentable = True
+        cls.lent_device.save()
+        cls.lent_record = LentRecord.objects.create(
+            device=cls.lent_device,
+            person=cls.person,
+            room=cls.room,
+            lent_start_date=datetime.date(2026, 1, 1),
+            lent_desired_end_date=datetime.date(2099, 1, 1),
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.url = reverse("lending:quick_lend")
+
+    def _payload(self, **overrides):
+        payload = {
+            "device_record": self.available_record.pk,
+            "person": self.person.id,
+            "room": self.room.id,
+            "lent_start_date": "2026-06-23",
+            "lent_desired_end_date": "2026-07-23",
+            "lent_accessories": "",
+            "lent_reason": "",
+            "lent_note": "",
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_get_renders_both_pickers(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="device-search-input"')
+        self.assertContains(response, 'id="person-search-input"')
+        self.assertContains(response, 'id="id_device_record"')
+        self.assertContains(response, 'id="id_room"')
+
+    def test_get_renders_print_button(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'id="quick-lend-print"')
+        # The print endpoint is keyed on the device record pk, substituted by JS.
+        self.assertContains(response, "/0/print/")
+
+    def test_device_option_exposes_lending_profile_flag(self):
+        # A profile exists for the available device's type -> option flag is "1".
+        LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
+        response = self.client.post(reverse("lending:device_search"), {"q": "AVAIL"})
+        self.assertContains(response, 'data-has-profile="1"')
+
+    def test_print_sheet_works_from_quick_lend_payload(self):
+        LendingProfile.objects.create(
+            device_type=self.available_device.device_type,
+            lent_sheet_template="{% load i18n %}Slip {{ record.person }}",
+        )
+        lent_before = LentRecord.objects.count()
+        response = self.client.post(
+            reverse("lending:print_sheet", args=[self.available_record.pk]),
+            self._payload(),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mustermann")
+        # Printing must not persist a lending.
+        self.assertEqual(LentRecord.objects.count(), lent_before)
+
+    def test_post_creates_lent_record_and_redirects(self):
+        response = self.client.post(self.url, self._payload())
+        self.assertRedirects(response, reverse("lending:index"))
+        self.available_device.refresh_from_db()
+        self.assertEqual(self.available_device.active_record.record_type, Record.LENT)
+        self.assertEqual(self.available_device.active_record.person, self.person)
+        self.assertEqual(self.available_device.active_record.room, self.room)
+
+    def test_post_rejects_non_inroom_record(self):
+        lent_before = LentRecord.objects.filter(record_type=Record.LENT).count()
+        response = self.client.post(self.url, self._payload(device_record=self.lent_record.pk))
+        self.assertRedirects(response, reverse("lending:quick_lend"))
+        self.assertEqual(LentRecord.objects.filter(record_type=Record.LENT).count(), lent_before)
+
+    def test_post_missing_device_redirects(self):
+        response = self.client.post(self.url, self._payload(device_record=""))
+        self.assertRedirects(response, reverse("lending:quick_lend"))
+        self.available_device.refresh_from_db()
+        self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
+
+    def test_post_soft_warning_no_contract_end(self):
+        response = self.client.post(self.url, self._payload(), follow=True)
+        messages = [str(m) for m in response.context["messages"]]
+        self.assertTrue(any("contract end date" in m.lower() for m in messages))
+
+    def test_login_required(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+
+    def test_permission_required(self):
+        plain = get_user_model().objects.create_user(email="plain@example.com", password="secret", username="plain")
+        self.client.force_login(plain)
+        response = self.client.post(self.url, self._payload())
+        self.assertEqual(response["HX-Refresh"], "true")
+        self.available_device.refresh_from_db()
+        self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)

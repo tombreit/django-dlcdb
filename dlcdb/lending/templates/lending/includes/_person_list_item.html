@@ -8,15 +8,16 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% comment %}
 Person card, reused for live-search results and the selected-person slot.
-Carries data-* attributes so lending_detail.js can wire it into the form's
+Carries data-* attributes so lending_picker.js can wire it into the form's
 hidden person field without a server round-trip.
 {% endcomment %}
 
 <div
-  class="js-person-option card {% if selectable %}mb-1 border-0 person-option{% else %}mb-2{% endif %}"
+  class="js-picker-option card {% if selectable %}mb-1 border-0 picker-option{% else %}mb-2{% endif %}"
   {% if selectable %}role="button" style="cursor: pointer;"{% endif %}
-  data-person-id="{{ person.id }}"
-  data-person-label="{{ person.last_name }}, {{ person.first_name }}"
+  data-option-id="{{ person.id }}"
+  data-option-label="{{ person.last_name }}, {{ person.first_name }}"
+  data-contract-end="{{ person.udb_contract_planned_checkout|date:'Y-m-d' }}"
 >
   <div class="card-body d-flex align-items-center gap-3 py-2">
     {% if person.udb_person_image %}
@@ -52,7 +53,7 @@ hidden person field without a server round-trip.
     {% if selectable %}
       <i class="bi bi-chevron-right text-muted"></i>
     {% elif not locked %}
-      <button type="button" class="js-person-clear btn btn-sm btn-outline-secondary">
+      <button type="button" class="js-picker-clear btn btn-sm btn-outline-secondary">
         <i class="bi bi-x-lg"></i> {% translate "Change" %}
       </button>
     {% endif %}
