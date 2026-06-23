@@ -41,7 +41,7 @@ UDB_REQUEST_TIMEOUT = 30
 # config: only contracts in an active/checked-out state, and never test-data
 # persons. Kept in code (not the admin) so they cannot drift into pulling test
 # or inactive records.
-UDB_SYNC_FILTERS = "state__in=CHECKED_IN_SIGNATURE_CONFIRMED,CHECKED_OUT_CONFIRMED&person__person_is_test_data=False"
+UDB_SYNC_FILTERS = "present=True&person__person_is_test_data=False"
 
 # Code-owned request field projection. These MUST stay in sync with the keys
 # read in `_process_contract()` below. They are intentionally not configurable
