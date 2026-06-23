@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}
+Sortable table header. Caller passes:
+  label  - visible column label
+  asc    - OrderingFilter param value for ascending (e.g. "device")
+  desc   - param value for descending (e.g. "-device")
+Preserves the active search/filters via the built-in {% querystring %} tag and
+stays bookmarkable (hx-push-url).
+{% endcomment %}
+{% with current=request.GET.o %}
+  {% if current == asc %}{% querystring o=desc as sort_href %}
+  {% elif current == desc %}{% querystring o=asc as sort_href %}
+  {% else %}{% querystring o=asc as sort_href %}{% endif %}
+  <th scope="col">
+    <a class="text-decoration-none text-reset d-inline-flex align-items-center gap-1"
+       href="{{ sort_href }}"
+       hx-get="{% url 'lending:index' %}{{ sort_href }}"
+       hx-target="#lent-list"
+       hx-swap="outerHTML"
+       hx-push-url="true">
+      {{ label }}
+      {% if current == asc %}<i class="bi bi-caret-up-fill"></i>
+      {% elif current == desc %}<i class="bi bi-caret-down-fill"></i>
+      {% else %}<i class="bi bi-arrow-down-up opacity-25"></i>{% endif %}
+    </a>
+  </th>
+{% endwith %}
