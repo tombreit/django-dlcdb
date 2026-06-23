@@ -46,3 +46,87 @@ if (document.readyState === 'loading') {
 document.body.addEventListener('htmx:afterSwap', function(event) {
     initTomSelects(event.target);
 });
+
+
+/**
+ * Bootstrap 5.3 color mode switcher (Light / Dark / Auto).
+ * Adapted from https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript
+ * The initial data-bs-theme is set by an inline <head> script (see _base.html) to
+ * avoid a flash of the wrong theme; this code only wires up the navbar switcher and
+ * follows the OS preference while in "auto" mode.
+ */
+(() => {
+    'use strict';
+
+    const STORAGE_KEY = 'dlcdb-theme';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const getStoredTheme = () => localStorage.getItem(STORAGE_KEY);
+    const setStoredTheme = (theme) => localStorage.setItem(STORAGE_KEY, theme);
+
+    const getPreferredTheme = () => {
+        const stored = getStoredTheme();
+        if (stored) return stored;
+        return prefersDark.matches ? 'dark' : 'light';
+    };
+
+    const setTheme = (theme) => {
+        const resolved = theme === 'auto'
+            ? (prefersDark.matches ? 'dark' : 'light')
+            : theme;
+        document.documentElement.setAttribute('data-bs-theme', resolved);
+    };
+
+    const showActiveTheme = (theme) => {
+        const switcher = document.querySelector('#bd-theme');
+        if (!switcher) return;
+
+        const activeBtn = document.querySelector(`[data-bs-theme-value="${theme}"]`);
+        if (!activeBtn) return;
+
+        document.querySelectorAll('[data-bs-theme-value]').forEach((btn) => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        });
+
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-pressed', 'true');
+
+        // Reflect the active mode in the toggle icon.
+        const activeIcon = switcher.querySelector('.theme-icon-active');
+        const sourceIcon = activeBtn.querySelector('.theme-icon');
+        if (activeIcon && sourceIcon) {
+            activeIcon.className = `${sourceIcon.className.replace('me-2', '').trim()} theme-icon-active`;
+        }
+
+        const label = `${document.querySelector('#bd-theme-text').textContent} (${theme})`;
+        switcher.setAttribute('aria-label', label);
+    };
+
+    // Follow the OS preference, but only while the user hasn't pinned light/dark.
+    prefersDark.addEventListener('change', () => {
+        const stored = getStoredTheme();
+        if (stored !== 'light' && stored !== 'dark') {
+            setTheme(getPreferredTheme());
+        }
+    });
+
+    const initThemeSwitcher = () => {
+        showActiveTheme(getPreferredTheme());
+
+        document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const theme = toggle.getAttribute('data-bs-theme-value');
+                setStoredTheme(theme);
+                setTheme(theme);
+                showActiveTheme(theme);
+            });
+        });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initThemeSwitcher);
+    } else {
+        initThemeSwitcher();
+    }
+})();

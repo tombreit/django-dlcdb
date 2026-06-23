@@ -12,6 +12,17 @@ SPDX-License-Identifier: EUPL-1.2
 
 <head>
   <meta charset="utf-8">
+  <script>
+    // Set the color theme before paint to avoid a flash of the wrong theme (FOUC).
+    // Keep the storage key in sync with theme.js.
+    (function () {
+      const stored = localStorage.getItem('dlcdb-theme');
+      const theme = (!stored || stored === 'auto')
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : stored;
+      document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+  </script>
   <title>{% block title %}{% endblock title %} | DLCDB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   {# <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'> #}

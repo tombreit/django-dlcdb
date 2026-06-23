@@ -69,6 +69,32 @@
           </li>
           {% endif %}
 
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="bd-theme"
+               data-bs-toggle="dropdown" aria-expanded="false"
+               aria-label="{% translate 'Toggle theme' %}" title="{% translate 'Toggle theme' %}">
+              <i class="bi bi-circle-half theme-icon-active"></i>
+              <span class="d-none" id="bd-theme-text">{% translate 'Toggle theme' %}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
+              <li>
+                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                  <i class="bi bi-sun me-2 theme-icon"></i>{% translate 'Light' %}
+                </button>
+              </li>
+              <li>
+                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                  <i class="bi bi-moon-stars me-2 theme-icon"></i>{% translate 'Dark' %}
+                </button>
+              </li>
+              <li>
+                <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                  <i class="bi bi-circle-half me-2 theme-icon"></i>{% translate 'Auto' %}
+                </button>
+              </li>
+            </ul>
+          </li>
+
           {% if request.user.is_authenticated or navigation.userdropdown %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
