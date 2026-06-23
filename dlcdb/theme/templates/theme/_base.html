@@ -51,6 +51,8 @@ SPDX-License-Identifier: EUPL-1.2
         {% block body %}{% endblock body %}
         </main>
 
+        {% block footer %}{% include 'theme/includes/footer.html' %}{% endblock footer %}
+
     </div>
     <script src="{% static 'theme/dist/js/theme.js' %}"></script>
     {% django_htmx_script %}

@@ -168,6 +168,7 @@ TEMPLATES = [
                 "dlcdb.core.context_processors.nav",
                 "dlcdb.core.context_processors.django_settings",
                 "dlcdb.theme.context_processors.navigation",
+                "dlcdb.theme.context_processors.project_meta",
                 "dlcdb.organization.context_processors.branding",
             ],
         },
