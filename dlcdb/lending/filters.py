@@ -92,3 +92,26 @@ class LentRecordFilter(django_filters.FilterSet):
         elif value == STATE_AVAILABLE:
             return queryset.filter(record_type=Record.INROOM)
         return queryset
+
+
+class LendingPersonFilter(django_filters.FilterSet):
+    """
+    Live-search filter backing the person picker on the lending detail view.
+    Searches all persons by name/email; an empty query returns nothing (so the
+    picker starts blank) and "*" returns everyone.
+    """
+
+    search = django_filters.CharFilter(method="search_method", label=_("Search"))
+
+    class Meta:
+        model = Person
+        fields = ["search"]
+
+    def search_method(self, queryset, name, value):
+        qs = Person.objects.order_by("last_name", "first_name")
+
+        if not value:
+            return Person.objects.none()
+        if value == "*":
+            return qs
+        return qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))

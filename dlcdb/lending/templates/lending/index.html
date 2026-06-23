@@ -81,10 +81,12 @@
       </thead>
       <tbody>
         {% for record in filter.qs %}
-          <tr>
+          <tr class="position-relative">
             <td>
-              <div class="fw-semibold">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</div>
-              <div class="">{{ record.device.manufacturer }} {{ record.device.series }}</div>
+              <a href="{% url 'lending:detail' record.pk %}" class="stretched-link text-decoration-none text-reset">
+                <div class="fw-semibold">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</div>
+                <div class="">{{ record.device.manufacturer }} {{ record.device.series }}</div>
+              </a>
             </td>
             <td>
               <div>
