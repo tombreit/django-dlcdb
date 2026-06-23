@@ -8,10 +8,13 @@
           alt="{{ branding.organization_abbr }}"
           style="max-height: 30px;"
         >
+        {# Current app identity hidden: it duplicates the highlighted "active" item in the main nav. Kept (not deleted) in case we want to restore the brand app label. #}
+        {% comment %}
         <span class="ms-4">
           <i class="{{ navigation.app_icon_class }}"></i>
           {% translate navigation.app_label %}
         </span>
+        {% endcomment %}
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,16 +23,14 @@
     
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto">
-          {% if navigation.navbar %}
-            {% for item in navigation.navbar %}
-              <li class="nav-item">
-                <a class="nav-link" href="{{ item.url }}">
-                  <i class="{{ item.icon_class }}"></i>
-                  {{ item.label }}
-                </a>
-              </li>
-            {% endfor %}
-          {% endif %}
+          {% for item in nav_items_main %}
+            <li class="nav-item">
+              <a class="nav-link{% if item.active %} active fw-bold{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
+                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                {{ item.label }}
+              </a>
+            </li>
+          {% endfor %}
         </ul>
 
         <ul  class="navbar-nav">
@@ -51,7 +52,23 @@
                 </a>
               </li>
         {% endif %}
-          
+
+          {% if nav_items_settings %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}">
+              <i class="fa-solid fa-gear"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+              {% for item in nav_items_settings %}
+                <a class="dropdown-item" href="{% url item.url %}">
+                  {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                  {{ item.label }}
+                </a>
+              {% endfor %}
+            </div>
+          </li>
+          {% endif %}
+
           {% if request.user.is_authenticated or navigation.userdropdown %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">

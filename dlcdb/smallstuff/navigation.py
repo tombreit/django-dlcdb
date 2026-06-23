@@ -11,11 +11,6 @@ navigation = {
     "navbar": [],
     "navbar_secondary": [
         {
-            "label": "Backend",
-            "url": reverse("admin:smallstuff_thing_changelist"),
-            "icon_class": "bi bi-gear",
-        },
-        {
             "label": "Docs",
             "url": "/docs/guides/kleinkram.html",
             "icon_class": "bi bi-life-preserver",

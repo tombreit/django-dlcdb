@@ -57,7 +57,8 @@
     "build:theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_themeSrcDir/scss:$npm_package_config_themeDistDir/css",
     "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_themeDistDir/js/theme.js",
     "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",
-    "build:theme": "npm run build:theme:scss && npm run build:theme:js && npm run build:theme:bs-icons",
+    "build:theme:fontawesome": "mkdir -p $npm_package_config_themeDistDir/fonts/fontawesome && cp node_modules/@fortawesome/fontawesome-free/webfonts/* $npm_package_config_themeDistDir/fonts/fontawesome/",
+    "build:theme": "npm run build:theme:scss && npm run build:theme:js && npm run build:theme:bs-icons && npm run build:theme:fontawesome",
     "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs node_modules/d3/dist/d3.min.js $npm_package_config_docsDistDir/mermaid/"
   },
   "repository": {

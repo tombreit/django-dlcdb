@@ -147,6 +147,11 @@ def nav(request):
         user_permissions = user.get_all_permissions()
         return requested_permission in user_permissions
 
+    # Namespace of the currently resolved view, used to mark the matching nav
+    # entry as "active" (e.g. on /lending/* the "Lending" entry is highlighted).
+    resolver_match = getattr(request, "resolver_match", None)
+    current_app_namespace = (resolver_match.namespace or resolver_match.app_name) if resolver_match else None
+
     for app in dlcdb_apps:
         # print(f"{app}: name: {app.name}; verbose_name: {app.verbose_name}; label: {app.label}")
 
@@ -172,12 +177,15 @@ def nav(request):
                         continue
 
             if has_permission or request.user.is_superuser:
+                url = nav_entry.get("url") or ""
+                url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
                 nav_item = {
                     "label": nav_entry.get("label"),
                     "icon": nav_entry.get("icon"),
                     "url": nav_entry.get("url"),
                     "slot": nav_entry.get("slot"),
                     "order": nav_entry.get("order"),
+                    "active": bool(current_app_namespace) and url_namespace == current_app_namespace,
                 }
                 nav_items.append(nav_item)
 

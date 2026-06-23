@@ -11,11 +11,6 @@ navigation = {
     "navbar": [],
     "navbar_secondary": [
         {
-            "label": "Backend",
-            "url": reverse("admin:core_lentrecord_changelist"),
-            "icon_class": "bi bi-gear",
-        },
-        {
             "label": "Docs",
             "url": "/docs/guides/ausleihe.html",
             "icon_class": "bi bi-life-preserver",

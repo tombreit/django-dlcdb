@@ -16,7 +16,7 @@ class CoreConfig(AppConfig):
             "order": 10,
             "label": _("Lending"),
             "icon": "fa-solid fa-arrow-right-arrow-left",
-            "url": "admin:core_lentrecord_changelist",
+            "url": "lending:index",
             "required_permission": "view_lentrecord",
         },
         {
