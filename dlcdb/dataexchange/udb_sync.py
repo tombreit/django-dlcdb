@@ -372,13 +372,11 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
             existing.save()
             created = False
     except IntegrityError as integrity_error:
-        # With uuid-first matching a uuid is never reassigned, so the remaining
-        # collision is two distinct people sharing a name (a known limitation of
-        # the unique_dlcdb_person_name / unique_udb_person_name constraints).
+        # Surface the original error verbatim — it already names the violated
+        # constraint (e.g. core_person.email) — prefixed with the person so the
+        # reported row identifies who clashed.
         raise IntegrityError(
-            f"Integrity error for {udb_person_last_name}/{udb_person_first_name}: {integrity_error}. "
-            "Hint: another local person already uses this name "
-            "(unique_dlcdb_person_name / unique_udb_person_name)."
+            f"Integrity error for {udb_person_last_name}/{udb_person_first_name}: {integrity_error}"
         ) from integrity_error
 
     if created:
