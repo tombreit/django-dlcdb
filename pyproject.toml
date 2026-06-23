@@ -5,7 +5,7 @@
 [project]
 name = "django-dlcdb"
 # dynamic = ["version"]
-version = "0.9.1"
+version = "0.9.2"
 description = "Device Live Cycle Database"
 authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
 license = {file = "LICENSE"}
