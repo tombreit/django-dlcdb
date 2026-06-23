@@ -10,14 +10,15 @@ from django.utils import timezone
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from .models.device import Device
-from .models.device_type import DeviceType
-from .models.record import Record
-
-from .models.prx_inroomrecord import InRoomRecord
-from .models.prx_lentrecord import LentRecord
-from .models.prx_lostrecord import LostRecord
-from .models.prx_removedrecord import RemovedRecord
+from dlcdb.core.models import (
+    Device,
+    DeviceType,
+    Record,
+    InRoomRecord,
+    LentRecord,
+    LostRecord,
+    RemovedRecord,
+)
 
 
 # Shared plotly config: hide modebar entirely

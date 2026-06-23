@@ -1,0 +1,43 @@
+<!--
+SPDX-FileCopyrightText: 2026 Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+-->
+{% extends "theme/_base.html" %}
+{% load static i18n %}
+
+{% block title %}{% translate "Dashboard" %}{% endblock title %}
+
+{% block body %}
+
+{# Load Plotly before the inline chart scripts below run (they live in the body, #}
+{# and the theme base outputs {% block extra_js %} only after the body). #}
+<script src="{% static 'dist/core/vendor/plotlyjs/plotly-basic.min.js' %}"></script>
+
+<h1 class="mb-4">{% translate "Device Life Cycle Database" %}</h1>
+
+<div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+  {% for tile in tiles %}
+    {% include "dashboard/includes/_tile.html" %}
+  {% endfor %}
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-lg-6">
+    <div class="card mb-4">
+      <div class="card-header">{% translate "Devices by location" %}</div>
+      <div class="card-body">{{ record_fraction_html|safe }}</div>
+    </div>
+    <div class="card">
+      <div class="card-header">{% translate "Device history" %}</div>
+      <div class="card-body">{{ record_timeline_html|safe }}</div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-header">{% translate "Devices by type" %}</div>
+      <div class="card-body">{{ device_type_html|safe }}</div>
+    </div>
+  </div>
+</div>
+
+{% endblock body %}

@@ -73,6 +73,7 @@ LOCAL_APPS = [
     "dlcdb.smallstuff",
     "dlcdb.api",
     "dlcdb.theme",
+    "dlcdb.dashboard",
 ]
 DEV_APPS = [
     "debug_toolbar",

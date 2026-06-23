@@ -11,7 +11,7 @@ from django.utils.text import slugify
 
 from ..utils.helpers import get_has_note_badge, get_icon_for_class
 from ..models import Inventory
-from .. import stats
+from dlcdb.dashboard import stats
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

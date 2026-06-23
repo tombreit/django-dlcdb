@@ -2,7 +2,7 @@
 
 <nav class="navbar-main navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
   <div class="container-fluid">
-    <a class="navbar-brand ms-2" href="{{ navigation.home_url }}">
+    <a class="navbar-brand ms-2" href="{% url 'dashboard:index' %}">
         <img 
           src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
           alt="{{ branding.organization_abbr }}"

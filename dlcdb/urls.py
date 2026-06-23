@@ -21,6 +21,7 @@ admin.site.logout_template = "accounts/logout.html"
 
 urlpatterns = [
     path("core/", include("dlcdb.core.urls")),
+    path("dashboard/", include("dlcdb.dashboard.urls")),
     path("inventory/", include("dlcdb.inventory.urls")),
     path("licenses/", include("dlcdb.licenses.urls")),
     path("lending/", include("dlcdb.lending.urls")),
@@ -32,7 +33,7 @@ urlpatterns = [
     path("admin/logout/", RedirectView.as_view(url=reverse_lazy("logout")), name="logout"),
     path("accounts/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
-    path("", RedirectView.as_view(url=reverse_lazy("core:core_dashboard")), name="dashboard"),
+    path("", RedirectView.as_view(url=reverse_lazy("dashboard:index")), name="dashboard"),
 ]
 
 if settings.DEBUG:
