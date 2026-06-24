@@ -84,6 +84,12 @@
         chevron.replaceWith(changeBtn);
       }
 
+      // Reveal any detail affordance (e.g. an "open in admin" link) that the
+      // option carries hidden so it only shows once the item is selected.
+      selectedCard.querySelectorAll(".js-picker-detail").forEach(function (el) {
+        el.classList.remove("d-none");
+      });
+
       selectedSlot.replaceChildren(selectedCard);
 
       // Collapse the search UI.

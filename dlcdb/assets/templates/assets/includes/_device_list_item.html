@@ -71,4 +71,19 @@ Expects: device (core.Device); selectable (bool); locked (bool).
       </button>
     {% endif %}
   </div>
+
+  {% comment %}
+    Link to the authoritative admin device view. Carried (hidden) inside the
+     option so it rides along when picker.js clones the option into the selected
+     slot, where the script reveals it; rendered visible for the server-side
+     selected card (selectable=False).
+  {% endcomment %}
+  {% if perms.core.change_device %}
+    <div class="js-picker-detail border-top px-3 py-1{% if selectable %} d-none{% endif %}">
+      <a href="{% url 'admin:core_device_change' device.pk %}" target="_blank" rel="noopener"
+         class="small link-secondary text-decoration-none">
+        <i class="bi bi-box-arrow-up-right"></i> {% translate "Open device in admin" %}
+      </a>
+    </div>
+  {% endif %}
 </div>
