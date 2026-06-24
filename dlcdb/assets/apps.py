@@ -14,7 +14,7 @@ class AssetsConfig(AppConfig):
     nav_entries = [
         {
             "slot": "nav_main",
-            "order": 30,
+            "order": 10,
             "label": _("Move device"),
             "icon": "bi bi-arrows-move",
             "url": "assets:relocate",
