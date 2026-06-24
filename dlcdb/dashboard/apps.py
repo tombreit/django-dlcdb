@@ -15,7 +15,7 @@ class DashboardConfig(AppConfig):
     #         "slot": "nav_main",
     #         "order": 0,
     #         "label": _("Dashboard"),
-    #         "icon": "fa-solid fa-gauge-high",
+    #         "icon": "bi bi-speedometer2",
     #         "url": "dashboard:index",
     #         # "true" disables permission checking, so the dashboard is visible
     #         # to any authenticated user (see core.context_processors.nav).

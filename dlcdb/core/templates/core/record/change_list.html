@@ -24,8 +24,8 @@ SPDX-License-Identifier: EUPL-1.2
 {% block result_list %}
     {% if device_obj %}
         <a class="btn btn-primary mb-4" role="button" href="{% url 'admin:core_device_change' device_obj.id %}">
-            <i class="fa fa-angle-left"></i> 
-            <i class="fa-solid fa-barcode"></i> 
+            <i class="bi bi-chevron-left"></i>
+            <i class="bi bi-upc"></i>
             Device {{ device_obj.edv_id }} / {{ device_obj.manufacturer }} / {{ device_obj.series }}
         </a>
     {% endif %}

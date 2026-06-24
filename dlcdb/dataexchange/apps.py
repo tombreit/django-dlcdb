@@ -32,7 +32,7 @@ class DataexchangeConfig(AppConfig):
             "slot": "nav_settings",
             "order": 40,
             "label": _("UDB sync configuration"),
-            "icon": "fa-solid fa-rotate",
+            "icon": "bi bi-arrow-clockwise",
             "url": "admin:dataexchange_udbsyncconfiguration_changelist",
             "required_permission": "view_udbsyncconfiguration",
         },

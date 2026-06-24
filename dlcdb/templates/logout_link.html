@@ -28,7 +28,7 @@ SPDX-License-Identifier: EUPL-1.2
 <form class="dropdown-item logout-form-link" method="post" action="{% url 'logout' %}">
     {% csrf_token %}
     <button type="submit">
-      <i class="fa fa-sign-out"></i>
+      <i class="bi bi-box-arrow-right"></i>
       Logout {{ request.user.username }}
     </button>
 </form>

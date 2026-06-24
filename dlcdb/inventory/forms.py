@@ -75,7 +75,7 @@ class DeviceSearchForm(forms.Form):
 #             FieldWithButtons(
 #                 Field('q', autofocus="on"),
 #                 StrictButton(
-#                     '<i class="fas fa-search"></i>', type="submit", css_class="btn-sm btn btn-outline-primary"
+#                     '<i class="bi bi-search"></i>', type="submit", css_class="btn-sm btn btn-outline-primary"
 #                 ),
 #             ),
 #         )

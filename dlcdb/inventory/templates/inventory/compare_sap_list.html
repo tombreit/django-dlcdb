@@ -10,7 +10,7 @@
 
             <div class="bt">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-angle-right"></i> Abgleich starten
+                    <i class="bi bi-chevron-right"></i> Abgleich starten
                 </button>
             </div>
         </form>
@@ -25,7 +25,7 @@
                 {% if result.get_url %}
                     <tr>
                         <td>
-                            <a href="{{ result.get_url }}"><i class="fa fa-file-o"></i> {{ result.file_name }}</a>
+                            <a href="{{ result.get_url }}"><i class="bi bi-file-earmark"></i> {{ result.file_name }}</a>
                         </td>
                         <td>
                             {{ result.created_at }} (vor {{ result.created_at|timesince }})

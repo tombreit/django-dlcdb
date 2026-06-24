@@ -24,7 +24,7 @@ class SapListAdmin(admin.ModelAdmin):
     @admin.display(description="Abgleich")
     def get_compare_button_display(self, obj):
         return Template(
-            '<div class="bt"><a class="btn btn-primary" href="{{url}}"><i class="fa fa-angle-right"></i> Abgleichen</a></div>'
+            '<div class="bt"><a class="btn btn-primary" href="{{url}}"><i class="bi bi-chevron-right"></i> Abgleichen</a></div>'
         ).render(Context(dict(url=reverse("inventory:compare-sap-list", kwargs=dict(pk=obj.id)))))
 
 

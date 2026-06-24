@@ -57,21 +57,21 @@ SPDX-License-Identifier: EUPL-1.2
               class="btn btn-primary text-nowrap"
               href="{{ branding.documentation_url }}"
           >
-              <i class="fa-solid fa-book"></i> Docs
+              <i class="bi bi-book"></i> Docs
           </a>
           {% else %}
           <a
               href="{% url 'admin:organization_branding_changelist' %}"
               class="btn btn-danger"
           >
-              <i class="fa-solid fa-book"></i> Documentation URL not set in Organization Branding.
+              <i class="bi bi-book"></i> Documentation URL not set in Organization Branding.
           </a>
           {% endif %}
 
           {% if nav_items_settings %}
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}">
-              <i class="fa-solid fa-gear" aria-hidden="true"></i>
+              <i class="bi bi-gear" aria-hidden="true"></i>
             </button>
             <div class="dropdown-menu dropdown-menu-end">
               {% for nav_item in nav_items_settings %}
@@ -88,12 +88,12 @@ SPDX-License-Identifier: EUPL-1.2
 
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="fa fa-user" aria-hidden="true"></i>
+              <i class="bi bi-person" aria-hidden="true"></i>
               {{ request.user.username }}
             </button>
             <div class="dropdown-menu dropdown-menu-end">
               <a class="dropdown-item" href="{% url 'admin:app_list' 'reporting' %}">
-                  <i class="fa fa-bell" aria-hidden="true"></i>
+                  <i class="bi bi-bell" aria-hidden="true"></i>
                   Reporting
               </a>
               <div class="dropdown-divider"></div>

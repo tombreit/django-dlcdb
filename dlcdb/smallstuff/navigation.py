@@ -13,7 +13,7 @@ navigation = {
         {
             "label": "Docs",
             "url": "/docs/guides/kleinkram.html",
-            "icon_class": "bi bi-life-preserver",
+            "icon_class": "bi bi-book",
         },
     ],
 }

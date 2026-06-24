@@ -24,7 +24,9 @@ $font-size-base:  0.75rem;
 
 @import "tom-select/dist/css/tom-select.bootstrap5.min";
 
-@import "_fontawesome";
+// https://icons.getbootstrap.com/
+$bootstrap-icons-font-dir: "./fonts";
+@import "bootstrap-icons/font/bootstrap-icons.scss";
 
 
 html {

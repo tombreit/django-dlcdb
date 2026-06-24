@@ -9,7 +9,7 @@
                 class="page-link"
                 hx-get="?page=1&{{ parameters }}"
             >
-                <i class="fa-solid fa-angles-left"></i>
+                <i class="bi bi-chevron-double-left"></i>
             </span>
         </li>
         <li class="page-item">
@@ -19,7 +19,7 @@
                 class="page-link" 
                 hx-get="?page={{ page_obj.previous_page_number }}&{{ parameters }}"
             >
-                <i class="fa-solid fa-angle-left"></i>
+                <i class="bi bi-chevron-left"></i>
             </span>
         </li>
     {% else %}
@@ -28,7 +28,7 @@
                 title="Next page"
                 class="page-link"
             >
-                <i class="fa-solid fa-angles-left"></i>
+                <i class="bi bi-chevron-double-left"></i>
             </span>
         </li>
         <li class="page-item disabled">
@@ -36,7 +36,7 @@
                 title="First page"
                 class="page-link"
             >
-                <i class="fa-solid fa-angle-left"></i>
+                <i class="bi bi-chevron-left"></i>
             </span>
         </li>
     {% endif %}
@@ -55,7 +55,7 @@
                 class="page-link"
                 hx-get="?page={{ page_obj.next_page_number }}&{{ parameters }}"
             >
-                <i class="fa-solid fa-angle-right"></i>
+                <i class="bi bi-chevron-right"></i>
             </span>
         </li>
         <li class="page-item">
@@ -65,7 +65,7 @@
                 class="page-link"
                 hx-get="?page={{ page_obj.paginator.num_pages }}&{{ parameters }}"
             >
-                <i class="fa-solid fa-angles-right"></i>
+                <i class="bi bi-chevron-double-right"></i>
             </span>
         </li>
     {% else %}
@@ -74,7 +74,7 @@
                 title="Next page"
                 class="page-link"
             >
-                <i class="fa-solid fa-angle-right"></i>
+                <i class="bi bi-chevron-right"></i>
             </span>
         </li>
         <li class="page-item disabled">
@@ -83,7 +83,7 @@
                 role="button"
                 class="page-link"
             >
-                <i class="fa-solid fa-angles-right"></i>
+                <i class="bi bi-chevron-double-right"></i>
             </span>
         </li>
     {% endif %}

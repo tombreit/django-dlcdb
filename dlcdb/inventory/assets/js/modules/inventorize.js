@@ -60,7 +60,7 @@ function btnClick() {
   if (!inventorizeStateBtn.classList.contains('state-trigger')) return
   // event.preventDefault()
 
-  let inventorizeStateBtnIconElem = inventorizeStateBtn.querySelector('.fas')
+  let inventorizeStateBtnIconElem = inventorizeStateBtn.querySelector('.bi')
   let uuid = inventorizeStateBtn.id.replace(STATE_BUTTON_PREFIX, '')
   let row = inventorizeStateBtn.closest('.inventory_row')
   let deviceAlreadyInventorized = inventorizeStateBtn.dataset.alreadyInventorized
@@ -69,19 +69,19 @@ function btnClick() {
   if (row.classList.contains(DEVICE_STATE_ADDED)) {
     row.classList.remove(DEVICE_STATE_ADDED, 'table-info')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'bi bi-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND_UNEXPECTED })
   }
   else if (row.classList.contains(DEVICE_STATE_UNKNOWN)) {
     row.classList.remove(DEVICE_STATE_UNKNOWN, 'table-default')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'bi bi-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
   }
   else if (row.classList.contains(DEVICE_STATE_FOUND)) {
     row.classList.remove(DEVICE_STATE_FOUND, 'table-success')
     row.classList.add(DEVICE_STATE_NOTFOUND, 'table-danger')
-    inventorizeStateBtnIconElem.className = 'fas fa-times-circle'
+    inventorizeStateBtnIconElem.className = 'bi bi-x-circle'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_NOTFOUND })
   }
   else if (row.classList.contains(DEVICE_STATE_NOTFOUND)) {
@@ -89,13 +89,13 @@ function btnClick() {
       if (confirm('This device is already inventorized. Changing the state to "unknown" will remove the current inventorized status!')) {
         row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
         row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
-        inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
+        inventorizeStateBtnIconElem.className = 'bi bi-question-circle'
         manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
       }
       else {
         row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
         row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-        inventorizeStateBtnIconElem.className = 'fas fa-check-square'
+        inventorizeStateBtnIconElem.className = 'bi bi-check-square'
         // We are ignoring this state change
         // manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
       }
@@ -103,7 +103,7 @@ function btnClick() {
     else {
       row.classList.remove(DEVICE_STATE_NOTFOUND, 'table-danger')
       row.classList.add(DEVICE_STATE_UNKNOWN, 'table-default')
-      inventorizeStateBtnIconElem.className = 'fas fa-question-circle'
+      inventorizeStateBtnIconElem.className = 'bi bi-question-circle'
       manageUuid({ uuid: uuid, state: DEVICE_STATE_UNKNOWN })
     }
   }
@@ -124,7 +124,7 @@ function deviceRowTemplate(device) {
                     class="state-trigger btn btn-outline-secondary" 
                     id="${STATE_BUTTON_PREFIX}${device.uuid}"
                 >
-                    <i class="fas fa-question-circle {# fa-plus-square #}"></i>
+                    <i class="bi bi-question-circle"></i>
                 </button>
             </td>
             <td>
@@ -235,11 +235,11 @@ export async function handleDeviceScan(uuid) {
   if (matchedRow) {
     console.info('matchedRow: ', matchedRow)
     const row = matchedRow
-    const inventorizeStateBtnIconElem = row.querySelector('.fas')
+    const inventorizeStateBtnIconElem = row.querySelector('.bi')
 
     row.classList.remove(DEVICE_STATE_UNKNOWN, 'table-default')
     row.classList.add(DEVICE_STATE_FOUND, 'table-success')
-    inventorizeStateBtnIconElem.className = 'fas fa-check-square'
+    inventorizeStateBtnIconElem.className = 'bi bi-check-square'
     manageUuid({ uuid: uuid, state: DEVICE_STATE_FOUND })
   }
   else {

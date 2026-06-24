@@ -416,43 +416,43 @@ DEVICE_HIDE_FIELDS = env.list("DEVICE_HIDE_FIELDS", default=[])
 # TODO: Move icon and color to class var for base model?
 THEME = {
     "core.record": {
-        "ICON": "fa-solid fa-layer-group",
+        "ICON": "bi bi-stack",
         "COLOR": "",
     },
     "core.device": {
-        "ICON": "fa-solid fa-barcode",
+        "ICON": "bi bi-upc",
         "COLOR": "",
     },
     "core.devicetype": {
-        "ICON": "fa-solid fa-palette",
+        "ICON": "bi bi-palette",
         "COLOR": "",
     },
     "core.room": {
-        "ICON": "fa-solid fa-door-open",
+        "ICON": "bi bi-door-open",
         "COLOR": "",
     },
     "core.lentrecord": {
-        "ICON": "fa-solid fa-arrow-right-arrow-left",
+        "ICON": "bi bi-arrow-left-right",
         "COLOR": "",
     },
     "core.lostrecord": {
-        "ICON": "fa-solid fa-layer-group",
+        "ICON": "bi bi-stack",
         "COLOR": "",
     },
     "core.licencerecord": {
-        "ICON": "fa-solid fa-scale-balanced",
+        "ICON": "bi bi-bank2",
         "COLOR": "",
     },
     "core.inventory": {
-        "ICON": "fa-solid fa-glasses",
+        "ICON": "bi bi-eyeglasses",
         "COLOR": "",
     },
     "core.manufacturer": {
-        "ICON": "fa-solid fa-industry",
+        "ICON": "bi bi-building",
         "COLOR": "",
     },
     "core.supplier": {
-        "ICON": "fa-solid fa-truck",
+        "ICON": "bi bi-truck",
         "COLOR": "",
     },
     "smallstuff.assignedthing": {

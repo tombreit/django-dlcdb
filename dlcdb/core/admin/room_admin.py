@@ -106,7 +106,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     def website_link(self, obj):
         if obj.website:
             return mark_safe(
-                '<a href="{url}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>'.format(
+                '<a href="{url}"><i class="bi bi-box-arrow-up-right"></i></a>'.format(
                     url=obj.website,
                 )
             )

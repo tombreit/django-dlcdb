@@ -76,7 +76,7 @@
     <div class="input-group mb-3">
         {{ device_add_form.device }}
         <button class="btn btn btn-outline-primary" type="button" id="add-device-button">
-            <i class="fas fa-plus"></i>
+            <i class="bi bi-plus-lg"></i>
         </button>
     </div>
 </form>
@@ -85,7 +85,7 @@
     <div class="input-group mb-3">
         <input id="search-table-input" type="search" class="form-control" placeholder="Search device table" autocomplete="off">
         <button class="btn btn btn-outline-primary" type="button" id="search-table-button">
-            <i class="fas fa-search"></i>
+            <i class="bi bi-search"></i>
         </button>
     </div>
 </div>
@@ -128,9 +128,9 @@
                     >
                         <i class="
                             {% if device.already_inventorized %}
-                                fas fa-check-square
+                                bi bi-check-square
                             {% else %}
-                                fas fa-question-circle
+                                bi bi-question-circle
                             {% endif %}
                         "></i>
                     </button>

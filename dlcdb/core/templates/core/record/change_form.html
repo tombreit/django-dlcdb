@@ -20,10 +20,10 @@ SPDX-License-Identifier: EUPL-1.2
     {% if original %}
         <div class="btn-group" role="group">
             <a class="btn btn-info" role="button" href="{% url 'admin:core_device_change' original.device.id %}">
-                <i class="fa fa-angle-left"></i> Zur Device-Ansicht
+                <i class="bi bi-chevron-left"></i> Zur Device-Ansicht
             </a>
             <a class="btn btn-info" role="button" href="{% url 'admin:core_record_changelist' %}">
-                <i class="fa fa-angle-left"></i> Zur Record-Übersicht
+                <i class="bi bi-chevron-left"></i> Zur Record-Übersicht
             </a>
         </div>
     {% endif %}

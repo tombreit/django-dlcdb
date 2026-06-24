@@ -18,13 +18,13 @@ SPDX-License-Identifier: EUPL-1.2
             target="_blank"
             href="{% url 'core:print_lent_sheet' original.pk %}"
         >
-            <i class="fa fa-print"></i> Ausleihzettel drucken
+            <i class="bi bi-printer"></i> Ausleihzettel drucken
         </a>
         {% else %}
         <span 
             class="btn btn-outline-secondary btn-block" 
         >
-            <i class="fa fa-print"></i> Ausleihzettel kann erst nach dem Speichern gedruckt werden
+            <i class="bi bi-printer"></i> Ausleihzettel kann erst nach dem Speichern gedruckt werden
         </span>
         {% endif %}
     </div>

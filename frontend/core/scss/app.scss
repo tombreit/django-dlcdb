@@ -5,8 +5,8 @@
 @import "bootstrap/scss/bootstrap";
 @import "./_bootstrap_adjustments";
 
+$bootstrap-icons-font-dir: "../fonts";
 @import "bootstrap-icons/font/bootstrap-icons.scss";
-@import "../../common/_fontawesome";
 
 @import "./django_admin_overrides";
 

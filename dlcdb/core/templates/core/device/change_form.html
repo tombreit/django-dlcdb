@@ -39,7 +39,7 @@ SPDX-License-Identifier: EUPL-1.2
                 style="color: black; background-color: var(--message-warning-bg)"
             {% endif %}
         >
-            <i class="fa-solid fa-glasses"></i> 
+            <i class="bi bi-eyeglasses"></i>
             {% if inventory_status.already_inventorized %}
                 {% translate "Already inventorized" %}
             {% else %}
@@ -51,7 +51,7 @@ SPDX-License-Identifier: EUPL-1.2
 
     <li>
         <a class="small" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
-            <i class="fa-solid fa-layer-group"></i> 
+            <i class="bi bi-stack"></i>
             {% translate "Show all records" %} {{ has_record_notes_badge|default:"" }}
         </a>
     </li>

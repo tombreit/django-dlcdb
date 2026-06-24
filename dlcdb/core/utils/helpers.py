@@ -103,20 +103,20 @@ def get_has_note_badge(*, obj_type, has_note):
     #     raise NotImplementedError
 
     level = "light"
-    note_icon = "fa-regular fa-comment"
+    note_icon = "bi bi-chat"
     text = "No notes"
     type_icon = None
 
     if has_note:
-        note_icon = "fa-solid fa-comment"
+        note_icon = "bi bi-chat-fill"
         level = "warning"
         text = "Notes exists"
         type_icon = get_icon_for_class(obj_type)
 
     return format_html(
         (
-            '<span title="{text}" class="ms-2 p-1 badge text-bg-{level}"><i class="me-2 fa-lg {type_icon}"></i><i'
-            ' class="fa-lg {note_icon}"></i></span>'
+            '<span title="{text}" class="ms-2 p-1 badge text-bg-{level}"><i class="me-2 {type_icon}"'
+            ' style="font-size:1.33em"></i><i class="{note_icon}" style="font-size:1.33em"></i></span>'
         ),
         type_icon=type_icon,
         note_icon=note_icon,

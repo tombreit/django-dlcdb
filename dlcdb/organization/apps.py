@@ -15,7 +15,7 @@ class OrganizationConfig(AppConfig):
             "slot": "nav_settings",
             "order": 10,
             "label": _("Branding"),
-            "icon": "fa-solid fa-palette",
+            "icon": "bi bi-palette",
             "url": "admin:organization_branding_changelist",
             "required_permission": "view_branding",
         },
