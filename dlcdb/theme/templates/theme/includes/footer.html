@@ -7,33 +7,27 @@ SPDX-License-Identifier: EUPL-1.2
 <footer class="border-top mt-4 pt-3 pb-4 text-body-secondary small">
 
   <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
-    {% if project_repository_url %}
-      <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ project_repository_url }}" target="_blank" rel="noopener">
-        <i class="bi bi-git"></i> {% translate "Repository" %}
-      </a>
-    {% endif %}
     <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="/docs/">
       <i class="bi bi-book"></i> {% translate "Documentation" %}
     </a>
-    {% if project_issues_url %}
-      <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ project_issues_url }}" target="_blank" rel="noopener">
-        <i class="bi bi-bug"></i> {% translate "Report an issue" %}
-      </a>
-    {% endif %}
     <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{% url 'admin:index' %}">
       <i class="bi bi-gear"></i> {% translate "Backend" %}
     </a>
   </div>
 
   <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 text-center">
-    <span>
-      {% if branding.organization_url %}
-        <a class="link-secondary text-decoration-none" href="{{ branding.organization_url }}" target="_blank" rel="noopener">{{ branding.organization_abbr|default:branding.organization_name_en }}</a>
-      {% else %}
-        {{ branding.organization_abbr|default:branding.organization_name_en }}
+    {% if project_repository_url %}
+      <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ project_repository_url }}" target="_blank" rel="noopener">
+        <i class="bi bi-git"></i> {% translate "Repository" %}
+      </a>
+      <span class="text-body-tertiary">&middot;</span>
       {% endif %}
-    </span>
-    <span class="text-body-tertiary">&middot;</span>
+    {% if project_issues_url %}
+      <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ project_issues_url }}" target="_blank" rel="noopener">
+        <i class="bi bi-bug"></i> {% translate "Report an issue" %}
+      </a>
+      <span class="text-body-tertiary">&middot;</span>
+    {% endif %}
     <span>
       DLCDB{% if project_version %} <span class="font-monospace">v{{ project_version }}</span>{% endif %}
     </span>
