@@ -6,6 +6,7 @@ from django.contrib import admin
 
 from ..models import DeviceType
 from ..utils.helpers import get_has_note_badge
+from ..widgets import IconPickerWidget
 from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, DeviceCountMixin
 from .filters.has_note_filter import HasNoteFilter
 
@@ -15,6 +16,7 @@ class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdm
     list_display = (
         "name",
         "prefix",
+        "icon",
         "has_note",
     ) + CustomBaseModelAdmin.list_display
 
@@ -32,6 +34,7 @@ class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdm
                 "fields": (
                     "name",
                     "prefix",
+                    "icon",
                     "note",
                 )
             },
@@ -53,6 +56,11 @@ class DeviceTypeAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdm
             },
         ),
     )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "icon":
+            kwargs["widget"] = IconPickerWidget
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.display(description="Has Note?")
     def has_note(self, obj):

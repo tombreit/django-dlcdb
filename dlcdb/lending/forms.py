@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -16,7 +16,7 @@ class LentingForm(forms.ModelForm):
     lending detail view. Replaces ``LentRecordAdminForm``.
 
     The ``person`` field is a hidden input driven by the HTMX live-search
-    person picker (see ``lending_picker.js``); ``record_type`` carries the
+    person picker (see ``theme/js/picker.js``); ``record_type`` carries the
     device's current state so ``clean()`` can block lending a "lost" device,
     mirroring ``LentRecordAdminForm``.
     """

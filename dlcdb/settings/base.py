@@ -71,6 +71,7 @@ LOCAL_APPS = [
     "dlcdb.notifications",
     "dlcdb.lending",
     "dlcdb.smallstuff",
+    "dlcdb.assets",
     "dlcdb.api",
     "dlcdb.theme",
     "dlcdb.dashboard",

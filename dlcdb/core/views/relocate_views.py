@@ -9,7 +9,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from ..forms.adminactions_forms import RelocateActionForm
-from ..models import Device, InRoomRecord, Record
+from ..models import Device
+from ..utils.relocate import relocate_device
 
 
 @method_decorator(login_required, name="dispatch")
@@ -70,34 +71,9 @@ class DevicesRelocateView(FormView):
                 messages.add_message(self.request, messages.INFO, update_msg)
 
             if new_room:
-                if hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.LENT:
-                    device.active_record.room = new_room
-                    device.active_record.save()
-
-                    update_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - just updating the room for the current LENT record."
-                    messages.add_message(self.request, messages.INFO, update_msg)
-
-                elif (
-                    hasattr(device.active_record, "record_type") and device.active_record.record_type == Record.REMOVED
-                ):
-                    error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> - this device should not be here anymore. Not relocating this device!"
-                    messages.add_message(self.request, messages.WARNING, error_msg)
-                    continue
-
-                elif hasattr(device.active_record, "record_type") and device.active_record.room == new_room:
-                    error_msg = f"Device <{device}> has record type <{device.active_record.record_type}> and is already in room <{new_room}>. No need to relocate this device!"
-                    messages.add_message(self.request, messages.WARNING, error_msg)
-                    continue
-
-                else:
-                    record_obj, created = InRoomRecord.objects.get_or_create(
-                        device=device,
-                        room=new_room,
-                        user=user,
-                        username=user.username,
-                    )
-
-                    update_msg = f"Device <{device}> has record type <{device.active_record.record_type}>. Creating a new INROOM record for room <{new_room}>."
-                    messages.add_message(self.request, messages.INFO, update_msg)
+                # Delegate the per-device room move to the shared state machine
+                # so admin and frontend cannot diverge.
+                result = relocate_device(device, new_room, user)
+                messages.add_message(self.request, result.level, result.message)
 
         return

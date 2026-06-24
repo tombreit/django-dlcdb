@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: EUPL-1.2
 

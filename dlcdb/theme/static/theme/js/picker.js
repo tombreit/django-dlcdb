@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2026 Thomas Breitner
+// SPDX-FileCopyrightText: Thomas Breitner
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-// Reusable live-search picker for the lending app (person and device pickers).
+// Reusable live-search picker shared across frontend apps (person, device,
+// room, … pickers).
 //
 // Each `[data-picker]` element drives its own hidden form field. The live
 // search results (`#<id>-results`) are rendered by HTMX; selecting a result

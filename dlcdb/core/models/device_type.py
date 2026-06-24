@@ -9,6 +9,8 @@ from .abstracts import SoftDeleteAuditBaseModel
 
 
 class DeviceType(SoftDeleteAuditBaseModel):
+    DEFAULT_ICON = "bi-pc-display"
+
     name = models.CharField(
         max_length=255,
         blank=False,
@@ -16,6 +18,13 @@ class DeviceType(SoftDeleteAuditBaseModel):
     prefix = models.CharField(
         max_length=255,
         blank=True,
+    )
+    icon = models.CharField(
+        max_length=64,
+        blank=True,
+        default="",
+        verbose_name=_("Icon"),
+        help_text=_("Bootstrap Icons class, e.g. “bi-laptop”. See https://icons.getbootstrap.com/."),
     )
     note = models.TextField(
         blank=True,
@@ -31,3 +40,7 @@ class DeviceType(SoftDeleteAuditBaseModel):
 
     def __str__(self):
         return self.name
+
+    @property
+    def icon_class(self):
+        return self.icon or self.DEFAULT_ICON

@@ -1,0 +1,104 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ *
+ * Layout for the DeviceType icon picker. Colours use Django admin CSS
+ * variables so it follows the admin light/dark theme; the glyph font-face is
+ * declared inline in the widget template (it needs a {% static %} URL).
+ */
+
+.bi-iconpicker {
+  max-width: 34rem;
+}
+
+.bi-iconpicker-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bi-iconpicker-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  background: var(--body-bg, #fff);
+  color: var(--body-fg, #333);
+}
+
+.bi-iconpicker-preview .bi-iconpicker-glyph {
+  font-size: 1.25rem;
+}
+
+.bi-iconpicker.is-unknown .bi-iconpicker-preview {
+  border-color: var(--error-fg, #e6a23c);
+  color: var(--error-fg, #e6a23c);
+}
+
+/* Rendered in normal flow (not an absolute overlay): when open it pushes the
+   following form rows down, so it can never be painted under them in the
+   admin's stacking context. */
+.bi-iconpicker-popup {
+  margin-top: 0.25rem;
+  max-height: 24rem;
+  overflow: auto;
+  padding: 0.5rem;
+  background: var(--body-bg, #fff);
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+}
+
+.bi-iconpicker-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.bi-iconpicker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.25rem;
+}
+
+.bi-iconpicker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--body-fg, #333);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.bi-iconpicker-item:hover {
+  border-color: var(--link-fg, #79aec8);
+  background: var(--darkened-bg, #f5f9fc);
+}
+
+.bi-iconpicker-item .bi-iconpicker-glyph {
+  font-size: 1.4rem;
+}
+
+.bi-iconpicker-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.65rem;
+  color: var(--body-quiet-color, #666);
+}
+
+.bi-iconpicker-empty {
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--body-quiet-color, #888);
+}

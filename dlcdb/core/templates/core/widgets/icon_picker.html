@@ -1,0 +1,37 @@
+{% load i18n static %}
+<div class="bi-iconpicker" data-iconpicker>
+  <style>
+    /* Scoped font-face so the picker can render glyphs without pulling all of
+       Bootstrap into the admin. Reuses the webfont the theme already ships. */
+    @font-face {
+      font-family: "bootstrap-icons-picker";
+      font-display: block;
+      src: url("{% static 'theme/dist/fonts/bootstrap-icons.woff2' %}") format("woff2");
+    }
+    .bi-iconpicker .bi-iconpicker-glyph {
+      font-family: "bootstrap-icons-picker" !important;
+      font-style: normal;
+      font-weight: normal;
+      line-height: 1;
+    }
+  </style>
+
+  <div class="bi-iconpicker-field">
+    <span class="bi-iconpicker-preview" data-iconpicker-preview aria-hidden="true">
+      <span class="bi-iconpicker-glyph">{{ widget.current_char }}</span>
+    </span>
+    {% include "django/forms/widgets/text.html" %}
+    <button type="button" class="button bi-iconpicker-browse" data-iconpicker-toggle>
+      {% translate "Browse…" %}
+    </button>
+  </div>
+
+  <div class="bi-iconpicker-popup" data-iconpicker-popup hidden>
+    <input type="search" class="bi-iconpicker-search" autocomplete="off"
+           placeholder="{% translate 'Search icons…' %}" data-iconpicker-search>
+    <div class="bi-iconpicker-grid" data-iconpicker-grid></div>
+    <p class="bi-iconpicker-empty" data-iconpicker-empty hidden>{% translate "No matching icon." %}</p>
+  </div>
+
+  <script type="application/json" data-iconpicker-data>{{ widget.icons_json|safe }}</script>
+</div>

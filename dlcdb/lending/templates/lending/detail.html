@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2026 Thomas Breitner
+SPDX-FileCopyrightText: Thomas Breitner
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -81,7 +81,7 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="card-body">
 
       {% url 'lending:person_search' as person_search_url %}
-      {% include "lending/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_return_flow fill_date_target=form.lent_desired_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
+      {% include "theme/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_return_flow fill_date_target=form.lent_desired_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
 
       <div class="row g-3">
         <div class="col-md-6">
@@ -204,5 +204,5 @@ SPDX-License-Identifier: EUPL-1.2
 {% endblock body %}
 
 {% block extra_js %}
-  <script src="{% static 'lending/lending_picker.js' %}"></script>
+  <script src="{% static 'theme/js/picker.js' %}"></script>
 {% endblock extra_js %}

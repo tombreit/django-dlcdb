@@ -56,6 +56,15 @@ RECORD_TYPE_LIST = [
 ]
 RECORD_TYPE_KEYS = [choice[0] for choice in RECORD_TYPE_LIST]
 
+# Bootstrap contextual colour per record type, used for state badges.
+RECORD_TYPE_COLORS = {
+    "ORDERED": "info",
+    "INROOM": "success",
+    "LENT": "warning",
+    "LOST": "danger",
+    "REMOVED": "secondary",
+}
+
 
 class Record(AuditBaseModel):
     # New record types/proxys must be added to:
@@ -200,6 +209,11 @@ class Record(AuditBaseModel):
 
     def __str__(self):
         return str(self.pk)
+
+    @property
+    def record_type_color(self):
+        """Bootstrap contextual colour for this record's state badge."""
+        return RECORD_TYPE_COLORS.get(self.record_type, "secondary")
 
     def clean(self):
         if not self._meta.proxy:

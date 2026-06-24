@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
+
+
+class AssetsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "dlcdb.assets"
+    verbose_name = _("Assets")
+
+    nav_entries = [
+        {
+            "slot": "nav_main",
+            "order": 30,
+            "label": _("Move device"),
+            "icon": "bi bi-arrows-move",
+            "url": "assets:relocate",
+            "required_permission": "core.add_inroomrecord",
+        },
+    ]

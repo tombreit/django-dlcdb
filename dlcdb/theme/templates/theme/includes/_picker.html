@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2026 Thomas Breitner
+SPDX-FileCopyrightText: Thomas Breitner
 
 SPDX-License-Identifier: EUPL-1.2
 -->
@@ -7,7 +7,9 @@ SPDX-License-Identifier: EUPL-1.2
 {% load i18n %}
 
 {% comment %}
-Reusable live-search picker (person or device), driven by lending_picker.js.
+Reusable live-search picker (person, device, room, …), driven by
+theme/js/picker.js. Shared across frontend apps; the caller supplies the
+search endpoint and the templates that render the options.
 
 Parameters (via {% include ... with %}):
   picker_id           unique slug; all element ids derive from it

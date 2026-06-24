@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: EUPL-1.2
 
@@ -17,7 +17,9 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from dlcdb.core.models import InRoomRecord, LentRecord, Person, Record, Room
+from dlcdb.core.models.record import RECORD_TYPE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.core.utils.tenants import tenant_scoped_queryset
 
 from .decorators import htmx_permission_required
 from .filters import (
@@ -34,18 +36,11 @@ from .models import LendingConfiguration, LendingProfile
 
 def _tenant_scoped(queryset, request):
     """
-    Scope a record queryset to the current tenant, mirroring
-    dlcdb.tenants.admin.TenantScopedAdmin: if a tenant is set on the request,
-    everyone (including superusers) is scoped to it; without a tenant only
-    superusers see all records, others see nothing. Records carry no tenant
-    field of their own, so we filter via the related device.
+    Scope a record queryset to the current tenant via the related device.
+    Records carry no tenant field of their own; the shared policy lives in
+    ``dlcdb.core.utils.tenants``.
     """
-    tenant = getattr(request, "tenant", None)
-    if tenant:
-        return queryset.filter(device__tenant=tenant)
-    if request.user.is_superuser:
-        return queryset
-    return queryset.none()
+    return tenant_scoped_queryset(queryset, request, tenant_field="device__tenant")
 
 
 def _annotate_lent_state(queryset):
@@ -70,9 +65,11 @@ def _annotate_lent_state(queryset):
         When(record_type=Record.LENT, then=Value(STATE_LENT)),
         When(record_type=Record.INROOM, then=Value(STATE_AVAILABLE)),
     ]
+    # Derive badge colours from the single record_type→colour map so the lending
+    # list and the asset card cannot disagree (see core.models.record).
     color_whens += [
-        When(record_type=Record.LENT, then=Value("warning")),
-        When(record_type=Record.INROOM, then=Value("success")),
+        When(record_type=Record.LENT, then=Value(RECORD_TYPE_COLORS[Record.LENT])),
+        When(record_type=Record.INROOM, then=Value(RECORD_TYPE_COLORS[Record.INROOM])),
     ]
     sort_whens += [
         When(record_type=Record.INROOM, then=Value(1)),

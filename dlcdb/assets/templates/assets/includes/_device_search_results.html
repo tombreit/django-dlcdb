@@ -1,0 +1,19 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% if devices %}
+  <div class="bg-body border rounded shadow-sm overflow-auto p-1" style="max-height: 22rem;">
+    {% for device in devices %}
+      {% include "assets/includes/_device_list_item.html" with device=device selectable=True %}
+    {% endfor %}
+  </div>
+{% elif query %}
+  <div class="bg-body border rounded shadow-sm p-3 text-muted small">
+    <i>{% translate "No matching device found." %}</i>
+  </div>
+{% endif %}
