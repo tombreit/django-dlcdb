@@ -12,8 +12,10 @@ SPDX-License-Identifier: EUPL-1.2
 
     <a class="navbar-brand" href="{% url 'dashboard:index' %}">
         <img 
-          src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
+          {# src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}" #}
+          src="{% static 'branding/dlcdb_logo_dark.svg' %}"
           alt="{{ branding.organization_abbr }}"
+          style="height: 30px;"
         >
     </a>
 

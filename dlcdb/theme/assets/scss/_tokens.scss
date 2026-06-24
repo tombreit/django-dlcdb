@@ -1,0 +1,19 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+/* Shared design tokens for the app shell.
+   Kept deliberately small; reused by the navbar, footer and future surfaces
+   so elevation, radius and motion stay consistent. */
+:root {
+  --app-elevation-1: 0 1px 2px rgba(0, 0, 0, .06), 0 2px 8px rgba(0, 0, 0, .06);
+  --app-elevation-2: 0 4px 16px rgba(0, 0, 0, .12);
+  --app-radius-lg: .75rem;
+  --app-transition: .15s ease;
+
+  /* App shell navbar */
+  --app-navbar-bg: #0f172a;       /* slate-900 */
+  --app-navbar-accent: #6366f1;   /* indigo-500 — active underline */
+}

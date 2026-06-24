@@ -15,7 +15,7 @@ class AssetsConfig(AppConfig):
         {
             "slot": "nav_main",
             "order": 10,
-            "label": _("Move device"),
+            "label": _("Move"),
             "icon": "bi bi-arrows-move",
             "url": "assets:relocate",
             "required_permission": "core.add_inroomrecord",

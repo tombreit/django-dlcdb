@@ -32,9 +32,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-    <div class="container">
-    
-        {% include 'theme/includes/navbar.html' %}
+    {% include 'theme/includes/navbar.html' %}
+
+    <div class="container pt-3">
 
         {% if messages %}
         <div class="messages my-1">

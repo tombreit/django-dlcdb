@@ -1,12 +1,13 @@
 {% load static i18n %}
 
-<nav class="navbar-main navbar navbar-expand-lg rounded my-1" style="background-color: var(--bs-primary);"  data-bs-theme="dark">
-  <div class="container-fluid">
-    <a class="navbar-brand ms-2" href="{% url 'dashboard:index' %}">
+<header class="navbar-main navbar navbar-expand-lg sticky-top" data-bs-theme="dark">
+  <nav class="container" aria-label="{% translate 'Main navigation' %}">
+    <a class="navbar-brand" href="{% url 'dashboard:index' %}">
         <img 
-          src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}"
+          {# src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'branding/dlcdb_logo_white.svg' %}{% endif %}" #}
+          src="{% static 'branding/dlcdb_logo_dark.svg' %}"
           alt="{{ branding.organization_abbr }}"
-          style="max-height: 30px;"
+          style="height: 30px;"
         >
         {# Current app identity hidden: it duplicates the highlighted "active" item in the main nav. Kept (not deleted) in case we want to restore the brand app label. #}
         {% comment %}
@@ -25,8 +26,7 @@
         <ul class="navbar-nav me-auto">
           {% for item in nav_items_main %}
             <li class="nav-item">
-              <a class="nav-link{% if item.active %} active fw-bold{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
-                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+              <a class="nav-link{% if item.active %} active{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
                 {{ item.label }}
               </a>
             </li>
@@ -54,6 +54,9 @@
         {% endif %}
 
           {% if nav_items_settings %}
+          <li class="nav-item d-none d-lg-flex align-items-stretch">
+            <span class="vr mx-2 my-2 opacity-25"></span>
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}">
               <i class="bi bi-gear"></i>
@@ -70,6 +73,9 @@
           {% endif %}
 
           {% if request.user.is_authenticated or navigation.userdropdown %}
+          <li class="nav-item d-none d-lg-flex align-items-stretch">
+            <span class="vr mx-2 my-2 opacity-25"></span>
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
               <i class="bi bi-person"></i>
@@ -113,5 +119,5 @@
 
         </ul>
     </div>
-  </div>
-</nav>
+  </nav>
+</header>

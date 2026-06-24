@@ -10,22 +10,27 @@ html {
 }
 
 .navbar-main {
-    background-color: var(--primary);
+    --bs-navbar-padding-y: .85rem; // roomier bar, closer to the Bootstrap docs masthead
+    background-color: var(--app-navbar-bg);
+    box-shadow: var(--app-elevation-1);
 
-    .nav-link {
-        color: white;
+    .navbar-nav .nav-link {
+        color: rgba(255, 255, 255, .75);
+        font-weight: 500;
         text-decoration: none;
+        border-bottom: 2px solid transparent; // reserve space → no jump when active
+        border-radius: 0;
+        transition: color var(--app-transition), border-color var(--app-transition);
+
+        &:hover,
+        &:focus-visible {
+            color: #fff;
+            border-bottom-color: rgba(255, 255, 255, .25);
+        }
+
+        &.active {
+            color: #fff;
+            border-bottom-color: var(--app-navbar-accent);
+        }
     }
-}
-
-#logout-form {
-    display: inline;
-}
-
-#logout-form button {
-    background: none;
-    border: 0;
-    cursor: pointer;
-    font-family: var(--font-family-primary);
-    color: white;
 }
