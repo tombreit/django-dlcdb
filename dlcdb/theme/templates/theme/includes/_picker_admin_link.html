@@ -1,0 +1,26 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+"Open device in admin" detail link for the device picker, shared across the
+frontend apps. Carried (hidden) inside an option so it rides along when
+theme/js/picker.js clones the option into the selected slot, where the script
+reveals it (.js-picker-detail). Rendered visible for the server-side selected
+card (selectable=False).
+
+Expects: device (core.Device); selectable (bool).
+{% endcomment %}
+
+{% if perms.core.change_device %}
+  <div class="js-picker-detail border-top px-3 py-1{% if selectable %} d-none{% endif %}">
+    <a href="{% url 'admin:core_device_change' device.pk %}" target="_blank" rel="noopener"
+       class="small link-secondary text-decoration-none">
+      <i class="bi bi-box-arrow-up-right"></i> {% translate "Open device in admin" %}
+    </a>
+  </div>
+{% endif %}
