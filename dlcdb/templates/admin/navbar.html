@@ -89,9 +89,9 @@ SPDX-License-Identifier: EUPL-1.2
           {% include 'tenants/navbar_current_tenant.html' %}
 
           <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user.email }}">
               <i class="bi bi-person" aria-hidden="true"></i>
-              {{ request.user.username }}
+              {{ request.user.email_localpart }}
             </button>
             <div class="dropdown-menu dropdown-menu-end">
               <a class="dropdown-item" href="{% url 'admin:app_list' 'reporting' %}">

@@ -77,9 +77,10 @@
             <span class="vr mx-2 my-2 opacity-25"></span>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user.email }}">
               <i class="bi bi-person"></i>
-              {{ request.user.username }}
+              {{ request.user.email_localpart }}
+              {% if request.user.is_superuser %}<span class="badge text-bg-danger ms-1" title="{% translate 'Superusers are not tenant aware' %}">{% translate 'Superuser' %}</span>{% elif request.tenant %}<span class="badge text-bg-secondary ms-1" title="{% translate 'Tenant' %}: {{ request.tenant }}">{{ request.tenant }}</span>{% endif %}
             </a>
             <div class="dropdown-menu dropdown-menu-end">
 

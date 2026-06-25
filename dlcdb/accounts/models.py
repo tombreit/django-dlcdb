@@ -84,6 +84,13 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
+    @property
+    def email_localpart(self):
+        """Return the part of the email address before the '@'."""
+        if not self.email:
+            return self.email
+        return self.email.split("@", 1)[0]
+
     def delete(self):
         self.is_active = False
         self.save()
