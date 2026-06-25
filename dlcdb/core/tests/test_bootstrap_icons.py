@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import DeviceType
-from dlcdb.core.utils.bootstrap_icons import get_bootstrap_icons
+from dlcdb.theme.bootstrap_icons import get_bootstrap_icons
 
 # Plain static storage so tests do not require a built staticfiles manifest
 # (mirrors dlcdb.lending.tests.test_views).
@@ -47,7 +47,7 @@ class DeviceTypeIconPickerAdminTests(TestCase):
         self.assertContains(response, "data-iconpicker-data")
         self.assertContains(response, "Browse")
         # The picker static assets are pulled in via the widget Media.
-        self.assertContains(response, "core/admin/iconpicker.js")
+        self.assertContains(response, "theme/widgets/iconpicker.js")
 
     def test_change_page_shows_current_glyph(self):
         char = next(icon["char"] for icon in get_bootstrap_icons() if icon["name"] == "laptop")

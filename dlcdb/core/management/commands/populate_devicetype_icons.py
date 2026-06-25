@@ -22,7 +22,7 @@ overwritten). Use ``--force`` to (re)assign every matched type, and
 from django.core.management.base import BaseCommand
 
 from dlcdb.core.models import DeviceType
-from dlcdb.core.utils.bootstrap_icons import get_bootstrap_icons
+from dlcdb.theme.bootstrap_icons import get_bootstrap_icons
 
 # Ordered keyword -> icon rules. Matching is case-insensitive substring against
 # the device type name; the FIRST matching rule wins, so rules must be ordered

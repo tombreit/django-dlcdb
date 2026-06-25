@@ -6,7 +6,7 @@ import json
 
 from django import forms
 
-from .utils.bootstrap_icons import get_bootstrap_icons
+from .bootstrap_icons import get_bootstrap_icons
 
 
 class IconPickerWidget(forms.TextInput):
@@ -16,15 +16,15 @@ class IconPickerWidget(forms.TextInput):
     The stored value stays a plain ``bi-<name>`` class string, so the field
     behaves like a normal text input (manual entry still works); the picker is
     a visual assist. The icon set is the one currently installed (see
-    ``dlcdb.core.utils.bootstrap_icons.get_bootstrap_icons``), so it tracks
+    ``dlcdb.theme.bootstrap_icons.get_bootstrap_icons``), so it tracks
     package upgrades automatically.
     """
 
-    template_name = "core/widgets/icon_picker.html"
+    template_name = "theme/widgets/icon_picker.html"
 
     class Media:
-        css = {"all": ["core/admin/iconpicker.css"]}
-        js = ["core/admin/iconpicker.js"]
+        css = {"all": ["theme/widgets/iconpicker.css"]}
+        js = ["theme/widgets/iconpicker.js"]
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)

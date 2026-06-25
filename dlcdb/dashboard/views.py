@@ -13,7 +13,7 @@ from . import stats
 
 
 # Map each dashboard model to the field path used to scope its queryset to a
-# tenant. Mirrors core.views.dashboard_views.DashboardView.
+# tenant.
 TENANT_FILTERS = {
     "core.device": "tenant",
     "core.lentrecord": "device__tenant",
@@ -77,8 +77,8 @@ def _build_tile(*, model_name, url, tenant):
 @login_required
 def index(request):
     """
-    New-frontend dashboard: model tiles (counts + note badges) and Plotly stats,
-    rebuilt on the theme app. Mirrors core.views.dashboard_views.DashboardView.
+    Dashboard on the theme frontend: model tiles (counts + note badges) and
+    Plotly stats, scoped to the current tenant.
     """
     tenant = request.tenant
 
