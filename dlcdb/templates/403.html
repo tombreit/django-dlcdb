@@ -27,7 +27,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% if not request.user.is_authenticated %}
 <p>
-{% trans "If you are not logged in, please log in:" %}
+{% translate "If you are not logged in, please log in:" %}
 <br>
 <a href="{% url 'login' %}">{% translate "Log in" %}</a>
 </p>

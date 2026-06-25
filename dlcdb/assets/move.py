@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Single-device relocation for the frontend.
+Device relocation for the frontend.
 
 Feature-named module (rather than a generic ``services.py``) so further device
 workflows get their own sibling modules (e.g. ``decommission.py``) instead of a

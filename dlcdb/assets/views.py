@@ -25,6 +25,12 @@ RELOCATE_PERM = "core.add_inroomrecord"
 DEVICE_SEARCH_PARAM = "q_device"
 ROOM_SEARCH_PARAM = "q_room"
 
+# Name of the multi-select picker's per-card hidden inputs (see RelocateForm and
+# the ``field_name`` passed in relocate.html). The device picker sends these
+# already-selected ids with each live search (via hx-include) so the search can
+# exclude them from its results.
+DEVICE_PICKER_FIELD = "devices"
+
 # Cap "*" / live-search result lists so the dropdown stays usable.
 SEARCH_RESULT_LIMIT = 25
 
@@ -68,6 +74,12 @@ def device_search(request):
             | Q(serial_number__icontains=value)
         )
 
+    # Hide devices already chosen in the picker (their hidden inputs ride along
+    # via hx-include) so the dropdown only ever offers fresh choices.
+    selected_ids = [pk for pk in request.POST.getlist(DEVICE_PICKER_FIELD) if pk.isdigit()]
+    if selected_ids:
+        devices = devices.exclude(pk__in=selected_ids)
+
     devices = devices.order_by("edv_id")[:SEARCH_RESULT_LIMIT]
     return TemplateResponse(
         request,
@@ -100,10 +112,13 @@ def room_search(request):
 @login_required
 def relocate(request):
     """
-    Move a single device to a new room: pick a device, pick a target room,
-    press "Move". Frontend replacement for the admin ``relocate`` action.
+    Move one or more devices to a new room: pick the devices, pick a single
+    target room, press "Move". Each device is relocated via the shared
+    ``relocate_device`` state machine (mirroring the admin bulk action), which
+    emits a per-device result message. Frontend replacement for the admin
+    ``relocate`` action.
     """
-    selected_device = None
+    selected_devices = []
     selected_room = None
 
     # Scope the device field to the moveable, tenant-visible set so a user cannot
@@ -118,33 +133,31 @@ def relocate(request):
 
         form = RelocateForm(request.POST, device_queryset=moveable_devices)
         if form.is_valid():
-            result = move.relocate_device(
-                device=form.cleaned_data["device"],
-                new_room=form.cleaned_data["new_room"],
-                user=request.user,
-            )
-            messages.add_message(request, result.level, result.message)
+            new_room = form.cleaned_data["new_room"]
+            for device in form.cleaned_data["devices"]:
+                result = move.relocate_device(device=device, new_room=new_room, user=request.user)
+                messages.add_message(request, result.level, result.message)
             return redirect("assets:relocate")
 
         # Validation failed: keep the picked cards visible (they otherwise live
         # only in the submitted hidden fields). Resolve only well-formed ids so a
         # blank/garbage hidden field does not raise.
-        device_id = request.POST.get("device") or ""
+        device_ids = [pk for pk in request.POST.getlist("devices") if pk.isdigit()]
         room_id = request.POST.get("new_room") or ""
-        if device_id.isdigit():
-            selected_device = moveable_devices.filter(pk=device_id).first()
+        if device_ids:
+            selected_devices = list(moveable_devices.filter(pk__in=device_ids))
         if room_id.isdigit():
             selected_room = Room.objects.filter(pk=room_id).first()
     else:
         form = RelocateForm(device_queryset=moveable_devices)
 
     context = {
-        "title": _("Move device"),
+        "title": _("Move devices"),
         "form": form,
-        "selected_device": selected_device,
+        "selected_devices": selected_devices,
         "selected_room": selected_room,
-        "selected_device_is_lent": bool(
-            selected_device and getattr(selected_device.active_record, "record_type", None) == Record.LENT
+        "selected_any_lent": any(
+            getattr(d.active_record, "record_type", None) == Record.LENT for d in selected_devices
         ),
     }
     return TemplateResponse(request, "assets/relocate.html", context)

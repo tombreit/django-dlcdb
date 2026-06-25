@@ -84,7 +84,7 @@ SPDX-License-Identifier: EUPL-1.2
             {% csrf_token %} 
             {{ form.as_p }} 
             <input class="btn btn-warning" type="submit" value="Relocate devices"> 
-            <a href="{% url 'admin:core_device_changelist' %}" class="btn btn-light">{% trans "No, take me back" %}</a>
+            <a href="{% url 'admin:core_device_changelist' %}" class="btn btn-light">{% translate "No, take me back" %}</a>
         </form> 
 
     </div>

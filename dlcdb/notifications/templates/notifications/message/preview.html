@@ -36,11 +36,11 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a> &rsaquo;
+  <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> &rsaquo;
   <a href="{% url 'admin:app_list' app_label=app_label %}">{{ app_label|capfirst }}</a> &rsaquo;
   <a href="{% url 'admin:notifications_message_changelist' %}">Messages</a> &rsaquo;
   <a href="{% url 'admin:notifications_message_change' object_id=message.pk %}">Message {{ message.pk }}</a> &rsaquo;
-  {% trans 'Preview' %}
+  {% translate 'Preview' %}
 </div>
 {% endblock %}
 

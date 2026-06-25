@@ -24,7 +24,8 @@ class DeviceType(SoftDeleteAuditBaseModel):
         blank=True,
         default="",
         verbose_name=_("Icon"),
-        help_text=_("Bootstrap Icons class, e.g. “bi-laptop”. See https://icons.getbootstrap.com/."),
+        help_text=_("Bootstrap Icons class, e.g. “bi-laptop”. See %(url)s.")
+        % {"url": "https://icons.getbootstrap.com/"},
     )
     note = models.TextField(
         blank=True,

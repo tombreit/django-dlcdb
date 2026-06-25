@@ -28,6 +28,17 @@ Parameters (via {% include ... with %}):
   has_selected        truthy when a card is pre-selected (collapses the search)
   selected_item_template (optional) template path rendering the pre-selected card
                       (the object it expects must be passed in too, e.g. person=…)
+  multiple            (optional) allow selecting several options; each becomes a
+                      card carrying its own hidden input (see picker.js). The
+                      search stays open and there is no single hidden field.
+  field_name          (multiple only) name for the per-card hidden inputs
+  selected_items      (multiple only) iterable of pre-selected objects to render
+                      back after a validation error. Each is passed to
+                      selected_item_template as ``device`` (the device picker is
+                      the only multi-select consumer today).
+
+An element with id "<picker_id>-count" placed anywhere on the page (e.g. in a
+section header) is kept in sync by picker.js with the number of selected cards.
 {% endcomment %}
 
 <div class="mb-3"
@@ -35,7 +46,10 @@ Parameters (via {% include ... with %}):
      data-picker-id="{{ picker_id }}"
      data-field-id="{{ field_id }}"
      data-locked="{% if locked %}1{% else %}0{% endif %}"
+     data-multiple="{% if multiple %}1{% else %}0{% endif %}"
+     {% if field_name %}data-field-name="{{ field_name }}"{% endif %}
      data-change-label="{% translate 'Change' %}"
+     data-remove-label="{% translate 'Remove' %}"
      {% if fill_date_target %}data-fill-date-target="{{ fill_date_target }}"{% endif %}
      id="{{ picker_id }}-picker">
 
@@ -49,16 +63,28 @@ Parameters (via {% include ... with %}):
     <div class="text-danger small mb-2">{{ errors }}</div>
   {% endif %}
 
+  {% comment %}
+  In multi-select mode the search box is pinned above the selected cards (via
+     flex order) so it stays put as cards accumulate below it; in single mode the
+     selected card precedes the (collapsed) search box as before.
+  {% endcomment %}
+  <div {% if multiple %}class="d-flex flex-column"{% endif %}>
+
   {# Selected-option slot #}
-  <div id="{{ picker_id }}-selected">
-    {% if has_selected and selected_item_template %}
+  <div id="{{ picker_id }}-selected"{% if multiple %} class="order-2"{% endif %}>
+    {% if multiple %}
+      {# Re-render previously chosen cards (e.g. after a validation error). The card template emits its own hidden input via ``multi_field_name``. #}
+      {% for device in selected_items %}
+        {% include selected_item_template with device=device multi_field_name=field_name selectable=False %}
+      {% endfor %}
+    {% elif has_selected and selected_item_template %}
       {% include selected_item_template %}
     {% endif %}
   </div>
 
-  {# Search box + live results (hidden once an option is selected) #}
-  <div id="{{ picker_id }}-search-wrap" class="position-relative {% if has_selected %}d-none{% endif %}">
-    <div class="input-group">
+  {# Search box + live results. In single mode it collapses once an option is selected; in multi mode it stays open (and pinned on top) so more can be added. #}
+  <div id="{{ picker_id }}-search-wrap" class="position-relative {% if multiple %}order-1 mb-2{% endif %} {% if has_selected and not multiple %}d-none{% endif %}">
+    <div class="input-group position-relative">
       <span class="input-group-text"><i class="bi bi-search"></i></span>
       <input
         type="search"
@@ -70,13 +96,24 @@ Parameters (via {% include ... with %}):
         hx-post="{{ search_url }}"
         hx-target="#{{ picker_id }}-results"
         hx-trigger="keyup changed delay:250ms, search"
-        hx-indicator=".htmx-indicator"
+        hx-indicator="#{{ picker_id }}-spinner"
+        {# Multi mode: send the already-selected cards' hidden inputs so the endpoint can exclude them from results. #}
+        {% if multiple %}hx-include="#{{ picker_id }}-selected"{% endif %}
       >
-      <span class="input-group-text htmx-indicator">
-        <span class="spinner-border spinner-border-sm" role="status"></span>
+      {% comment %}
+      Spinner overlays the input's right edge rather than sitting in the
+         input-group flow, so the input stays the last child (full width, rounded
+         right corners) instead of an always-present, opacity:0 indicator addon
+         eating that space. Scoped by id so sibling pickers don't co-trigger.
+         {% endcomment %}
+      <span id="{{ picker_id }}-spinner"
+            class="htmx-indicator position-absolute top-50 end-0 translate-middle-y me-2 z-3">
+        <span class="spinner-border spinner-border-sm text-secondary" role="status"></span>
       </span>
     </div>
     {# Dropdown panel; the inner styled box is rendered by the partial only when there is content. #}
     <div id="{{ picker_id }}-results" class="position-absolute start-0 end-0 z-3"></div>
+  </div>
+
   </div>
 </div>

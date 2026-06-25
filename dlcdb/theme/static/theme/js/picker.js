@@ -16,6 +16,13 @@
 // desired-return-date from a person's contract end via `data-contract-end` on
 // the option), only when that input is still empty and the date is not in the
 // past.
+//
+// Optional `data-multiple="1"` turns the picker into a multi-select: instead of
+// a single hidden field, each selected option becomes a card that carries its
+// own hidden `<input name="<data-field-name>" value="<id>">`. Picking keeps the
+// search open and appends (deduped); the per-card Remove button drops just that
+// card (and its hidden input). The form thus submits the live set. A `#<id>-count`
+// element, if present, is kept in sync with the number of selected cards.
 
 (function () {
   "use strict";
@@ -29,9 +36,15 @@
     const resultsBox = document.getElementById(id + "-results");
     const locked = picker.dataset.locked === "1";
     const changeLabel = picker.dataset.changeLabel || "Change";
+    const removeLabel = picker.dataset.removeLabel || "Remove";
     const fillDateTarget = picker.dataset.fillDateTarget || null;
+    const multiple = picker.dataset.multiple === "1";
+    const fieldName = picker.dataset.fieldName || null;
+    const countEl = document.getElementById(id + "-count");
 
-    if (!hiddenInput) {
+    // Multi-select has no single hidden field (each card carries its own), so
+    // only the single-select mode requires `hiddenInput` to exist.
+    if (!multiple && !hiddenInput) {
       return;
     }
 
@@ -58,16 +71,19 @@
       document.dispatchEvent(new CustomEvent("picker:changed", { detail: { pickerId: id } }));
     }
 
-    function selectOption(option) {
-      const optionId = option.dataset.optionId;
-      if (!optionId) {
-        return;
+    // Multi-select only: reflect the number of selected cards in the count badge.
+    function updateCount() {
+      if (countEl) {
+        countEl.textContent = selectedSlot.querySelectorAll("[data-option-id]").length;
       }
-      hiddenInput.value = optionId;
+    }
 
-      // Reuse the clicked option markup as the selected card, then turn it into
-      // a proper "selected" card (solid border, a Change button instead of the
-      // chevron, no pointer affordances).
+    // Turn a clicked result option into a proper "selected" card: solid border,
+    // a removal button instead of the chevron, no pointer affordances, and any
+    // detail affordance (e.g. an "open in admin" link) revealed. The button
+    // says "Remove" in multi mode (it drops just this card) and "Change" in
+    // single mode (it reopens the search).
+    function buildSelectedCard(option) {
       const selectedCard = option.cloneNode(true);
       selectedCard.classList.remove("js-picker-option", "picker-option", "picker-active", "border-0", "mb-1");
       selectedCard.classList.add("mb-2");
@@ -80,17 +96,59 @@
         const changeBtn = document.createElement("button");
         changeBtn.type = "button";
         changeBtn.className = "js-picker-clear btn btn-sm btn-outline-secondary";
-        changeBtn.innerHTML = '<i class="bi bi-x-lg"></i> ' + changeLabel;
+        changeBtn.innerHTML = '<i class="bi bi-x-lg"></i> ' + (multiple ? removeLabel : changeLabel);
         chevron.replaceWith(changeBtn);
       }
 
-      // Reveal any detail affordance (e.g. an "open in admin" link) that the
-      // option carries hidden so it only shows once the item is selected.
       selectedCard.querySelectorAll(".js-picker-detail").forEach(function (el) {
         el.classList.remove("d-none");
       });
 
-      selectedSlot.replaceChildren(selectedCard);
+      return selectedCard;
+    }
+
+    function selectOption(option) {
+      const optionId = option.dataset.optionId;
+      if (!optionId) {
+        return;
+      }
+
+      if (multiple) {
+        // Ignore a repeat pick of an already-selected option.
+        if (selectedSlot.querySelector('[data-option-id="' + CSS.escape(optionId) + '"]')) {
+          closeResults();
+          if (searchInput) {
+            searchInput.value = "";
+          }
+          return;
+        }
+
+        const selectedCard = buildSelectedCard(option);
+        // The card carries its own hidden input, so removing the card removes
+        // its value from the submitted set.
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = fieldName;
+        input.value = optionId;
+        selectedCard.appendChild(input);
+        // Prepend so the most recently picked device appears on top of the list.
+        selectedSlot.prepend(selectedCard);
+        updateCount();
+
+        // Keep the search open so further options can be added.
+        closeResults();
+        if (searchInput) {
+          searchInput.value = "";
+          searchInput.focus();
+        }
+
+        picker.dispatchEvent(new CustomEvent("picker:selected", { detail: { option: option } }));
+        notifyChanged();
+        return;
+      }
+
+      hiddenInput.value = optionId;
+      selectedSlot.replaceChildren(buildSelectedCard(option));
 
       // Collapse the search UI.
       searchWrap.classList.add("d-none");
@@ -167,7 +225,17 @@
       const clearBtn = event.target.closest(".js-picker-clear");
       if (clearBtn && picker.contains(clearBtn)) {
         event.preventDefault();
-        clearOption();
+        if (multiple) {
+          // Remove just this card (and its hidden input); the search stays open.
+          const card = clearBtn.closest("[data-option-id]");
+          if (card) {
+            card.remove();
+          }
+          updateCount();
+          notifyChanged();
+        } else {
+          clearOption();
+        }
         return;
       }
 
@@ -220,6 +288,9 @@
         }
       });
     }
+
+    // Reflect any server-rendered pre-selected cards in the count badge.
+    updateCount();
   }
 
   function init() {

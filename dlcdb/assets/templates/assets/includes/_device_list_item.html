@@ -12,6 +12,9 @@ the selected-device slot. Carries data-* attributes so theme/js/picker.js can
 write the chosen device pk into the form's hidden ``device`` field.
 
 Expects: device (core.Device); selectable (bool); locked (bool).
+
+When ``multi_field_name`` is set (multi-select picker) the card renders its own
+hidden input carrying the device pk, so the form submits the live set.
 {% endcomment %}
 
 <div
@@ -67,10 +70,14 @@ Expects: device (core.Device); selectable (bool); locked (bool).
       <i class="bi bi-chevron-right text-muted"></i>
     {% elif not locked %}
       <button type="button" class="js-picker-clear btn btn-sm btn-outline-secondary">
-        <i class="bi bi-x-lg"></i> {% translate "Change" %}
+        <i class="bi bi-x-lg"></i> {% if multi_field_name %}{% translate "Remove" %}{% else %}{% translate "Change" %}{% endif %}
       </button>
     {% endif %}
   </div>
 
   {% include "theme/includes/_picker_admin_link.html" with device=device %}
+
+  {% if multi_field_name %}
+    <input type="hidden" name="{{ multi_field_name }}" value="{{ device.pk }}">
+  {% endif %}
 </div>
