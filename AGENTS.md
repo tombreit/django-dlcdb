@@ -29,3 +29,7 @@ Device Lifecycle Database
 - If in doubt: ask me
 - You may suggest commit messages, but do not commit on your own
 - If adding SPDX license headers: omit the year
+
+## Quirks
+
+- Django template language supports only single line comments via `{# ... #}`, multiline comments via `{% comment %}...{% endcomment %}`
