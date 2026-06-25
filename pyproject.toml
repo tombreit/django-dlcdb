@@ -42,6 +42,7 @@ dependencies = [
     "Sphinx",
     "sphinx-book-theme",
     "sphinxcontrib-mermaid",
+    "sphinxcontrib-openapi",
     "myst_parser",  # currently not working: myst_parser[linkify]
     "sphinx-design",
     "sphinx-togglebutton",

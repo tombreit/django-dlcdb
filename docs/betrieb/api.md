@@ -1,37 +1,7 @@
 # API
 
-An interactive Swagger-UI is available at:  
-{{ api_swagger_url }}
-
-## Endpoints
-
-*All endpoints are readonly.*
-
-```{list-table}
-   :widths: 20 50 30
-   :header-rows: 1
-
-   * - Case
-     - Endpoint
-     - Note
-   * - Root
-     - {{ api_base_url }}
-     -
-   * - Devices
-     - {{ api_devices_url }}
-     -
-   * - Device by ``pk``
-     - {{ api_device_by_pk_url }}
-     -
-   * - Filter Devices by EDV-ID
-     - {{ api_device_by_id_url }}
-     - *Note: Filter string must be an exact match.*
-   * - Search Devices
-     - {{ api_device_search_url }}
-     -
-   * - Persons with devices lent
-     - {{ api_persons_with_devices }}
-     - Filterable via ``?first_name=&last_name=&email=``
+```{admonition} Interactive REST API Documentation
+**{{ api_swagger_url }}**
 ```
 
 ## Token Authentication
@@ -57,3 +27,15 @@ In your queries the token must be present via HTTP header, e.g.:
 
 `Authorization: Token 9949899m0980f9418ad8464c345x4x4ee4b`
 :::
+
+## Endpoints
+
+*All endpoints are readonly.* Base URL: {{ api_base_url }}
+
+The reference below is generated automatically from the API source code at
+build time, so it always matches the deployed API.
+
+```{eval-rst}
+.. openapi:: ../_generated/openapi.yaml
+   :examples:
+```

@@ -18,6 +18,17 @@ os.environ["DJANGO_SETTINGS_MODULE"] = "dlcdb.settings.base"
 django.setup()
 
 
+# Generate the OpenAPI schema from drf-spectacular at build time, so the API
+# reference in docs/betrieb/api.md can never drift from the code. The file is
+# gitignored (see .gitignore) and regenerated on every sphinx-build, both
+# locally and in GitLab CI.
+from django.core.management import call_command  # noqa: E402
+
+_schema_path = os.path.join(os.path.dirname(__file__), "_generated", "openapi.yaml")
+os.makedirs(os.path.dirname(_schema_path), exist_ok=True)
+call_command("spectacular", file=_schema_path, validate=True)
+
+
 # -- General configuration ------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -29,6 +40,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
     "sphinxcontrib.mermaid",
+    "sphinxcontrib.openapi",
     # 'sphinx.ext.autosectionlabel',  # sphinx WARNING: duplicate label foo other instance in bar
     "myst_parser",
     "sphinx_design",
@@ -116,11 +128,6 @@ myst_substitutions = {
     "licenses_fe_link": f"[Lizenzen]({base_url}/lizenzen/)",
     "inventorize_fe_link": f"[Inventarisieren]({base_url}/inventory/)",
     "api_base_url": f"[{base_url}/api/v2/]({base_url}/api/v2/)",
-    "api_devices_url": f"[{base_url}/api/v2/devices/]({base_url}/api/v2/devices/)",
-    "api_device_by_pk_url": f"[{base_url}/api/v2/devices/1689/]({base_url}/api/v2/devices/1689/)",
-    "api_device_by_id_url": f"[{base_url}/api/v2/devices/devices/?edv_id=NTB1146/]({base_url}/api/v2/devices/devices/?edv_id=NTB1146)",
-    "api_device_search_url": f"[{base_url}/api/v2/devices/?search=ntb1146]({base_url}/api/v2/devices/?search=ntb1146)",
-    "api_persons_with_devices": f"[{base_url}/api/v2/persons/]({base_url}/api/v2/persons/)",
     "api_swagger_url": f"[{base_url}/api/v2/schema/swagger-ui/]({base_url}/api/v2/schema/swagger-ui/)",
 }
 myst_enable_extensions = ["colon_fence", "substitution", "attrs_inline", "html_image"]
