@@ -235,6 +235,7 @@ class LendingDetailViewTests(BaseTest):
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 
+    @override_settings(LANGUAGE_CODE="en")
     def test_soft_warning_when_no_contract_end_date(self):
         response = self.client.post(
             reverse("lending:detail", args=[self.available_record.pk]),
@@ -244,6 +245,7 @@ class LendingDetailViewTests(BaseTest):
         messages = [str(m) for m in response.context["messages"]]
         self.assertTrue(any("contract end date" in m.lower() for m in messages))
 
+    @override_settings(LANGUAGE_CODE="en")
     def test_soft_warning_when_contract_ends_before_desired_return(self):
         self.person.udb_contract_planned_checkout = datetime.date(2026, 6, 30)
         self.person.save()

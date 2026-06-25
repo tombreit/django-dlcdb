@@ -12,6 +12,7 @@ Tests for the UDB person sync:
   required field becomes an ERROR row without aborting the run.
 """
 
+import datetime
 import json
 from contextlib import contextmanager
 from unittest import mock
@@ -22,7 +23,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from dlcdb.core.models import Person
+from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.dataexchange import udb_sync
 from dlcdb.dataexchange.reporting import Outcome
@@ -49,7 +50,9 @@ def _fake_urlopen(payload):
     yield response
 
 
-def _contract(uuid, first, last, *, email=..., checkin="2024-01-01", drop_checkin=False, image=None):
+def _contract(
+    uuid, first, last, *, email=..., checkin="2024-01-01", checkout="2024-12-31", drop_checkin=False, image=None
+):
     person = {
         "id": uuid,
         "person_first_name": first,
@@ -61,7 +64,7 @@ def _contract(uuid, first, last, *, email=..., checkin="2024-01-01", drop_checki
         person["person_image"] = image
     contract = {
         "person": person,
-        "contract_planned_checkout": "2024-12-31",
+        "contract_planned_checkout": checkout,
         "contract_organization_unit": {"name": "OU-1"},
         "contract_contract_type": {"name": "Mitarbeiter"},
         "contract_organizational_positions": [{"name": "Pos-1"}],
@@ -426,3 +429,115 @@ def test_changed_image_reports_updated_and_rewrites(settings):
     assert report.counts[Outcome.UPDATED] == 1
     updated_row = next(row for row in report.rows if row.outcome == Outcome.UPDATED)
     assert "udb_person_image_hash" in updated_row.detail
+
+
+# --- lending desired-end-date sync (sync_lent_end_date toggle) ----------------
+
+
+def _make_lending(person, *, sync, desired_end, start=datetime.date(2024, 1, 1)):
+    """Create an active, still-out LentRecord for ``person``."""
+    device = Device.objects.create(
+        device_type=DeviceType.objects.get_or_create(name="Notebook", prefix="NTB")[0],
+        edv_id=f"EDV-{person.pk}-{int(sync)}",
+        sap_id=f"SAP-{person.pk}-{int(sync)}",
+    )
+    room = Room.objects.get_or_create(number="A1.23", nickname="Theke")[0]
+    return LentRecord.objects.create(
+        device=device,
+        person=person,
+        room=room,
+        lent_start_date=start,
+        lent_desired_end_date=desired_end,
+        sync_lent_end_date=sync,
+    )
+
+
+def _sync_person_with_checkout(uuid, checkout):
+    _run_with_payload(
+        {"results": {"contracts": [_contract(uuid, "Ada", "Lovelace", email="ada@example.org", checkout=checkout)]}}
+    )
+
+
+@pytest.mark.django_db
+def test_contract_end_change_syncs_opted_in_open_lending():
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31))
+
+    _sync_person_with_checkout("uuid-1", "2025-06-30")
+
+    lending.refresh_from_db()
+    assert lending.lent_desired_end_date == datetime.date(2025, 6, 30)
+
+
+@pytest.mark.django_db
+def test_contract_end_change_leaves_opted_out_lending_untouched():
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=False, desired_end=datetime.date(2024, 12, 31))
+
+    _sync_person_with_checkout("uuid-1", "2025-06-30")
+
+    lending.refresh_from_db()
+    assert lending.lent_desired_end_date == datetime.date(2024, 12, 31)
+
+
+@pytest.mark.django_db
+def test_returned_lending_is_not_synced():
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31))
+    lending.lent_end_date = datetime.date(2024, 6, 1)
+    lending.save(update_fields=["lent_end_date"])
+
+    _sync_person_with_checkout("uuid-1", "2025-06-30")
+
+    lending.refresh_from_db()
+    assert lending.lent_desired_end_date == datetime.date(2024, 12, 31)
+
+
+@pytest.mark.django_db
+def test_sync_skips_when_contract_end_precedes_lent_start():
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31), start=datetime.date(2024, 6, 1))
+
+    # A contract end before the lending's start date is nonsensical -> skip.
+    _sync_person_with_checkout("uuid-1", "2024-01-15")
+
+    lending.refresh_from_db()
+    assert lending.lent_desired_end_date == datetime.date(2024, 12, 31)
+
+
+@pytest.mark.django_db
+def test_sync_skips_when_contract_end_exceeds_max_future(settings):
+    settings.MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31))
+
+    # Beyond MAX_FUTURE_LENT_DESIRED_END_DATE would violate the CheckConstraint -> skip.
+    _sync_person_with_checkout("uuid-1", "2100-06-30")
+
+    lending.refresh_from_db()
+    assert lending.lent_desired_end_date == datetime.date(2024, 12, 31)
+
+
+@pytest.mark.django_db
+def test_synced_lending_writes_change_history():
+    _enable_sync()
+    _sync_person_with_checkout("uuid-1", "2024-12-31")
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31))
+
+    _sync_person_with_checkout("uuid-1", "2025-06-30")
+
+    entry = LogEntry.objects.filter(change_message__icontains="synced desired return date").latest("id")
+    assert entry.action_flag == CHANGE
+    assert entry.object_id == str(lending.pk)
+    assert entry.user.username == "udb-sync"

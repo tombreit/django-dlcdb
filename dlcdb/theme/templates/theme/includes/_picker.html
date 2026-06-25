@@ -21,6 +21,9 @@ Parameters (via {% include ... with %}):
   locked              disable selecting/changing (read-only)
   fill_date_target    (optional) id of a date input to prefill from the option's
                       data-contract-end
+  sync_toggle_target  (optional) id of a checkbox that is auto-checked when
+                      fill_date_target gets prefilled (marks the date as
+                      contract-derived); see picker.js
   errors              (optional) bound-field errors to render
   search_name         (optional) name of the search input (default "search"); use
                       a distinct value when two pickers share one <form> so HTMX
@@ -51,6 +54,7 @@ section header) is kept in sync by picker.js with the number of selected cards.
      data-change-label="{% translate 'Change' %}"
      data-remove-label="{% translate 'Remove' %}"
      {% if fill_date_target %}data-fill-date-target="{{ fill_date_target }}"{% endif %}
+     {% if sync_toggle_target %}data-sync-toggle-target="{{ sync_toggle_target }}"{% endif %}
      id="{{ picker_id }}-picker">
 
   {% if label %}

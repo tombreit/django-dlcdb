@@ -111,6 +111,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
                     (
                         "lent_start_date",
                         "lent_desired_end_date",
+                        "sync_lent_end_date",
                     ),
                 )
             },
@@ -250,7 +251,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
             messages.warning(request, f"Warnung: Kein UDB Vertragsablaufdatum für {obj.person} gefunden!")
 
         if contract_end_date:
-            if desired_lent_end_date >= contract_end_date:
+            if desired_lent_end_date > contract_end_date:
                 messages.warning(request, "Warnung: Vertragsende vor Soll-Rückgabedatum!")
 
         # Save logic
@@ -291,6 +292,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
                 person=obj.person,
                 lent_start_date=obj.lent_start_date,
                 lent_desired_end_date=obj.lent_desired_end_date,
+                sync_lent_end_date=obj.sync_lent_end_date,
                 lent_note=obj.lent_note,
                 lent_reason=obj.lent_reason,
                 lent_accessories=obj.lent_accessories,

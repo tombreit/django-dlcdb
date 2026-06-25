@@ -51,6 +51,7 @@ class LentingForm(forms.ModelForm):
             "room",
             "lent_start_date",
             "lent_desired_end_date",
+            "sync_lent_end_date",
             "lent_end_date",
             "lent_reason",
             "lent_accessories",
@@ -58,6 +59,7 @@ class LentingForm(forms.ModelForm):
         ]
         widgets = {
             "person": forms.HiddenInput(),
+            "sync_lent_end_date": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             # The format pairing is required to populate native date inputs from
             # the model instance (see the licenses form for the same gotcha).
             "lent_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),

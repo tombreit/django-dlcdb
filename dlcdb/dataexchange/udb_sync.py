@@ -21,6 +21,7 @@ import json
 import logging
 import urllib.error
 import urllib.request
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
@@ -28,7 +29,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.utils.timezone import now
 
-from dlcdb.core.models import OrganizationalUnit, Person
+from dlcdb.core.models import OrganizationalUnit, Person, Record
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
 
 from .models import UdbSyncConfiguration, UdbSyncRun
@@ -264,6 +265,64 @@ def _log_admin_history(person, *, log_user_id, action_flag, message):
     LogEntry.objects.log_actions(log_user_id, [person], action_flag, change_message=message, single_object=True)
 
 
+def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
+    """Propagate a changed UDB contract end date onto the person's open lendings.
+
+    Only lendings that opted in (``sync_lent_end_date=True``) and are currently out
+    (the device's active LENT record, ``lent_end_date IS NULL``) follow the
+    contract. We query ``Record`` directly with explicit filters rather than the
+    ``LentRecord`` proxy manager, whose ``device__is_lentable=True`` filter would
+    silently drop otherwise-valid lendings.
+
+    The write is intentionally a direct ``save()`` that bypasses
+    ``LentRecord.clean()``, so we re-check here the two bounds the form/DB would
+    otherwise enforce, and skip (with a log) rather than raise mid-sync:
+    - a contract end before the lending's start date makes no sense;
+    - a contract end beyond ``MAX_FUTURE_LENT_DESIRED_END_DATE`` would violate the
+      ``valid_lent_desired_end_date`` CheckConstraint and raise IntegrityError.
+
+    ``new_checkout`` is None-safe: a cleared contract end is not propagated (we
+    never blank out a desired return date).
+    """
+    if not new_checkout:
+        return
+
+    max_future = datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d").date()
+
+    lendings = Record.objects.filter(
+        person=person,
+        record_type=Record.LENT,
+        is_active=True,
+        lent_end_date__isnull=True,
+        sync_lent_end_date=True,
+    )
+    for lending in lendings:
+        if lending.lent_desired_end_date == new_checkout:
+            continue
+        if lending.lent_start_date and new_checkout < lending.lent_start_date:
+            logger.warning(
+                f"[UDB] Skipping lent-date sync for record {lending.pk}: "
+                f"contract end {new_checkout} precedes lent start {lending.lent_start_date}."
+            )
+            continue
+        if new_checkout > max_future:
+            logger.warning(
+                f"[UDB] Skipping lent-date sync for record {lending.pk}: "
+                f"contract end {new_checkout} exceeds MAX_FUTURE_LENT_DESIRED_END_DATE {max_future}."
+            )
+            continue
+
+        old = lending.lent_desired_end_date
+        lending.lent_desired_end_date = new_checkout
+        lending.save(update_fields=["lent_desired_end_date"])
+        _log_admin_history(
+            lending,
+            log_user_id=log_user_id,
+            action_flag=CHANGE,
+            message=f"Synced desired return date from UDB contract end: {old!r} -> {new_checkout!r}",
+        )
+
+
 def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_id):
     """Upsert a single Person from one UDB contract.
 
@@ -389,6 +448,12 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
         for field in COMPARED_PERSON_FIELDS
         if values_before[field] != values_after[field]
     ]
+
+    # When the contract end date moved, push it onto the person's opted-in open
+    # lendings (a brand-new person, handled above, has none). Use the post-save,
+    # DB-typed value from `values_after` (a `date`), not the raw JSON string.
+    if any(field == "udb_contract_planned_checkout" for field, _old, _new in changes):
+        _sync_lent_end_dates(existing, values_after["udb_contract_planned_checkout"], log_user_id=log_user_id)
 
     if not changes:
         return Outcome.UNCHANGED, ""

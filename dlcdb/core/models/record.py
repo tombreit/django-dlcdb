@@ -147,6 +147,14 @@ class Record(AuditBaseModel):
     )
     lent_start_date = models.DateField(null=True, blank=True, verbose_name="Verleihbeginn")
     lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name="Soll-Rückgabedatum")
+    sync_lent_end_date = models.BooleanField(
+        default=False,
+        verbose_name=_("Sync return date with contract end"),
+        help_text=_(
+            "If on, the desired return date follows the borrower's UDB contract end "
+            "date on each sync. Turn off to keep a custom return date."
+        ),
+    )
     lent_end_date = models.DateField(
         null=True, blank=True, verbose_name="Zurückgegeben am", help_text="Mit dem Setzen ist der Verleih abgeschlossen"
     )

@@ -145,7 +145,7 @@ def _lending_soft_warnings(request, form):
     contract_end = person.udb_contract_planned_checkout
     if not contract_end:
         messages.warning(request, _("Warning: No UDB contract end date found for %(person)s!") % {"person": person})
-    elif desired_end and desired_end >= contract_end:
+    elif desired_end and desired_end > contract_end:
         messages.warning(request, _("Warning: Contract ends before the desired return date!"))
 
 
@@ -183,6 +183,7 @@ def _apply_state_machine(record, form, user, username):
             person=form.cleaned_data["person"],
             lent_start_date=form.cleaned_data["lent_start_date"],
             lent_desired_end_date=form.cleaned_data["lent_desired_end_date"],
+            sync_lent_end_date=form.cleaned_data.get("sync_lent_end_date", False),
             lent_note=form.cleaned_data.get("lent_note", ""),
             lent_reason=form.cleaned_data.get("lent_reason", ""),
             lent_accessories=form.cleaned_data.get("lent_accessories", ""),

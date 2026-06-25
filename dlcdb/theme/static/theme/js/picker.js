@@ -38,6 +38,7 @@
     const changeLabel = picker.dataset.changeLabel || "Change";
     const removeLabel = picker.dataset.removeLabel || "Remove";
     const fillDateTarget = picker.dataset.fillDateTarget || null;
+    const syncToggleTarget = picker.dataset.syncToggleTarget || null;
     const multiple = picker.dataset.multiple === "1";
     const fieldName = picker.dataset.fieldName || null;
     const countEl = document.getElementById(id + "-count");
@@ -65,6 +66,25 @@
         return; // a past contract end is not a sensible default
       }
       target.value = contractEnd;
+      // The date is now contract-derived, so opt this lending into following the
+      // contract end on future syncs. Setting .value above does not fire an
+      // `input` event, so the user-edit listener below stays silent here.
+      const toggle = syncToggleTarget && document.getElementById(syncToggleTarget);
+      if (toggle) {
+        toggle.checked = true;
+      }
+    }
+
+    // A manual edit of the auto-filled date makes it "custom": stop following the
+    // contract so the user's value is never overwritten by a sync.
+    if (fillDateTarget && syncToggleTarget) {
+      const dateField = document.getElementById(fillDateTarget);
+      const toggle = document.getElementById(syncToggleTarget);
+      if (dateField && toggle) {
+        dateField.addEventListener("input", function () {
+          toggle.checked = false;
+        });
+      }
     }
 
     function notifyChanged() {
