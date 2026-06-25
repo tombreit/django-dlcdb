@@ -98,7 +98,29 @@ SPDX-License-Identifier: EUPL-1.2
                   <i class="bi bi-bell" aria-hidden="true"></i>
                   Reporting
               </a>
+
               <div class="dropdown-divider"></div>
+
+              {# Language switcher: manual override of the browser-detected language #}
+              {% get_current_language as LANGUAGE_CODE %}
+              {% get_available_languages as LANGUAGES %}
+              <h6 class="dropdown-header">
+                <span>{% translate 'Language' %}</span>
+                <i class="bi bi-translate"></i>
+              </h6>
+              {% for code, name in LANGUAGES %}
+                <form action="{% url 'set_language' %}" method="post" class="m-0">
+                  {% csrf_token %}
+                  <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                  <input name="language" type="hidden" value="{{ code }}">
+                  <button type="submit" class="dropdown-item d-flex align-items-center{% if code == LANGUAGE_CODE %} active{% endif %}">
+                    <i class="bi bi-check2 me-2{% if code != LANGUAGE_CODE %} invisible{% endif %}"></i>{{ name }}
+                  </button>
+                </form>
+              {% endfor %}
+
+              <div class="dropdown-divider"></div>
+
               {% include 'logout_link.html' %}
             </div>
           </div>

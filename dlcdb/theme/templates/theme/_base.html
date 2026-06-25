@@ -6,9 +6,11 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% load static %}
 {% load django_htmx %}
+{% load i18n %}
 
+{% get_current_language as LANGUAGE_CODE %}
 <!doctype html>
-<html lang="en" translate="no">
+<html lang="{{ LANGUAGE_CODE }}" translate="no">
 
 <head>
   <meta charset="utf-8">
