@@ -74,7 +74,7 @@ SPDX-License-Identifier: EUPL-1.2
           {# Live selected-device count, kept in sync by picker.js (id derives from picker_id "device"). #}
           <span class="badge rounded-pill text-bg-secondary ms-auto" id="device-count">0</span>
         </div>
-        {% include "theme/includes/_picker.html" with picker_id="device" multiple=True field_name="devices" search_url=device_search_url search_name="q_device" placeholder=_("Search by EDV/Inv. no., manufacturer, serial…") errors=form.devices.errors selected_items=selected_devices selected_item_template="assets/includes/_device_list_item.html" %}
+        {% include "theme/includes/_picker.html" with picker_id="device" multiple=True field_name="devices" search_url=device_search_url search_name="q_device" placeholder=_("Search by EDV/Inv. no., manufacturer, serial…") errors=form.devices.errors selected_items=selected_devices selected_item_template="theme/includes/_device_picker_item.html" %}
       </div>
     </div>
 

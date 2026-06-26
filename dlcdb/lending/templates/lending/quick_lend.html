@@ -53,7 +53,7 @@ SPDX-License-Identifier: EUPL-1.2
           <i class="bi bi-pc-display"></i> {% translate "Device" %}
         </div>
         <div class="card-body">
-          {% include "theme/includes/_picker.html" with picker_id="device" field_id="id_device_record" search_url=device_search_url search_name="q" label=_("Available device") placeholder=_("Search by EDV/Inv. no., manufacturer…") required=True has_selected=selected_device selected_item_template="lending/includes/_device_list_item.html" record=selected_device selectable=False %}
+          {% include "theme/includes/_picker.html" with picker_id="device" field_id="id_device_record" search_url=device_search_url search_name="q" label=_("Available device") placeholder=_("Search by EDV/Inv. no., manufacturer…") required=True has_selected=selected_device selected_item_template="theme/includes/_device_picker_item.html" device=selected_device.device record=selected_device selectable=False %}
         </div>
       </div>
     </div>

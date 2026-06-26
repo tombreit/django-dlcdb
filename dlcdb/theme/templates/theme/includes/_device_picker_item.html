@@ -1,0 +1,116 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+Shared device option card for the device picker, driven by theme/js/picker.js.
+Reused for live-search results and the selected-device slot across the assets
+(relocate) and lending (quick lend) pickers.
+
+Always pass ``device`` (core.Device). ``record`` is the variant selector:
+  device only            relocate flow; option id is the device pk, the meta
+                         line shows the device's current status badge.
+  device + record        quick-lend flow; ``record`` is the available
+    (lending.LentRecord) LentRecord (pass ``device=record.device record=record``).
+                         Option id is the record pk, the meta line shows the
+                         device's current room and the card carries
+                         data-room-*/data-has-profile so the picker can prefill
+                         the room select.
+
+``record`` is only ever read inside ``{% if record %}`` (a missing var is safely
+falsy there) — never via a filter argument, which would raise on the assets
+variant where ``record`` is absent.
+
+Other params:
+  selectable (bool)        search-result card (shows chevron) vs selected slot.
+  locked (bool)            selected slot is read-only (no change/remove button).
+  multi_field_name (str)   multi-select: emit a hidden input carrying the pk so
+                           the form submits the live set.
+{% endcomment %}
+
+<div
+  class="js-picker-option card {% if selectable %}mb-1 border-0 picker-option{% else %}mb-2{% endif %}"
+  {% if selectable %}role="button" style="cursor: pointer;"{% endif %}
+  data-option-id="{% if record %}{{ record.pk }}{% else %}{{ device.pk }}{% endif %}"
+  data-option-label="{{ device.edv_id|default:device.sap_id|default:device.serial_number|default:device }}"
+  {% if record %}
+    data-room-id="{{ record.room.pk|default:'' }}"
+    data-room-label="{{ record.room|default:'' }}"
+    data-has-profile="{{ record.has_lending_profile|yesno:'1,' }}"
+  {% else %}
+    data-lent="{% if device.active_record.record_type == 'LENT' %}1{% endif %}"
+  {% endif %}
+>
+  <div class="card-body d-flex align-items-center gap-2 px-1 py-2">
+    <div class="d-flex flex-column align-items-center gap-1 flex-shrink-0">
+      <span class="d-inline-flex align-items-center justify-content-center rounded bg-secondary p-3 w-100"
+            style="aspect-ratio: 1; max-width: 70px;">
+        <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} fs-3 text-light lh-1"></i>
+      </span>
+      {% if device.device_type %}
+        <div class="small">
+          <span class="badge text-bg-light text-wrap" title="{{ device.device_type }}"  style="max-width: 70px;">
+                {{ device.device_type }}
+          </span>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="flex-grow-1">
+      <div class="fw-semibold">
+        {% if device.manufacturer or device.series %}
+          {{ device.manufacturer }} {{ device.series }}
+        {% else %}
+          {{ device }}
+        {% endif %}
+      </div>
+      <div>
+        <i class="bi bi-upc"></i>
+        {% if device.edv_id %}
+          {% translate "EDV" %}: <span class="font-monospace">{{ device.edv_id }}</span>
+        {% elif device.sap_id %}
+          {% translate "Inv." %}: <span class="font-monospace">{{ device.sap_id }}</span>
+        {% elif device.serial_number %}
+          {% translate "SN" %}: <span class="font-monospace">{{ device.serial_number }}</span>
+        {% else %}
+          <span class="text-muted">—</span>
+        {% endif %}
+      </div>
+      <div class="small{% if record %} text-muted{% endif %}">
+        {% if record %}
+          <i class="bi bi-door-open"></i> {{ record.room|default:"—" }}
+        {% else %}
+          {% with rec=device.active_record %}
+            {% if rec %}
+              <span class="badge text-bg-{{ rec.record_type_color }}">
+                {{ rec.get_record_type_display }}{% if rec.record_type == 'INROOM' and rec.room %} · {{ rec.room.number }}{% elif rec.record_type == 'LENT' and rec.person %} · {{ rec.person }}{% endif %}
+              </span>
+            {% else %}
+              <span class="badge text-bg-light border text-muted">{% translate "No record" %}</span>
+            {% endif %}
+          {% endwith %}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if selectable %}
+      <i class="bi bi-chevron-right text-muted"></i>
+    {% elif not locked %}
+      <button type="button" class="js-picker-clear btn btn-sm btn-outline-secondary"
+              title="{% if multi_field_name %}{% translate 'Remove' %}{% else %}{% translate 'Change' %}{% endif %}"
+              aria-label="{% if multi_field_name %}{% translate 'Remove' %}{% else %}{% translate 'Change' %}{% endif %}">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    {% endif %}
+  </div>
+
+  {% include "theme/includes/_picker_admin_link.html" with device=device %}
+
+  {% if multi_field_name %}
+    <input type="hidden" name="{{ multi_field_name }}" value="{{ device.pk }}">
+  {% endif %}
+</div>

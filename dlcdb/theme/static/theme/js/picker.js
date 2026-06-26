@@ -116,7 +116,10 @@
         const changeBtn = document.createElement("button");
         changeBtn.type = "button";
         changeBtn.className = "js-picker-clear btn btn-sm btn-outline-secondary";
-        changeBtn.innerHTML = '<i class="bi bi-x-lg"></i> ' + (multiple ? removeLabel : changeLabel);
+        const clearLabel = multiple ? removeLabel : changeLabel;
+        changeBtn.title = clearLabel;
+        changeBtn.setAttribute("aria-label", clearLabel);
+        changeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
         chevron.replaceWith(changeBtn);
       }
 
