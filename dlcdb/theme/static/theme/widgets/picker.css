@@ -1,0 +1,11 @@
+/*
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+*/
+
+/* Hover affordance for a selectable live-search result card. Shipped with the
+   DevicePickerWidget Media so consumers no longer inline this rule per page. */
+.picker-option:hover {
+  background-color: var(--bs-tertiary-bg);
+}

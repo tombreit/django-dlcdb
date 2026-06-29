@@ -28,6 +28,9 @@ Parameters (via {% include ... with %}):
   search_name         (optional) name of the search input (default "search"); use
                       a distinct value when two pickers share one <form> so HTMX
                       does not mix their query terms
+  hx_vals             (optional) JSON string posted with every live search via
+                      hx-vals (e.g. '{"source": "lend"}'); lets one shared search
+                      endpoint know which data source to use
   has_selected        truthy when a card is pre-selected (collapses the search)
   selected_item_template (optional) template path rendering the pre-selected card
                       (the object it expects must be passed in too, e.g. person=…)
@@ -101,6 +104,7 @@ section header) is kept in sync by picker.js with the number of selected cards.
         hx-target="#{{ picker_id }}-results"
         hx-trigger="keyup changed delay:250ms, search"
         hx-indicator="#{{ picker_id }}-spinner"
+        {% if hx_vals %}hx-vals='{{ hx_vals|safe }}'{% endif %}
         {# Multi mode: send the already-selected cards' hidden inputs so the endpoint can exclude them from results. #}
         {% if multiple %}hx-include="#{{ picker_id }}-selected"{% endif %}
       >

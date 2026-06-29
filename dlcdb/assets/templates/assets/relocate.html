@@ -10,9 +10,8 @@ SPDX-License-Identifier: EUPL-1.2
 {% block title %}{{ title }}{% endblock title %}
 
 {% block extra_css %}
+{{ form.media.css }}
 <style>
-  .picker-option:hover { background-color: var(--bs-tertiary-bg); }
-
   .step-badge {
     width: 1.75rem;
     height: 1.75rem;
@@ -50,7 +49,6 @@ SPDX-License-Identifier: EUPL-1.2
   {# Room hidden field kept outside the picker's HTMX swap region, driven by it. The device multi-select carries its own hidden inputs inside each card. #}
   {{ form.new_room }}
 
-  {% url 'assets:device_search' as device_search_url %}
   {% url 'assets:room_search' as room_search_url %}
 
   <div id="lent-warning" class="alert alert-warning{% if not selected_any_lent %} d-none{% endif %}" role="alert">
@@ -74,7 +72,8 @@ SPDX-License-Identifier: EUPL-1.2
           {# Live selected-device count, kept in sync by picker.js (id derives from picker_id "device"). #}
           <span class="badge rounded-pill text-bg-secondary ms-auto" id="device-count">0</span>
         </div>
-        {% include "theme/includes/_picker.html" with picker_id="device" multiple=True field_name="devices" search_url=device_search_url search_name="q_device" placeholder=_("Search by EDV/Inv. no., manufacturer, serial…") errors=form.devices.errors selected_items=selected_devices selected_item_template="theme/includes/_device_picker_item.html" %}
+        {{ form.devices.errors }}
+        {{ form.devices }}
       </div>
     </div>
 
@@ -112,7 +111,7 @@ SPDX-License-Identifier: EUPL-1.2
 {% endblock body %}
 
 {% block extra_js %}
-<script src="{% static 'theme/js/picker.js' %}"></script>
+{{ form.media.js }}
 <script>
   (function () {
     "use strict";

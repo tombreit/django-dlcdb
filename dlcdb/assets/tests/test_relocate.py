@@ -77,20 +77,22 @@ class RelocateViewTests(BaseTest):
 
     def test_device_search_matches(self):
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "EDV-MOVE")
 
     def test_device_search_empty_query_returns_nothing(self):
-        response = self.client.post(reverse("assets:device_search"), {"q_device": ""}, headers={"HX-Request": "true"})
+        response = self.client.post(
+            reverse("theme:device_search"), {"source": "move", "q_device": ""}, headers={"HX-Request": "true"}
+        )
         self.assertNotContains(response, "EDV-MOVE")
 
     def test_device_search_excludes_already_selected(self):
         # The picker sends already-selected cards' hidden ``devices`` inputs along
         # with each search (hx-include); those devices must drop out of results.
         response = self.client.post(
-            reverse("assets:device_search"),
-            {"q_device": "*", "devices": [self.device.pk]},
+            reverse("theme:device_search"),
+            {"source": "move", "q_device": "*", "devices": [self.device.pk]},
             headers={"HX-Request": "true"},
         )
         self.assertNotContains(response, "EDV-MOVE")
@@ -101,7 +103,7 @@ class RelocateViewTests(BaseTest):
         self.assertNotContains(response, "A1.01")
 
     def test_search_requires_post(self):
-        self.assertEqual(self.client.get(reverse("assets:device_search")).status_code, 405)
+        self.assertEqual(self.client.get(reverse("theme:device_search")).status_code, 405)
 
     # --- relocate logic ---------------------------------------------------
 
@@ -190,7 +192,7 @@ class RelocateViewTests(BaseTest):
     def test_device_search_marks_lent_device(self):
         self._create_lent_device("EDV-LENT", "2-2", self.room_a)
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-LENT"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-LENT"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, 'data-lent="1"')
         # Consolidated state badge: record-type display label + lender, amber.
@@ -200,7 +202,7 @@ class RelocateViewTests(BaseTest):
 
     def test_device_search_shows_record_type_badge(self):
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
         # INROOM device -> green badge with the display label and the room number.
         self.assertContains(response, "text-bg-success")
@@ -212,7 +214,7 @@ class RelocateViewTests(BaseTest):
     def test_device_search_shows_single_identifier(self):
         # edv_id present -> only the EDV id is shown, not the sap_id.
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "EDV-MOVE")
         self.assertNotContains(response, "1-1")
@@ -221,7 +223,7 @@ class RelocateViewTests(BaseTest):
         sn_device = Device.objects.create(serial_number="SN-XYZ-9")
         InRoomRecord.objects.create(device=sn_device, room=self.room_a)
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "SN-XYZ-9"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "SN-XYZ-9"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "SN-XYZ-9")
 
@@ -230,14 +232,14 @@ class RelocateViewTests(BaseTest):
         device = Device.objects.create(edv_id="EDV-LAPTOP", device_type=laptop_type)
         InRoomRecord.objects.create(device=device, room=self.room_a)
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-LAPTOP"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-LAPTOP"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "bi-laptop")
 
         # A device type without an icon falls back to the default.
         self.assertEqual(DeviceType(name="x").icon_class, "bi-pc-display")
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "bi-pc-display")
 
@@ -248,7 +250,7 @@ class RelocateViewTests(BaseTest):
         # once the device becomes the selected card).
         admin_url = reverse("admin:core_device_change", args=[self.device.pk])
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, admin_url)
         self.assertContains(response, "js-picker-detail")
@@ -272,7 +274,9 @@ class RelocateViewTests(BaseTest):
         ordered = self._create_device(edv_id="EDV-ORDERED", sap_id="4-4")
         OrderedRecord.objects.create(device=ordered)
 
-        response = self.client.post(reverse("assets:device_search"), {"q_device": "*"}, headers={"HX-Request": "true"})
+        response = self.client.post(
+            reverse("theme:device_search"), {"source": "move", "q_device": "*"}, headers={"HX-Request": "true"}
+        )
         self.assertNotContains(response, "EDV-REMOVED")
         self.assertNotContains(response, "EDV-ORDERED")
         # The plain INROOM device is still offered.
@@ -282,7 +286,7 @@ class RelocateViewTests(BaseTest):
         lost = self._create_device(edv_id="EDV-LOST", sap_id="5-5")
         LostRecord.objects.create(device=lost)
         response = self.client.post(
-            reverse("assets:device_search"), {"q_device": "EDV-LOST"}, headers={"HX-Request": "true"}
+            reverse("theme:device_search"), {"source": "move", "q_device": "EDV-LOST"}, headers={"HX-Request": "true"}
         )
         self.assertContains(response, "EDV-LOST")
 

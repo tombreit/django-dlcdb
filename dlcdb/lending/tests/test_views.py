@@ -341,7 +341,7 @@ class LendingPrintSheetTests(BaseTest):
 
     def setUp(self):
         self.client.force_login(self.user)
-        self.url = reverse("lending:print_sheet", args=[self.record.pk])
+        self.url = reverse("lending:print_sheet", args=[self.device.pk])
 
     def _payload(self, **overrides):
         payload = {
@@ -402,31 +402,31 @@ class LendingDeviceSearchTests(BaseTest):
 
     def setUp(self):
         self.client.force_login(self.user)
-        self.url = reverse("lending:device_search")
+        self.url = reverse("theme:device_search")
 
     def test_empty_search_returns_no_devices(self):
-        response = self.client.post(self.url, {"q": ""})
+        response = self.client.post(self.url, {"source": "lend", "q": ""})
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "EDV-AVAIL")
 
     def test_wildcard_returns_all_available(self):
-        response = self.client.post(self.url, {"q": "*"})
+        response = self.client.post(self.url, {"source": "lend", "q": "*"})
         self.assertContains(response, "EDV-AVAIL")
         self.assertNotContains(response, "EDV-LENT")
 
     def test_search_matches_edv(self):
-        response = self.client.post(self.url, {"q": "AVAIL"})
+        response = self.client.post(self.url, {"source": "lend", "q": "AVAIL"})
         self.assertContains(response, "EDV-AVAIL")
 
     def test_lent_device_not_searchable(self):
-        response = self.client.post(self.url, {"q": "LENT"})
+        response = self.client.post(self.url, {"source": "lend", "q": "LENT"})
         self.assertNotContains(response, "EDV-LENT")
 
     def test_device_search_uses_q_not_search(self):
         # On the quick-lend page both pickers sit in one <form>; HTMX includes a
         # stray (empty) "search" from the person picker. Device search must key
         # off "q" only, so the stray param does not blank the results.
-        response = self.client.post(self.url, {"q": "*", "search": ""})
+        response = self.client.post(self.url, {"source": "lend", "q": "*", "search": ""})
         self.assertContains(response, "EDV-AVAIL")
 
 
@@ -464,7 +464,7 @@ class QuickLendViewTests(BaseTest):
 
     def _payload(self, **overrides):
         payload = {
-            "device_record": self.available_record.pk,
+            "device": self.available_device.pk,
             "person": self.person.id,
             "room": self.room.id,
             "lent_start_date": "2026-06-23",
@@ -481,19 +481,19 @@ class QuickLendViewTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="device-search-input"')
         self.assertContains(response, 'id="person-search-input"')
-        self.assertContains(response, 'id="id_device_record"')
+        self.assertContains(response, 'id="id_device"')
         self.assertContains(response, 'id="id_room"')
 
     def test_get_renders_print_button(self):
         response = self.client.get(self.url)
         self.assertContains(response, 'id="quick-lend-print"')
-        # The print endpoint is keyed on the device record pk, substituted by JS.
+        # The print endpoint is keyed on the device pk, substituted by JS.
         self.assertContains(response, "/0/print/")
 
     def test_device_option_exposes_lending_profile_flag(self):
         # A profile exists for the available device's type -> option flag is "1".
         LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
-        response = self.client.post(reverse("lending:device_search"), {"q": "AVAIL"})
+        response = self.client.post(reverse("theme:device_search"), {"source": "lend", "q": "AVAIL"})
         self.assertContains(response, 'data-has-profile="1"')
 
     def test_print_sheet_works_from_quick_lend_payload(self):
@@ -503,7 +503,7 @@ class QuickLendViewTests(BaseTest):
         )
         lent_before = LentRecord.objects.count()
         response = self.client.post(
-            reverse("lending:print_sheet", args=[self.available_record.pk]),
+            reverse("lending:print_sheet", args=[self.available_device.pk]),
             self._payload(),
         )
         self.assertEqual(response.status_code, 200)
@@ -521,12 +521,12 @@ class QuickLendViewTests(BaseTest):
 
     def test_post_rejects_non_inroom_record(self):
         lent_before = LentRecord.objects.filter(record_type=Record.LENT).count()
-        response = self.client.post(self.url, self._payload(device_record=self.lent_record.pk))
+        response = self.client.post(self.url, self._payload(device=self.lent_device.pk))
         self.assertRedirects(response, reverse("lending:quick_lend"))
         self.assertEqual(LentRecord.objects.filter(record_type=Record.LENT).count(), lent_before)
 
     def test_post_missing_device_redirects(self):
-        response = self.client.post(self.url, self._payload(device_record=""))
+        response = self.client.post(self.url, self._payload(device=""))
         self.assertRedirects(response, reverse("lending:quick_lend"))
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)

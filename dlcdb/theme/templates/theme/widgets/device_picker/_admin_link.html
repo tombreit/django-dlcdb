@@ -13,10 +13,12 @@ theme/js/picker.js clones the option into the selected slot, where the script
 reveals it (.js-picker-detail). Rendered visible for the server-side selected
 card (selectable=False).
 
-Expects: device (core.Device); selectable (bool).
+Expects: device (core.Device); selectable (bool). ``perms`` is used in the normal
+(request) render path; the device picker widget renders with no context
+processors, so it passes ``can_change_device`` explicitly instead.
 {% endcomment %}
 
-{% if perms.core.change_device %}
+{% if perms.core.change_device or can_change_device %}
   <div class="js-picker-detail border-top px-3 py-1{% if selectable %} d-none{% endif %}">
     <a href="{% url 'admin:core_device_change' device.pk %}" target="_blank" rel="noopener"
        class="small link-secondary text-decoration-none">

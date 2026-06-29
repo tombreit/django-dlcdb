@@ -10,6 +10,12 @@ class LendingConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.lending"
 
+    def ready(self):
+        # Register the lending device-picker source with the shared theme registry.
+        from . import pickers
+
+        pickers.register()
+
     nav_entries = [
         {
             "slot": "nav_settings",

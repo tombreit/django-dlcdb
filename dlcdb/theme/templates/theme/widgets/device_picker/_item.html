@@ -7,26 +7,26 @@ SPDX-License-Identifier: EUPL-1.2
 {% load i18n %}
 
 {% comment %}
-Shared device option card for the device picker, driven by theme/js/picker.js.
-Reused for live-search results and the selected-device slot across the assets
-(relocate) and lending (quick lend) pickers.
+Shared device option card for the centralized device picker, driven by
+theme/js/picker.js. Reused for live-search results and the selected-device slot
+across every picker source (assets relocate, lending quick lend, …).
 
-Always pass ``device`` (core.Device). ``record`` is the variant selector:
-  device only            relocate flow; option id is the device pk, the meta
-                         line shows the device's current status badge.
-  device + record        quick-lend flow; ``record`` is the available
-    (lending.LentRecord) LentRecord (pass ``device=record.device record=record``).
-                         Option id is the record pk, the meta line shows the
-                         device's current room and the card carries
-                         data-room-*/data-has-profile so the picker can prefill
-                         the room select.
+The card is device-only: the option id is always the device pk and the meta line
+is always the device's active-record status badge — there is no per-flow branch.
+Generic device data attributes are emitted unconditionally; a consumer's glue JS
+reads only the ones it needs:
+  data-room-id / data-room-label  the device's current room (lending prefills the
+                                  target room select from it).
+  data-has-profile                "1" when the device's type has a lending profile
+                                  (only the lending source annotates this; absent
+                                  -> falsy for other sources).
+  data-lent                       "1" when the device is currently lent (relocate
+                                  warns about moving a lent device).
 
-``record`` is only ever read inside ``{% if record %}`` (a missing var is safely
-falsy there) — never via a filter argument, which would raise on the assets
-variant where ``record`` is absent.
-
-Other params:
-  selectable (bool)        search-result card (shows chevron) vs selected slot.
+Params:
+  device (core.Device)     the device to render. The active record should be
+                           select_related for the status line / room.
+  selectable (bool)        search-result card (chevron) vs selected slot (button).
   locked (bool)            selected slot is read-only (no change/remove button).
   multi_field_name (str)   multi-select: emit a hidden input carrying the pk so
                            the form submits the live set.
@@ -35,15 +35,12 @@ Other params:
 <div
   class="js-picker-option card {% if selectable %}mb-1 border-0 picker-option{% else %}mb-2{% endif %}"
   {% if selectable %}role="button" style="cursor: pointer;"{% endif %}
-  data-option-id="{% if record %}{{ record.pk }}{% else %}{{ device.pk }}{% endif %}"
+  data-option-id="{{ device.pk }}"
   data-option-label="{{ device.edv_id|default:device.sap_id|default:device.serial_number|default:device }}"
-  {% if record %}
-    data-room-id="{{ record.room.pk|default:'' }}"
-    data-room-label="{{ record.room|default:'' }}"
-    data-has-profile="{{ record.has_lending_profile|yesno:'1,' }}"
-  {% else %}
-    data-lent="{% if device.active_record.record_type == 'LENT' %}1{% endif %}"
-  {% endif %}
+  data-room-id="{{ device.active_record.room_id|default:'' }}"
+  data-room-label="{{ device.active_record.room|default:'' }}"
+  data-has-profile="{{ device.has_lending_profile|yesno:'1,' }}"
+  data-lent="{% if device.active_record.record_type == 'LENT' %}1{% endif %}"
 >
   <div class="card-body d-flex align-items-center gap-2 px-1 py-2">
     <div class="d-flex flex-column align-items-center gap-1 flex-shrink-0">
@@ -80,20 +77,16 @@ Other params:
           <span class="text-muted">—</span>
         {% endif %}
       </div>
-      <div class="small{% if record %} text-muted{% endif %}">
-        {% if record %}
-          <i class="bi bi-door-open"></i> {{ record.room|default:"—" }}
-        {% else %}
-          {% with rec=device.active_record %}
-            {% if rec %}
-              <span class="badge text-bg-{{ rec.record_type_color }}">
-                {{ rec.get_record_type_display }}{% if rec.record_type == 'INROOM' and rec.room %} · {{ rec.room.number }}{% elif rec.record_type == 'LENT' and rec.person %} · {{ rec.person }}{% endif %}
-              </span>
-            {% else %}
-              <span class="badge text-bg-light border text-muted">{% translate "No record" %}</span>
-            {% endif %}
-          {% endwith %}
-        {% endif %}
+      <div class="small">
+        {% with rec=device.active_record %}
+          {% if rec %}
+            <span class="badge text-bg-{{ rec.record_type_color }}">
+              {{ rec.get_record_type_display }}{% if rec.record_type == 'INROOM' and rec.room %} · {{ rec.room.number }}{% elif rec.record_type == 'LENT' and rec.person %} · {{ rec.person }}{% endif %}
+            </span>
+          {% else %}
+            <span class="badge text-bg-light border text-muted">{% translate "No record" %}</span>
+          {% endif %}
+        {% endwith %}
       </div>
     </div>
 
@@ -108,7 +101,7 @@ Other params:
     {% endif %}
   </div>
 
-  {% include "theme/includes/_picker_admin_link.html" with device=device %}
+  {% include "theme/widgets/device_picker/_admin_link.html" with device=device %}
 
   {% if multi_field_name %}
     <input type="hidden" name="{{ multi_field_name }}" value="{{ device.pk }}">

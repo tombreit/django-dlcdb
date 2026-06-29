@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import BooleanField, Case, CharField, Count, Exists, IntegerField, OuterRef, Q, Value, When
+from django.db.models import BooleanField, Case, CharField, Count, IntegerField, Q, Value, When
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -23,14 +23,13 @@ from dlcdb.core.utils.tenants import tenant_scoped_queryset
 
 from .decorators import htmx_permission_required
 from .filters import (
-    LendingDeviceFilter,
     LendingPersonFilter,
     LentRecordFilter,
     STATE_OVERDUE,
     STATE_LENT,
     STATE_AVAILABLE,
 )
-from .forms import LentingForm
+from .forms import LentingForm, QuickLendDeviceForm
 from .models import LendingConfiguration, LendingProfile
 
 
@@ -130,6 +129,24 @@ def _get_scoped_record(request, pk):
         _tenant_scoped(LentRecord.objects.select_related("device", "person", "room"), request),
         pk=pk,
     )
+
+
+def _get_scoped_inroom_record(request, device_pk):
+    """
+    Resolve a device pk (as chosen in the device picker) to its current,
+    tenant-visible INROOM record — the available record a new lending starts
+    from. ``LentRecord.objects`` already restricts to the active record, so there
+    is at most one. Returns ``None`` if the device is out of tenant, unknown, or
+    no longer available (so the caller can reject it).
+    """
+    record = (
+        _tenant_scoped(LentRecord.objects.select_related("device", "person", "room"), request)
+        .filter(device_id=device_pk)
+        .first()
+    )
+    if record is None or record.record_type != Record.INROOM:
+        return None
+    return record
 
 
 def _lending_soft_warnings(request, form):
@@ -281,34 +298,6 @@ def person_search(request):
     )
 
 
-def _available_devices(request):
-    """Tenant-scoped queryset of available (INROOM), lentable devices to lend.
-
-    Annotates ``has_lending_profile`` so the device picker can tell whether an
-    Ausleihzettel (lending slip) can be printed for the device.
-    """
-    return _tenant_scoped(
-        LentRecord.objects.filter(record_type=Record.INROOM)
-        .select_related("device__manufacturer", "room")
-        .annotate(
-            has_lending_profile=Exists(LendingProfile.objects.filter(device_type=OuterRef("device__device_type")))
-        ),
-        request,
-    )
-
-
-@login_required
-@htmx_permission_required("core.change_lentrecord")
-def device_search(request):
-    """HTMX live-search backing the device picker in the quick-lend assistant."""
-    device_filter = LendingDeviceFilter(request.POST or None, queryset=_available_devices(request))
-    return TemplateResponse(
-        request,
-        "lending/includes/_device_search_results.html",
-        {"filter": device_filter},
-    )
-
-
 @login_required
 @htmx_permission_required("core.change_lentrecord")
 def quick_lend(request):
@@ -316,18 +305,22 @@ def quick_lend(request):
     One-screen "shortcut lending" assistant: pick an available device and a
     person (either order), a room, and create the lending in a single submit.
     Reuses the same lend path as the detail view via ``_save_lending``.
+
+    The device picker selects a ``core.Device``; we resolve its available INROOM
+    record before lending. The selected-device card is re-rendered by the device
+    picker widget from the bound ``QuickLendDeviceForm``.
     """
-    selected_device = None
     selected_person = None
+    device_form = QuickLendDeviceForm(request.POST or None, request=request)
 
     if request.method == "POST":
-        record_pk = request.POST.get("device_record")
-        if not record_pk:
+        device_pk = request.POST.get("device")
+        if not device_pk:
             messages.error(request, _("Please select a device to lend."))
             return redirect("lending:quick_lend")
 
-        record = _get_scoped_record(request, record_pk)
-        if record.record_type != Record.INROOM:
+        record = _get_scoped_inroom_record(request, device_pk)
+        if record is None:
             messages.error(request, _("This device is no longer available for lending."))
             return redirect("lending:quick_lend")
 
@@ -335,9 +328,9 @@ def quick_lend(request):
         if form.is_valid() and _save_lending(request, record, form):
             return redirect("lending:index")
 
-        # Validation failed: keep the picked device/person cards on re-render
-        # (they otherwise live only in the hidden fields).
-        selected_device = record
+        # Validation failed: keep the picked person card on re-render (it
+        # otherwise lives only in the hidden field; the device card is restored
+        # by the widget from the bound device_form).
         person_id = request.POST.get("person")
         if person_id:
             selected_person = Person.objects.filter(pk=person_id).first()
@@ -346,8 +339,8 @@ def quick_lend(request):
 
     context = {
         "form": form,
+        "device_form": device_form,
         "title": _("Quick lend"),
-        "selected_device": selected_device,
         "selected_person": selected_person,
     }
     return TemplateResponse(request, "lending/quick_lend.html", context)
@@ -377,8 +370,13 @@ def print_sheet(request, pk):
     Render the "Ausleihzettel" (lending slip) from the *unsaved* form data, so
     helpdesk can print and have it signed before committing the lending.
     Generalizes ``core.views.lent_management_views.print_lent_sheet``.
+
+    ``pk`` is the device pk (the device picker's option id); the slip is built
+    from the device's available INROOM record plus the submitted form data.
     """
-    record = _get_scoped_record(request, pk)
+    record = _get_scoped_inroom_record(request, pk)
+    if record is None:
+        raise Http404("Device is not available for lending.")
     device = record.device
 
     form = LentingForm(request.POST, instance=record, record_type=record.record_type)

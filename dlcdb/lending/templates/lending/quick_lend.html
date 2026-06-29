@@ -10,9 +10,7 @@ SPDX-License-Identifier: EUPL-1.2
 {% block title %}{{ title }}{% endblock title %}
 
 {% block extra_css %}
-<style>
-  .picker-option:hover { background-color: var(--bs-tertiary-bg); }
-</style>
+{{ device_form.media.css }}
 {% endblock extra_css %}
 
 {% block body %}
@@ -37,11 +35,9 @@ SPDX-License-Identifier: EUPL-1.2
 <form method="POST" action="{% url 'lending:quick_lend' %}" novalidate id="quick-lend-form">
   {% csrf_token %}
 
-  {# Hidden fields kept outside any HTMX swap region, driven by the pickers. #}
-  <input type="hidden" name="device_record" id="id_device_record" value="{{ form.data.device_record|default:'' }}">
+  {# Person hidden field kept outside any HTMX swap region, driven by the person picker. The device picker widget renders its own hidden field. #}
   {{ form.person }}
 
-  {% url 'lending:device_search' as device_search_url %}
   {% url 'lending:person_search' as person_search_url %}
 
   <div class="row g-4">
@@ -53,7 +49,7 @@ SPDX-License-Identifier: EUPL-1.2
           <i class="bi bi-pc-display"></i> {% translate "Device" %}
         </div>
         <div class="card-body">
-          {% include "theme/includes/_picker.html" with picker_id="device" field_id="id_device_record" search_url=device_search_url search_name="q" label=_("Available device") placeholder=_("Search by EDV/Inv. no., manufacturer…") required=True has_selected=selected_device selected_item_template="theme/includes/_device_picker_item.html" device=selected_device.device record=selected_device selectable=False %}
+          {{ device_form.device }}
         </div>
       </div>
     </div>
@@ -146,11 +142,11 @@ SPDX-License-Identifier: EUPL-1.2
 {% endblock body %}
 
 {% block extra_js %}
-<script src="{% static 'theme/js/picker.js' %}"></script>
+{{ device_form.media.js }}
 <script>
   (function () {
     "use strict";
-    const deviceInput = document.getElementById("id_device_record");
+    const deviceInput = document.getElementById("id_device");
     const personInput = document.getElementById("id_person");
     const submitBtn = document.getElementById("quick-lend-submit");
     const printBtn = document.getElementById("quick-lend-print");

@@ -7,7 +7,37 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import LentRecord, Person, Record, Room
+from dlcdb.core.models import Device, LentRecord, Person, Record, Room
+from dlcdb.theme.widgets import DevicePickerField
+
+from .pickers import lend_queryset
+
+
+class QuickLendDeviceForm(forms.Form):
+    """
+    Device selection for the quick-lend assistant: a single-select device picker
+    (see ``dlcdb.theme.widgets.DevicePickerWidget``). Kept separate from
+    ``LentingForm`` because it picks a ``core.Device`` while ``LentingForm`` edits
+    the resulting ``LentRecord``; the view resolves the device's available INROOM
+    record before lending.
+    """
+
+    device = DevicePickerField(
+        source="lend",
+        queryset=Device.objects.none(),
+        label=_("Available device"),
+        placeholder=_("Search by EDV/Inv. no., manufacturer…"),
+        error_messages={"required": _("Please select a device to lend.")},
+    )
+
+    def __init__(self, *args, request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if request is not None:
+            # Scope to the tenant-visible, available devices so re-render and
+            # validation both reject an out-of-scope device pk.
+            self.fields["device"].queryset = lend_queryset(request)
+            # Let the widget gate the selected card's admin link on the user's perm.
+            self.fields["device"].widget.user = request.user
 
 
 class LentingForm(forms.ModelForm):

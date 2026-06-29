@@ -6,10 +6,16 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% load i18n %}
 
+{% comment %}
+Live-search results for the centralized device picker, swapped in by HTMX and
+shared by every picker source (lending, relocate, …). Each row is the uniform
+device card; ``query`` is the submitted search term (drives the "no match" hint).
+{% endcomment %}
+
 {% if devices %}
   <div class="bg-body border rounded shadow-sm overflow-auto p-1" style="max-height: 22rem;">
     {% for device in devices %}
-      {% include "theme/includes/_device_picker_item.html" with device=device selectable=True %}
+      {% include "theme/widgets/device_picker/_item.html" with device=device selectable=True %}
     {% endfor %}
   </div>
 {% elif query %}

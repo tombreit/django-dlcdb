@@ -11,6 +11,12 @@ class AssetsConfig(AppConfig):
     name = "dlcdb.assets"
     verbose_name = _("Assets")
 
+    def ready(self):
+        # Register the relocate device-picker source with the shared theme registry.
+        from . import pickers
+
+        pickers.register()
+
     nav_entries = [
         {
             "slot": "nav_main",

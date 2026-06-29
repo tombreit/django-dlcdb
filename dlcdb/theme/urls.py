@@ -6,9 +6,8 @@ from django.urls import path
 
 from . import views
 
-app_name = "assets"
+app_name = "theme"
 
 urlpatterns = [
-    path("relocate/", views.relocate, name="relocate"),
-    path("room-search/", views.room_search, name="room_search"),
+    path("device-search/", views.device_search, name="device_search"),
 ]
