@@ -156,11 +156,26 @@ class Record(AuditBaseModel):
         ),
     )
     lent_end_date = models.DateField(
-        null=True, blank=True, verbose_name="Zurückgegeben am", help_text="Mit dem Setzen ist der Verleih abgeschlossen"
+        null=True,
+        blank=True,
+        verbose_name=_("Returned on"),
+        help_text=_("Once provided, the rental is complete"),
     )
-    lent_note = models.TextField(blank=True, verbose_name="Interne Bemerkung (Ausleihe)")
-    lent_reason = models.TextField(blank=True, verbose_name="Ausleihgrund")
-    lent_accessories = models.TextField(blank=True, verbose_name="Zubehör")
+    lent_note = models.TextField(
+        blank=True,
+        verbose_name=_("Note"),
+        help_text=_("Note (lending, internal only)"),
+    )
+    lent_reason = models.TextField(
+        blank=True,
+        # Translators: label for the reason a device is lent out
+        verbose_name=_("Reason"),
+        help_text=_("Reason for lending"),
+    )
+    lent_accessories = models.TextField(
+        blank=True,
+        verbose_name=_("Accessories"),
+    )
 
     # InRoomRecord
     room = models.ForeignKey(

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 17:39+0200\n"
-"PO-Revision-Date: 2026-06-25 17:43+0200\n"
+"POT-Creation-Date: 2026-06-29 16:36+0200\n"
+"PO-Revision-Date: 2026-06-29 16:40+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -68,73 +68,46 @@ msgstr "Erneut anmelden"
 msgid "Assets"
 msgstr "Assets"
 
-#: dlcdb/assets/apps.py:18
+#: dlcdb/assets/apps.py:24
 msgid "Move"
 msgstr "Umziehen"
 
-#: dlcdb/assets/forms.py:25
+#: dlcdb/assets/forms.py:29
+msgid "Search by EDV/Inv. no., manufacturer, serial…"
+msgstr "Suche nach EDV-ID, Inventarnummer, Hersteller, Seriennummer etc..."
+
+#: dlcdb/assets/forms.py:30
 msgid "Please select at least one device to move."
 msgstr "Bitte mindestens ein zu verschiebendes Gerät auswählen."
 
-#: dlcdb/assets/forms.py:30
+#: dlcdb/assets/forms.py:35
 msgid "Please select a target room."
 msgstr "Bitte einen Zielraum auswählen."
 
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:47
-#: dlcdb/lending/templates/lending/detail.html:61
-#: dlcdb/lending/templates/lending/includes/_device_list_item.html:43
-msgid "EDV"
-msgstr "EDV"
-
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:49
-#: dlcdb/lending/templates/lending/detail.html:62
-#: dlcdb/lending/templates/lending/includes/_device_list_item.html:44
-msgid "Inv."
-msgstr "Inventar-Nr."
-
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:51
-#: dlcdb/lending/templates/lending/includes/_device_list_item.html:46
-msgid "SN"
-msgstr ""
-
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:63
-msgid "No record"
-msgstr "Kein Record"
-
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:73
-#: dlcdb/theme/templates/theme/includes/_picker.html:55
-msgid "Remove"
-msgstr "Entfernen"
-
-#: dlcdb/assets/templates/assets/includes/_device_list_item.html:73
 #: dlcdb/assets/templates/assets/includes/_room_list_item.html:40
-#: dlcdb/lending/templates/lending/includes/_device_list_item.html:58
 #: dlcdb/lending/templates/lending/includes/_person_list_item.html:57
-#: dlcdb/theme/templates/theme/includes/_picker.html:54
+#: dlcdb/theme/templates/theme/includes/_picker.html:57
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:97
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:98
 msgid "Change"
 msgstr "Ändern"
-
-#: dlcdb/assets/templates/assets/includes/_device_search_results.html:17
-#: dlcdb/lending/templates/lending/includes/_device_search_results.html:18
-msgid "No matching device found."
-msgstr "Kein passendes Gerät gefunden."
 
 #: dlcdb/assets/templates/assets/includes/_room_search_results.html:17
 msgid "No matching room found."
 msgstr "Kein entsprechender Raum gefunden."
 
-#: dlcdb/assets/templates/assets/relocate.html:38 dlcdb/assets/views.py:155
+#: dlcdb/assets/templates/assets/relocate.html:37 dlcdb/assets/views.py:97
 msgid "Move devices"
 msgstr "Geräte verschieben"
 
-#: dlcdb/assets/templates/assets/relocate.html:40
+#: dlcdb/assets/templates/assets/relocate.html:39
 msgid ""
 "Pick one or more devices, choose the room to move them to, then press Move."
 msgstr ""
 "Ein oder mehrere Geräte auswählen, den Zielraum wählen und auf „Verschieben“ "
 "klicken."
 
-#: dlcdb/assets/templates/assets/relocate.html:58
+#: dlcdb/assets/templates/assets/relocate.html:56
 msgid ""
 "One or more selected devices are currently lent. Moving a lent device only "
 "updates the room of its active lending record — it does not end the lending."
@@ -143,27 +116,23 @@ msgstr ""
 "Verschieben eines verliehenen Geräts aktualisiert nur den Raum des aktiven "
 "Verleihvorgangs — der Verleih wird dadurch nicht beendet."
 
-#: dlcdb/assets/templates/assets/relocate.html:72 dlcdb/core/apps.py:25
+#: dlcdb/assets/templates/assets/relocate.html:70 dlcdb/core/apps.py:25
 msgid "Devices"
 msgstr "Gerät"
 
-#: dlcdb/assets/templates/assets/relocate.html:77
-msgid "Search by EDV/Inv. no., manufacturer, serial…"
-msgstr "Suche nach EDV-ID, Inventarnummer, Hersteller, Seriennummer etc..."
-
-#: dlcdb/assets/templates/assets/relocate.html:96
+#: dlcdb/assets/templates/assets/relocate.html:95
 msgid "Target room"
 msgstr "Raum"
 
-#: dlcdb/assets/templates/assets/relocate.html:99
+#: dlcdb/assets/templates/assets/relocate.html:98
 msgid "Search by room number or nickname…"
 msgstr "Raum-Suche via Raumnummer oder Nickname"
 
-#: dlcdb/assets/templates/assets/relocate.html:107
+#: dlcdb/assets/templates/assets/relocate.html:106
 msgid "Move now"
 msgstr "Jetzt umziehen"
 
-#: dlcdb/assets/views.py:131
+#: dlcdb/assets/views.py:73
 msgid "You do not have permission to move devices."
 msgstr "Sie haben nicht die Berechtigung, Geräte zu verschieben."
 
@@ -181,7 +150,7 @@ msgstr "Lizenztyp"
 
 #: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:101
 #: dlcdb/lending/templates/lending/index.html:5
-#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:263
+#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:280
 msgid "Lending"
 msgstr "Ausleihe"
 
@@ -332,7 +301,9 @@ msgid "Contact (internal)"
 msgstr "Kontakt (intern)"
 
 #: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/core/models/record.py:166
 #: dlcdb/lending/templates/lending/detail.html:170
+#: dlcdb/lending/templates/lending/quick_lend.html:141
 #: dlcdb/licenses/templates/licenses/licenses_table.html:83
 msgid "Note"
 msgstr "Notiz"
@@ -497,7 +468,7 @@ msgid "Duplicate"
 msgstr "Duplikat"
 
 #: dlcdb/core/models/record.py:93 dlcdb/lending/templates/lending/index.html:80
-#: dlcdb/lending/templates/lending/quick_lend.html:53
+#: dlcdb/lending/templates/lending/quick_lend.html:49
 msgid "Device"
 msgstr "Gerät"
 
@@ -529,11 +500,37 @@ msgstr ""
 "Wenn aktiviert wird das Rückgabedatum mit dem Vertragsende synchronisiert. "
 "Deaktivieren um ein abweichendes Datum zu setzen."
 
-#: dlcdb/core/models/record.py:170 dlcdb/core/models/room.py:72
+#: dlcdb/core/models/record.py:161
+msgid "Returned on"
+msgstr "Zurückgegeben am"
+
+#: dlcdb/core/models/record.py:162
+msgid "Once provided, the rental is complete"
+msgstr "Wenn angegeben gilt das Gerät als zurückgegeben"
+
+#: dlcdb/core/models/record.py:167
+msgid "Note (lending, internal only)"
+msgstr "Notiz (Ausleihe, nur intern)"
+
+#. Translators: label for the reason a device is lent out
+#: dlcdb/core/models/record.py:172
+#: dlcdb/lending/templates/lending/detail.html:176
+msgid "Reason"
+msgstr "Grund"
+
+#: dlcdb/core/models/record.py:173
+msgid "Reason for lending"
+msgstr "Ausleihgrund"
+
+#: dlcdb/core/models/record.py:177
+msgid "Accessories"
+msgstr "Zubehör"
+
+#: dlcdb/core/models/record.py:185 dlcdb/core/models/room.py:72
 msgid "Room"
 msgstr "Raum"
 
-#: dlcdb/core/models/record.py:182
+#: dlcdb/core/models/record.py:197
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
@@ -670,7 +667,7 @@ msgstr ""
 
 #: dlcdb/dashboard/templates/dashboard/index.html:27
 msgid "Devices by location"
-msgstr ""
+msgstr "Geräte nach Standort"
 
 #: dlcdb/dashboard/templates/dashboard/index.html:31
 msgid "Device history"
@@ -721,11 +718,11 @@ msgstr "Inventarisieren"
 msgid "SAP comparison"
 msgstr "SAP-Abgleich"
 
-#: dlcdb/lending/apps.py:17
+#: dlcdb/lending/apps.py:23
 msgid "Lending configuration"
 msgstr "Ausleihe Konfiguration"
 
-#: dlcdb/lending/apps.py:25
+#: dlcdb/lending/apps.py:31
 msgid "Lending profiles"
 msgstr "Ausleih-Profile"
 
@@ -755,11 +752,23 @@ msgstr "Geräteklasse..."
 msgid "Person..."
 msgstr "Person..."
 
-#: dlcdb/lending/filters.py:104 dlcdb/lending/filters.py:130
+#: dlcdb/lending/filters.py:104
 msgid "Search"
 msgstr "Suche"
 
-#: dlcdb/lending/forms.py:44
+#: dlcdb/lending/forms.py:28
+msgid "Available device"
+msgstr "Verfügbares Gerät"
+
+#: dlcdb/lending/forms.py:29
+msgid "Search by EDV/Inv. no., manufacturer…"
+msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
+
+#: dlcdb/lending/forms.py:30 dlcdb/lending/views.py:319
+msgid "Please select a device to lend."
+msgstr "Bitte ein Gerät zum verleihen auswählen."
+
+#: dlcdb/lending/forms.py:74
 msgid ""
 "Device is currently \"not locatable\". It must be located before it can be "
 "lent."
@@ -768,7 +777,7 @@ msgstr ""
 "lokalisiert werden."
 
 #: dlcdb/lending/templates/lending/detail.html:23
-#: dlcdb/lending/templates/lending/quick_lend.html:23
+#: dlcdb/lending/templates/lending/quick_lend.html:21
 msgid "Back to overview"
 msgstr "Zurück zur Übersicht"
 
@@ -782,49 +791,59 @@ msgid "Device data"
 msgstr "Geräte-Daten"
 
 #: dlcdb/lending/templates/lending/detail.html:54
-#: dlcdb/theme/templates/theme/includes/_picker_admin_link.html:23
+#: dlcdb/theme/templates/theme/widgets/device_picker/_admin_link.html:25
 msgid "Open device in admin"
 msgstr "Gerät Admin-Detailansicht"
 
+#: dlcdb/lending/templates/lending/detail.html:61
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:71
+msgid "EDV"
+msgstr "EDV"
+
+#: dlcdb/lending/templates/lending/detail.html:62
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:73
+msgid "Inv."
+msgstr "Inventar-Nr."
+
 #: dlcdb/lending/templates/lending/detail.html:79
-#: dlcdb/lending/templates/lending/quick_lend.html:65
+#: dlcdb/lending/templates/lending/quick_lend.html:61
 msgid "Person and room"
 msgstr "Person und Raum"
 
 #: dlcdb/lending/templates/lending/detail.html:84
-#: dlcdb/lending/templates/lending/quick_lend.html:68
+#: dlcdb/lending/templates/lending/quick_lend.html:64
 msgid "Person"
 msgstr "Person"
 
 #: dlcdb/lending/templates/lending/detail.html:84
-#: dlcdb/lending/templates/lending/quick_lend.html:68
+#: dlcdb/lending/templates/lending/quick_lend.html:64
 msgid "Search person by name or e-mail, or “*” for all…"
 msgstr "Suche Person via Name oder Email, oder \"*\" für Alle"
 
 #: dlcdb/lending/templates/lending/detail.html:89
-#: dlcdb/lending/templates/lending/quick_lend.html:73
+#: dlcdb/lending/templates/lending/quick_lend.html:69
 msgid "Room / location"
 msgstr "Raum/Standort"
 
 #: dlcdb/lending/templates/lending/detail.html:102
-#: dlcdb/lending/templates/lending/quick_lend.html:88
+#: dlcdb/lending/templates/lending/quick_lend.html:84
 msgid "Dates"
 msgstr ""
 
 #: dlcdb/lending/templates/lending/detail.html:109
-#: dlcdb/lending/templates/lending/quick_lend.html:95
+#: dlcdb/lending/templates/lending/quick_lend.html:91
 msgid "Lent from"
 msgstr "Verliehen von"
 
 #: dlcdb/lending/templates/lending/detail.html:118
-#: dlcdb/lending/templates/lending/quick_lend.html:104
+#: dlcdb/lending/templates/lending/quick_lend.html:100
 msgid "Desired return date"
 msgstr "Verleihende"
 
 #: dlcdb/lending/templates/lending/detail.html:125
-#: dlcdb/lending/templates/lending/quick_lend.html:112
+#: dlcdb/lending/templates/lending/quick_lend.html:108
 msgid "Keep in sync with contract end"
-msgstr ""
+msgstr "Synchronisiere mit Vertragsenddatum"
 
 #: dlcdb/lending/templates/lending/detail.html:134
 msgid "Return date"
@@ -835,18 +854,16 @@ msgid "Set this to acknowledge the return."
 msgstr "Rückgabe bestätigen."
 
 #: dlcdb/lending/templates/lending/detail.html:156
+#: dlcdb/lending/templates/lending/quick_lend.html:127
 msgid "Accessories, notes & more"
-msgstr ""
+msgstr "Zubehör, Notizen etc."
 
 #: dlcdb/lending/templates/lending/detail.html:164
+#: dlcdb/lending/templates/lending/quick_lend.html:135
 msgid "Accessories / condition"
 msgstr "Zubehör/Zustand"
 
-#: dlcdb/lending/templates/lending/detail.html:176
-msgid "Reason"
-msgstr "Grund"
-
-#: dlcdb/lending/templates/lending/detail.html:189 dlcdb/lending/views.py:263
+#: dlcdb/lending/templates/lending/detail.html:189 dlcdb/lending/views.py:280
 msgid "Lend device"
 msgstr "Gerät verleihen"
 
@@ -856,12 +873,12 @@ msgid "Save"
 msgstr "Speichern"
 
 #: dlcdb/lending/templates/lending/detail.html:200
-#: dlcdb/lending/templates/lending/quick_lend.html:137
+#: dlcdb/lending/templates/lending/quick_lend.html:175
 msgid "Print lending slip"
 msgstr "Verleihzettel drucken"
 
 #: dlcdb/lending/templates/lending/detail.html:205
-#: dlcdb/lending/templates/lending/quick_lend.html:141
+#: dlcdb/lending/templates/lending/quick_lend.html:179
 #: dlcdb/licenses/templates/licenses/form_partial.html:81
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -879,8 +896,8 @@ msgid "Loading..."
 msgstr "Lädt..."
 
 #: dlcdb/lending/templates/lending/index.html:18
-#: dlcdb/lending/templates/lending/quick_lend.html:25
-#: dlcdb/lending/views.py:349
+#: dlcdb/lending/templates/lending/quick_lend.html:23
+#: dlcdb/lending/views.py:343
 msgid "Quick lend"
 msgstr "Schnellverleih"
 
@@ -906,7 +923,7 @@ msgstr "Zeige alle"
 
 #: dlcdb/lending/templates/lending/index.html:81
 msgid "Person / status"
-msgstr ""
+msgstr "Person / Status"
 
 #: dlcdb/lending/templates/lending/index.html:82
 msgid "Due"
@@ -916,72 +933,60 @@ msgstr "Fällig"
 msgid "No devices found."
 msgstr "Keine Geräte gefunden."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:30
+#: dlcdb/lending/templates/lending/quick_lend.html:28
 msgid "Pick an available device and a person, choose a room, then lend."
 msgstr "Wähle Gerät und Person für den Verleih."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:56
-msgid "Available device"
-msgstr "Verfügbares Gerät"
-
-#: dlcdb/lending/templates/lending/quick_lend.html:56
-msgid "Search by EDV/Inv. no., manufacturer…"
-msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
-
-#: dlcdb/lending/templates/lending/quick_lend.html:77
+#: dlcdb/lending/templates/lending/quick_lend.html:73
 msgid "Prefilled from the device's current location."
 msgstr "Vorausgefüllt mit dem aktuellen Standort."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:108
+#: dlcdb/lending/templates/lending/quick_lend.html:104
 msgid "Defaults to the person's contract end date."
 msgstr "Standardmäßig das Vertragsende der Person."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:124
+#: dlcdb/lending/templates/lending/quick_lend.html:162
 msgid "Lend now"
 msgstr "Jetzt verleihen"
 
-#: dlcdb/lending/views.py:147
+#: dlcdb/lending/views.py:164
 #, python-format
 msgid "Warning: No UDB contract end date found for %(person)s!"
 msgstr ""
 
-#: dlcdb/lending/views.py:149
+#: dlcdb/lending/views.py:166
 msgid "Warning: Contract ends before the desired return date!"
 msgstr "Warnung: Vertrag endet vor Verleihfrist!"
 
-#: dlcdb/lending/views.py:195
+#: dlcdb/lending/views.py:212
 msgid "Lent state unknown - please report this issue!"
 msgstr ""
 
-#: dlcdb/lending/views.py:211
+#: dlcdb/lending/views.py:228
 #, python-format
 msgid "Configuration error: %(err)s"
 msgstr ""
 
-#: dlcdb/lending/views.py:218
+#: dlcdb/lending/views.py:235
 #, python-format
 msgid "Device “%(device)s” lent to “%(person)s”."
 msgstr "Gerät “%(device)s” verliehen an “%(person)s”."
 
-#: dlcdb/lending/views.py:220
+#: dlcdb/lending/views.py:237
 #, python-format
 msgid "Return of “%(device)s” from “%(person)s” acknowledged."
 msgstr "Rückgabe von “%(device)s” von “%(person)s” bestätigt."
 
-#: dlcdb/lending/views.py:222
+#: dlcdb/lending/views.py:239
 #, python-format
 msgid "Lending of “%(device)s” to “%(person)s” saved."
 msgstr "Verleih von “%(device)s” an “%(person)s” gespeichert."
 
-#: dlcdb/lending/views.py:238
+#: dlcdb/lending/views.py:255
 msgid "Device is currently \"not locatable\" and must be located first."
 msgstr ""
 
-#: dlcdb/lending/views.py:326
-msgid "Please select a device to lend."
-msgstr "Bitte ein Gerät zum verleihen auswählen."
-
-#: dlcdb/lending/views.py:331
+#: dlcdb/lending/views.py:324
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
 
@@ -1265,7 +1270,7 @@ msgid "Settings"
 msgstr "Einstellungen"
 
 #: dlcdb/templates/admin/navbar.html:108
-#: dlcdb/theme/templates/theme/includes/navbar.html:108
+#: dlcdb/theme/templates/theme/includes/navbar.html:109
 msgid "Language"
 msgstr "Sprache"
 
@@ -1289,6 +1294,12 @@ msgstr "Geändert von"
 msgid "None"
 msgstr "None"
 
+#: dlcdb/theme/templates/theme/includes/_picker.html:58
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:97
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:98
+msgid "Remove"
+msgstr "Entfernen"
+
 #: dlcdb/theme/templates/theme/includes/footer.html:11
 msgid "Documentation"
 msgstr "Dokumentation"
@@ -1309,21 +1320,45 @@ msgstr "Problem melden"
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:89
+#: dlcdb/theme/templates/theme/includes/navbar.html:84
+msgid "Superusers are not tenant aware"
+msgstr "Superuser sind nicht auf Mandanten beschränkt"
+
+#: dlcdb/theme/templates/theme/includes/navbar.html:84
+msgid "Superuser"
+msgstr ""
+
+#: dlcdb/theme/templates/theme/includes/navbar.html:84
+msgid "Tenant"
+msgstr "Mandant"
+
+#: dlcdb/theme/templates/theme/includes/navbar.html:90
 msgid "Toggle theme"
 msgstr "Theme umschalten"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:93
+#: dlcdb/theme/templates/theme/includes/navbar.html:94
 msgid "Light"
 msgstr "Hell"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:96
+#: dlcdb/theme/templates/theme/includes/navbar.html:97
 msgid "Dark"
 msgstr "Dunkel"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:99
+#: dlcdb/theme/templates/theme/includes/navbar.html:100
 msgid "Auto"
 msgstr "Auto"
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:75
+msgid "SN"
+msgstr ""
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:87
+msgid "No record"
+msgstr "Kein Record"
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_results.html:23
+msgid "No matching device found."
+msgstr "Kein passendes Gerät gefunden."
 
 #: dlcdb/theme/templates/theme/widgets/icon_picker.html:25
 msgid "Browse…"
@@ -1336,6 +1371,10 @@ msgstr "Icons suchen..."
 #: dlcdb/theme/templates/theme/widgets/icon_picker.html:33
 msgid "No matching icon."
 msgstr "Kein passendes Icon."
+
+#: dlcdb/theme/views.py:44
+msgid "Permission denied."
+msgstr "Zugriff verweigert."
 
 #~ msgid "Record of type 'Lost'"
 #~ msgstr "Record vom Typ \"Nicht auffindbar\""

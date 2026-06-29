@@ -98,7 +98,7 @@ class LentingForm(forms.ModelForm):
             ),
             "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "room": forms.Select(attrs={"class": "form-select is-tom-select"}),
-            "lent_reason": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
-            "lent_accessories": forms.Textarea(attrs={"rows": 2, "class": "form-control"}),
+            "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_note": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
         }

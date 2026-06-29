@@ -114,6 +114,47 @@ SPDX-License-Identifier: EUPL-1.2
     </div>
   </div>
 
+  {# --- 4. Misc (collapsed) -------------------------------------------- #}
+  <div class="card mb-4">
+    <button
+      class="btn card-header fw-semibold w-100 text-start collapsed d-flex align-items-center justify-content-between"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#misc-fields"
+      aria-expanded="false"
+      aria-controls="misc-fields"
+    >
+      <span><i class="bi bi-sliders"></i> {% translate "Accessories, notes & more" %}</span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <div class="collapse" id="misc-fields">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="{{ form.lent_accessories.id_for_label }}" class="form-label">
+              {% translate "Accessories / condition" %}
+            </label>
+            {{ form.lent_accessories }}
+          </div>
+          <div class="col-md-6">
+            <label for="{{ form.lent_note.id_for_label }}" class="form-label">
+              {% translate "Note" %}
+            </label>
+            {{ form.lent_note }}
+          </div>
+          {% comment %}
+          <div class="col-md-6">
+            <label for="{{ form.lent_reason.id_for_label }}" class="form-label">
+              {% translate "Reason" %}
+            </label>
+            {{ form.lent_reason }}
+          </div>
+          {% endcomment %}
+        </div>
+      </div>
+    </div>
+  </div>
+
   {# --- Actions -------------------------------------------------------- #}
   <div class="d-flex flex-wrap gap-2 mt-4">
     <button type="submit" id="quick-lend-submit" class="btn btn-primary" disabled>
