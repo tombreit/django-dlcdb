@@ -13,6 +13,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -126,7 +127,10 @@ def _get_scoped_record(request, pk):
     out-of-tenant or non-lentable (e.g. REMOVED) records.
     """
     return get_object_or_404(
-        _tenant_scoped(LentRecord.objects.select_related("device", "person", "room"), request),
+        _tenant_scoped(
+            LentRecord.objects.select_related("device__active_record__room", "person", "room"),
+            request,
+        ),
         pk=pk,
     )
 
@@ -220,7 +224,10 @@ def _save_lending(request, record, form):
     ``quick_lend``.
     """
     user, username = get_denormalized_user(request.user)
-    _lending_soft_warnings(request, form)
+    # Soft warnings sanity-check a lending's dates against the borrower's contract;
+    # they do not apply when the submit is acknowledging a return (lent_end_date set).
+    if not form.cleaned_data.get("lent_end_date"):
+        _lending_soft_warnings(request, form)
     try:
         with transaction.atomic():
             _apply_state_machine(record, form, user, username)
@@ -243,45 +250,92 @@ def _save_lending(request, record, form):
 
 @login_required
 @htmx_permission_required("core.change_lentrecord")
-def detail(request, pk):
+def lend(request, pk=None):
     """
-    Lend an available device to a person, or acknowledge the return of / edit a
-    currently lent device. Replaces the django-admin LentRecord change view.
-    """
-    record = _get_scoped_record(request, pk)
-    device = record.device
+    Single lending screen. Two entry points share one form and one save path:
 
-    if record.record_type == Record.LOST:
-        messages.error(request, _('Device is currently "not locatable" and must be located first.'))
-        return redirect("lending:index")
+    - **picker mode** (``pk`` is None, ``lending:lend``): pick an available device
+      via the live device picker and a person, then lend in one submit — the
+      "quick lend" assistant.
+    - **record mode** (``pk`` given, ``lending:detail``): open a device's active
+      ``LentRecord`` to lend it (INROOM), or acknowledge its return / edit it
+      (LENT). The device is shown locked; ``?action=return`` prefills today's
+      return date.
+
+    Both resolve to a ``LentRecord`` and run the same ``_save_lending`` state
+    machine. Replaces the django-admin LentRecord change view.
+    """
+    picker_mode = pk is None
+    device_form = QuickLendDeviceForm(request.POST or None, request=request) if picker_mode else None
+
+    if picker_mode:
+        record = device = None
+    else:
+        record = _get_scoped_record(request, pk)
+        device = record.device
+        if record.record_type == Record.LOST:
+            messages.error(request, _('Device is currently "not locatable" and must be located first.'))
+            return redirect("lending:index")
 
     if request.method == "POST":
+        if picker_mode:
+            device_pk = request.POST.get("device")
+            if not device_pk:
+                messages.error(request, _("Please select a device to lend."))
+                return redirect("lending:lend")
+            record = _get_scoped_inroom_record(request, device_pk)
+            if record is None:
+                messages.error(request, _("This device is no longer available for lending."))
+                return redirect("lending:lend")
+            device = record.device
+
         form = LentingForm(request.POST, instance=record, record_type=record.record_type)
         if form.is_valid() and _save_lending(request, record, form):
             return redirect("lending:index")
     else:
-        form = LentingForm(instance=record, record_type=record.record_type)
+        form = LentingForm(
+            instance=record,
+            record_type=record.record_type if record else Record.INROOM,
+        )
+        # A "return" quick action lands here with today's date prefilled; guarded
+        # on LENT so a stale ?action=return on an already-returned device is inert
+        # (and the field is not rendered outside the return flow anyway).
+        if not picker_mode and record.record_type == Record.LENT and request.GET.get("action") == "return":
+            form.initial["lent_end_date"] = timezone.localdate()
 
     # Keep the visually selected person card in sync after a failed POST, where
-    # the picked person lives only in the submitted (hidden) person field.
-    selected_person = record.person
+    # the picked person lives only in the submitted (hidden) person field. In
+    # record mode it defaults to the record's current person.
+    selected_person = record.person if record else None
     if request.method == "POST":
         submitted_person_id = request.POST.get("person")
         if submitted_person_id:
-            selected_person = Person.objects.filter(pk=submitted_person_id).first() or record.person
+            selected_person = Person.objects.filter(pk=submitted_person_id).first() or selected_person
+
+    is_lend_flow = picker_mode or record.record_type == Record.INROOM
+    is_return_flow = (not picker_mode) and record.record_type == Record.LENT
 
     context = {
         "form": form,
+        "device_form": device_form,
         "record": record,
         "device": device,
         "selected_person": selected_person,
-        "is_lend_flow": record.record_type == Record.INROOM,
-        "is_return_flow": record.record_type == Record.LENT,
-        "title": _("Lend device") if record.record_type == Record.INROOM else _("Lending"),
-        "obj_admin_url": reverse("admin:core_lentrecord_change", args=[record.pk]),
-        "has_lending_profile": LendingProfile.objects.filter(device_type=device.device_type).exists(),
+        "picker_mode": picker_mode,
+        "is_lend_flow": is_lend_flow,
+        "is_return_flow": is_return_flow,
+        "title": _("Quick lend")
+        if picker_mode
+        else (_("Lend device") if record.record_type == Record.INROOM else _("Lending")),
+        "obj_admin_url": None if picker_mode else reverse("admin:core_lentrecord_change", args=[record.pk]),
+        # Only the lend flow can print a slip (print_sheet resolves an INROOM
+        # record and 404s otherwise), so gate the button on it here.
+        "has_lending_profile": is_lend_flow
+        and not picker_mode
+        and LendingProfile.objects.filter(device_type=device.device_type).exists(),
+        "form_action": reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk]),
     }
-    return TemplateResponse(request, "lending/detail.html", context)
+    return TemplateResponse(request, "lending/lend.html", context)
 
 
 @login_required
@@ -296,54 +350,6 @@ def person_search(request):
         "lending/includes/_person_search_results.html",
         {"filter": person_filter},
     )
-
-
-@login_required
-@htmx_permission_required("core.change_lentrecord")
-def quick_lend(request):
-    """
-    One-screen "shortcut lending" assistant: pick an available device and a
-    person (either order), a room, and create the lending in a single submit.
-    Reuses the same lend path as the detail view via ``_save_lending``.
-
-    The device picker selects a ``core.Device``; we resolve its available INROOM
-    record before lending. The selected-device card is re-rendered by the device
-    picker widget from the bound ``QuickLendDeviceForm``.
-    """
-    selected_person = None
-    device_form = QuickLendDeviceForm(request.POST or None, request=request)
-
-    if request.method == "POST":
-        device_pk = request.POST.get("device")
-        if not device_pk:
-            messages.error(request, _("Please select a device to lend."))
-            return redirect("lending:quick_lend")
-
-        record = _get_scoped_inroom_record(request, device_pk)
-        if record is None:
-            messages.error(request, _("This device is no longer available for lending."))
-            return redirect("lending:quick_lend")
-
-        form = LentingForm(request.POST, instance=record, record_type=record.record_type)
-        if form.is_valid() and _save_lending(request, record, form):
-            return redirect("lending:index")
-
-        # Validation failed: keep the picked person card on re-render (it
-        # otherwise lives only in the hidden field; the device card is restored
-        # by the widget from the bound device_form).
-        person_id = request.POST.get("person")
-        if person_id:
-            selected_person = Person.objects.filter(pk=person_id).first()
-    else:
-        form = LentingForm(record_type=Record.INROOM)
-
-    context = {
-        "form": form,
-        "device_form": device_form,
-        "title": _("Quick lend"),
-        "selected_person": selected_person,
-    }
-    return TemplateResponse(request, "lending/quick_lend.html", context)
 
 
 def _build_unsaved_lentrecord(device, form):

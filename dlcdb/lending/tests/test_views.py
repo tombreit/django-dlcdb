@@ -192,6 +192,41 @@ class LendingDetailViewTests(BaseTest):
         self.assertContains(response, 'name="lent_end_date"')
         self.assertTrue(response.context["is_return_flow"])
 
+    def test_return_action_prefills_todays_return_date(self):
+        from django.utils import timezone
+
+        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]), {"action": "return"})
+        self.assertEqual(
+            response.context["form"]["lent_end_date"].value(),
+            timezone.localdate(),
+        )
+
+    def test_return_flow_without_action_does_not_prefill(self):
+        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
+        self.assertFalse(response.context["form"]["lent_end_date"].value())
+
+    def test_lend_flow_renders_locked_device_card(self):
+        # Record mode shows the device as a read-only card: no live device picker
+        # and no change/remove control on the selected card.
+        response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
+        self.assertContains(response, "EDV-AVAIL")
+        self.assertNotContains(response, 'id="device-search-input"')
+        self.assertNotContains(response, "js-picker-clear")
+
+    def test_lend_flow_print_button_uses_device_pk(self):
+        LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
+        response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
+        self.assertContains(response, 'id="quick-lend-print"')
+        # The slip endpoint is keyed on the device pk, not the record pk.
+        self.assertContains(response, reverse("lending:print_sheet", args=[self.available_device.pk]))
+
+    def test_return_flow_has_no_print_button(self):
+        # A profile exists, but the return flow cannot print a slip (print_sheet
+        # 404s for non-INROOM records), so the button must be absent.
+        LendingProfile.objects.create(device_type=self.lent_device.device_type, lent_sheet_template="x")
+        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
+        self.assertNotContains(response, 'id="quick-lend-print"')
+
     def test_lend_creates_new_lent_record(self):
         response = self.client.post(
             reverse("lending:detail", args=[self.available_record.pk]),
@@ -256,6 +291,25 @@ class LendingDetailViewTests(BaseTest):
         )
         messages = [str(m) for m in response.context["messages"]]
         self.assertTrue(any("contract ends before" in m.lower() for m in messages))
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_no_contract_warnings_on_return(self):
+        # Acknowledging a return must not surface lending soft warnings: the
+        # device is coming back, so contract-vs-desired-return checks are moot.
+        self.person.udb_contract_planned_checkout = datetime.date(2026, 6, 30)
+        self.person.save()
+        response = self.client.post(
+            reverse("lending:detail", args=[self.lent_record.pk]),
+            # Desired return (2026-07-23) runs past the contract end (2026-06-30) —
+            # the condition that warns in the lend flow — but this is a return
+            # (a valid, non-future return date), so no warning should appear.
+            self._lend_payload(lent_desired_end_date="2026-07-23", lent_end_date="2026-06-23"),
+            follow=True,
+        )
+        messages = [str(m) for m in response.context["messages"]]
+        self.assertFalse(any("contract ends before" in m.lower() for m in messages))
+        self.assertFalse(any("contract end date" in m.lower() for m in messages))
+        self.assertTrue(any("acknowledged" in m.lower() for m in messages))
 
     def test_missing_auto_return_room_errors_and_rolls_back(self):
         self.auto_return_room.delete()
@@ -460,7 +514,7 @@ class QuickLendViewTests(BaseTest):
 
     def setUp(self):
         self.client.force_login(self.user)
-        self.url = reverse("lending:quick_lend")
+        self.url = reverse("lending:lend")
 
     def _payload(self, **overrides):
         payload = {
@@ -522,12 +576,12 @@ class QuickLendViewTests(BaseTest):
     def test_post_rejects_non_inroom_record(self):
         lent_before = LentRecord.objects.filter(record_type=Record.LENT).count()
         response = self.client.post(self.url, self._payload(device=self.lent_device.pk))
-        self.assertRedirects(response, reverse("lending:quick_lend"))
+        self.assertRedirects(response, reverse("lending:lend"))
         self.assertEqual(LentRecord.objects.filter(record_type=Record.LENT).count(), lent_before)
 
     def test_post_missing_device_redirects(self):
         response = self.client.post(self.url, self._payload(device=""))
-        self.assertRedirects(response, reverse("lending:quick_lend"))
+        self.assertRedirects(response, reverse("lending:lend"))
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 

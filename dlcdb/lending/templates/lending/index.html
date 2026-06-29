@@ -14,7 +14,7 @@
       <span class="visually-hidden">{% translate "Loading..." %}</span>
     </span>
   </span>
-  <a href="{% url 'lending:quick_lend' %}" class="btn btn-primary ms-auto">
+  <a href="{% url 'lending:lend' %}" class="btn btn-primary ms-auto">
     <i class="bi bi-lightning-charge"></i> {% translate "Quick lend" %}
   </a>
 </div>
@@ -80,16 +80,15 @@
           {% include "lending/includes/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
           {% include "lending/includes/_sort_th.html" with label=_("Person / status") asc="person" desc="-person" %}
           {% include "lending/includes/_sort_th.html" with label=_("Due") asc="due" desc="-due" %}
+          <th class="text-end">{% translate "Actions" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for record in filter.qs %}
-          <tr class="position-relative">
+          <tr>
             <td>
-              <a href="{% url 'lending:detail' record.pk %}" class="stretched-link text-decoration-none text-reset">
-                <div class="fw-semibold">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</div>
-                <div class="">{{ record.device.manufacturer }} {{ record.device.series }}</div>
-              </a>
+              <div class="fw-semibold">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</div>
+              <div class="">{{ record.device.manufacturer }} {{ record.device.series }}</div>
             </td>
             <td>
               <div>
@@ -110,10 +109,24 @@
             <td class="{% if record.is_overdue %}text-danger fw-semibold{% endif %}">
               {{ record.lent_desired_end_date|date:"Y-m-d"|default:"—" }}
             </td>
+            <td class="text-end text-nowrap">
+              {% if record.record_type == "INROOM" %}
+                <a href="{% url 'lending:detail' record.pk %}" class="btn btn-sm btn-primary">
+                  <i class="bi bi-box-arrow-right"></i> {% translate "Lend" %}
+                </a>
+              {% elif record.record_type == "LENT" %}
+                <a href="{% url 'lending:detail' record.pk %}?action=return" class="btn btn-sm btn-success">
+                  <i class="bi bi-box-arrow-in-left"></i> {% translate "Return" %}
+                </a>
+                <a href="{% url 'lending:detail' record.pk %}" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-pencil"></i> {% translate "Edit" %}
+                </a>
+              {% endif %}
+            </td>
           </tr>
         {% empty %}
           <tr>
-            <td colspan="3" class="text-center text-muted">
+            <td colspan="4" class="text-center text-muted">
               <i>{% translate "No devices found." %}</i>
             </td>
           </tr>

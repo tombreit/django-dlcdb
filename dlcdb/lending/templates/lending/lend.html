@@ -10,7 +10,10 @@ SPDX-License-Identifier: EUPL-1.2
 {% block title %}{{ title }}{% endblock title %}
 
 {% block extra_css %}
-{{ device_form.media.css }}
+{% if device_form %}{{ device_form.media.css }}{% else %}<link rel="stylesheet" href="{% static 'theme/widgets/picker.css' %}">{% endif %}
+<style>
+  .picker-option:hover { background-color: var(--bs-tertiary-bg); }
+</style>
 {% endblock extra_css %}
 
 {% block body %}
@@ -20,19 +23,28 @@ SPDX-License-Identifier: EUPL-1.2
     <a href="{% url 'lending:index' %}" class="text-decoration-none small">
       <i class="bi bi-arrow-left"></i> {% translate "Back to overview" %}
     </a>
-    <h1 class="mb-0"><i class="bi bi-lightning-charge"></i> {% translate "Quick lend" %}</h1>
+    <h1 class="mb-0">
+      {% if picker_mode %}<i class="bi bi-lightning-charge"></i> {% endif %}{{ title }}
+    </h1>
   </div>
+  {% if obj_admin_url and request.user.is_staff %}
+    <a href="{{ obj_admin_url }}" class="btn btn-outline-warning btn-sm">
+      <i class="bi bi-box-arrow-up-right"></i> {% translate "Admin view" %}
+    </a>
+  {% endif %}
 </div>
 
-<p class="text-muted">
-  {% translate "Pick an available device and a person, choose a room, then lend." %}
-</p>
+{% if picker_mode %}
+  <p class="text-muted">
+    {% translate "Pick an available device and a person, choose a room, then lend." %}
+  </p>
+{% endif %}
 
 {% if form.non_field_errors %}
   <div class="alert alert-danger">{{ form.non_field_errors }}</div>
 {% endif %}
 
-<form method="POST" action="{% url 'lending:quick_lend' %}" novalidate id="quick-lend-form">
+<form method="POST" action="{{ form_action }}" novalidate id="lend-form">
   {% csrf_token %}
 
   {# Person hidden field kept outside any HTMX swap region, driven by the person picker. The device picker widget renders its own hidden field. #}
@@ -49,7 +61,12 @@ SPDX-License-Identifier: EUPL-1.2
           <i class="bi bi-pc-display"></i> {% translate "Device" %}
         </div>
         <div class="card-body">
-          {{ device_form.device }}
+          {% if device_form %}
+            {{ device_form.device }}
+          {% else %}
+            {# Record mode: the device is fixed, so render it as a read-only card. #}
+            {% include "theme/widgets/device_picker/_item.html" with device=device selectable=False locked=True %}
+          {% endif %}
         </div>
       </div>
     </div>
@@ -61,7 +78,7 @@ SPDX-License-Identifier: EUPL-1.2
           <i class="bi bi-person-vcard"></i> {% translate "Person and room" %}
         </div>
         <div class="card-body">
-          {% include "theme/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=True fill_date_target=form.lent_desired_end_date.id_for_label sync_toggle_target=form.sync_lent_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
+          {% include "theme/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_return_flow fill_date_target=form.lent_desired_end_date.id_for_label sync_toggle_target=form.sync_lent_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
 
           <div class="row g-3">
             <div class="col-12">
@@ -70,7 +87,9 @@ SPDX-License-Identifier: EUPL-1.2
               </label>
               {{ form.room }}
               {{ form.room.errors }}
-              <div class="form-text">{% translate "Prefilled from the device's current location." %}</div>
+              {% if picker_mode %}
+                <div class="form-text">{% translate "Prefilled from the device's current location." %}</div>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -110,11 +129,23 @@ SPDX-License-Identifier: EUPL-1.2
             </div>
           </div>
         </div>
+        {% if is_return_flow %}
+          <div class="col-md-4">
+            <div class="alert alert-info mb-0">
+              <label for="{{ form.lent_end_date.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-box-arrow-in-left"></i> {% translate "Return date" %}
+              </label>
+              {{ form.lent_end_date }}
+              {{ form.lent_end_date.errors }}
+              <div class="form-text">{% translate "Set this to acknowledge the return." %}</div>
+            </div>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
 
-  {# --- 4. Misc (collapsed) -------------------------------------------- #}
+  {# --- Misc (collapsed) ----------------------------------------------- #}
   <div class="card mb-4">
     <button
       class="btn card-header fw-semibold w-100 text-start collapsed d-flex align-items-center justify-content-between"
@@ -142,14 +173,12 @@ SPDX-License-Identifier: EUPL-1.2
             </label>
             {{ form.lent_note }}
           </div>
-          {% comment %}
           <div class="col-md-6">
             <label for="{{ form.lent_reason.id_for_label }}" class="form-label">
               {% translate "Reason" %}
             </label>
             {{ form.lent_reason }}
           </div>
-          {% endcomment %}
         </div>
       </div>
     </div>
@@ -157,22 +186,28 @@ SPDX-License-Identifier: EUPL-1.2
 
   {# --- Actions -------------------------------------------------------- #}
   <div class="d-flex flex-wrap gap-2 mt-4">
-    <button type="submit" id="quick-lend-submit" class="btn btn-primary" disabled>
-      <i class="bi bi-check-lg"></i> {% translate "Lend now" %}
+    <button type="submit" id="quick-lend-submit" class="btn btn-primary"{% if picker_mode %} disabled{% endif %}>
+      <i class="bi bi-check-lg"></i>
+      {% if is_lend_flow %}{% translate "Lend device" %}{% else %}{% translate "Save" %}{% endif %}
     </button>
 
-    {# Prints the slip from the unsaved form data; formaction is set by JS once a device is chosen (the print endpoint is keyed on the device's record pk). #}
-    <button
-      type="submit"
-      id="quick-lend-print"
-      class="btn btn-outline-secondary"
-      formmethod="post"
-      formtarget="_blank"
-      data-print-url-template="{% url 'lending:print_sheet' 0 %}"
-      disabled
-    >
-      <i class="bi bi-printer"></i> {% translate "Print lending slip" %}
-    </button>
+    {% if picker_mode or has_lending_profile %}
+      {% comment %}
+        Prints the slip from the unsaved form data. The print endpoint is keyed
+         on the device pk; in picker mode JS sets formaction once a device is
+         chosen, in record mode it is rendered server-side.
+      {% endcomment %}
+      <button
+        type="submit"
+        id="quick-lend-print"
+        class="btn btn-outline-secondary"
+        formmethod="post"
+        formtarget="_blank"
+        {% if picker_mode %}data-print-url-template="{% url 'lending:print_sheet' 0 %}" disabled{% else %}formaction="{% url 'lending:print_sheet' device.pk %}"{% endif %}
+      >
+        <i class="bi bi-printer"></i> {% translate "Print lending slip" %}
+      </button>
+    {% endif %}
 
     <a href="{% url 'lending:index' %}" class="btn btn-outline-secondary ms-auto">
       <i class="bi bi-x-lg"></i> {% translate "Cancel" %}
@@ -183,7 +218,13 @@ SPDX-License-Identifier: EUPL-1.2
 {% endblock body %}
 
 {% block extra_js %}
-{{ device_form.media.js }}
+  {% comment %}
+   picker.js drives both the device picker (picker mode) and the person picker
+   (both modes). Load it exactly once — do NOT also emit device_form.media.js, or
+   it double-binds its document-level listeners.
+   {% endcomment %}
+<script src="{% static 'theme/js/picker.js' %}"></script>
+{% if picker_mode %}
 <script>
   (function () {
     "use strict";
@@ -198,7 +239,9 @@ SPDX-License-Identifier: EUPL-1.2
     function sync() {
       submitBtn.disabled = !(deviceInput.value && personInput.value);
       // A slip can only be printed once a device with a lending profile is set.
-      printBtn.disabled = !(deviceInput.value && deviceHasProfile);
+      if (printBtn) {
+        printBtn.disabled = !(deviceInput.value && deviceHasProfile);
+      }
     }
 
     if (devicePicker) {
@@ -218,8 +261,10 @@ SPDX-License-Identifier: EUPL-1.2
 
         // Point the print button at this device's print endpoint.
         deviceHasProfile = option.dataset.hasProfile === "1";
-        const template = printBtn.dataset.printUrlTemplate || "";
-        printBtn.formAction = template.replace("/0/print/", "/" + option.dataset.optionId + "/print/");
+        if (printBtn) {
+          const template = printBtn.dataset.printUrlTemplate || "";
+          printBtn.formAction = template.replace("/0/print/", "/" + option.dataset.optionId + "/print/");
+        }
         sync();
       });
     }
@@ -229,4 +274,5 @@ SPDX-License-Identifier: EUPL-1.2
     sync();
   })();
 </script>
+{% endif %}
 {% endblock extra_js %}
