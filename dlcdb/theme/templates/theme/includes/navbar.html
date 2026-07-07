@@ -68,6 +68,14 @@
                   {{ item.label }}
                 </a>
               {% endfor %}
+
+              {% if request.user.is_staff or request.user.is_superuser %}
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="{% url 'admin:index' %}">
+                <i class="bi bi-gear"></i>
+                {% translate 'Django admin' %}
+              </a>
+              {% endif %}
             </div>
           </li>
           {% endif %}
