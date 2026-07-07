@@ -8,6 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* All notifications (device events and periodic record reports) are now managed as *Subscriptions* in the `notifications` app; existing notification rules must be re-created in the admin. The `reporting` app only generates the report artifacts (xlsx)
+* Renamed `.env` variables: `REPORTING_NOTIFY_OVERDUE_LENDERS` → `NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS`, `REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT` → `NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT`
 * Dedicated `dataexchange` app with a rewritten CSV-based importer that now also supports `LENT` records
 * New license management module
 * Documentation served via WhiteNoise from `/docs/`, no custom webserver configs necessary for the `/docs/` endpoint

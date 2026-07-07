@@ -13,5 +13,5 @@ The following {{ records_count }} device{{ records_count|pluralize:"s" }} {{ rec
 {% endif %}
 
 
-Best, 
+Best,
 "Your IT department" <{{ contact_email }}>

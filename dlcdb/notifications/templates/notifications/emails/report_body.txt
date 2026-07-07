@@ -1,18 +1,17 @@
 -------------------------------------------------------------------------------
-Notification:     {{ notification }}
-Affected Records: {{ record_collection.records.count }}
+Report:           {{ subscription }}
+Affected Records: {{ records_count }}
 Listing:          <{{ changelist_url }}>
-Created:          {{ record_collection.created_at }}
-Last run:         {{ record_collection.last_run }}
+From:             {{ window_start }}
+To:               {{ window_end }}
 -------------------------------------------------------------------------------
-{% if msg %}
-{{ msg }}
+{% if not records_count %}
+No records affected by this subscription.
 {% endif %}
-
-{% if record_collection.records %}
+{% if record_rows %}
 --- START LISTING -------------------------------------------------------------
-{% for record in record_collection.text_repr %}
-{{ forloop.counter }}: {{ record|safe }}
+{% for row in record_rows %}
+{{ forloop.counter }}: {{ row|safe }}
 {% endfor %}
 --- END LISTING ---------------------------------------------------------------
 {% endif %}

@@ -2,14 +2,16 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.urls import path
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import Subscription, Message
+from .reports import create_report_message
+from .tasks import send_message
 
 
 @admin.register(Subscription)
@@ -17,29 +19,58 @@ class SubscriptionAdmin(SimpleHistoryAdmin):
     list_display = [
         "id",
         "event",
+        "condition",
         "device",
         "interval",
         "next_scheduled",
+        "last_run",
         "subscriber",
-        "subscribed_at",
         "is_active",
     ]
     list_filter = [
         "event",
+        "condition",
         "interval",
-        "subscribed_at",
         "is_active",
     ]
 
     show_facets = admin.ShowFacets.NEVER
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "trigger-report/<int:pk>",
+                self.admin_site.admin_view(self.trigger_adhoc_report),
+                name="notifications_subscription_trigger",
+            ),
+        ]
+        return custom_urls + urls
+
+    def trigger_adhoc_report(self, request, pk):
+        """Create and immediately send a report, without shifting the reporting window."""
+        subscription = get_object_or_404(Subscription, pk=pk)
+
+        if not subscription.is_report_subscription:
+            messages.warning(request, "Ad hoc reports are only available for report subscriptions.")
+            return redirect("admin:notifications_subscription_change", pk)
+
+        message = create_report_message(subscription, update_window=False)
+        if message and send_message.call_local(message.id):
+            messages.info(request, "Report has been sent via email.")
+        else:
+            messages.warning(request, "No report sent.")
+
+        return redirect("admin:notifications_subscription_change", pk)
+
 
 @admin.register(Message)
-class MessageAdmin(SimpleHistoryAdmin):
+class MessageAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "subscription",
-        "preview_link",  # Add this new column
+        "recipient_email",
+        "preview_link",
         "sent_at",
         "status",
         "created_at",
@@ -73,10 +104,16 @@ class MessageAdmin(SimpleHistoryAdmin):
         return custom_urls + urls
 
     def message_preview_view(self, request, message_id):
-        """Custom view to preview message content"""
+        """Custom view to preview message content and send it ad hoc"""
         message = get_object_or_404(Message, pk=message_id)
 
-        # Get the message content - adjust this based on your actual implementation
+        if request.method == "POST" and "_send_now" in request.POST:
+            if send_message.call_local(message.pk):
+                messages.info(request, f"Message {message.pk} has been sent.")
+            else:
+                messages.warning(request, f"Message {message.pk} could not be sent, see its error message.")
+            return redirect("admin:notifications_message_change", message.pk)
+
         subject, body = message.get_content()
 
         context = {

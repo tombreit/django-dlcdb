@@ -5,9 +5,6 @@
 from ..core.models import Record
 
 
-LENT_OVERDUE_TOLERANCE_DAYS = 5
-
-
 # object: Record
 EXPOSED_FIELDS = [
     # {

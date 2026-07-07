@@ -3,11 +3,15 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import logging
+import os
+
 from django.conf import settings
 from django.utils import timezone
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 
 from .models import Message
+
+XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 logger = logging.getLogger(__name__)
 
@@ -44,23 +48,38 @@ class EmailChannel(NotificationChannel):
     def send(cls, message):
         """Send notification via email"""
         try:
-            subscription = message.subscription
             subject, body = message.get_content()
+            to = message.get_recipients()
 
-            subject = f"{settings.EMAIL_SUBJECT_PREFIX} {subject}"
+            # Without this guard, EmailMessage.send() with no recipients
+            # silently sends nothing and the message would be marked SENT.
+            if not to:
+                mark_message_failed(message, "No recipient email address")
+                logger.warning(f"No recipient email address for message {message.id}")
+                return False
 
-            send_mail(
-                subject=subject,
-                message=body,
+            email = EmailMessage(
+                subject=f"{settings.EMAIL_SUBJECT_PREFIX} {subject}",
+                body=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[subscription.subscriber.email],
-                fail_silently=False,
+                to=to,
             )
+
+            # Attach the report spreadsheet, if any. Read via the storage
+            # API, so this also works for non-filesystem storages.
+            if message.report and message.report.spreadsheet:
+                email.attach(
+                    os.path.basename(message.report.spreadsheet.name),
+                    message.report.spreadsheet.read(),
+                    XLSX_CONTENT_TYPE,
+                )
+
+            email.send(fail_silently=False)
 
             message.status = Message.STATUS_SENT
             message.sent_at = timezone.now()
             message.save()
-            logger.info(f"Email sent for message {message.id} to {subscription.subscriber.email}")
+            logger.info(f"Email sent for message {message.id} to {to}")
             return True
 
         except Exception as e:

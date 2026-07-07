@@ -84,6 +84,14 @@
             </a>
             <div class="dropdown-menu dropdown-menu-end">
 
+              {% if request.user.is_authenticated %}
+                <a class="dropdown-item" href="{% url 'notifications:index' %}">
+                  <i class="bi bi-bell"></i>
+                  {% translate 'My subscriptions' %}
+                </a>
+                <div class="dropdown-divider"></div>
+              {% endif %}
+
               {# Bootstrap light/dark/auto theme switcher #}
               <h6 class="dropdown-header" id="bd-theme">
                 <span id="bd-theme-text">{% translate 'Toggle theme' %}</span>

@@ -1,0 +1,126 @@
+{% extends "theme/_base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block title %}
+  {% translate "My subscriptions" %}
+{% endblock title %}
+
+
+{% block body %}
+
+<h1>
+  {% translate "My subscriptions" %}
+</h1>
+
+{% if not person %}
+
+  <div class="alert alert-info">
+    {% translate "No person record matches your email address, so subscriptions cannot be managed for your account. Please contact your IT department." %}
+  </div>
+
+{% else %}
+
+  <div class="card mb-4">
+    <div class="card-header">
+      {% translate "Add a report subscription" %}
+    </div>
+    <div class="card-body">
+      <form method="post" action="{% url 'notifications:index' %}">
+        {% csrf_token %}
+        {% crispy form %}
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-bell"></i>
+          {% translate "Subscribe" %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>{% translate "Event" %}</th>
+        <th>{% translate "Details" %}</th>
+        <th>{% translate "Interval" %}</th>
+        <th>{% translate "Subscribed at" %}</th>
+        <th>{% translate "Last sent" %}</th>
+        <th>{% translate "Next scheduled" %}</th>
+        <th title="{% translate "Notification even if there are no updates?" %}">{% translate "Notify empty" %}</th>
+        <th>{% translate "Actions" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for subscription in subscriptions %}
+        <tr>
+          <td>{{ subscription.get_event_display }}</td>
+          <td>
+            {% if subscription.is_report_subscription %}
+              {{ subscription.get_condition_display|default:"—" }}
+            {% else %}
+              {{ subscription.device }}
+            {% endif %}
+          </td>
+          <td>{{ subscription.get_interval_display }}</td>
+          <td>{{ subscription.subscribed_at|date:"SHORT_DATE_FORMAT" }}</td>
+          <td>{{ subscription.last_sent|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
+          <td>{{ subscription.next_scheduled|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</td>
+          <td>
+            {% if subscription.is_report_subscription %}
+              {% if subscription.notify_no_updates %}
+                <i class="bi bi-check-lg text-success"></i> {% translate "Yes" %}
+              {% else %}
+                {% translate "No" %}
+              {% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td>
+            {% if subscription.is_report_subscription %}
+              <form method="post" action="{% url 'notifications:trigger' subscription.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="m-1 btn btn-sm btn-outline-primary">
+                  <i class="bi bi-send"></i> {% translate "Ad hoc report" %}
+                </button>
+              </form>
+              <br>
+              <form method="post" action="{% url 'notifications:toggle' subscription.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="m-1 btn btn-sm btn-outline-secondary">
+                  {% if subscription.is_active %}
+                    <i class="bi bi-pause"></i> {% translate "Deactivate" %}
+                  {% else %}
+                    <i class="bi bi-play"></i> {% translate "Activate" %}
+                  {% endif %}
+                </button>
+              </form>
+              <br>
+              <form method="post" action="{% url 'notifications:delete' subscription.pk %}" class="d-inline"
+                    onsubmit="return confirm('{% translate "Delete this subscription?" %}')">
+                {% csrf_token %}
+                <button type="submit" class="m-1 btn btn-sm btn-outline-danger">
+                  <i class="bi bi-trash"></i> {% translate "Delete" %}
+                </button>
+              </form>
+            {% else %}
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'licenses:edit' license_id=subscription.device_id %}">
+                <i class="bi bi-pencil"></i> {% translate "Edit license" %}
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8" class="text-body-secondary">
+            {% translate "You have no subscriptions yet." %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+{% endif %}
+
+{% endblock body %}

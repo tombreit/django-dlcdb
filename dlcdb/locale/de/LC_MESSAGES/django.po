@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-29 16:36+0200\n"
-"PO-Revision-Date: 2026-06-29 16:40+0200\n"
+"POT-Creation-Date: 2026-07-07 12:08+0200\n"
+"PO-Revision-Date: 2026-07-07 12:15+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -150,7 +150,7 @@ msgstr "Lizenztyp"
 
 #: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:101
 #: dlcdb/lending/templates/lending/index.html:5
-#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:280
+#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:329
 msgid "Lending"
 msgstr "Ausleihe"
 
@@ -302,8 +302,7 @@ msgstr "Kontakt (intern)"
 
 #: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
 #: dlcdb/core/models/record.py:166
-#: dlcdb/lending/templates/lending/detail.html:170
-#: dlcdb/lending/templates/lending/quick_lend.html:141
+#: dlcdb/lending/templates/lending/lend.html:172
 #: dlcdb/licenses/templates/licenses/licenses_table.html:83
 msgid "Note"
 msgstr "Notiz"
@@ -421,7 +420,7 @@ msgid "Terminated"
 msgstr "Gekündigt"
 
 #: dlcdb/core/models/prx_licencerecord.py:118
-#: dlcdb/lending/templates/lending/index.html:100
+#: dlcdb/lending/templates/lending/index.html:99
 msgid "Unknown"
 msgstr "Unbekannt"
 
@@ -468,7 +467,7 @@ msgid "Duplicate"
 msgstr "Duplikat"
 
 #: dlcdb/core/models/record.py:93 dlcdb/lending/templates/lending/index.html:80
-#: dlcdb/lending/templates/lending/quick_lend.html:49
+#: dlcdb/lending/templates/lending/lend.html:61
 msgid "Device"
 msgstr "Gerät"
 
@@ -514,7 +513,7 @@ msgstr "Notiz (Ausleihe, nur intern)"
 
 #. Translators: label for the reason a device is lent out
 #: dlcdb/core/models/record.py:172
-#: dlcdb/lending/templates/lending/detail.html:176
+#: dlcdb/lending/templates/lending/lend.html:178
 msgid "Reason"
 msgstr "Grund"
 
@@ -623,6 +622,7 @@ msgid "Show removal record"
 msgstr "Zeige Entfernt-Record"
 
 #: dlcdb/core/utils/device_methods.py:117
+#: dlcdb/lending/templates/lending/index.html:115
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -726,17 +726,15 @@ msgstr "Ausleihe Konfiguration"
 msgid "Lending profiles"
 msgstr "Ausleih-Profile"
 
-#: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:97
+#: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:96
 msgid "Overdue"
 msgstr "Überfällig"
 
-#: dlcdb/lending/filters.py:22 dlcdb/lending/templates/lending/detail.html:48
-#: dlcdb/lending/templates/lending/index.html:98
+#: dlcdb/lending/filters.py:22 dlcdb/lending/templates/lending/index.html:97
 msgid "Lent"
 msgstr "Verliehen"
 
-#: dlcdb/lending/filters.py:23 dlcdb/lending/templates/lending/detail.html:47
-#: dlcdb/lending/templates/lending/index.html:99
+#: dlcdb/lending/filters.py:23 dlcdb/lending/templates/lending/index.html:98
 msgid "Available"
 msgstr "Verfügbar"
 
@@ -764,7 +762,7 @@ msgstr "Verfügbares Gerät"
 msgid "Search by EDV/Inv. no., manufacturer…"
 msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
 
-#: dlcdb/lending/forms.py:30 dlcdb/lending/views.py:319
+#: dlcdb/lending/forms.py:30 dlcdb/lending/views.py:284
 msgid "Please select a device to lend."
 msgstr "Bitte ein Gerät zum verleihen auswählen."
 
@@ -775,113 +773,6 @@ msgid ""
 msgstr ""
 "Gerät ist aktuell noch nicht lokalisiert. Es muss vor einem Verleih "
 "lokalisiert werden."
-
-#: dlcdb/lending/templates/lending/detail.html:23
-#: dlcdb/lending/templates/lending/quick_lend.html:21
-msgid "Back to overview"
-msgstr "Zurück zur Übersicht"
-
-#: dlcdb/lending/templates/lending/detail.html:29
-#: dlcdb/licenses/templates/licenses/form_partial.html:18
-msgid "Admin view"
-msgstr "Admin Ansicht"
-
-#: dlcdb/lending/templates/lending/detail.html:43
-msgid "Device data"
-msgstr "Geräte-Daten"
-
-#: dlcdb/lending/templates/lending/detail.html:54
-#: dlcdb/theme/templates/theme/widgets/device_picker/_admin_link.html:25
-msgid "Open device in admin"
-msgstr "Gerät Admin-Detailansicht"
-
-#: dlcdb/lending/templates/lending/detail.html:61
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:71
-msgid "EDV"
-msgstr "EDV"
-
-#: dlcdb/lending/templates/lending/detail.html:62
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:73
-msgid "Inv."
-msgstr "Inventar-Nr."
-
-#: dlcdb/lending/templates/lending/detail.html:79
-#: dlcdb/lending/templates/lending/quick_lend.html:61
-msgid "Person and room"
-msgstr "Person und Raum"
-
-#: dlcdb/lending/templates/lending/detail.html:84
-#: dlcdb/lending/templates/lending/quick_lend.html:64
-msgid "Person"
-msgstr "Person"
-
-#: dlcdb/lending/templates/lending/detail.html:84
-#: dlcdb/lending/templates/lending/quick_lend.html:64
-msgid "Search person by name or e-mail, or “*” for all…"
-msgstr "Suche Person via Name oder Email, oder \"*\" für Alle"
-
-#: dlcdb/lending/templates/lending/detail.html:89
-#: dlcdb/lending/templates/lending/quick_lend.html:69
-msgid "Room / location"
-msgstr "Raum/Standort"
-
-#: dlcdb/lending/templates/lending/detail.html:102
-#: dlcdb/lending/templates/lending/quick_lend.html:84
-msgid "Dates"
-msgstr ""
-
-#: dlcdb/lending/templates/lending/detail.html:109
-#: dlcdb/lending/templates/lending/quick_lend.html:91
-msgid "Lent from"
-msgstr "Verliehen von"
-
-#: dlcdb/lending/templates/lending/detail.html:118
-#: dlcdb/lending/templates/lending/quick_lend.html:100
-msgid "Desired return date"
-msgstr "Verleihende"
-
-#: dlcdb/lending/templates/lending/detail.html:125
-#: dlcdb/lending/templates/lending/quick_lend.html:108
-msgid "Keep in sync with contract end"
-msgstr "Synchronisiere mit Vertragsenddatum"
-
-#: dlcdb/lending/templates/lending/detail.html:134
-msgid "Return date"
-msgstr "Rückgabedatum"
-
-#: dlcdb/lending/templates/lending/detail.html:138
-msgid "Set this to acknowledge the return."
-msgstr "Rückgabe bestätigen."
-
-#: dlcdb/lending/templates/lending/detail.html:156
-#: dlcdb/lending/templates/lending/quick_lend.html:127
-msgid "Accessories, notes & more"
-msgstr "Zubehör, Notizen etc."
-
-#: dlcdb/lending/templates/lending/detail.html:164
-#: dlcdb/lending/templates/lending/quick_lend.html:135
-msgid "Accessories / condition"
-msgstr "Zubehör/Zustand"
-
-#: dlcdb/lending/templates/lending/detail.html:189 dlcdb/lending/views.py:280
-msgid "Lend device"
-msgstr "Gerät verleihen"
-
-#: dlcdb/lending/templates/lending/detail.html:189
-#: dlcdb/licenses/templates/licenses/form_partial.html:74
-msgid "Save"
-msgstr "Speichern"
-
-#: dlcdb/lending/templates/lending/detail.html:200
-#: dlcdb/lending/templates/lending/quick_lend.html:175
-msgid "Print lending slip"
-msgstr "Verleihzettel drucken"
-
-#: dlcdb/lending/templates/lending/detail.html:205
-#: dlcdb/lending/templates/lending/quick_lend.html:179
-#: dlcdb/licenses/templates/licenses/form_partial.html:81
-msgid "Cancel"
-msgstr "Abbrechen"
 
 #: dlcdb/lending/templates/lending/includes/_person_list_item.html:48
 msgid "Contract until"
@@ -895,9 +786,7 @@ msgstr "Keine entsprechende Person gefunden."
 msgid "Loading..."
 msgstr "Lädt..."
 
-#: dlcdb/lending/templates/lending/index.html:18
-#: dlcdb/lending/templates/lending/quick_lend.html:23
-#: dlcdb/lending/views.py:343
+#: dlcdb/lending/templates/lending/index.html:18 dlcdb/lending/views.py:327
 msgid "Quick lend"
 msgstr "Schnellverleih"
 
@@ -929,64 +818,148 @@ msgstr "Person / Status"
 msgid "Due"
 msgstr "Fällig"
 
-#: dlcdb/lending/templates/lending/index.html:117
+#: dlcdb/lending/templates/lending/index.html:83
+#: dlcdb/notifications/templates/notifications/index.html:50
+msgid "Actions"
+msgstr "Aktionen"
+
+#: dlcdb/lending/templates/lending/index.html:119
+msgid "Return"
+msgstr "Zurückgegeben"
+
+#: dlcdb/lending/templates/lending/index.html:122
+msgid "Edit"
+msgstr ""
+
+#: dlcdb/lending/templates/lending/index.html:130
 msgid "No devices found."
 msgstr "Keine Geräte gefunden."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:28
+#: dlcdb/lending/templates/lending/lend.html:24
+msgid "Back to overview"
+msgstr "Zurück zur Übersicht"
+
+#: dlcdb/lending/templates/lending/lend.html:32
+#: dlcdb/licenses/templates/licenses/form_partial.html:18
+msgid "Admin view"
+msgstr "Admin Ansicht"
+
+#: dlcdb/lending/templates/lending/lend.html:39
 msgid "Pick an available device and a person, choose a room, then lend."
 msgstr "Wähle Gerät und Person für den Verleih."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:73
+#: dlcdb/lending/templates/lending/lend.html:78
+msgid "Person and room"
+msgstr "Person und Raum"
+
+#: dlcdb/lending/templates/lending/lend.html:81
+msgid "Person"
+msgstr "Person"
+
+#: dlcdb/lending/templates/lending/lend.html:81
+msgid "Search person by name or e-mail, or “*” for all…"
+msgstr "Suche Person via Name oder Email, oder \"*\" für Alle"
+
+#: dlcdb/lending/templates/lending/lend.html:86
+msgid "Room / location"
+msgstr "Raum/Standort"
+
+#: dlcdb/lending/templates/lending/lend.html:91
 msgid "Prefilled from the device's current location."
 msgstr "Vorausgefüllt mit dem aktuellen Standort."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:104
+#: dlcdb/lending/templates/lending/lend.html:103
+msgid "Dates"
+msgstr ""
+
+#: dlcdb/lending/templates/lending/lend.html:110
+msgid "Lent from"
+msgstr "Verliehen von"
+
+#: dlcdb/lending/templates/lending/lend.html:119
+msgid "Desired return date"
+msgstr "Verleihende"
+
+#: dlcdb/lending/templates/lending/lend.html:123
 msgid "Defaults to the person's contract end date."
 msgstr "Standardmäßig das Vertragsende der Person."
 
-#: dlcdb/lending/templates/lending/quick_lend.html:162
-msgid "Lend now"
-msgstr "Jetzt verleihen"
+#: dlcdb/lending/templates/lending/lend.html:127
+msgid "Keep in sync with contract end"
+msgstr "Synchronisiere mit Vertragsenddatum"
 
-#: dlcdb/lending/views.py:164
+#: dlcdb/lending/templates/lending/lend.html:136
+msgid "Return date"
+msgstr "Rückgabedatum"
+
+#: dlcdb/lending/templates/lending/lend.html:140
+msgid "Set this to acknowledge the return."
+msgstr "Rückgabe bestätigen."
+
+#: dlcdb/lending/templates/lending/lend.html:158
+msgid "Accessories, notes & more"
+msgstr "Zubehör, Notizen etc."
+
+#: dlcdb/lending/templates/lending/lend.html:166
+msgid "Accessories / condition"
+msgstr "Zubehör/Zustand"
+
+#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:329
+msgid "Lend device"
+msgstr "Gerät verleihen"
+
+#: dlcdb/lending/templates/lending/lend.html:191
+#: dlcdb/licenses/templates/licenses/form_partial.html:74
+msgid "Save"
+msgstr "Speichern"
+
+#: dlcdb/lending/templates/lending/lend.html:209
+msgid "Print lending slip"
+msgstr "Verleihzettel drucken"
+
+#: dlcdb/lending/templates/lending/lend.html:214
+#: dlcdb/licenses/templates/licenses/form_partial.html:81
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: dlcdb/lending/views.py:168
 #, python-format
 msgid "Warning: No UDB contract end date found for %(person)s!"
 msgstr ""
 
-#: dlcdb/lending/views.py:166
+#: dlcdb/lending/views.py:170
 msgid "Warning: Contract ends before the desired return date!"
 msgstr "Warnung: Vertrag endet vor Verleihfrist!"
 
-#: dlcdb/lending/views.py:212
+#: dlcdb/lending/views.py:216
 msgid "Lent state unknown - please report this issue!"
-msgstr ""
-
-#: dlcdb/lending/views.py:228
-#, python-format
-msgid "Configuration error: %(err)s"
 msgstr ""
 
 #: dlcdb/lending/views.py:235
 #, python-format
+msgid "Configuration error: %(err)s"
+msgstr ""
+
+#: dlcdb/lending/views.py:242
+#, python-format
 msgid "Device “%(device)s” lent to “%(person)s”."
 msgstr "Gerät “%(device)s” verliehen an “%(person)s”."
 
-#: dlcdb/lending/views.py:237
+#: dlcdb/lending/views.py:244
 #, python-format
 msgid "Return of “%(device)s” from “%(person)s” acknowledged."
 msgstr "Rückgabe von “%(device)s” von “%(person)s” bestätigt."
 
-#: dlcdb/lending/views.py:239
+#: dlcdb/lending/views.py:246
 #, python-format
 msgid "Lending of “%(device)s” to “%(person)s” saved."
 msgstr "Verleih von “%(device)s” an “%(person)s” gespeichert."
 
-#: dlcdb/lending/views.py:255
+#: dlcdb/lending/views.py:277
 msgid "Device is currently \"not locatable\" and must be located first."
 msgstr ""
 
-#: dlcdb/lending/views.py:324
+#: dlcdb/lending/views.py:288
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
 
@@ -1091,6 +1064,7 @@ msgid "Playground"
 msgstr ""
 
 #: dlcdb/licenses/views.py:119
+#: dlcdb/notifications/templates/notifications/index.html:108
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
@@ -1138,27 +1112,210 @@ msgstr ""
 msgid "Every Year"
 msgstr ""
 
+#: dlcdb/notifications/models.py:63
+msgid "Return overdue"
+msgstr "Überfällige Rückgabe"
+
+#: dlcdb/notifications/models.py:64
+msgid "Is new PC or notebook"
+msgstr ""
+
+#: dlcdb/notifications/models.py:65
+msgid "Is PC or notebook"
+msgstr ""
+
+#: dlcdb/notifications/models.py:66
+msgid "Is PC"
+msgstr ""
+
+#: dlcdb/notifications/models.py:67
+msgid "Is notebook"
+msgstr ""
+
+#: dlcdb/notifications/models.py:68
+msgid "Has SAP number"
+msgstr ""
+
+#: dlcdb/notifications/models.py:69
+msgid "Licence expires"
+msgstr "Lizenz läuft ab"
+
 #: dlcdb/notifications/models.py:74
 msgid "Type of event"
 msgstr "Art des Ereignisses"
 
-#: dlcdb/notifications/models.py:87
-msgid "Interval Name"
-msgstr "Bezeichnung Interval"
+#: dlcdb/notifications/models.py:80
+msgid "Condition"
+msgstr ""
 
-#: dlcdb/notifications/models.py:100
+#: dlcdb/notifications/models.py:81
+msgid "Only for report events: restrict which records are reported."
+msgstr ""
+
+#: dlcdb/notifications/models.py:87
+#: dlcdb/notifications/templates/notifications/index.html:45
+msgid "Interval"
+msgstr "Interval"
+
+#: dlcdb/notifications/models.py:97
+msgid "Notify without updates"
+msgstr ""
+
+#: dlcdb/notifications/models.py:98
+msgid ""
+"Also send an email when no records match. Useful for testing the email "
+"functionality."
+msgstr ""
+
+#: dlcdb/notifications/models.py:109
 msgid ""
 "When the next message should be sent. Based on the interval setting. "
 "Subscriptions with a date/time in the past are due for processing."
 msgstr ""
 
+#: dlcdb/notifications/models.py:132
+msgid "Report subscriptions are not device-specific."
+msgstr ""
+
+#: dlcdb/notifications/models.py:134
+msgid "Report subscriptions need a recurring interval."
+msgstr ""
+
+#: dlcdb/notifications/models.py:141
+msgid "Immediately/hourly intervals are only allowed in development mode."
+msgstr ""
+
+#: dlcdb/notifications/models.py:149
+msgid "Overdue notifications can only be created for \"lent\" records."
+msgstr ""
+
+#: dlcdb/notifications/models.py:157
+msgid "You already have a subscription for this report."
+msgstr ""
+
+#: dlcdb/notifications/models.py:161
+msgid "Conditions are only available for report subscriptions."
+msgstr ""
+
+#: dlcdb/notifications/models.py:164
+msgid "Device subscriptions need a device."
+msgstr ""
+
+#: dlcdb/notifications/models.py:172
+msgid "You already have a subscription for this event and device."
+msgstr ""
+
+#: dlcdb/notifications/templates/notifications/index.html:5
+#: dlcdb/notifications/templates/notifications/index.html:12
+#: dlcdb/theme/templates/theme/includes/navbar.html:91
+msgid "My subscriptions"
+msgstr ""
+
+#: dlcdb/notifications/templates/notifications/index.html:18
+msgid ""
+"No person record matches your email address, so subscriptions cannot be "
+"managed for your account. Please contact your IT department."
+msgstr ""
+
+#: dlcdb/notifications/templates/notifications/index.html:25
+msgid "Add a report subscription"
+msgstr "Ein Bericht-Abonnement hinzufügen"
+
+#: dlcdb/notifications/templates/notifications/index.html:33
+msgid "Subscribe"
+msgstr "Abonnieren"
+
+#: dlcdb/notifications/templates/notifications/index.html:43
+msgid "Event"
+msgstr "Event"
+
+#: dlcdb/notifications/templates/notifications/index.html:44
+msgid "Details"
+msgstr "Details"
+
+#: dlcdb/notifications/templates/notifications/index.html:46
+msgid "Subscribed at"
+msgstr "Abonniert am"
+
+#: dlcdb/notifications/templates/notifications/index.html:47
+msgid "Last sent"
+msgstr "Zuletzt versendet"
+
+#: dlcdb/notifications/templates/notifications/index.html:48
+msgid "Next scheduled"
+msgstr "Nächste Ausführung"
+
+#: dlcdb/notifications/templates/notifications/index.html:49
+msgid "Notification even if there are no updates?"
+msgstr "Benachrichtigung auch wenn keine Änderungen stattgefunden haben?"
+
+#: dlcdb/notifications/templates/notifications/index.html:49
+msgid "Notify empty"
+msgstr "Benachrichtigungen ohne Änderung"
+
+#: dlcdb/notifications/templates/notifications/index.html:71
+msgid "Yes"
+msgstr "Ja"
+
+#: dlcdb/notifications/templates/notifications/index.html:73
+msgid "No"
+msgstr "Nein"
+
+#: dlcdb/notifications/templates/notifications/index.html:84
+msgid "Ad hoc report"
+msgstr "Ad-hoc Meldung"
+
+#: dlcdb/notifications/templates/notifications/index.html:92
+msgid "Deactivate"
+msgstr "Deaktivieren"
+
+#: dlcdb/notifications/templates/notifications/index.html:94
+msgid "Activate"
+msgstr "Aktivieren"
+
+#: dlcdb/notifications/templates/notifications/index.html:100
+msgid "Delete this subscription?"
+msgstr "Abonnement löschen?"
+
+#: dlcdb/notifications/templates/notifications/index.html:103
+msgid "Delete"
+msgstr "Löschen"
+
+#: dlcdb/notifications/templates/notifications/index.html:116
+msgid "You have no subscriptions yet."
+msgstr "Noch keine Abonnements."
+
 #: dlcdb/notifications/templates/notifications/message/preview.html:39
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
 #: dlcdb/notifications/templates/notifications/message/preview.html:43
 msgid "Preview"
 msgstr "Vorschau"
+
+#: dlcdb/notifications/views.py:45
+msgid "Subscription added."
+msgstr "Abonnement hinzugefügt."
+
+#: dlcdb/notifications/views.py:69
+msgid "Subscription deleted."
+msgstr "Abonnement gelöscht."
+
+#: dlcdb/notifications/views.py:80
+msgid "Report has been sent via email."
+msgstr "Bericht wurde via Email versendet."
+
+#: dlcdb/notifications/views.py:82
+msgid "No report sent."
+msgstr "Kein Bericht versendet."
+
+#: dlcdb/notifications/views.py:93
+msgid "Subscription activated."
+msgstr "Abonnement aktiviert."
+
+#: dlcdb/notifications/views.py:95
+msgid "Subscription deactivated."
+msgstr "Abonnement deaktiviert."
 
 #: dlcdb/organization/apps.py:17
 msgid "Branding"
@@ -1269,8 +1426,8 @@ msgstr "Datenhaltung"
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: dlcdb/templates/admin/navbar.html:108
-#: dlcdb/theme/templates/theme/includes/navbar.html:109
+#: dlcdb/templates/admin/navbar.html:112
+#: dlcdb/theme/templates/theme/includes/navbar.html:117
 msgid "Language"
 msgstr "Sprache"
 
@@ -1332,21 +1489,33 @@ msgstr ""
 msgid "Tenant"
 msgstr "Mandant"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:90
+#: dlcdb/theme/templates/theme/includes/navbar.html:98
 msgid "Toggle theme"
 msgstr "Theme umschalten"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:94
+#: dlcdb/theme/templates/theme/includes/navbar.html:102
 msgid "Light"
 msgstr "Hell"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:97
+#: dlcdb/theme/templates/theme/includes/navbar.html:105
 msgid "Dark"
 msgstr "Dunkel"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:100
+#: dlcdb/theme/templates/theme/includes/navbar.html:108
 msgid "Auto"
 msgstr "Auto"
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_admin_link.html:25
+msgid "Open device in admin"
+msgstr "Gerät Admin-Detailansicht"
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:71
+msgid "EDV"
+msgstr "EDV"
+
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:73
+msgid "Inv."
+msgstr "Inventar-Nr."
 
 #: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:75
 msgid "SN"
@@ -1362,7 +1531,7 @@ msgstr "Kein passendes Gerät gefunden."
 
 #: dlcdb/theme/templates/theme/widgets/icon_picker.html:25
 msgid "Browse…"
-msgstr ""
+msgstr "Browse..."
 
 #: dlcdb/theme/templates/theme/widgets/icon_picker.html:31
 msgid "Search icons…"
@@ -1375,6 +1544,12 @@ msgstr "Kein passendes Icon."
 #: dlcdb/theme/views.py:44
 msgid "Permission denied."
 msgstr "Zugriff verweigert."
+
+#~ msgid "Device data"
+#~ msgstr "Geräte-Daten"
+
+#~ msgid "Lend now"
+#~ msgstr "Jetzt verleihen"
 
 #~ msgid "Record of type 'Lost'"
 #~ msgstr "Record vom Typ \"Nicht auffindbar\""
@@ -1419,9 +1594,6 @@ msgstr "Zugriff verweigert."
 #, python-format
 #~ msgid "Invalid email address: %(email)s"
 #~ msgstr "Ungültige Email-Adresse: %(email)s"
-
-#~ msgid "active"
-#~ msgstr "Aktiv"
 
 #~ msgid "Purchase date"
 #~ msgstr "Kaufdatum"

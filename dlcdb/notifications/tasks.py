@@ -6,6 +6,7 @@ import logging
 import datetime
 from datetime import timedelta
 
+from django.conf import settings
 from django.utils import timezone
 
 import huey
@@ -15,19 +16,10 @@ from dlcdb.core.models import Device
 from .models import Subscription, Message
 from .channels import send_via_all_channels
 from .intervals import NotificationInterval, INTERVAL_DETAILS
+from .overdue_lenders import create_overdue_lender_messages
+from .reports import create_report_message, create_report_messages, get_window_start
 
 logger = logging.getLogger(__name__)
-
-
-# Define intervals as a mapping between interval choices and crontab expressions
-# Use the cron expressions from the model
-# TASK_INTERVALS = {
-#     "PENDING_INTERVAL": huey.crontab(minute="*/5"),  # Retry failed messages every 5 minutes
-#     **{
-#         interval_choice: interval_details["cron_expression"]
-#         for interval_choice, interval_details in INTERVAL_DETAILS.items()
-#     },
-# }
 
 
 #######################################################################
@@ -52,9 +44,8 @@ def _ensure_aware_dt(dt):
 
 
 def _update_subscription_after_send(subscription):
-    """Update subscription after successful message send"""
+    """Record a successful send. Rescheduling happens at message creation."""
     subscription.last_sent = timezone.now()
-    subscription.schedule_next_message()
     subscription.save()
 
 
@@ -139,7 +130,7 @@ def _update_license_subscriptions():
     Monitors fields like contract_expiration_date and updates subscriptions accordingly.
     """
 
-    print("Checking for license changes that require subscription updates")
+    logger.info("Checking for license changes that require subscription updates")
 
     # Find recently modified devices
     back_in_time_minutes = 60 * 48
@@ -147,10 +138,10 @@ def _update_license_subscriptions():
     modified_devices = Device.objects.filter(modified_at__gte=recent_time)
 
     if not modified_devices.exists():
-        print("No recently modified devices found")
+        logger.info("No recently modified devices found")
         return 0
 
-    print(f"Found {modified_devices.count()} recently modified devices")
+    logger.info(f"Found {modified_devices.count()} recently modified devices")
     update_count = 0
 
     for device in modified_devices:
@@ -158,8 +149,6 @@ def _update_license_subscriptions():
         subscriptions = Subscription.objects.filter(
             device=device, interval=NotificationInterval.POINT_IN_TIME.value, is_active=True
         )
-        print(f"{subscriptions=}")
-
         if not subscriptions.exists():
             continue
 
@@ -192,7 +181,7 @@ def _update_license_subscriptions():
             if updated:
                 subscription.save()
                 update_count += 1
-                print(
+                logger.info(
                     f"Updated subscription {subscription.id} for device {device.id}, "
                     f"event {subscription.event}, next_scheduled={subscription.next_scheduled}"
                 )
@@ -216,7 +205,9 @@ def _update_license_subscriptions():
 def send_message(message_id):
     """Send a message by ID via the appropriate channel(s)"""
     try:
-        message = Message.objects.select_related("subscription").get(id=message_id)
+        message = Message.objects.select_related("subscription", "subscription__subscriber", "report").get(
+            id=message_id
+        )
     except Message.DoesNotExist:
         logger.error(f"Message with ID {message_id} not found")
         return False
@@ -227,8 +218,8 @@ def send_message(message_id):
     # Send via all configured channels
     success = send_via_all_channels(message)
 
-    # Update subscription if any channel succeeded
-    if success:
+    # Record the send on the subscription; standalone messages have none.
+    if success and message.subscription is not None:
         _update_subscription_after_send(message.subscription)
 
     return success
@@ -240,8 +231,36 @@ def queue_messages_for_interval(interval):
 
     subscription_count = 0
     message_count = 0
+    now = timezone.localtime(timezone.now())
 
-    for subscription in Subscription.objects.filter(interval=interval.value, is_active=True):
+    # Report subscriptions: subscribers may hold identical subscriptions
+    # (uniqueness is only enforced per subscriber), so group the due ones by
+    # settings and reporting window and build each report only once. Due
+    # means: scheduled, and the scheduled time has passed (report
+    # subscriptions are never POINT_IN_TIME, see Subscription.clean).
+    due_report_subscriptions = Subscription.objects.filter(
+        interval=interval.value,
+        is_active=True,
+        event__in=Subscription.REPORT_EVENTS,
+        next_scheduled__isnull=False,
+        next_scheduled__lte=now,
+    )
+    groups = {}
+    for subscription in due_report_subscriptions:
+        key = (subscription.event, subscription.condition, get_window_start(subscription, now))
+        groups.setdefault(key, []).append(subscription)
+
+    for group in groups.values():
+        messages = create_report_messages(group, now=now)
+        subscription_count += len(group)
+        message_count += len(messages)
+        for subscription in group:
+            subscription.schedule_next_message()
+            subscription.save()
+
+    for subscription in Subscription.objects.filter(interval=interval.value, is_active=True).exclude(
+        event__in=Subscription.REPORT_EVENTS
+    ):
         result = queue_message(subscription.id)
         subscription_count += 1
         if result:  # If a message ID was returned
@@ -255,7 +274,7 @@ def queue_messages_for_interval(interval):
 
 @db_task()
 def queue_message(subscription_id):
-    """Create a message for a specific subscription if not already created"""
+    """Create a message for a specific subscription if it is due."""
     try:
         subscription = Subscription.objects.get(id=subscription_id)
     except Subscription.DoesNotExist:
@@ -264,44 +283,65 @@ def queue_message(subscription_id):
 
     now = timezone.now()
 
-    # Check if the subscription is due for processing
-    if subscription.next_scheduled is None or subscription.next_scheduled <= now:
-        # Check if a message already exists for this subscription and is not yet sent
-        existing_message = Message.objects.filter(
-            subscription=subscription, status__in=[Message.STATUS_PENDING, Message.STATUS_SENT]
-        ).first()
+    # Due means: scheduled, and the scheduled time has passed. No schedule
+    # (e.g. a fired one-shot, or a point-in-time date not yet known) means
+    # not due.
+    if subscription.next_scheduled is None or subscription.next_scheduled > now:
+        logger.info(f"Skipping subscription {subscription.id}: not due (next_scheduled={subscription.next_scheduled})")
+        return None
 
+    if subscription.is_report_subscription:
+        # Every scheduled run produces a fresh report message (or none, when
+        # nothing matched and notify_no_updates is off).
+        message = create_report_message(subscription)
+    else:
+        # Reuse an unsent message instead of queueing a duplicate. One-shots
+        # (POINT_IN_TIME) fire once, ever: their sent message keeps blocking,
+        # since _update_license_subscriptions may re-arm next_scheduled on
+        # any device edit.
+        blocking_statuses = [Message.STATUS_PENDING, Message.STATUS_FAILED]
+        if subscription.interval == NotificationInterval.POINT_IN_TIME.value:
+            blocking_statuses.append(Message.STATUS_SENT)
+        existing_message = Message.objects.filter(subscription=subscription, status__in=blocking_statuses).first()
         if existing_message:
             logger.info(
-                f"Skipping subscription {subscription.id}: Existing message {existing_message.id} found with status {existing_message.status}."
+                f"Skipping subscription {subscription.id}: unsent message {existing_message.id} "
+                f"({existing_message.status}) exists."
             )
-            return existing_message.id  # Return existing message ID
+            return existing_message.id
+        message, _ = subscription.create_message()
 
-        # Create a new message
-        message, created = subscription.create_message()
-
-        # Only reschedule for regular intervals, not for POINT_IN_TIME
-        if subscription.interval != NotificationInterval.POINT_IN_TIME.value:
-            subscription.schedule_next_message()
-        else:
-            # For point-in-time, just clear the next_scheduled since it's a one-time event
-            subscription.next_scheduled = None
-
-        subscription.last_sent = timezone.now()
-        subscription.save()
-
-        logger.info(f"Created message {message.id} for subscription {subscription.id}")
-        return message.id  # Return new message ID
+    # Only reschedule for regular intervals, not for POINT_IN_TIME
+    if subscription.interval != NotificationInterval.POINT_IN_TIME.value:
+        subscription.schedule_next_message()
     else:
-        logger.info(
-            f"Skipping subscription {subscription.id}: next_scheduled is {subscription.next_scheduled}, which is in the future."
-        )
-        return None  # Not due for processing
+        # For point-in-time, just clear the next_scheduled since it's a one-time event
+        subscription.next_scheduled = None
+    subscription.save()
+
+    if message:
+        logger.info(f"Created message {message.id} for subscription {subscription.id}")
+        return message.id
+    return None
 
 
 #######################################################################
 # @db_periodic_task()
 #######################################################################
+
+
+@db_periodic_task(
+    # Weekly on Monday mornings; every 10 minutes in development.
+    huey.crontab(minute="*/10") if settings.DEBUG else huey.crontab(day_of_week=1, hour=7, minute=5)
+)
+@lock_task("notify_overdue_lenders")
+def notify_overdue_lenders():
+    """Send reminder mails to lenders with overdue lendings."""
+    if not settings.NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS:
+        return
+
+    for message in create_overdue_lender_messages():
+        send_message(message.id)
 
 
 @db_periodic_task(huey.crontab(minute="*"))  # Run every minute
@@ -312,13 +352,12 @@ def process_notification_system():
     - Updates license subscriptions based on device changes
     - Processes notification intervals that are due
     """
-    print("Starting notification system processing")
+    logger.info("Starting notification system processing")
 
     # First update subscriptions for any changed licenses
-    update_count = _update_license_subscriptions()
-    print(f"Updated {update_count} subscriptions based on device changes")
+    _update_license_subscriptions()
 
     # Then process all notification intervals
     _process_all_notification_intervals()
 
-    print("Completed notification system processing")
+    logger.info("Completed notification system processing")

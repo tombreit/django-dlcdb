@@ -18,3 +18,4 @@ from .note_admin import NoteAdmin  # noqa
 from .misc_admin import AttachmentAdmin, LinkAdmin  # noqa
 from .licencerecord_admin import LicenceRecordAdmin  # noqa
 from .manufacturer_admin import ManufacturerAdmin  # noqa
+from .logentry_admin import LogEntryAdmin  # noqa

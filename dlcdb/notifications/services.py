@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import logging
-from django.utils import timezone
 
 from .models import Subscription, Message
 from .intervals import NotificationInterval
@@ -29,10 +28,7 @@ def create_license_subscriptions(
     result = []
     scheduled_times = scheduled_times or {}
 
-    print(f"create_license_subscriptions {subscriber=}, {device=}/{type(device)=}, {interval=}, {scheduled_times=}")
-
     for license_event in Subscription.LICENSE_EVENTS:
-        print(f"create_license_subscriptions {license_event=}")
         # Determine which interval to use
         sub_interval = interval
         if license_event in scheduled_times:
@@ -59,7 +55,7 @@ def create_license_subscriptions(
             }
         )
 
-        print(
+        logger.info(
             f"{'Created' if created else 'Updated'} subscription {subscription.id} "
             f"for {subscriber} on device {device.id}, event {license_event}"
         )
@@ -117,46 +113,3 @@ def get_pending_messages_for_subscriber(subscriber, include_failed=True):
         status_list.append(Message.STATUS_FAILED)
 
     return Message.objects.filter(subscription__subscriber=subscriber, status__in=status_list).order_by("created_at")
-
-
-# PRIVATE API - for internal use only
-
-
-def _trigger_license_event(device, event_type, scheduled_time=None):
-    """
-    INTERNAL: Process notifications for a license-related event.
-
-    Args:
-        device: Device instance
-        event_type: One of Subscription.LICENSE_EVENTS
-        scheduled_time: When the notification should be sent
-
-    Returns:
-        Number of messages queued or created
-    """
-    if event_type not in Subscription.LICENSE_EVENTS:
-        logger.warning(f"Event type {event_type} is not a license event")
-        return 0
-
-    subscriptions = Subscription.objects.filter(device=device, event=event_type, is_active=True)
-
-    if not subscriptions.exists():
-        logger.info(f"No active subscriptions found for device {device.id}, event {event_type}")
-        return 0
-
-    message_count = 0
-    for subscription in subscriptions:
-        if scheduled_time:
-            subscription.schedule_next_message(datetime_obj=scheduled_time)
-            subscription.save()
-
-        if subscription.interval == NotificationInterval.IMMEDIATELY.value or (
-            subscription.next_scheduled and subscription.next_scheduled <= timezone.now()
-        ):
-            from .tasks import queue_message
-
-            result = queue_message(subscription.id)
-            if result:
-                message_count += 1
-
-    return message_count

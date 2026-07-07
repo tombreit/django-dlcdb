@@ -54,9 +54,14 @@
   <strong>Sent at:</strong> {{ message.sent_at }}<br>
   {% endif %}
   <strong>Created:</strong> {{ message.created_at }}<br>
+  {% if message.subscription %}
   <strong>Subscription:</strong> {{ message.subscription }}<br>
   <strong>Event:</strong> {{ message.subscription.get_event_display }}<br>
   <strong>Subscriber:</strong> {{ message.subscription.subscriber.email }}<br>
+  {% endif %}
+  {% if message.recipient_email %}
+  <strong>Recipient:</strong> {{ message.recipient_email }}<br>
+  {% endif %}
 </div>
 
 <div class="email-preview">
@@ -69,7 +74,7 @@
 <div class="submit-row">
   <a href="{% url 'admin:notifications_message_change' object_id=message.pk %}" class="button">Back to Message</a>
   {% if message.status == 'pending' or message.status == 'failed' %}
-  <form method="post" action="{% url 'admin:notifications_message_change' object_id=message.pk %}">
+  <form method="post" action="{% url 'admin:notifications_message_preview' message_id=message.pk %}">
     {% csrf_token %}
     <input type="hidden" name="_send_now" value="1">
     <input type="submit" value="Send Now" class="default">

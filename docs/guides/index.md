@@ -11,5 +11,6 @@ ausmustern
 kleinkram
 inventur
 lizenzen
+notifications
 reporting
 ```

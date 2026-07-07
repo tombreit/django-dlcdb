@@ -1,0 +1,1 @@
+{{ subscription.get_event_display }}: {{ device }}
