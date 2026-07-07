@@ -47,7 +47,6 @@ from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.html import format_html
 
 from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
@@ -272,14 +271,12 @@ def search_devices(request):
 
     # Add a custom attribute to each device in the current page
     for device in page_obj:
-        device.state_data_rendered = format_html(
-            render_to_string(
-                "core/device/state_btn_group.html",
-                {
-                    "state_data": device.get_state_data(user=request.user, app_name="inventory"),
-                    "size": "sm",
-                },
-            )
+        device.state_data_rendered = render_to_string(
+            "core/device/state_btn_group.html",
+            {
+                "state_data": device.get_state_data(user=request.user, app_name="inventory"),
+                "size": "sm",
+            },
         )
 
     context = {
