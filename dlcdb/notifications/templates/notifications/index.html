@@ -80,14 +80,14 @@
             {% if subscription.is_report_subscription %}
               <form method="post" action="{% url 'notifications:trigger' subscription.pk %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="m-1 btn btn-sm btn-outline-primary">
+                <button type="submit" class="text-nowrap m-1 btn btn-sm btn-outline-primary">
                   <i class="bi bi-send"></i> {% translate "Ad hoc report" %}
                 </button>
               </form>
               <br>
               <form method="post" action="{% url 'notifications:toggle' subscription.pk %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="m-1 btn btn-sm btn-outline-secondary">
+                <button type="submit" class="text-nowrap m-1 btn btn-sm btn-outline-secondary">
                   {% if subscription.is_active %}
                     <i class="bi bi-pause"></i> {% translate "Deactivate" %}
                   {% else %}
@@ -99,12 +99,12 @@
               <form method="post" action="{% url 'notifications:delete' subscription.pk %}" class="d-inline"
                     onsubmit="return confirm('{% translate "Delete this subscription?" %}')">
                 {% csrf_token %}
-                <button type="submit" class="m-1 btn btn-sm btn-outline-danger">
+                <button type="submit" class="text-nowrap m-1 btn btn-sm btn-outline-danger">
                   <i class="bi bi-trash"></i> {% translate "Delete" %}
                 </button>
               </form>
             {% else %}
-              <a class="btn btn-sm btn-outline-secondary" href="{% url 'licenses:edit' license_id=subscription.device_id %}">
+              <a class="text-nowrap m-1 btn btn-sm btn-outline-secondary" href="{% url 'licenses:edit' license_id=subscription.device_id %}">
                 <i class="bi bi-pencil"></i> {% translate "Edit license" %}
               </a>
             {% endif %}
