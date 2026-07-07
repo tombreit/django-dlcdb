@@ -83,7 +83,7 @@ class RoomSerializer(serializers.HyperlinkedModelSerializer):
 
 class LendingsSerializer(serializers.ModelSerializer):
     device_desc = serializers.StringRelatedField(
-        source="device.get_lent_string_repr",
+        source="device.get_human_repr",
     )
 
     class Meta:

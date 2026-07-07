@@ -96,7 +96,7 @@ target-version = "py311"
 extend-exclude = ["migrations"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "dlcdb.settings"
+DJANGO_SETTINGS_MODULE = "dlcdb.settings.test"
 # norecursedirs = [
 #     "*/node_modules/",
 #     "/.venv/",

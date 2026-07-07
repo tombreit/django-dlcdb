@@ -45,10 +45,13 @@ class MySubscriptionsViewTests(BaseTest):
         self.client.force_login(self.user)
 
     def create_license_subscription(self):
+        device = self._create_device()
+        device.is_licence = True
+        device.save(update_fields=["is_licence"])
         return Subscription.objects.create(
             event=Subscription.NotificationEventChoices.CONTRACT_EXPIRED,
             subscriber=self.person,
-            device=self._create_device(),
+            device=device,
             interval=NotificationInterval.POINT_IN_TIME.value,
         )
 
