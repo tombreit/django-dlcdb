@@ -238,6 +238,10 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             self.qrcode.save(qrcode.filename, qrcode.fileobj, save=False)
         super().save(*args, **kwargs)
 
+    @property
+    def get_human_repr(self):
+        return f"EDV-ID: {self.edv_id or '-'}, SAP-ID: {self.sap_id or '-'}, Manufacturer: {self.manufacturer or '-'}, Model: {self.series or '-'}"
+
     def get_latest_note(self):
         """
         Returns the latest note for this device and the current inventory.

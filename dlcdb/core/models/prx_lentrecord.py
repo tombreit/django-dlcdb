@@ -92,10 +92,6 @@ class LentRecord(Record):
         self.record_type = Record.LENT
         super().save(*args, **kwargs)
 
-    @property
-    def get_lent_string_repr(self):
-        return f"EDV-ID: {self.device.edv_id}, SAP-ID: {self.device.sap_id}, Manufacturer: {self.device.manufacturer}, Model: {self.device.series}"
-
     class Meta:
         proxy = True
         verbose_name = _("Lending")
