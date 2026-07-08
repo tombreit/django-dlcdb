@@ -122,7 +122,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
         Using `readonly_fields = ('tenant',)` does not work as I do not know
         how to set a default value for these readonly_fields.
         """
-        form = super().get_form(request, obj=None, change=False, **kwargs)
+        form = super().get_form(request, obj=obj, change=change, **kwargs)
 
         # print(f"TenantScopedAdmin get_form: {request.tenant=}")
         # print(f"TenantScopedAdmin form.base_fields: {form.base_fields=}")
