@@ -101,7 +101,13 @@ def index(request):
         )
     )
 
-    lent_record_filter = LentRecordFilter(request.GET, queryset=base_qs, request=request)
+    # Default the list to newest-modified first. Copying request.GET (immutable)
+    # and using setdefault means the OrderingFilter always applies an ordering,
+    # so the default view is modified-desc while explicit clicks still win.
+    data = request.GET.copy()
+    data.setdefault("ordering", "-modified")
+
+    lent_record_filter = LentRecordFilter(data, queryset=base_qs, request=request)
 
     counts = lent_record_filter.qs.aggregate(
         total=Count("pk"),
@@ -111,6 +117,10 @@ def index(request):
 
     context = {
         "filter": lent_record_filter,
+        "current_ordering": data.get("ordering"),
+        # The Modified column shows relative time ("2 hours ago") only for recent
+        # edits; anything older than this cutoff falls back to an absolute date.
+        "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
         "lent_filtered_count": counts["total"],
         "lent_total_count": base_qs.count(),
         "lent_available_count": counts["available"],

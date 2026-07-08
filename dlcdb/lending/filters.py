@@ -55,18 +55,19 @@ class LentRecordFilter(django_filters.FilterSet):
         empty_label=_("Person..."),
     )
 
-    o = django_filters.OrderingFilter(
+    ordering = django_filters.OrderingFilter(
         fields=(
             ("device__edv_id", "device"),
             ("person__last_name", "person"),
             ("room__number", "room"),
             ("lent_desired_end_date", "due"),
+            ("modified_at", "modified"),
         ),
     )
 
     class Meta:
         model = LentRecord
-        fields = ["search", "state", "device__device_type", "person", "o"]
+        fields = ["search", "state", "device__device_type", "person", "ordering"]
 
     def search_filter_method(self, queryset, name, value):
         return queryset.filter(

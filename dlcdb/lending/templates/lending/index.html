@@ -1,5 +1,5 @@
 {% extends "theme/_base.html" %}
-{% load i18n %}
+{% load i18n humanize %}
 
 {% block title %}
   {% translate "Lending" %}
@@ -80,6 +80,7 @@
           {% include "lending/includes/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
           {% include "lending/includes/_sort_th.html" with label=_("Person / status") asc="person" desc="-person" %}
           {% include "lending/includes/_sort_th.html" with label=_("Due") asc="due" desc="-due" %}
+          {% include "lending/includes/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" %}
           <th class="text-end">{% translate "Actions" %}</th>
         </tr>
       </thead>
@@ -109,6 +110,9 @@
             <td class="{% if record.is_overdue %}text-danger fw-semibold{% endif %}">
               {{ record.lent_desired_end_date|date:"Y-m-d"|default:"—" }}
             </td>
+            <td class="text-nowrap">
+              {% if record.modified_at >= recent_cutoff %}{{ record.modified_at|naturaltime }}{% else %}{{ record.modified_at|date:"Y-m-d" }}{% endif %}
+            </td>
             <td class="text-end text-nowrap">
               {% if record.record_type == "INROOM" %}
                 <a href="{% url 'lending:detail' record.pk %}" class="btn btn-sm btn-primary">
@@ -126,7 +130,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="4" class="text-center text-muted">
+            <td colspan="5" class="text-center text-muted">
               <i>{% translate "No devices found." %}</i>
             </td>
           </tr>

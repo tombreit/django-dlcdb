@@ -101,8 +101,8 @@ class LendingIndexViewTests(BaseTest):
         self.assertNotIn(self.other_person, person_qs)
 
     def test_ordering_by_device_is_reversible(self):
-        asc = self.client.get(self.url, {"o": "device"}, headers={"HX-Request": "true"}).content.decode()
-        desc = self.client.get(self.url, {"o": "-device"}, headers={"HX-Request": "true"}).content.decode()
+        asc = self.client.get(self.url, {"ordering": "device"}, headers={"HX-Request": "true"}).content.decode()
+        desc = self.client.get(self.url, {"ordering": "-device"}, headers={"HX-Request": "true"}).content.decode()
         # "EDV-AVAIL" < "EDV-LENT" alphabetically.
         self.assertLess(asc.index("EDV-AVAIL"), asc.index("EDV-LENT"))
         self.assertLess(desc.index("EDV-LENT"), desc.index("EDV-AVAIL"))
