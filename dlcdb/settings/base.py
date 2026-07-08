@@ -407,7 +407,7 @@ QRCODE_INFIXES = {
 }
 
 SAP_LIST_COMPARISON_RESULT_FOLDER = "sap_list_comparison_results"
-MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
+MAX_FUTURE_LENT_DESIRED_END_DATE = env.str("MAX_FUTURE_LENT_DESIRED_END_DATE", default="2099-12-31")
 
 # UDB integration is configured at runtime via the admin-managed
 # `dlcdb.dataexchange.models.UdbSyncConfiguration` singleton, not via env/settings.
