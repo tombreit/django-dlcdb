@@ -32,8 +32,8 @@ class DeviceAddForm(forms.Form):
 
         self.fields["device"] = forms.ChoiceField(
             choices=device_choices,
-            # The BS5 .form-control class is applied via TomSelect
-            # widget=forms.Select(attrs={"class": "form-control"}),
+            # TomSelect is initialized by theme.js for all .is-tom-select elements
+            widget=forms.Select(attrs={"class": "is-tom-select"}),
         )
 
     room = forms.CharField(widget=forms.HiddenInput())

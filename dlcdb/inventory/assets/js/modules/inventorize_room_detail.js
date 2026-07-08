@@ -2,21 +2,14 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-import TomSelect from 'tom-select'
+import { getPage } from './ui.js'
 
 export function initInventorizeRoomDetail() {
   // Page-specific code for inventorize_room_detail only
   // TODO: Move this to a separate module
   function inventorizeRoomDetail() {
-    // Initialize TomSelect on the "device" field
-    const deviceSelect = document.getElementById('id_device')
-    if (deviceSelect) {
-      new TomSelect(deviceSelect, {
-        create: false,
-        maxItems: 1,
-        closeAfterSelect: true,
-      })
-    }
+    // TomSelect on the "device" field is initialized by theme.js via the
+    // "is-tom-select" class (see DeviceAddForm widget attrs).
 
     // Filter table functionality
     const devicesTable = document.querySelector('#devices-table tbody')
@@ -83,7 +76,7 @@ export function initInventorizeRoomDetail() {
   }
 
   // Check if we're on the inventorize_room_detail page via a data attribute
-  if (document.body.dataset.page === 'inventorize-room-detail') {
+  if (getPage() === 'inventorize-room-detail') {
     inventorizeRoomDetail()
   }
 }

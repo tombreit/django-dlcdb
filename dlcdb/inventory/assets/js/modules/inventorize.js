@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-import { Modal } from 'bootstrap'
+import { getJsVars, getPage } from './ui.js'
 
 // Constants from backend
-const jsVars = JSON.parse(document.getElementById('js_vars').textContent)
+const jsVars = getJsVars()
 const djangoDebug = jsVars.djangoDebug
 const apiBaseUrl = jsVars.apiBaseUrl
 const apiToken = jsVars.apiToken
@@ -261,7 +261,7 @@ export async function handleRoomScan(uuid) {
   roomNumberElem.textContent = roomObj.number
 
   const modalEl = document.getElementById('switch_room_modal')
-  const modalObject = new Modal(modalEl)
+  const modalObject = new window.bootstrap.Modal(modalEl)
 
   // Listen for the modal to be fully shown
   modalEl.addEventListener('shown.bs.modal', function () {
@@ -283,7 +283,7 @@ export function initInventorize() {
   console.log('initInventorize...')
 
   // Check if we're on the inventorize_room_detail page via a data attribute
-  if (document.body.dataset.page === 'inventorize-room-detail' || document.body.dataset.page === 'inventorize-room-list') {
+  if (getPage() === 'inventorize-room-detail' || getPage() === 'inventorize-room-list') {
     let btns = document.getElementsByClassName('state-trigger')
     if (btns) {
       for (let btn of btns) {

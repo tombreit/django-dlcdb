@@ -1,8 +1,9 @@
-{% extends "inventory/base_inventory.html" %}
+{% extends "inventory/base.html" %}
 {% load crispy_forms_tags %}
 
+{% block page_title %}Device search{% endblock page_title %}
 
-{% block body %}
+{% block inventory_body %}
 
 <div 
     hx-push-url="true"
@@ -38,7 +39,7 @@
 >
     <div class="text-center">
         <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
         </div>
     </div>
 </div>
@@ -48,4 +49,4 @@
 {% include 'inventory/partials/bs_modal.html' %}
 {% include 'inventory/partials/bs_toast.html' %}
 
-{% endblock body %}
+{% endblock inventory_body %}

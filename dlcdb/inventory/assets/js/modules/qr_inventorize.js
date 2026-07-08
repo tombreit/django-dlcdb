@@ -7,8 +7,9 @@
 import QrScanner from 'qr-scanner'
 
 import { handleDeviceScan, handleRoomScan } from './inventorize.js'
+import { getJsVars, getPage } from './ui.js'
 
-const jsVars = JSON.parse(document.getElementById('js_vars').textContent)
+const jsVars = getJsVars()
 const djangoDebug = jsVars.djangoDebug
 const qrCodePrefix = jsVars.qrCodePrefix
 
@@ -78,7 +79,7 @@ export function initQrScanner() {
   const qrScannerEnabled = jsVars.qrScannerEnabled
   console.log('qrScannerEnabled: ', qrScannerEnabled)
 
-  if (qrScannerEnabled && ['inventorize-room-detail', 'inventorize-room-list'].includes(document.body.dataset.page)) {
+  if (qrScannerEnabled && ['inventorize-room-detail', 'inventorize-room-list'].includes(getPage())) {
     console.log('initQrScanner...')
 
     const qrScanner = new QrScanner(videoElem, result => setResult(camQrResult, result), {

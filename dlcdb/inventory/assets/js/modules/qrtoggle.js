@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-const jsVars = JSON.parse(document.getElementById('js_vars').textContent)
-const qrToggleUrl = jsVars.qrToggleUrl
+import { getJsVars } from './ui.js'
 
 function updateQrSwitch(state) {
+  const qrToggleUrl = getJsVars().qrToggleUrl
   const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
   fetch(qrToggleUrl, {
     method: 'POST',

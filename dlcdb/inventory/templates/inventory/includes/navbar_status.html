@@ -1,0 +1,10 @@
+{% if current_inventory %}
+<span class="badge text-bg-success">
+  <i class="bi bi-check-circle"></i>
+  {{ current_inventory.name }}
+</span>
+{% else %}
+<span class="badge text-bg-danger">
+  No active inventory
+</span>
+{% endif %}

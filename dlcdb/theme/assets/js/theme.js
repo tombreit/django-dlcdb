@@ -6,6 +6,10 @@ import * as bootstrap from 'bootstrap'
 import htmx from "htmx.org";
 import TomSelect from 'tom-select';
 
+// Expose Bootstrap for slim per-app bundles (e.g. inventory) that need
+// Modal/Toast programmatically without bundling Bootstrap a second time.
+window.bootstrap = bootstrap;
+
 
 // Keep track of initialized elements to prevent duplicates
 const initializedElements = new WeakSet();

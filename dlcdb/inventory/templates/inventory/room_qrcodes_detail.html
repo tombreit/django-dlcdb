@@ -1,7 +1,8 @@
-{% extends "inventory/base_inventory.html" %}
+{% extends "inventory/base.html" %}
 
+{% block page_title %}QR codes room {{ room }}{% endblock page_title %}
 
-{% block body %}
+{% block inventory_body %}
 
 
 <div class="row">
@@ -33,7 +34,7 @@
 <h2>{{ devices.count }} Devices in Room {{ room }}</h2>
 
 
-<table id="devices-table" class="table">
+<table id="devices-table" class="table table-sm">
     <thead>
         <tr>
             <th>Device</th>
@@ -78,4 +79,4 @@
 </table>
 
 
-{% endblock body %}
+{% endblock inventory_body %}

@@ -4,30 +4,10 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
-// $brand-primary: rgb(16,66,122);
-// $brand-primary-light: lighten( $brand-primary, 50% );
-// $brand-primary-light: rgba( $brand-primary, .15 );
-
-
-// $theme-colors: (
-//   "primary": $brand-primary,
-//   "primary-light": $brand-primary-light,
-// );
-
-$enable-responsive-font-sizes: false;
-$font-size-base:  0.75rem;
-
-/* --- Set common styles ---------------------------------------------------- */
-
-/* todo: only include used bootstrap components */
-@import "bootstrap/scss/bootstrap";
-
-@import "tom-select/dist/css/tom-select.bootstrap5.min";
-
-// https://icons.getbootstrap.com/
-$bootstrap-icons-font-dir: "./fonts";
-@import "bootstrap-icons/font/bootstrap-icons.scss";
-
+/*
+ * Inventory-specific styles only. Bootstrap, tom-select and bootstrap-icons
+ * are provided by the shared theme bundle (theme/dist/css/theme.css).
+ */
 
 html {
     overflow-y: scroll;
@@ -58,4 +38,3 @@ html {
 .note-update-form textarea {
     height: 5rem;
 }
-

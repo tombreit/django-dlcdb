@@ -48,7 +48,6 @@ from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
 
-from rest_framework.authtoken.models import Token
 from django_filters.views import FilterView
 
 from dlcdb.core.models import Room, Device, Inventory, Note
@@ -68,33 +67,6 @@ def update_session_qrtoggle(request):
         return JsonResponse(data)
     else:
         return HttpResponse("")
-
-
-def get_js_vars(request):
-    """
-    Expose some Django settings and other variables to the frontend.
-    Will be consumed via:
-
-    ```html
-    {{ js_vars|json_script:"js_vars" }}
-    ```
-
-    ```javascript
-    const jsVars = JSON.parse(document.getElementById('js_vars').textContent);
-    const qrToggleUrl = jsVars.qrToggleUrl;
-    ```
-    """
-
-    js_vars = {
-        "qrCodePrefix": settings.QRCODE_PREFIX,
-        "djangoDebug": settings.DEBUG,
-        "apiBaseUrl": reverse("api-v2-root"),  # request.build_absolute_uri(reverse("api-v2-root")),
-        "apiToken": Token.objects.first().key,
-        "qrToggleUrl": reverse("inventory:update-qrtoggle"),
-        "qrScannerEnabled": bool(request.session.get("qrscanner_enabled")),
-    }
-
-    return js_vars
 
 
 class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
@@ -161,7 +133,6 @@ def inventorize_room(request, pk):
             "device_add_form": device_add_form,
             "inventory_progress": inventory_progress,
             "debug": settings.DEBUG,
-            "js_vars": get_js_vars(request),
         }
 
     return TemplateResponse(request, template, context)
@@ -235,7 +206,6 @@ class InventorizeRoomListView(LoginRequiredMixin, PermissionRequiredMixin, Filte
                 "current_inventory": current_inventory,
                 "parameters": parameters,
                 "inventory_progress": inventory_progress,
-                "js_vars": get_js_vars(self.request),
             }
         )
         return context

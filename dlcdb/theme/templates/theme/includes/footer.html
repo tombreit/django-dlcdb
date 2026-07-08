@@ -6,15 +6,6 @@ SPDX-License-Identifier: EUPL-1.2
 
 <footer class="border-top border-opacity-50 mt-5 pt-3 pb-4 text-body-secondary small">
 
-  <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
-    <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="/docs/">
-      <i class="bi bi-book"></i> {% translate "Documentation" %}
-    </a>
-    <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{% url 'admin:index' %}">
-      <i class="bi bi-gear"></i> {% translate "Backend" %}
-    </a>
-  </div>
-
   <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 text-center">
     {% if project_repository_url %}
       <a class="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" href="{{ project_repository_url }}" target="_blank" rel="noopener">

@@ -171,6 +171,7 @@ TEMPLATES = [
                 "dlcdb.theme.context_processors.navigation",
                 "dlcdb.theme.context_processors.project_meta",
                 "dlcdb.organization.context_processors.branding",
+                "dlcdb.inventory.context_processors.inventory",
             ],
         },
     },

@@ -30,6 +30,7 @@ SPDX-License-Identifier: EUPL-1.2
   {# <meta name="htmx-config" content='{"getCacheBusterParam":"true"}'> #}
   <link rel="stylesheet" href="{% static 'theme/dist/css/theme.css' %}">
   {% block extra_css %}{% endblock extra_css %}
+  {% block extra_head %}{% endblock extra_head %}
 </head>
 
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

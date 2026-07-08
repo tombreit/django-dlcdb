@@ -1,8 +1,10 @@
-{% extends "inventory/base_inventory.html" %}
+{% extends "inventory/base.html" %}
+
+{% block page_title %}Room {{ room }}{% endblock page_title %}
 
 {% block data_page %}inventorize-room-detail{% endblock data_page %}
 
-{% block body %}
+{% block inventory_body %}
 {% if current_inventory %}
 
 {% include 'inventory/includes/inventory_progress.html' %}
@@ -234,4 +236,4 @@
 {% include 'inventory/partials/bs_toast.html' %}
 
 {% endif %}{# endif for current_inventory exists #}
-{% endblock body %}
+{% endblock inventory_body %}

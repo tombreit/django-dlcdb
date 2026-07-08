@@ -18,6 +18,8 @@
         {% endcomment %}
     </a>
 
+    {% if navigation.navbar_status_template %}{% include navigation.navbar_status_template %}{% endif %}
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -80,7 +82,7 @@
           </li>
           {% endif %}
 
-          {% if request.user.is_authenticated or navigation.userdropdown %}
+          {% if request.user.is_authenticated or navigation.userdropdown or navigation.userdropdown_template %}
           <li class="nav-item d-none d-lg-flex align-items-stretch">
             <span class="vr mx-2 my-2 opacity-25"></span>
           </li>
@@ -91,6 +93,11 @@
               {% if request.user.is_superuser %}<span class="badge text-bg-danger ms-1" title="{% translate 'Superusers are not tenant aware' %}">{% translate 'Superuser' %}</span>{% elif request.tenant %}<span class="badge text-bg-secondary ms-1" title="{% translate 'Tenant' %}: {{ request.tenant }}">{{ request.tenant }}</span>{% endif %}
             </a>
             <div class="dropdown-menu dropdown-menu-end">
+
+              {% if navigation.userdropdown_template %}
+              {% include navigation.userdropdown_template %}
+              <div class="dropdown-divider"></div>
+              {% endif %}
 
               {% if request.user.is_authenticated %}
                 <a class="dropdown-item" href="{% url 'notifications:index' %}">
