@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-07 12:08+0200\n"
-"PO-Revision-Date: 2026-07-07 12:15+0200\n"
+"POT-Creation-Date: 2026-07-08 10:07+0200\n"
+"PO-Revision-Date: 2026-07-08 10:10+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -148,7 +148,7 @@ msgstr "Wiederherstellung von REMOVED auf LOST"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:101
+#: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:97
 #: dlcdb/lending/templates/lending/index.html:5
 #: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:329
 msgid "Lending"
@@ -395,7 +395,7 @@ msgstr "Name"
 msgid "Manufacturers"
 msgstr "Hersteller"
 
-#: dlcdb/core/models/prx_lentrecord.py:102
+#: dlcdb/core/models/prx_lentrecord.py:98
 msgid "Lendings"
 msgstr "Ausleihen"
 
@@ -828,6 +828,7 @@ msgid "Return"
 msgstr "Zurückgegeben"
 
 #: dlcdb/lending/templates/lending/index.html:122
+#: dlcdb/notifications/templates/notifications/index.html:115
 msgid "Edit"
 msgstr ""
 
@@ -1061,10 +1062,9 @@ msgstr "Keine Lizenz gefunden."
 #: dlcdb/licenses/templates/licenses/playground.html:5
 #: dlcdb/licenses/templates/licenses/playground.html:11
 msgid "Playground"
-msgstr ""
+msgstr "Playground"
 
 #: dlcdb/licenses/views.py:119
-#: dlcdb/notifications/templates/notifications/index.html:108
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
@@ -1086,31 +1086,31 @@ msgstr "Benachrichtigungen"
 
 #: dlcdb/notifications/intervals.py:26
 msgid "Specific Date/Time"
-msgstr ""
+msgstr "Spezifisches Datum/Zeit"
 
 #: dlcdb/notifications/intervals.py:34
 msgid "Immediately"
-msgstr ""
+msgstr "Sofort"
 
 #: dlcdb/notifications/intervals.py:40
 msgid "Every Hour"
-msgstr ""
+msgstr "Jede Stunde"
 
 #: dlcdb/notifications/intervals.py:46
 msgid "Every Day"
-msgstr ""
+msgstr "Jeden Tag"
 
 #: dlcdb/notifications/intervals.py:52
 msgid "Every Week"
-msgstr ""
+msgstr "Jede Woche"
 
 #: dlcdb/notifications/intervals.py:60
 msgid "Every Month"
-msgstr ""
+msgstr "Jeden Monat"
 
 #: dlcdb/notifications/intervals.py:66
 msgid "Every Year"
-msgstr ""
+msgstr "Jedes Jahr"
 
 #: dlcdb/notifications/models.py:63
 msgid "Return overdue"
@@ -1146,7 +1146,7 @@ msgstr "Art des Ereignisses"
 
 #: dlcdb/notifications/models.py:80
 msgid "Condition"
-msgstr ""
+msgstr "Bedingung"
 
 #: dlcdb/notifications/models.py:81
 msgid "Only for report events: restrict which records are reported."
@@ -1159,7 +1159,7 @@ msgstr "Interval"
 
 #: dlcdb/notifications/models.py:97
 msgid "Notify without updates"
-msgstr ""
+msgstr "Benachrichtigung auch ohne Updates"
 
 #: dlcdb/notifications/models.py:98
 msgid ""
@@ -1207,9 +1207,8 @@ msgstr ""
 
 #: dlcdb/notifications/templates/notifications/index.html:5
 #: dlcdb/notifications/templates/notifications/index.html:12
-#: dlcdb/theme/templates/theme/includes/navbar.html:91
 msgid "My subscriptions"
-msgstr ""
+msgstr "Meine Abonnements"
 
 #: dlcdb/notifications/templates/notifications/index.html:18
 msgid ""
@@ -1261,6 +1260,10 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nein"
 
+#: dlcdb/notifications/templates/notifications/index.html:76
+msgid "Not available for device-based subscriptions."
+msgstr ""
+
 #: dlcdb/notifications/templates/notifications/index.html:84
 msgid "Ad hoc report"
 msgstr "Ad-hoc Meldung"
@@ -1281,7 +1284,7 @@ msgstr "Abonnement löschen?"
 msgid "Delete"
 msgstr "Löschen"
 
-#: dlcdb/notifications/templates/notifications/index.html:116
+#: dlcdb/notifications/templates/notifications/index.html:123
 msgid "You have no subscriptions yet."
 msgstr "Noch keine Abonnements."
 
@@ -1422,12 +1425,12 @@ msgid "Data management"
 msgstr "Datenhaltung"
 
 #: dlcdb/templates/admin/navbar.html:75
-#: dlcdb/theme/templates/theme/includes/navbar.html:62
+#: dlcdb/theme/templates/theme/includes/navbar.html:76
 msgid "Settings"
 msgstr "Einstellungen"
 
 #: dlcdb/templates/admin/navbar.html:112
-#: dlcdb/theme/templates/theme/includes/navbar.html:117
+#: dlcdb/theme/templates/theme/includes/navbar.html:144
 msgid "Language"
 msgstr "Sprache"
 
@@ -1457,19 +1460,11 @@ msgstr "None"
 msgid "Remove"
 msgstr "Entfernen"
 
-#: dlcdb/theme/templates/theme/includes/footer.html:11
-msgid "Documentation"
-msgstr "Dokumentation"
-
-#: dlcdb/theme/templates/theme/includes/footer.html:14
-msgid "Backend"
-msgstr "Backend"
-
-#: dlcdb/theme/templates/theme/includes/footer.html:21
+#: dlcdb/theme/templates/theme/includes/footer.html:12
 msgid "Repository"
 msgstr "Repository"
 
-#: dlcdb/theme/templates/theme/includes/footer.html:27
+#: dlcdb/theme/templates/theme/includes/footer.html:18
 msgid "Report an issue"
 msgstr "Problem melden"
 
@@ -1477,31 +1472,39 @@ msgstr "Problem melden"
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:84
+#: dlcdb/theme/templates/theme/includes/navbar.html:91
+msgid "Django admin"
+msgstr "Django Site-Verwaltung"
+
+#: dlcdb/theme/templates/theme/includes/navbar.html:106
 msgid "Superusers are not tenant aware"
 msgstr "Superuser sind nicht auf Mandanten beschränkt"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:84
+#: dlcdb/theme/templates/theme/includes/navbar.html:106
 msgid "Superuser"
 msgstr ""
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:84
+#: dlcdb/theme/templates/theme/includes/navbar.html:106
 msgid "Tenant"
 msgstr "Mandant"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:98
+#: dlcdb/theme/templates/theme/includes/navbar.html:118
+msgid "Subscriptions"
+msgstr "Abonnements"
+
+#: dlcdb/theme/templates/theme/includes/navbar.html:125
 msgid "Toggle theme"
 msgstr "Theme umschalten"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:102
+#: dlcdb/theme/templates/theme/includes/navbar.html:129
 msgid "Light"
 msgstr "Hell"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:105
+#: dlcdb/theme/templates/theme/includes/navbar.html:132
 msgid "Dark"
 msgstr "Dunkel"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:108
+#: dlcdb/theme/templates/theme/includes/navbar.html:135
 msgid "Auto"
 msgstr "Auto"
 
@@ -1544,6 +1547,12 @@ msgstr "Kein passendes Icon."
 #: dlcdb/theme/views.py:44
 msgid "Permission denied."
 msgstr "Zugriff verweigert."
+
+#~ msgid "Documentation"
+#~ msgstr "Dokumentation"
+
+#~ msgid "Backend"
+#~ msgstr "Backend"
 
 #~ msgid "Device data"
 #~ msgstr "Geräte-Daten"
