@@ -21,6 +21,15 @@ $link-decoration: underline;
 $font-family-sans-serif: "InterVariable", system-ui, -apple-system, "Segoe UI",
   Roboto, "Helvetica Neue", Arial, sans-serif;
 
+// Widen the container at large viewports to use more screen real estate.
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1320px,
+  xxl: 1600px,
+);
+
 // Bootstrap
 @import "bootstrap/scss/_variables";
 // Explicit import matching upstream bootstrap.scss order: _variables.scss only
