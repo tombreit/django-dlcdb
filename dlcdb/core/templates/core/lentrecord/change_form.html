@@ -14,7 +14,7 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="m-4">
         {% if original.record_type == 'LENT' %}
         <a 
-            class="btn btn-success btn-block" 
+            class="btn btn-success w-100"
             target="_blank"
             href="{% url 'core:print_lent_sheet' original.pk %}"
         >
@@ -22,7 +22,7 @@ SPDX-License-Identifier: EUPL-1.2
         </a>
         {% else %}
         <span 
-            class="btn btn-outline-secondary btn-block" 
+            class="btn btn-outline-secondary w-100"
         >
             <i class="bi bi-printer"></i> Ausleihzettel kann erst nach dem Speichern gedruckt werden
         </span>

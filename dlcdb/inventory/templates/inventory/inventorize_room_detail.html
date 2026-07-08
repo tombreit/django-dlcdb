@@ -185,7 +185,7 @@
                         {{ device.device_type.name }}
                     </span>
                     <br>
-                    <span class="d-inline-block my-1 badge text-bg-success small text-left text-wrap {# text-break #}">
+                    <span class="d-inline-block my-1 badge text-bg-success small text-start text-wrap {# text-break #}">
                         {% if device.active_record.is_type_lent %}
                             {{ device.active_record.get_record_type_display }} an 
                             <br>
@@ -220,7 +220,7 @@
 
     <button
         type="submit"
-        class="btn btn-danger btn-lg btn-block"
+        class="btn btn-danger btn-lg w-100"
         accesskey="s"
     >
         Save inventory for room {{ room }}

@@ -23,6 +23,9 @@ $font-family-sans-serif: "InterVariable", system-ui, -apple-system, "Segoe UI",
 
 // Bootstrap
 @import "bootstrap/scss/_variables";
+// Explicit import matching upstream bootstrap.scss order: _variables.scss only
+// pulls this in transitively as a v5.3 back-compat shim that goes away in v6.
+@import "bootstrap/scss/_variables-dark";
 
 // Bootstrap: Include any default map overrides here
 @import "_bootstrap_components";
