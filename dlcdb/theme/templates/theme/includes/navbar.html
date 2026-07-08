@@ -26,13 +26,25 @@
     
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto">
-          {% for item in nav_items_main %}
-            <li class="nav-item">
-              <a class="nav-link{% if item.active %} active{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
-                {{ item.label }}
-              </a>
-            </li>
-          {% endfor %}
+          {% if navigation.navbar %}
+            {# App focus mode: a non-empty per-app navbar replaces the global main nav. #}
+            {% for item in navigation.navbar %}
+              <li class="nav-item">
+                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}"{% if request.path == item.url %} aria-current="page"{% endif %}>
+                  {% if item.icon_class %}<i class="{{ item.icon_class }}"></i>{% endif %}
+                  {{ item.label }}
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            {% for item in nav_items_main %}
+              <li class="nav-item">
+                <a class="nav-link{% if item.active %} active{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
+                  {{ item.label }}
+                </a>
+              </li>
+            {% endfor %}
+          {% endif %}
         </ul>
 
         <ul  class="navbar-nav">

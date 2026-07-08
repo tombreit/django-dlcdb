@@ -8,7 +8,13 @@ from django.urls import reverse
 navigation = {
     "home_url": reverse("inventory:inventorize-room-list"),
     "app_icon_class": "bi bi-eyeglasses",
-    "navbar": [],
+    "navbar": [
+        {
+            "label": "Rooms",
+            "url": reverse("inventory:inventorize-room-list"),
+            "icon_class": "bi bi-door-open",
+        },
+    ],
     "navbar_secondary": [
         {
             "label": "Devices",

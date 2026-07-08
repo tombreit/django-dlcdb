@@ -70,7 +70,11 @@ def test_room_list_uses_theme_base(su_client, inventory_1, room_1, device_in_roo
     # navigation.py driven items
     assert reverse("inventory:search-devices") in html  # Devices (navbar_secondary)
     assert "/docs/guides/inventur.html" in html  # Docs
-    assert reverse("inventory:inventory-lending-report") in html  # VG bei MAs (userdropdown)
+    assert reverse("inventory:inventory-lending-report") in html  # VG bei MAs (navbar_secondary)
+
+    # Focus mode: per-app navbar replaces the global main nav entries
+    assert "Rooms" in html
+    assert f'href="{reverse("lending:index")}"' not in html  # global nav_main suppressed
 
     # Old shell must be gone
     assert "dlcdb-inventory-logo" not in html
@@ -117,6 +121,8 @@ def test_non_inventory_page_unaffected(su_client, inventory_1):
     html = response.content.decode()
     assert 'id="qr-toggle"' not in html
     assert "inventory/dist/inventory.js" not in html
+    # Global main nav still renders outside inventory focus mode
+    assert f'href="{reverse("lending:index")}"' in html
 
 
 @pytest.mark.django_db
