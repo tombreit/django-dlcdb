@@ -135,8 +135,10 @@ def nav(request):
             return False
 
         if permission == "true":
-            # The string "true" is currently used to disable permission checking
-            return True
+            # The string "true" disables *model-permission* checking but still
+            # requires an authenticated user (matches @login_required on such
+            # views, e.g. licenses:index).
+            return user.is_authenticated
 
         if "." in permission:
             # It seems the persmission is already in the format "app_label.permission_name"
