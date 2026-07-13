@@ -1,0 +1,102 @@
+{% load i18n %}
+{% comment %}
+Reusable search/filter/sort bar. Include with:
+
+    {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+where ``filterbar`` is built in the view via dlcdb.theme.filterbar.build_filterbar().
+The bar submits plain GET to the current path; HTMX swaps ``bar.target``.
+Active filter chips are rendered separately inside the swapped fragment via
+theme/filterbar/chips.html (so they refresh with every response while the bar
+itself keeps focus state).
+
+On viewports below md the filter/sort dropdowns fold into an offcanvas panel
+behind a "Filters (n)" button; search stays visible.
+{% endcomment %}
+<form
+  id="{{ bar.bar_id }}"
+  class="filterbar mb-3"
+  data-filterbar
+  action="{{ request.path }}"
+  method="get"
+  hx-get="{{ request.path }}"
+  hx-target="{{ bar.target }}"
+  hx-swap="outerHTML"
+  hx-push-url="true"
+  hx-trigger="keyup changed delay:250ms, search, change"
+  hx-indicator=".htmx-indicator"
+>
+  <div class="d-flex flex-wrap gap-2 align-items-start">
+
+    {% if bar.search_param %}
+      <div class="input-group flex-nowrap filterbar-search">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input
+          type="search"
+          class="form-control"
+          name="{{ bar.search_param }}"
+          value="{{ bar.search_value }}"
+          placeholder="{{ bar.search_placeholder }}"
+          autocomplete="off"
+        >
+      </div>
+    {% endif %}
+
+    <button
+      class="btn btn-outline-secondary d-md-none"
+      type="button"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#{{ bar.bar_id }}-panel"
+      aria-controls="{{ bar.bar_id }}-panel"
+    >
+      <i class="bi bi-funnel"></i> {% translate "Filters" %}
+      <span data-filterbar-count class="badge text-bg-secondary {% if not bar.chips %}d-none{% endif %}">{{ bar.chips|length }}</span>
+    </button>
+
+    <div class="offcanvas-md offcanvas-end" tabindex="-1" id="{{ bar.bar_id }}-panel" aria-labelledby="{{ bar.bar_id }}-panel-label">
+      <div class="offcanvas-header d-md-none">
+        <h5 class="offcanvas-title" id="{{ bar.bar_id }}-panel-label">{% translate "Filters" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#{{ bar.bar_id }}-panel" aria-label="{% translate 'Close' %}"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column flex-md-row flex-md-wrap gap-2 p-3 p-md-0">
+
+        {% for spec in bar.specs %}
+          {% include "theme/filterbar/_dropdown.html" %}
+        {% endfor %}
+
+        {% if bar.sort_options %}
+          <div class="dropdown filterbar-filter filterbar-sort">
+            <button
+              type="button"
+              class="btn btn-outline-secondary dropdown-toggle"
+              data-bs-toggle="dropdown"
+              data-filterbar-label="{% translate 'Sort' %}"
+            >
+              <span data-filterbar-btn-label>{% translate "Sort" %}{% if bar.current_sort %}: {{ bar.current_sort.label }} <i class="bi {% if bar.current_sort.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i>{% endif %}</span>
+            </button>
+            <div class="dropdown-menu filterbar-menu p-2">
+              {% for opt in bar.sort_options %}
+                <label class="dropdown-item d-flex align-items-center gap-2 rounded">
+                  <input
+                    class="form-check-input m-0 flex-shrink-0"
+                    type="radio"
+                    name="{{ bar.ordering_param }}"
+                    value="{{ opt.value }}"
+                    {% if opt.selected %}checked{% endif %}
+                  >
+                  <span data-filterbar-option>{{ opt.label }} <i class="bi {% if opt.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i></span>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <noscript>
+      <button type="submit" class="btn btn-primary">{% translate "Apply" %}</button>
+    </noscript>
+
+  </div>
+</form>

@@ -19,6 +19,9 @@
   </a>
 </div>
 
+{% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+{# Legacy search/filter bar — kept during the filterbar pilot, remove after testing. #}
 <form
   class="search mb-3"
   hx-get="{% url 'lending:index' %}"
@@ -58,7 +61,9 @@
 </form>
 
 {% partialdef lent-list inline %}
-<div id="lent-list">
+<div id="lent-list" hx-target="#lent-list" hx-swap="outerHTML" hx-push-url="true">
+
+  {% include "theme/filterbar/chips.html" with bar=filterbar %}
 
   <p class="text-muted small">
     <i>
@@ -77,10 +82,10 @@
     <table class="table table-hover align-middle">
       <thead>
         <tr>
-          {% include "lending/includes/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
-          {% include "lending/includes/_sort_th.html" with label=_("Person / status") asc="person" desc="-person" %}
-          {% include "lending/includes/_sort_th.html" with label=_("Due") asc="due" desc="-due" %}
-          {% include "lending/includes/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" %}
+          {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
+          {% include "theme/filterbar/_sort_th.html" with label=_("Person / status") asc="person" desc="-person" %}
+          {% include "theme/filterbar/_sort_th.html" with label=_("Due") asc="due" desc="-due" %}
+          {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" %}
           <th class="text-end">{% translate "Actions" %}</th>
         </tr>
       </thead>

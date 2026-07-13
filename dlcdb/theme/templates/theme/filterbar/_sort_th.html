@@ -1,0 +1,28 @@
+{% comment %}
+Sortable table header for filterbar list views. Caller passes:
+  label  - visible column label
+  asc    - OrderingFilter param value for ascending (e.g. "device")
+  desc   - param value for descending (e.g. "-device")
+Context conventions:
+  current_ordering - the active ordering param (the list view provides it)
+The link's hx-get is relative ("?ordering=..."), so hx-target/hx-swap/
+hx-push-url must be inherited from the fragment root element, and the list
+page must be served at its own endpoint. Preserves active search/filters via
+the built-in {% querystring %} tag; data-filterbar-ordering lets filterbar.js
+sync the bar's sort radio when a header is clicked.
+{% endcomment %}
+{% with current=current_ordering %}
+  {% if current == asc %}{% querystring ordering=desc as sort_href %}
+  {% else %}{% querystring ordering=asc as sort_href %}{% endif %}
+  <th scope="col">
+    <a class="text-decoration-none text-reset d-inline-flex align-items-center gap-1"
+       href="{{ sort_href }}"
+       hx-get="{{ sort_href }}"
+       data-filterbar-ordering="{% if current == asc %}{{ desc }}{% else %}{{ asc }}{% endif %}">
+      {{ label }}
+      {% if current == asc %}<i class="bi bi-caret-up-fill"></i>
+      {% elif current == desc %}<i class="bi bi-caret-down-fill"></i>
+      {% else %}<i class="bi bi-arrow-down-up opacity-25"></i>{% endif %}
+    </a>
+  </th>
+{% endwith %}

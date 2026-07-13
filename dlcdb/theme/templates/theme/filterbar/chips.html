@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}
+Active-filter chips for the filterbar. Include INSIDE the HTMX-swapped list
+fragment so the chips refresh with every response:
+
+    {% include "theme/filterbar/chips.html" with bar=filterbar %}
+
+With JS, clicking a chip clears the matching input in the bar's form and lets
+the form's own hx-get fire (one request path, widgets stay in sync). The href
+is the no-JS / middle-click fallback and reloads the page with that value
+removed. "Clear all" resets every filter but keeps the ordering.
+{% endcomment %}
+{% if bar.chips %}
+  <div class="filterbar-chips d-flex flex-wrap align-items-center gap-2 mb-2">
+    {% for chip in bar.chips %}
+      <a
+        class="filterbar-chip badge rounded-pill text-decoration-none"
+        href="{{ chip.remove_href }}"
+        data-filterbar-remove="{{ chip.param }}"
+        data-filterbar-value="{{ chip.value }}"
+        data-filterbar-form="{{ bar.bar_id }}"
+        title="{% blocktranslate with label=chip.label %}Remove filter: {{ label }}{% endblocktranslate %}"
+      >
+        {{ chip.label }}{% if chip.value_label %}: {{ chip.value_label }}{% endif %}
+        <i class="bi bi-x-lg"></i>
+      </a>
+    {% endfor %}
+    <a
+      class="small text-decoration-none"
+      href="{{ bar.clear_all_href }}"
+      data-filterbar-clear-all
+      data-filterbar-form="{{ bar.bar_id }}"
+    >{% translate "Clear all" %}</a>
+  </div>
+{% endif %}

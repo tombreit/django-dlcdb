@@ -107,6 +107,42 @@ class LendingIndexViewTests(BaseTest):
         self.assertLess(asc.index("EDV-AVAIL"), asc.index("EDV-LENT"))
         self.assertLess(desc.index("EDV-LENT"), desc.index("EDV-AVAIL"))
 
+    @override_settings(LANGUAGE_CODE="en")
+    def test_filterbar_renders_dropdowns_and_sort(self):
+        response = self.client.get(self.url)
+        content = response.content.decode()
+        self.assertContains(response, "data-filterbar")
+        # State, Type, Person dropdowns plus the sort dropdown.
+        self.assertEqual(content.count("data-filterbar-label"), 4)
+        # The view's default ordering (-modified) is reflected as checked radio.
+        self.assertRegex(content, r'value="-modified"\s+checked')
+        self.assertContains(response, 'value="-due"')
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_filterbar_chips_in_fragment(self):
+        response = self.client.get(
+            self.url,
+            {"state": "overdue", "person": self.person.id},
+            headers={"HX-Request": "true"},
+        )
+        content = response.content.decode()
+        # The fragment carries the chips, but not the bar itself.
+        self.assertIn("State: Overdue", content)
+        self.assertIn('data-filterbar-remove="state"', content)
+        self.assertIn('data-filterbar-remove="person"', content)
+        self.assertIn("Clear all", content)
+        self.assertNotIn("<form", content)
+
+    def test_filterbar_chip_removal_hrefs(self):
+        response = self.client.get(self.url, {"state": "overdue", "person": self.person.id, "ordering": "-due"})
+        bar = response.context["filterbar"]
+        self.assertEqual(len(bar.chips), 2)
+        state_chip = next(chip for chip in bar.chips if chip.param == "state")
+        self.assertNotIn("state=", state_chip.remove_href)
+        self.assertIn(f"person={self.person.id}", state_chip.remove_href)
+        self.assertIn("ordering=-due", state_chip.remove_href)
+        self.assertEqual(bar.clear_all_href, f"{self.url}?ordering=-due")
+
     def test_overdue_due_date_is_red_and_bold(self):
         response = self.client.get(self.url, headers={"HX-Request": "true"})
         content = response.content.decode()

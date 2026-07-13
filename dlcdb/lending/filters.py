@@ -42,16 +42,19 @@ class LentRecordFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(
         method="state_filter_method",
         choices=STATE_CHOICES,
+        label=_("State"),
         empty_label=_("Any state..."),
     )
 
     device__device_type = django_filters.ModelChoiceFilter(
         queryset=DeviceType.objects.filter(device__is_lentable=True).distinct(),
+        label=_("Type"),
         empty_label=_("Device type..."),
     )
 
     person = django_filters.ModelChoiceFilter(
         queryset=current_borrowers,
+        label=_("Person"),
         empty_label=_("Person..."),
     )
 

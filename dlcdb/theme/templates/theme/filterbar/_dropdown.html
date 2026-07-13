@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}
+One filter of the filterbar. Expects ``spec`` (a FilterSpec) in context.
+Radios/checkboxes carry the real GET parameter name, so native form submit
+and the form-level HTMX trigger both work. The first (empty-value) radio is
+the in-dropdown reset.
+{% endcomment %}
+<div class="dropdown filterbar-filter">
+  <button
+    type="button"
+    class="btn btn-outline-secondary dropdown-toggle"
+    data-bs-toggle="dropdown"
+    {% if spec.multiple %}data-bs-auto-close="outside"{% endif %}
+    data-filterbar-label="{{ spec.label }}"
+  >
+    <span data-filterbar-btn-label>{% if spec.selected_label %}{{ spec.label }}: {{ spec.selected_label }}{% else %}{{ spec.label }}{% endif %}</span>
+  </button>
+  <div class="dropdown-menu filterbar-menu p-2">
+    {% if spec.choices|length > 10 %}
+      <input
+        type="search"
+        class="form-control form-control-sm mb-2"
+        data-filterbar-menufilter
+        placeholder="{% translate 'Filter options...' %}"
+        autocomplete="off"
+      >
+    {% endif %}
+    {% for value, choice_label, checked in spec.choices %}
+      <label class="dropdown-item d-flex align-items-center gap-2 rounded">
+        <input
+          class="form-check-input m-0 flex-shrink-0"
+          type="{{ spec.input_type }}"
+          name="{{ spec.param }}"
+          value="{{ value }}"
+          {% if checked %}checked{% endif %}
+        >
+        <span data-filterbar-option>{{ choice_label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+</div>

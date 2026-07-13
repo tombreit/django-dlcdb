@@ -22,6 +22,7 @@ from dlcdb.core.models import InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.models.record import RECORD_TYPE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.theme.filterbar import build_filterbar
 
 from .decorators import htmx_permission_required
 from .filters import (
@@ -118,6 +119,12 @@ def index(request):
 
     context = {
         "filter": lent_record_filter,
+        "filterbar": build_filterbar(
+            lent_record_filter,
+            request,
+            target="#lent-list",
+            search_placeholder=_("Search device, person, note..."),
+        ),
         "current_ordering": data.get("ordering"),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.

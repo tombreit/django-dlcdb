@@ -1,0 +1,57 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+// Filterbar: reusable search/filter/sort bar (see theme/templates/theme/filterbar/).
+
+.filterbar {
+    .filterbar-search {
+        flex: 1 1 16rem;
+    }
+
+    .filterbar-menu {
+        max-height: 60vh;
+        overflow-y: auto;
+        min-width: 14rem;
+
+        label.dropdown-item {
+            cursor: pointer;
+
+            &:has(input:checked) {
+                font-weight: 600;
+            }
+        }
+    }
+
+    // Inside the mobile offcanvas panel, controls stack full-width.
+    @include media-breakpoint-down(md) {
+        .offcanvas-body {
+            .filterbar-filter,
+            .filterbar-filter > .btn {
+                width: 100%;
+            }
+
+            .filterbar-filter > .btn {
+                text-align: start;
+            }
+        }
+    }
+}
+
+// Removable active-filter chips (rendered inside the list fragment).
+.filterbar-chip {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+
+    &:hover,
+    &:focus-visible {
+        border-color: var(--bs-danger);
+
+        .bi-x-lg {
+            color: var(--bs-danger);
+        }
+    }
+}

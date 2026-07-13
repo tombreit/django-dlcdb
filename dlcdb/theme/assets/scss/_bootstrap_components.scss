@@ -35,6 +35,8 @@
 @import "bootstrap/scss/progress";
 @import "bootstrap/scss/modal";
 @import "bootstrap/scss/toasts";
+// Responsive offcanvas (offcanvas-md) is used by the filterbar component.
+@import "bootstrap/scss/offcanvas";
 
 // Helpers must come AFTER components so position helpers (.sticky-top, .fixed-top)
 // win over `.navbar { position: relative }`. This matches stock Bootstrap's order.
