@@ -232,6 +232,8 @@ class Message(models.Model):
     # Explicit recipient for standalone messages; when empty, the
     # subscription's subscriber is used.
     recipient_email = models.EmailField(blank=True)
+    # Optional CC (e.g. IT on overdue lender mails).
+    cc_email = models.EmailField(blank=True)
 
     # Report artifact whose spreadsheet gets attached to the email.
     report = models.ForeignKey("reporting.Report", on_delete=models.SET_NULL, null=True, blank=True)

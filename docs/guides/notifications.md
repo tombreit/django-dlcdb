@@ -25,10 +25,16 @@ Empfänger = mehrere Subscriptions.
 
 Daneben gibt es die **Overdue-Lender-Mails**: Personen mit überfälligen
 Ausleihen werden wöchentlich automatisch erinnert (eine Mail pro Person mit
-allen überfälligen Geräten) — gesteuert über die Settings
-`NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS` und
-`NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT` (Umleitung an
-`DEFAULT_FROM_EMAIL`).
+allen überfälligen Geräten). Der Empfänger wird über die *Lending
+Configuration* im Admin gesteuert (`overdue_notifications_recipient`):
+
+- *Nobody* — keine Mails
+- *Lender* — Mail an die ausleihende Person
+- *Lender, IT in CC* — eine Mail, Person im To, IT (`DEFAULT_FROM_EMAIL`) im CC
+- *IT only* — Mail nur an IT (Testdrive: identischer Inhalt, umgeleitet)
+
+Für eine mailfreie Übersicht zeigt das Dashboard eine Kachel mit der Anzahl
+überfälliger Ausleihen, verlinkt auf die vorgefilterte Lending-Liste.
 
 ## Implementation
 

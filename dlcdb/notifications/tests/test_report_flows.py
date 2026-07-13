@@ -20,6 +20,7 @@ from django.utils import timezone
 from huey.contrib import djhuey
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, Person
+from dlcdb.lending.models import LendingConfiguration
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
 from dlcdb.notifications.tasks import notify_overdue_lenders, queue_messages_for_interval, send_message
@@ -243,14 +244,21 @@ class AdHocReportTriggerTests(TestCase):
         self.assertEqual(len(mail.outbox), 0)
 
 
-# The gate and redirect settings are pinned here since both are
-# environment-dependent (env.template / .env).
-@override_settings(NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS=True, NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT=False)
 class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
     """
     Overdue semantics: a lending is overdue once
     lent_desired_end_date + 5 days tolerance <= today (inclusive).
+
+    The recipient mode lives on the LendingConfiguration singleton; tests set
+    it via ``set_lending_config``. The base cases rely on the model default
+    (overdue_notifications_recipient="lender").
     """
+
+    def set_lending_config(self, **kwargs):
+        config = LendingConfiguration.load()
+        for key, value in kwargs.items():
+            setattr(config, key, value)
+        config.save()
 
     def create_lent_record(self, person, edv_id, overdue_days):
         return LentRecord.objects.create(
@@ -317,8 +325,8 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
 
-    @override_settings(NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT=True)
     def test_overdue_mails_can_be_redirected_to_it(self):
+        self.set_lending_config(overdue_notifications_recipient="it")
         self.create_lent_record(self.lender1, edv_id="ntb106", overdue_days=10)
 
         notify_overdue_lenders.call_local()
@@ -328,8 +336,20 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
 
         self.assertEqual(mail.outbox[0].to, [settings.DEFAULT_FROM_EMAIL])
 
-    @override_settings(NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS=False)
+    def test_overdue_mails_can_cc_it(self):
+        self.set_lending_config(overdue_notifications_recipient="lender_and_it")
+        self.create_lent_record(self.lender1, edv_id="ntb108", overdue_days=10)
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual(len(mail.outbox), 1)
+        from django.conf import settings
+
+        self.assertEqual(mail.outbox[0].to, ["max@example.org"])
+        self.assertEqual(mail.outbox[0].cc, [settings.DEFAULT_FROM_EMAIL])
+
     def test_overdue_mails_can_be_disabled(self):
+        self.set_lending_config(overdue_notifications_recipient="none")
         self.create_lent_record(self.lender1, edv_id="ntb107", overdue_days=10)
 
         notify_overdue_lenders.call_local()

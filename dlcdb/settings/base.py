@@ -388,10 +388,8 @@ MORE_WHITENOISE = [
 
 DLCDB_BASE_URL = env("DLCDB_BASE_URL", default="http://127.0.0.1:8000")
 
-# Notifications
-NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS = env.bool("NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS", default=True)
-# Testdrive mode: send overdue mails to DEFAULT_FROM_EMAIL instead of the actual lenders.
-NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT = env.bool("NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT", default=False)
+# Overdue-lender notification flags now live on the LendingConfiguration
+# singleton (admin-editable); see dlcdb/lending/models.py.
 
 # Inventory/Scanner
 

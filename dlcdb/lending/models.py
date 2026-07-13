@@ -22,6 +22,12 @@ class LendingConfigurationRegulation(models.Model):
 
 
 class LendingConfiguration(SingletonBaseModel):
+    class OverdueNotificationRecipient(models.TextChoices):
+        NONE = "none", "Nobody — no overdue mails"
+        LENDER = "lender", "Lender"
+        LENDER_AND_IT = "lender_and_it", "Lender, IT in CC"
+        IT = "it", "IT only (testdrive: lender mails rerouted to IT)"
+
     lending_preparation_checklist = models.TextField(
         blank=True, help_text="Basic Markdown supported. '[ ]' converted to checkbox input."
     )
@@ -33,6 +39,12 @@ class LendingConfiguration(SingletonBaseModel):
     admin_mark_overdue = models.BooleanField(
         default=True,
         help_text="If checked, the admin listing highlights overdue devices.",
+    )
+    overdue_notifications_recipient = models.CharField(
+        max_length=20,
+        choices=OverdueNotificationRecipient.choices,
+        default=OverdueNotificationRecipient.LENDER,
+        help_text="Who receives the weekly overdue-lending reminder mails. IT = DEFAULT_FROM_EMAIL.",
     )
 
     def __str__(self):

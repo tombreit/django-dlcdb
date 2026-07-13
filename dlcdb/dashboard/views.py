@@ -2,11 +2,14 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from datetime import date
+
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Inventory, Record
+from dlcdb.core.models import Inventory, LentRecord, Record
 from dlcdb.core.utils.helpers import get_icon_for_class
 
 from . import stats
@@ -95,6 +98,27 @@ def index(request):
         tile_specs.append(("core.inventory", "inventory:inventorize-room-list"))
 
     tiles = [_build_tile(model_name=name, url=url, tenant=tenant) for name, url in tile_specs]
+
+    # Overdue tile: same predicate as the lending list's "state=overdue" filter
+    # (lending/filters.py), so the count always matches the linked list.
+    overdue_qs = LentRecord.objects.filter(
+        lent_desired_end_date__lte=date.today(),
+        lent_end_date__isnull=True,
+    )
+    if tenant:
+        overdue_qs = overdue_qs.filter(device__tenant=tenant)
+    tiles.insert(
+        2,
+        {
+            "label": _("Overdue lendings"),
+            "count": overdue_qs.count(),
+            "note_count": 0,
+            "show_badge": False,
+            "icon": "bi bi-alarm",
+            "url": "lending:index",
+            "query_params": "state=overdue",
+        },
+    )
 
     context = {
         "tiles": tiles,

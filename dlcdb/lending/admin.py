@@ -21,7 +21,13 @@ class RegulationInline(admin.TabularInline):
 
 @admin.register(LendingConfiguration)
 class LendingConfigurationAdmin(admin.ModelAdmin):
-    fieldsets = ((None, {"fields": ("admin_mark_overdue",)}),)
+    fieldsets = (
+        (None, {"fields": ("admin_mark_overdue",)}),
+        (
+            "Overdue lender notifications",
+            {"fields": ("overdue_notifications_recipient",)},
+        ),
+    )
 
     inlines = [
         RegulationInline,

@@ -13,6 +13,7 @@ import huey
 from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
 from dlcdb.core.models import Device
+from dlcdb.lending.models import LendingConfiguration
 from .models import Subscription, Message
 from .channels import send_via_all_channels
 from .intervals import NotificationInterval, INTERVAL_DETAILS
@@ -332,12 +333,13 @@ def queue_message(subscription_id):
 
 @db_periodic_task(
     # Weekly on Monday mornings; every 10 minutes in development.
-    huey.crontab(minute="*/10") if settings.DEBUG else huey.crontab(day_of_week=1, hour=7, minute=5)
+    huey.crontab(minute="*/5") if settings.DEBUG else huey.crontab(day_of_week=1, hour=7, minute=5)
 )
 @lock_task("notify_overdue_lenders")
 def notify_overdue_lenders():
     """Send reminder mails to lenders with overdue lendings."""
-    if not settings.NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS:
+    recipient_mode = LendingConfiguration.load().overdue_notifications_recipient
+    if recipient_mode == LendingConfiguration.OverdueNotificationRecipient.NONE:
         return
 
     for message in create_overdue_lender_messages():

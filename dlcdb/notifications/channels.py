@@ -63,6 +63,7 @@ class EmailChannel(NotificationChannel):
                 body=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=to,
+                cc=[message.cc_email] if message.cc_email else None,
             )
 
             # Attach the report spreadsheet, if any. Read via the storage
