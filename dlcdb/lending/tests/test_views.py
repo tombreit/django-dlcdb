@@ -143,6 +143,26 @@ class LendingIndexViewTests(BaseTest):
         self.assertIn("ordering=-due", state_chip.remove_href)
         self.assertEqual(bar.clear_all_href, f"{self.url}?ordering=-due")
 
+    @override_settings(LANGUAGE_CODE="en")
+    def test_show_all_badge_removed(self):
+        # The legacy "Show all" reset is gone; the filterbar "Clear all" is the
+        # single reset now.
+        response = self.client.get(self.url, {"state": "overdue"}, headers={"HX-Request": "true"})
+        self.assertNotContains(response, "Show all")
+        self.assertNotContains(response, "text-bg-warning")
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_search_only_query_gets_chip_and_clear_all(self):
+        # A search-only query used to have no reset affordance (chips are for
+        # dropdown filters); the search chip now covers it.
+        response = self.client.get(self.url, {"search": "EDV-LENT"}, headers={"HX-Request": "true"})
+        content = response.content.decode()
+        self.assertIn("Search: EDV-LENT", content)
+        self.assertIn('data-filterbar-remove="search"', content)
+        self.assertIn("Clear all", content)
+        # Count summary still renders.
+        self.assertRegex(content, r"\d+ of \d+ device")
+
     def test_overdue_due_date_is_red_and_bold(self):
         response = self.client.get(self.url, headers={"HX-Request": "true"})
         content = response.content.decode()

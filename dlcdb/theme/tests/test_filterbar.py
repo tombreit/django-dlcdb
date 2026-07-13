@@ -97,6 +97,18 @@ class BuildFilterbarTests(TestCase):
         self.assertNotIn("tags=a", tag_a_chip.remove_href)
         self.assertIn("tags=b", tag_a_chip.remove_href)
 
+    def test_search_chip(self):
+        bar = self._bar("?search=laptop")
+        self.assertIsNotNone(bar.search_chip)
+        self.assertEqual(bar.search_chip.param, "search")
+        self.assertEqual(bar.search_chip.value_label, "laptop")
+        self.assertNotIn("search=", bar.search_chip.remove_href)
+        # The search chip is separate from the dropdown-filter chips.
+        self.assertEqual(bar.chips, [])
+
+    def test_no_search_chip_without_query(self):
+        self.assertIsNone(self._bar("?state=open").search_chip)
+
     def test_clear_all_keeps_only_ordering(self):
         bar = self._bar("?search=laptop&state=open&tags=a&ordering=-modified")
         self.assertEqual(bar.clear_all_href, "/items/?ordering=-modified")

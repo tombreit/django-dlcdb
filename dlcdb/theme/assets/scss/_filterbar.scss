@@ -42,9 +42,23 @@
 
 // Removable active-filter chips (rendered inside the list fragment).
 .filterbar-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    // A long search term must not blow out the status row.
+    max-width: 20rem;
+
     background-color: var(--bs-secondary-bg);
     color: var(--bs-body-color);
     border: 1px solid var(--bs-border-color);
+
+    // Truncate a long label/value (e.g. the search term), keep the ✕ visible.
+    .filterbar-chip-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
 
     &:hover,
     &:focus-visible {

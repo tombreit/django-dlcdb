@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}
+One removable filter chip. Expects ``chip`` (a Chip) and ``bar_id`` in context.
+Used by chips.html for both the search chip and the dropdown-filter chips.
+{% endcomment %}
+<a
+  class="filterbar-chip badge rounded-pill text-decoration-none"
+  href="{{ chip.remove_href }}"
+  data-filterbar-remove="{{ chip.param }}"
+  data-filterbar-value="{{ chip.value }}"
+  data-filterbar-form="{{ bar_id }}"
+  title="{% blocktranslate with label=chip.label %}Remove filter: {{ label }}{% endblocktranslate %}"
+>
+  <span class="filterbar-chip-label">{{ chip.label }}{% if chip.value_label %}: {{ chip.value_label }}{% endif %}</span>
+  <i class="bi bi-x-lg"></i>
+</a>
+

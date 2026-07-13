@@ -73,11 +73,12 @@ class SortOption:
 class FilterBar:
     search_param: str  # "" when the FilterSet has no search filter
     search_value: str
+    search_chip: Chip | None  # the active search term as a removable chip
     specs: list[FilterSpec]
     ordering_param: str  # "" when the FilterSet has no OrderingFilter
     sort_options: list[SortOption]
     current_sort: SortOption | None
-    chips: list[Chip]
+    chips: list[Chip]  # dropdown-filter chips only (search is search_chip)
     clear_all_href: str
     target: str
     search_placeholder: str
@@ -125,9 +126,20 @@ def build_filterbar(
     chips = [chip for spec in specs for chip in _spec_chips(spec, request)]
     current_sort = next((opt for opt in sort_options if opt.selected), None)
 
+    search_chip = None
+    if search_value:
+        search_chip = Chip(
+            param=search_param,
+            value=search_value,
+            label=_("Search"),
+            value_label=search_value,
+            remove_href=_remove_value_href(request, search_param, search_value),
+        )
+
     return FilterBar(
         search_param=search_param,
         search_value=search_value,
+        search_chip=search_chip,
         specs=specs,
         ordering_param=ordering_param,
         sort_options=sort_options,

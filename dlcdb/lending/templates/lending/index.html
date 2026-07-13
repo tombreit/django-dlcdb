@@ -21,62 +21,21 @@
 
 {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
-{# Legacy search/filter bar — kept during the filterbar pilot, remove after testing. #}
-<form
-  class="search mb-3"
-  hx-get="{% url 'lending:index' %}"
-  hx-target="#lent-list"
-  hx-swap="outerHTML"
-  hx-push-url="true"
-  hx-trigger="keyup changed delay:250ms, search, change"
-  hx-indicator=".htmx-indicator"
->
-  <div class="input-group flex-wrap">
-    <span class="input-group-text">
-      <i class="bi bi-search"></i>
-    </span>
-    <input
-      type="search"
-      class="form-control"
-      style="flex-grow: 3;"
-      placeholder="{% translate 'Search device, person, note...' %}"
-      name="{{ filter.form.search.html_name }}"
-      id="{{ filter.form.search.id_for_label }}"
-      value="{{ filter.form.search.value|default:'' }}"
-      autocomplete="off"
-    >
-
-    <select class="form-select" name="{{ filter.form.state.html_name }}">
-      {% for choice in filter.form.state %}{{ choice }}{% endfor %}
-    </select>
-
-    <select class="form-select is-tom-select" name="{{ filter.form.device__device_type.html_name }}">
-      {% for choice in filter.form.device__device_type %}{{ choice }}{% endfor %}
-    </select>
-
-    <select class="form-select is-tom-select" name="{{ filter.form.person.html_name }}">
-      {% for choice in filter.form.person %}{{ choice }}{% endfor %}
-    </select>
-  </div>
-</form>
-
 {% partialdef lent-list inline %}
 <div id="lent-list" hx-target="#lent-list" hx-swap="outerHTML" hx-push-url="true">
 
-  {% include "theme/filterbar/chips.html" with bar=filterbar %}
-
-  <p class="text-muted small">
-    <i>
+  {% comment %}
+  App-specific count sits alongside the generic filterbar chips + single
+  "Clear all" (from chips.html). The filterbar component knows nothing about
+  these lending counts.
+  {% endcomment %}
+  <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+    <span>
       {% blocktranslate count counter=lent_filtered_count with total=lent_total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
-      <span class="ms-1">({% blocktranslate with available=lent_available_count lent=lent_lent_count %}{{ available }} available, {{ lent }} lent{% endblocktranslate %})</span>
-      {% if lent_filtered_count != lent_total_count %}
-        <a class="ms-1 badge text-bg-warning" href="{% url 'lending:index' %}">
-          <i class="bi bi-x-circle-fill"></i>
-          {% translate "Show all" %}
-        </a>
-      {% endif %}
-    </i>
-  </p>
+      ({% blocktranslate with available=lent_available_count lent=lent_lent_count %}{{ available }} available, {{ lent }} lent{% endblocktranslate %})
+    </span>
+    {% include "theme/filterbar/chips.html" with bar=filterbar %}
+  </div>
 
   <div class="table-responsive">
     <table class="table table-hover align-middle">

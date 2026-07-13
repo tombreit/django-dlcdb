@@ -5,25 +5,23 @@ fragment so the chips refresh with every response:
 
     {% include "theme/filterbar/chips.html" with bar=filterbar %}
 
+Renders the active search term (search_chip) and each active dropdown filter
+(chips) as removable chips, plus a single "Clear all". The wrapper carries no
+outer margin, so a consuming template can drop it into its own status row
+(e.g. next to a result count) — the component itself knows nothing about counts.
+
 With JS, clicking a chip clears the matching input in the bar's form and lets
 the form's own hx-get fire (one request path, widgets stay in sync). The href
 is the no-JS / middle-click fallback and reloads the page with that value
-removed. "Clear all" resets every filter but keeps the ordering.
+removed. "Clear all" resets search + every filter but keeps the ordering.
 {% endcomment %}
-{% if bar.chips %}
-  <div class="filterbar-chips d-flex flex-wrap align-items-center gap-2 mb-2">
+{% if bar.search_chip or bar.chips %}
+  <span class="filterbar-chips d-inline-flex flex-wrap align-items-center gap-2">
+    {% if bar.search_chip %}
+      {% include "theme/filterbar/_chip.html" with chip=bar.search_chip bar_id=bar.bar_id %}
+    {% endif %}
     {% for chip in bar.chips %}
-      <a
-        class="filterbar-chip badge rounded-pill text-decoration-none"
-        href="{{ chip.remove_href }}"
-        data-filterbar-remove="{{ chip.param }}"
-        data-filterbar-value="{{ chip.value }}"
-        data-filterbar-form="{{ bar.bar_id }}"
-        title="{% blocktranslate with label=chip.label %}Remove filter: {{ label }}{% endblocktranslate %}"
-      >
-        {{ chip.label }}{% if chip.value_label %}: {{ chip.value_label }}{% endif %}
-        <i class="bi bi-x-lg"></i>
-      </a>
+      {% include "theme/filterbar/_chip.html" with chip=chip bar_id=bar.bar_id %}
     {% endfor %}
     <a
       class="small text-decoration-none"
@@ -31,5 +29,5 @@ removed. "Clear all" resets every filter but keeps the ordering.
       data-filterbar-clear-all
       data-filterbar-form="{{ bar.bar_id }}"
     >{% translate "Clear all" %}</a>
-  </div>
+  </span>
 {% endif %}
