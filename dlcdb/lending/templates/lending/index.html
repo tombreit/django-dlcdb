@@ -115,14 +115,14 @@
             </td>
             <td class="text-end text-nowrap">
               {% if record.record_type == "INROOM" %}
-                <a href="{% url 'lending:detail' record.pk %}" class="btn btn-sm btn-primary">
+                <a href="{% url 'lending:detail' record.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}" class="btn btn-sm btn-primary">
                   <i class="bi bi-box-arrow-right"></i> {% translate "Lend" %}
                 </a>
               {% elif record.record_type == "LENT" %}
-                <a href="{% url 'lending:detail' record.pk %}?action=return" class="btn btn-sm btn-success">
+                <a href="{% url 'lending:detail' record.pk %}?action=return{% if request.GET %}&next={{ request.GET.urlencode|urlencode }}{% endif %}" class="btn btn-sm btn-success">
                   <i class="bi bi-box-arrow-in-left"></i> {% translate "Return" %}
                 </a>
-                <a href="{% url 'lending:detail' record.pk %}" class="btn btn-sm btn-outline-secondary">
+                <a href="{% url 'lending:detail' record.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}" class="btn btn-sm btn-outline-secondary">
                   <i class="bi bi-pencil"></i> {% translate "Edit" %}
                 </a>
               {% endif %}

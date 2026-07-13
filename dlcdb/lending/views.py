@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -278,6 +279,16 @@ def lend(request, pk=None):
     picker_mode = pk is None
     device_form = QuickLendDeviceForm(request.POST or None, request=request) if picker_mode else None
 
+    # Filters/search on the index live in its querystring; the row links carry it
+    # here as ?next=. Thread it back into the post-save redirect and the
+    # back/cancel links so the user returns to the exact filtered view. Read from
+    # request.GET so it works on both the GET render and the POST (form_action
+    # carries it in its querystring).
+    index_query = request.GET.get("next", "")
+    index_url = reverse("lending:index")
+    if index_query:
+        index_url = f"{index_url}?{index_query}"
+
     if picker_mode:
         record = device = None
     else:
@@ -285,7 +296,7 @@ def lend(request, pk=None):
         device = record.device
         if record.record_type == Record.LOST:
             messages.error(request, _('Device is currently "not locatable" and must be located first.'))
-            return redirect("lending:index")
+            return redirect(index_url)
 
     if request.method == "POST":
         if picker_mode:
@@ -301,7 +312,7 @@ def lend(request, pk=None):
 
         form = LentingForm(request.POST, instance=record, record_type=record.record_type)
         if form.is_valid() and _save_lending(request, record, form):
-            return redirect("lending:index")
+            return redirect(index_url)
     else:
         form = LentingForm(
             instance=record,
@@ -325,6 +336,12 @@ def lend(request, pk=None):
     is_lend_flow = picker_mode or record.record_type == Record.INROOM
     is_return_flow = (not picker_mode) and record.record_type == Record.LENT
 
+    # Carry the index filters through the POST (and any failed-POST re-render) by
+    # appending ?next= to the form action.
+    form_action = reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk])
+    if index_query:
+        form_action += "?" + urlencode({"next": index_query})
+
     context = {
         "form": form,
         "device_form": device_form,
@@ -343,7 +360,8 @@ def lend(request, pk=None):
         "has_lending_profile": is_lend_flow
         and not picker_mode
         and LendingProfile.objects.filter(device_type=device.device_type).exists(),
-        "form_action": reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk]),
+        "form_action": form_action,
+        "index_url": index_url,
     }
     return TemplateResponse(request, "lending/lend.html", context)
 

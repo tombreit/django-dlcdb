@@ -20,7 +20,7 @@ SPDX-License-Identifier: EUPL-1.2
 
 <div class="d-flex align-items-center justify-content-between mb-3">
   <div>
-    <a href="{% url 'lending:index' %}" class="text-decoration-none small">
+    <a href="{{ index_url }}" class="text-decoration-none small">
       <i class="bi bi-arrow-left"></i> {% translate "Back to overview" %}
     </a>
     <h1 class="mb-0">
@@ -209,7 +209,7 @@ SPDX-License-Identifier: EUPL-1.2
       </button>
     {% endif %}
 
-    <a href="{% url 'lending:index' %}" class="btn btn-outline-secondary ms-auto">
+    <a href="{{ index_url }}" class="btn btn-outline-secondary ms-auto">
       <i class="bi bi-x-lg"></i> {% translate "Cancel" %}
     </a>
   </div>
