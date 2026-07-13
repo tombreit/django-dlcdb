@@ -5,7 +5,6 @@
 from typing import Optional
 from datetime import datetime
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db import models
@@ -210,12 +209,6 @@ class Record(AuditBaseModel):
         verbose_name = "Record"
         verbose_name_plural = "Records"
         constraints = [
-            models.CheckConstraint(
-                name="%(app_label)s_%(class)s_valid_lent_desired_end_date",
-                condition=Q(
-                    lent_desired_end_date__lte=datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d")
-                ),
-            ),
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_record_type_required",
                 condition=~Q(record_type="") & Q(record_type__in=RECORD_TYPE_KEYS),

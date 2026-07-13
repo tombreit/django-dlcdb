@@ -84,6 +84,21 @@
         dateField.addEventListener("input", function () {
           toggle.checked = false;
         });
+
+        // Explicitly checking the sync box adopts the borrower's contract end as
+        // the desired return date. Programmatic .value writes don't fire `input`,
+        // so the un-sync listener above stays silent and the box stays checked.
+        toggle.addEventListener("change", function () {
+          if (!toggle.checked) {
+            return;
+          }
+          const selectedCard = selectedSlot.querySelector("[data-contract-end]");
+          const contractEnd = selectedCard && selectedCard.dataset.contractEnd;
+          if (!contractEnd) {
+            return; // no person selected, or no contract end on that person
+          }
+          dateField.value = contractEnd;
+        });
       }
     }
 
