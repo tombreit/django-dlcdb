@@ -6,8 +6,8 @@ from django.urls import reverse
 
 
 navigation = {
-    "home_url": reverse("assets:relocate"),
-    "app_icon_class": "bi bi-arrows-move",
+    "home_url": reverse("assets:device_index"),
+    "app_icon_class": "bi bi-pc-display",
     "navbar": [],
     "navbar_secondary": [],
 }

@@ -1,0 +1,86 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Devices" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{% translate "Devices" %}</h1>
+    <span class="htmx-indicator ms-3">
+      <span class="spinner-border spinner-border-sm text-secondary" role="status">
+        <span class="visually-hidden">{% translate "Loading..." %}</span>
+      </span>
+    </span>
+    {% if perms.core.add_device %}
+      <a href="{% url 'assets:device_add' %}" class="btn btn-primary ms-auto">
+        <i class="bi bi-plus-lg"></i> {% translate "Add device" %}
+      </a>
+    {% endif %}
+  </div>
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef device-list inline %}
+    <div id="device-list" hx-target="#device-list" hx-swap="outerHTML" hx-push-url="true">
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=device_filtered_count with total=device_total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="it_id" desc="-it_id" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Type") asc="type" desc="-type" th_class="d-none d-md-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("State / location") asc="state" desc="-state" th_class="d-none d-lg-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell" %}
+              <th class="text-end">{% translate "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for device in filter.qs %}
+              <tr>
+                <td>
+                  <div class="fw-semibold">
+                    <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
+                    {{ device.edv_id|default:device.sap_id|default:"—" }}
+                  </div>
+                  <div>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
+                  <div class="small text-muted">
+                    {% if device.edv_id and device.sap_id %}{% translate "Inventory ID" %}: {{ device.sap_id }} · {% endif %}
+                    {% if device.serial_number %}{% translate "Serial" %}: {{ device.serial_number }}{% endif %}
+                  </div>
+                  <div class="d-md-none mt-1">
+                    {% include "assets/devices/includes/_state.html" with device=device %}
+                  </div>
+                </td>
+                <td class="d-none d-md-table-cell">
+                  {{ device.device_type|default:"—" }}
+                  {% if device.is_lentable %}
+                    <div><span class="badge text-bg-light border">{% translate "Loanable" %}</span></div>
+                  {% endif %}
+                </td>
+                <td class="d-none d-lg-table-cell">
+                  {% include "assets/devices/includes/_state.html" with device=device %}
+                </td>
+                <td class="d-none d-lg-table-cell text-nowrap">{{ device.modified_at|date:"Y-m-d" }}</td>
+                <td class="text-end text-nowrap">
+                  <a href="{% url 'assets:device_detail' device.pk %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i><span class="visually-hidden"> {% translate "Open device" %}</span>
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted"><i>{% translate "No devices found." %}</i></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endpartialdef %}
+{% endblock body %}

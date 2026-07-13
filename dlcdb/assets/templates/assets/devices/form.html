@@ -1,0 +1,19 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{{ title }}</h1>
+    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary ms-auto">{% translate "Cancel" %}</a>
+  </div>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "assets/devices/includes/_form_fields.html" with form=form %}
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+    </div>
+  </form>
+{% endblock body %}

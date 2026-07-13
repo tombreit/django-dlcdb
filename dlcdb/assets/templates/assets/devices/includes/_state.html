@@ -1,0 +1,14 @@
+{% load i18n %}
+{% if device.active_record %}
+  <span class="badge text-bg-{{ device.active_record.record_type_color }}">
+    {{ device.active_record.get_record_type_display }}
+  </span>
+  {% if device.active_record.room %}
+    <span class="ms-1"><i class="bi bi-door-open"></i> {{ device.active_record.room }}</span>
+  {% endif %}
+  {% if device.active_record.person %}
+    <span class="ms-1"><i class="bi bi-person"></i> {{ device.active_record.person }}</span>
+  {% endif %}
+{% else %}
+  <span class="badge text-bg-secondary">{% translate "No active record" %}</span>
+{% endif %}

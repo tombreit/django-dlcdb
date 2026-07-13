@@ -1,0 +1,36 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ device }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <div>
+      <h1 class="mb-0">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</h1>
+      <div class="text-muted">{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
+    </div>
+    <div class="ms-sm-auto">{% include "assets/devices/includes/_state.html" with device=device %}</div>
+    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Back to devices" %}</a>
+  </div>
+
+  {% if can_change %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "assets/devices/includes/_form_fields.html" with form=form %}
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">{% translate "Save changes" %}</button>
+        {% if device.is_lentable and device.active_record.record_type == "INROOM" and perms.core.add_lentrecord %}
+          <a class="btn btn-outline-primary" href="{% url 'lending:detail' device.active_record.pk %}">{% translate "Lend" %}</a>
+        {% endif %}
+      </div>
+    </form>
+  {% else %}
+    <div class="alert alert-secondary">{% translate "You may view this device but do not have permission to edit it." %}</div>
+    <dl class="row">
+      <dt class="col-sm-3">{% translate "IT ID" %}</dt><dd class="col-sm-9">{{ device.edv_id|default:"—" }}</dd>
+      <dt class="col-sm-3">{% translate "Inventory ID" %}</dt><dd class="col-sm-9">{{ device.sap_id|default:"—" }}</dd>
+      <dt class="col-sm-3">{% translate "Serial number" %}</dt><dd class="col-sm-9">{{ device.serial_number|default:"—" }}</dd>
+      <dt class="col-sm-3">{% translate "Device type" %}</dt><dd class="col-sm-9">{{ device.device_type|default:"—" }}</dd>
+    </dl>
+  {% endif %}
+{% endblock body %}

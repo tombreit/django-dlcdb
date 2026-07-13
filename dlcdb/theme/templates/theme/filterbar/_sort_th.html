@@ -14,7 +14,7 @@ sync the bar's sort radio when a header is clicked.
 {% with current=current_ordering %}
   {% if current == asc %}{% querystring ordering=desc as sort_href %}
   {% else %}{% querystring ordering=asc as sort_href %}{% endif %}
-  <th scope="col">
+  <th scope="col"{% if th_class %} class="{{ th_class }}"{% endif %}>
     <a class="text-decoration-none text-reset d-inline-flex align-items-center gap-1"
        href="{{ sort_href }}"
        hx-get="{{ sort_href }}"

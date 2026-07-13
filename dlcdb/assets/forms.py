@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, Room
+from dlcdb.core.models import Device, Record, Room
 from dlcdb.theme.widgets import DevicePickerMultiField
 
 
@@ -42,3 +43,87 @@ class RelocateForm(forms.Form):
         if request is not None:
             # Let the widget gate the selected card's admin link on the user's perm.
             self.fields["devices"].widget.user = request.user
+
+
+class DeviceForm(forms.ModelForm):
+    """The editable operational fields of a device.
+
+    Audit, import and UUID values intentionally remain model data rather than
+    form fields: they explain where a device came from, but are not ordinary
+    operator input.
+    """
+
+    class Meta:
+        model = Device
+        fields = [
+            "edv_id",
+            "sap_id",
+            "device_type",
+            "is_lentable",
+            "is_licence",
+            "tenant",
+            "manufacturer",
+            "series",
+            "serial_number",
+            "note",
+            "supplier",
+            "order_number",
+            "cost_centre",
+            "purchase_date",
+            "warranty_expiration_date",
+            "contract_start_date",
+            "contract_expiration_date",
+            "contract_termination_date",
+            "procurement_note",
+            "contact_person_internal",
+            "nick_name",
+            "mac_address",
+            "extra_mac_addresses",
+            "machine_encryption_key",
+            "backup_encryption_key",
+        ]
+        widgets = {
+            "purchase_date": forms.DateInput(attrs={"type": "date"}),
+            "warranty_expiration_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_start_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_expiration_date": forms.DateInput(attrs={"type": "date"}),
+            "contract_termination_date": forms.DateInput(attrs={"type": "date"}),
+            "note": forms.Textarea(attrs={"rows": 3}),
+            "procurement_note": forms.Textarea(attrs={"rows": 3}),
+            "extra_mac_addresses": forms.Textarea(attrs={"rows": 2}),
+            "machine_encryption_key": forms.Textarea(attrs={"rows": 3}),
+            "backup_encryption_key": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, request, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
+
+        if not request.user.is_superuser:
+            self.fields.pop("tenant")
+        else:
+            # A superuser may deliberately create an unscoped device, matching
+            # the existing admin behaviour. Tenant-aware operators never see
+            # this field and receive their request tenant on save.
+            self.fields["tenant"].required = False
+
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs["class"] = "form-check-input"
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
+            else:
+                field.widget.attrs["class"] = "form-control"
+
+    def clean_is_lentable(self):
+        is_lentable = self.cleaned_data["is_lentable"]
+        active_record = getattr(self.instance, "active_record", None)
+        if (
+            self.instance.pk
+            and not self.request.user.is_superuser
+            and active_record
+            and active_record.record_type == Record.LENT
+            and is_lentable != self.instance.is_lentable
+        ):
+            raise ValidationError(_("Loanability cannot be changed while this device is lent."))
+        return is_lentable
