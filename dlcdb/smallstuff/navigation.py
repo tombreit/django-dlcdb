@@ -2,18 +2,26 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 
-navigation = {
-    "home_url": reverse("smallstuff:person_search"),
-    "app_icon_class": "bi bi-handbag",
-    "navbar": [],
+nav_entries = [
+    {
+        "slot": "nav_main",
+        "order": 30,
+        "label": _("Smallstuff"),
+        "icon": "bi bi-handbag",
+        "url": "smallstuff:person_search",
+        "required_permission": "view_assignedthing",
+    },
+]
+
+nav_focus = {
     "navbar_secondary": [
         {
-            "label": "Docs",
-            "url": "/docs/guides/kleinkram.html",
-            "icon_class": "bi bi-book",
+            "label": _("Docs"),
+            "href": "/docs/guides/kleinkram.html",
+            "icon": "bi bi-book",
         },
     ],
 }

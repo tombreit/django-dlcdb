@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.apps import AppConfig
-from django.utils.translation import gettext_lazy as _
 
 
 class LendingConfig(AppConfig):
@@ -15,22 +14,3 @@ class LendingConfig(AppConfig):
         from . import pickers
 
         pickers.register()
-
-    nav_entries = [
-        {
-            "slot": "nav_settings",
-            "order": 20,
-            "label": _("Lending configuration"),
-            "icon": "bi bi-arrow-left-right",
-            "url": "admin:lending_lendingconfiguration_changelist",
-            "required_permission": "view_lendingconfiguration",
-        },
-        {
-            "slot": "nav_settings",
-            "order": 25,
-            "label": _("Lending profiles"),
-            "icon": "bi bi-card-checklist",
-            "url": "admin:lending_lendingprofile_changelist",
-            "required_permission": "view_lendingprofile",
-        },
-    ]

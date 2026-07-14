@@ -10,14 +10,3 @@ class SmallstuffConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.smallstuff"
     verbose_name = _("Smallstuff")
-
-    nav_entries = [
-        {
-            "slot": "nav_main",
-            "order": 30,
-            "label": _("Smallstuff"),
-            "icon": "bi bi-handbag",
-            "url": "smallstuff:person_search",
-            "required_permission": "view_assignedthing",
-        },
-    ]

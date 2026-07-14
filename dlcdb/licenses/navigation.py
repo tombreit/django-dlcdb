@@ -2,18 +2,34 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 
-navigation = {
-    "home_url": reverse("licenses:index"),
-    "app_icon_class": "bi bi-c-circle",
-    "navbar": [],
+nav_entries = [
+    {
+        "slot": "nav_main",
+        "order": 40,
+        "label": _("Licenses"),
+        "icon": "bi bi-bank2",
+        "url": "licenses:index",
+        "required_permission": "true",
+    },
+    {
+        "slot": "nav_settings",
+        "order": 30,
+        "label": _("Licenses configuration"),
+        "icon": "bi bi-bank2",
+        "url": "admin:licenses_licensesconfiguration_changelist",
+        "required_permission": "view_licensesconfiguration",
+    },
+]
+
+nav_focus = {
     "navbar_secondary": [
         {
-            "label": "Docs",
-            "url": "/docs/guides/lizenzen.html",
-            "icon_class": "bi bi-book",
+            "label": _("Docs"),
+            "href": "/docs/guides/lizenzen.html",
+            "icon": "bi bi-book",
         },
     ],
 }

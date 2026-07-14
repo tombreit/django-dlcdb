@@ -9,16 +9,9 @@
           alt="{{ branding.organization_abbr }}"
           style="height: 30px;"
         >
-        {# Current app identity hidden: it duplicates the highlighted "active" item in the main nav. Kept (not deleted) in case we want to restore the brand app label. #}
-        {% comment %}
-        <span class="ms-4">
-          <i class="{{ navigation.app_icon_class }}"></i>
-          {% translate navigation.app_label %}
-        </span>
-        {% endcomment %}
     </a>
 
-    {% if navigation.navbar_status_template %}{% include navigation.navbar_status_template %}{% endif %}
+    {% if nav_focus.navbar_status_template %}{% include nav_focus.navbar_status_template %}{% endif %}
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -26,12 +19,13 @@
     
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto">
-          {% if navigation.navbar %}
+          {% if nav_focus.navbar %}
             {# App focus mode: a non-empty per-app navbar replaces the global main nav. #}
-            {% for item in navigation.navbar %}
+            {% for item in nav_focus.navbar %}
+              {% url item.url as item_href %}
               <li class="nav-item">
-                <a class="nav-link{% if request.path == item.url %} active{% endif %}" href="{{ item.url }}"{% if request.path == item.url %} aria-current="page"{% endif %}>
-                  {% if item.icon_class %}<i class="{{ item.icon_class }}"></i>{% endif %}
+                <a class="nav-link{% if request.path == item_href %} active{% endif %}" href="{{ item_href }}"{% if request.path == item_href %} aria-current="page"{% endif %}>
+                  {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
                   {{ item.label }}
                 </a>
               </li>
@@ -49,11 +43,11 @@
 
         <ul  class="navbar-nav">
 
-        {% if navigation.navbar_secondary %}
-            {% for item in navigation.navbar_secondary %}
+        {% if nav_focus.navbar_secondary %}
+            {% for item in nav_focus.navbar_secondary %}
             <li class="nav-item">
-                <a class="nav-link" href="{{ item.url }}">
-                <i class="{{ item.icon_class }}"></i>
+                <a class="nav-link" href="{% if item.url %}{% url item.url %}{% else %}{{ item.href }}{% endif %}">
+                {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
                 {{ item.label }}
                 </a>
             </li>
@@ -94,7 +88,7 @@
           </li>
           {% endif %}
 
-          {% if request.user.is_authenticated or navigation.userdropdown or navigation.userdropdown_template %}
+          {% if request.user.is_authenticated or nav_focus.userdropdown or nav_focus.userdropdown_template %}
           <li class="nav-item d-none d-lg-flex align-items-stretch">
             <span class="vr mx-2 my-2 opacity-25"></span>
           </li>
@@ -106,8 +100,8 @@
             </a>
             <div class="dropdown-menu dropdown-menu-end">
 
-              {% if navigation.userdropdown_template %}
-              {% include navigation.userdropdown_template %}
+              {% if nav_focus.userdropdown_template %}
+              {% include nav_focus.userdropdown_template %}
               <div class="dropdown-divider"></div>
               {% endif %}
 
@@ -160,11 +154,11 @@
                 {% include 'theme/logout_link.html' %}
               {% endif %}
 
-              {% if navigation.userdropdown %}
+              {% if nav_focus.userdropdown %}
               <div class="dropdown-divider"></div>
-                {% for item in navigation.userdropdown %}
-                  <a class="dropdown-item" href="{{ item.url }}">
-                    <i class="{{ item.icon_class }}"></i>
+                {% for item in nav_focus.userdropdown %}
+                  <a class="dropdown-item" href="{% if item.url %}{% url item.url %}{% else %}{{ item.href }}{% endif %}">
+                    {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
                     {{ item.label }}
                   </a>
                 {% endfor %}

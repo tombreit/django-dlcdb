@@ -2,34 +2,62 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 
-navigation = {
-    "home_url": reverse("inventory:inventorize-room-list"),
-    "app_icon_class": "bi bi-eyeglasses",
+nav_entries = [
+    {
+        "slot": "nav_main",
+        "order": 5,
+        "label": _("Inventorize"),
+        "icon": "bi bi-eyeglasses",
+        "url": "inventory:inventorize-room-list",
+        "required_permission": "core.can_inventorize",
+        "show_condition": "active_inventory_exists",
+    },
+    {
+        "slot": "nav_processes",
+        "order": 40,
+        "label": _("Inventorize"),
+        "icon": "bi bi-eyeglasses",
+        "url": "inventory:inventorize-room-list",
+        "required_permission": "core.can_inventorize",
+        "show_condition": "active_inventory_exists",
+    },
+    {
+        "slot": "nav_processes",
+        "order": 50,
+        "label": _("SAP comparison"),
+        "icon": "",
+        "url": "admin:inventory_saplist_changelist",
+        "required_permission": "core.change_inventory",
+        "show_condition": "active_inventory_exists",
+    },
+]
+
+nav_focus = {
     "navbar": [
         {
-            "label": "Rooms",
-            "url": reverse("inventory:inventorize-room-list"),
-            "icon_class": "bi bi-door-open",
+            "label": _("Rooms"),
+            "url": "inventory:inventorize-room-list",
+            "icon": "bi bi-door-open",
         },
     ],
     "navbar_secondary": [
         {
-            "label": "Devices",
-            "url": reverse("inventory:search-devices"),
-            "icon_class": "",
+            "label": _("Devices"),
+            "url": "inventory:search-devices",
+            "icon": "",
         },
         {
-            "label": "VG bei MAs",
-            "url": reverse("inventory:inventory-lending-report"),
-            "icon_class": "",
+            "label": _("VG bei MAs"),
+            "url": "inventory:inventory-lending-report",
+            "icon": "",
         },
         {
-            "label": "Docs",
-            "url": "/docs/guides/inventur.html",
-            "icon_class": "bi bi-book",
+            "label": _("Docs"),
+            "href": "/docs/guides/inventur.html",
+            "icon": "bi bi-book",
         },
     ],
     "navbar_status_template": "inventory/includes/navbar_status.html",

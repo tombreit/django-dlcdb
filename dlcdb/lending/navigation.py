@@ -2,18 +2,34 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 
-navigation = {
-    "home_url": reverse("lending:index"),
-    "app_icon_class": "bi bi-arrow-left-right",
-    "navbar": [],
+nav_entries = [
+    {
+        "slot": "nav_settings",
+        "order": 20,
+        "label": _("Lending configuration"),
+        "icon": "bi bi-arrow-left-right",
+        "url": "admin:lending_lendingconfiguration_changelist",
+        "required_permission": "view_lendingconfiguration",
+    },
+    {
+        "slot": "nav_settings",
+        "order": 25,
+        "label": _("Lending profiles"),
+        "icon": "bi bi-card-checklist",
+        "url": "admin:lending_lendingprofile_changelist",
+        "required_permission": "view_lendingprofile",
+    },
+]
+
+nav_focus = {
     "navbar_secondary": [
         {
-            "label": "Docs",
-            "url": "/docs/guides/ausleihe.html",
-            "icon_class": "bi bi-book",
+            "label": _("Docs"),
+            "href": "/docs/guides/ausleihe.html",
+            "icon": "bi bi-book",
         },
     ],
 }

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from operator import itemgetter
+from importlib import import_module
 from dataclasses import dataclass
 from django.contrib import messages
 from django.apps import apps
@@ -108,6 +109,20 @@ def hints(request):
     return {}  # empty dict to make context_processor happy
 
 
+def _app_navigation(app_name):
+    """Import an app's ``navigation`` module (single source of nav declarations).
+
+    ``app_name`` is the full dotted path, e.g. "dlcdb.inventory". Apps without a
+    navigation module simply contribute nothing. ModuleNotFoundError (not bare
+    ImportError) is caught so a genuine import error inside a navigation.py still
+    surfaces instead of being silently swallowed.
+    """
+    try:
+        return import_module(f"{app_name}.navigation")
+    except ModuleNotFoundError:
+        return None
+
+
 # https://github.com/apache/airavata-django-portal/blob/0e2736ba1e72d24fa47b1699a11cbda4dc3fcc4c/django_airavata/context_processors.py#L99
 def nav(request):
     nav_items = []
@@ -158,10 +173,11 @@ def nav(request):
     for app in dlcdb_apps:
         # print(f"{app}: name: {app.name}; verbose_name: {app.verbose_name}; label: {app.label}")
 
-        if not hasattr(app, "nav_entries"):
+        nav_module = _app_navigation(app.name)
+        if nav_module is None:
             continue
 
-        for nav_entry in app.nav_entries:
+        for nav_entry in getattr(nav_module, "nav_entries", []):
             # name: dlcdb.reporting; verbose_name: DLCDB Reporting; label: reporting
             # for a concrete permission string we need the app name without the project prefix
             # so 'app.label' seems to fit
@@ -202,11 +218,27 @@ def nav(request):
                 nav_items.append(nav_item)
 
     nav_items = sorted(nav_items, key=itemgetter("order"))
+
+    # Focus config for the current app (its navigation.nav_focus). Deliberately
+    # NOT run through the permission gate: these are per-app helper links shown
+    # only while already inside that app (matches previous behavior).
+    nav_focus = {}
+    if current_app_namespace:
+        try:
+            current_app = apps.get_app_config(current_app_namespace)
+        except LookupError:
+            current_app = None
+        if current_app is not None:
+            module = _app_navigation(current_app.name)
+            if module is not None:
+                nav_focus = getattr(module, "nav_focus", {}) or {}
+
     return {
         "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
         "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
         "nav_items_processes": [item for item in nav_items if item["slot"] == "nav_processes"],
         "nav_items_settings": [item for item in nav_items if item["slot"] == "nav_settings"],
+        "nav_focus": nav_focus,
     }
 
 
