@@ -19,14 +19,14 @@ class CoreConfig(AppConfig):
             "url": "lending:index",
             "required_permission": "view_lentrecord",
         },
-        {
-            "slot": "nav_main",
-            "order": 20,
-            "label": _("Devices"),
-            "icon": "bi bi-upc",
-            "url": "admin:core_device_changelist",
-            "required_permission": "view_device",
-        },
+        # {
+        #     "slot": "nav_main",
+        #     "order": 20,
+        #     "label": _("Devices"),
+        #     "icon": "bi bi-upc",
+        #     "url": "admin:core_device_changelist",
+        #     "required_permission": "view_device",
+        # },
         # This slot is set in the app licenses.navigation module
         # {
         #     "slot": "nav_main",
