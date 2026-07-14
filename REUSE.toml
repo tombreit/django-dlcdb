@@ -40,7 +40,7 @@ SPDX-FileCopyrightText = "Copyright (c) 2017 Nimiq, danimoh"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
-path = "dlcdb/static/branding/favicon.ico"
+path = "dlcdb/theme/static/theme/branding/favicon.ico"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
 SPDX-License-Identifier = "CC0-1.0"

@@ -41,7 +41,6 @@ class BrandingAdmin(admin.ModelAdmin):
                     "organization_logo_white",
                     "organization_logo_black",
                     "organization_figurative_mark",
-                    "organization_favicon",
                     "licenses_logo",
                 ),
             },

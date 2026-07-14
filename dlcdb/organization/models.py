@@ -16,6 +16,7 @@ def validate_logo_image_file_extension(value):
 
 
 def validate_favicon_file_extension(value):
+    """model field removed, validator kept to keep history of migrations intact"""
     valid_extensions = ["ico"]
     return FileExtensionValidator(allowed_extensions=valid_extensions)(value)
 
@@ -75,13 +76,6 @@ class Branding(SingletonBaseModel):
         validators=[validate_logo_image_file_extension],
         verbose_name="Figurative Mark/Bildmarke",
         help_text="Bildmarke, quasi Logo ohne Wortmarke.",
-    )
-    organization_favicon = models.FileField(
-        null=True,
-        blank=True,
-        upload_to="branding/",
-        validators=[validate_favicon_file_extension],
-        verbose_name="Favicon file",
     )
 
     organization_it_dept_name = models.CharField(
