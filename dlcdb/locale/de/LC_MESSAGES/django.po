@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-08 10:07+0200\n"
-"PO-Revision-Date: 2026-07-08 10:10+0200\n"
+"POT-Creation-Date: 2026-07-14 21:21+0200\n"
+"PO-Revision-Date: 2026-07-14 21:39+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -68,22 +68,353 @@ msgstr "Erneut anmelden"
 msgid "Assets"
 msgstr "Assets"
 
-#: dlcdb/assets/apps.py:24
-msgid "Move"
-msgstr "Umziehen"
+#: dlcdb/assets/filters.py:20
+#: dlcdb/assets/templates/assets/devices/includes/_state.html:14
+msgid "No active record"
+msgstr "Kein aktueller Record"
 
-#: dlcdb/assets/forms.py:29
+#: dlcdb/assets/filters.py:25
+msgid "Duplicate serial number"
+msgstr "Seriennummern-Duplikat"
+
+#: dlcdb/assets/filters.py:26
+msgid "Duplicate nickname"
+msgstr "Doppelter Nickname"
+
+#: dlcdb/assets/filters.py:33 dlcdb/lending/filters.py:108
+#: dlcdb/theme/filterbar.py:143
+msgid "Search"
+msgstr "Suche"
+
+#: dlcdb/assets/filters.py:37
+#: dlcdb/assets/templates/assets/devices/index.html:37
+#: dlcdb/lending/filters.py:51 dlcdb/licenses/forms.py:134
+msgid "Type"
+msgstr "Typ"
+
+#: dlcdb/assets/filters.py:38
+msgid "Any device type..."
+msgstr "Alle Geräteklassen..."
+
+#: dlcdb/assets/filters.py:43 dlcdb/lending/filters.py:45
+msgid "State"
+msgstr "Status"
+
+#: dlcdb/assets/filters.py:44 dlcdb/lending/filters.py:46
+msgid "Any state..."
+msgstr "Status..."
+
+#: dlcdb/assets/filters.py:47 dlcdb/assets/filters.py:49
+#: dlcdb/assets/templates/assets/devices/index.html:71
+msgid "Loanable"
+msgstr "Verleihbar"
+
+#: dlcdb/assets/filters.py:47
+msgid "Not loanable"
+msgstr "Nicht verleihbar"
+
+#: dlcdb/assets/filters.py:50
+msgid "Any loanability..."
+msgstr "Jede Verfügbarkeit..."
+
+#: dlcdb/assets/filters.py:54 dlcdb/core/models/record.py:184
+#: dlcdb/core/models/room.py:72
+msgid "Room"
+msgstr "Raum"
+
+#: dlcdb/assets/filters.py:55
+msgid "Any room..."
+msgstr "Alle Räume..."
+
+#: dlcdb/assets/filters.py:59
+#: dlcdb/assets/templates/assets/devices/detail.html:66
+#: dlcdb/core/models/device.py:132 dlcdb/core/models/manufacturer.py:25
+#: dlcdb/core/navigation.py:53
+msgid "Manufacturer"
+msgstr "Hersteller"
+
+#: dlcdb/assets/filters.py:60
+msgid "Any manufacturer..."
+msgstr "Alle Hersteller..."
+
+#: dlcdb/assets/filters.py:64 dlcdb/core/models/inventory.py:245
+#: dlcdb/core/models/inventory.py:252 dlcdb/core/models/record.py:134
+msgid "Inventory"
+msgstr "Inventur"
+
+#: dlcdb/assets/filters.py:65
+msgid "Any inventory..."
+msgstr "Jede Inventur..."
+
+#: dlcdb/assets/filters.py:68
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:94
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:97
+msgid "Imported"
+msgstr "Importiert"
+
+#: dlcdb/assets/filters.py:68
+msgid "Not imported"
+msgstr "Nicht importiert"
+
+#: dlcdb/assets/filters.py:70
+msgid "Import"
+msgstr "Import"
+
+#: dlcdb/assets/filters.py:71
+msgid "Any import status..."
+msgstr "Jeder Import-Status..."
+
+#: dlcdb/assets/filters.py:76
+msgid "Duplicates"
+msgstr "Duplikate"
+
+#: dlcdb/assets/filters.py:77
+msgid "No duplicate filter..."
+msgstr "Duplikate Filter"
+
+#: dlcdb/assets/forms.py:30
 msgid "Search by EDV/Inv. no., manufacturer, serial…"
 msgstr "Suche nach EDV-ID, Inventarnummer, Hersteller, Seriennummer etc..."
 
-#: dlcdb/assets/forms.py:30
+#: dlcdb/assets/forms.py:31
 msgid "Please select at least one device to move."
 msgstr "Bitte mindestens ein zu verschiebendes Gerät auswählen."
 
-#: dlcdb/assets/forms.py:35
+#: dlcdb/assets/forms.py:36
 msgid "Please select a target room."
 msgstr "Bitte einen Zielraum auswählen."
 
+#: dlcdb/assets/forms.py:172
+msgid "Loanability cannot be changed while this device is lent."
+msgstr "Verleih-Attribut kann während des Verleihs nicht geändert werden."
+
+#: dlcdb/assets/navigation.py:12
+#: dlcdb/assets/templates/assets/devices/index.html:4
+#: dlcdb/assets/templates/assets/devices/index.html:8
+#: dlcdb/assets/templates/assets/relocate.html:67
+#: dlcdb/inventory/navigation.py:48
+msgid "Devices"
+msgstr "Gerät"
+
+#: dlcdb/assets/navigation.py:21 dlcdb/core/utils/device_methods.py:123
+msgid "Move"
+msgstr "Umziehen"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:31
+msgid "Back to devices"
+msgstr "Zurück zur Übersicht"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:43
+msgid "Save changes"
+msgstr "Änderungen speichern"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:45
+#: dlcdb/assets/templates/assets/devices/form.html:16
+#: dlcdb/assets/templates/assets/devices/form.html:28
+#: dlcdb/lending/templates/lending/lend.html:214
+#: dlcdb/licenses/templates/licenses/form_partial.html:81
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:51
+msgid "You may view this device but do not have permission to edit it."
+msgstr ""
+"Sie können dieses Gerät anzeigen, haben jedoch keine Berechtigung, es zu "
+"bearbeiten."
+
+#: dlcdb/assets/templates/assets/devices/detail.html:56
+#: dlcdb/assets/templates/assets/devices/index.html:36
+#: dlcdb/core/models/record.py:92 dlcdb/lending/templates/lending/index.html:45
+#: dlcdb/lending/templates/lending/lend.html:61
+msgid "Device"
+msgstr "Gerät"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:60
+#: dlcdb/core/models/device.py:94
+msgid "IT ID"
+msgstr "IT ID"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:62
+#: dlcdb/assets/templates/assets/devices/index.html:60
+#: dlcdb/core/models/device.py:109
+msgid "Inventory ID"
+msgstr "Inventarnummer"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:64
+#: dlcdb/core/models/device.py:123
+msgid "Device type"
+msgstr "Geräteklasse"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:68
+#: dlcdb/core/models/device.py:138
+msgid "Model name"
+msgstr "Modellbezeichnung"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:70
+#: dlcdb/core/models/device.py:117
+msgid "Serial number"
+msgstr "Seriennummer"
+
+#: dlcdb/assets/templates/assets/devices/detail.html:73
+#: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
+#: dlcdb/core/models/record.py:165
+#: dlcdb/lending/templates/lending/lend.html:172
+#: dlcdb/licenses/templates/licenses/index.html:97
+msgid "Note"
+msgstr "Notiz"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:11
+msgid "Identification"
+msgstr "Identifizierung"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:38
+msgid "Manufacturer and model"
+msgstr "Hersteller und Modell"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:53
+#: dlcdb/core/navigation.py:37
+msgid "Procurement"
+msgstr "Beschaffung"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:68
+#: dlcdb/lending/templates/lending/lend.html:81
+msgid "Search person by name or e-mail, or “*” for all…"
+msgstr "Suche Person via Name oder Email, oder \"*\" für Alle"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:85
+msgid "Names and network"
+msgstr "Namen und Netzwerk"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:100
+msgid "Sensitive credentials"
+msgstr "Vertrauliche Daten"
+
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:104
+msgid ""
+"Only store credentials here when this is required by your operating "
+"procedure."
+msgstr ""
+"Speichern Sie Zugangsdaten hier nur dann, wenn dies gemäß Ihrer "
+"Betriebsanweisung erforderlich ist."
+
+#: dlcdb/assets/templates/assets/devices/includes/_set_state.html:16
+msgid "New state"
+msgstr "Neuer Zustand"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:21
+msgid "Current state"
+msgstr "Aktueller Status"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:33
+msgid "Trail"
+msgstr "Verlauf"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:39
+msgid "All records"
+msgstr "Alle Zustände"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:45
+msgid "Field history"
+msgstr "History"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:55
+msgid "Device details"
+msgstr "Geräte-Details"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:60
+#: dlcdb/lending/templates/lending/lend.html:32
+#: dlcdb/licenses/templates/licenses/form_partial.html:18
+msgid "Admin view"
+msgstr "Admin Ansicht"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:63
+msgid "Open in admin"
+msgstr "In Admin-Ansicht öffnen"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:69
+msgid "Created"
+msgstr "Erstellt"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:78
+msgid "Last modified"
+msgstr "Zuletzt geändert"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:89
+msgid "Origin"
+msgstr "Ursprung"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:100
+msgid "Manual entry"
+msgstr "Manueller Eintrag"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:102
+msgid "Legacy"
+msgstr "Legacy"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:106
+msgid "UUID"
+msgstr "UUID"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:111
+msgid "Deleted"
+msgstr "Gelöscht"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:127
+msgid "QR code"
+msgstr "QR-Code"
+
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:131
+msgid "Device QR code"
+msgstr "Geräte QR-Code"
+
+#: dlcdb/assets/templates/assets/devices/index.html:11
+#: dlcdb/lending/templates/lending/index.html:14
+#: dlcdb/licenses/templates/licenses/index.html:21
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:14
+msgid "Loading..."
+msgstr "Lädt..."
+
+#: dlcdb/assets/templates/assets/devices/index.html:16
+#: dlcdb/assets/views/devices.py:113
+msgid "Add device"
+msgstr "Gerät hinzufügen"
+
+#: dlcdb/assets/templates/assets/devices/index.html:27
+#: dlcdb/lending/templates/lending/index.html:35
+#, python-format
+msgid "%(counter)s of %(total)s device"
+msgid_plural "%(counter)s of %(total)s devices"
+msgstr[0] "%(counter)s von %(total)s Gerät"
+msgstr[1] "%(counter)s von %(total)s Geräten"
+
+#: dlcdb/assets/templates/assets/devices/index.html:38
+msgid "State / location"
+msgstr "Zustand/Standort"
+
+#: dlcdb/assets/templates/assets/devices/index.html:39
+#: dlcdb/lending/templates/lending/index.html:48
+msgid "Modified"
+msgstr "Geändert"
+
+#: dlcdb/assets/templates/assets/devices/index.html:41
+#: dlcdb/theme/templates/theme/includes/navbar.html:99
+msgid "Tenant"
+msgstr "Mandant"
+
+#: dlcdb/assets/templates/assets/devices/index.html:62
+msgid "Serial"
+msgstr "Seriennummer"
+
+#: dlcdb/assets/templates/assets/devices/index.html:88
+msgid "No devices match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
+#: dlcdb/assets/templates/assets/devices/index.html:89
+#: dlcdb/licenses/templates/licenses/index.html:144
+msgid "Clear filters"
+msgstr "Filter zurücksetzen"
+
+#: dlcdb/assets/templates/assets/includes/_person_list_item.html:42
 #: dlcdb/assets/templates/assets/includes/_room_list_item.html:40
 #: dlcdb/lending/templates/lending/includes/_person_list_item.html:57
 #: dlcdb/theme/templates/theme/includes/_picker.html:57
@@ -92,22 +423,28 @@ msgstr "Bitte einen Zielraum auswählen."
 msgid "Change"
 msgstr "Ändern"
 
+#: dlcdb/assets/templates/assets/includes/_person_search_results.html:17
+#: dlcdb/lending/templates/lending/includes/_person_search_results.html:18
+msgid "No matching person found."
+msgstr "Keine entsprechende Person gefunden."
+
 #: dlcdb/assets/templates/assets/includes/_room_search_results.html:17
 msgid "No matching room found."
 msgstr "Kein entsprechender Raum gefunden."
 
-#: dlcdb/assets/templates/assets/relocate.html:37 dlcdb/assets/views.py:97
+#: dlcdb/assets/templates/assets/relocate.html:32
+#: dlcdb/assets/views/relocate.py:104
 msgid "Move devices"
 msgstr "Geräte verschieben"
 
-#: dlcdb/assets/templates/assets/relocate.html:39
+#: dlcdb/assets/templates/assets/relocate.html:36
 msgid ""
 "Pick one or more devices, choose the room to move them to, then press Move."
 msgstr ""
 "Ein oder mehrere Geräte auswählen, den Zielraum wählen und auf „Verschieben“ "
 "klicken."
 
-#: dlcdb/assets/templates/assets/relocate.html:56
+#: dlcdb/assets/templates/assets/relocate.html:53
 msgid ""
 "One or more selected devices are currently lent. Moving a lent device only "
 "updates the room of its active lending record — it does not end the lending."
@@ -116,25 +453,35 @@ msgstr ""
 "Verschieben eines verliehenen Geräts aktualisiert nur den Raum des aktiven "
 "Verleihvorgangs — der Verleih wird dadurch nicht beendet."
 
-#: dlcdb/assets/templates/assets/relocate.html:70 dlcdb/core/apps.py:25
-msgid "Devices"
-msgstr "Gerät"
-
-#: dlcdb/assets/templates/assets/relocate.html:95
+#: dlcdb/assets/templates/assets/relocate.html:92
 msgid "Target room"
 msgstr "Raum"
 
-#: dlcdb/assets/templates/assets/relocate.html:98
+#: dlcdb/assets/templates/assets/relocate.html:95
 msgid "Search by room number or nickname…"
 msgstr "Raum-Suche via Raumnummer oder Nickname"
 
-#: dlcdb/assets/templates/assets/relocate.html:106
+#: dlcdb/assets/templates/assets/relocate.html:103
 msgid "Move now"
 msgstr "Jetzt umziehen"
 
-#: dlcdb/assets/views.py:73
-msgid "You do not have permission to move devices."
-msgstr "Sie haben nicht die Berechtigung, Geräte zu verschieben."
+#: dlcdb/assets/views/devices.py:76
+msgid "Search IT ID, serial number, model..."
+msgstr "Suche nach IDs, Seriennummer, Modell..."
+
+#: dlcdb/assets/views/devices.py:107
+#, python-format
+msgid "Device “%(device)s” was created."
+msgstr "Gerät “%(device)s” wurde hinzugefügt."
+
+#: dlcdb/assets/views/devices.py:113
+msgid "Create device"
+msgstr "Gerät erstellen"
+
+#: dlcdb/assets/views/devices.py:144
+#, python-format
+msgid "Device “%(device)s” was updated."
+msgstr "Gerät “%(device)s” wurde modifiziert."
 
 #: dlcdb/core/admin/device_admin.py:320
 msgid "Relocate selected devices"
@@ -148,102 +495,36 @@ msgstr "Wiederherstellung von REMOVED auf LOST"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/apps.py:17 dlcdb/core/models/prx_lentrecord.py:97
-#: dlcdb/lending/templates/lending/index.html:5
-#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:329
-msgid "Lending"
-msgstr "Ausleihe"
-
-#: dlcdb/core/apps.py:42
-msgid "Procurement"
-msgstr "Beschaffung"
-
-#: dlcdb/core/apps.py:50 dlcdb/core/models/room.py:73
-msgid "Rooms"
-msgstr "Räume"
-
-#: dlcdb/core/apps.py:58 dlcdb/core/models/device.py:132
-#: dlcdb/core/models/manufacturer.py:25
-msgid "Manufacturer"
-msgstr "Hersteller"
-
-#: dlcdb/core/apps.py:66
-msgid "Distributor"
-msgstr "Zulieferer"
-
-#: dlcdb/core/apps.py:74
-msgid "Device types"
-msgstr "Geräteklassen"
-
-#: dlcdb/core/apps.py:82
-msgid "People"
-msgstr "Personen"
-
-#: dlcdb/core/apps.py:90
-msgid "Records"
-msgstr "Records"
-
-#: dlcdb/core/apps.py:98
-msgid "Removed records"
-msgstr "Entfernt-Records"
-
-#: dlcdb/core/apps.py:106 dlcdb/core/models/inventory.py:246
-msgid "Inventories"
-msgstr "Inventuren"
-
-#: dlcdb/core/apps.py:114
-msgid "Notes"
-msgstr "Notizen"
-
-#: dlcdb/core/context_processors.py:67
+#: dlcdb/core/context_processors.py:68
 msgid "Add proper record?"
 msgstr "Einen Record hinzufügen?"
 
-#: dlcdb/core/context_processors.py:76
+#: dlcdb/core/context_processors.py:77
 msgid "No room configured as 'is_external'!"
 msgstr "Kein Raum als 'is_external' konfiguriert!"
 
-#: dlcdb/core/context_processors.py:78 dlcdb/core/context_processors.py:88
+#: dlcdb/core/context_processors.py:79 dlcdb/core/context_processors.py:89
 msgid "Configure one?"
 msgstr "Konfigurieren?"
 
-#: dlcdb/core/context_processors.py:86
+#: dlcdb/core/context_processors.py:87
 msgid "No room configured as 'is_auto_return_room'!"
 msgstr "Kein \"Auto return\" Raum konfiguriert!"
 
-#: dlcdb/core/context_processors.py:96
+#: dlcdb/core/context_processors.py:97
 msgid "No rooms defined yet."
 msgstr "Bisher wurden keine Räume  eingegeben."
 
-#: dlcdb/core/context_processors.py:98
+#: dlcdb/core/context_processors.py:99
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
-
-#: dlcdb/core/models/device.py:94
-msgid "IT ID"
-msgstr "IT ID"
 
 #: dlcdb/core/models/device.py:99
 msgid "Inventory number must be entered as the main number-sub-number."
 msgstr "Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden."
 
-#: dlcdb/core/models/device.py:109
-msgid "Inventory ID"
-msgstr "Inventarnummer"
-
-#: dlcdb/core/models/device.py:117
-msgid "Serial number"
-msgstr "Seriennummer"
-
-#: dlcdb/core/models/device.py:123
-msgid "Device type"
-msgstr "Geräteklasse"
-
-#: dlcdb/core/models/device.py:138
-msgid "Model name"
-msgstr "Modellbezeichnung"
-
 #: dlcdb/core/models/device.py:140 dlcdb/core/models/supplier.py:27
+#: dlcdb/licenses/filters.py:36
 msgid "Supplier"
 msgstr "Distributor"
 
@@ -284,7 +565,7 @@ msgid "Book value"
 msgstr "Buchwert"
 
 #: dlcdb/core/models/device.py:165
-#: dlcdb/licenses/templates/licenses/licenses_table.html:74
+#: dlcdb/licenses/templates/licenses/index.html:88
 msgid "Procurement note"
 msgstr "Beschaffungsnotiz"
 
@@ -299,13 +580,6 @@ msgstr ""
 #: dlcdb/core/models/device.py:175
 msgid "Contact (internal)"
 msgstr "Kontakt (intern)"
-
-#: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
-#: dlcdb/core/models/record.py:166
-#: dlcdb/lending/templates/lending/lend.html:172
-#: dlcdb/licenses/templates/licenses/licenses_table.html:83
-msgid "Note"
-msgstr "Notiz"
 
 #: dlcdb/core/models/device.py:179
 msgid "Main MAC address"
@@ -382,18 +656,23 @@ msgstr ""
 "Wenn aktiviert, werden bei der Gerätesuche nur Geräte des aktuellen "
 "Mandanten angezeigt."
 
-#: dlcdb/core/models/inventory.py:245 dlcdb/core/models/inventory.py:252
-#: dlcdb/core/models/record.py:135
-msgid "Inventory"
-msgstr "Inventur"
+#: dlcdb/core/models/inventory.py:246 dlcdb/core/navigation.py:101
+msgid "Inventories"
+msgstr "Inventuren"
 
-#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:139
+#: dlcdb/core/models/manufacturer.py:16 dlcdb/licenses/forms.py:135
 msgid "Name"
 msgstr "Name"
 
 #: dlcdb/core/models/manufacturer.py:26
 msgid "Manufacturers"
 msgstr "Hersteller"
+
+#: dlcdb/core/models/prx_lentrecord.py:97 dlcdb/core/navigation.py:12
+#: dlcdb/lending/templates/lending/index.html:5
+#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:363
+msgid "Lending"
+msgstr "Ausleihe"
 
 #: dlcdb/core/models/prx_lentrecord.py:98
 msgid "Lendings"
@@ -403,7 +682,7 @@ msgstr "Ausleihen"
 msgid "Ordered"
 msgstr "Bestellt"
 
-#: dlcdb/core/models/prx_licencerecord.py:113 dlcdb/core/models/record.py:99
+#: dlcdb/core/models/prx_licencerecord.py:113 dlcdb/core/models/record.py:98
 msgid "Active"
 msgstr "Aktiv"
 
@@ -420,19 +699,19 @@ msgid "Terminated"
 msgstr "Gekündigt"
 
 #: dlcdb/core/models/prx_licencerecord.py:118
-#: dlcdb/lending/templates/lending/index.html:99
+#: dlcdb/lending/templates/lending/index.html:65
 msgid "Unknown"
 msgstr "Unbekannt"
 
 #: dlcdb/core/models/prx_licencerecord.py:129
-#: dlcdb/licenses/templates/licenses/licenses_table.html:29
+#: dlcdb/licenses/templates/licenses/index.html:48
 msgid "License"
 msgstr "Lizenz"
 
-#: dlcdb/core/models/prx_licencerecord.py:130 dlcdb/licenses/apps.py:17
+#: dlcdb/core/models/prx_licencerecord.py:130 dlcdb/licenses/navigation.py:12
 #: dlcdb/licenses/templates/licenses/form.html:5
 #: dlcdb/licenses/templates/licenses/index.html:5
-#: dlcdb/licenses/templates/licenses/index.html:12
+#: dlcdb/licenses/templates/licenses/index.html:18
 msgid "Licenses"
 msgstr "Lizenzen"
 
@@ -446,52 +725,47 @@ msgstr "Unauffindbar"
 msgid "Removed"
 msgstr "Entfernt"
 
-#: dlcdb/core/models/record.py:27
+#: dlcdb/core/models/record.py:26
 msgid "Sold"
 msgstr "Verkauft"
 
-#: dlcdb/core/models/record.py:28
+#: dlcdb/core/models/record.py:27
 msgid "Scrapped"
 msgstr "Verschrottet"
 
-#: dlcdb/core/models/record.py:29
+#: dlcdb/core/models/record.py:28
 msgid "Surrendered"
 msgstr "Abgegeben"
 
-#: dlcdb/core/models/record.py:30
+#: dlcdb/core/models/record.py:29
 msgid "Stolen"
 msgstr "Gestohlen"
 
-#: dlcdb/core/models/record.py:31
+#: dlcdb/core/models/record.py:30
 msgid "Duplicate"
 msgstr "Duplikat"
 
-#: dlcdb/core/models/record.py:93 dlcdb/lending/templates/lending/index.html:80
-#: dlcdb/lending/templates/lending/lend.html:61
-msgid "Device"
-msgstr "Gerät"
-
-#: dlcdb/core/models/record.py:104
+#: dlcdb/core/models/record.py:103
 msgid "Replaced by the next record at this timestamp."
 msgstr ""
 
-#: dlcdb/core/models/record.py:113
+#: dlcdb/core/models/record.py:112
 msgid "Record type"
 msgstr "Record Typ"
 
-#: dlcdb/core/models/record.py:117
+#: dlcdb/core/models/record.py:116
 msgid "Record note"
 msgstr "Record Notiz"
 
-#: dlcdb/core/models/record.py:127
+#: dlcdb/core/models/record.py:126
 msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
-#: dlcdb/core/models/record.py:152
+#: dlcdb/core/models/record.py:151
 msgid "Sync return date with contract end"
 msgstr "Synchronisiere Rückgabedatum mit Vertragslaufzeit"
 
-#: dlcdb/core/models/record.py:154
+#: dlcdb/core/models/record.py:153
 msgid ""
 "If on, the desired return date follows the borrower's UDB contract end date "
 "on each sync. Turn off to keep a custom return date."
@@ -499,37 +773,33 @@ msgstr ""
 "Wenn aktiviert wird das Rückgabedatum mit dem Vertragsende synchronisiert. "
 "Deaktivieren um ein abweichendes Datum zu setzen."
 
-#: dlcdb/core/models/record.py:161
+#: dlcdb/core/models/record.py:160
 msgid "Returned on"
 msgstr "Zurückgegeben am"
 
-#: dlcdb/core/models/record.py:162
+#: dlcdb/core/models/record.py:161
 msgid "Once provided, the rental is complete"
 msgstr "Wenn angegeben gilt das Gerät als zurückgegeben"
 
-#: dlcdb/core/models/record.py:167
+#: dlcdb/core/models/record.py:166
 msgid "Note (lending, internal only)"
 msgstr "Notiz (Ausleihe, nur intern)"
 
 #. Translators: label for the reason a device is lent out
-#: dlcdb/core/models/record.py:172
+#: dlcdb/core/models/record.py:171
 #: dlcdb/lending/templates/lending/lend.html:178
 msgid "Reason"
 msgstr "Grund"
 
-#: dlcdb/core/models/record.py:173
+#: dlcdb/core/models/record.py:172
 msgid "Reason for lending"
 msgstr "Ausleihgrund"
 
-#: dlcdb/core/models/record.py:177
+#: dlcdb/core/models/record.py:176
 msgid "Accessories"
 msgstr "Zubehör"
 
-#: dlcdb/core/models/record.py:185 dlcdb/core/models/room.py:72
-msgid "Room"
-msgstr "Raum"
-
-#: dlcdb/core/models/record.py:197
+#: dlcdb/core/models/record.py:196
 msgid "Whereabouts after decommissioning"
 msgstr "Verbleib nach der Ausmusterung"
 
@@ -569,6 +839,11 @@ msgstr "Standard Lizenz Location"
 msgid "Room or location where the license information is stored."
 msgstr "Raum oder Location wo die Lizenz aufbewahrt wird."
 
+#: dlcdb/core/models/room.py:73 dlcdb/core/navigation.py:45
+#: dlcdb/inventory/navigation.py:41
+msgid "Rooms"
+msgstr "Räume"
+
 #: dlcdb/core/models/supplier.py:20
 msgid ""
 "Contact and support information: contact persons, hotlines, mail addresses "
@@ -580,6 +855,30 @@ msgstr ""
 #: dlcdb/core/models/supplier.py:28
 msgid "Suppliers"
 msgstr "Distributoren"
+
+#: dlcdb/core/navigation.py:61
+msgid "Distributor"
+msgstr "Zulieferer"
+
+#: dlcdb/core/navigation.py:69
+msgid "Device types"
+msgstr "Geräteklassen"
+
+#: dlcdb/core/navigation.py:77
+msgid "People"
+msgstr "Personen"
+
+#: dlcdb/core/navigation.py:85
+msgid "Records"
+msgstr "Records"
+
+#: dlcdb/core/navigation.py:93
+msgid "Removed records"
+msgstr "Entfernt-Records"
+
+#: dlcdb/core/navigation.py:109
+msgid "Notes"
+msgstr "Notizen"
 
 #: dlcdb/core/templates/core/actions/relocate.html:87
 msgid "No, take me back"
@@ -621,8 +920,9 @@ msgstr "Verleih bearbeiten"
 msgid "Show removal record"
 msgstr "Zeige Entfernt-Record"
 
-#: dlcdb/core/utils/device_methods.py:117
-#: dlcdb/lending/templates/lending/index.html:115
+#: dlcdb/core/utils/device_methods.py:128
+#: dlcdb/lending/templates/lending/index.html:18
+#: dlcdb/lending/templates/lending/index.html:84
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -677,21 +977,13 @@ msgstr "Geräte History"
 msgid "Devices by type"
 msgstr "Gerät nach Typ"
 
+#: dlcdb/dashboard/views.py:113
+msgid "Overdue lendings"
+msgstr "Überfällige Ausleihen"
+
 #: dlcdb/dataexchange/apps.py:12
 msgid "Data exchange"
 msgstr "Datenaustausch"
-
-#: dlcdb/dataexchange/apps.py:18
-msgid "Bulk import"
-msgstr "Bulk Import"
-
-#: dlcdb/dataexchange/apps.py:26
-msgid "Bulk decommissioning"
-msgstr "Bulk Ausmusterung"
-
-#: dlcdb/dataexchange/apps.py:34
-msgid "UDB sync configuration"
-msgstr "UDB Sync Konfiguration"
 
 #: dlcdb/dataexchange/models.py:94
 msgid "Internal (CSV)"
@@ -700,6 +992,18 @@ msgstr "Internal (CSV)"
 #: dlcdb/dataexchange/models.py:95
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
+
+#: dlcdb/dataexchange/navigation.py:12
+msgid "Bulk import"
+msgstr "Bulk Import"
+
+#: dlcdb/dataexchange/navigation.py:20
+msgid "Bulk decommissioning"
+msgstr "Bulk Ausmusterung"
+
+#: dlcdb/dataexchange/navigation.py:28
+msgid "UDB sync configuration"
+msgstr "UDB Sync Konfiguration"
 
 #: dlcdb/dataexchange/validators.py:20
 #, python-format
@@ -710,49 +1014,46 @@ msgstr ""
 "Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende Spalte(n): "
 "%(missing)s. Erwartet werden: %(expected)s."
 
-#: dlcdb/inventory/apps.py:17 dlcdb/inventory/apps.py:26
+#: dlcdb/inventory/navigation.py:12 dlcdb/inventory/navigation.py:21
 msgid "Inventorize"
 msgstr "Inventarisieren"
 
-#: dlcdb/inventory/apps.py:35
+#: dlcdb/inventory/navigation.py:30
 msgid "SAP comparison"
 msgstr "SAP-Abgleich"
 
-#: dlcdb/lending/apps.py:23
-msgid "Lending configuration"
-msgstr "Ausleihe Konfiguration"
+#: dlcdb/inventory/navigation.py:53
+msgid "VG bei MAs"
+msgstr ""
 
-#: dlcdb/lending/apps.py:31
-msgid "Lending profiles"
-msgstr "Ausleih-Profile"
+#: dlcdb/inventory/navigation.py:58 dlcdb/lending/navigation.py:30
+#: dlcdb/licenses/navigation.py:30 dlcdb/smallstuff/navigation.py:22
+msgid "Docs"
+msgstr ""
 
-#: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:96
+#: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:62
 msgid "Overdue"
 msgstr "Überfällig"
 
-#: dlcdb/lending/filters.py:22 dlcdb/lending/templates/lending/index.html:97
+#: dlcdb/lending/filters.py:22 dlcdb/lending/templates/lending/index.html:63
 msgid "Lent"
 msgstr "Verliehen"
 
-#: dlcdb/lending/filters.py:23 dlcdb/lending/templates/lending/index.html:98
+#: dlcdb/lending/filters.py:23 dlcdb/lending/templates/lending/index.html:64
 msgid "Available"
 msgstr "Verfügbar"
 
-#: dlcdb/lending/filters.py:45
-msgid "Any state..."
-msgstr "Status..."
-
-#: dlcdb/lending/filters.py:50
+#: dlcdb/lending/filters.py:52
 msgid "Device type..."
 msgstr "Geräteklasse..."
 
-#: dlcdb/lending/filters.py:55
+#: dlcdb/lending/filters.py:57 dlcdb/lending/templates/lending/lend.html:81
+msgid "Person"
+msgstr "Person"
+
+#: dlcdb/lending/filters.py:58
 msgid "Person..."
 msgstr "Person..."
-
-#: dlcdb/lending/filters.py:104
-msgid "Search"
-msgstr "Suche"
 
 #: dlcdb/lending/forms.py:28
 msgid "Available device"
@@ -762,7 +1063,7 @@ msgstr "Verfügbares Gerät"
 msgid "Search by EDV/Inv. no., manufacturer…"
 msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
 
-#: dlcdb/lending/forms.py:30 dlcdb/lending/views.py:284
+#: dlcdb/lending/forms.py:30 dlcdb/lending/views.py:312
 msgid "Please select a device to lend."
 msgstr "Bitte ein Gerät zum verleihen auswählen."
 
@@ -774,76 +1075,52 @@ msgstr ""
 "Gerät ist aktuell noch nicht lokalisiert. Es muss vor einem Verleih "
 "lokalisiert werden."
 
+#: dlcdb/lending/navigation.py:12
+msgid "Lending configuration"
+msgstr "Ausleihe Konfiguration"
+
+#: dlcdb/lending/navigation.py:20
+msgid "Lending profiles"
+msgstr "Ausleih-Profile"
+
 #: dlcdb/lending/templates/lending/includes/_person_list_item.html:48
 msgid "Contract until"
 msgstr "Vertrag bis"
 
-#: dlcdb/lending/templates/lending/includes/_person_search_results.html:18
-msgid "No matching person found."
-msgstr "Keine entsprechende Person gefunden."
-
-#: dlcdb/lending/templates/lending/index.html:14
-msgid "Loading..."
-msgstr "Lädt..."
-
-#: dlcdb/lending/templates/lending/index.html:18 dlcdb/lending/views.py:327
-msgid "Quick lend"
-msgstr "Schnellverleih"
-
-#: dlcdb/lending/templates/lending/index.html:39
-msgid "Search device, person, note..."
-msgstr "Suche Gerät, Person, Notiz..."
-
-#: dlcdb/lending/templates/lending/index.html:65
-#, python-format
-msgid "%(counter)s of %(total)s device"
-msgid_plural "%(counter)s of %(total)s devices"
-msgstr[0] "%(counter)s von %(total)s Gerät"
-msgstr[1] "%(counter)s von %(total)s Geräten"
-
-#: dlcdb/lending/templates/lending/index.html:66
+#: dlcdb/lending/templates/lending/index.html:36
 #, python-format
 msgid "%(available)s available, %(lent)s lent"
 msgstr "%(available)s verfügbar, %(lent)s verliehen"
 
-#: dlcdb/lending/templates/lending/index.html:70
-msgid "Show all"
-msgstr "Zeige alle"
-
-#: dlcdb/lending/templates/lending/index.html:81
+#: dlcdb/lending/templates/lending/index.html:46
 msgid "Person / status"
 msgstr "Person / Status"
 
-#: dlcdb/lending/templates/lending/index.html:82
+#: dlcdb/lending/templates/lending/index.html:47
 msgid "Due"
 msgstr "Fällig"
 
-#: dlcdb/lending/templates/lending/index.html:83
+#: dlcdb/lending/templates/lending/index.html:49
 #: dlcdb/notifications/templates/notifications/index.html:50
 msgid "Actions"
 msgstr "Aktionen"
 
-#: dlcdb/lending/templates/lending/index.html:119
+#: dlcdb/lending/templates/lending/index.html:88
 msgid "Return"
 msgstr "Zurückgegeben"
 
-#: dlcdb/lending/templates/lending/index.html:122
+#: dlcdb/lending/templates/lending/index.html:91
 #: dlcdb/notifications/templates/notifications/index.html:115
 msgid "Edit"
-msgstr ""
+msgstr "Bearbeiten"
 
-#: dlcdb/lending/templates/lending/index.html:130
+#: dlcdb/lending/templates/lending/index.html:99
 msgid "No devices found."
 msgstr "Keine Geräte gefunden."
 
 #: dlcdb/lending/templates/lending/lend.html:24
 msgid "Back to overview"
 msgstr "Zurück zur Übersicht"
-
-#: dlcdb/lending/templates/lending/lend.html:32
-#: dlcdb/licenses/templates/licenses/form_partial.html:18
-msgid "Admin view"
-msgstr "Admin Ansicht"
 
 #: dlcdb/lending/templates/lending/lend.html:39
 msgid "Pick an available device and a person, choose a room, then lend."
@@ -852,14 +1129,6 @@ msgstr "Wähle Gerät und Person für den Verleih."
 #: dlcdb/lending/templates/lending/lend.html:78
 msgid "Person and room"
 msgstr "Person und Raum"
-
-#: dlcdb/lending/templates/lending/lend.html:81
-msgid "Person"
-msgstr "Person"
-
-#: dlcdb/lending/templates/lending/lend.html:81
-msgid "Search person by name or e-mail, or “*” for all…"
-msgstr "Suche Person via Name oder Email, oder \"*\" für Alle"
 
 #: dlcdb/lending/templates/lending/lend.html:86
 msgid "Room / location"
@@ -905,7 +1174,7 @@ msgstr "Zubehör, Notizen etc."
 msgid "Accessories / condition"
 msgstr "Zubehör/Zustand"
 
-#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:329
+#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:363
 msgid "Lend device"
 msgstr "Gerät verleihen"
 
@@ -918,99 +1187,101 @@ msgstr "Speichern"
 msgid "Print lending slip"
 msgstr "Verleihzettel drucken"
 
-#: dlcdb/lending/templates/lending/lend.html:214
-#: dlcdb/licenses/templates/licenses/form_partial.html:81
-msgid "Cancel"
-msgstr "Abbrechen"
+#: dlcdb/lending/views.py:126
+msgid "Search device, person, note..."
+msgstr "Suche Gerät, Person, Notiz..."
 
-#: dlcdb/lending/views.py:168
+#: dlcdb/lending/views.py:186
 #, python-format
 msgid "Warning: No UDB contract end date found for %(person)s!"
 msgstr ""
 
-#: dlcdb/lending/views.py:170
+#: dlcdb/lending/views.py:188
 msgid "Warning: Contract ends before the desired return date!"
 msgstr "Warnung: Vertrag endet vor Verleihfrist!"
 
-#: dlcdb/lending/views.py:216
+#: dlcdb/lending/views.py:234
 msgid "Lent state unknown - please report this issue!"
 msgstr ""
 
-#: dlcdb/lending/views.py:235
+#: dlcdb/lending/views.py:253
 #, python-format
 msgid "Configuration error: %(err)s"
 msgstr ""
 
-#: dlcdb/lending/views.py:242
+#: dlcdb/lending/views.py:260
 #, python-format
 msgid "Device “%(device)s” lent to “%(person)s”."
 msgstr "Gerät “%(device)s” verliehen an “%(person)s”."
 
-#: dlcdb/lending/views.py:244
+#: dlcdb/lending/views.py:262
 #, python-format
 msgid "Return of “%(device)s” from “%(person)s” acknowledged."
 msgstr "Rückgabe von “%(device)s” von “%(person)s” bestätigt."
 
-#: dlcdb/lending/views.py:246
+#: dlcdb/lending/views.py:264
 #, python-format
 msgid "Lending of “%(device)s” to “%(person)s” saved."
 msgstr "Verleih von “%(device)s” an “%(person)s” gespeichert."
 
-#: dlcdb/lending/views.py:277
+#: dlcdb/lending/views.py:305
 msgid "Device is currently \"not locatable\" and must be located first."
-msgstr ""
+msgstr "Gerät muss zuerst lokalisiert werden."
 
-#: dlcdb/lending/views.py:288
+#: dlcdb/lending/views.py:316
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
+
+#: dlcdb/lending/views.py:361
+msgid "Quick lend"
+msgstr "Schnellverleih"
 
 #: dlcdb/licenses/apps.py:11
 msgid "License Management"
 msgstr "Lizenzmanagement"
 
-#: dlcdb/licenses/apps.py:25 dlcdb/licenses/models.py:34
-#: dlcdb/licenses/models.py:35
-msgid "Licenses configuration"
-msgstr "Lizenzmodul Konfiguration"
+#: dlcdb/licenses/filters.py:30
+#: dlcdb/licenses/templates/licenses/index.html:105
+msgid "License type"
+msgstr "Lizenztyp"
 
-#: dlcdb/licenses/filters.py:31
+#: dlcdb/licenses/filters.py:32
 msgid "License type..."
 msgstr "Lizenztyp..."
 
-#: dlcdb/licenses/filters.py:36
+#: dlcdb/licenses/filters.py:38
 msgid "Supplier..."
 msgstr "Distributor..."
 
-#: dlcdb/licenses/filters.py:52
+#: dlcdb/licenses/filters.py:53
+msgid "License state"
+msgstr "Lizenzstatus"
+
+#: dlcdb/licenses/filters.py:55
 msgid "License state..."
 msgstr "Lizenzstatus..."
 
-#: dlcdb/licenses/forms.py:24
+#: dlcdb/licenses/forms.py:25
 msgid "Check this box if the contract has been terminated."
 msgstr "Anhaken, wenn Vertrag gekündigt ist."
 
-#: dlcdb/licenses/forms.py:49
+#: dlcdb/licenses/forms.py:50
 msgid "Select one or more subscribers."
 msgstr "Es können mehrere Abonnenten angegeben werden."
 
-#: dlcdb/licenses/forms.py:99
+#: dlcdb/licenses/forms.py:95
 msgid "At least one field must be filled."
 msgstr "Mindestens ein Feld muss ausgefüllt sein."
 
-#: dlcdb/licenses/forms.py:137
-#: dlcdb/licenses/templates/licenses/licenses_table.html:38
+#: dlcdb/licenses/forms.py:133 dlcdb/licenses/templates/licenses/index.html:52
 msgid "Subscribers"
 msgstr "Abonnenten"
 
-#: dlcdb/licenses/forms.py:138
-msgid "Type"
-msgstr "Typ"
-
-#: dlcdb/licenses/forms.py:140
+#: dlcdb/licenses/forms.py:136
 msgid "Start Date"
 msgstr "Startdatum"
 
-#: dlcdb/licenses/forms.py:141
+#: dlcdb/licenses/forms.py:137
 msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
@@ -1018,12 +1289,13 @@ msgstr "Ablaufdatum"
 msgid "These subscribers will be added to all new licenses by default."
 msgstr ""
 
-#: dlcdb/licenses/templates/licenses/filters.html:20
-msgid "Search licenses"
-msgstr "Lizenz suchen"
+#: dlcdb/licenses/models.py:34 dlcdb/licenses/models.py:35
+#: dlcdb/licenses/navigation.py:20
+msgid "Licenses configuration"
+msgstr "Lizenzmodul Konfiguration"
 
 #: dlcdb/licenses/templates/licenses/form_partial.html:28
-#: dlcdb/licenses/templates/licenses/licenses_table.html:62
+#: dlcdb/licenses/templates/licenses/index.html:76
 msgid "Show history"
 msgstr "Zeige Historie"
 
@@ -1031,31 +1303,22 @@ msgstr "Zeige Historie"
 msgid "Add license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:12
-msgid "of"
-msgstr "von"
+#: dlcdb/licenses/templates/licenses/index.html:38
+#, python-format
+msgid "%(counter)s of %(total)s license"
+msgid_plural "%(counter)s of %(total)s licenses"
+msgstr[0] "%(counter)s von %(total)s Lizenz"
+msgstr[1] "%(counter)s von %(total)s Lizenzen"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:12
-msgid "licences"
-msgstr "Lizenzen"
-
-#: dlcdb/licenses/templates/licenses/licenses_table.html:16
-msgid "Show all?"
-msgstr "Zeige alle?"
-
-#: dlcdb/licenses/templates/licenses/licenses_table.html:32
+#: dlcdb/licenses/templates/licenses/index.html:49
 msgid "Start date"
 msgstr "Startdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:35
+#: dlcdb/licenses/templates/licenses/index.html:50
 msgid "Expiry date"
 msgstr "Ablaufdatum"
 
-#: dlcdb/licenses/templates/licenses/licenses_table.html:91
-msgid "License type"
-msgstr "Lizenztyp"
-
-#: dlcdb/licenses/templates/licenses/licenses_table.html:134
+#: dlcdb/licenses/templates/licenses/index.html:140
 msgid "No licenses found."
 msgstr "Keine Lizenz gefunden."
 
@@ -1064,15 +1327,19 @@ msgstr "Keine Lizenz gefunden."
 msgid "Playground"
 msgstr "Playground"
 
-#: dlcdb/licenses/views.py:119
+#: dlcdb/licenses/views.py:69
+msgid "Search title, manufacturer, supplier, inventory ID..."
+msgstr "Suche nach Titel, Hersteller, Zulieferer, Inventar-ID..."
+
+#: dlcdb/licenses/views.py:137
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
-#: dlcdb/licenses/views.py:195
+#: dlcdb/licenses/views.py:213
 msgid "New license"
 msgstr "Neue Lizenz"
 
-#: dlcdb/licenses/views.py:250
+#: dlcdb/licenses/views.py:268
 msgid "License History"
 msgstr "Lizenz Historie"
 
@@ -1118,23 +1385,23 @@ msgstr "Überfällige Rückgabe"
 
 #: dlcdb/notifications/models.py:64
 msgid "Is new PC or notebook"
-msgstr ""
+msgstr "Ist neuer PC oder Notebook"
 
 #: dlcdb/notifications/models.py:65
 msgid "Is PC or notebook"
-msgstr ""
+msgstr "Ist PC oder Notebook"
 
 #: dlcdb/notifications/models.py:66
 msgid "Is PC"
-msgstr ""
+msgstr "Ist PC"
 
 #: dlcdb/notifications/models.py:67
 msgid "Is notebook"
-msgstr ""
+msgstr "Ist Notebook"
 
 #: dlcdb/notifications/models.py:68
 msgid "Has SAP number"
-msgstr ""
+msgstr "Hat SAP-Nummer"
 
 #: dlcdb/notifications/models.py:69
 msgid "Licence expires"
@@ -1320,39 +1587,40 @@ msgstr "Abonnement aktiviert."
 msgid "Subscription deactivated."
 msgstr "Abonnement deaktiviert."
 
-#: dlcdb/organization/apps.py:17
-msgid "Branding"
-msgstr "Branding"
-
-#: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
+#: dlcdb/organization/models.py:29 dlcdb/organization/models.py:36
 msgid "A Company that Makes Everything"
 msgstr ""
 
-#: dlcdb/organization/models.py:29
+#: dlcdb/organization/models.py:30
 msgid "Company, institute, site name (english version)."
 msgstr ""
 
-#: dlcdb/organization/models.py:36
+#: dlcdb/organization/models.py:37
 msgid "Company, institute, site name (german version)."
 msgstr ""
 
-#: dlcdb/organization/models.py:43
+#: dlcdb/organization/models.py:44
 msgid "Company, institute, site abbreviation."
 msgstr ""
 
-#: dlcdb/organization/models.py:60
+#: dlcdb/organization/models.py:61
 msgid ""
 "Logo file. SVG, white foreground, transparent background. Used in the main "
 "navigation bar/site header."
 msgstr ""
 
-#: dlcdb/organization/models.py:69
+#: dlcdb/organization/models.py:70
 msgid ""
 "Logo file. SVG, black foreground, transparent background. Used in PDF "
 "printouts."
 msgstr ""
 
-#: dlcdb/smallstuff/apps.py:12 dlcdb/smallstuff/apps.py:18
+#: dlcdb/organization/navigation.py:12
+msgid "Branding"
+msgstr "Branding"
+
+#: dlcdb/smallstuff/apps.py:12 dlcdb/smallstuff/navigation.py:12
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:6
 msgid "Smallstuff"
 msgstr "Kleinkram"
 
@@ -1368,7 +1636,7 @@ msgstr ""
 msgid "Stuff"
 msgstr "Kleinkram"
 
-#: dlcdb/smallstuff/templates/smallstuff/person_search.html:21
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:11
 msgid "Smallstuff Person Search"
 msgstr "Kleinkram Personen Suche"
 
@@ -1425,12 +1693,12 @@ msgid "Data management"
 msgstr "Datenhaltung"
 
 #: dlcdb/templates/admin/navbar.html:75
-#: dlcdb/theme/templates/theme/includes/navbar.html:76
+#: dlcdb/theme/templates/theme/includes/navbar.html:69
 msgid "Settings"
 msgstr "Einstellungen"
 
 #: dlcdb/templates/admin/navbar.html:112
-#: dlcdb/theme/templates/theme/includes/navbar.html:144
+#: dlcdb/theme/templates/theme/includes/navbar.html:137
 msgid "Language"
 msgstr "Sprache"
 
@@ -1454,6 +1722,58 @@ msgstr "Geändert von"
 msgid "None"
 msgstr "None"
 
+#: dlcdb/theme/filterbar.py:185
+#, python-format
+msgid "%(count)d selected"
+msgstr ""
+
+#: dlcdb/theme/templates/theme/filterbar/_chip.html:12
+#, python-format
+msgid "Remove filter: %(label)s"
+msgstr ""
+
+#: dlcdb/theme/templates/theme/filterbar/_dropdown.html:24
+msgid "Filter options..."
+msgstr ""
+
+#: dlcdb/theme/templates/theme/filterbar/chips.html:31
+msgid "Clear all"
+msgstr "Alle zurücksetzen"
+
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:52
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:58
+msgid "Filters"
+msgstr "Filter"
+
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:59
+msgid "Close"
+msgstr "Schließen"
+
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:74
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:76
+msgid "Sort"
+msgstr "Sortieren"
+
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:107
+msgid "More filters"
+msgstr "Weitere Filter"
+
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:123
+msgid "Apply"
+msgstr "Anwenden"
+
+#: dlcdb/theme/templates/theme/includes/_pagination.html:15
+msgid "List pages"
+msgstr "Seiten auflisten"
+
+#: dlcdb/theme/templates/theme/includes/_pagination.html:20
+msgid "Previous page"
+msgstr "Vorherige Seite"
+
+#: dlcdb/theme/templates/theme/includes/_pagination.html:42
+msgid "Next page"
+msgstr "Nächste Seite"
+
 #: dlcdb/theme/templates/theme/includes/_picker.html:58
 #: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:97
 #: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:98
@@ -1472,39 +1792,35 @@ msgstr "Problem melden"
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:91
+#: dlcdb/theme/templates/theme/includes/navbar.html:84
 msgid "Django admin"
 msgstr "Django Site-Verwaltung"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:106
+#: dlcdb/theme/templates/theme/includes/navbar.html:99
 msgid "Superusers are not tenant aware"
 msgstr "Superuser sind nicht auf Mandanten beschränkt"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:106
+#: dlcdb/theme/templates/theme/includes/navbar.html:99
 msgid "Superuser"
 msgstr ""
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:106
-msgid "Tenant"
-msgstr "Mandant"
-
-#: dlcdb/theme/templates/theme/includes/navbar.html:118
+#: dlcdb/theme/templates/theme/includes/navbar.html:111
 msgid "Subscriptions"
 msgstr "Abonnements"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:125
+#: dlcdb/theme/templates/theme/includes/navbar.html:118
 msgid "Toggle theme"
 msgstr "Theme umschalten"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:129
+#: dlcdb/theme/templates/theme/includes/navbar.html:122
 msgid "Light"
 msgstr "Hell"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:132
+#: dlcdb/theme/templates/theme/includes/navbar.html:125
 msgid "Dark"
 msgstr "Dunkel"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:135
+#: dlcdb/theme/templates/theme/includes/navbar.html:128
 msgid "Auto"
 msgstr "Auto"
 
@@ -1548,14 +1864,30 @@ msgstr "Kein passendes Icon."
 msgid "Permission denied."
 msgstr "Zugriff verweigert."
 
+#: dlcdb/theme/widgets.py:37 dlcdb/theme/widgets.py:56
+msgid "Type to search…"
+msgstr "Suchbegriff eingeben..."
+
+#~ msgid "Show all"
+#~ msgstr "Zeige alle"
+
+#~ msgid "Search licenses"
+#~ msgstr "Lizenz suchen"
+
+#~ msgid "of"
+#~ msgstr "von"
+
+#~ msgid "licences"
+#~ msgstr "Lizenzen"
+
+#~ msgid "Show all?"
+#~ msgstr "Zeige alle?"
+
 #~ msgid "Documentation"
 #~ msgstr "Dokumentation"
 
 #~ msgid "Backend"
 #~ msgstr "Backend"
-
-#~ msgid "Device data"
-#~ msgstr "Geräte-Daten"
 
 #~ msgid "Lend now"
 #~ msgstr "Jetzt verleihen"
@@ -1568,9 +1900,6 @@ msgstr "Zugriff verweigert."
 
 #~ msgid "Issued stuff"
 #~ msgstr "Ausgegebener Kleinkram"
-
-#~ msgid "In room"
-#~ msgstr "In Raum"
 
 #~ msgid "Unknown record type! Contact your administrator!"
 #~ msgstr ""
@@ -1593,9 +1922,6 @@ msgstr "Zugriff verweigert."
 #~ msgstr ""
 #~ "Das Verleihende (lend_desired_end_date) kann nicht nach "
 #~ "{settings.MAX_FUTURE_LENT_DESIRED_END_DATE} sein!"
-
-#~ msgid "State"
-#~ msgstr "Status"
 
 #~ msgid "Enter email addresses separated by comma."
 #~ msgstr "Eingabe mehrerer E-Mail-Adressen durch Komma getrennt."
