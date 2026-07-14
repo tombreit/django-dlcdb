@@ -15,7 +15,7 @@
       {% include "assets/devices/includes/_field.html" with field=form.edv_id col="col-md-6" %}
       {% include "assets/devices/includes/_field.html" with field=form.sap_id col="col-md-6" %}
       {% include "assets/devices/includes/_field.html" with field=form.device_type col="col-md-6" %}
-      {% if form.tenant %}{% include "assets/devices/includes/_field.html" with field=form.tenant col="col-md-6" %}{% endif %}
+      {% include "assets/devices/includes/_field.html" with field=form.tenant col="col-md-6" %}
       <div class="col-12">
         <div class="d-flex flex-wrap gap-4 pt-1">
           <div class="form-check form-switch">

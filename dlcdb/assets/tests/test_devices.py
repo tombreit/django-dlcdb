@@ -125,6 +125,64 @@ class DeviceFrontendTests(BaseTest):
         self.assertFalse(form.is_valid())
         self.assertIn("is_lentable", form.errors)
 
+    def test_tenant_field_is_shown_but_disabled_for_non_superuser(self):
+        """Non-superusers always see the tenant field, but it is locked."""
+        tenant = Tenant.objects.create(name="Tenant One")
+        device = self._create_device(edv_id="EDV-TEN", sap_id="7-1")
+        device.tenant = tenant
+        device.save()
+
+        operator = get_user_model().objects.create_user(
+            username="ten-operator", email="ten-op@example.com", password="secret"
+        )
+        request = RequestFactory().get("/")
+        request.user = operator
+
+        form = DeviceForm(instance=device, request=request)
+        tenant_field = form.fields["tenant"]
+        # Present (not popped) and locked / optional.
+        self.assertTrue(tenant_field.disabled)
+        self.assertFalse(tenant_field.required)
+        # The disabled <select> lists only the device's own tenant, and the
+        # rendered control carries the HTML `disabled` attribute.
+        self.assertEqual(list(tenant_field.queryset), [tenant])
+        html = str(form["tenant"])
+        self.assertIn("disabled", html)
+        self.assertIn(str(tenant), html)
+
+    def test_tenant_field_is_editable_for_superuser(self):
+        request = RequestFactory().get("/")
+        request.user = self.user  # superuser (see setUpTestData)
+
+        form = DeviceForm(instance=self.inroom_device, request=request)
+        tenant_field = form.fields["tenant"]
+        self.assertFalse(tenant_field.disabled)
+        self.assertFalse(tenant_field.required)
+        self.assertNotIn("disabled", str(form["tenant"]))
+
+    def test_non_superuser_cannot_reassign_tenant_via_crafted_post(self):
+        """A crafted tenant in POST is ignored; the disabled field keeps the instance value."""
+        own = Tenant.objects.create(name="Tenant Own")
+        other = Tenant.objects.create(name="Tenant Other")
+        device = self._create_device(edv_id="EDV-TEN2", sap_id="7-2")
+        device.tenant = own
+        device.save()
+
+        operator = get_user_model().objects.create_user(
+            username="ten-operator2", email="ten-op2@example.com", password="secret"
+        )
+        request = RequestFactory().post("/")
+        request.user = operator
+
+        form = DeviceForm(
+            {"edv_id": device.edv_id, "sap_id": device.sap_id, "tenant": other.pk},
+            instance=device,
+            request=request,
+        )
+        self.assertTrue(form.is_valid(), form.errors)
+        # The disabled field ignores the crafted `other` and keeps the instance's tenant.
+        self.assertEqual(form.cleaned_data["tenant"], own)
+
     def test_index_paginates_and_preserves_active_filter(self):
         for i in range(30):
             self._create_device(edv_id=f"PAGED-{i:02d}", sap_id=f"9-{i}")

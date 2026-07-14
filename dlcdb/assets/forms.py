@@ -112,13 +112,27 @@ class DeviceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.request = request
 
-        if not request.user.is_superuser:
-            self.fields.pop("tenant")
-        else:
+        tenant_field = self.fields["tenant"]
+        if request.user.is_superuser:
             # A superuser may deliberately create an unscoped device, matching
-            # the existing admin behaviour. Tenant-aware operators never see
-            # this field and receive their request tenant on save.
-            self.fields["tenant"].required = False
+            # the existing admin behaviour, so the field is optional and freely
+            # editable.
+            tenant_field.required = False
+        else:
+            # Non-superusers always SEE their tenant but cannot change it. The
+            # tenant is authoritative from the request and (re)assigned on save
+            # (see the views), so `disabled` is a display guard: Django ignores
+            # any submitted value and keeps the initial, meaning a crafted POST
+            # cannot reassign the tenant. Narrow the queryset to just the
+            # relevant tenant so the disabled <select> shows that one option
+            # rather than the full tenant list.
+            current_tenant = self.instance.tenant if self.instance.pk else getattr(request, "tenant", None)
+            tenant_field.disabled = True
+            tenant_field.required = False
+            tenant_field.initial = current_tenant
+            tenant_field.queryset = (
+                tenant_field.queryset.filter(pk=current_tenant.pk) if current_tenant else tenant_field.queryset.none()
+            )
 
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.HiddenInput):

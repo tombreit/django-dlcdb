@@ -79,14 +79,22 @@ and mirror the admin's read-only status.
             {% if device.modified_at %}
               <span title="{{ device.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ device.modified_at|naturaltime }}</span>
             {% else %}—{% endif %}
+            {% if device.user or device.username %}
+              <span class="text-muted">· {{ device.user|default:device.username }}</span>
+            {% endif %}
           </dd>
         </div>
         <div>
           <dt>{% translate "Origin" %}</dt>
           <dd>
             {% if device.is_imported %}
-              <span class="badge text-bg-info">{% translate "CSV import" %}</span>
-              {% if device.imported_by %}<span class="text-muted">{{ device.imported_by }}</span>{% endif %}
+              {% if device.imported_by %}
+                <a class="badge text-bg-info" href="{% url 'admin:dataexchange_importerlist_change' device.imported_by.pk %}">
+                  {% translate "Imported" %} {{ device.imported_by.created_at }}
+                </a>
+              {% else %}
+                <span class="badge text-bg-info">{% translate "Imported" %}</span>
+              {% endif %}
             {% else %}
               <span class="badge text-bg-light border">{% translate "Manual entry" %}</span>
             {% endif %}
