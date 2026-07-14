@@ -27,11 +27,13 @@ class LicenceRecordFilter(django_filters.FilterSet):
     _license_type_prefixes = ["Lizenz::", "License::", "Licence::"]
     _license_type_queries = [Q(name__startswith=prefix) for prefix in _license_type_prefixes]
     device__device_type = django_filters.ModelChoiceFilter(
+        label=_("License type"),
         queryset=DeviceType.objects.filter(reduce(or_, _license_type_queries)),
         empty_label=_("License type..."),
     )
 
     device__supplier = django_filters.ModelChoiceFilter(
+        label=_("Supplier"),
         queryset=Supplier.objects.filter(device__is_licence=True, device__isnull=False).distinct(),
         empty_label=_("Supplier..."),
     )
@@ -48,10 +50,21 @@ class LicenceRecordFilter(django_filters.FilterSet):
         return choices
 
     license_state = django_filters.ChoiceFilter(
+        label=_("License state"),
         choices=get_license_state_choices,
         empty_label=_("License state..."),
     )
 
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("device_human_title", "license"),  # annotation supplied by the view's base_qs
+            ("license_state", "state"),  # annotation from the LicenceRecord manager
+            ("device__contract_start_date", "start"),
+            ("device__contract_expiration_date", "expiry"),
+            ("device__modified_at", "modified"),
+        ),
+    )
+
     class Meta:
         model = LicenceRecord
-        fields = ["search", "device__device_type", "device__supplier", "license_state"]
+        fields = ["search", "device__device_type", "device__supplier", "license_state", "ordering"]

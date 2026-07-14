@@ -21,10 +21,15 @@ from django.db.models import OuterRef, Subquery
 from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core.models import LicenceRecord, InRoomRecord, Room, Device
+from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.pagination import paginate
 from .forms import LicenseForm
 from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
 from .models import LicensesConfiguration, LicenseAsset
+
+# Rows per page for the licenses list. Mirrors dlcdb.assets.views.devices.
+LICENSES_PER_PAGE = 25
 
 
 @login_required
@@ -40,20 +45,33 @@ def _playground(request):
 
 @login_required
 def index(request):
-    if request.htmx:
-        template = "licenses/licenses_table.html"
-    else:
-        template = "licenses/index.html"
+    template = "licenses/index.html#licenses-list" if request.htmx else "licenses/index.html"
 
     base_qs = LicenceRecord.objects.annotate(
         device_human_title=Subquery(LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
-    ).order_by("-device__modified_at")
-    license_record_filter = LicenceRecordFilter(request.GET, queryset=base_qs)
+    )
+
+    # Always supply a default ordering so a bare page load is deterministic;
+    # an explicit header/dropdown click still wins. Mirrors device_index.
+    data = request.GET.copy()
+    data.setdefault("ordering", "-modified")
+    license_record_filter = LicenceRecordFilter(data, queryset=base_qs, request=request)
+
+    page_obj = paginate(request, license_record_filter.qs, LICENSES_PER_PAGE)
 
     context = {
-        "licenses_filtered": license_record_filter.qs.count(),
-        "licenses_total": base_qs.count(),
         "license_record_filter": license_record_filter,
+        "page_obj": page_obj,
+        "filterbar": build_filterbar(
+            license_record_filter,
+            request,
+            target="#licenses-list",
+            search_placeholder=_("Search title, manufacturer, supplier, inventory ID..."),
+        ),
+        "current_ordering": data["ordering"],
+        # paginator.count runs the filtered COUNT once; reuse it here.
+        "licenses_filtered": page_obj.paginator.count,
+        "licenses_total": base_qs.count(),
     }
 
     return TemplateResponse(request, template, context)

@@ -1,5 +1,5 @@
 {% extends "theme/_base.html" %}
-{% load static i18n crispy_forms_tags %}
+{% load i18n %}
 
 {% block title %}
   {% translate "Licenses" %}
@@ -8,34 +8,167 @@
 
 {% block body %}
 
-<h1>
-  {% translate "Licenses" %}
-</h1>
+  <style>
+    .license-state img {
+      max-width: 18px;
+    }
+  </style>
 
-<div id="licenses-content-wrapper">
-
-  <div class="d-flex flex-wrap">
-    {% include "licenses/filters.html" %}
-
-    <div id="add-license" class="ms-lg-4">
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{% translate "Licenses" %}</h1>
+    <span class="htmx-indicator ms-3">
+      <span class="spinner-border spinner-border-sm text-secondary" role="status">
+        <span class="visually-hidden">{% translate "Loading..." %}</span>
+      </span>
+    </span>
+    <div id="add-license" class="ms-auto">
       {% include "licenses/includes/add_button.html" with style="btn btn-primary" %}
     </div>
-
   </div>
 
-  <div
-    id="licenses-list"
-    hx-trigger="load"
-    hx-get="{% url 'licenses:index' %}?{{ request.GET.urlencode|safe }}"
-  >
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    {% comment %}
-      {% include "licenses/licenses_table.html" %}
-    {% endcomment %}
-  </div>
+  <div id="licenses-content-wrapper">
 
-</div>
+    {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+    {% partialdef licenses-list inline %}
+      <div id="licenses-list" hx-target="#licenses-list" hx-swap="outerHTML" hx-push-url="true">
+
+        <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+          <span>
+            {% blocktranslate count counter=licenses_filtered with total=licenses_total %}{{ counter }} of {{ total }} license{% plural %}{{ counter }} of {{ total }} licenses{% endblocktranslate %}
+          </span>
+          {% include "theme/filterbar/chips.html" with bar=filterbar %}
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th><!-- License status --></th>
+                {% include "theme/filterbar/_sort_th.html" with label=_("License") asc="license" desc="-license" %}
+                {% include "theme/filterbar/_sort_th.html" with label=_("Start date") asc="start" desc="-start" %}
+                {% include "theme/filterbar/_sort_th.html" with label=_("Expiry date") asc="expiry" desc="-expiry" %}
+                <th>
+                  {% translate "Subscribers" %}
+                  <a href="/docs/guides/lizenzen.html#subscribers">
+                    <i class="bi bi-info-circle-fill"></i>
+                  </a>
+                </th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+
+            {% for license in page_obj %}
+            <tr class="
+            {% if license.license_state == 'expired' %}
+            {% elif license.license_state == 'expiring' %}
+              table-warning
+            {% endif %}
+            ">
+                <td style="vertical-align: top;">
+                  {% include "licenses/traffic_light.html" %}
+                </td>
+              <td>
+                {{ license.device_human_title }}
+                <a
+                    href="{% url 'licenses:history' license.device.id %}"
+                    title="{% translate 'Show history' %}"
+                    class="mx-2"
+                >
+                    <i class="bi bi-clock-history"></i>
+                </a>
+
+                {% if license.device.note or license.device.procurement_note %}
+                  <span class="text-primary">
+                    <i class="px-2 bi bi-chat-fill"></i>
+                  </span>
+                  <div id="note-{{ license.device.id }}" class="bg-white border rounded p-2 font-monospace mt-1 small d-none">
+                    {% if license.device.procurement_note %}
+                      <strong>{% translate "Procurement note" %}:</strong>
+                      {{ license.device.procurement_note|linebreaks }}
+                    {% endif %}
+
+                    {% if license.device.note and license.device.procurement_note %}
+                    <hr>
+                    {% endif %}
+
+                    {% if license.device.note %}
+                      <strong>{% translate "Note" %}:</strong>
+                      {{ license.device.note|linebreaks }}
+                    {% endif %}
+                  </div>
+                {% endif %}
+                <div>
+
+                  {% if license.device.device_type %}
+                  <span class="badge text-bg-secondary" title="{% translate 'License type' %}">
+                    {{ license.device.device_type }}
+                  </span>
+                  {% endif %}
+
+                  {% if license.device.order_number %}
+                  <small class="text-muted">
+                    Order: {{ license.device.order_number }}
+                  </small>
+                  {% endif %}
+
+                </div>
+              </td>
+              <td>
+                {{ license.device.contract_start_date | default:"n/a" }}
+              </td>
+              <td>
+                {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
+              </td>
+              <td class="small">
+                {{ license.get_subscribers|default:""|linebreaksbr }}
+              </td>
+              <td>
+                <a
+                    href="{% url 'licenses:edit' license_id=license.device.id %}"
+                    class="btn btn-primary btn-sm"
+                >
+                    <i class="bi bi-pencil-square"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">
+                <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                {% translate "No licenses found." %}
+                {% if licenses_total == 0 %}
+                  {% include "licenses/includes/add_button.html" with style="btn" %}
+                {% else %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+
+      <script>
+      document.querySelectorAll('.bi.bi-chat-fill').forEach(function(stickyIcon) {
+        if (!stickyIcon.hasListener) {
+          stickyIcon.addEventListener('click', function() {
+            let noteElement = this.parentElement.nextElementSibling;
+            if (noteElement) {
+              noteElement.classList.toggle('d-none');
+            }
+          });
+          stickyIcon.hasListener = true;
+        }
+      });
+      </script>
+
+      </div>
+    {% endpartialdef %}
+
+  </div>
 
 {% endblock body %}
