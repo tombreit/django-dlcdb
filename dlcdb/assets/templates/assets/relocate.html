@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText: Thomas Breitner
-
-SPDX-License-Identifier: EUPL-1.2
--->
-
 {% extends "theme/_base.html" %}
 {% load static i18n %}
 
@@ -34,8 +28,11 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block body %}
 
-<h1 class="h4 mb-1"><i class="bi bi-arrows-move"></i> {% translate "Move devices" %}</h1>
-<p class="small text-muted mb-3">
+<div class="d-flex align-items-center mb-3">
+  <h1 class="mb-0">{% translate "Move devices" %}</h1>
+</div>
+
+<p class="small text-muted my-4">
   {% translate "Pick one or more devices, choose the room to move them to, then press Move." %}
 </p>
 

@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2024 Thomas Breitner
-
-SPDX-License-Identifier: EUPL-1.2
--->
-
 {% extends 'theme/_base.html' %}
 
 {% load i18n %}
@@ -15,60 +9,45 @@ Kleinkram
 
 {% block body %}
 
-    <div class="d-flex">
-        <div class="me-auto p-2">
-            <h1>
-                {% translate "Smallstuff Person Search" %}
-                <span class="htmx-indicator"> 
-                    <div class="spinner-grow text-info" role="status">
-                        <span class="visually-hidden">Searching...</span>
-                      </div>
-                </span> 
-            </h1>
-        </div>
+<div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{% translate "Smallstuff Person Search" %}</h1>
+    <span class="htmx-indicator ms-3">
+        <span class="spinner-border spinner-border-sm text-secondary" role="status">
+            <span class="visually-hidden">{% translate "Loading..." %}</span>
+        </span>
+    </span>
+</div>
+
+<form hx-post="{% url 'smallstuff:person_search' %}" hx-target="#search-results">
+    <div class="input-group input-group-lg mb-3">
+        <input type="search" name="search" class="form-control" placeholder="Tippe halt mal was, oder einfach *"
+            autocomplete="off" hx-trigger="keyup changed delay:200ms" hx-indicator=".htmx-indicator"
+            hx-post="{% url 'smallstuff:person_search' %}" hx-target="#search-results">
+
+        <span class="input-group-text">
+            <span id="results-count">0</span>
+        </span>
+        {# <button class="btn btn-success" type="search">Search</button> #}
+        <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
+
     </div>
-    
-    <form
-        hx-post="{% url 'smallstuff:person_search' %}"
-        hx-target="#search-results"
-    >
-        <div class="input-group input-group-lg mb-3">
-            <input 
-                type="search"
-                name="search" 
-                class="form-control"
-                placeholder="Tippe halt mal was, oder einfach *" 
-                autocomplete="off" 
-                hx-trigger="keyup changed delay:200ms" 
-                hx-indicator=".htmx-indicator"
-                hx-post="{% url 'smallstuff:person_search' %}"
-                hx-target="#search-results"
-            >
+</form>
 
-            <span class="input-group-text">
-                <span id="results-count">0</span> 
-            </span>
-            {# <button class="btn btn-success" type="search">Search</button> #}
-            <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
-
-        </div>
-    </form>
-
-    <div id="search-results"></div>
+<div id="search-results"></div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function(){
-        
+    document.addEventListener('DOMContentLoaded', function () {
+
         const resultCountNode = document.getElementById('results-count');
         const targetNode = document.getElementById('search-results');
-        
+
         // Options for the observer (which mutations to observe)
         const config = { attributes: true, childList: true, subtree: true };
-        
+
         // Callback function to execute when mutations are observed
-        const callback = function(mutationList, observer) {
+        const callback = function (mutationList, observer) {
             // Use traditional 'for loops' for IE 11
-            for(const mutation of mutationList) {
+            for (const mutation of mutationList) {
                 if (mutation.type === 'childList') {
                     console.log('A child node has been added or removed.');
                     let resultCount = targetNode.childElementCount;
@@ -80,15 +59,14 @@ Kleinkram
                 // }
             }
         };
-        
+
         // Create an observer instance linked to the callback function
         const observer = new MutationObserver(callback);
-        
+
         // Start observing the target node for configured mutations
         observer.observe(targetNode, config);
-        
+
     });
 </script>
-
 
 {% endblock body %}
