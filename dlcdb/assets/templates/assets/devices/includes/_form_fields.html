@@ -47,11 +47,12 @@
   </div>
 </section>
 
-<section class="card device-card mb-3">
-  <div class="card-header">
+<details class="card device-card mb-3"{% if form.supplier.errors or form.contact_person_internal.errors or form.order_number.errors or form.cost_centre.errors or form.purchase_date.errors or form.warranty_expiration_date.errors or form.contract_start_date.errors or form.contract_expiration_date.errors or form.contract_termination_date.errors or form.procurement_note.errors %} open{% endif %}>
+  <summary class="card-header">
     <i class="bi bi-receipt"></i>
     <h2 class="device-card-title">{% translate "Procurement" %}</h2>
-  </div>
+    <i class="bi bi-chevron-down device-caret"></i>
+  </summary>
   <div class="card-body">
     <div class="row g-3">
       {% include "assets/devices/includes/_field.html" with field=form.supplier col="col-md-6" %}
@@ -75,13 +76,14 @@
       {% include "assets/devices/includes/_field.html" with field=form.procurement_note col="col-12" %}
     </div>
   </div>
-</section>
+</details>
 
-<section class="card device-card mb-3">
-  <div class="card-header">
+<details class="card device-card mb-3"{% if form.nick_name.errors or form.mac_address.errors or form.extra_mac_addresses.errors %} open{% endif %}>
+  <summary class="card-header">
     <i class="bi bi-ethernet"></i>
     <h2 class="device-card-title">{% translate "Names and network" %}</h2>
-  </div>
+    <i class="bi bi-chevron-down device-caret"></i>
+  </summary>
   <div class="card-body">
     <div class="row g-3">
       {% include "assets/devices/includes/_field.html" with field=form.nick_name col="col-md-4" %}
@@ -89,9 +91,9 @@
       {% include "assets/devices/includes/_field.html" with field=form.extra_mac_addresses col="col-md-4" %}
     </div>
   </div>
-</section>
+</details>
 
-<details class="card device-card mb-3">
+<details class="card device-card mb-3"{% if form.machine_encryption_key.errors or form.backup_encryption_key.errors %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-shield-lock"></i>
     <h2 class="device-card-title">{% translate "Sensitive credentials" %}</h2>

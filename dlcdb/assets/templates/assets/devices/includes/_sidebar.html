@@ -111,27 +111,16 @@ and mirror the admin's read-only status.
   </section>
 
   {% if device.qrcode %}
-    <section class="card device-card mb-3 device-qr">
-      <div class="card-header">
-        <h2 class="device-card-title mb-0">
-          <button
-            type="button"
-            class="btn btn-link p-0 text-decoration-none"
-            data-bs-toggle="collapse"
-            data-bs-target="#deviceQrCode"
-            aria-controls="deviceQrCode"
-            aria-expanded="false"
-          >
-            <i class="bi bi-qr-code"></i>
-            {% translate "QR code" %}
-          </button>
-        </h2>
+    {# Collapsed by default (no `open`); native <details> — same mechanism as the Sensitive-credentials card, no id/JS needed. #}
+    <details class="card device-card mb-3 device-qr">
+      <summary class="card-header">
+        <i class="bi bi-qr-code"></i>
+        <h2 class="device-card-title">{% translate "QR code" %}</h2>
+        <i class="bi bi-chevron-down device-caret"></i>
+      </summary>
+      <div class="card-body text-center">
+        <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
       </div>
-      <div class="collapse" id="deviceQrCode">
-        <div class="card-body text-center">
-          <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
-        </div>
-      </div>
-    </section>
+    </details>
   {% endif %}
 </div>
