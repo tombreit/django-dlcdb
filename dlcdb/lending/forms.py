@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, LentRecord, Person, Record, Room
-from dlcdb.theme.widgets import DevicePickerField
+from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
 
 from .pickers import lend_queryset
 
@@ -97,7 +97,7 @@ class LentingForm(forms.ModelForm):
                 format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}
             ),
             "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
-            "room": forms.Select(attrs={"class": "form-select is-tom-select"}),
+            "room": TomSelectWidget(),
             "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_note": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),

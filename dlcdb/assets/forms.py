@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, Record, Room
-from dlcdb.theme.widgets import DevicePickerMultiField
+from dlcdb.theme.widgets import DevicePickerMultiField, TomSelectMultipleWidget, TomSelectWidget
 
 
 class RelocateForm(forms.Form):
@@ -53,12 +53,6 @@ class DeviceForm(forms.ModelForm):
     operator input.
     """
 
-    # FK selects over small reference tables that benefit from type-to-filter.
-    # `is-tom-select` is enhanced client-side by theme.js (same mechanism the
-    # licenses app uses). The large Person relation is handled separately by the
-    # HTMX live-search picker (see contact_person_internal below).
-    SEARCHABLE_SELECT_FIELDS = {"manufacturer", "device_type", "supplier"}
-
     class Meta:
         model = Device
         fields = [
@@ -89,6 +83,15 @@ class DeviceForm(forms.ModelForm):
             "backup_encryption_key",
         ]
         widgets = {
+            # FK selects over small reference tables that benefit from
+            # type-to-filter. TomSelectWidget carries the searchable-select
+            # contract; theme.js enhances it client-side (same mechanism the
+            # licenses/lending/inventory apps use). The large Person relation is
+            # handled separately by the HTMX live-search picker (see
+            # contact_person_internal below).
+            "device_type": TomSelectWidget(),
+            "manufacturer": TomSelectWidget(),
+            "supplier": TomSelectWidget(),
             "purchase_date": forms.DateInput(attrs={"type": "date"}),
             "warranty_expiration_date": forms.DateInput(attrs={"type": "date"}),
             "contract_start_date": forms.DateInput(attrs={"type": "date"}),
@@ -120,21 +123,12 @@ class DeviceForm(forms.ModelForm):
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.HiddenInput):
                 continue  # picker-driven fields carry no Bootstrap control styling
+            if isinstance(field.widget, (TomSelectWidget, TomSelectMultipleWidget)):
+                continue  # widget already carries `form-select is-tom-select`
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs["class"] = "form-check-input"
             elif isinstance(field.widget, forms.Select):
-                css = "form-select"
-                if name in self.SEARCHABLE_SELECT_FIELDS:
-                    css += " is-tom-select"  # searchable dropdown, enhanced by theme.js
-                    # Give Tom Select a real placeholder. Without this it falls back
-                    # to the empty option's "---------" label, which reads as content
-                    # rather than a greyed hint; data-placeholder takes precedence
-                    # (Tom Select getSettings) so the "---------" never surfaces.
-                    field.widget.attrs["data-placeholder"] = _("Type to search…")
-                    # Single selects read better with a single "clear all" button
-                    # than a per-tag remove button (theme.js reads this opt-in).
-                    field.widget.attrs["data-clear-button"] = "true"
-                field.widget.attrs["class"] = css
+                field.widget.attrs["class"] = "form-select"
             else:
                 field.widget.attrs["class"] = "form-control"
 

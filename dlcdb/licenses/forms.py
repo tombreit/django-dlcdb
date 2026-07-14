@@ -14,6 +14,7 @@ from crispy_forms.layout import Layout, Row, Column, Div, HTML
 from crispy_bootstrap5.bootstrap5 import FloatingField
 
 from dlcdb.core.models import Device, DeviceType, Person
+from dlcdb.theme.widgets import TomSelectMultipleWidget
 from .subscribers import manage_subscribers
 
 
@@ -47,12 +48,7 @@ class LicenseForm(forms.ModelForm):
             queryset=Person.objects.filter(email__isnull=False),
             required=False,
             help_text=_("Select one or more subscribers."),
-            widget=forms.SelectMultiple(
-                attrs={
-                    "class": "is-tom-select",
-                    # "data-placeholder": "-----",
-                }
-            ),
+            widget=TomSelectMultipleWidget(),
             initial=self.instance.subscription_set.values_list("subscriber_id", flat=True)
             if self.instance.pk
             else None,
@@ -147,9 +143,4 @@ class LicenseForm(forms.ModelForm):
             "contract_start_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
-            "contact_person_internal": forms.Select(
-                attrs={
-                    "class": "is-tom-select",
-                }
-            ),
         }

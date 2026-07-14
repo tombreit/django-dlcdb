@@ -8,6 +8,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Field
 
 from dlcdb.core.models import Note
+from dlcdb.theme.widgets import TomSelectWidget
 
 
 class InventorizeRoomForm(forms.Form):
@@ -32,8 +33,7 @@ class DeviceAddForm(forms.Form):
 
         self.fields["device"] = forms.ChoiceField(
             choices=device_choices,
-            # TomSelect is initialized by theme.js for all .is-tom-select elements
-            widget=forms.Select(attrs={"class": "is-tom-select"}),
+            widget=TomSelectWidget(),
         )
 
     room = forms.CharField(widget=forms.HiddenInput())

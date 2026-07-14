@@ -5,9 +5,66 @@
 import json
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from .bootstrap_icons import get_bootstrap_icons
 from .pickers import get_picker_source
+
+
+class TomSelectWidget(forms.Select):
+    """
+    Searchable single-select, enhanced client-side by ``theme.js``.
+
+    Emits the ``is-tom-select`` contract (alongside Bootstrap's ``form-select``)
+    plus the ``data-placeholder`` / ``data-clear-button`` hints that
+    ``theme.js`` reads (see ``initTomSelect`` in
+    ``theme/assets/js/theme.js``): ``data-clear-button`` opts a single-select
+    into the ``clear_button`` plugin (one "clear all" control) instead of a
+    per-tag ``remove_button``, and ``data-placeholder`` replaces the empty
+    option's ``---------`` label with a greyed hint.
+
+    Intentionally ships NO ``Media`` and NO ``template_name`` — unlike the
+    picker widgets below. TomSelect's JS/CSS are bundled once into the global
+    theme bundle loaded by ``theme/_base.html`` on every page, and Django's
+    default ``<select>`` template renders fine (TomSelect enhances it in the
+    browser). Adding a per-widget ``Media`` here would double-load TomSelect,
+    so do not "fix" this by adding one.
+    """
+
+    def __init__(self, attrs=None, *, placeholder=None):
+        defaults = {
+            "class": "form-select is-tom-select",
+            "data-placeholder": placeholder or _("Type to search…"),
+            "data-clear-button": "true",  # single select -> clear_button plugin
+        }
+        super().__init__(_merge_tom_select_attrs(defaults, attrs))
+
+
+class TomSelectMultipleWidget(forms.SelectMultiple):
+    """
+    Searchable multi-select counterpart to :class:`TomSelectWidget`.
+
+    Same ``is-tom-select`` contract, but no ``data-clear-button``: a
+    multi-select reads better with the default per-tag ``remove_button``
+    plugin. See :class:`TomSelectWidget` for why this widget carries no
+    ``Media``/``template_name``.
+    """
+
+    def __init__(self, attrs=None, *, placeholder=None):
+        defaults = {
+            "class": "form-select is-tom-select",
+            "data-placeholder": placeholder or _("Type to search…"),
+        }
+        super().__init__(_merge_tom_select_attrs(defaults, attrs))
+
+
+def _merge_tom_select_attrs(defaults, attrs):
+    """Merge caller ``attrs`` over ``defaults``, appending (not clobbering) class."""
+    merged = {**defaults, **(attrs or {})}
+    extra_class = (attrs or {}).get("class")
+    if extra_class:
+        merged["class"] = f"{defaults['class']} {extra_class}"
+    return merged
 
 
 class IconPickerWidget(forms.TextInput):
