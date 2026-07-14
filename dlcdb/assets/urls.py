@@ -12,6 +12,7 @@ urlpatterns = [
     path("devices/", views.device_index, name="device_index"),
     path("devices/add/", views.device_add, name="device_add"),
     path("devices/<int:pk>/", views.device_detail, name="device_detail"),
+    path("person-search/", views.person_search, name="person_search"),
     path("relocate/", views.relocate, name="relocate"),
     path("room-search/", views.room_search, name="room_search"),
 ]

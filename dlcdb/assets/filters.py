@@ -86,6 +86,7 @@ class DeviceFilter(django_filters.FilterSet):
             ("active_record__record_type", "state"),
             ("active_record__room__number", "room"),
             ("modified_at", "modified"),
+            ("tenant__name", "tenant"),
         ),
     )
 

@@ -1,0 +1,46 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+Person option card for the contact-person picker, reused for live-search results
+and the selected-person slot. Carries data-* attributes so theme/js/picker.js can
+write the chosen person pk into the form's hidden ``contact_person_internal`` field.
+
+Expects: person (core.Person); selectable (bool); locked (bool).
+{% endcomment %}
+
+<div
+  class="js-picker-option card {% if selectable %}mb-1 border-0 picker-option{% else %}mb-2{% endif %}"
+  {% if selectable %}role="button" style="cursor: pointer;"{% endif %}
+  data-option-id="{{ person.pk }}"
+  data-option-label="{{ person.last_name }}, {{ person.first_name }}"
+>
+  <div class="card-body d-flex align-items-center gap-3 py-2">
+    <span class="d-inline-flex align-items-center justify-content-center rounded bg-body-tertiary flex-shrink-0"
+          style="width: 40px; height: 40px;">
+      <i class="bi bi-person fs-5 text-secondary"></i>
+    </span>
+
+    <div class="flex-grow-1">
+      <div class="fw-semibold">{{ person.last_name }}, {{ person.first_name }}</div>
+      <div class="text-muted small">
+        {{ person.organizational_unit.name|default:"" }}
+        {% if person.organizational_unit and person.email %} · {% endif %}
+        {{ person.email|default:"" }}
+      </div>
+    </div>
+
+    {% if selectable %}
+      <i class="bi bi-chevron-right text-muted"></i>
+    {% elif not locked %}
+      <button type="button" class="js-picker-clear btn btn-sm btn-outline-secondary">
+        <i class="bi bi-x-lg"></i> {% translate "Change" %}
+      </button>
+    {% endif %}
+  </div>
+</div>

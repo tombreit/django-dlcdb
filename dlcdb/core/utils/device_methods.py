@@ -102,34 +102,45 @@ def get_device_state_data(device, *, user=None, app_name=None):
         if next_state is None:
             continue
 
-        try:
-            proxy_model = Record.get_proxy_model_by_record_type(next_state)
+        proxy_model = Record.get_proxy_model_by_record_type(next_state)
 
-            # Construct the permission string: <app_label>.add_<model_name>
-            perm_str = f"{proxy_model._meta.app_label}.add_{proxy_model._meta.model_name}"
+        # Construct the permission string: <app_label>.add_<model_name>
+        perm_str = f"{proxy_model._meta.app_label}.add_{proxy_model._meta.model_name}"
 
-            if user and user.has_perm(perm_str):
-                action_url = f"{proxy_model.get_admin_action_url()}?device={device.pk}"
-                action_label = dict(Record.RECORD_TYPE_CHOICES).get(next_state, next_state)
+        if not (user and user.has_perm(perm_str)):
+            continue
 
-                if next_state == Record.LENT and device.is_lentable:
-                    action_url = f"{reverse('admin:core_lentrecord_changelist')}?q={device.uuid}"
-                    action_label = _("Lend")
-                elif next_state == Record.LENT and not device.is_lentable:
-                    continue
+        # Default target: the proxy model's admin add-view. Admin add-views
+        # require is_staff, so mark these as "external" links; surfaces that
+        # gate on is_staff (see the assets frontend) use this flag.
+        action_url = f"{proxy_model.get_admin_action_url()}?device={device.pk}"
+        action_label = dict(Record.RECORD_TYPE_CHOICES).get(next_state, next_state)
+        external = True
 
-                actions.append(
-                    {
-                        "url": action_url,
-                        "label": action_label,
-                    }
-                )
+        if next_state == Record.INROOM and app_name == "assets":
+            # Native "Move" module (single-device prefill via ?device=).
+            action_url = f"{reverse('assets:relocate')}?device={device.pk}"
+            action_label = _("Move")
+            external = False
+        elif next_state == Record.LENT:
+            if not device.is_lentable:
+                continue
+            action_label = _("Lend")
+            if app_name == "assets" and active_record:
+                # Native frontend lending flow. LENT is only reachable from an
+                # INROOM active record, so active_record.pk is always valid here.
+                action_url = reverse("lending:detail", args=[active_record.pk])
+                external = False
+            else:
+                action_url = f"{reverse('admin:core_lentrecord_changelist')}?q={device.uuid}"
 
-        except Exception as e:
-            import traceback
-
-            traceback.print_exc()
-            raise e
+        actions.append(
+            {
+                "url": action_url,
+                "label": action_label,
+                "external": external,
+            }
+        )
 
     return DeviceStateData(
         label=label,

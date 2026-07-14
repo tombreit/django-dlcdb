@@ -58,35 +58,60 @@ behind a "Filters (n)" button; search stays visible.
         <h5 class="offcanvas-title" id="{{ bar.bar_id }}-panel-label">{% translate "Filters" %}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#{{ bar.bar_id }}-panel" aria-label="{% translate 'Close' %}"></button>
       </div>
-      <div class="offcanvas-body d-flex flex-column flex-md-row flex-md-wrap gap-2 p-3 p-md-0">
+      <div class="offcanvas-body d-flex flex-column gap-2 p-3 p-md-0">
 
-        {% for spec in bar.specs %}
-          {% include "theme/filterbar/_dropdown.html" %}
-        {% endfor %}
+        <div class="d-flex flex-column flex-md-row flex-md-wrap gap-2">
+          {% for spec in bar.specs %}
+            {% include "theme/filterbar/_dropdown.html" %}
+          {% endfor %}
 
-        {% if bar.sort_options %}
-          <div class="dropdown filterbar-filter filterbar-sort">
+          {% if bar.sort_options %}
+            <div class="dropdown filterbar-filter filterbar-sort">
+              <button
+                type="button"
+                class="btn btn-outline-secondary dropdown-toggle"
+                data-bs-toggle="dropdown"
+                data-filterbar-label="{% translate 'Sort' %}"
+              >
+                <span data-filterbar-btn-label>{% translate "Sort" %}{% if bar.current_sort %}: {{ bar.current_sort.label }} <i class="bi {% if bar.current_sort.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i>{% endif %}</span>
+              </button>
+              <div class="dropdown-menu filterbar-menu p-2">
+                {% for opt in bar.sort_options %}
+                  <label class="dropdown-item d-flex align-items-center gap-2 rounded">
+                    <input
+                      class="form-check-input m-0 flex-shrink-0"
+                      type="radio"
+                      name="{{ bar.ordering_param }}"
+                      value="{{ opt.value }}"
+                      {% if opt.selected %}checked{% endif %}
+                    >
+                    <span data-filterbar-option>{{ opt.label }} <i class="bi {% if opt.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i></span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if bar.secondary_specs %}
+          {# A separate row below the primary filters, so expanding/collapsing it never reflows them. #}
+          <div class="filterbar-secondary d-flex flex-column align-items-end">
             <button
               type="button"
-              class="btn btn-outline-secondary dropdown-toggle"
-              data-bs-toggle="dropdown"
-              data-filterbar-label="{% translate 'Sort' %}"
+              class="btn btn-link btn-sm text-muted px-0 d-inline-flex align-items-center gap-1{% if not bar.secondary_active %} collapsed{% endif %}"
+              data-bs-toggle="collapse"
+              data-bs-target="#{{ bar.bar_id }}-secondary"
+              aria-expanded="{% if bar.secondary_active %}true{% else %}false{% endif %}"
+              aria-controls="{{ bar.bar_id }}-secondary"
             >
-              <span data-filterbar-btn-label>{% translate "Sort" %}{% if bar.current_sort %}: {{ bar.current_sort.label }} <i class="bi {% if bar.current_sort.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i>{% endif %}</span>
+              <i class="bi bi-chevron-down"></i> {% translate "More filters" %}
             </button>
-            <div class="dropdown-menu filterbar-menu p-2">
-              {% for opt in bar.sort_options %}
-                <label class="dropdown-item d-flex align-items-center gap-2 rounded">
-                  <input
-                    class="form-check-input m-0 flex-shrink-0"
-                    type="radio"
-                    name="{{ bar.ordering_param }}"
-                    value="{{ opt.value }}"
-                    {% if opt.selected %}checked{% endif %}
-                  >
-                  <span data-filterbar-option>{{ opt.label }} <i class="bi {% if opt.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i></span>
-                </label>
-              {% endfor %}
+            <div class="collapse {% if bar.secondary_active %}show{% endif %} w-100" id="{{ bar.bar_id }}-secondary">
+              <div class="d-flex flex-column flex-md-row flex-md-wrap justify-content-md-end gap-2 mt-2">
+                {% for spec in bar.secondary_specs %}
+                  {% include "theme/filterbar/_dropdown.html" %}
+                {% endfor %}
+              </div>
             </div>
           </div>
         {% endif %}

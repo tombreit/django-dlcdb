@@ -75,6 +75,8 @@ class FilterBar:
     search_value: str
     search_chip: Chip | None  # the active search term as a removable chip
     specs: list[FilterSpec]
+    secondary_specs: list[FilterSpec]  # demoted filters, tucked behind "More filters"
+    secondary_active: bool  # a secondary spec has a selected value -> start expanded
     ordering_param: str  # "" when the FilterSet has no OrderingFilter
     sort_options: list[SortOption]
     current_sort: SortOption | None
@@ -93,16 +95,22 @@ def build_filterbar(
     search_placeholder="",
     search_field="search",
     bar_id="filterbar",
+    secondary_fields=(),
 ):
     """
     Pure helper: derive a FilterBar from a bound FilterSet and the request's
     GET parameters. Does not touch ``filterset.qs``.
+
+    ``secondary_fields`` names filters to demote into ``secondary_specs`` (a
+    "More filters" tier the view considers less important) — the component
+    itself has no notion of which filters matter more.
     """
     form = filterset.form
 
     search_param = ""
     search_value = ""
     specs = []
+    secondary_specs = []
     ordering_param = ""
     sort_options = []
 
@@ -121,9 +129,10 @@ def build_filterbar(
 
         spec = _filter_spec(flt, bound_field)
         if spec is not None:
-            specs.append(spec)
+            (secondary_specs if name in secondary_fields else specs).append(spec)
 
-    chips = [chip for spec in specs for chip in _spec_chips(spec, request)]
+    chips = [chip for spec in specs + secondary_specs for chip in _spec_chips(spec, request)]
+    secondary_active = any(spec.selected_values for spec in secondary_specs)
     current_sort = next((opt for opt in sort_options if opt.selected), None)
 
     search_chip = None
@@ -141,6 +150,8 @@ def build_filterbar(
         search_value=search_value,
         search_chip=search_chip,
         specs=specs,
+        secondary_specs=secondary_specs,
+        secondary_active=secondary_active,
         ordering_param=ordering_param,
         sort_options=sort_options,
         current_sort=current_sort,

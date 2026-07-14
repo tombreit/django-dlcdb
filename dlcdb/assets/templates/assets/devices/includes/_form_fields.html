@@ -1,68 +1,107 @@
 {% load i18n %}
-{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+{% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+  </div>
+{% endif %}
 
-<section class="card mb-3">
+<section class="card device-card mb-3">
+  <div class="card-header">
+    <i class="bi bi-upc-scan"></i>
+    <h2 class="device-card-title">{% translate "Identification" %}</h2>
+  </div>
   <div class="card-body">
-    <h2 class="h5 card-title">{% translate "Device" %}</h2>
     <div class="row g-3">
-      <div class="col-md-6">{{ form.edv_id.label_tag }}{{ form.edv_id }}{{ form.edv_id.errors }}</div>
-      <div class="col-md-6">{{ form.sap_id.label_tag }}{{ form.sap_id }}{{ form.sap_id.errors }}</div>
-      <div class="col-md-6">{{ form.device_type.label_tag }}{{ form.device_type }}{{ form.device_type.errors }}</div>
-      {% if form.tenant %}<div class="col-md-6">{{ form.tenant.label_tag }}{{ form.tenant }}{{ form.tenant.errors }}</div>{% endif %}
-      <div class="col-md-6 form-check ms-3">{{ form.is_lentable }}{{ form.is_lentable.label_tag }}{{ form.is_lentable.errors }}</div>
-      <div class="col-md-6 form-check ms-3">{{ form.is_licence }}{{ form.is_licence.label_tag }}{{ form.is_licence.errors }}</div>
+      {% include "assets/devices/includes/_field.html" with field=form.edv_id col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.sap_id col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.device_type col="col-md-6" %}
+      {% if form.tenant %}{% include "assets/devices/includes/_field.html" with field=form.tenant col="col-md-6" %}{% endif %}
+      <div class="col-12">
+        <div class="d-flex flex-wrap gap-4 pt-1">
+          <div class="form-check form-switch">
+            {{ form.is_lentable }}{{ form.is_lentable.label_tag }}
+            {% for error in form.is_lentable.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="form-check form-switch">
+            {{ form.is_licence }}{{ form.is_licence.label_tag }}
+            {% for error in form.is_licence.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="card mb-3">
+<section class="card device-card mb-3">
+  <div class="card-header">
+    <i class="bi bi-cpu"></i>
+    <h2 class="device-card-title">{% translate "Manufacturer and model" %}</h2>
+  </div>
   <div class="card-body">
-    <h2 class="h5 card-title">{% translate "Manufacturer and model" %}</h2>
     <div class="row g-3">
-      <div class="col-md-4">{{ form.manufacturer.label_tag }}{{ form.manufacturer }}{{ form.manufacturer.errors }}</div>
-      <div class="col-md-4">{{ form.series.label_tag }}{{ form.series }}{{ form.series.errors }}</div>
-      <div class="col-md-4">{{ form.serial_number.label_tag }}{{ form.serial_number }}{{ form.serial_number.errors }}</div>
-      <div class="col-12">{{ form.note.label_tag }}{{ form.note }}{{ form.note.errors }}</div>
+      {% include "assets/devices/includes/_field.html" with field=form.manufacturer col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.series col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.serial_number col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.note col="col-12" %}
     </div>
   </div>
 </section>
 
-<section class="card mb-3">
+<section class="card device-card mb-3">
+  <div class="card-header">
+    <i class="bi bi-receipt"></i>
+    <h2 class="device-card-title">{% translate "Procurement" %}</h2>
+  </div>
   <div class="card-body">
-    <h2 class="h5 card-title">{% translate "Procurement" %}</h2>
     <div class="row g-3">
-      <div class="col-md-6">{{ form.supplier.label_tag }}{{ form.supplier }}{{ form.supplier.errors }}</div>
-      <div class="col-md-6">{{ form.contact_person_internal.label_tag }}{{ form.contact_person_internal }}{{ form.contact_person_internal.errors }}</div>
-      <div class="col-md-6">{{ form.order_number.label_tag }}{{ form.order_number }}{{ form.order_number.errors }}</div>
-      <div class="col-md-6">{{ form.cost_centre.label_tag }}{{ form.cost_centre }}{{ form.cost_centre.errors }}</div>
-      <div class="col-md-4">{{ form.purchase_date.label_tag }}{{ form.purchase_date }}{{ form.purchase_date.errors }}</div>
-      <div class="col-md-4">{{ form.warranty_expiration_date.label_tag }}{{ form.warranty_expiration_date }}{{ form.warranty_expiration_date.errors }}</div>
-      <div class="col-md-4">{{ form.contract_start_date.label_tag }}{{ form.contract_start_date }}{{ form.contract_start_date.errors }}</div>
-      <div class="col-md-6">{{ form.contract_expiration_date.label_tag }}{{ form.contract_expiration_date }}{{ form.contract_expiration_date.errors }}</div>
-      <div class="col-md-6">{{ form.contract_termination_date.label_tag }}{{ form.contract_termination_date }}{{ form.contract_termination_date.errors }}</div>
-      <div class="col-12">{{ form.procurement_note.label_tag }}{{ form.procurement_note }}{{ form.procurement_note.errors }}</div>
+      {% include "assets/devices/includes/_field.html" with field=form.supplier col="col-md-6" %}
+      <div class="col-md-6">
+        {% comment %}
+        Contact person: live-search picker instead of a full select of every
+        Person. The hidden field carries the pk and must sit outside the
+        picker's own result-swap region.
+        {% endcomment %}
+        {% url 'assets:person_search' as person_search_url %}
+        {{ form.contact_person_internal }}
+        {% include "theme/includes/_picker.html" with picker_id="contact_person" field_id=form.contact_person_internal.id_for_label search_url=person_search_url search_name="q_person" label=form.contact_person_internal.label placeholder=_("Search person by name or e-mail, or “*” for all…") errors=form.contact_person_internal.errors has_selected=form.instance.contact_person_internal selected_item_template="assets/includes/_person_list_item.html" person=form.instance.contact_person_internal selectable=False %}
+      </div>
+      {% include "assets/devices/includes/_field.html" with field=form.order_number col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.cost_centre col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.purchase_date col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.warranty_expiration_date col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.contract_start_date col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.contract_expiration_date col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.contract_termination_date col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.procurement_note col="col-12" %}
     </div>
   </div>
 </section>
 
-<section class="card mb-3">
+<section class="card device-card mb-3">
+  <div class="card-header">
+    <i class="bi bi-ethernet"></i>
+    <h2 class="device-card-title">{% translate "Names and network" %}</h2>
+  </div>
   <div class="card-body">
-    <h2 class="h5 card-title">{% translate "Names and network" %}</h2>
     <div class="row g-3">
-      <div class="col-md-4">{{ form.nick_name.label_tag }}{{ form.nick_name }}{{ form.nick_name.errors }}</div>
-      <div class="col-md-4">{{ form.mac_address.label_tag }}{{ form.mac_address }}{{ form.mac_address.errors }}</div>
-      <div class="col-md-4">{{ form.extra_mac_addresses.label_tag }}{{ form.extra_mac_addresses }}{{ form.extra_mac_addresses.errors }}</div>
+      {% include "assets/devices/includes/_field.html" with field=form.nick_name col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.mac_address col="col-md-4" %}
+      {% include "assets/devices/includes/_field.html" with field=form.extra_mac_addresses col="col-md-4" %}
     </div>
   </div>
 </section>
 
-<details class="card mb-3">
-  <summary class="card-header">{% translate "Sensitive credentials" %}</summary>
+<details class="card device-card mb-3">
+  <summary class="card-header">
+    <i class="bi bi-shield-lock"></i>
+    <h2 class="device-card-title">{% translate "Sensitive credentials" %}</h2>
+    <i class="bi bi-chevron-down device-caret"></i>
+  </summary>
   <div class="card-body">
     <p class="text-muted small">{% translate "Only store credentials here when this is required by your operating procedure." %}</p>
     <div class="row g-3">
-      <div class="col-md-6">{{ form.machine_encryption_key.label_tag }}{{ form.machine_encryption_key }}{{ form.machine_encryption_key.errors }}</div>
-      <div class="col-md-6">{{ form.backup_encryption_key.label_tag }}{{ form.backup_encryption_key }}{{ form.backup_encryption_key.errors }}</div>
+      {% include "assets/devices/includes/_field.html" with field=form.machine_encryption_key col="col-md-6" %}
+      {% include "assets/devices/includes/_field.html" with field=form.backup_encryption_key col="col-md-6" %}
     </div>
   </div>
 </details>

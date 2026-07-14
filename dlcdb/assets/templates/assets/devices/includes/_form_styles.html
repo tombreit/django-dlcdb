@@ -1,0 +1,74 @@
+{% comment %}
+Scoped styling for the device detail/add surfaces. Extends the existing app
+shell language (slate identity, indigo primary, --app-* tokens) rather than
+introducing a new palette. Included once per page from the extra_css block.
+{% endcomment %}
+<style>
+  .device-page { --device-tile-bg: var(--app-navbar-bg); }
+
+  /* Identity tile — mirrors the slate navbar so the page reads as one system. */
+  .device-tile {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: var(--app-radius-lg);
+    background: var(--device-tile-bg);
+    color: #fff;
+    font-size: 1.4rem;
+  }
+
+  .device-card {
+    border-radius: var(--app-radius-lg);
+    box-shadow: var(--app-elevation-1);
+  }
+  .device-card > .card-header {
+    background: transparent;
+    border-bottom-color: var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding-top: .85rem;
+    padding-bottom: .85rem;
+  }
+  .device-card > .card-header .device-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .device-card > .card-header .bi { color: var(--bs-primary); }
+  details.device-card > summary { cursor: pointer; list-style: none; }
+  details.device-card > summary::-webkit-details-marker { display: none; }
+  details.device-card > summary .device-caret { margin-left: auto; transition: transform var(--app-transition); }
+  details.device-card[open] > summary .device-caret { transform: rotate(180deg); }
+
+  /* Quieter, tighter field labels for a dense operational form. */
+  .device-form .form-label {
+    font-weight: 500;
+    font-size: .8125rem;
+    margin-bottom: .25rem;
+    color: var(--bs-secondary-color);
+  }
+
+  .device-sidebar { position: sticky; top: 1rem; }
+  @media (max-width: 991.98px) { .device-sidebar { position: static; } }
+
+  /* Read-only record metadata (the admin "Informal" fields). */
+  .device-meta { margin: 0; }
+  .device-meta > div + div {
+    margin-top: .6rem;
+    padding-top: .6rem;
+    border-top: 1px solid var(--bs-border-color-translucent);
+  }
+  .device-meta dt {
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    margin-bottom: .1rem;
+  }
+  .device-meta dd { margin: 0; font-size: .875rem; word-break: break-word; }
+  .device-qr img { width: 100%; height: auto; max-width: 220px; }
+</style>

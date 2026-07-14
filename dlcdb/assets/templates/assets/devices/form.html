@@ -1,19 +1,36 @@
 {% extends "theme/_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{{ title }}{% endblock title %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'theme/widgets/picker.css' %}">
+  {% include "assets/devices/includes/_form_styles.html" %}
+{% endblock extra_css %}
+
 {% block body %}
-  <div class="d-flex align-items-center mb-3">
-    <h1 class="mb-0">{{ title }}</h1>
-    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary ms-auto">{% translate "Cancel" %}</a>
+<div class="device-page">
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <div class="device-tile"><i class="bi bi-plus-lg"></i></div>
+    <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
+    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
   </div>
 
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {% include "assets/devices/includes/_form_fields.html" with form=form %}
-    <div class="mt-4">
-      <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <form class="device-form" method="post" novalidate>
+        {% csrf_token %}
+        {% include "assets/devices/includes/_form_fields.html" with form=form %}
+        <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-check-lg"></i> {{ submit_label }}
+          </button>
+          <a class="btn btn-outline-secondary" href="{% url 'assets:device_index' %}">{% translate "Cancel" %}</a>
+        </div>
+      </form>
     </div>
-  </form>
+  </div>
+</div>
 {% endblock body %}
+
+{% block extra_js %}<script src="{% static 'theme/js/picker.js' %}"></script>{% endblock extra_js %}

@@ -24,8 +24,14 @@ function initTomSelect(el) {
     if (initializedElements.has(el)) return;
 
     console.info("Initializing TomSelect for element:", el);
+    // `remove_button` puts an "x" on each selected tag — the right affordance for
+    // multi-selects. `clear_button` adds a single "clear all" control on the right,
+    // which reads better on single selects. Opt in per element via
+    // data-clear-button (e.g. the device form's FK selects); default stays
+    // remove_button so existing consumers are unchanged.
+    const plugin = el.dataset.clearButton !== undefined ? 'clear_button' : 'remove_button';
     let tomSelectConfig = {
-        plugins: ['remove_button'],
+        plugins: [plugin],
         create: false,
         hidePlaceholder: true,
         maxOptions: null,

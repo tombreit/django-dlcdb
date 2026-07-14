@@ -1,36 +1,89 @@
 {% extends "theme/_base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{{ device }}{% endblock title %}
 
-{% block body %}
-  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <div>
-      <h1 class="mb-0">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</h1>
-      <div class="text-muted">{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
-    </div>
-    <div class="ms-sm-auto">{% include "assets/devices/includes/_state.html" with device=device %}</div>
-    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Back to devices" %}</a>
-  </div>
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'theme/widgets/picker.css' %}">
+  {% include "assets/devices/includes/_form_styles.html" %}
+{% endblock extra_css %}
 
-  {% if can_change %}
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {% include "assets/devices/includes/_form_fields.html" with form=form %}
-      <div class="mt-4 d-flex gap-2">
-        <button class="btn btn-primary" type="submit">{% translate "Save changes" %}</button>
-        {% if device.is_lentable and device.active_record.record_type == "INROOM" and perms.core.add_lentrecord %}
-          <a class="btn btn-outline-primary" href="{% url 'lending:detail' device.active_record.pk %}">{% translate "Lend" %}</a>
+{% block body %}
+<div class="device-page">
+  {# Identity band — slate tile + monospace id mirror the app shell. #}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <div class="device-tile">
+      <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }}"></i>
+    </div>
+    <div class="me-auto">
+      <h1 class="h3 mb-1 font-monospace">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</h1>
+      <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
+        {% if device.manufacturer or device.series %}
+          <span>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</span>
+        {% endif %}
+        {% if device.device_type %}<span class="badge text-bg-light border fw-normal">{{ device.device_type }}</span>{% endif %}
+        {% if device.active_record %}
+          <span class="badge text-bg-{{ device.active_record.record_type_color }}">{{ device.active_record.get_record_type_display }}</span>
         {% endif %}
       </div>
-    </form>
-  {% else %}
-    <div class="alert alert-secondary">{% translate "You may view this device but do not have permission to edit it." %}</div>
-    <dl class="row">
-      <dt class="col-sm-3">{% translate "IT ID" %}</dt><dd class="col-sm-9">{{ device.edv_id|default:"—" }}</dd>
-      <dt class="col-sm-3">{% translate "Inventory ID" %}</dt><dd class="col-sm-9">{{ device.sap_id|default:"—" }}</dd>
-      <dt class="col-sm-3">{% translate "Serial number" %}</dt><dd class="col-sm-9">{{ device.serial_number|default:"—" }}</dd>
-      <dt class="col-sm-3">{% translate "Device type" %}</dt><dd class="col-sm-9">{{ device.device_type|default:"—" }}</dd>
-    </dl>
-  {% endif %}
+    </div>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to devices" %}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% if can_change %}
+        <form class="device-form" method="post" action="{{ form_action }}" novalidate>
+          {% csrf_token %}
+          {% include "assets/devices/includes/_form_fields.html" with form=form %}
+          <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-check-lg"></i> {% translate "Save changes" %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-secondary d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          {% translate "You may view this device but do not have permission to edit it." %}
+        </div>
+        <section class="card device-card mb-3">
+          <div class="card-header">
+            <i class="bi bi-upc-scan"></i>
+            <h2 class="device-card-title">{% translate "Device" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "IT ID" %}</dt>
+              <dd class="col-sm-8 font-monospace">{{ device.edv_id|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Inventory ID" %}</dt>
+              <dd class="col-sm-8 font-monospace">{{ device.sap_id|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Device type" %}</dt>
+              <dd class="col-sm-8">{{ device.device_type|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Manufacturer" %}</dt>
+              <dd class="col-sm-8">{{ device.manufacturer|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Model name" %}</dt>
+              <dd class="col-sm-8">{{ device.series|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Serial number" %}</dt>
+              <dd class="col-sm-8 font-monospace">{{ device.serial_number|default:"—" }}</dd>
+              {% if device.note %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "Note" %}</dt>
+                <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ device.note }}</dd>
+              {% endif %}
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      {% include "assets/devices/includes/_sidebar.html" with device=device %}
+    </div>
+  </div>
+</div>
 {% endblock body %}
+
+{% block extra_js %}<script src="{% static 'theme/js/picker.js' %}"></script>{% endblock extra_js %}

@@ -153,6 +153,7 @@ def nav(request):
     # entry as "active" (e.g. on /lending/* the "Lending" entry is highlighted).
     resolver_match = getattr(request, "resolver_match", None)
     current_app_namespace = (resolver_match.namespace or resolver_match.app_name) if resolver_match else None
+    current_url_name = resolver_match.url_name if resolver_match else None
 
     for app in dlcdb_apps:
         # print(f"{app}: name: {app.name}; verbose_name: {app.verbose_name}; label: {app.label}")
@@ -181,13 +182,22 @@ def nav(request):
             if has_permission or request.user.is_superuser:
                 url = nav_entry.get("url") or ""
                 url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
+                in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
+
+                # Most apps have exactly one nav entry per namespace, so any page
+                # in that namespace should highlight it. An app with more than one
+                # entry sharing a namespace (e.g. assets: "Devices" vs "Move") must
+                # list its own url_names in "active_url_names" to disambiguate.
+                active_url_names = nav_entry.get("active_url_names")
+                is_active = in_namespace and (active_url_names is None or current_url_name in active_url_names)
+
                 nav_item = {
                     "label": nav_entry.get("label"),
                     "icon": nav_entry.get("icon"),
                     "url": nav_entry.get("url"),
                     "slot": nav_entry.get("slot"),
                     "order": nav_entry.get("order"),
-                    "active": bool(current_app_namespace) and url_namespace == current_app_namespace,
+                    "active": is_active,
                 }
                 nav_items.append(nav_item)
 

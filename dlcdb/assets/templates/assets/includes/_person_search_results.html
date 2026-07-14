@@ -1,0 +1,19 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% if people %}
+  <div class="bg-body border rounded shadow-sm overflow-auto p-1" style="max-height: 22rem;">
+    {% for person in people %}
+      {% include "assets/includes/_person_list_item.html" with person=person selectable=True %}
+    {% endfor %}
+  </div>
+{% elif query %}
+  <div class="bg-body border rounded shadow-sm p-3 text-muted small">
+    <i>{% translate "No matching person found." %}</i>
+  </div>
+{% endif %}

@@ -2,36 +2,39 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import datetime
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.http import urlencode
 from django.views.decorators.http import require_POST
 
-from dlcdb.core.models import Device, Record, Room
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.models import Device, Person
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.pagination import paginate
 
-from . import move
-from .filters import DeviceFilter
-from .forms import DeviceForm, RelocateForm
-from .pickers import move_queryset
+from ..filters import DeviceFilter
+from ..forms import DeviceForm
 
-# Permission required to create the InRoomRecord that a relocation produces.
-RELOCATE_PERM = "core.add_inroomrecord"
+# Rows this many per page. The old changelist rendered up to 5000 rows at once;
+# paging keeps the HTMX payload and template render small (the SQL was never the
+# problem — see _device_queryset).
+DEVICES_PER_PAGE = 25
 
-# Distinct search-input name so the room picker can share the relocate <form>
-# with the device picker without HTMX mixing their query terms.
-ROOM_SEARCH_PARAM = "q_room"
-
-# Cap the room picker's "*" / live-search result list so the dropdown stays
-# usable. (The device picker is intentionally uncapped: it relevance-ranks; see
-# dlcdb.core.utils.device_search.)
-SEARCH_RESULT_LIMIT = 25
+# Distinct search-input name so the person picker cannot collide with the device
+# form's own fields, and a cap so the "*" / live-search dropdown stays usable.
+PERSON_SEARCH_PARAM = "q_person"
+PERSON_SEARCH_LIMIT = 25
 
 
 def _device_queryset(request):
@@ -61,17 +64,27 @@ def device_index(request):
     data.setdefault("ordering", "-modified")
     device_filter = DeviceFilter(data, queryset=base_queryset, request=request)
 
+    page_obj = paginate(request, device_filter.qs, DEVICES_PER_PAGE)
+
     context = {
         "filter": device_filter,
+        "page_obj": page_obj,
         "filterbar": build_filterbar(
             device_filter,
             request,
             target="#device-list",
             search_placeholder=_("Search IT ID, serial number, model..."),
+            secondary_fields={"is_imported", "duplicate", "active_record__inventory"},
         ),
         "current_ordering": data["ordering"],
-        "device_filtered_count": device_filter.qs.count(),
+        # paginator.count runs the filtered COUNT once; reuse it here instead of
+        # a second device_filter.qs.count().
+        "device_filtered_count": page_obj.paginator.count,
         "device_total_count": base_queryset.count(),
+        # The Modified column shows relative time ("2 hours ago") only for recent
+        # edits; anything older than this cutoff falls back to an absolute date.
+        # Mirrors dlcdb.lending.views.index.
+        "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
     }
     return TemplateResponse(request, template, context)
 
@@ -107,10 +120,19 @@ def device_detail(request, pk):
     device = _get_device(request, pk)
     can_change = request.user.has_perm("core.change_device")
 
+    # The index threads its active search/filter/sort here as ?next= so Save,
+    # Back and Cancel return to the exact filtered list. Read from GET so it
+    # survives both the render and the POST (form_action carries it forward).
+    next_query = request.GET.get("next", "")
+    index_url = reverse("assets:device_index")
+    if next_query:
+        index_url = f"{index_url}?{next_query}"
+    form_action = reverse("assets:device_detail", args=[device.pk])
+    if next_query:
+        form_action += "?" + urlencode({"next": next_query})
+
     if request.method == "POST":
         if not can_change:
-            from django.core.exceptions import PermissionDenied
-
             raise PermissionDenied
         form = DeviceForm(request.POST, instance=device, request=request)
         if form.is_valid():
@@ -120,87 +142,48 @@ def device_detail(request, pk):
             saved_device.user, saved_device.username = get_denormalized_user(request.user)
             saved_device.save()
             messages.success(request, _("Device “%(device)s” was updated.") % {"device": saved_device})
-            return redirect("assets:device_detail", pk=saved_device.pk)
+            return redirect(index_url)
     else:
         form = DeviceForm(instance=device, request=request)
 
     return TemplateResponse(
         request,
         "assets/devices/detail.html",
-        {"device": device, "form": form, "can_change": can_change},
+        {
+            "device": device,
+            "form": form,
+            "can_change": can_change,
+            "index_url": index_url,
+            "form_action": form_action,
+            # Shared state-machine data (same builder the admin uses); the
+            # "assets" surface swaps in native frontend URLs for Move/Lend.
+            "state_data": device.get_state_data(user=request.user, app_name="assets"),
+        },
     )
 
 
 @require_POST
 @htmx_login_required
-@htmx_permission_required(RELOCATE_PERM)
-def room_search(request):
-    """HTMX live-search backing the room picker. Empty query yields nothing."""
-    value = (request.POST.get(ROOM_SEARCH_PARAM) or "").strip()
-    rooms = Room.objects.filter(deleted_at__isnull=True)
+@htmx_permission_required("core.change_device")
+def person_search(request):
+    """
+    HTMX live-search backing the contact-person picker on the device form. An
+    empty query returns nothing (so the picker starts blank); "*" lists everyone
+    (capped). Mirrors ``relocate.room_search``.
+    """
+    value = (request.POST.get(PERSON_SEARCH_PARAM) or "").strip()
+    people = Person.objects.all()
 
     if not value:
-        rooms = rooms.none()
+        people = people.none()
     elif value != "*":
-        rooms = rooms.filter(Q(number__icontains=value) | Q(nickname__icontains=value))
+        people = people.filter(
+            Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value)
+        )
 
-    rooms = rooms.order_by("number")[:SEARCH_RESULT_LIMIT]
+    people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(
         request,
-        "assets/includes/_room_search_results.html",
-        {"rooms": rooms, "query": value},
+        "assets/includes/_person_search_results.html",
+        {"people": people, "query": value},
     )
-
-
-@login_required
-def relocate(request):
-    """
-    Move one or more devices to a new room: pick the devices, pick a single
-    target room, press "Move". Each device is relocated via the shared
-    ``relocate_device`` state machine (mirroring the admin bulk action), which
-    emits a per-device result message. Frontend replacement for the admin
-    ``relocate`` action.
-    """
-    selected_devices = []
-    selected_room = None
-
-    # Scope the device field to the moveable, tenant-visible set so a user cannot
-    # relocate another tenant's device — or an ORDERED/REMOVED one — by POSTing
-    # its pk. Built once and reused for both the form and the re-render lookup.
-    moveable_devices = move_queryset(request)
-
-    if request.method == "POST":
-        if not request.user.has_perm(RELOCATE_PERM):
-            messages.error(request, _("You do not have permission to move devices."))
-            return redirect("assets:relocate")
-
-        form = RelocateForm(request.POST, device_queryset=moveable_devices, request=request)
-        if form.is_valid():
-            new_room = form.cleaned_data["new_room"]
-            for device in form.cleaned_data["devices"]:
-                result = move.relocate_device(device=device, new_room=new_room, user=request.user)
-                messages.add_message(request, result.level, result.message)
-            return redirect("assets:relocate")
-
-        # Validation failed: keep the picked cards visible (they otherwise live
-        # only in the submitted hidden fields). Resolve only well-formed ids so a
-        # blank/garbage hidden field does not raise.
-        device_ids = [pk for pk in request.POST.getlist("devices") if pk.isdigit()]
-        room_id = request.POST.get("new_room") or ""
-        if device_ids:
-            selected_devices = list(moveable_devices.filter(pk__in=device_ids))
-        if room_id.isdigit():
-            selected_room = Room.objects.filter(pk=room_id).first()
-    else:
-        form = RelocateForm(device_queryset=moveable_devices, request=request)
-
-    context = {
-        "title": _("Move devices"),
-        "form": form,
-        "selected_devices": selected_devices,
-        "selected_room": selected_room,
-        "selected_any_lent": any(
-            getattr(d.active_record, "record_type", None) == Record.LENT for d in selected_devices
-        ),
-    }
-    return TemplateResponse(request, "assets/relocate.html", context)

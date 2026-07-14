@@ -53,6 +53,12 @@ class DeviceForm(forms.ModelForm):
     operator input.
     """
 
+    # FK selects over small reference tables that benefit from type-to-filter.
+    # `is-tom-select` is enhanced client-side by theme.js (same mechanism the
+    # licenses app uses). The large Person relation is handled separately by the
+    # HTMX live-search picker (see contact_person_internal below).
+    SEARCHABLE_SELECT_FIELDS = {"manufacturer", "device_type", "supplier"}
+
     class Meta:
         model = Device
         fields = [
@@ -90,6 +96,10 @@ class DeviceForm(forms.ModelForm):
             "contract_termination_date": forms.DateInput(attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 3}),
             "procurement_note": forms.Textarea(attrs={"rows": 3}),
+            # Rendered as a hidden field driven by the live-search person picker
+            # (theme/includes/_picker.html); a full <select> of every Person is
+            # what made the detail page slow. Mirrors the admin autocomplete.
+            "contact_person_internal": forms.HiddenInput(),
             "extra_mac_addresses": forms.Textarea(attrs={"rows": 2}),
             "machine_encryption_key": forms.Textarea(attrs={"rows": 3}),
             "backup_encryption_key": forms.Textarea(attrs={"rows": 3}),
@@ -107,13 +117,39 @@ class DeviceForm(forms.ModelForm):
             # this field and receive their request tenant on save.
             self.fields["tenant"].required = False
 
-        for field in self.fields.values():
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.HiddenInput):
+                continue  # picker-driven fields carry no Bootstrap control styling
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs["class"] = "form-check-input"
             elif isinstance(field.widget, forms.Select):
-                field.widget.attrs["class"] = "form-select"
+                css = "form-select"
+                if name in self.SEARCHABLE_SELECT_FIELDS:
+                    css += " is-tom-select"  # searchable dropdown, enhanced by theme.js
+                    # Give Tom Select a real placeholder. Without this it falls back
+                    # to the empty option's "---------" label, which reads as content
+                    # rather than a greyed hint; data-placeholder takes precedence
+                    # (Tom Select getSettings) so the "---------" never surfaces.
+                    field.widget.attrs["data-placeholder"] = _("Type to search…")
+                    # Single selects read better with a single "clear all" button
+                    # than a per-tag remove button (theme.js reads this opt-in).
+                    field.widget.attrs["data-clear-button"] = "true"
+                field.widget.attrs["class"] = css
             else:
                 field.widget.attrs["class"] = "form-control"
+
+        # Bootstrap 5 server-side validation styling: a bound field that failed
+        # validation gets `.is-invalid`, so the control renders in the invalid
+        # state (red border + icon). The messages themselves are emitted as
+        # `.invalid-feedback` next to each control in the template.
+        # https://getbootstrap.com/docs/5.3/forms/validation/
+        if self.is_bound:
+            for name in self.errors:
+                field = self.fields.get(name)
+                if field is None or isinstance(field.widget, forms.HiddenInput):
+                    continue  # non-field ("__all__") or picker-driven field
+                css = field.widget.attrs.get("class", "")
+                field.widget.attrs["class"] = f"{css} is-invalid".strip()
 
     def clean_is_lentable(self):
         is_lentable = self.cleaned_data["is_lentable"]

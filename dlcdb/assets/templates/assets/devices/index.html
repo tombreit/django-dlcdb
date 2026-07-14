@@ -1,5 +1,5 @@
 {% extends "theme/_base.html" %}
-{% load i18n %}
+{% load i18n humanize %}
 
 {% block title %}{% translate "Devices" %}{% endblock title %}
 
@@ -30,30 +30,38 @@
       </div>
 
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle mb-0">
           <thead>
             <tr>
               {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="it_id" desc="-it_id" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Type") asc="type" desc="-type" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("State / location") asc="state" desc="-state" th_class="d-none d-lg-table-cell" %}
-              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell" %}
-              <th class="text-end">{% translate "Actions" %}</th>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
+              {% if request.user.is_superuser %}
+                {% include "theme/filterbar/_sort_th.html" with label=_("Tenant") asc="tenant" desc="-tenant" th_class="d-none d-xl-table-cell" %}
+              {% endif %}
             </tr>
           </thead>
           <tbody>
-            {% for device in filter.qs %}
+            {% for device in page_obj %}
               <tr>
-                <td>
+                <td class="position-relative">
                   <div class="fw-semibold">
                     <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
-                    {{ device.edv_id|default:device.sap_id|default:"—" }}
+                    <a href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                       class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
+                      {{ device.edv_id|default:device.sap_id|default:"—" }}
+                    </a>
                   </div>
-                  <div>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
+                  {% if device.manufacturer or device.series %}
+                    <div>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
+                  {% endif %}
                   <div class="small text-muted">
-                    {% if device.edv_id and device.sap_id %}{% translate "Inventory ID" %}: {{ device.sap_id }} · {% endif %}
-                    {% if device.serial_number %}{% translate "Serial" %}: {{ device.serial_number }}{% endif %}
+                    {% if device.edv_id and device.sap_id %}{% translate "Inventory ID" %}: <span class="font-monospace">{{ device.sap_id }}</span>{% endif %}
+                    {% if device.edv_id and device.sap_id and device.serial_number %} · {% endif %}
+                    {% if device.serial_number %}{% translate "Serial" %}: <span class="font-monospace">{{ device.serial_number }}</span>{% endif %}
                   </div>
-                  <div class="d-md-none mt-1">
+                  <div class="d-lg-none mt-1">
                     {% include "assets/devices/includes/_state.html" with device=device %}
                   </div>
                 </td>
@@ -66,21 +74,27 @@
                 <td class="d-none d-lg-table-cell">
                   {% include "assets/devices/includes/_state.html" with device=device %}
                 </td>
-                <td class="d-none d-lg-table-cell text-nowrap">{{ device.modified_at|date:"Y-m-d" }}</td>
-                <td class="text-end text-nowrap">
-                  <a href="{% url 'assets:device_detail' device.pk %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-pencil"></i><span class="visually-hidden"> {% translate "Open device" %}</span>
-                  </a>
+                <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">
+                  {% if device.modified_at >= recent_cutoff %}{{ device.modified_at|naturaltime }}{% else %}{{ device.modified_at|date:"Y-m-d" }}{% endif %}
                 </td>
+                {% if request.user.is_superuser %}
+                  <td class="d-none d-xl-table-cell text-muted">{{ device.tenant|default:"—" }}</td>
+                {% endif %}
               </tr>
             {% empty %}
               <tr>
-                <td colspan="5" class="text-center text-muted"><i>{% translate "No devices found." %}</i></td>
+                <td colspan="{% if request.user.is_superuser %}5{% else %}4{% endif %}" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No devices match these filters." %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
     </div>
   {% endpartialdef %}
 {% endblock body %}

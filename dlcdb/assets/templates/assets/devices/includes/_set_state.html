@@ -1,0 +1,37 @@
+{% comment %}
+"Set state" dropdown for the device sidebar. Consumes the SAME DeviceStateData
+that the admin uses (built by core.utils.device_methods.get_device_state_data),
+just with the "assets" surface so Move/Lend point at the native frontend flows.
+
+Each action carries an `external` flag: True means it opens a Django admin
+add-view (needs is_staff), so those items are staff-gated and marked with an
+out-link icon — matching the "Trail" card convention. Native actions (Move,
+Lend) are already permission-filtered in the builder, so they render for anyone
+who got them.
+{% endcomment %}
+{% load i18n %}
+{% if state_data.actions %}
+  <div class="btn-group mt-3 w-100" role="group">
+    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-plus-lg"></i> {% translate "New state" %}
+    </button>
+    <ul class="dropdown-menu w-100">
+      {% for action in state_data.actions %}
+        {% if action.external %}
+          {% if request.user.is_staff %}
+            <li>
+              <a class="dropdown-item d-flex align-items-center gap-2" href="{{ action.url }}">
+                <span class="me-auto">{{ action.label|title }}</span>
+                <i class="bi bi-box-arrow-up-right small text-muted"></i>
+              </a>
+            </li>
+          {% endif %}
+        {% else %}
+          <li>
+            <a class="dropdown-item" href="{{ action.url }}">{{ action.label|title }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

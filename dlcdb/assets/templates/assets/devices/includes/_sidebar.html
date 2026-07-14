@@ -1,0 +1,137 @@
+{% comment %}
+Read-only companion to the device form. Surfaces the current state, the QR
+code and the audit/import metadata that the admin keeps in its "Informal"
+fieldset (created/modified/by whom, uuid, import origin, legacy, soft-delete).
+These are model facts, never operator input, so they render as plain values
+and mirror the admin's read-only status.
+{% endcomment %}
+{% load i18n humanize %}
+
+<div class="device-sidebar">
+  {% comment %}
+  Record trail + field history. These point at the existing Django admin views
+  (a device's chronological record list, and simple-history's field diff), so
+  they only appear for staff who can actually open the admin.
+  {% endcomment %}
+
+  <section class="card device-card mb-3">
+    <div class="card-header">
+      <i class="bi bi-activity"></i>
+      <h2 class="device-card-title">{% translate "Current state" %}</h2>
+    </div>
+    <div class="card-body">
+      {% include "assets/devices/includes/_state.html" with device=device %}
+      {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
+    </div>
+  </section>
+
+  {% if request.user.is_staff %}
+    <section class="card device-card mb-3">
+      <div class="card-header">
+        <i class="bi bi-clock-history"></i>
+        <h2 class="device-card-title">{% translate "Trail" %}</h2>
+      </div>
+      <div class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+           href="{% url 'admin:core_record_changelist' %}?device__id__exact={{ device.pk }}">
+          <i class="bi bi-list-ul text-primary"></i>
+          <span class="me-auto">{% translate "All records" %}</span>
+          <i class="bi bi-box-arrow-up-right small text-muted"></i>
+        </a>
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+           href="{% url 'admin:core_device_history' device.pk %}">
+          <i class="bi bi-arrow-counterclockwise text-primary"></i>
+          <span class="me-auto">{% translate "Field history" %}</span>
+          <i class="bi bi-box-arrow-up-right small text-muted"></i>
+        </a>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="card device-card mb-3">
+    <div class="card-header">
+      <i class="bi bi-info-circle"></i>
+      <h2 class="device-card-title">{% translate "Device details" %}</h2>
+    </div>
+    <div class="card-body">
+      <dl class="device-meta">
+        <div>
+          <dt>{% translate "Admin view" %}</dt>
+          <dd>
+            <a href="{% url 'admin:core_device_change' device.pk %}">
+              {% translate "Open in admin" %}
+              <i class="bi bi-box-arrow-up-right small text-muted"></i>
+            </a>
+          </dd>
+        </div>
+        <div>
+          <dt>{% translate "Created" %}</dt>
+          <dd>
+            {{ device.created_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}
+            {% if device.user or device.username %}
+              <span class="text-muted">· {{ device.user|default:device.username }}</span>
+            {% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>{% translate "Last modified" %}</dt>
+          <dd>
+            {% if device.modified_at %}
+              <span title="{{ device.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ device.modified_at|naturaltime }}</span>
+            {% else %}—{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>{% translate "Origin" %}</dt>
+          <dd>
+            {% if device.is_imported %}
+              <span class="badge text-bg-info">{% translate "CSV import" %}</span>
+              {% if device.imported_by %}<span class="text-muted">{{ device.imported_by }}</span>{% endif %}
+            {% else %}
+              <span class="badge text-bg-light border">{% translate "Manual entry" %}</span>
+            {% endif %}
+            {% if device.is_legacy %}<span class="badge text-bg-secondary">{% translate "Legacy" %}</span>{% endif %}
+          </dd>
+        </div>
+        <div>
+          <dt>{% translate "UUID" %}</dt>
+          <dd class="font-monospace small">{{ device.uuid }}</dd>
+        </div>
+        {% if device.deleted_at %}
+          <div>
+            <dt class="text-danger">{% translate "Deleted" %}</dt>
+            <dd>
+              {{ device.deleted_at|date:"SHORT_DATETIME_FORMAT" }}
+              {% if device.deleted_by %}<span class="text-muted">· {{ device.deleted_by }}</span>{% endif %}
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+    </div>
+  </section>
+
+  {% if device.qrcode %}
+    <section class="card device-card mb-3 device-qr">
+      <div class="card-header">
+        <h2 class="device-card-title mb-0">
+          <button
+            type="button"
+            class="btn btn-link p-0 text-decoration-none"
+            data-bs-toggle="collapse"
+            data-bs-target="#deviceQrCode"
+            aria-controls="deviceQrCode"
+            aria-expanded="false"
+          >
+            <i class="bi bi-qr-code"></i>
+            {% translate "QR code" %}
+          </button>
+        </h2>
+      </div>
+      <div class="collapse" id="deviceQrCode">
+        <div class="card-body text-center">
+          <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
+        </div>
+      </div>
+    </section>
+  {% endif %}
+</div>

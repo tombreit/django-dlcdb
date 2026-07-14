@@ -133,3 +133,35 @@ class BuildFilterbarTests(TestCase):
     def test_no_ordering_selected_without_param(self):
         bar = self._bar("?state=open")
         self.assertIsNone(bar.current_sort)
+
+    def test_default_secondary_fields_is_empty_and_unchanged_behavior(self):
+        bar = self._bar()
+        self.assertEqual(bar.secondary_specs, [])
+        self.assertFalse(bar.secondary_active)
+
+    def test_secondary_fields_are_routed_out_of_specs(self):
+        request = RequestFactory().get("/items/")
+        filterset = SampleFilter(request.GET, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list", secondary_fields={"tags"})
+
+        self.assertEqual([spec.param for spec in bar.specs], ["state", "person"])
+        self.assertEqual([spec.param for spec in bar.secondary_specs], ["tags"])
+
+    def test_secondary_active_true_only_when_a_secondary_filter_is_selected(self):
+        request = RequestFactory().get("/items/?state=open")
+        filterset = SampleFilter(request.GET, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list", secondary_fields={"tags"})
+        self.assertFalse(bar.secondary_active)
+
+        request = RequestFactory().get("/items/?tags=a")
+        filterset = SampleFilter(request.GET, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list", secondary_fields={"tags"})
+        self.assertTrue(bar.secondary_active)
+
+    def test_secondary_filter_value_still_produces_a_chip(self):
+        request = RequestFactory().get("/items/?tags=a")
+        filterset = SampleFilter(request.GET, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list", secondary_fields={"tags"})
+
+        self.assertEqual(len(bar.chips), 1)
+        self.assertEqual(bar.chips[0].param, "tags")
