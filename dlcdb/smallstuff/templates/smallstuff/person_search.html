@@ -3,12 +3,10 @@
 {% load i18n %}
 
 {% block title %}
-Kleinkram
+    {% translate "Smallstuff" %}
 {% endblock title %}
 
-
 {% block body %}
-
 <div class="d-flex align-items-center mb-3">
     <h1 class="mb-0">{% translate "Smallstuff Person Search" %}</h1>
     <span class="htmx-indicator ms-3">
@@ -29,7 +27,6 @@ Kleinkram
         </span>
         {# <button class="btn btn-success" type="search">Search</button> #}
         <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
-
     </div>
 </form>
 
@@ -68,5 +65,4 @@ Kleinkram
 
     });
 </script>
-
 {% endblock body %}
