@@ -86,7 +86,7 @@ def index(request):
     tenant = request.tenant
 
     tile_specs = [
-        ("core.device", "admin:core_device_changelist"),
+        ("core.device", "assets:device_index"),
         ("core.lentrecord", "lending:index"),
         ("core.room", "admin:core_room_changelist"),
         ("core.devicetype", "admin:core_devicetype_changelist"),
