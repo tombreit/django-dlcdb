@@ -7,6 +7,14 @@ from django.utils.translation import gettext_lazy as _
 
 nav_entries = [
     {
+        "slot": "nav_main",
+        "order": 5,
+        "label": _("Lending"),
+        "icon": "bi bi-arrow-left-right",
+        "url": "lending:index",
+        "required_permission": "view_lentrecord",
+    },
+    {
         "slot": "nav_settings",
         "order": 20,
         "label": _("Lending configuration"),

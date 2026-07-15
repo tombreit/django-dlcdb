@@ -6,14 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 nav_entries = [
-    {
-        "slot": "nav_main",
-        "order": 10,
-        "label": _("Lending"),
-        "icon": "bi bi-arrow-left-right",
-        "url": "lending:index",
-        "required_permission": "view_lentrecord",
-    },
     # {
     #     "slot": "nav_main",
     #     "order": 20,
@@ -22,22 +14,45 @@ nav_entries = [
     #     "url": "admin:core_device_changelist",
     #     "required_permission": "view_device",
     # },
-    # This slot is set in the app licenses.navigation module
     # {
-    #     "slot": "nav_main",
-    #     "order": 40,
-    #     "label": _("Licenses"),
-    #     "icon": "bi bi-bank2",
-    #     "url": "licenses:index",
-    #     "required_permission": "view_licencerecord",
+    #     "slot": "nav_processes",
+    #     "order": 10,
+    #     "label": _("Procurement"),
+    #     "icon": "",
+    #     "url": "admin:core_orderedrecord_changelist",
+    #     "required_permission": "view_orderedrecord",
     # },
     {
-        "slot": "nav_processes",
+        "slot": "nav_settings",
         "order": 10,
-        "label": _("Procurement"),
-        "icon": "",
-        "url": "admin:core_orderedrecord_changelist",
-        "required_permission": "view_orderedrecord",
+        "label": _("Rooms"),
+        "icon": "bi bi-door-open",
+        "url": "admin:core_room_changelist",
+        "required_permission": "view_room",
+    },
+    {
+        "slot": "nav_settings",
+        "order": 11,
+        "label": _("Manufacturer"),
+        "icon": "bi bi-building",
+        "url": "admin:core_manufacturer_changelist",
+        "required_permission": "view_manufacturer",
+    },
+    {
+        "slot": "nav_settings",
+        "order": 12,
+        "label": _("Distributor"),
+        "icon": "bi bi-truck",
+        "url": "admin:core_supplier_changelist",
+        "required_permission": "view_supplier",
+    },
+    {
+        "slot": "nav_settings",
+        "order": 13,
+        "label": _("Device types"),
+        "icon": "bi bi-palette",
+        "url": "admin:core_devicetype_changelist",
+        "required_permission": "view_devicetype",
     },
     {
         "slot": "nav_masterdata",
