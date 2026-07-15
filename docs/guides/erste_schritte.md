@@ -31,6 +31,53 @@
 Wenn für Ihre DLCDB die Anmeldung via LDAP konfiguriert ist, werden bestimmte LDAP-Gruppen in das DLCDB-Gruppenverzeichnis gespiegelt. Die Rechtezuweisung erfolgt dann über diese Gruppen. User/Benutzer werden bei erfolgreicher Anmeldung via LDAP automatisch in *Start › Accounts › Benutzer* angelegt.
 :::
 
+## Navigation über Berechtigungen steuern
+
+Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt erscheint für einen Benutzer nur dann, wenn dessen Gruppe die passende *view*-Berechtigung (bzw. die in der Tabelle genannte Berechtigung) des zugrundeliegenden Models besitzt. Wer einem Benutzer einen bestimmten Menüpunkt geben möchte, weist der Gruppe des Benutzers die entsprechende Berechtigung zu (*Start › Authentifizierung und Autorisierung › Gruppen*).
+
+:::{warning}
+**Superuser sehen alle Menüpunkte** – unabhängig von den zugewiesenen Berechtigungen. Um zu prüfen, ob ein Menüpunkt tatsächlich durch eine Berechtigung sichtbar wird, verwenden Sie einen **Nicht-Superuser** (sonst erscheint der Menüpunkt auch ohne die Berechtigung).
+:::
+
+:::{admonition} **Berechtigung unter *DLCDB Core* finden**
+:class: note
+
+Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt die Berechtigung **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
+:::
+
+<!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
+     dlcdb/*/navigation.py-Dateien wider. Bei Änderungen an den Menüs
+     (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen. -->
+
+| Menüpunkt (Bereich) | Berechtigung (Django-Admin-Anzeige) | codename |
+|---|---|---|
+| Ausleihe (Hauptmenü) | Core \| lent record \| Can view lent record | `core.view_lentrecord` |
+| Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
+| Umziehen (Hauptmenü) | Core \| in room record \| Can add in room record | `core.add_inroomrecord` |
+| Inventarisieren (Hauptmenü) | Core \| … \| Can inventorize | `core.can_inventorize` |
+| Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
+| Lizenzen (Hauptmenü) | *nur Anmeldung erforderlich* | — |
+| Datenhaltung › Räume | Core \| room \| Can view room | `core.view_room` |
+| Datenhaltung › Hersteller | Core \| manufacturer \| Can view manufacturer | `core.view_manufacturer` |
+| Datenhaltung › Zulieferer | Core \| supplier \| Can view supplier | `core.view_supplier` |
+| Datenhaltung › Geräteklassen | Core \| device type \| Can view device type | `core.view_devicetype` |
+| Datenhaltung › Personen | Core \| person \| Can view person | `core.view_person` |
+| Datenhaltung › Records / Entfernt-Records | Core \| record \| Can view record | `core.view_record` |
+| Datenhaltung › Inventuren | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Datenhaltung › Notizen | Core \| note \| Can view note | `core.view_note` |
+| Prozesse › Bulk Import | Dataexchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
+| Prozesse › Bulk Ausmusterung | Dataexchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
+| Prozesse › SAP-Abgleich | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
+| Einstellungen › Ausleih-Profile | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
+| Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
+| Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
+| Einstellungen › UDB Sync Konfiguration | Dataexchange \| udb sync configuration \| Can view udb sync configuration | `dataexchange.view_udbsyncconfiguration` |
+
+:::{tip}
+Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **gespiegelten Gruppen** zu (siehe LDAP-Hinweis oben unter „Benutzer, Gruppen und Tenants einrichten“). Manuell in der DLCDB angelegte Gruppenzugehörigkeiten können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.
+:::
+
 ## Branding
 
 Branding-Einstellungen wie z.B. Logo und Organisationsname sind via *Start › Organization › Branding* vorzunehmen.
