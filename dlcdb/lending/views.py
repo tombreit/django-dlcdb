@@ -6,7 +6,7 @@ import datetime
 from urllib.parse import urlencode
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import BooleanField, Case, CharField, Count, IntegerField, Q, Value, When
@@ -89,6 +89,7 @@ def _annotate_lent_state(queryset):
 
 
 @login_required
+@permission_required("core.view_lentrecord", raise_exception=True)
 def index(request):
     """
     Overview of lendable devices: what is currently lent to whom and what is

@@ -12,7 +12,7 @@ nav_entries = [
         "label": _("Lending"),
         "icon": "bi bi-arrow-left-right",
         "url": "lending:index",
-        "required_permission": "view_lentrecord",
+        "required_permission": "core.view_lentrecord",
     },
     {
         "slot": "nav_settings",
@@ -20,7 +20,7 @@ nav_entries = [
         "label": _("Lending configuration"),
         "icon": "bi bi-arrow-left-right",
         "url": "admin:lending_lendingconfiguration_changelist",
-        "required_permission": "view_lendingconfiguration",
+        "required_permission": "lending.view_lendingconfiguration",
     },
     {
         "slot": "nav_settings",
@@ -28,7 +28,7 @@ nav_entries = [
         "label": _("Lending profiles"),
         "icon": "bi bi-card-checklist",
         "url": "admin:lending_lendingprofile_changelist",
-        "required_permission": "view_lendingprofile",
+        "required_permission": "lending.view_lendingprofile",
     },
 ]
 

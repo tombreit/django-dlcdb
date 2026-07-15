@@ -12,7 +12,7 @@ nav_entries = [
         "label": _("Smallstuff"),
         "icon": "bi bi-handbag",
         "url": "smallstuff:person_search",
-        "required_permission": "view_assignedthing",
+        "required_permission": "smallstuff.view_assignedthing",
     },
 ]
 

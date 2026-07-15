@@ -12,7 +12,7 @@ nav_entries = [
         "label": _("Bulk import"),
         "icon": "",
         "url": "admin:dataexchange_importerlist_changelist",
-        "required_permission": "view_importerlist",
+        "required_permission": "dataexchange.view_importerlist",
     },
     {
         "slot": "nav_processes",
@@ -20,7 +20,7 @@ nav_entries = [
         "label": _("Bulk decommissioning"),
         "icon": "",
         "url": "admin:dataexchange_removerlist_changelist",
-        "required_permission": "view_removerlist",
+        "required_permission": "dataexchange.view_removerlist",
     },
     {
         "slot": "nav_settings",
@@ -28,6 +28,6 @@ nav_entries = [
         "label": _("UDB sync configuration"),
         "icon": "bi bi-arrow-clockwise",
         "url": "admin:dataexchange_udbsyncconfiguration_changelist",
-        "required_permission": "view_udbsyncconfiguration",
+        "required_permission": "dataexchange.view_udbsyncconfiguration",
     },
 ]

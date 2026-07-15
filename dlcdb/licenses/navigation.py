@@ -20,7 +20,7 @@ nav_entries = [
         "label": _("Licenses configuration"),
         "icon": "bi bi-bank2",
         "url": "admin:licenses_licensesconfiguration_changelist",
-        "required_permission": "view_licensesconfiguration",
+        "required_permission": "licenses.view_licensesconfiguration",
     },
 ]
 

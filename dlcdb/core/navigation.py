@@ -12,7 +12,7 @@ nav_entries = [
     #     "label": _("Devices"),
     #     "icon": "bi bi-upc",
     #     "url": "admin:core_device_changelist",
-    #     "required_permission": "view_device",
+    #     "required_permission": "core.view_device",
     # },
     # {
     #     "slot": "nav_processes",
@@ -20,7 +20,7 @@ nav_entries = [
     #     "label": _("Procurement"),
     #     "icon": "",
     #     "url": "admin:core_orderedrecord_changelist",
-    #     "required_permission": "view_orderedrecord",
+    #     "required_permission": "core.view_orderedrecord",
     # },
     {
         "slot": "nav_settings",
@@ -28,7 +28,7 @@ nav_entries = [
         "label": _("Rooms"),
         "icon": "bi bi-door-open",
         "url": "admin:core_room_changelist",
-        "required_permission": "view_room",
+        "required_permission": "core.view_room",
     },
     {
         "slot": "nav_settings",
@@ -36,7 +36,7 @@ nav_entries = [
         "label": _("Manufacturer"),
         "icon": "bi bi-building",
         "url": "admin:core_manufacturer_changelist",
-        "required_permission": "view_manufacturer",
+        "required_permission": "core.view_manufacturer",
     },
     {
         "slot": "nav_settings",
@@ -44,7 +44,7 @@ nav_entries = [
         "label": _("Distributor"),
         "icon": "bi bi-truck",
         "url": "admin:core_supplier_changelist",
-        "required_permission": "view_supplier",
+        "required_permission": "core.view_supplier",
     },
     {
         "slot": "nav_settings",
@@ -52,7 +52,7 @@ nav_entries = [
         "label": _("Device types"),
         "icon": "bi bi-palette",
         "url": "admin:core_devicetype_changelist",
-        "required_permission": "view_devicetype",
+        "required_permission": "core.view_devicetype",
     },
     {
         "slot": "nav_masterdata",
@@ -60,7 +60,7 @@ nav_entries = [
         "label": _("Rooms"),
         "icon": "bi bi-door-open",
         "url": "admin:core_room_changelist",
-        "required_permission": "view_room",
+        "required_permission": "core.view_room",
     },
     {
         "slot": "nav_masterdata",
@@ -68,7 +68,7 @@ nav_entries = [
         "label": _("Manufacturer"),
         "icon": "bi bi-building",
         "url": "admin:core_manufacturer_changelist",
-        "required_permission": "view_manufacturer",
+        "required_permission": "core.view_manufacturer",
     },
     {
         "slot": "nav_masterdata",
@@ -76,7 +76,7 @@ nav_entries = [
         "label": _("Distributor"),
         "icon": "bi bi-truck",
         "url": "admin:core_supplier_changelist",
-        "required_permission": "view_supplier",
+        "required_permission": "core.view_supplier",
     },
     {
         "slot": "nav_masterdata",
@@ -84,7 +84,7 @@ nav_entries = [
         "label": _("Device types"),
         "icon": "bi bi-palette",
         "url": "admin:core_devicetype_changelist",
-        "required_permission": "view_devicetype",
+        "required_permission": "core.view_devicetype",
     },
     {
         "slot": "nav_masterdata",
@@ -92,7 +92,7 @@ nav_entries = [
         "label": _("People"),
         "icon": "bi bi-people",
         "url": "admin:core_person_changelist",
-        "required_permission": "view_person",
+        "required_permission": "core.view_person",
     },
     {
         "slot": "nav_masterdata",
@@ -100,7 +100,7 @@ nav_entries = [
         "label": _("Records"),
         "icon": "bi bi-stack",
         "url": "admin:core_record_changelist",
-        "required_permission": "view_record",
+        "required_permission": "core.view_record",
     },
     {
         "slot": "nav_masterdata",
@@ -108,7 +108,7 @@ nav_entries = [
         "label": _("Removed records"),
         "icon": "bi bi-stack",
         "url": "admin:core_removedrecord_changelist",
-        "required_permission": "view_record",
+        "required_permission": "core.view_record",
     },
     {
         "slot": "nav_masterdata",
@@ -116,7 +116,7 @@ nav_entries = [
         "label": _("Inventories"),
         "icon": "bi bi-eyeglasses",
         "url": "admin:core_inventory_changelist",
-        "required_permission": "change_inventory",
+        "required_permission": "core.change_inventory",
     },
     {
         "slot": "nav_masterdata",
@@ -124,6 +124,6 @@ nav_entries = [
         "label": _("Notes"),
         "icon": "bi bi-chat",
         "url": "admin:core_note_changelist",
-        "required_permission": "view_note",
+        "required_permission": "core.view_note",
     },
 ]

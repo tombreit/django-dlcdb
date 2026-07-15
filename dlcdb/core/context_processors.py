@@ -7,6 +7,7 @@ from importlib import import_module
 from dataclasses import dataclass
 from django.contrib import messages
 from django.apps import apps
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext as _
 from django.utils.html import format_html
 from django.urls import reverse
@@ -145,8 +146,8 @@ def nav(request):
             "Function _get_is_active to retrieve the active navigation entry is not implemented (yet)."
         )
 
-    def _get_has_permission(user, applabel, permission):
-        if not all([user, applabel, permission]):
+    def _get_has_permission(user, permission):
+        if not user or not permission:
             return False
 
         if permission == "true":
@@ -155,14 +156,15 @@ def nav(request):
             # views, e.g. licenses:index).
             return user.is_authenticated
 
-        if "." in permission:
-            # It seems the persmission is already in the format "app_label.permission_name"
-            requested_permission = permission
-        else:
-            requested_permission = f"{applabel}.{permission}"
+        if "." not in permission:
+            # One authoritative scheme: a nav entry's required_permission must be
+            # the Django-canonical "app_label.codename" (what user.has_perm expects).
+            # A bare codename is ambiguous — it silently meant a different permission
+            # depending on which app's navigation.py it lived in — so reject it loudly
+            # instead of guessing an app label.
+            raise ImproperlyConfigured(f"nav required_permission {permission!r} must be 'app_label.codename'")
 
-        user_permissions = user.get_all_permissions()
-        return requested_permission in user_permissions
+        return permission in user.get_all_permissions()
 
     # Namespace of the currently resolved view, used to mark the matching nav
     # entry as "active" (e.g. on /lending/* the "Lending" entry is highlighted).
@@ -181,9 +183,8 @@ def nav(request):
             # name: dlcdb.reporting; verbose_name: DLCDB Reporting; label: reporting
             # for a concrete permission string we need the app name without the project prefix
             # so 'app.label' seems to fit
-            app_label = app.label
             required_permission = nav_entry.get("required_permission")
-            has_permission = _get_has_permission(request.user, app_label, required_permission)
+            has_permission = _get_has_permission(request.user, required_permission)
 
             # Ugly hack to conditionally hide some nav_entries
             show_condition = nav_entry.get("show_condition")

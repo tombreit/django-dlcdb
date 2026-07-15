@@ -5,6 +5,7 @@
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
 
@@ -176,6 +177,18 @@ class LendingIndexViewTests(BaseTest):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
+
+    def test_permission_required(self):
+        # A logged-in user without core.view_lentrecord is denied (403), matching
+        # the nav gate that hides the "Lending" entry for the same user.
+        plain = get_user_model().objects.create_user(email="plain@example.com", password="secret", username="plain")
+        self.client.force_login(plain)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+        # Granting the permission opens the view.
+        plain.user_permissions.add(Permission.objects.get(content_type__app_label="core", codename="view_lentrecord"))
+        self.client.force_login(plain)  # refresh the cached permission set
+        self.assertEqual(self.client.get(self.url).status_code, 200)
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
