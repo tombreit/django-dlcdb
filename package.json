@@ -42,12 +42,11 @@
   "scripts": {
     "debug": "echo $npm_package_config_adminSrcDir",
     "build": "npm run build:core && npm run build:theme && npm run build:inventory && npm run docs:copy-mermaid",
-    "build:core": "npm run build:core:scss && npm run build:core:scss-print && npm run build:core:js && npm run build:core:copy-bootstrap-icons && npm run build:core:copy-plotlyjs",
+    "build:core": "npm run build:core:scss && npm run build:core:scss-print && npm run build:core:js && npm run build:core:copy-bootstrap-icons",
     "build:core:scss": "sass --load-path=node_modules --stop-on-error --style compressed --source-map --embed-sources $npm_package_config_adminSrcDir/scss:${npm_package_config_adminDistDir}/css",
     "build:core:scss-print": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_adminSrcDir/scss/print.scss:$npm_package_config_adminDistDir/css/print.css",
     "build:core:js": "esbuild $npm_package_config_adminSrcDir/js/admin-custom.js --bundle --sourcemap --outfile=$npm_package_config_adminDistDir/js/admin-custom.js",
     "build:core:copy-bootstrap-icons": "mkdir -p $npm_package_config_adminDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_adminDistDir/fonts/",
-    "build:core:copy-plotlyjs": "mkdir -p $npm_package_config_adminDistDir/vendor/plotlyjs && cp node_modules/plotly.js-basic-dist-min/plotly-basic.min.js $npm_package_config_adminDistDir/vendor/plotlyjs/",
     "build:inventory:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_inventorySrcDir/scss:$npm_package_config_inventoryDistDir",
     "build:inventory:js": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js",
     "build:inventory": "npm run build:inventory:scss && npm run build:inventory:js",
@@ -57,7 +56,8 @@
     "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_themeDistDir/js/theme.js",
     "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",
     "build:theme:fonts": "cp node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2 $npm_package_config_themeDistDir/fonts/",
-    "build:theme": "npm run build:theme:scss && npm run build:theme:js && npm run build:theme:bs-icons && npm run build:theme:fonts",
+    "build:theme:copy-plotlyjs": "mkdir -p $npm_package_config_themeDistDir/vendor/plotlyjs && cp node_modules/plotly.js-basic-dist-min/plotly-basic.min.js $npm_package_config_themeDistDir/vendor/plotlyjs/",
+    "build:theme": "npm run build:theme:scss && npm run build:theme:js && npm run build:theme:bs-icons && npm run build:theme:fonts && npm run build:theme:copy-plotlyjs",
     "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs node_modules/d3/dist/d3.min.js $npm_package_config_docsDistDir/mermaid/"
   },
   "repository": {
