@@ -1,3 +1,5 @@
 Event:  {{ subscription.get_event_display }}
 Device: {{ device }}
 URL:    {{ device.get_fqdn_url }}
+
+{% include "emails/email_footer.txt" %}

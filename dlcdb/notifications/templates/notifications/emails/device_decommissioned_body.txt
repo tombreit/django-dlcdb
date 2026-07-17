@@ -1,3 +1,5 @@
 Device {{ device }} has been decommissioned.
 
 URL: {{ device.get_fqdn_url }}
+
+{% include "emails/email_footer.txt" %}

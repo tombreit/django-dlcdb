@@ -16,6 +16,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from dlcdb.core.models import Device, DeviceType, Person
+from dlcdb.organization.models import Branding
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
 from dlcdb.notifications.services import create_license_subscriptions, delete_license_subscriptions
@@ -110,6 +111,22 @@ class MessageDeliveryTests(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("moved", mail.outbox[0].subject)
+
+    def test_email_body_contains_common_footer(self):
+        branding = Branding.load()
+        branding.organization_name_en = "Example Institute"
+        branding.organization_it_dept_email = "it@example.org"
+        branding.save()
+        subscription = self.create_due_subscription(Subscription.NotificationEventChoices.CONTRACT_EXPIRED)
+
+        message_id = queue_message.call_local(subscription.id)
+        send_message.call_local(message_id)
+
+        body = mail.outbox[0].body
+        self.assertIn("-- \n", body)
+        self.assertIn("Example Institute", body)
+        self.assertIn("it@example.org", body)
+        self.assertIn("DLCDB v", body)
 
     def test_future_subscription_is_not_due(self):
         subscription = Subscription.objects.create(

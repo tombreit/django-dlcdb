@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 
 from simple_history.models import HistoricalRecords
 
+from .email_footer import email_footer_context
 from .intervals import NotificationInterval, INTERVAL_DETAILS
 
 
@@ -306,6 +307,7 @@ class Message(models.Model):
             "subscription": subscription,
             "subscriber": subscription.subscriber,
             "device": subscription.device,
+            **email_footer_context(),
         }
 
         # Render the templates

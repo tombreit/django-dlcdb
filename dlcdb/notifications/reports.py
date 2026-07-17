@@ -22,6 +22,7 @@ from dlcdb.core.models import Record
 from dlcdb.reporting.services import create_report
 from dlcdb.reporting.utils.representations import get_records_as_text
 
+from .email_footer import email_footer_context
 from .intervals import NotificationInterval
 from .models import Message, Subscription
 
@@ -189,5 +190,6 @@ def _render_report_body(subscription, report_records, record_rows):
         "changelist_url": changelist_url,
         "window_start": report_records.window_start,
         "window_end": report_records.window_end,
+        **email_footer_context(),
     }
     return render_to_string("notifications/emails/report_body.txt", context)

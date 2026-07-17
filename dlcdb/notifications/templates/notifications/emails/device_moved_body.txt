@@ -1,1 +1,3 @@
 Device {{ device }} moved
+
+{% include "emails/email_footer.txt" %}

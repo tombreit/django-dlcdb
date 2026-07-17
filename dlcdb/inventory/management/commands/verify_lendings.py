@@ -15,6 +15,7 @@ from django.template.loader import get_template
 
 from dlcdb.core.models import Inventory, Person
 from dlcdb.inventory.utils import update_inventory_note
+from dlcdb.notifications.email_footer import email_footer_context
 import logging
 
 logger = logging.getLogger(__name__)
@@ -98,6 +99,7 @@ class Command(BaseCommand):
             "lender_email": person.get_email,
             "deadline": deadline,
             "contact_email": settings.DEFAULT_FROM_EMAIL,
+            **email_footer_context(),
         }
         subject = email_template_subject.render(email_context)
         body = email_template_body.render(email_context)

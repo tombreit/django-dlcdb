@@ -16,6 +16,7 @@ from django.utils import timezone
 
 from dlcdb.lending.models import LendingConfiguration
 
+from .email_footer import email_footer_context
 from .models import Message
 from .reports import get_lent_overdue_records
 
@@ -56,6 +57,7 @@ def create_overdue_lender_messages(*, now=None) -> list[Message]:
             "records": records,
             "records_count": len(records),
             "contact_email": settings.DEFAULT_FROM_EMAIL,
+            **email_footer_context(),
         }
         message = Message.objects.create(
             recipient_email=recipient,

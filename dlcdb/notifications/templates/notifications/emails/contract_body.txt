@@ -6,3 +6,5 @@ URL:        {{ device.get_fqdn_url }}
 
 Contract started at: {{ device.contract_start_date|date:"Y-m-d" }}
 Contract expires at: {{ device.contract_expiration_date|date:"Y-m-d" }}
+
+{% include "emails/email_footer.txt" %}
