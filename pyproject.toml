@@ -61,6 +61,7 @@ dev = [
     "pytest-cov",
     "pip-tools",
     "django-auth-ldap",
+    "Faker",
     # "django-debug-toolbar<6",  # As v6 introduced a db migration: https://github.com/django-commons/django-debug-toolbar/issues/2168
     "django-debug-toolbar",
     "django_extensions",
