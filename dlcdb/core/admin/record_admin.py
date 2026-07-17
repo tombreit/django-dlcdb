@@ -7,9 +7,8 @@ from django.template import Template, Context
 from django.urls import reverse
 from django.utils.html import format_html_join
 
-from ..utils.helpers import get_has_note_badge
 from ..models import Record
-from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin
+from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin, get_has_note_badge
 
 
 class CustomRecordModelAdmin(CustomBaseModelAdmin):

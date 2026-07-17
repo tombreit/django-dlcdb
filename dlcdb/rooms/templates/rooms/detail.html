@@ -1,0 +1,132 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ room }}{% endblock title %}
+
+{% block extra_css %}
+  <style>
+    /* Native <details> card (QR code): hide the disclosure marker, rotate the caret. */
+    details.card-collapse > summary { cursor: pointer; list-style: none; }
+    details.card-collapse > summary::-webkit-details-marker { display: none; }
+    details.card-collapse > summary .card-caret { margin-left: auto; transition: transform .15s ease; }
+    details.card-collapse[open] > summary .card-caret { transform: rotate(180deg); }
+  </style>
+{% endblock extra_css %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    <div class="me-auto">
+      <h1 class="h3 mb-1 font-monospace">{{ room.number }}</h1>
+      <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
+        {% if room.nickname %}<span>{{ room.nickname }}</span>{% endif %}
+        {% if room.is_auto_return_room %}<span class="badge text-bg-light border fw-normal">{% translate "Auto return" %}</span>{% endif %}
+        {% if room.is_external %}<span class="badge text-bg-light border fw-normal">{% translate "External" %}</span>{% endif %}
+        {% if room.is_default_license_room %}<span class="badge text-bg-light border fw-normal">{% translate "License room" %}</span>{% endif %}
+      </div>
+    </div>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to rooms" %}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% if can_change %}
+        <form method="post" action="{{ form_action }}" novalidate>
+          {% csrf_token %}
+          {% include "rooms/includes/_form_fields.html" with form=form %}
+          <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-check-lg"></i> {% translate "Save changes" %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-secondary d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          {% translate "You may view this room but do not have permission to edit it." %}
+        </div>
+        <section class="card mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-door-open text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Room" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Number" %}</dt>
+              <dd class="col-sm-8 font-monospace">{{ room.number }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Nickname" %}</dt>
+              <dd class="col-sm-8">{{ room.nickname|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Description" %}</dt>
+              <dd class="col-sm-8" style="white-space: pre-line;">{{ room.description|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Website" %}</dt>
+              <dd class="col-sm-8">
+                {% if room.website %}<a href="{{ room.website }}" target="_blank" rel="noopener">{{ room.website }}</a>{% else %}—{% endif %}
+              </dd>
+              {% if room.note %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "Note" %}</dt>
+                <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ room.note }}</dd>
+              {% endif %}
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pc-display text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Usage" %}</h2>
+        </div>
+        <div class="card-body">
+          {% blocktranslate count counter=room.assets_count asvar devices_label %}{{ counter }} device in this room{% plural %}{{ counter }} devices in this room{% endblocktranslate %}
+          {% if perms.core.view_device %}
+            <a href="{% url 'assets:device_index' %}?active_record__room={{ room.pk }}">{{ devices_label }}</a>
+          {% else %}
+            {{ devices_label }}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-info-circle text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0 small">
+            <dt class="col-sm-4 text-secondary fw-medium">UUID</dt>
+            <dd class="col-sm-8 font-monospace text-break">{{ room.uuid }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
+            <dd class="col-sm-8">{{ room.created_at|date:"Y-m-d H:i" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
+            <dd class="col-sm-8 mb-0">
+              {{ room.modified_at|date:"Y-m-d H:i" }}
+              {% if room.user or room.username %}
+                <span class="text-muted">· {{ room.user|default:room.username }}</span>
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </section>
+
+      {% if room.qrcode %}
+        {# Collapsed by default — same native <details> mechanism as the device QR card. #}
+        <details class="card mb-3 card-collapse">
+          <summary class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-qr-code text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "QR code" %}</h2>
+            <i class="bi bi-chevron-down card-caret"></i>
+          </summary>
+          <div class="card-body text-center">
+            <img src="{{ room.qrcode.url }}"
+                 alt="{% blocktranslate with room=room.number %}QR code for room {{ room }}{% endblocktranslate %}"
+                 class="w-100 h-auto" style="max-width: 260px;" width="260" height="260">
+          </div>
+        </details>
+      {% endif %}
+    </div>
+  </div>
+{% endblock body %}

@@ -1,0 +1,75 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Device types" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "Device types" %}</h1>
+    <span class="htmx-indicator ms-1">
+      <span class="spinner-border spinner-border-sm text-secondary" role="status">
+        <span class="visually-hidden">{% translate "Loading..." %}</span>
+      </span>
+    </span>
+    {% if perms.core.add_devicetype %}
+      <div class="ms-auto">
+        <a href="{% url 'assets:device_type_add' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> {% translate "Add device type" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef device-type-list inline %}
+    <div id="device-type-list" hx-target="#device-type-list" hx-swap="outerHTML" hx-push-url="true">
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=filtered_count with total=total_count %}{{ counter }} of {{ total }} device type{% plural %}{{ counter }} of {{ total }} device types{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Name") asc="name" desc="-name" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Prefix") asc="prefix" desc="-prefix" th_class="d-none d-md-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Assets") asc="assets" desc="-assets" th_class="text-end" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for device_type in page_obj %}
+              <tr>
+                <td class="position-relative">
+                  <i class="bi {{ device_type.icon_class }} text-muted me-1"></i>
+                  <a href="{% url 'assets:device_type_detail' device_type.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                     class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
+                    {{ device_type.name }}
+                  </a>
+                  {% if device_type.note %}<i class="bi bi-chat-fill text-warning-emphasis ms-1" title="{% translate 'Has note' %}"></i>{% endif %}
+                </td>
+                <td class="d-none d-md-table-cell text-muted font-monospace">{{ device_type.prefix|default:"—" }}</td>
+                <td class="text-end">
+                  <span class="badge text-bg-light border">{{ device_type.assets_count }}</span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No device types match these filters." %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock body %}

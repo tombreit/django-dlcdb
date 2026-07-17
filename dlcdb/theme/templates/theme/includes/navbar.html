@@ -38,6 +38,23 @@
                 </a>
               </li>
             {% endfor %}
+
+            {% if nav_items_masterdata %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle{% for item in nav_items_masterdata %}{% if item.active %} active{% endif %}{% endfor %}" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-database"></i>
+                {% translate 'Master data' %}
+              </a>
+              <div class="dropdown-menu">
+                {% for item in nav_items_masterdata %}
+                  <a class="dropdown-item{% if item.active %} active{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
+                    {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                    {{ item.label }}
+                  </a>
+                {% endfor %}
+              </div>
+            </li>
+            {% endif %}
           {% endif %}
         </ul>
 

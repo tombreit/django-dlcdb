@@ -1,0 +1,48 @@
+{% load i18n %}
+{% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+  </div>
+{% endif %}
+
+<section class="card mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-door-open text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Room" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.number col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.nickname col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.description col="col-12" %}
+      {% include "theme/includes/_field.html" with field=form.website col="col-12" %}
+      {% include "theme/includes/_field.html" with field=form.note col="col-12" %}
+    </div>
+  </div>
+</section>
+
+<section class="card mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-sliders text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Special roles" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-column gap-3">
+      <div class="form-check form-switch">
+        {{ form.is_auto_return_room }}{{ form.is_auto_return_room.label_tag }}
+        {% if form.is_auto_return_room.help_text %}<div class="form-text">{{ form.is_auto_return_room.help_text }}</div>{% endif %}
+        {% for error in form.is_auto_return_room.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="form-check form-switch">
+        {{ form.is_external }}{{ form.is_external.label_tag }}
+        {% if form.is_external.help_text %}<div class="form-text">{{ form.is_external.help_text }}</div>{% endif %}
+        {% for error in form.is_external.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="form-check form-switch">
+        {{ form.is_default_license_room }}{{ form.is_default_license_room.label_tag }}
+        {% if form.is_default_license_room.help_text %}<div class="form-text">{{ form.is_default_license_room.help_text }}</div>{% endif %}
+        {% for error in form.is_default_license_room.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+    </div>
+  </div>
+</section>

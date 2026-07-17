@@ -21,13 +21,14 @@
       <span class="bi-iconpicker-glyph">{{ widget.current_char }}</span>
     </span>
     {% include "django/forms/widgets/text.html" %}
-    <button type="button" class="button bi-iconpicker-browse" data-iconpicker-toggle>
+    {# "button" styles it in the Django admin, the btn classes in the Bootstrap frontend. #}
+    <button type="button" class="button btn btn-outline-secondary bi-iconpicker-browse" data-iconpicker-toggle>
       {% translate "Browse…" %}
     </button>
   </div>
 
   <div class="bi-iconpicker-popup" data-iconpicker-popup hidden>
-    <input type="search" class="bi-iconpicker-search" autocomplete="off"
+    <input type="search" class="form-control form-control-sm bi-iconpicker-search" autocomplete="off"
            placeholder="{% translate 'Search icons…' %}" data-iconpicker-search>
     <div class="bi-iconpicker-grid" data-iconpicker-grid></div>
     <p class="bi-iconpicker-empty" data-iconpicker-empty hidden>{% translate "No matching icon." %}</p>

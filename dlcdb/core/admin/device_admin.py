@@ -20,10 +20,10 @@ from simple_history.admin import SimpleHistoryAdmin
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from ..models import Device, Record, LostRecord
-from ..utils.helpers import get_has_note_badge, get_superuser_list
+from ..utils.helpers import get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin
+from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, ExportCsvMixin, get_has_note_badge
 
 
 # class NoteInline(admin.TabularInline):

@@ -13,7 +13,7 @@ import django_filters
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room
+from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
 
 
 STATE_NO_RECORD = "no-record"
@@ -59,6 +59,11 @@ class DeviceFilter(django_filters.FilterSet):
         label=_("Manufacturer"),
         empty_label=_("Any manufacturer..."),
     )
+    supplier = django_filters.ModelChoiceFilter(
+        queryset=Supplier.objects.all(),
+        label=_("Supplier"),
+        empty_label=_("Any supplier..."),
+    )
     active_record__inventory = django_filters.ModelChoiceFilter(
         queryset=Inventory.objects.all(),
         label=_("Inventory"),
@@ -99,6 +104,7 @@ class DeviceFilter(django_filters.FilterSet):
             "is_lentable",
             "active_record__room",
             "manufacturer",
+            "supplier",
             "active_record__inventory",
             "is_imported",
             "duplicate",
@@ -144,3 +150,74 @@ class DeviceFilter(django_filters.FilterSet):
             .values(value)
         )
         return queryset.filter(**{f"{value}__in": duplicates})
+
+
+class DeviceTypeFilter(django_filters.FilterSet):
+    """Search and the has-note filter from the previous DeviceType changelist."""
+
+    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
+
+    has_note = django_filters.ChoiceFilter(
+        choices=[("has_note", _("Has note")), ("has_no_note", _("No note"))],
+        method="note_filter",
+        label=_("Note"),
+        empty_label=_("Any note status..."),
+    )
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("name", "name"),
+            ("prefix", "prefix"),
+            ("assets_count", "assets"),
+        ),
+    )
+
+    class Meta:
+        model = DeviceType
+        fields = ["search", "has_note", "ordering"]
+
+    def search_filter(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(prefix__icontains=value))
+
+    def note_filter(self, queryset, name, value):
+        # Same semantics as the admin's HasNoteFilter.
+        if value == "has_note":
+            return queryset.exclude(note__exact="")
+        if value == "has_no_note":
+            return queryset.filter(note__exact="")
+        return queryset
+
+
+class ManufacturerFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
+
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("name", "name"),
+            ("assets_count", "assets"),
+        ),
+    )
+
+    class Meta:
+        model = Manufacturer
+        fields = ["search", "ordering"]
+
+    def search_filter(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(note__icontains=value))
+
+
+class SupplierFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
+
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("name", "name"),
+            ("assets_count", "assets"),
+        ),
+    )
+
+    class Meta:
+        model = Supplier
+        fields = ["search", "ordering"]
+
+    def search_filter(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value) | Q(note__icontains=value))

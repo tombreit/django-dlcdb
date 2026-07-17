@@ -1,0 +1,85 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "People" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "People" %}</h1>
+    <span class="htmx-indicator ms-1">
+      <span class="spinner-border spinner-border-sm text-secondary" role="status">
+        <span class="visually-hidden">{% translate "Loading..." %}</span>
+      </span>
+    </span>
+    {% if perms.core.add_person %}
+      <div class="ms-auto">
+        <a href="{% url 'persons:add' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> {% translate "Add person" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef person-list inline %}
+    <div id="person-list" hx-target="#person-list" hx-swap="outerHTML" hx-push-url="true">
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=person_filtered_count with total=person_total_count %}{{ counter }} of {{ total }} person{% plural %}{{ counter }} of {{ total }} persons{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Name") asc="name" desc="-name" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("E-mail") asc="email" desc="-email" th_class="d-none d-md-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Organizational unit") asc="unit" desc="-unit" th_class="d-none d-lg-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for person in page_obj %}
+              <tr>
+                <td class="position-relative">
+                  <div class="d-flex align-items-center gap-2">
+                    {% if person.udb_person_image %}
+                      <img src="{{ person.udb_person_image.url }}" alt="" class="rounded-circle object-fit-cover" width="32" height="32">
+                    {% else %}
+                      <i class="bi bi-person-circle text-muted fs-4"></i>
+                    {% endif %}
+                    <div>
+                      <a href="{% url 'persons:detail' person.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                         class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
+                        {{ person }}
+                      </a>
+                      {% if person.udb_person_uuid %}
+                        <span class="badge text-bg-light border fw-normal ms-1" title="{% translate 'Managed by UDB sync' %}">UDB</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td class="d-none d-md-table-cell text-muted">{{ person.get_email|default:"—" }}</td>
+                <td class="d-none d-lg-table-cell text-muted">{{ person.organizational_unit|default:"—" }}</td>
+                <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">{{ person.modified_at|date:"Y-m-d" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No persons match these filters." %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock body %}

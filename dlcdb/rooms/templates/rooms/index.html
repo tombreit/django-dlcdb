@@ -1,0 +1,102 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Rooms" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "Rooms" %}</h1>
+    <span class="htmx-indicator ms-1">
+      <span class="spinner-border spinner-border-sm text-secondary" role="status">
+        <span class="visually-hidden">{% translate "Loading..." %}</span>
+      </span>
+    </span>
+    <div class="ms-auto d-flex flex-wrap gap-2">
+      {% if branding.room_plan %}
+        <a href="{{ branding.room_plan.url }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
+          <i class="bi bi-map"></i> {% translate "Floor plan" %}
+        </a>
+      {% endif %}
+      {% if perms.core.view_roomreconcile %}
+        <a href="{% url 'admin:core_roomreconcile_changelist' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-ui-checks-grid"></i> {% translate "Room reconcile" %}
+        </a>
+      {% endif %}
+      {% if perms.core.add_room %}
+        <a href="{% url 'rooms:add' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> {% translate "Add room" %}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef room-list inline %}
+    <div id="room-list" hx-target="#room-list" hx-swap="outerHTML" hx-push-url="true">
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=room_filtered_count with total=room_total_count %}{{ counter }} of {{ total }} room{% plural %}{{ counter }} of {{ total }} rooms{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Room") asc="number" desc="-number" %}
+              <th scope="col" class="d-none d-md-table-cell">{% translate "Description" %}</th>
+              <th scope="col" class="d-none d-lg-table-cell">{% translate "Properties" %}</th>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Assets") asc="assets" desc="-assets" th_class="text-end" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for room in page_obj %}
+              <tr>
+                <td class="position-relative">
+                  <div class="fw-semibold">
+                    <a href="{% url 'rooms:detail' room.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                       class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
+                      {{ room.number }}
+                    </a>
+                    {% if room.note %}<i class="bi bi-chat-fill text-warning-emphasis ms-1" title="{% translate 'Has note' %}"></i>{% endif %}
+                  </div>
+                  {% if room.nickname %}<div class="small text-muted">{{ room.nickname }}</div>{% endif %}
+                </td>
+                <td class="d-none d-md-table-cell text-muted">
+                  {{ room.description|truncatechars:80|default:"—" }}
+                  {% if room.website %}
+                    <a href="{{ room.website }}" target="_blank" rel="noopener" title="{% translate 'Website' %}">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                  {% endif %}
+                </td>
+                <td class="d-none d-lg-table-cell">
+                  {% if room.is_auto_return_room %}<span class="badge text-bg-light border">{% translate "Auto return" %}</span>{% endif %}
+                  {% if room.is_external %}<span class="badge text-bg-light border">{% translate "External" %}</span>{% endif %}
+                  {% if room.is_default_license_room %}<span class="badge text-bg-light border">{% translate "License room" %}</span>{% endif %}
+                </td>
+                <td class="text-end">
+                  <span class="badge text-bg-light border">{{ room.assets_count }}</span>
+                </td>
+                <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">{{ room.modified_at|date:"Y-m-d" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No rooms match these filters." %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock body %}

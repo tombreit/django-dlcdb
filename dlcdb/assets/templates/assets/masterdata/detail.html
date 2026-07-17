@@ -1,0 +1,95 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block extra_css %}{{ form.media.css }}{% endblock extra_css %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    <div class="me-auto">
+      <h1 class="h3 mb-1">{{ object }}</h1>
+      <div class="text-muted">{{ heading }}</div>
+    </div>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to list" %}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% if can_change %}
+        <form method="post" action="{{ form_action }}" novalidate>
+          {% csrf_token %}
+          {% include "assets/masterdata/_form_fields.html" with form=form heading=heading icon=icon %}
+          <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-check-lg"></i> {% translate "Save changes" %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-secondary d-flex align-items-center gap-2">
+          <i class="bi bi-eye"></i>
+          {% translate "You may view this entry but do not have permission to edit it." %}
+        </div>
+        <section class="card mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi {{ icon }} text-primary"></i>
+            <h2 class="h6 mb-0">{{ heading }}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              {% for field in form.visible_fields %}
+                <dt class="col-sm-4 text-secondary fw-medium">{{ field.label }}</dt>
+                <dd class="col-sm-8" style="white-space: pre-line;">{{ field.value|default:"—" }}</dd>
+              {% endfor %}
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pc-display text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Usage" %}</h2>
+        </div>
+        <div class="card-body">
+          {% blocktranslate count counter=object.assets_count asvar devices_label %}{{ counter }} device{% plural %}{{ counter }} devices{% endblocktranslate %}
+          {% if perms.core.view_device %}
+            <a href="{{ devices_url }}">{{ devices_label }}</a>
+          {% else %}
+            {{ devices_label }}
+          {% endif %}
+        </div>
+      </section>
+
+      {% if has_audit_fields %}
+        <section class="card mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0 small">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
+              <dd class="col-sm-8">{{ object.created_at|date:"Y-m-d H:i" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
+              <dd class="col-sm-8 mb-0">
+                {{ object.modified_at|date:"Y-m-d H:i" }}
+                {% if object.user or object.username %}
+                  <span class="text-muted">· {{ object.user|default:object.username }}</span>
+                {% endif %}
+              </dd>
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+  </div>
+{% endblock body %}
+
+{% block extra_js %}{{ form.media.js }}{% endblock extra_js %}

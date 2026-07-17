@@ -9,8 +9,7 @@ from django.urls import reverse
 
 from ..models import Room
 from ..models.room import RoomReconcile
-from ..utils.helpers import get_has_note_badge
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
+from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, get_has_note_badge
 from .base_admin import DeviceCountMixin
 from .filters.has_note_filter import HasNoteFilter
 
@@ -125,6 +124,6 @@ class RoomReconcileAdmin(admin.ModelAdmin):
     def get_reconcile_button(self, obj):
         return format_html(
             '<a class="btn btn-warning" href="{}">&rarr; {}</a>',
-            reverse("core:reconcile-rooms", args=[obj.id]),
+            reverse("rooms:reconcile", args=[obj.id]),
             "Abgleichen",
         )

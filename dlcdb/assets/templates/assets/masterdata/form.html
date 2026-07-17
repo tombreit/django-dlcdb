@@ -1,0 +1,31 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{# The DeviceType form ships widget assets (icon picker); empty for the others. #}
+{% block extra_css %}{{ form.media.css }}{% endblock extra_css %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "assets/masterdata/_form_fields.html" with form=form heading=heading icon=icon %}
+        <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-check-lg"></i> {{ submit_label }}
+          </button>
+          <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock body %}
+
+{% block extra_js %}{{ form.media.js }}{% endblock extra_js %}

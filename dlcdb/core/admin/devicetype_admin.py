@@ -5,9 +5,8 @@
 from django.contrib import admin
 
 from ..models import DeviceType
-from ..utils.helpers import get_has_note_badge
 from dlcdb.theme.widgets import IconPickerWidget
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, DeviceCountMixin
+from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, DeviceCountMixin, get_has_note_badge
 from .filters.has_note_filter import HasNoteFilter
 
 

@@ -73,6 +73,8 @@ LOCAL_APPS = [
     "dlcdb.lending",
     "dlcdb.smallstuff",
     "dlcdb.assets",
+    "dlcdb.rooms",
+    "dlcdb.persons",
     "dlcdb.api",
     "dlcdb.theme",
     "dlcdb.dashboard",

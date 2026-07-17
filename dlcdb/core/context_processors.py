@@ -9,12 +9,13 @@ from django.contrib import messages
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.utils.html import format_html
 from django.urls import reverse
-from django.template.defaultfilters import pluralize
 from django.conf import settings
 
 from dlcdb.core.models import Room, Device
+from dlcdb.core.utils.tenants import tenant_scoped_queryset
 
 
 def hints(request):
@@ -46,26 +47,33 @@ def hints(request):
             request.path_info.startswith("/admin/logout/"),
         ]
     ):
-        rooms_changelist_url = reverse("admin:core_room_changelist")
+        rooms_index_url = reverse("rooms:index")
 
-        # Make this queryset tenant aware
-        qs = Device.objects.none()
+        qs = tenant_scoped_queryset(Device.objects.all(), request, tenant_field="tenant")
+        recordless_devices = qs.filter(active_record__isnull=True)
+        recordless_devices_count = recordless_devices.count()
 
-        if request.user.is_superuser:
-            # No pre-filtering for superusers
-            qs = Device.objects.all()
-        elif request.tenant:
-            qs = qs.filter(tenant=request.tenant)
+        if recordless_devices_count:
+            if recordless_devices_count == 1:
+                # A single device: jump straight into Move with it preselected.
+                cta_link = f"{reverse('assets:relocate')}?device={recordless_devices.first().pk}"
+            else:
+                # Several devices: the device list filtered to record-less
+                # devices; each detail page offers the Move action from there.
+                from dlcdb.assets.filters import STATE_NO_RECORD
 
-        if qs.filter(active_record__isnull=True).exists():
-            devices_wo_record_changelist = f"{reverse('admin:core_device_changelist')}?has_record=has_no_record"
-            recordless_devices_count = Device.objects.filter(active_record__isnull=True).count()
+                cta_link = f"{reverse('assets:device_index')}?state={STATE_NO_RECORD}"
 
             sticky_messages.append(
                 StickyMessage(
                     level=messages.WARNING,
-                    msg=_(f"{recordless_devices_count} Device{pluralize(recordless_devices_count)} without record!"),
-                    cta_link=devices_wo_record_changelist,
+                    msg=ngettext(
+                        "%(count)d device without record!",
+                        "%(count)d devices without record!",
+                        recordless_devices_count,
+                    )
+                    % {"count": recordless_devices_count},
+                    cta_link=cta_link,
                     cta_text=_("Add proper record?"),
                 )
             )
@@ -76,7 +84,7 @@ def hints(request):
                     StickyMessage(
                         level=messages.WARNING,
                         msg=_("No room configured as 'is_external'!"),
-                        cta_link=rooms_changelist_url,
+                        cta_link=rooms_index_url,
                         cta_text=_("Configure one?"),
                     )
                 )
@@ -86,7 +94,7 @@ def hints(request):
                     StickyMessage(
                         level=messages.WARNING,
                         msg=_("No room configured as 'is_auto_return_room'!"),
-                        cta_link=rooms_changelist_url,
+                        cta_link=rooms_index_url,
                         cta_text=_("Configure one?"),
                     )
                 )
@@ -96,7 +104,7 @@ def hints(request):
                 StickyMessage(
                     level=messages.WARNING,
                     msg=_("No rooms defined yet."),
-                    cta_link=rooms_changelist_url,
+                    cta_link=reverse("rooms:add"),
                     cta_text=_("Add some rooms?"),
                 )
             )

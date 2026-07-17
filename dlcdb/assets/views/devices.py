@@ -74,7 +74,7 @@ def device_index(request):
             request,
             target="#device-list",
             search_placeholder=_("Search IT ID, serial number, model..."),
-            secondary_fields={"is_imported", "duplicate", "active_record__inventory"},
+            secondary_fields={"is_imported", "duplicate", "supplier", "active_record__inventory"},
         ),
         "current_ordering": data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here instead of

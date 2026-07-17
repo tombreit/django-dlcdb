@@ -1,0 +1,26 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
+    <a href="{% url 'rooms:index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "rooms/includes/_form_fields.html" with form=form %}
+        <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-check-lg"></i> {{ submit_label }}
+          </button>
+          <a class="btn btn-outline-secondary" href="{% url 'rooms:index' %}">{% translate "Cancel" %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock body %}

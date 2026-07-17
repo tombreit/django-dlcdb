@@ -6,8 +6,9 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, Record, Room
-from dlcdb.theme.widgets import DevicePickerMultiField, TomSelectMultipleWidget, TomSelectWidget
+from dlcdb.core.models import Device, DeviceType, Manufacturer, Record, Room, Supplier
+from dlcdb.theme.forms import add_bootstrap_classes
+from dlcdb.theme.widgets import DevicePickerMultiField, IconPickerWidget, TomSelectWidget
 
 
 class RelocateForm(forms.Form):
@@ -134,30 +135,7 @@ class DeviceForm(forms.ModelForm):
                 tenant_field.queryset.filter(pk=current_tenant.pk) if current_tenant else tenant_field.queryset.none()
             )
 
-        for name, field in self.fields.items():
-            if isinstance(field.widget, forms.HiddenInput):
-                continue  # picker-driven fields carry no Bootstrap control styling
-            if isinstance(field.widget, (TomSelectWidget, TomSelectMultipleWidget)):
-                continue  # widget already carries `form-select is-tom-select`
-            if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs["class"] = "form-check-input"
-            elif isinstance(field.widget, forms.Select):
-                field.widget.attrs["class"] = "form-select"
-            else:
-                field.widget.attrs["class"] = "form-control"
-
-        # Bootstrap 5 server-side validation styling: a bound field that failed
-        # validation gets `.is-invalid`, so the control renders in the invalid
-        # state (red border + icon). The messages themselves are emitted as
-        # `.invalid-feedback` next to each control in the template.
-        # https://getbootstrap.com/docs/5.3/forms/validation/
-        if self.is_bound:
-            for name in self.errors:
-                field = self.fields.get(name)
-                if field is None or isinstance(field.widget, forms.HiddenInput):
-                    continue  # non-field ("__all__") or picker-driven field
-                css = field.widget.attrs.get("class", "")
-                field.widget.attrs["class"] = f"{css} is-invalid".strip()
+        add_bootstrap_classes(self)
 
     def clean_is_lentable(self):
         is_lentable = self.cleaned_data["is_lentable"]
@@ -171,3 +149,49 @@ class DeviceForm(forms.ModelForm):
         ):
             raise ValidationError(_("Loanability cannot be changed while this device is lent."))
         return is_lentable
+
+
+class DeviceTypeForm(forms.ModelForm):
+    class Meta:
+        model = DeviceType
+        fields = ["name", "prefix", "icon", "note"]
+        widgets = {
+            "icon": IconPickerWidget(),
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+
+class ManufacturerForm(forms.ModelForm):
+    class Meta:
+        model = Manufacturer
+        fields = ["name", "note"]
+        widgets = {
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The model allows a NULL name (legacy data); a nameless manufacturer
+        # renders as "None" everywhere, so the frontend requires one.
+        self.fields["name"].required = True
+        add_bootstrap_classes(self)
+
+
+class SupplierForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = ["name", "contact", "note"]
+        widgets = {
+            "contact": forms.Textarea(attrs={"rows": 3}),
+            "note": forms.Textarea(attrs={"rows": 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Same reasoning as ManufacturerForm: no nameless suppliers.
+        self.fields["name"].required = True
+        add_bootstrap_classes(self)

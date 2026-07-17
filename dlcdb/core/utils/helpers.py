@@ -13,9 +13,6 @@ from contextlib import suppress
 
 from django.db.transaction import atomic
 from django.conf import settings
-from django.urls import reverse
-from django.utils.http import urlencode
-from django.utils.html import format_html
 
 from PIL import Image, UnidentifiedImageError
 
@@ -48,30 +45,6 @@ def get_user_email(user):
     return email
 
 
-def get_current_room_href(obj):
-    from ..models import Record, Device
-
-    # Currently not used, leftover from MoveDeviceAdmin
-    current_room_link = None
-    current_room = None
-
-    if isinstance(obj, Device):
-        # print(f"obj {obj} isinstance Device!")
-        current_room = obj.active_record.room
-    elif isinstance(obj, Record):
-        # print(f"obj {obj} isinstance Record!")
-        current_room = obj.room
-
-    if current_room:
-        url = "{base_url}?{filter}".format(
-            base_url=reverse("admin:core_device_changelist"),
-            filter=urlencode({"active_record__room__id__exact": f"{current_room.pk}"}),
-        )
-        current_room_link = format_html('<a href="{}">{}</a>', url, current_room)
-
-    return current_room_link
-
-
 def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
     try:
         image_string = re.sub("^data:.+;base64,", "", base64string)
@@ -96,33 +69,6 @@ def get_icon_for_class(class_name):
         pass
 
     return icon
-
-
-def get_has_note_badge(*, obj_type, has_note):
-    # if obj_type not in ["device", "record", "room", "device_type", "lent_record"]:
-    #     raise NotImplementedError
-
-    level = "light"
-    note_icon = "bi bi-chat"
-    text = "No notes"
-    type_icon = None
-
-    if has_note:
-        note_icon = "bi bi-chat-fill"
-        level = "warning"
-        text = "Notes exists"
-        type_icon = get_icon_for_class(obj_type)
-
-    return format_html(
-        (
-            '<span title="{text}" class="ms-2 p-1 badge text-bg-{level}"><i class="me-2 {type_icon}"'
-            ' style="font-size:1.33em"></i><i class="{note_icon}" style="font-size:1.33em"></i></span>'
-        ),
-        type_icon=type_icon,
-        note_icon=note_icon,
-        level=level,
-        text=text,
-    )
 
 
 class DoRollback(Exception):

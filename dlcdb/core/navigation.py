@@ -5,95 +5,10 @@
 from django.utils.translation import gettext_lazy as _
 
 
+# Rooms, Manufacturer, Distributor, Device types and People are owned by their
+# frontend apps (dlcdb.rooms, dlcdb.assets, dlcdb.persons navigation.py); core
+# only keeps the admin-changelist entries that have no frontend yet.
 nav_entries = [
-    # {
-    #     "slot": "nav_main",
-    #     "order": 20,
-    #     "label": _("Devices"),
-    #     "icon": "bi bi-upc",
-    #     "url": "admin:core_device_changelist",
-    #     "required_permission": "core.view_device",
-    # },
-    # {
-    #     "slot": "nav_processes",
-    #     "order": 10,
-    #     "label": _("Procurement"),
-    #     "icon": "",
-    #     "url": "admin:core_orderedrecord_changelist",
-    #     "required_permission": "core.view_orderedrecord",
-    # },
-    {
-        "slot": "nav_settings",
-        "order": 10,
-        "label": _("Rooms"),
-        "icon": "bi bi-door-open",
-        "url": "admin:core_room_changelist",
-        "required_permission": "core.view_room",
-    },
-    {
-        "slot": "nav_settings",
-        "order": 11,
-        "label": _("Manufacturer"),
-        "icon": "bi bi-building",
-        "url": "admin:core_manufacturer_changelist",
-        "required_permission": "core.view_manufacturer",
-    },
-    {
-        "slot": "nav_settings",
-        "order": 12,
-        "label": _("Distributor"),
-        "icon": "bi bi-truck",
-        "url": "admin:core_supplier_changelist",
-        "required_permission": "core.view_supplier",
-    },
-    {
-        "slot": "nav_settings",
-        "order": 13,
-        "label": _("Device types"),
-        "icon": "bi bi-palette",
-        "url": "admin:core_devicetype_changelist",
-        "required_permission": "core.view_devicetype",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 10,
-        "label": _("Rooms"),
-        "icon": "bi bi-door-open",
-        "url": "admin:core_room_changelist",
-        "required_permission": "core.view_room",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 20,
-        "label": _("Manufacturer"),
-        "icon": "bi bi-building",
-        "url": "admin:core_manufacturer_changelist",
-        "required_permission": "core.view_manufacturer",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 30,
-        "label": _("Distributor"),
-        "icon": "bi bi-truck",
-        "url": "admin:core_supplier_changelist",
-        "required_permission": "core.view_supplier",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 40,
-        "label": _("Device types"),
-        "icon": "bi bi-palette",
-        "url": "admin:core_devicetype_changelist",
-        "required_permission": "core.view_devicetype",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 50,
-        "label": _("People"),
-        "icon": "bi bi-people",
-        "url": "admin:core_person_changelist",
-        "required_permission": "core.view_person",
-    },
     {
         "slot": "nav_masterdata",
         "order": 60,

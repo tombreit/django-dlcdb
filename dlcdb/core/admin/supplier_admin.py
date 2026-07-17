@@ -4,9 +4,8 @@
 
 from django.contrib import admin
 
-from ..utils.helpers import get_has_note_badge
 from ..models import Supplier
-from .base_admin import DeviceCountMixin
+from .base_admin import DeviceCountMixin, get_has_note_badge
 
 
 @admin.register(Supplier)

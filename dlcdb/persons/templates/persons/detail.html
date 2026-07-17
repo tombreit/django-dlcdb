@@ -1,0 +1,122 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ person }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    {% if person.udb_person_image %}
+      <img src="{{ person.udb_person_image.url }}" alt="" class="rounded-circle object-fit-cover" width="56" height="56">
+    {% endif %}
+    <div class="me-auto">
+      <h1 class="h3 mb-1">{{ person }}</h1>
+      <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
+        {% if person.organizational_unit %}<span>{{ person.organizational_unit }}</span>{% endif %}
+        {% if is_udb_synced %}
+          <span class="badge text-bg-light border fw-normal" title="{% translate 'Managed by UDB sync' %}">UDB</span>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to people" %}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% if can_change %}
+        <form method="post" action="{{ form_action }}" novalidate>
+          {% csrf_token %}
+          {% include "persons/includes/_form_fields.html" with form=form %}
+          <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" type="submit">
+              <i class="bi bi-check-lg"></i> {% translate "Save changes" %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="alert alert-secondary d-flex align-items-center gap-2">
+          {% if is_udb_synced %}
+            <i class="bi bi-arrow-repeat"></i>
+            {% translate "This person is managed by the UDB sync and cannot be edited here." %}
+          {% else %}
+            <i class="bi bi-eye"></i>
+            {% translate "You may view this person but do not have permission to edit them." %}
+          {% endif %}
+        </div>
+        <section class="card mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-person text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Person" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Last name" %}</dt>
+              <dd class="col-sm-8">{{ person.last_name }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "First name" %}</dt>
+              <dd class="col-sm-8">{{ person.first_name|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "E-mail" %}</dt>
+              <dd class="col-sm-8">{{ person.email|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Organizational unit" %}</dt>
+              <dd class="col-sm-8 mb-0">{{ person.organizational_unit|default:"—" }}</dd>
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      {% if is_udb_synced %}
+        <section class="card mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-repeat text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "UDB data" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0 small">
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Name" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_person_last_name|default:"—" }}{% if person.udb_person_first_name %}, {{ person.udb_person_first_name }}{% endif %}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Business e-mail" %}</dt>
+              <dd class="col-sm-7 text-break">{{ person.udb_person_email_internal_business|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Private e-mail" %}</dt>
+              <dd class="col-sm-7 text-break">{{ person.udb_person_email_private|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Organization unit" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_contract_organization_unit|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Contract type" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_contract_contract_type|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Positions" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_contract_organizational_positions|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Planned check-in" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_contract_planned_checkin|date:"Y-m-d"|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Planned check-out" %}</dt>
+              <dd class="col-sm-7">{{ person.udb_contract_planned_checkout|date:"Y-m-d"|default:"—" }}</dd>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Last UDB update" %}</dt>
+              <dd class="col-sm-7 mb-0">{{ person.udb_data_updated_at|date:"Y-m-d H:i"|default:"—" }}</dd>
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-info-circle text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0 small">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
+            <dd class="col-sm-8">{{ person.created_at|date:"Y-m-d H:i" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
+            <dd class="col-sm-8 mb-0">
+              {{ person.modified_at|date:"Y-m-d H:i" }}
+              {% if person.user or person.username %}
+                <span class="text-muted">· {{ person.user|default:person.username }}</span>
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock body %}

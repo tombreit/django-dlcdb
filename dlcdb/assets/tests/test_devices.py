@@ -274,10 +274,13 @@ class DeviceFrontendTests(BaseTest):
         self.assertNotContains(viewer_response, "ordering=tenant")
 
     def test_modified_column_uses_naturaltime_for_recent_edits_only(self):
-        self._create_device(edv_id="EDV-RECENT", sap_id="9-9")  # modified_at defaults to now
+        # A device modified "just now" renders as "now", not "... ago", so give
+        # the recent device an age that is unambiguously inside the cutoff.
+        # auto_now overrides a plain .save(), so backdate via .update().
+        recent = self._create_device(edv_id="EDV-RECENT", sap_id="9-9")
+        Device.objects.filter(pk=recent.pk).update(modified_at=timezone.now() - datetime.timedelta(hours=2))
         old = self._create_device(edv_id="EDV-OLD", sap_id="9-8")
         old_modified_at = timezone.now() - datetime.timedelta(weeks=10)
-        # auto_now overrides a plain .save(), so backdate via .update().
         Device.objects.filter(pk=old.pk).update(modified_at=old_modified_at)
 
         response = self.client.get(self.index_url)

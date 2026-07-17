@@ -16,7 +16,32 @@ from django.urls import path
 
 
 from ..models import Device, Room, DeviceType, Supplier, Manufacturer, LentRecord, Record
-from ..utils.helpers import get_denormalized_user
+from ..utils.helpers import get_denormalized_user, get_icon_for_class
+
+
+def get_has_note_badge(*, obj_type, has_note):
+    """Admin changelist badge signalling whether an object carries a note."""
+    level = "light"
+    note_icon = "bi bi-chat"
+    text = "No notes"
+    type_icon = None
+
+    if has_note:
+        note_icon = "bi bi-chat-fill"
+        level = "warning"
+        text = "Notes exists"
+        type_icon = get_icon_for_class(obj_type)
+
+    return format_html(
+        (
+            '<span title="{text}" class="ms-2 p-1 badge text-bg-{level}"><i class="me-2 {type_icon}"'
+            ' style="font-size:1.33em"></i><i class="{note_icon}" style="font-size:1.33em"></i></span>'
+        ),
+        type_icon=type_icon,
+        note_icon=note_icon,
+        level=level,
+        text=text,
+    )
 
 
 class CustomBaseModelAdmin(admin.ModelAdmin):

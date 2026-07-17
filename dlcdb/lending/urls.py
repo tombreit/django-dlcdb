@@ -14,4 +14,5 @@ urlpatterns = [
     path("person-search/", views.person_search, name="person_search"),
     path("<int:pk>/", views.lend, name="detail"),
     path("<int:pk>/print/", views.print_sheet, name="print_sheet"),
+    path("record/<int:pk>/print/", views.print_lent_sheet, name="print_lent_sheet"),
 ]

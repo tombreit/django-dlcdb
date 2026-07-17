@@ -1,0 +1,18 @@
+{% comment %}
+One standard form field, rendered in the Bootstrap 5 idiom: label, control,
+optional help text, then any validation messages as `.invalid-feedback`. The
+control already carries `.is-invalid` when the bound field errored (set via
+dlcdb.theme.forms.add_bootstrap_classes), so the feedback is emitted with
+`d-block` to show the server-rendered message.
+See https://getbootstrap.com/docs/5.3/forms/validation/
+
+Params:
+  field  — a bound form field (e.g. form.number)
+  col    — grid column class for the wrapper (default "col-12")
+{% endcomment %}
+<div class="{{ col|default:'col-12' }}">
+  {{ field.label_tag }}
+  {{ field }}
+  {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+  {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+</div>

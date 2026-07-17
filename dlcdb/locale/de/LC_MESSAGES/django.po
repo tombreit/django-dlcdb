@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 18:20+0200\n"
+"POT-Creation-Date: 2026-07-17 21:40+0200\n"
 "PO-Revision-Date: 2026-07-15 10:52+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -64,7 +64,10 @@ msgstr "Danke für die Zeit, die Sie heute mit Ihrer DLCDB verbracht haben."
 msgid "Log in again"
 msgstr "Erneut anmelden"
 
-#: assets/apps.py:12
+#: assets/apps.py:12 assets/templates/assets/device_types/index.html:40
+#: assets/templates/assets/manufacturers/index.html:39
+#: assets/templates/assets/suppliers/index.html:40
+#: rooms/templates/rooms/index.html:51
 msgid "Assets"
 msgstr "Assets"
 
@@ -80,7 +83,9 @@ msgstr "Seriennummern-Duplikat"
 msgid "Duplicate nickname"
 msgstr "Doppelter Nickname"
 
-#: assets/filters.py:33 lending/filters.py:108 theme/filterbar.py:143
+#: assets/filters.py:33 assets/filters.py:158 assets/filters.py:191
+#: assets/filters.py:209 lending/filters.py:108 persons/filters.py:17
+#: rooms/filters.py:17 theme/filterbar.py:143
 msgid "Search"
 msgstr "Suche"
 
@@ -115,6 +120,9 @@ msgid "Any loanability..."
 msgstr "Jede Verfügbarkeit..."
 
 #: assets/filters.py:54 core/models/record.py:184 core/models/room.py:72
+#: rooms/templates/rooms/detail.html:53
+#: rooms/templates/rooms/includes/_form_fields.html:11
+#: rooms/templates/rooms/index.html:48
 msgid "Room"
 msgstr "Raum"
 
@@ -122,9 +130,9 @@ msgstr "Raum"
 msgid "Any room..."
 msgstr "Alle Räume..."
 
-#: assets/filters.py:59 assets/templates/assets/devices/detail.html:66
+#: assets/filters.py:59 assets/navigation.py:30
+#: assets/templates/assets/devices/detail.html:66 assets/views/masterdata.py:88
 #: core/models/device.py:132 core/models/manufacturer.py:25
-#: core/navigation.py:36 core/navigation.py:68
 msgid "Manufacturer"
 msgstr "Hersteller"
 
@@ -132,54 +140,95 @@ msgstr "Hersteller"
 msgid "Any manufacturer..."
 msgstr "Alle Hersteller..."
 
-#: assets/filters.py:64 core/models/inventory.py:245
+#: assets/filters.py:64 assets/views/masterdata.py:106
+#: core/models/device.py:140 core/models/supplier.py:27 licenses/filters.py:36
+msgid "Supplier"
+msgstr "Distributor"
+
+#: assets/filters.py:65
+#, fuzzy
+#| msgid "Supplier..."
+msgid "Any supplier..."
+msgstr "Distributor..."
+
+#: assets/filters.py:69 core/models/inventory.py:245
 #: core/models/inventory.py:252 core/models/record.py:134
 msgid "Inventory"
 msgstr "Inventur"
 
-#: assets/filters.py:65
+#: assets/filters.py:70
 msgid "Any inventory..."
 msgstr "Jede Inventur..."
 
-#: assets/filters.py:68
+#: assets/filters.py:73
 #: assets/templates/assets/devices/includes/_sidebar.html:94
 #: assets/templates/assets/devices/includes/_sidebar.html:97
 msgid "Imported"
 msgstr "Importiert"
 
-#: assets/filters.py:68
+#: assets/filters.py:73
 msgid "Not imported"
 msgstr "Nicht importiert"
 
-#: assets/filters.py:70
+#: assets/filters.py:75
 msgid "Import"
 msgstr "Import"
 
-#: assets/filters.py:71
+#: assets/filters.py:76
 msgid "Any import status..."
 msgstr "Jeder Import-Status..."
 
-#: assets/filters.py:76
+#: assets/filters.py:81
 msgid "Duplicates"
 msgstr "Duplikate"
 
-#: assets/filters.py:77
+#: assets/filters.py:82
 msgid "No duplicate filter..."
 msgstr "Duplikate Filter"
 
-#: assets/forms.py:30
+#: assets/filters.py:161 assets/templates/assets/device_types/index.html:52
+#: assets/templates/assets/manufacturers/index.html:50
+#: assets/templates/assets/suppliers/index.html:51 rooms/filters.py:32
+#: rooms/templates/rooms/index.html:64
+#, fuzzy
+#| msgid "Is notebook"
+msgid "Has note"
+msgstr "Ist Notebook"
+
+#: assets/filters.py:161 rooms/filters.py:32
+#, fuzzy
+#| msgid "Record note"
+msgid "No note"
+msgstr "Record Notiz"
+
+#: assets/filters.py:163 assets/templates/assets/devices/detail.html:73
+#: core/models/device.py:178 core/models/manufacturer.py:21
+#: core/models/record.py:165 dataexchange/forms.py:72
+#: lending/templates/lending/lend.html:172
+#: licenses/templates/licenses/index.html:97 rooms/filters.py:34
+#: rooms/templates/rooms/detail.html:68
+msgid "Note"
+msgstr "Notiz"
+
+#: assets/filters.py:164 rooms/filters.py:35
+#, fuzzy
+#| msgid "Any import status..."
+msgid "Any note status..."
+msgstr "Jeder Import-Status..."
+
+#: assets/forms.py:31
 msgid "Search by EDV/Inv. no., manufacturer, serial…"
 msgstr "Suche nach EDV-ID, Inventarnummer, Hersteller, Seriennummer etc..."
 
-#: assets/forms.py:31
+#: assets/forms.py:32
 msgid "Please select at least one device to move."
 msgstr "Bitte mindestens ein zu verschiebendes Gerät auswählen."
 
-#: assets/forms.py:36
+#: assets/forms.py:37
 msgid "Please select a target room."
 msgstr "Bitte einen Zielraum auswählen."
 
-#: assets/forms.py:172
+#: assets/forms.py:150
 msgid "Loanability cannot be changed while this device is lent."
 msgstr "Verleih-Attribut kann während des Verleihs nicht geändert werden."
 
@@ -193,23 +242,97 @@ msgstr "Umziehen"
 msgid "Devices"
 msgstr "Gerät"
 
+#: assets/navigation.py:39
+msgid "Distributor"
+msgstr "Zulieferer"
+
+#: assets/navigation.py:48 assets/templates/assets/device_types/index.html:4
+#: assets/templates/assets/device_types/index.html:8
+msgid "Device types"
+msgstr "Geräteklassen"
+
+#: assets/templates/assets/device_types/index.html:11
+#: assets/templates/assets/devices/index.html:11
+#: assets/templates/assets/manufacturers/index.html:11
+#: assets/templates/assets/suppliers/index.html:11
+#: lending/templates/lending/index.html:14
+#: licenses/templates/licenses/index.html:21
+#: persons/templates/persons/index.html:11 rooms/templates/rooms/index.html:11
+#: smallstuff/templates/smallstuff/person_search.html:14
+msgid "Loading..."
+msgstr "Lädt..."
+
+#: assets/templates/assets/device_types/index.html:17
+#: assets/views/masterdata.py:72
+#, fuzzy
+#| msgid "Add device"
+msgid "Add device type"
+msgstr "Gerät hinzufügen"
+
+#: assets/templates/assets/device_types/index.html:29
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s device"
+#| msgid_plural "%(counter)s of %(total)s devices"
+msgid "%(counter)s of %(total)s device type"
+msgid_plural "%(counter)s of %(total)s device types"
+msgstr[0] "%(counter)s von %(total)s Gerät"
+msgstr[1] "%(counter)s von %(total)s Geräten"
+
+#: assets/templates/assets/device_types/index.html:38
+#: assets/templates/assets/manufacturers/index.html:38
+#: assets/templates/assets/suppliers/index.html:38
+#: core/models/manufacturer.py:16 licenses/forms.py:135
+#: persons/templates/persons/detail.html:78
+#: persons/templates/persons/index.html:38
+msgid "Name"
+msgstr "Name"
+
+#: assets/templates/assets/device_types/index.html:39
+msgid "Prefix"
+msgstr ""
+
+#: assets/templates/assets/device_types/index.html:63
+#, fuzzy
+#| msgid "No devices match these filters."
+msgid "No device types match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
+#: assets/templates/assets/device_types/index.html:64
+#: assets/templates/assets/devices/index.html:88
+#: assets/templates/assets/manufacturers/index.html:61
+#: assets/templates/assets/suppliers/index.html:63
+#: licenses/templates/licenses/index.html:144
+#: persons/templates/persons/index.html:74 rooms/templates/rooms/index.html:91
+msgid "Clear filters"
+msgstr "Filter zurücksetzen"
+
 #: assets/templates/assets/devices/detail.html:31
 msgid "Back to devices"
 msgstr "Zurück zur Übersicht"
 
 #: assets/templates/assets/devices/detail.html:43
+#: assets/templates/assets/masterdata/detail.html:27
+#: persons/templates/persons/detail.html:33
+#: rooms/templates/rooms/detail.html:40
 msgid "Save changes"
 msgstr "Änderungen speichern"
 
 #: assets/templates/assets/devices/detail.html:45
 #: assets/templates/assets/devices/form.html:16
 #: assets/templates/assets/devices/form.html:28
+#: assets/templates/assets/masterdata/detail.html:29
+#: assets/templates/assets/masterdata/form.html:12
+#: assets/templates/assets/masterdata/form.html:24
 #: dataexchange/templates/dataexchange/import.html:9
 #: dataexchange/templates/dataexchange/import.html:46
 #: dataexchange/templates/dataexchange/import_preview.html:9
 #: dataexchange/templates/dataexchange/import_preview.html:62
 #: lending/templates/lending/lend.html:214
 #: licenses/templates/licenses/form_partial.html:81
+#: persons/templates/persons/detail.html:35
+#: persons/templates/persons/form.html:9 persons/templates/persons/form.html:21
+#: rooms/templates/rooms/detail.html:42 rooms/templates/rooms/form.html:9
+#: rooms/templates/rooms/form.html:21
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -237,7 +360,8 @@ msgstr "IT ID"
 msgid "Inventory ID"
 msgstr "Inventarnummer"
 
-#: assets/templates/assets/devices/detail.html:64 core/models/device.py:123
+#: assets/templates/assets/devices/detail.html:64 assets/views/masterdata.py:70
+#: core/models/device.py:123
 msgid "Device type"
 msgstr "Geräteklasse"
 
@@ -248,13 +372,6 @@ msgstr "Modellbezeichnung"
 #: assets/templates/assets/devices/detail.html:70 core/models/device.py:117
 msgid "Serial number"
 msgstr "Seriennummer"
-
-#: assets/templates/assets/devices/detail.html:73 core/models/device.py:178
-#: core/models/manufacturer.py:21 core/models/record.py:165
-#: dataexchange/forms.py:72 lending/templates/lending/lend.html:172
-#: licenses/templates/licenses/index.html:97
-msgid "Note"
-msgstr "Notiz"
 
 #: assets/templates/assets/devices/includes/_device_teaser.html:15
 #, fuzzy
@@ -334,6 +451,9 @@ msgid "Open in admin"
 msgstr "In Admin-Ansicht öffnen"
 
 #: assets/templates/assets/devices/includes/_sidebar.html:69
+#: assets/templates/assets/masterdata/detail.html:78
+#: persons/templates/persons/detail.html:108
+#: rooms/templates/rooms/detail.html:102
 msgid "Created"
 msgstr "Erstellt"
 
@@ -362,19 +482,13 @@ msgid "Deleted"
 msgstr "Gelöscht"
 
 #: assets/templates/assets/devices/includes/_sidebar.html:127
+#: rooms/templates/rooms/detail.html:120
 msgid "QR code"
 msgstr "QR-Code"
 
 #: assets/templates/assets/devices/includes/_sidebar.html:131
 msgid "Device QR code"
 msgstr "Geräte QR-Code"
-
-#: assets/templates/assets/devices/index.html:11
-#: lending/templates/lending/index.html:14
-#: licenses/templates/licenses/index.html:21
-#: smallstuff/templates/smallstuff/person_search.html:14
-msgid "Loading..."
-msgstr "Lädt..."
 
 #: assets/templates/assets/devices/index.html:17 assets/views/devices.py:113
 msgid "Add device"
@@ -401,23 +515,22 @@ msgid "State / location"
 msgstr "Zustand/Standort"
 
 #: assets/templates/assets/devices/index.html:52
+#: assets/templates/assets/masterdata/detail.html:80
 #: lending/templates/lending/index.html:48
+#: persons/templates/persons/detail.html:110
+#: persons/templates/persons/index.html:41
+#: rooms/templates/rooms/detail.html:104 rooms/templates/rooms/index.html:52
 msgid "Modified"
 msgstr "Geändert"
 
 #: assets/templates/assets/devices/index.html:54
-#: theme/templates/theme/includes/navbar.html:99
+#: theme/templates/theme/includes/navbar.html:116
 msgid "Tenant"
 msgstr "Mandant"
 
 #: assets/templates/assets/devices/index.html:87
 msgid "No devices match these filters."
 msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
-
-#: assets/templates/assets/devices/index.html:88
-#: licenses/templates/licenses/index.html:144
-msgid "Clear filters"
-msgstr "Filter zurücksetzen"
 
 #: assets/templates/assets/includes/_person_list_item.html:42
 #: assets/templates/assets/includes/_room_list_item.html:40
@@ -436,6 +549,70 @@ msgstr "Keine entsprechende Person gefunden."
 #: assets/templates/assets/includes/_room_search_results.html:17
 msgid "No matching room found."
 msgstr "Kein entsprechender Raum gefunden."
+
+#: assets/templates/assets/manufacturers/index.html:4
+#: assets/templates/assets/manufacturers/index.html:8
+#: core/models/manufacturer.py:26
+msgid "Manufacturers"
+msgstr "Hersteller"
+
+#: assets/templates/assets/manufacturers/index.html:17
+#: assets/views/masterdata.py:90
+#, fuzzy
+#| msgid "Any manufacturer..."
+msgid "Add manufacturer"
+msgstr "Alle Hersteller..."
+
+#: assets/templates/assets/manufacturers/index.html:29
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s device"
+#| msgid_plural "%(counter)s of %(total)s devices"
+msgid "%(counter)s of %(total)s manufacturer"
+msgid_plural "%(counter)s of %(total)s manufacturers"
+msgstr[0] "%(counter)s von %(total)s Gerät"
+msgstr[1] "%(counter)s von %(total)s Geräten"
+
+#: assets/templates/assets/manufacturers/index.html:60
+#, fuzzy
+#| msgid "No devices match these filters."
+msgid "No manufacturers match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
+#: assets/templates/assets/masterdata/detail.html:15
+#, fuzzy
+#| msgid "Back to devices"
+msgid "Back to list"
+msgstr "Zurück zur Übersicht"
+
+#: assets/templates/assets/masterdata/detail.html:35
+#, fuzzy
+#| msgid "You may view this device but do not have permission to edit it."
+msgid "You may view this entry but do not have permission to edit it."
+msgstr ""
+"Sie können dieses Gerät anzeigen, haben jedoch keine Berechtigung, es zu "
+"bearbeiten."
+
+#: assets/templates/assets/masterdata/detail.html:58
+#: rooms/templates/rooms/detail.html:81
+msgid "Usage"
+msgstr ""
+
+#: assets/templates/assets/masterdata/detail.html:61
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s device"
+#| msgid_plural "%(counter)s of %(total)s devices"
+msgid "%(counter)s device"
+msgid_plural "%(counter)s devices"
+msgstr[0] "%(counter)s von %(total)s Gerät"
+msgstr[1] "%(counter)s von %(total)s Geräten"
+
+#: assets/templates/assets/masterdata/detail.html:74
+#: persons/templates/persons/detail.html:104
+#: rooms/templates/rooms/detail.html:96
+#, fuzzy
+#| msgid "Record type"
+msgid "Record data"
+msgstr "Record Typ"
 
 #: assets/templates/assets/relocate.html:32 assets/views/relocate.py:104
 msgid "Move devices"
@@ -469,6 +646,39 @@ msgstr "Raum-Suche via Raumnummer oder Nickname"
 msgid "Move now"
 msgstr "Jetzt umziehen"
 
+#: assets/templates/assets/suppliers/index.html:4
+#: assets/templates/assets/suppliers/index.html:8 core/models/supplier.py:28
+msgid "Suppliers"
+msgstr "Distributoren"
+
+#: assets/templates/assets/suppliers/index.html:17
+#: assets/views/masterdata.py:108
+#, fuzzy
+#| msgid "Supplier"
+msgid "Add supplier"
+msgstr "Distributor"
+
+#: assets/templates/assets/suppliers/index.html:29
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s license"
+#| msgid_plural "%(counter)s of %(total)s licenses"
+msgid "%(counter)s of %(total)s supplier"
+msgid_plural "%(counter)s of %(total)s suppliers"
+msgstr[0] "%(counter)s von %(total)s Lizenz"
+msgstr[1] "%(counter)s von %(total)s Lizenzen"
+
+#: assets/templates/assets/suppliers/index.html:39
+#, fuzzy
+#| msgid "Contract until"
+msgid "Contact"
+msgstr "Vertrag bis"
+
+#: assets/templates/assets/suppliers/index.html:62
+#, fuzzy
+#| msgid "No devices match these filters."
+msgid "No suppliers match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
 #: assets/views/devices.py:76
 msgid "Search IT ID, serial number, model..."
 msgstr "Suche nach IDs, Seriennummer, Modell..."
@@ -487,6 +697,48 @@ msgstr "Gerät erstellen"
 msgid "Device “%(device)s” was updated."
 msgstr "Gerät “%(device)s” wurde modifiziert."
 
+#: assets/views/masterdata.py:73
+#, fuzzy
+#| msgid "Create device"
+msgid "Create device type"
+msgstr "Gerät erstellen"
+
+#: assets/views/masterdata.py:74
+#, fuzzy
+#| msgid "Search device, person, note..."
+msgid "Search name, prefix..."
+msgstr "Suche Gerät, Person, Notiz..."
+
+#: assets/views/masterdata.py:91
+#, fuzzy
+#| msgid "Manufacturer"
+msgid "Create manufacturer"
+msgstr "Hersteller"
+
+#: assets/views/masterdata.py:92 assets/views/masterdata.py:110
+#, fuzzy
+#| msgid "Search device, person, note..."
+msgid "Search name, note..."
+msgstr "Suche Gerät, Person, Notiz..."
+
+#: assets/views/masterdata.py:109
+#, fuzzy
+#| msgid "Create device"
+msgid "Create supplier"
+msgstr "Gerät erstellen"
+
+#: assets/views/masterdata.py:160
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was created."
+msgid "%(model)s “%(obj)s” was created."
+msgstr "Gerät “%(device)s” wurde hinzugefügt."
+
+#: assets/views/masterdata.py:203
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was updated."
+msgid "%(model)s “%(obj)s” was updated."
+msgstr "Gerät “%(device)s” wurde modifiziert."
+
 #: core/admin/device_admin.py:320
 msgid "Relocate selected devices"
 msgstr "Ausgewählte Geräte umziehen"
@@ -499,37 +751,42 @@ msgstr "Wiederherstellung von REMOVED auf LOST"
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: core/context_processors.py:69
+#: core/context_processors.py:71
+#, fuzzy, python-format
+#| msgid "%(counter)s with note"
+#| msgid_plural "%(counter)s with notes"
+msgid "%(count)d device without record!"
+msgid_plural "%(count)d devices without record!"
+msgstr[0] "%(counter)s mit Notiz"
+msgstr[1] "%(counter)s mit Notizen"
+
+#: core/context_processors.py:77
 msgid "Add proper record?"
 msgstr "Einen Record hinzufügen?"
 
-#: core/context_processors.py:78
+#: core/context_processors.py:86
 msgid "No room configured as 'is_external'!"
 msgstr "Kein Raum als 'is_external' konfiguriert!"
 
-#: core/context_processors.py:80 core/context_processors.py:90
+#: core/context_processors.py:88 core/context_processors.py:98
 msgid "Configure one?"
 msgstr "Konfigurieren?"
 
-#: core/context_processors.py:88
+#: core/context_processors.py:96
 msgid "No room configured as 'is_auto_return_room'!"
 msgstr "Kein \"Auto return\" Raum konfiguriert!"
 
-#: core/context_processors.py:98
+#: core/context_processors.py:106
 msgid "No rooms defined yet."
 msgstr "Bisher wurden keine Räume  eingegeben."
 
-#: core/context_processors.py:100
+#: core/context_processors.py:108
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
 #: core/models/device.py:99
 msgid "Inventory number must be entered as the main number-sub-number."
 msgstr "Inventarnummer muss als Hauptnummer-Unternummer eingegeben werden."
-
-#: core/models/device.py:140 core/models/supplier.py:27 licenses/filters.py:36
-msgid "Supplier"
-msgstr "Distributor"
 
 #: core/models/device.py:144
 msgid "Is license?"
@@ -658,17 +915,9 @@ msgstr ""
 "Wenn aktiviert, werden bei der Gerätesuche nur Geräte des aktuellen "
 "Mandanten angezeigt."
 
-#: core/models/inventory.py:246 core/navigation.py:116
+#: core/models/inventory.py:246 core/navigation.py:31
 msgid "Inventories"
 msgstr "Inventuren"
-
-#: core/models/manufacturer.py:16 licenses/forms.py:135
-msgid "Name"
-msgstr "Name"
-
-#: core/models/manufacturer.py:26
-msgid "Manufacturers"
-msgstr "Hersteller"
 
 #: core/models/prx_lentrecord.py:97 lending/navigation.py:12
 #: lending/templates/lending/index.html:5
@@ -837,8 +1086,9 @@ msgstr "Standard Lizenz Location"
 msgid "Room or location where the license information is stored."
 msgstr "Raum oder Location wo die Lizenz aufbewahrt wird."
 
-#: core/models/room.py:73 core/navigation.py:28 core/navigation.py:60
-#: inventory/navigation.py:41
+#: core/models/room.py:73 inventory/navigation.py:41 rooms/apps.py:12
+#: rooms/navigation.py:12 rooms/templates/rooms/index.html:4
+#: rooms/templates/rooms/index.html:8
 msgid "Rooms"
 msgstr "Räume"
 
@@ -850,31 +1100,15 @@ msgstr ""
 "Kontakt- und Supportinformationen: Ansprechpersonen, Hotlines, Mailadressen "
 "etc."
 
-#: core/models/supplier.py:28
-msgid "Suppliers"
-msgstr "Distributoren"
-
-#: core/navigation.py:44 core/navigation.py:76
-msgid "Distributor"
-msgstr "Zulieferer"
-
-#: core/navigation.py:52 core/navigation.py:84
-msgid "Device types"
-msgstr "Geräteklassen"
-
-#: core/navigation.py:92
-msgid "People"
-msgstr "Personen"
-
-#: core/navigation.py:100
+#: core/navigation.py:15
 msgid "Records"
 msgstr "Records"
 
-#: core/navigation.py:108
+#: core/navigation.py:23
 msgid "Removed records"
 msgstr "Entfernt-Records"
 
-#: core/navigation.py:124
+#: core/navigation.py:39
 msgid "Notes"
 msgstr "Notizen"
 
@@ -903,6 +1137,7 @@ msgid "Room replication"
 msgstr "Raumabgleich"
 
 #: core/templates/core/room/change_list.html:21
+#: rooms/templates/rooms/index.html:17
 msgid "Floor plan"
 msgstr "Raumplan"
 
@@ -1114,6 +1349,8 @@ msgid "Device type..."
 msgstr "Geräteklasse..."
 
 #: lending/filters.py:57 lending/templates/lending/lend.html:81
+#: persons/templates/persons/detail.html:51
+#: persons/templates/persons/includes/_form_fields.html:11
 msgid "Person"
 msgstr "Person"
 
@@ -1683,6 +1920,310 @@ msgstr ""
 msgid "Branding"
 msgstr "Branding"
 
+#: persons/apps.py:12
+#, fuzzy
+#| msgid "Person"
+msgid "Persons"
+msgstr "Person"
+
+#: persons/filters.py:21 persons/templates/persons/detail.html:61
+#: persons/templates/persons/index.html:40
+msgid "Organizational unit"
+msgstr ""
+
+#: persons/filters.py:22
+#, fuzzy
+#| msgid "Any loanability..."
+msgid "Any organizational unit..."
+msgstr "Jede Verfügbarkeit..."
+
+#: persons/navigation.py:12 persons/templates/persons/index.html:4
+#: persons/templates/persons/index.html:8
+msgid "People"
+msgstr "Personen"
+
+#: persons/templates/persons/detail.html:16
+#: persons/templates/persons/index.html:60
+msgid "Managed by UDB sync"
+msgstr ""
+
+#: persons/templates/persons/detail.html:21
+#, fuzzy
+#| msgid "Back to devices"
+msgid "Back to people"
+msgstr "Zurück zur Übersicht"
+
+#: persons/templates/persons/detail.html:42
+msgid "This person is managed by the UDB sync and cannot be edited here."
+msgstr ""
+
+#: persons/templates/persons/detail.html:45
+#, fuzzy
+#| msgid "You may view this device but do not have permission to edit it."
+msgid "You may view this person but do not have permission to edit them."
+msgstr ""
+"Sie können dieses Gerät anzeigen, haben jedoch keine Berechtigung, es zu "
+"bearbeiten."
+
+#: persons/templates/persons/detail.html:55
+#, fuzzy
+#| msgid "Last sent"
+msgid "Last name"
+msgstr "Zuletzt versendet"
+
+#: persons/templates/persons/detail.html:57
+msgid "First name"
+msgstr ""
+
+#: persons/templates/persons/detail.html:59
+#: persons/templates/persons/index.html:39
+msgid "E-mail"
+msgstr ""
+
+#: persons/templates/persons/detail.html:74
+msgid "UDB data"
+msgstr ""
+
+#: persons/templates/persons/detail.html:80
+msgid "Business e-mail"
+msgstr ""
+
+#: persons/templates/persons/detail.html:82
+msgid "Private e-mail"
+msgstr ""
+
+#: persons/templates/persons/detail.html:84
+msgid "Organization unit"
+msgstr ""
+
+#: persons/templates/persons/detail.html:86
+#, fuzzy
+#| msgid "Contract until"
+msgid "Contract type"
+msgstr "Vertrag bis"
+
+#: persons/templates/persons/detail.html:88
+#, fuzzy
+#| msgid "Condition"
+msgid "Positions"
+msgstr "Bedingung"
+
+#: persons/templates/persons/detail.html:90
+msgid "Planned check-in"
+msgstr ""
+
+#: persons/templates/persons/detail.html:92
+msgid "Planned check-out"
+msgstr ""
+
+#: persons/templates/persons/detail.html:94
+msgid "Last UDB update"
+msgstr ""
+
+#: persons/templates/persons/index.html:17 persons/views.py:74
+#, fuzzy
+#| msgid "Person"
+msgid "Add person"
+msgstr "Person"
+
+#: persons/templates/persons/index.html:29
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s license"
+#| msgid_plural "%(counter)s of %(total)s licenses"
+msgid "%(counter)s of %(total)s person"
+msgid_plural "%(counter)s of %(total)s persons"
+msgstr[0] "%(counter)s von %(total)s Lizenz"
+msgstr[1] "%(counter)s von %(total)s Lizenzen"
+
+#: persons/templates/persons/index.html:73
+#, fuzzy
+#| msgid "No devices match these filters."
+msgid "No persons match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
+#: persons/views.py:51
+msgid "Search name or e-mail..."
+msgstr ""
+
+#: persons/views.py:68
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was created."
+msgid "Person “%(person)s” was created."
+msgstr "Gerät “%(device)s” wurde hinzugefügt."
+
+#: persons/views.py:74
+#, fuzzy
+#| msgid "Create device"
+msgid "Create person"
+msgstr "Gerät erstellen"
+
+#: persons/views.py:107
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was updated."
+msgid "Person “%(person)s” was updated."
+msgstr "Gerät “%(device)s” wurde modifiziert."
+
+#: rooms/filters.py:20
+#, fuzzy
+#| msgid "\"Auto return\" room"
+msgid "Auto-return room"
+msgstr "\"Auto return\" Raum"
+
+#: rooms/filters.py:20
+#, fuzzy
+#| msgid "\"Auto return\" room"
+msgid "No auto-return room"
+msgstr "\"Auto return\" Raum"
+
+#: rooms/filters.py:22 rooms/templates/rooms/detail.html:22
+#: rooms/templates/rooms/index.html:77
+#, fuzzy
+#| msgid "\"Auto return\" room"
+msgid "Auto return"
+msgstr "\"Auto return\" Raum"
+
+#: rooms/filters.py:23
+#, fuzzy
+#| msgid "Any import status..."
+msgid "Any auto-return status..."
+msgstr "Jeder Import-Status..."
+
+#: rooms/filters.py:26
+#, fuzzy
+#| msgid "External/Lent Room"
+msgid "External room"
+msgstr "Extern/Verliehen-Raum"
+
+#: rooms/filters.py:26
+#, fuzzy
+#| msgid "Contact (internal)"
+msgid "Not external"
+msgstr "Kontakt (intern)"
+
+#: rooms/filters.py:28 rooms/templates/rooms/detail.html:23
+#: rooms/templates/rooms/index.html:78
+#, fuzzy
+#| msgid "External/Lent Room"
+msgid "External"
+msgstr "Extern/Verliehen-Raum"
+
+#: rooms/filters.py:29
+#, fuzzy
+#| msgid "Any import status..."
+msgid "Any external status..."
+msgstr "Jeder Import-Status..."
+
+#: rooms/templates/rooms/detail.html:24 rooms/templates/rooms/index.html:79
+#, fuzzy
+#| msgid "License"
+msgid "License room"
+msgstr "Lizenz"
+
+#: rooms/templates/rooms/detail.html:28
+#, fuzzy
+#| msgid "Back to devices"
+msgid "Back to rooms"
+msgstr "Zurück zur Übersicht"
+
+#: rooms/templates/rooms/detail.html:48
+#, fuzzy
+#| msgid "You may view this device but do not have permission to edit it."
+msgid "You may view this room but do not have permission to edit it."
+msgstr ""
+"Sie können dieses Gerät anzeigen, haben jedoch keine Berechtigung, es zu "
+"bearbeiten."
+
+#: rooms/templates/rooms/detail.html:57
+msgid "Number"
+msgstr ""
+
+#: rooms/templates/rooms/detail.html:59
+#, fuzzy
+#| msgid "Nickname / C-Name"
+msgid "Nickname"
+msgstr "Nickname / C-Name"
+
+#: rooms/templates/rooms/detail.html:61 rooms/templates/rooms/index.html:49
+#, fuzzy
+#| msgid "Subscriptions"
+msgid "Description"
+msgstr "Abonnements"
+
+#: rooms/templates/rooms/detail.html:63 rooms/templates/rooms/index.html:71
+msgid "Website"
+msgstr ""
+
+#: rooms/templates/rooms/detail.html:84
+#, fuzzy, python-format
+#| msgid "%(counter)s with note"
+#| msgid_plural "%(counter)s with notes"
+msgid "%(counter)s device in this room"
+msgid_plural "%(counter)s devices in this room"
+msgstr[0] "%(counter)s mit Notiz"
+msgstr[1] "%(counter)s mit Notizen"
+
+#: rooms/templates/rooms/detail.html:125
+#, python-format
+msgid "QR code for room %(room)s"
+msgstr ""
+
+#: rooms/templates/rooms/includes/_form_fields.html:27
+msgid "Special roles"
+msgstr ""
+
+#: rooms/templates/rooms/index.html:22
+#, fuzzy
+#| msgid "Room replication"
+msgid "Room reconcile"
+msgstr "Raumabgleich"
+
+#: rooms/templates/rooms/index.html:27 rooms/views.py:87
+#, fuzzy
+#| msgid "Add some rooms?"
+msgid "Add room"
+msgstr "Räume hinzufügen?"
+
+#: rooms/templates/rooms/index.html:39
+#, fuzzy, python-format
+#| msgid "%(counter)s of %(total)s device"
+#| msgid_plural "%(counter)s of %(total)s devices"
+msgid "%(counter)s of %(total)s room"
+msgid_plural "%(counter)s of %(total)s rooms"
+msgstr[0] "%(counter)s von %(total)s Gerät"
+msgstr[1] "%(counter)s von %(total)s Geräten"
+
+#: rooms/templates/rooms/index.html:50
+msgid "Properties"
+msgstr ""
+
+#: rooms/templates/rooms/index.html:90
+#, fuzzy
+#| msgid "No devices match these filters."
+msgid "No rooms match these filters."
+msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
+
+#: rooms/views.py:62
+msgid "Search number, nickname, description..."
+msgstr ""
+
+#: rooms/views.py:81
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was created."
+msgid "Room “%(room)s” was created."
+msgstr "Gerät “%(device)s” wurde hinzugefügt."
+
+#: rooms/views.py:87
+#, fuzzy
+#| msgid "Target room"
+msgid "Create room"
+msgstr "Raum"
+
+#: rooms/views.py:115
+#, fuzzy, python-format
+#| msgid "Device “%(device)s” was updated."
+msgid "Room “%(room)s” was updated."
+msgstr "Gerät “%(device)s” wurde modifiziert."
+
 #: smallstuff/apps.py:12 smallstuff/navigation.py:12
 #: smallstuff/templates/smallstuff/person_search.html:6
 msgid "Smallstuff"
@@ -1756,12 +2297,12 @@ msgstr "Prozesse"
 msgid "Data management"
 msgstr "Datenhaltung"
 
-#: templates/admin/navbar.html:75 theme/templates/theme/includes/navbar.html:69
+#: templates/admin/navbar.html:75 theme/templates/theme/includes/navbar.html:86
 msgid "Settings"
 msgstr "Einstellungen"
 
 #: templates/admin/navbar.html:112
-#: theme/templates/theme/includes/navbar.html:137
+#: theme/templates/theme/includes/navbar.html:154
 msgid "Language"
 msgstr "Sprache"
 
@@ -1855,35 +2396,39 @@ msgstr "Problem melden"
 msgid "Main navigation"
 msgstr "Hauptnavigation"
 
-#: theme/templates/theme/includes/navbar.html:84
+#: theme/templates/theme/includes/navbar.html:46
+msgid "Master data"
+msgstr ""
+
+#: theme/templates/theme/includes/navbar.html:101
 msgid "Django admin"
 msgstr "Django Site-Verwaltung"
 
-#: theme/templates/theme/includes/navbar.html:99
+#: theme/templates/theme/includes/navbar.html:116
 msgid "Superusers are not tenant aware"
 msgstr "Superuser sind nicht auf Mandanten beschränkt"
 
-#: theme/templates/theme/includes/navbar.html:99
+#: theme/templates/theme/includes/navbar.html:116
 msgid "Superuser"
 msgstr ""
 
-#: theme/templates/theme/includes/navbar.html:111
+#: theme/templates/theme/includes/navbar.html:128
 msgid "Subscriptions"
 msgstr "Abonnements"
 
-#: theme/templates/theme/includes/navbar.html:118
+#: theme/templates/theme/includes/navbar.html:135
 msgid "Toggle theme"
 msgstr "Theme umschalten"
 
-#: theme/templates/theme/includes/navbar.html:122
+#: theme/templates/theme/includes/navbar.html:139
 msgid "Light"
 msgstr "Hell"
 
-#: theme/templates/theme/includes/navbar.html:125
+#: theme/templates/theme/includes/navbar.html:142
 msgid "Dark"
 msgstr "Dunkel"
 
-#: theme/templates/theme/includes/navbar.html:128
+#: theme/templates/theme/includes/navbar.html:145
 msgid "Auto"
 msgstr "Auto"
 
@@ -1911,15 +2456,15 @@ msgstr "Kein Record"
 msgid "No matching device found."
 msgstr "Kein passendes Gerät gefunden."
 
-#: theme/templates/theme/widgets/icon_picker.html:25
+#: theme/templates/theme/widgets/icon_picker.html:26
 msgid "Browse…"
 msgstr "Browse..."
 
-#: theme/templates/theme/widgets/icon_picker.html:31
+#: theme/templates/theme/widgets/icon_picker.html:32
 msgid "Search icons…"
 msgstr "Icons suchen..."
 
-#: theme/templates/theme/widgets/icon_picker.html:33
+#: theme/templates/theme/widgets/icon_picker.html:34
 msgid "No matching icon."
 msgstr "Kein passendes Icon."
 
@@ -1930,6 +2475,16 @@ msgstr "Zugriff verweigert."
 #: theme/widgets.py:37 theme/widgets.py:56
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
+
+#, fuzzy
+#~| msgid "Modified"
+#~ msgid "Modified by"
+#~ msgstr "Geändert"
+
+#, fuzzy
+#~| msgid "No rooms defined yet."
+#~ msgid "No QR code generated yet."
+#~ msgstr "Bisher wurden keine Räume  eingegeben."
 
 #~ msgid "Show all"
 #~ msgstr "Zeige alle"
