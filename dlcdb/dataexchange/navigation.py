@@ -25,7 +25,7 @@ nav_entries = [
     {
         "slot": "nav_settings",
         "order": 40,
-        "label": _("UDB sync configuration"),
+        "label": _("HR API sync configuration"),
         "icon": "bi bi-arrow-clockwise",
         "url": "admin:dataexchange_udbsyncconfiguration_changelist",
         "required_permission": "dataexchange.view_udbsyncconfiguration",

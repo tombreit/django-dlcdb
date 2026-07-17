@@ -72,7 +72,7 @@ Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem 
 | Einstellungen › Ausleih-Profile | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
 | Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
-| Einstellungen › UDB Sync Konfiguration | Dataexchange \| udb sync configuration \| Can view udb sync configuration | `dataexchange.view_udbsyncconfiguration` |
+| Einstellungen › HR-API-Sync-Konfiguration | Dataexchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 
 :::{tip}
 Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **gespiegelten Gruppen** zu (siehe LDAP-Hinweis oben unter „Benutzer, Gruppen und Tenants einrichten“). Manuell in der DLCDB angelegte Gruppenzugehörigkeiten können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.

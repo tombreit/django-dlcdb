@@ -171,27 +171,27 @@ class UdbSyncConfiguration(SingletonBaseModel):
     )
     url = models.URLField(
         blank=True,
-        verbose_name="UDB URL",
+        verbose_name="HR API URL",
         help_text=(
-            "Complete URL of the UDB contracts API endpoint or a ready-made JSON dump, "
+            "Complete URL of the HR contracts API endpoint or a ready-made JSON dump, "
             "without a query string — e.g. "
-            "<code>https://udb.example.org/api/external_interface/contracts/</code>. "
+            "<code>https://hr.example.org/api/external_interface/contracts/</code>. "
             "Filters and requested fields are appended by the code (a static JSON file simply ignores them)."
         ),
     )
     api_token = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="UDB API token",
+        verbose_name="HR API token",
         help_text="Sent as the <code>X-API-KEY</code> header. Stored in plaintext in the database.",
     )
 
     class Meta:
-        verbose_name = "UDB Sync Configuration"
-        verbose_name_plural = "UDB Sync Configuration"
+        verbose_name = "HR API Sync Configuration"
+        verbose_name_plural = "HR API Sync Configuration"
 
     def __str__(self):
-        return "UDB Sync Configuration"
+        return "HR API Sync Configuration"
 
     def clean(self):
         super().clean()
@@ -211,9 +211,9 @@ class UdbSyncRun(OperationLogBase):
     """
 
     class Meta:
-        verbose_name = "UDB Sync Run"
-        verbose_name_plural = "UDB Sync Runs"
+        verbose_name = "HR API Sync Run"
+        verbose_name_plural = "HR API Sync Runs"
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"UDB Sync Run {self.created_at:%Y-%m-%d %H:%M} ({self.status or 'pending'})"
+        return f"HR API Sync Run {self.created_at:%Y-%m-%d %H:%M} ({self.status or 'pending'})"

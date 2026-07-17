@@ -93,7 +93,7 @@ which is especially useful for the sap list comparison.
 
 Represents a person. Used by the LentRecord in order to relate the record to the person
 that lents the related device.
-Person data is enriched with UDB contract data.
+Person data is enriched with contract data from the HR system.
 
 ## Room
 

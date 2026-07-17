@@ -107,45 +107,61 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
 
     # Additional UDB mirrored fields, all optional, updated by a cron task:
     udb_data_updated_at = models.DateTimeField(
+        verbose_name="Last HR API update",
         editable=False,
         null=True,
     )
     udb_person_first_name = models.CharField(
+        verbose_name="HR first name",
         max_length=255,
         blank=True,
         null=True,
     )
     udb_person_last_name = models.CharField(
+        verbose_name="HR last name",
         max_length=255,
         blank=True,
         null=True,
     )
     udb_person_email_private = models.EmailField(
+        verbose_name="HR private email",
         unique=True,
         max_length=320,
         blank=True,
         null=True,  # we need null=True to have unique=True together with missing values, stored as null
     )
     udb_person_email_internal_business = models.EmailField(
+        verbose_name="HR internal business email",
         unique=True,
         max_length=320,
         blank=True,
         null=True,
     )
-    udb_person_image = models.ImageField(blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/")
+    udb_person_image = models.ImageField(
+        verbose_name="HR person image", blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/"
+    )
     # md5 of the source base64 last imported from UDB. Lets the sync skip rewriting
     # an unchanged image and detect an actual image change (the file path alone is
     # deterministic and never reflects a content change).
-    udb_person_image_hash = models.CharField(max_length=32, blank=True, editable=False)
+    udb_person_image_hash = models.CharField(
+        verbose_name="HR person image hash", max_length=32, blank=True, editable=False
+    )
     # TODO: Use stay-dates instead of individual contract dates to avoid
     # please-return notifications if a follow up contract exists.
-    udb_person_uuid = models.CharField(max_length=255, blank=True, null=True, unique=True)
-    udb_contract_organization_unit = models.CharField(max_length=255, blank=True)
-    udb_contract_planned_checkin = models.DateField(blank=True, null=True)
-    udb_contract_planned_checkout = models.DateField(blank=True, null=True)
-    udb_contract_organization_unit = models.CharField(max_length=255, blank=True)
-    udb_contract_contract_type = models.CharField(max_length=255, blank=True)
-    udb_contract_organizational_positions = models.CharField(max_length=255, blank=True)
+    udb_person_uuid = models.CharField(
+        verbose_name="HR person UUID", max_length=255, blank=True, null=True, unique=True
+    )
+    udb_contract_organization_unit = models.CharField(
+        verbose_name="HR contract organization unit", max_length=255, blank=True
+    )
+    udb_contract_planned_checkin = models.DateField(verbose_name="HR contract planned check-in", blank=True, null=True)
+    udb_contract_planned_checkout = models.DateField(
+        verbose_name="HR contract planned check-out", blank=True, null=True
+    )
+    udb_contract_contract_type = models.CharField(verbose_name="HR contract type", max_length=255, blank=True)
+    udb_contract_organizational_positions = models.CharField(
+        verbose_name="HR contract organizational positions", max_length=255, blank=True
+    )
 
     class Meta:
         ordering = ["last_name", "first_name"]

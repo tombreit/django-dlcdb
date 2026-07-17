@@ -117,14 +117,14 @@ class UdbSyncConfigurationAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    @admin.action(description="Run UDB sync now")
+    @admin.action(description="Run HR API sync now")
     def sync_now(self, request, queryset):
         # Enqueue the relocated huey task; imported lazily to avoid loading the
         # task module (and huey) at admin import time.
         from .tasks import task_import_udb_persons
 
         task_import_udb_persons()
-        messages.info(request, "UDB sync has been enqueued. See the 'UDB Sync Runs' list for the result.")
+        messages.info(request, "HR API sync has been enqueued. See the 'HR API Sync Runs' list for the result.")
 
 
 @admin.register(UdbSyncRun)

@@ -87,7 +87,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
             },
         ),
         (
-            "UDB data",
+            "HR API data",
             {
                 "classes": ("collapse",),
                 "fields": (*udb_fields,),

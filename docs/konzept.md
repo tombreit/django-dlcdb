@@ -96,6 +96,6 @@ Die DLCDB setzt konsequent auf einen "schmalen" Technik-Stack:
   für jede Rolle übersichtlich.
 - **Ein Prozess plus ein Worker.** Neben dem Webprozess läuft genau ein
   huey-Worker für Hintergrundaufgaben (Benachrichtigungen,
-  UDB-Sync) — ebenfalls SQLite-basiert, ohne Redis oder Message-Broker.
+  HR-Sync) — ebenfalls SQLite-basiert, ohne Redis oder Message-Broker.
 
 ![Device-Detailseite mit aktivem Record und Historie](/_static/device-detail.webp){.sd-card}

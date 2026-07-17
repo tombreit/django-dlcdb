@@ -1,12 +1,12 @@
-# UDB
+# HR-Sync
 
-Die DLCDB kann die Personendaten (z.B. für den Verleih) mit der UDB abgleichen.
+Die DLCDB kann die Personendaten (z.B. für den Verleih) mit einem HR-System (Personal-/Vertragsverwaltung) über dessen API abgleichen.
 
 ## Ziele
 
-- **[Autarkie]** Die DLCDB bleibt voll funktionsfähig, auch wenn keine UDB-Daten abgreifbar oder vorhanden sind.
-- **[Redundanz]** Die Personen- und Vertragsdaten aus der UDB für den DLCDB-Verleih nutzen.
-- Die UDB soll wissen, welche Devices eine Person ausgeliehen hat (siehe [API](api))
+- **[Autarkie]** Die DLCDB bleibt voll funktionsfähig, auch wenn keine HR-Daten abgreifbar oder vorhanden sind.
+- **[Redundanz]** Die Personen- und Vertragsdaten aus dem HR-System für den DLCDB-Verleih nutzen.
+- Das HR-System soll wissen, welche Devices eine Person ausgeliehen hat (siehe [API](api))
 
 ## User stories
 
@@ -16,18 +16,18 @@ Die DLCDB kann die Personendaten (z.B. für den Verleih) mit der UDB abgleichen.
 
 ## Quirks
 
-- UDB-API ist aus aktuellem Netzwerksegment von der DLCDB nicht abfragbar.
+- HR-API ist aus aktuellem Netzwerksegment von der DLCDB nicht abfragbar.
   - **Lösung:** Erzeugung eines JSON und verschieben des JSON ins Netzwerksegment der DLCDB.
 - Personen, die keinen aktuellen Vertrag mehr haben, müssen weiterhin als Datenbankobjekte in der DLCDB vorhanden sein (Audit, Historie etc.).
   - **Lösung:** Abgelaufene Verträge bzw. Personen werden soft-deleted, sofern sie keine aktuellen Ausleihen mehr haben.
-- Datenänderungen in der UDB (Vertragsverlängerung etc.) sollte sich die DLCDB holen und abgleichen.
+- Datenänderungen im HR-System (Vertragsverlängerung etc.) sollte sich die DLCDB holen und abgleichen.
   - **Lösung:** Ein cronjob (huey) updated das DLCDB-Person-Model regelmäßig.
-- DLCDB hat Personen, für die keine Daten in der UDB zu finden sind.
+- DLCDB hat Personen, für die keine Daten im HR-System zu finden sind.
   - **Lösung:** Ist kein Problem, sondern eine Flexibilität.
 
 ## Gespiegelte Felder
 
-Für diese use cases müssen die folgenden Informationen aus der UDB in der DLCDB vorhanden sein/gespiegelt werden:
+Für diese use cases müssen die folgenden Informationen aus dem HR-System in der DLCDB vorhanden sein/gespiegelt werden:
 
 - Vorname
 - Nachname
@@ -39,14 +39,14 @@ Für diese use cases müssen die folgenden Informationen aus der UDB in der DLCD
 
 ## Konfiguration
 
-Die UDB-Integration wird im Django-Admin konfiguriert: *Data exchange › UDB Sync Configuration* (Singleton).
+Die HR-Integration wird im Django-Admin konfiguriert: *Data exchange › HR API Sync Configuration* (Singleton).
 
 - **enabled** – aktiviert Cronjob und Management-Command.
-- **url** – die vollständige URL ohne Query-String: entweder der UDB-API-Endpunkt (z.B. `https://udb.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
+- **url** – die vollständige URL ohne Query-String: entweder der HR-API-Endpunkt (z.B. `https://hr.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
 - **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert).
 
 Request-Filter (nur aktive Verträge, keine Testdaten) und abgefragte Felder sind bewusst im Code verankert (`dlcdb/dataexchange/udb_sync.py`), nicht konfigurierbar.
 
 ## Scheduler
 
-Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen (huey-Task `task_import_udb_persons`). Manueller Anstoß per `./manage.py udb_sync_persons` oder im Admin über die Aktion „Run UDB sync now“.
+Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen (huey-Task `task_import_udb_persons`). Manueller Anstoß per `./manage.py udb_sync_persons` oder im Admin über die Aktion „Run HR API sync now“.

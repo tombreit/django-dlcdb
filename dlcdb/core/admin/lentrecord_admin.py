@@ -248,7 +248,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
         contract_end_date = obj.person.udb_contract_planned_checkout
 
         if not contract_end_date:
-            messages.warning(request, f"Warnung: Kein UDB Vertragsablaufdatum für {obj.person} gefunden!")
+            messages.warning(request, f"Warnung: Kein HR-Vertragsablaufdatum für {obj.person} gefunden!")
 
         if contract_end_date:
             if desired_lent_end_date > contract_end_date:

@@ -13,7 +13,7 @@ model
 news
 management_commands
 api
-udb
+hr-sync
 ```
 
 `````

@@ -13,7 +13,7 @@
       <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
         {% if person.organizational_unit %}<span>{{ person.organizational_unit }}</span>{% endif %}
         {% if is_udb_synced %}
-          <span class="badge text-bg-light border fw-normal" title="{% translate 'Managed by UDB sync' %}">UDB</span>
+          <span class="badge text-bg-light border fw-normal" title="{% translate 'Managed by HR API sync' %}">HR</span>
         {% endif %}
       </div>
     </div>
@@ -39,7 +39,7 @@
         <div class="alert alert-secondary d-flex align-items-center gap-2">
           {% if is_udb_synced %}
             <i class="bi bi-arrow-repeat"></i>
-            {% translate "This person is managed by the UDB sync and cannot be edited here." %}
+            {% translate "This person is managed by the HR API sync and cannot be edited here." %}
           {% else %}
             <i class="bi bi-eye"></i>
             {% translate "You may view this person but do not have permission to edit them." %}
@@ -71,7 +71,7 @@
         <section class="card mb-3">
           <div class="card-header d-flex align-items-center gap-2">
             <i class="bi bi-arrow-repeat text-primary"></i>
-            <h2 class="h6 mb-0">{% translate "UDB data" %}</h2>
+            <h2 class="h6 mb-0">{% translate "HR API data" %}</h2>
           </div>
           <div class="card-body">
             <dl class="row mb-0 small">
@@ -91,7 +91,7 @@
               <dd class="col-sm-7">{{ person.udb_contract_planned_checkin|date:"Y-m-d"|default:"—" }}</dd>
               <dt class="col-sm-5 text-secondary fw-medium">{% translate "Planned check-out" %}</dt>
               <dd class="col-sm-7">{{ person.udb_contract_planned_checkout|date:"Y-m-d"|default:"—" }}</dd>
-              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Last UDB update" %}</dt>
+              <dt class="col-sm-5 text-secondary fw-medium">{% translate "Last HR API update" %}</dt>
               <dd class="col-sm-7 mb-0">{{ person.udb_data_updated_at|date:"Y-m-d H:i"|default:"—" }}</dd>
             </dl>
           </div>

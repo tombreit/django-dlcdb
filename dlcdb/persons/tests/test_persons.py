@@ -50,7 +50,7 @@ class PersonFrontendTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Musterfrau")
         self.assertContains(response, "Mustermann")
-        self.assertContains(response, ">UDB</span>")
+        self.assertContains(response, ">HR</span>")
         self.assertContains(response, "Add person")
 
     def test_index_htmx_response_is_fragment_only(self):
@@ -109,7 +109,7 @@ class PersonFrontendTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, '<form method="post"')
-        self.assertContains(response, "managed by the UDB sync")
+        self.assertContains(response, "managed by the HR API sync")
         self.assertContains(response, "Mustermann-UDB")
 
         denied = self.client.post(url, {"last_name": "Hacked", "first_name": "Max", "email": "max@example.com"})

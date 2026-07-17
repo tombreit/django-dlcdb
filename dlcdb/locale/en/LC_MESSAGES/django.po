@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 21:40+0200\n"
+"POT-Creation-Date: 2026-07-17 23:35+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -947,7 +947,7 @@ msgstr ""
 
 #: core/models/record.py:153
 msgid ""
-"If on, the desired return date follows the borrower's UDB contract end date "
+"If on, the desired return date follows the borrower's HR contract end date "
 "on each sync. Turn off to keep a custom return date."
 msgstr ""
 
@@ -1160,7 +1160,7 @@ msgid "Bulk decommissioning"
 msgstr ""
 
 #: dataexchange/navigation.py:28
-msgid "UDB sync configuration"
+msgid "HR API sync configuration"
 msgstr ""
 
 #: dataexchange/templates/dataexchange/import.html:18
@@ -1412,7 +1412,7 @@ msgstr ""
 
 #: lending/views.py:187
 #, python-format
-msgid "Warning: No UDB contract end date found for %(person)s!"
+msgid "Warning: No HR contract end date found for %(person)s!"
 msgstr ""
 
 #: lending/views.py:189
@@ -1856,7 +1856,7 @@ msgstr ""
 
 #: persons/templates/persons/detail.html:16
 #: persons/templates/persons/index.html:60
-msgid "Managed by UDB sync"
+msgid "Managed by HR API sync"
 msgstr ""
 
 #: persons/templates/persons/detail.html:21
@@ -1864,7 +1864,7 @@ msgid "Back to people"
 msgstr ""
 
 #: persons/templates/persons/detail.html:42
-msgid "This person is managed by the UDB sync and cannot be edited here."
+msgid "This person is managed by the HR API sync and cannot be edited here."
 msgstr ""
 
 #: persons/templates/persons/detail.html:45
@@ -1885,7 +1885,7 @@ msgid "E-mail"
 msgstr ""
 
 #: persons/templates/persons/detail.html:74
-msgid "UDB data"
+msgid "HR API data"
 msgstr ""
 
 #: persons/templates/persons/detail.html:80
@@ -1917,7 +1917,7 @@ msgid "Planned check-out"
 msgstr ""
 
 #: persons/templates/persons/detail.html:94
-msgid "Last UDB update"
+msgid "Last HR API update"
 msgstr ""
 
 #: persons/templates/persons/index.html:17 persons/views.py:74

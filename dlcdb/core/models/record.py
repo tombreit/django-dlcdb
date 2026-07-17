@@ -150,7 +150,7 @@ class Record(AuditBaseModel):
         default=False,
         verbose_name=_("Sync return date with contract end"),
         help_text=_(
-            "If on, the desired return date follows the borrower's UDB contract end "
+            "If on, the desired return date follows the borrower's HR contract end "
             "date on each sync. Turn off to keep a custom return date."
         ),
     )

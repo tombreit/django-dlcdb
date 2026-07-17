@@ -184,7 +184,7 @@ def _lending_soft_warnings(request, form):
 
     contract_end = person.udb_contract_planned_checkout
     if not contract_end:
-        messages.warning(request, _("Warning: No UDB contract end date found for %(person)s!") % {"person": person})
+        messages.warning(request, _("Warning: No HR contract end date found for %(person)s!") % {"person": person})
     elif desired_end and desired_end > contract_end:
         messages.warning(request, _("Warning: Contract ends before the desired return date!"))
 
