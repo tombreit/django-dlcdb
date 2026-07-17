@@ -7,6 +7,7 @@ import string
 from datetime import datetime
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -53,8 +54,9 @@ def unique_value(generate, used_values):
 
 class Command(BaseCommand):
     help = (
-        "Anonymizes Person names/emails/photos and Device serial numbers, "
-        "e.g. before taking screenshots of the running app."
+        "Anonymizes Person names/emails/photos, Device serial numbers and "
+        "user accounts (username/names/email), e.g. before taking "
+        "screenshots of the running app."
     )
 
     def add_arguments(self, parser):
@@ -184,6 +186,39 @@ class Command(BaseCommand):
 
                 devices_touched += 1
 
+            # CustomUser logs in via its unique email (USERNAME_FIELD), so the
+            # printed old -> new email mapping is the only way to know the new
+            # login credentials. Passwords are left untouched.
+            UserModel = get_user_model()
+            used_usernames = set(filter(None, UserModel.objects.values_list("username", flat=True)))
+            used_user_emails = set(filter(None, UserModel.objects.values_list("email", flat=True)))
+
+            users_touched = 0
+            # The udb-sync actor is looked up by this exact email in
+            # dataexchange/udb_sync.py and carries no personal data.
+            for user in UserModel.objects.exclude(email="udb-sync@dlcdb.invalid"):
+                print(80 * "-")
+                print(f"{user=}")
+
+                new_username = unique_value(fake.user_name, used_usernames)
+                new_first_name = fake.first_name()
+                new_last_name = fake.last_name()
+                new_email = unique_value(fake.email, used_user_emails)
+
+                print(f"username: {user.username!r} -> {new_username!r}")
+                print(f"first_name: {user.first_name!r} -> {new_first_name!r}")
+                print(f"last_name: {user.last_name!r} -> {new_last_name!r}")
+                print(f"email (login): {user.email!r} -> {new_email!r}")
+
+                if write:
+                    user.username = new_username
+                    user.first_name = new_first_name
+                    user.last_name = new_last_name
+                    user.email = new_email
+                    user.save(update_fields=["username", "first_name", "last_name", "email"])
+
+                users_touched += 1
+
             if not write:
                 # Dryrun: nothing above actually wrote to the db, but roll back
                 # regardless in case any save() call above slipped through.
@@ -193,10 +228,15 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"{'Anonymized' if write else '[Dryrun] Would anonymize'}: "
-                f"{persons_touched} person(s), {devices_touched} device(s)."
+                f"{persons_touched} person(s), {devices_touched} device(s), {users_touched} user(s)."
             )
         )
 
         if write:
             self.stdout.write(self.style.WARNING(f"Database file: {db_path}"))
             self.stdout.write(self.style.WARNING(f"Backup file: {backup_path}"))
+            self.stdout.write(
+                self.style.WARNING(
+                    "User login emails have changed - see the printed mapping above. Passwords are unchanged."
+                )
+            )
