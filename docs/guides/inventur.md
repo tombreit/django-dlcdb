@@ -50,9 +50,9 @@ Geräte-Inventurnotizen erscheinen auch im [SAP-Abgleich](#sap-abgleich).
 
 ### Sonderfälle
 
-### Nicht auffindbare Geräte
+#### Nicht auffindbare Geräte
 
-Wird ein Gerät über den Iventurmodus auf "Nicht auffindbar" gesetzt, muss das entsprechende Gerät auch wieder über den Inventurmodus auf "Gefunden" gesetzt werden, damit der aktuelle Inventurstempel auf den neuen Status zeigt.  
+Wird ein Gerät über den Inventurmodus auf "Nicht auffindbar" gesetzt, muss das entsprechende Gerät auch wieder über den Inventurmodus auf "Gefunden" gesetzt werden, damit der aktuelle Inventurstempel auf den neuen Status zeigt.  
 Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der DLCDB (Backend, Django-Admin etc.) wieder einem neuen Raum zugeordnet, bleibt der Inventurstempel auf dem letzten inventarisierten Record "Nicht auffindbar".
 
 #### Verleihgeräte
@@ -66,11 +66,11 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ### Nacharbeiten
 
-- [SAP-Ableich (*Prozesse > SAP-Abgleich*)](#sap-abgleich)
+- [SAP-Abgleich (*Prozesse > SAP-Abgleich*)](#sap-abgleich)
 
 ## Geräte-Übersicht
 
-Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht (*Hauptnavigation > Devices*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant/Kunde eingeschränkt.
+Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant/Kunde eingeschränkt.
 
 Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurstatus ausstehend etc.).
 
@@ -78,7 +78,7 @@ Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurst
 
 ## Hinweise
 
-- Geräteänderungen im Inventurmodus werden erst übertragen, wenn der der Button "Save inventory for room..." angeklickt wird. Es ist daher problemlos möglich, Iventurstatusänderungen an Geräten vorzunehmen und auch wiederholt zu ändern, ohne eine Inventarisierungsaktion auszulösen. Der Status einer Rauminventur wird erst und ausschließlich beim oben genannten Speichern des Raums übertragen.
+- Geräteänderungen im Inventurmodus werden erst übertragen, wenn der Button "Save inventory for room..." angeklickt wird. Es ist daher problemlos möglich, Inventurstatusänderungen an Geräten vorzunehmen und auch wiederholt zu ändern, ohne eine Inventarisierungsaktion auszulösen. Der Status einer Rauminventur wird erst und ausschließlich beim oben genannten Speichern des Raums übertragen.
 - Die Person, die an der DLCDB angemeldet ist, wird in diversen Auswertungen vermerkt. Daher sollten personalisierte Accounts für die Inventarisierung genutzt werden (und z.B. nicht der Benutzername 'admin').
 - Ein Raum gilt als fertig inventarisiert, wenn alle Devices die aktuell diesem Raum zugeordnet sind irgendeinen Record vom Typ INROOM oder LENT haben, der einen aktuellen Inventurstempel hat.
 
@@ -97,7 +97,7 @@ Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurst
 
 - Ausgabedateien
 
-  Als Ausgabedatei eines "Ableichs" produziert die DLCDB ein CSV-Format, welches direkt mit Excel geöffnet werden kann. Die Ausgabedatei ist das Ergebnis der Inventur und enthält unverändert die Spalten der Importdatei, erweitert um neue Spalten mit Inventur-relevanten Daten.
+  Als Ausgabedatei eines "Abgleichs" produziert die DLCDB ein CSV-Format, welches direkt mit Excel geöffnet werden kann. Die Ausgabedatei ist das Ergebnis der Inventur und enthält unverändert die Spalten der Importdatei, erweitert um neue Spalten mit Inventur-relevanten Daten.
 
 - Was geschieht beim SAP-Abgleich?
     - Die Inventurliste der Verwaltung wird Zeile für Zeile durchgegangen
@@ -113,9 +113,8 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
 
 - Tip: Mobiles Endgerät (Smartphone, Tablet) nutzen
 - Inventur-Ansicht öffnen
-- *QR-Scanner* (Schalter rechts oben) einschalten
-- Seite neu laden
-- Raum-Schild scannen, App welchselt in den gescannten Raum
+- *QR-Scanner* (Schalter rechts oben) einschalten — die Seite lädt automatisch neu
+- Raum-Schild scannen, App wechselt in den gescannten Raum
 - Assets scannen
 - Nächstes Raum-Schild scannen
 - Assets scannen
@@ -129,7 +128,7 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
 ### QR-Codes
 
 - Jedes Device hat automatisch eine eindeutige UUID
-- Für jedes Gerät wird ein QR-Code geniert, der sich aus einem Prefix, einem (optionalen) Infix und einem Suffix zusammensetzt:
+- Für jedes Gerät wird ein QR-Code generiert, der sich aus einem Prefix, einem (optionalen) Infix und einem Suffix zusammensetzt:
 
     - Prefix: String, wird in via `settings` definiert, dient der Unterscheidung von eigenen und fremden QR-Codes. Zum Beispiel: `DLCDB` oder `example.com`
     - Suffix: UUID eines Items, in der Regel eines Devices

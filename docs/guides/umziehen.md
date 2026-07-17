@@ -2,7 +2,7 @@
 
 ## Umzug eines einzelnen Gerätes
 
-- Umzuziehendes Gerät aufrufen. Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
+- Umzuziehendes Gerät in der Geräte-Übersicht (*Hauptmenü › Geräte*) aufrufen. Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
 - Im Dropdown-Menü "Lokalisiert" auswählen.
 - Neuen Raum angeben.
 - Neue Raumzuordnung speichern.
@@ -14,12 +14,15 @@ Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", 
 
 ## Umzug mehrerer Geräte
 
-- "Device-Admin" aufrufen
-- Umzuziehende Geräte aufrufen.
-  - Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
-  - Die Paginierung kann via "Zeige alle" in der Fußzeile der Gerätetabelle deaktiviert werden.
-- Im Django-Admin Actions Dropdown "Relocate" auswählen
-- Gerätedaten nochmals prüfen.
+- Menüpunkt *Umziehen* im Hauptmenü aufrufen.
+- Umzuziehende Geräte auswählen (Mehrfachauswahl; die Suche hilft bei der Auswahl).
 - Neuen Raum angeben.
   - Nur für Superuser: Es kann auch ein neuer Tenant angegeben werden.
-- Button "Relocate devices" anklicken.
+- Umzug speichern.
+
+![Umziehen mehrerer Geräte](/_static/relocate.webp){.sd-card}
+
+:::{note}
+**Fallback Django-Admin:** Der Massen-Umzug ist alternativ auch im
+Device-Admin über die Action *Relocate* möglich.
+:::

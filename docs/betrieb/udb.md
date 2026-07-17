@@ -6,7 +6,7 @@ Die DLCDB kann die Personendaten (z.B. für den Verleih) mit der UDB abgleichen.
 
 - **[Autarkie]** Die DLCDB bleibt voll funktionsfähig, auch wenn keine UDB-Daten abgreifbar oder vorhanden sind.
 - **[Redundanz]** Die Personen- und Vertragsdaten aus der UDB für den DLCDB-Verleih nutzen.
-- Die UDB soll wissen, welche Devices eine Person ausgehliehen hat (siehe [API](api))
+- Die UDB soll wissen, welche Devices eine Person ausgeliehen hat (siehe [API](api))
 
 ## User stories
 
@@ -49,4 +49,4 @@ Request-Filter (nur aktive Verträge, keine Testdaten) und abgefragte Felder sin
 
 ## Scheduler
 
-Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen (huey-Task `task_import_udb_persons`). Manueller Anstoß per `./manage.py import_udb_persons` oder im Admin über die Aktion „Run UDB sync now“.
+Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen (huey-Task `task_import_udb_persons`). Manueller Anstoß per `./manage.py udb_sync_persons` oder im Admin über die Aktion „Run UDB sync now“.

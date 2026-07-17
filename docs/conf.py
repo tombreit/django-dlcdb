@@ -111,7 +111,7 @@ html_static_path = ["_static"]
 
 
 html_theme_options = {
-    "repository_url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb",
+    "repository_url": "https://gitlab.gwdg.de/dlcdb/django-dlcdb",
     "use_repository_button": True,
     "show_toc_level": 3,
     "navigation_with_keys": True,
@@ -125,7 +125,7 @@ html_title = "♻ DLCDB Docs"
 base_url = getattr(settings, "DLCDB_BASE_URL")
 myst_substitutions = {
     "base_url": base_url,
-    "licenses_fe_link": f"[Lizenzen]({base_url}/lizenzen/)",
+    "licenses_fe_link": f"[Lizenzen]({base_url}/licenses/)",
     "inventorize_fe_link": f"[Inventarisieren]({base_url}/inventory/)",
     "api_base_url": f"[{base_url}/api/v2/]({base_url}/api/v2/)",
     "api_swagger_url": f"[{base_url}/api/v2/schema/swagger-ui/]({base_url}/api/v2/schema/swagger-ui/)",

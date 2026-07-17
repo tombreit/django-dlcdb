@@ -4,7 +4,7 @@
 
 1. Gruppen anlegen
 
-   Via: *Start › Authentifizierung und Autorisierung › Gruppen*. Es empfieht sich, für Alltagsaufgaben eine Gruppe mit eingeschränkten Rechten zu verwenden.
+   Via: *Start › Authentifizierung und Autorisierung › Gruppen*. Es empfiehlt sich, für Alltagsaufgaben eine Gruppe mit eingeschränkten Rechten zu verwenden.
 
 1. Permissions für Gruppen vergeben
 
@@ -82,11 +82,12 @@ Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **g
 
 Branding-Einstellungen wie z.B. Logo und Organisationsname sind via *Start › Organization › Branding* vorzunehmen.
 
-Werden keine Branding-Einstellungen vorgenommen, firmiert die die DLCDB als "DLCDB Corporation".
+Werden keine Branding-Einstellungen vorgenommen, firmiert die DLCDB als "DLCDB Corporation".
 
 ## Räume anlegen
 
-Via *Start › DLCDB Core › Räume* oder über das Menü *Datenhaltung*.
+Via Menü *Datenhaltung › Räume*: Die Raumübersicht bietet rechts oben
+einen Button zum Anlegen neuer Räume.
 
 Es muss mindestens ein Raum als *Extern/Verliehen-Raum* und ein Raum als *"Auto return" Raum* definiert sein. Wird ein Raum als solcher definiert, wird dieses Attribut bisher vorhandenen Raums bei diesem entfernt.
 
@@ -99,12 +100,12 @@ Es muss mindestens ein Raum als *Extern/Verliehen-Raum* und ein Raum als *"Auto 
 :::{admonition} **Gebäude/Locations**
 :class: tip
 
-Sollen Räume mehrer Standorte oder Gebäude verwaltet werden, oder werden kleinteiligere Einheiten als ein Raum benötigt, so kann dies über ein Bezeichnungsschema erfolgen. Beispiel: Eine Storage-Einheit im `Rack 32` in Raum `456` am Standort `Berlin Mitte` könnte folgende Raumnummer ergeben: `BM-456-R32`.
+Sollen Räume mehrerer Standorte oder Gebäude verwaltet werden, oder werden kleinteiligere Einheiten als ein Raum benötigt, so kann dies über ein Bezeichnungsschema erfolgen. Beispiel: Eine Storage-Einheit im `Rack 32` in Raum `456` am Standort `Berlin Mitte` könnte folgende Raumnummer ergeben: `BM-456-R32`.
 :::
 
 ## Personen anlegen
 
-Via *Start › DLCDB Core › Personen* oder den Menüpunkt in "Datenhaltung".
+Via Menü *Datenhaltung › Personen*.
 
 :::{admonition} **Personen vs. User**
 :class: tip
@@ -116,21 +117,23 @@ Via *Start › DLCDB Core › Personen* oder den Menüpunkt in "Datenhaltung".
 
 ## Devices anlegen
 
-Via *Start › DLCDB Core › Devices* oder die entsprechenden Menüpunkte.
+Via Menü *Geräte* (Hauptmenü).
 
 :::{tip}
-Auf der Devices-Übersicht ist rechts oben ein Button *Device hinzufügen*.
+Auf der Geräte-Übersicht ist rechts oben ein Button *Gerät hinzufügen*.
 :::
+
+![Geräte-Übersicht](/_static/devices-index.webp){.sd-card}
 
 ## Devices zuordnen
 
-Die DLCDB verwaltet im Grunde nicht nur Devices, sondern vor allem die unterschiedlichen Stauts (in der DLCDB genannt *Records*), die ein Device in seinem Lebenscyclus durchgeht.
+Die DLCDB verwaltet im Grunde nicht nur Devices, sondern vor allem die unterschiedlichen Status (in der DLCDB genannt *Records*), die ein Device in seinem Lebenszyklus durchläuft — siehe [Konzept](../konzept.md).
 
 Als Status oder *Record* stehen zur Verfügung:
 
 1. Lokalisiert → Device ist einem Raum zugeordnet
-1. Verleih → Device ist an eine Person verliehen
-1. Nicht auffindbar → Verbleib des Devices ist aktuell nicht kla
+1. Verliehen → Device ist an eine Person verliehen
+1. Nicht auffindbar → Verbleib des Devices ist aktuell nicht klar
 1. Entfernt → Device ist z.B. ausgemustert und verschrottet
 
 Jedes Device kann zu einem Zeitpunkt nur einem *Record* zugeordnet sein.

@@ -240,7 +240,7 @@ msgstr "Umziehen"
 #: assets/templates/assets/devices/index.html:8
 #: assets/templates/assets/relocate.html:67 inventory/navigation.py:48
 msgid "Devices"
-msgstr "Gerät"
+msgstr "Geräte"
 
 #: assets/navigation.py:39
 msgid "Distributor"
@@ -2398,7 +2398,7 @@ msgstr "Hauptnavigation"
 
 #: theme/templates/theme/includes/navbar.html:46
 msgid "Master data"
-msgstr ""
+msgstr "Datenhaltung"
 
 #: theme/templates/theme/includes/navbar.html:101
 msgid "Django admin"

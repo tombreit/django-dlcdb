@@ -32,12 +32,16 @@ podman run \
     dlcdb dev
 ```
 
+The same image (see `container/Containerfile` and `container/entrypoint.sh`)
+can be used for containerized production deployments.
+
 ### Install from source
 
-**Prequisites**
+**Prerequisites**
 
-- (assuming) Debian 11.x
-- Python>=3.9
+- (assuming) Debian 12/13 (current stable)
+- Python >= 3.13 (see `pyproject.toml`)
+- Django 6.x (installed via the requirements files)
 - npm
 - for LDAP: libldap2-dev libsasl2-dev
 
@@ -202,6 +206,11 @@ Build (this) Documentation:
 make docs
 ```
 
+The built documentation lands in `run/docs` and is served by the
+application itself at `/docs/` (via WhiteNoise, see
+`MoreWhiteNoiseMiddleware`) — that is why `make docs` is part of the
+deployment steps above.
+
 ### Localization
 
 ```bash
@@ -212,4 +221,5 @@ poedit dlcdb/locale/de/LC_MESSAGES/django.po
 
 ### Requirements
 
-(Re-)Build requirements via `make requirements`.
+(Re-)Build requirements via `make requirements` (uses pip-tools to
+compile `requirements/{prod,prod-ldap,dev}.txt` from `pyproject.toml`).

@@ -45,7 +45,18 @@ Eine Lizenz gilt als ausgeben/genutzt, wenn sie:
 - einer Person zugeordnet ist (hier ist nicht der "Verleih" gemeint, sondern schlicht das Feld *Person* im Lizenz-Admin)
 - einem Device zugeordnet ist
 
-Der [Lizenzadmin](https://fqdn/admin/core/licencerecord/) gibt Auskuft über:
+Die Lizenzverwaltung ({{ licenses_fe_link }}) gibt Auskunft über:
 
 - den Expiry-Status von Lizenzen, inkl. einer 60-tägigen Warnfrist vor Ablauf
 - den *ist ausgegeben/genutzt* Status
+
+## Kalender-Abo (ICS)
+
+Auf der Detailseite einer Lizenz steht ein ICS-Kalender-Link zur
+Verfügung. Damit lassen sich Ablaufdaten einer Lizenz direkt in den
+eigenen Kalender (Outlook, Thunderbird, etc.) übernehmen.
+
+:::{note}
+**Fallback Django-Admin:** Lizenz-Records sind zusätzlich unter
+`/admin/core/licencerecord/` einsehbar.
+:::

@@ -1,7 +1,7 @@
 # Betrieb
 
 
-`````{dropdown} Inhalsverzeichnis
+`````{dropdown} Inhaltsverzeichnis
 :icon: book
 :color: light
 
