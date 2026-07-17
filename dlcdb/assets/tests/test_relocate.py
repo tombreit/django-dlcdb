@@ -117,6 +117,27 @@ class RelocateViewTests(BaseTest):
         self.assertEqual(self.device.active_record.record_type, Record.INROOM)
         self.assertEqual(InRoomRecord.objects.filter(device=self.device).count(), before + 1)
 
+    def test_prefill_preselects_device_without_record(self):
+        # The device detail "Set state" action links here as ?device=<pk> also
+        # for a device that has no record yet (INROOM is a valid initial state).
+        recordless = self._create_device(edv_id="EDV-NO-RECORD", sap_id="7-7")
+
+        response = self.client.get(f"{self.url}?device={recordless.pk}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["selected_devices"], [recordless])
+        self.assertContains(response, "EDV-NO-RECORD")
+
+    def test_move_device_without_record_creates_first_inroom_record(self):
+        recordless = self._create_device(edv_id="EDV-NO-RECORD", sap_id="7-7")
+
+        response = self.client.post(self.url, {"devices": [recordless.pk], "new_room": self.room_b.pk})
+        self.assertRedirects(response, self.url)
+
+        recordless.refresh_from_db()
+        self.assertEqual(recordless.active_record.record_type, Record.INROOM)
+        self.assertEqual(recordless.active_record.room, self.room_b)
+
     def test_move_multiple_devices_to_one_room(self):
         # The multi-select picker submits several device pks; each is relocated
         # to the single chosen room and gets its own result message.
