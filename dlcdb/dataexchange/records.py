@@ -42,6 +42,11 @@ def create_record(
     # they must be saved; the last one saved becomes the active record.
     records = []
 
+    # A row with a room but no explicit record type means the device is in
+    # that room.
+    if not record_type and room:
+        record_type = Record.INROOM
+
     # Fields shared by every record type. Type-specific fields (room, person,
     # lent_*, removed_date, ...) are added per branch.
     common = {

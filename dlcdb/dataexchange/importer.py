@@ -233,6 +233,40 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
     return device_objs
 
 
+def run_device_import(*, file, tenant, import_format, username, importer_list=None, write=False):
+    """
+    Single entry point for device imports, shared by the admin and the frontend.
+
+    Runs import_data() against ImporterList.VALID_COL_HEADERS. When write=True
+    and an ImporterList instance is given, created devices are linked to it and
+    the report is persisted on it. A failed attempt is part of the import
+    history too: it is recorded on the given ImporterList row (status "error"
+    plus the error text in the log) before the exception is re-raised.
+    """
+    try:
+        report = import_data(
+            file,
+            importer_inst_pk=importer_list.pk if importer_list else None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=import_format,
+            tenant=tenant,
+            username=username,
+            write=write,
+        )
+    except Exception as error:
+        if importer_list is not None and importer_list.pk:
+            error_text = "; ".join(error.messages) if isinstance(error, ValidationError) else str(error)
+            importer_list.status = ImporterList.Status.ERROR
+            importer_list.summary = error_text[:255]
+            importer_list.messages = f"{'Import' if write else 'Import check (dry run)'} failed: {error_text}"
+            importer_list.save()
+        raise
+
+    if write and importer_list is not None:
+        report.persist(importer_list)
+    return report
+
+
 def import_data(
     csvfile, *, tenant, username=None, importer_inst_pk=None, import_format=None, valid_col_headers=None, write=False
 ):

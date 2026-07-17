@@ -8,7 +8,7 @@ from django.contrib import messages
 
 from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
-from .importer import import_data
+from .importer import run_device_import
 from .remover import set_removed_record
 
 
@@ -84,16 +84,14 @@ class ImporterListAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
-        report = import_data(
-            obj.file,
-            importer_inst_pk=obj.pk,
-            valid_col_headers=obj.VALID_COL_HEADERS,
-            import_format=obj.import_format,
+        report = run_device_import(
+            file=obj.file,
             tenant=obj.tenant,
+            import_format=obj.import_format,
             username=request.user.username,
+            importer_list=obj,
             write=True,
         )
-        report.persist(obj)
         getattr(messages, report.level)(request, report.short_html())
 
 

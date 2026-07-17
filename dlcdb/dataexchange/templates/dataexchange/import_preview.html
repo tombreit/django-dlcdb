@@ -1,0 +1,68 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block body %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+  <h1 class="h3 mb-0 me-auto"><i class="bi bi-upload"></i> {{ title }}</h1>
+  <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-10 col-xl-9">
+
+    <div class="alert {{ report.alert_class }}">
+      <strong>{% translate "Dry run" %} — {% translate "nothing has been written yet." %}</strong><br>
+      {{ importer_list.file }}: {{ report.summary }}
+    </div>
+
+    <p class="d-flex flex-wrap gap-2">
+      {% for count in report.counts %}
+        <span class="badge {{ count.badge }}">{{ count.count }} {{ count.outcome }}</span>
+      {% endfor %}
+    </p>
+
+    {% if report.rows %}
+      <div class="table-responsive mb-4">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% translate "Device" %}</th>
+              <th>{% translate "Outcome" %}</th>
+              <th>{% translate "Detail" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in report.rows %}
+              <tr>
+                <td class="text-muted">{{ row.row }}</td>
+                <td class="font-monospace small">{{ row.identifier }}</td>
+                <td><span class="badge {{ row.badge }}">{{ row.outcome }}</span></td>
+                <td class="text-muted">
+                  {% if row.detail %}{{ row.detail }}{% else %}<span class="fst-italic">{% translate "no details" %}</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-warning">{% translate "No data rows found in this file." %}</div>
+    {% endif %}
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-5">
+      <form method="post" action="{% url 'dataexchange:device_import_confirm' importer_list.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit" {% if not can_confirm %}disabled{% endif %}>
+          <i class="bi bi-check-lg"></i> {% translate "Confirm import" %}
+        </button>
+      </form>
+      <a class="btn btn-outline-secondary" href="{% url 'assets:device_index' %}">{% translate "Cancel" %}</a>
+      <span class="text-muted small ms-2">{% translate "Confirming will write the rows shown above." %}</span>
+    </div>
+
+  </div>
+</div>
+{% endblock body %}

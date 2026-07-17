@@ -18,7 +18,8 @@ from dlcdb.core.models import (
     Person,
     OrganizationalUnit,
 )
-from dlcdb.dataexchange.importer import import_data
+from dlcdb.dataexchange.csv_template import build_import_template_csv
+from dlcdb.dataexchange.importer import import_data, run_device_import
 from dlcdb.dataexchange.models import ImporterList
 
 TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
@@ -310,3 +311,128 @@ def test_bulk_import_csv_sap_update(tenant):
 
     device_in_another_tenant.refresh_from_db()
     assert device_in_another_tenant.modified_at == device_in_another_tenant_modified_at
+
+
+@pytest.mark.django_db
+def test_run_device_import_dry_run_does_not_persist(tenant):
+    csv_path = TEST_DATA_DIR / "devices.correct.csv"
+
+    with open(csv_path, "rb") as csv_file:
+        report = run_device_import(
+            file=csv_file,
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+    assert report.dry_run is True
+    assert report.rows
+    assert Device.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_run_device_import_write_persists_report_and_links_devices(tenant):
+    csv_path = TEST_DATA_DIR / "devices.correct.csv"
+    importer_list = ImporterList.objects.create(file="imported_csv/pytest.csv", tenant=tenant)
+
+    with open(csv_path, "rb") as csv_file:
+        report = run_device_import(
+            file=csv_file,
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            importer_list=importer_list,
+            write=True,
+        )
+
+    assert report.dry_run is False
+
+    importer_list.refresh_from_db()
+    assert importer_list.status == "success"
+    assert importer_list.summary == report.counts_summary()
+    assert importer_list.messages
+
+    device = Device.objects.get(edv_id="NTB1282")
+    assert device.is_imported is True
+    assert device.imported_by == importer_list
+
+
+def test_build_import_template_csv_contains_all_columns():
+    lines = build_import_template_csv().splitlines()
+    assert lines[0] == ",".join(ImporterList.VALID_COL_HEADERS)
+    # Header plus the two example rows (notebook INROOM, smartphone LENT).
+    assert len(lines) == 3
+
+
+@pytest.mark.django_db
+def test_import_template_example_rows_import_cleanly(tenant):
+    """The template's example rows must stay valid import data."""
+    from io import BytesIO
+
+    report = run_device_import(
+        file=BytesIO(build_import_template_csv().encode("utf-8")),
+        tenant=tenant,
+        import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+        username="pytestuser",
+        write=True,
+    )
+
+    assert report.level == "success"
+    assert len(report.rows) == 2
+
+    notebook = Device.objects.get(edv_id="NTB0001")
+    assert notebook.active_record.record_type == Record.INROOM
+    assert notebook.active_record.room.number == "101"
+
+    smartphone = Device.objects.get(edv_id="SMA0001")
+    assert smartphone.active_record.record_type == Record.LENT
+    assert smartphone.active_record.person.email == "ada.lovelace@example.com"
+
+
+@pytest.mark.django_db
+def test_room_without_record_type_defaults_to_inroom(tenant):
+    """A row with a ROOM but no RECORD_TYPE gets an INROOM record."""
+    import csv
+    from io import BytesIO, StringIO
+
+    buffer = StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=ImporterList.VALID_COL_HEADERS, restval="")
+    writer.writeheader()
+    writer.writerow({"EDV_ID": "NTB0815", "ROOM": "202"})
+
+    run_device_import(
+        file=BytesIO(buffer.getvalue().encode("utf-8")),
+        tenant=tenant,
+        import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+        username="pytestuser",
+        write=True,
+    )
+
+    device = Device.objects.get(edv_id="NTB0815")
+    assert device.active_record.record_type == Record.INROOM
+    assert device.active_record.room.number == "202"
+
+
+@pytest.mark.django_db
+def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
+    """A raising import records status "error" on the given ImporterList row."""
+    csv_path = TEST_DATA_DIR / "devices.incompleterowheader.csv"
+    importer_list = ImporterList.objects.create(file="imported_csv/pytest-failed.csv", tenant=tenant)
+
+    with translation.override("en"):
+        with pytest.raises(ValidationError):
+            with open(csv_path, "rb") as csv_file:
+                run_device_import(
+                    file=csv_file,
+                    tenant=tenant,
+                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                    username="pytestuser",
+                    importer_list=importer_list,
+                    write=False,
+                )
+
+    importer_list.refresh_from_db()
+    assert importer_list.status == "error"
+    assert "Missing column(s):" in importer_list.messages
+    assert importer_list.summary

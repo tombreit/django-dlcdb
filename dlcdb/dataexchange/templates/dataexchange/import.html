@@ -1,0 +1,52 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block body %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+  <h1 class="h3 mb-0 me-auto"><i class="bi bi-upload"></i> {{ title }}</h1>
+  <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-9 col-xl-8">
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <p class="mb-2">
+          {% translate "Upload a CSV file in the internal format to import devices. The file is checked first and nothing is written until you confirm the preview." %}
+        </p>
+        <a href="{% url 'dataexchange:device_import_template' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-filetype-csv"></i> {% translate "Download CSV template" %}
+        </a>
+        <details class="mt-3">
+          <summary class="text-muted">{% translate "Available columns" %}</summary>
+          <ul class="list-unstyled font-monospace small mt-2 mb-0">
+            {% for col_header in valid_col_headers %}<li>{{ col_header }}</li>{% endfor %}
+          </ul>
+        </details>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+      {% endfor %}
+      <div class="row g-3">
+        {% include "assets/devices/includes/_field.html" with field=form.file %}
+        {% include "assets/devices/includes/_field.html" with field=form.tenant %}
+        {% include "assets/devices/includes/_field.html" with field=form.note %}
+      </div>
+      <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-search"></i> {% translate "Check file (dry run)" %}
+        </button>
+        <a class="btn btn-outline-secondary" href="{% url 'assets:device_index' %}">{% translate "Cancel" %}</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock body %}

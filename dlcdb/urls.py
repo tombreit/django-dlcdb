@@ -27,6 +27,7 @@ urlpatterns = [
     path("lending/", include("dlcdb.lending.urls")),
     path("notifications/", include("dlcdb.notifications.urls")),
     path("assets/", include("dlcdb.assets.urls")),
+    path("dataexchange/", include("dlcdb.dataexchange.urls")),
     path("theme/", include("dlcdb.theme.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("select2/", include("django_select2.urls")),
