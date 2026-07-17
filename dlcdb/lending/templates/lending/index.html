@@ -52,8 +52,7 @@
         {% for record in filter.qs %}
           <tr>
             <td>
-              <div class="fw-semibold">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</div>
-              <div class="">{{ record.device.manufacturer }} {{ record.device.series }}</div>
+              {% include "assets/devices/includes/_device_teaser.html" with device=record.device link="icon" %}
             </td>
             <td>
               <div>

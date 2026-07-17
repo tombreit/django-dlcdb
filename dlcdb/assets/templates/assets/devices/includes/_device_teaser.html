@@ -1,0 +1,34 @@
+{% load i18n %}
+
+
+<div class="fw-semibold">
+    <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
+    {% if link == "stretched" %}
+    <a href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+        class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
+        {{ device.edv_id|default:device.sap_id|default:"—" }}
+    </a>
+    {% elif link == "icon" %}
+       {{ device.edv_id|default:device.sap_id|default:"—" }}
+       <a
+        href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+        title="{% translate 'View device details' %}"
+       >
+        <i class="bi bi-box-arrow-up-right text-muted ms-3"></i>
+       </a>
+    {% else %}
+        {{ device.edv_id|default:device.sap_id|default:"—" }}
+    {% endif %}
+</div>
+{% if device.manufacturer or device.series %}
+<div>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
+{% endif %}
+<div class="small text-muted">
+    {% if device.edv_id and device.sap_id %}
+        {% translate "Inventory ID" %}: <span class="font-monospace">{{ device.sap_id }}</span>
+    {% endif %}
+    {% if device.edv_id and device.sap_id and device.serial_number %} · {% endif %}
+    {% if device.serial_number %}
+        {% translate "Serial" %}: <span class="font-monospace">{{ device.serial_number }}</span>
+    {% endif %}
+</div>

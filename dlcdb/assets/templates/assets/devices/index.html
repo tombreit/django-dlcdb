@@ -46,21 +46,7 @@
             {% for device in page_obj %}
               <tr>
                 <td class="position-relative">
-                  <div class="fw-semibold">
-                    <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
-                    <a href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
-                       class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
-                      {{ device.edv_id|default:device.sap_id|default:"—" }}
-                    </a>
-                  </div>
-                  {% if device.manufacturer or device.series %}
-                    <div>{{ device.manufacturer|default:"" }} {{ device.series|default:"" }}</div>
-                  {% endif %}
-                  <div class="small text-muted">
-                    {% if device.edv_id and device.sap_id %}{% translate "Inventory ID" %}: <span class="font-monospace">{{ device.sap_id }}</span>{% endif %}
-                    {% if device.edv_id and device.sap_id and device.serial_number %} · {% endif %}
-                    {% if device.serial_number %}{% translate "Serial" %}: <span class="font-monospace">{{ device.serial_number }}</span>{% endif %}
-                  </div>
+                  {% include "assets/devices/includes/_device_teaser.html" with device=device link="stretched" %}
                   <div class="d-lg-none mt-1">
                     {% include "assets/devices/includes/_state.html" with device=device %}
                   </div>
