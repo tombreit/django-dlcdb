@@ -31,10 +31,20 @@ def paginate(
     sentinels) is precomputed onto the page as ``elided_page_range`` because a
     template cannot call ``get_elided_page_range()`` with arguments itself; the
     pager template just iterates it.
+
+    ``?show_all=1`` is a manual override: it collapses the queryset into a single
+    page holding every row, however slow or large. The chosen state is exposed as
+    ``page.show_all`` so the pager template can render the toggle both ways.
     """
+    show_all = request.GET.get("show_all") == "1"
+    if show_all:
+        # Paginator rejects a per-page of 0, so keep at least one for an empty set.
+        per_page = queryset.count() or 1
+
     paginator = Paginator(queryset, per_page)
-    page = paginator.get_page(request.GET.get("page"))
+    page = paginator.get_page(1 if show_all else request.GET.get("page"))
     page.elided_page_range = list(
         paginator.get_elided_page_range(page.number, on_each_side=on_each_side, on_ends=on_ends)
     )
+    page.show_all = show_all
     return page

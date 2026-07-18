@@ -196,6 +196,24 @@ class DeviceFrontendTests(BaseTest):
         self.assertEqual(second.status_code, 200)
         self.assertContains(second, "search=PAGED")
 
+    def test_show_all_override_bypasses_pagination(self):
+        for i in range(30):
+            self._create_device(edv_id=f"PAGED-{i:02d}", sap_id=f"9-{i}")
+
+        # Default: paginated -> numbered pager plus a "show all" link carrying the flag.
+        default = self.client.get(self.index_url, {"search": "PAGED"})
+        self.assertContains(default, 'class="pagination')
+        self.assertContains(default, "show_all=1")
+
+        # ?show_all=1: every match on one page, the numbered pager gone, and the
+        # active search preserved on the "back to paginated" link.
+        every = self.client.get(self.index_url, {"search": "PAGED", "show_all": "1"})
+        self.assertEqual(every.status_code, 200)
+        self.assertNotContains(every, 'class="pagination')
+        self.assertEqual(every.context["page_obj"].paginator.count, 30)
+        self.assertEqual(len(every.context["page_obj"].object_list), 30)
+        self.assertContains(every, "search=PAGED")
+
     def _tenant_viewer(self):
         """A non-superuser scoped to a tenant, able to view but not change devices."""
         group = Group.objects.create(name="tenant-viewers")

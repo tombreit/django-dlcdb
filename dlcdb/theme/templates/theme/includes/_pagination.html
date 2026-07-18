@@ -2,44 +2,55 @@
 Reusable numbered pager for filterbar list views.
 
 Caller passes:
-  page_obj - a Page from theme.pagination.paginate() (carries .elided_page_range)
+page_obj - a Page from theme.pagination.paginate() (carries .elided_page_range)
 
 Links use the native {% querystring %} tag, so every active search/filter/sort
 param is preserved and only `page` changes. Each link carries a real href (no-JS
 fallback) plus hx-get; hx-target / hx-swap / hx-push-url are inherited from the
 fragment root the pager is rendered inside (same trick as _sort_th.html), so a
 page click swaps the list fragment and pushes the URL.
+
+Beneath the pager a manual override toggles `?show_all=1`: unconditionally show
+every object, or return to the paginated view. It lives outside the num_pages
+guard because show-all collapses everything onto one page (num_pages == 1), which
+would otherwise hide the only way back.
 {% endcomment %}
+
 {% load i18n %}
-{% if page_obj.paginator.num_pages > 1 %}
-  <nav aria-label="{% translate 'List pages' %}" class="mt-3">
-    <ul class="pagination pagination-sm justify-content-center flex-wrap mb-0">
+
+<div class="d-flex justify-content-center mt-3">
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav aria-label="{% translate 'List pages' %}">
+    <ul class="pagination">
       <li class="page-item{% if not page_obj.has_previous %} disabled{% endif %}">
         {% if page_obj.has_previous %}
-          {% querystring page=page_obj.previous_page_number as prev_href %}
-          <a class="page-link" href="{{ prev_href }}" hx-get="{{ prev_href }}" rel="prev" aria-label="{% translate 'Previous page' %}">
-            <i class="bi bi-chevron-left"></i>
-          </a>
+        {% querystring page=page_obj.previous_page_number as prev_href %}
+        <a class="page-link" href="{{ prev_href }}" hx-get="{{ prev_href }}" rel="prev"
+          aria-label="{% translate 'Previous page' %}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
         {% else %}
-          <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
+        <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-left"></i></span>
         {% endif %}
       </li>
 
       {% for num in page_obj.elided_page_range %}
         {% if num == page_obj.paginator.ELLIPSIS %}
           <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
-        {% elif num == page_obj.number %}
+         {% elif num == page_obj.number %}
           <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
         {% else %}
           {% querystring page=num as page_href %}
-          <li class="page-item"><a class="page-link" href="{{ page_href }}" hx-get="{{ page_href }}">{{ num }}</a></li>
+            <li class="page-item"><a class="page-link" href="{{ page_href }}" hx-get="{{ page_href }}">{{ num }}</a></li>
         {% endif %}
       {% endfor %}
 
       <li class="page-item{% if not page_obj.has_next %} disabled{% endif %}">
         {% if page_obj.has_next %}
           {% querystring page=page_obj.next_page_number as next_href %}
-          <a class="page-link" href="{{ next_href }}" hx-get="{{ next_href }}" rel="next" aria-label="{% translate 'Next page' %}">
+          <a class="page-link" href="{{ next_href }}" hx-get="{{ next_href }}" rel="next"
+            aria-label="{% translate 'Next page' %}">
             <i class="bi bi-chevron-right"></i>
           </a>
         {% else %}
@@ -48,4 +59,36 @@ page click swaps the list fragment and pushes the URL.
       </li>
     </ul>
   </nav>
-{% endif %}
+  {% endif %}
+
+
+  {% if page_obj.show_all %}
+  {% querystring show_all=None page=None as paginated_href %}
+  <nav aria-label="{% translate 'Show paginated view' %}" class="ms-4">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" href="{{ paginated_href }}" hx-get="{{ paginated_href }}">
+          <i class="bi bi-chevron-contract"></i>
+          {% translate "Show paginated view" %}
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  {% elif page_obj.paginator.num_pages > 1 %}
+  {% querystring show_all="1" page=None as all_href %}
+  <nav aria-label="{% translate 'Show paginated view' %}" class="ms-4">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" href="{{ all_href }}" hx-get="{{ all_href }}">
+          <i class="bi bi-chevron-expand"></i>
+          {% blocktranslate count counter=page_obj.paginator.count %}
+            Show all {{ counter }} item{% plural %}Show all {{ counter }} items
+          {% endblocktranslate %}
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
