@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from django.contrib import messages
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Count, Min, Q
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.utils.html import format_html
@@ -15,6 +16,7 @@ from django.urls import reverse
 from django.conf import settings
 
 from dlcdb.core.models import Room, Device
+from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 
 
@@ -50,13 +52,16 @@ def hints(request):
         rooms_index_url = reverse("rooms:index")
 
         qs = tenant_scoped_queryset(Device.objects.all(), request, tenant_field="tenant")
-        recordless_devices = qs.filter(active_record__isnull=True)
-        recordless_devices_count = recordless_devices.count()
+        recordless_devices = qs.filter(active_record__isnull=True).aggregate(
+            count=Count("pk"),
+            single_pk=Min("pk"),
+        )
+        recordless_devices_count = recordless_devices["count"]
 
         if recordless_devices_count:
             if recordless_devices_count == 1:
                 # A single device: jump straight into Move with it preselected.
-                cta_link = f"{reverse('assets:relocate')}?device={recordless_devices.first().pk}"
+                cta_link = f"{reverse('assets:relocate')}?device={recordless_devices['single_pk']}"
             else:
                 # Several devices: the device list filtered to record-less
                 # devices; each detail page offers the Move action from there.
@@ -78,8 +83,14 @@ def hints(request):
                 )
             )
 
-        if Room.objects.exists():
-            if not Room.objects.filter(is_external=True).exists():
+        room_flags = Room.objects.aggregate(
+            room_count=Count("pk"),
+            external_room_count=Count("pk", filter=Q(is_external=True)),
+            auto_return_room_count=Count("pk", filter=Q(is_auto_return_room=True)),
+        )
+
+        if room_flags["room_count"]:
+            if not room_flags["external_room_count"]:
                 sticky_messages.append(
                     StickyMessage(
                         level=messages.WARNING,
@@ -89,7 +100,7 @@ def hints(request):
                     )
                 )
 
-            if not Room.objects.filter(is_auto_return_room=True).exists():
+            if not room_flags["auto_return_room_count"]:
                 sticky_messages.append(
                     StickyMessage(
                         level=messages.WARNING,
@@ -194,17 +205,15 @@ def nav(request):
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, required_permission)
 
-            # Ugly hack to conditionally hide some nav_entries
-            show_condition = nav_entry.get("show_condition")
-            if show_condition:
+            if has_permission or request.user.is_superuser:
+                # Ugly hack to conditionally hide some nav_entries. Checked only
+                # after the permission gate so unpermitted users never trigger
+                # the underlying query.
+                show_condition = nav_entry.get("show_condition")
                 if show_condition == "active_inventory_exists":
-                    from dlcdb.core.models.inventory import Inventory
-
-                    active_inventory_exists = Inventory.objects.active_inventory()
-                    if not active_inventory_exists:
+                    if not get_active_inventory(request):
                         continue
 
-            if has_permission or request.user.is_superuser:
                 url = nav_entry.get("url") or ""
                 url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
                 in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace

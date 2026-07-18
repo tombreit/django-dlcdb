@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from rest_framework.authtoken.models import Token
 
-from dlcdb.core.models import Inventory
+from dlcdb.core.models.inventory import get_active_inventory
 
 
 def _get_js_vars(request):
@@ -46,6 +46,6 @@ def inventory(request):
         return {}
 
     return {
-        "current_inventory": Inventory.objects.active_inventory(),
+        "current_inventory": get_active_inventory(request),
         "js_vars": _get_js_vars(request),
     }

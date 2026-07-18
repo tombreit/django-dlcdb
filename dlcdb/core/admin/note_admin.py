@@ -20,8 +20,6 @@ class NoteAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         "inventory",
-        # TODO: Filter got same filter title as the next filter: room
-        # "device__active_record__room",
         "device",
         "room",
         "updated_at",
@@ -42,11 +40,25 @@ class NoteAdmin(admin.ModelAdmin):
 
     show_facets = admin.ShowFacets.NEVER
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "device",
+                "device__active_record",
+                "device__active_record__room",
+                "room",
+                "inventory",
+            )
+        )
+
     @admin.display(description="Device room")
     @admin.display(ordering="device__active_record__room")
     def get_device_room(self, obj):
-        if hasattr(obj, "device") and obj.device:
+        if obj.device and obj.device.active_record:
             return obj.device.active_record.room
+        return None
 
     def changelist_view(self, request, extra_context=None):
         if extra_context is None:

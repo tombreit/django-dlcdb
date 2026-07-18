@@ -212,6 +212,16 @@ class InventoryQuerySet(models.QuerySet):
         return devices
 
 
+def get_active_inventory(request):
+    """
+    Per-request memoized Inventory.objects.active_inventory(): context
+    processors and views handling the same request share one query.
+    """
+    if not hasattr(request, "_active_inventory"):
+        request._active_inventory = Inventory.objects.active_inventory()
+    return request._active_inventory
+
+
 class Inventory(models.Model):
     """
     Represents an inventory.

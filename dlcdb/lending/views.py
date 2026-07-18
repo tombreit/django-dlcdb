@@ -99,7 +99,7 @@ def index(request):
 
     base_qs = _annotate_lent_state(
         _tenant_scoped(
-            LentRecord.objects.select_related("device__manufacturer", "person", "room"),
+            LentRecord.objects.select_related("device__manufacturer", "device__device_type", "person", "room"),
             request,
         )
     )
