@@ -14,10 +14,6 @@ from dlcdb.core.models import (
     Device,
     DeviceType,
     Record,
-    InRoomRecord,
-    LentRecord,
-    LostRecord,
-    RemovedRecord,
 )
 
 
@@ -51,15 +47,21 @@ def get_record_fraction_html(tenant=None):
     Returns a plotly HTML div showing the fraction of active records by type.
     """
     labels = ["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"]
-    filter_kwargs = {"is_active": True}
+    base = Record.objects.filter(is_active=True)
     if tenant:
-        filter_kwargs["device__tenant"] = tenant
-    counts = [
-        InRoomRecord.objects.filter(**filter_kwargs).count(),
-        LentRecord.objects.filter(**filter_kwargs).count(),
-        LostRecord.objects.filter(**filter_kwargs).count(),
-        RemovedRecord.objects.filter(**filter_kwargs).count(),
-    ]
+        base = base.filter(device__tenant=tenant)
+
+    # "Verliehen" mirrors LentRecordManager's WHERE (core/models/prx_lentrecord.py):
+    # active + lentable device, excluding removed/licence — NOT a pure record_type=LENT count.
+    lent_filter = Q(device__is_lentable=True) & ~Q(record_type=Record.REMOVED) & ~Q(device__is_licence=True)
+
+    counts_map = base.aggregate(
+        inroom=Count("pk", filter=Q(record_type=Record.INROOM)),
+        lent=Count("pk", filter=lent_filter),
+        lost=Count("pk", filter=Q(record_type=Record.LOST)),
+        removed=Count("pk", filter=Q(record_type=Record.REMOVED)),
+    )
+    counts = [counts_map["inroom"], counts_map["lent"], counts_map["lost"], counts_map["removed"]]
 
     colors = [COLORS["primary"], COLORS["accent"], COLORS["muted"], COLORS["accent_light"]]
     fig = go.Figure(

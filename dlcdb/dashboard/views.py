@@ -6,6 +6,7 @@ from datetime import date
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
@@ -41,10 +42,9 @@ def _get_tenant_queryset(model_name, ModelClass, tenant):
     if filter_field is None:
         return ModelClass.objects.all()
 
-    qs = ModelClass.objects.filter(**{filter_field: tenant})
-    if model_name in TENANT_DISTINCT:
-        qs = qs.distinct()
-    return qs
+    # Distinctness is applied in _build_tile via Count(distinct=...), not here,
+    # so it is expressed once at the aggregation.
+    return ModelClass.objects.filter(**{filter_field: tenant})
 
 
 def _build_tile(*, model_name, url, tenant):
@@ -52,17 +52,23 @@ def _build_tile(*, model_name, url, tenant):
     ModelClass = apps.get_model(model_name)
     qs = _get_tenant_queryset(model_name, ModelClass, tenant)
 
-    raw_count = qs.count()
-    human_name = ModelClass._meta.verbose_name_plural if raw_count >= 2 else ModelClass._meta.verbose_name
-
-    note_count = 0
+    # Collapse the per-tile counts (total, note badge, lent) into a single
+    # aggregate query instead of 2-3 separate .count() scans over the same rows.
+    distinct = model_name in TENANT_DISTINCT and tenant is not None
+    agg = {"total": Count("pk", distinct=distinct)}
     if hasattr(ModelClass, "note"):
-        note_count = qs.exclude(note__exact="").count()
+        agg["with_note"] = Count("pk", filter=~Q(note__exact=""), distinct=distinct)
+    if model_name == "core.lentrecord":
+        agg["lent"] = Count("pk", filter=Q(record_type=Record.LENT), distinct=distinct)
+
+    counts = qs.aggregate(**agg)
+    raw_count = counts["total"]
+    note_count = counts.get("with_note", 0)
+    human_name = ModelClass._meta.verbose_name_plural if raw_count >= 2 else ModelClass._meta.verbose_name
 
     count = raw_count
     if model_name == "core.lentrecord":
-        lent_count = qs.filter(record_type=Record.LENT).count()
-        count = f"{lent_count} / {raw_count}"
+        count = f"{counts['lent']} / {raw_count}"
     elif model_name == "core.inventory":
         count = ModelClass.objects.filter(is_active=True).first()
 

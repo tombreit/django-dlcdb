@@ -4,9 +4,9 @@
 
 from datetime import datetime, timedelta
 
+from django.apps import apps
 from django.db import models
-from django.db.models import Q, Case, CharField, Value, When
-from django.db.models.expressions import RawSQL
+from django.db.models import Q, Case, CharField, OuterRef, StringAgg, Subquery, Value, When
 from django.utils.translation import gettext_lazy as _
 
 from .record import Record
@@ -41,22 +41,28 @@ class BaseLicenceRecordManager(models.Manager):
         # TODO: make threshold configurable
         expiration_warning_threshold = today + timedelta(days=93)
 
-        # Raw SQL for distinct emails concatenated with newlines
-        subscribers_subquery = """
-            SELECT GROUP_CONCAT(distinct_email, char(10))
-            FROM (
-                SELECT DISTINCT p.email as distinct_email
-                FROM core_person p
-                INNER JOIN notifications_subscription s ON s.subscriber_id = p.id
-                WHERE s.device_id = core_device.id
-                AND p.email IS NOT NULL
-                ORDER BY p.email
-            )
-        """
+        # Distinct subscriber emails per device, newline-joined, via the ORM
+        # (replaces a raw GROUP_CONCAT). Dedup on persons — Person.email is unique —
+        # with pk__in instead of StringAgg(distinct=True), which SQLite rejects when a
+        # delimiter is set. OuterRef(OuterRef(...)) correlates to the outer record's
+        # device across the two subquery levels.
+        Subscription = apps.get_model("notifications", "Subscription")
+        Person = apps.get_model("core", "Person")
+        subscriber_pks = Subscription.objects.filter(
+            device=OuterRef(OuterRef("device_id")),
+            subscriber__email__isnull=False,
+        ).values("subscriber")
+        subscribers_subquery = (
+            Person.objects.filter(pk__in=subscriber_pks, email__isnull=False)
+            .order_by()
+            .values(_grp=Value(1))
+            .annotate(emails=StringAgg("email", delimiter=Value("\n"), order_by="email"))
+            .values("emails")
+        )
 
         # TODO: use descriptive license_state wording like "expires_soon", "expired" instead of "80-warning"
         qs = qs.annotate(
-            get_subscribers=models.ExpressionWrapper(RawSQL(subscribers_subquery, []), output_field=CharField()),
+            get_subscribers=Subquery(subscribers_subquery, output_field=CharField()),
             license_state=Case(
                 # Ordering matters: the first When() condition that is met will be used.
                 When(
