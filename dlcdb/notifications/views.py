@@ -4,6 +4,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
@@ -18,8 +19,19 @@ from .tasks import send_message
 
 
 def _get_person(request):
-    """The Person matching the logged-in user; there is no FK, only email."""
-    return Person.objects.filter(email=request.user.email).first()
+    """
+    The Person matching the logged-in user; there is no FK, only email.
+    Matched case-insensitively against all Person email fields (mirrors
+    the fields Person.get_email draws from).
+    """
+    email = (request.user.email or "").strip()
+    if not email:
+        return None
+    return Person.objects.filter(
+        Q(email__iexact=email)
+        | Q(udb_person_email_internal_business__iexact=email)
+        | Q(udb_person_email_private__iexact=email)
+    ).first()
 
 
 def _get_own_report_subscription(request, pk):

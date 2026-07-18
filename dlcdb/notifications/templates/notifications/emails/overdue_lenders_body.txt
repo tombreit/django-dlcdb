@@ -16,4 +16,4 @@ The following {{ records_count }} device{{ records_count|pluralize:"s" }} {{ rec
 Best,
 "Your IT department" <{{ contact_email }}>
 
-{% include "emails/email_footer.txt" %}
+{% include "notifications/emails/email_footer.txt" %}

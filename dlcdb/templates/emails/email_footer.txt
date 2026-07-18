@@ -1,4 +1,0 @@
---{{ " " }}
-{{ branding.organization_name_en }}
-{{ branding.organization_it_dept_email }}
-DLCDB v{{ project_version }}

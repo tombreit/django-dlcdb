@@ -41,4 +41,4 @@ Please reply to this email by {{ deadline|date:"m-d-Y" }}. Use the "Reply" funct
 Kind regards,
 {{ contact_email }}
 
-{% include "emails/email_footer.txt" %}
+{% include "notifications/emails/email_footer.txt" %}

@@ -84,6 +84,44 @@ class MySubscriptionsViewTests(BaseTest):
         self.assertIsNone(response.context["form"])
         self.assertContains(response, "No person record matches your email address")
 
+    def test_person_matched_case_insensitively(self):
+        shouty = get_user_model().objects.create_superuser(email="ME@EXAMPLE.COM", username="shouty", password="secret")
+        self.client.force_login(shouty)
+
+        response = self.client.get(self.index_url)
+
+        self.assertEqual(response.context["person"], self.person)
+        self.assertIsNotNone(response.context["form"])
+
+    def test_person_matched_via_udb_business_email(self):
+        udb_person = Person.objects.create(
+            first_name="Udb",
+            last_name="Only",
+            udb_person_email_internal_business="udb@example.com",
+        )
+        udb_user = get_user_model().objects.create_superuser(email="udb@example.com", username="udb", password="secret")
+        self.client.force_login(udb_user)
+
+        response = self.client.get(self.index_url)
+
+        self.assertEqual(response.context["person"], udb_person)
+        self.assertIsNotNone(response.context["form"])
+
+    def test_user_without_email_gets_notice_not_blank_person_match(self):
+        Person.objects.create(first_name="Blank", last_name="Email")
+        no_email_user = get_user_model().objects.create_superuser(
+            email="temp@example.com", username="noemail", password="secret"
+        )
+        no_email_user.email = ""
+        no_email_user.save()
+        self.client.force_login(no_email_user)
+
+        response = self.client.get(self.index_url)
+
+        self.assertIsNone(response.context["person"])
+        self.assertIsNone(response.context["form"])
+        self.assertContains(response, "No person record matches your email address")
+
     def test_lists_only_own_subscriptions(self):
         create_report_subscription(subscriber=self.person)
         create_report_subscription(subscriber=self.other_person, condition=Subscription.ConditionChoices.IS_NOTEBOOK)

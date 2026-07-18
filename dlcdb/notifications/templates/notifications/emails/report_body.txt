@@ -20,4 +20,4 @@ No records affected by this subscription.
 Es grüßt freundlichst,
 deine DLCDB
 
-{% include "emails/email_footer.txt" %}
+{% include "notifications/emails/email_footer.txt" %}
