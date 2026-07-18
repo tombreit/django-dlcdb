@@ -209,7 +209,10 @@ class DeviceFrontendTests(BaseTest):
         # active search preserved on the "back to paginated" link.
         every = self.client.get(self.index_url, {"search": "PAGED", "show_all": "1"})
         self.assertEqual(every.status_code, 200)
-        self.assertNotContains(every, 'class="pagination')
+        # The numbered pager is gone. Its nav is the unambiguous marker: the
+        # "show all"/"paginated view" toggle intentionally reuses .pagination
+        # pill styling, so a bare `class="pagination"` check would false-positive.
+        self.assertNotContains(every, 'aria-label="List pages"')
         self.assertEqual(every.context["page_obj"].paginator.count, 30)
         self.assertEqual(len(every.context["page_obj"].object_list), 30)
         self.assertContains(every, "search=PAGED")

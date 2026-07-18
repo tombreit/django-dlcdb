@@ -1,3 +1,3 @@
---
+-- {# RFC 3676 signature separator: the trailing space after "--" is significant, keep it #}
 {{ branding.organization_name_en }}{% if branding.organization_name_en and branding.organization_it_dept_email %} · {% endif %}{{ branding.organization_it_dept_email }}
 DLCDB v{{ project_version }}
