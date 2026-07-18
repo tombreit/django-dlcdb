@@ -6,11 +6,6 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <h1 class="mb-0">{% translate "Suppliers" %}</h1>
-    <span class="htmx-indicator ms-1">
-      <span class="spinner-border spinner-border-sm text-secondary" role="status">
-        <span class="visually-hidden">{% translate "Loading..." %}</span>
-      </span>
-    </span>
     {% if perms.core.add_supplier %}
       <div class="ms-auto">
         <a href="{% url 'assets:supplier_add' %}" class="btn btn-primary">
@@ -23,7 +18,8 @@
   {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
   {% partialdef supplier-list inline %}
-    <div id="supplier-list" hx-target="#supplier-list" hx-swap="outerHTML" hx-push-url="true">
+    <div id="supplier-list" class="position-relative" hx-target="#supplier-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
       <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
         <span>
           {% blocktranslate count counter=filtered_count with total=total_count %}{{ counter }} of {{ total }} supplier{% plural %}{{ counter }} of {{ total }} suppliers{% endblocktranslate %}

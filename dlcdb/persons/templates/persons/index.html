@@ -6,11 +6,6 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <h1 class="mb-0">{% translate "People" %}</h1>
-    <span class="htmx-indicator ms-1">
-      <span class="spinner-border spinner-border-sm text-secondary" role="status">
-        <span class="visually-hidden">{% translate "Loading..." %}</span>
-      </span>
-    </span>
     {% if perms.core.add_person %}
       <div class="ms-auto">
         <a href="{% url 'persons:add' %}" class="btn btn-primary">
@@ -23,7 +18,8 @@
   {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
   {% partialdef person-list inline %}
-    <div id="person-list" hx-target="#person-list" hx-swap="outerHTML" hx-push-url="true">
+    <div id="person-list" class="position-relative" hx-target="#person-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
       <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
         <span>
           {% blocktranslate count counter=person_filtered_count with total=person_total_count %}{{ counter }} of {{ total }} person{% plural %}{{ counter }} of {{ total }} persons{% endblocktranslate %}

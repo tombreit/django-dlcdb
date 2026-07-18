@@ -9,11 +9,6 @@
 
 <div class="d-flex align-items-center mb-3">
   <h1 class="mb-0">{% translate "Lending" %}</h1>
-  <span class="htmx-indicator ms-3">
-    <span class="spinner-border spinner-border-sm text-secondary" role="status">
-      <span class="visually-hidden">{% translate "Loading..." %}</span>
-    </span>
-  </span>
   <a href="{% url 'lending:lend' %}" class="btn btn-primary ms-auto">
     <i class="bi bi-lightning-charge"></i> {% translate "Lend" %}
   </a>
@@ -22,7 +17,8 @@
 {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
 {% partialdef lent-list inline %}
-<div id="lent-list" hx-target="#lent-list" hx-swap="outerHTML" hx-push-url="true">
+<div id="lent-list" class="position-relative" hx-target="#lent-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+  {% include "theme/includes/_list_loading.html" %}
 
   {% comment %}
   App-specific count sits alongside the generic filterbar chips + single

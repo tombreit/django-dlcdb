@@ -6,11 +6,6 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <h1 class="mb-0">{% translate "Rooms" %}</h1>
-    <span class="htmx-indicator ms-1">
-      <span class="spinner-border spinner-border-sm text-secondary" role="status">
-        <span class="visually-hidden">{% translate "Loading..." %}</span>
-      </span>
-    </span>
     <div class="ms-auto d-flex flex-wrap gap-2">
       {% if branding.room_plan %}
         <a href="{{ branding.room_plan.url }}" class="btn btn-outline-secondary" target="_blank" rel="noopener">
@@ -33,7 +28,8 @@
   {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
   {% partialdef room-list inline %}
-    <div id="room-list" hx-target="#room-list" hx-swap="outerHTML" hx-push-url="true">
+    <div id="room-list" class="position-relative" hx-target="#room-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
       <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
         <span>
           {% blocktranslate count counter=room_filtered_count with total=room_total_count %}{{ counter }} of {{ total }} room{% plural %}{{ counter }} of {{ total }} rooms{% endblocktranslate %}

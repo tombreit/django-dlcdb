@@ -16,11 +16,6 @@
 
   <div class="d-flex align-items-center mb-3">
     <h1 class="mb-0">{% translate "Licenses" %}</h1>
-    <span class="htmx-indicator ms-3">
-      <span class="spinner-border spinner-border-sm text-secondary" role="status">
-        <span class="visually-hidden">{% translate "Loading..." %}</span>
-      </span>
-    </span>
     <div id="add-license" class="ms-auto">
       {% include "licenses/includes/add_button.html" with style="btn btn-primary" %}
     </div>
@@ -31,7 +26,8 @@
     {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
 
     {% partialdef licenses-list inline %}
-      <div id="licenses-list" hx-target="#licenses-list" hx-swap="outerHTML" hx-push-url="true">
+      <div id="licenses-list" class="position-relative" hx-target="#licenses-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+        {% include "theme/includes/_list_loading.html" %}
 
         <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
           <span>
