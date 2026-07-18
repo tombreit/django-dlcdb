@@ -29,6 +29,16 @@ Beginne deine IT-Assets/Devices mit der DLCDB zu verwalten.
 [Erste Schritte »](guides/erste_schritte)
 :::
 
+:::{grid-item-card} {octicon}`device-desktop;1.5em;sd-me-1` Geräte
+:link: guides/devices
+:link-type: doc
+
+Die zentrale Geräteverwaltung: Übersicht, Detailseite und Zustände.
+
++++
+[Geräte »](guides/devices)
+:::
+
 :::{grid-item-card} {octicon}`rocket;1.5em;sd-me-1` Setup
 :link: betrieb/setup
 :link-type: doc

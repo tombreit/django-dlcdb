@@ -4,6 +4,7 @@
 :maxdepth: 2
 
 erste_schritte
+devices
 import
 umziehen
 ausleihe

@@ -127,6 +127,7 @@ myst_substitutions = {
     "base_url": base_url,
     "licenses_fe_link": f"[Lizenzen]({base_url}/licenses/)",
     "inventorize_fe_link": f"[Inventarisieren]({base_url}/inventory/)",
+    "devices_fe_link": f"[Geräte]({base_url}/assets/devices/)",
     "api_base_url": f"[{base_url}/api/v2/]({base_url}/api/v2/)",
     "api_swagger_url": f"[{base_url}/api/v2/schema/swagger-ui/]({base_url}/api/v2/schema/swagger-ui/)",
 }
