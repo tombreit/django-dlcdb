@@ -1,0 +1,28 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+"Open device detail" link (frontend detail view, not the admin) for the device
+picker, shared across the frontend apps. Carried (hidden) inside an option so it
+rides along when theme/js/picker.js clones the option into the selected slot,
+where the script reveals it (.js-picker-detail). Rendered visible for the
+server-side selected card (selectable=False).
+
+Expects: device (core.Device); selectable (bool). ``perms`` is used in the normal
+(request) render path; the device picker widget renders with no context
+processors, so it passes ``can_view_device`` explicitly instead.
+{% endcomment %}
+
+{% if perms.core.view_device or can_view_device %}
+  <div class="js-picker-detail border-top px-3 py-1{% if selectable %} d-none{% endif %}">
+    <a href="{% url 'assets:device_detail' pk=device.pk %}" target="_blank" rel="noopener"
+       class="small link-secondary text-decoration-none">
+      <i class="bi bi-box-arrow-up-right"></i> {% translate "Open device detail" %}
+    </a>
+  </div>
+{% endif %}

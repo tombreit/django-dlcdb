@@ -101,7 +101,7 @@ Params:
     {% endif %}
   </div>
 
-  {% include "theme/widgets/device_picker/_admin_link.html" with device=device %}
+  {% include "theme/widgets/device_picker/_detail_link.html" with device=device %}
 
   {% if multi_field_name %}
     <input type="hidden" name="{{ multi_field_name }}" value="{{ device.pk }}">

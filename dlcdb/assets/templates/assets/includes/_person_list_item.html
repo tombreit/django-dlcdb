@@ -43,4 +43,6 @@ Expects: person (core.Person); selectable (bool); locked (bool).
       </button>
     {% endif %}
   </div>
+
+  {% include "theme/includes/_person_detail_link.html" with person=person selectable=selectable %}
 </div>

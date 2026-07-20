@@ -264,26 +264,26 @@ class RelocateViewTests(BaseTest):
         )
         self.assertContains(response, "bi-pc-display")
 
-    # --- admin detail link ------------------------------------------------
+    # --- detail link ------------------------------------------------------
 
-    def test_search_option_carries_hidden_admin_link(self):
-        # The dropdown rows ship the admin link but hidden (revealed by JS only
-        # once the device becomes the selected card).
-        admin_url = reverse("admin:core_device_change", args=[self.device.pk])
+    def test_search_option_carries_hidden_detail_link(self):
+        # The dropdown rows ship the device detail link but hidden (revealed by JS
+        # only once the device becomes the selected card).
+        detail_url = reverse("assets:device_detail", kwargs={"pk": self.device.pk})
         response = self.client.post(
             reverse("theme:device_search"), {"source": "move", "q_device": "EDV-MOVE"}, headers={"HX-Request": "true"}
         )
-        self.assertContains(response, admin_url)
+        self.assertContains(response, detail_url)
         self.assertContains(response, "js-picker-detail")
         # Hidden in the option variant.
         self.assertContains(response, "js-picker-detail border-top px-3 py-1 d-none")
 
-    def test_selected_card_shows_admin_link_visible(self):
+    def test_selected_card_shows_detail_link_visible(self):
         # On a validation re-render the selected card is server-rendered visible.
-        admin_url = reverse("admin:core_device_change", args=[self.device.pk])
+        detail_url = reverse("assets:device_detail", kwargs={"pk": self.device.pk})
         response = self.client.post(self.url, {"devices": [self.device.pk], "new_room": ""})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, admin_url)
+        self.assertContains(response, detail_url)
         self.assertContains(response, "js-picker-detail")
         self.assertNotContains(response, "js-picker-detail border-top px-3 py-1 d-none")
 

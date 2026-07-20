@@ -132,7 +132,7 @@ class DevicePickerWidget(forms.Widget):
         self.label = label
         self.placeholder = placeholder
         # Set per request by the form so the (perms-less) widget render context can
-        # still gate the "open in admin" link on the change_device permission.
+        # still gate the "open device detail" link on the view_device permission.
         self.user = None
         super().__init__(attrs)
 
@@ -178,9 +178,10 @@ class DevicePickerWidget(forms.Widget):
                 "selected_device": devices[0] if devices else None,
                 "has_selected": bool(devices),
                 # The widget render context has no `perms` (no context processors),
-                # so pass the change_device permission explicitly for the selected
-                # cards' "open in admin" link.
-                "can_change_device": bool(self.user and self.user.has_perm("core.change_device")),
+                # so pass the view_device permission explicitly for the selected
+                # cards' "open device detail" link (points at the frontend detail
+                # view, which requires core.view_device).
+                "can_view_device": bool(self.user and self.user.has_perm("core.view_device")),
             }
         )
         return context
