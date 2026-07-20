@@ -152,7 +152,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
 
 @admin.register(Tenant)
 class TenantAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "contact_email")
     search_fields = ("name",)
     ordering = ("name",)
     filter_horizontal = ("groups",)

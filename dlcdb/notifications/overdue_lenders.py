@@ -10,10 +10,10 @@ on every run.
 
 import logging
 
-from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone
 
+from dlcdb.core.utils.helpers import get_contact_email
 from dlcdb.lending.models import LendingConfiguration
 
 from .email_footer import email_footer_context
@@ -25,8 +25,10 @@ logger = logging.getLogger(__name__)
 
 def create_overdue_lender_messages(*, now=None) -> list[Message]:
     """
-    Create one standalone pending Message per person with overdue lendings,
-    listing all their overdue devices. Sending is left to the caller.
+    Create one standalone pending Message per (person, tenant) with overdue
+    lendings, listing that tenant's overdue devices. Splitting per tenant lets
+    each mail's IT copy go to the tenant responsible for those devices (via
+    device.tenant). Sending is left to the caller.
     """
     now = now or timezone.localtime(timezone.now())
     overdue_records = get_lent_overdue_records(now)
@@ -37,16 +39,19 @@ def create_overdue_lender_messages(*, now=None) -> list[Message]:
         return []
 
     messages = []
-    for lender_pk in set(overdue_records.values_list("person__pk", flat=True)):
-        records = list(overdue_records.filter(person__pk=lender_pk))
+    groups = set(overdue_records.values_list("person__pk", "device__tenant"))
+    for lender_pk, tenant_pk in groups:
+        records = list(overdue_records.filter(person__pk=lender_pk, device__tenant=tenant_pk))
         person = records[0].person
+        tenant = records[0].device.tenant
+        it_email = get_contact_email(tenant)
 
         if mode == Recipient.IT:
             # Testdrive: the lender's mail is rerouted to IT, no lender copy.
-            recipient, cc = settings.DEFAULT_FROM_EMAIL, ""
+            recipient, cc = it_email, ""
         else:  # LENDER or LENDER_AND_IT
             recipient = person.get_email
-            cc = settings.DEFAULT_FROM_EMAIL if mode == Recipient.LENDER_AND_IT else ""
+            cc = it_email if mode == Recipient.LENDER_AND_IT else ""
 
         if not recipient:
             logger.warning(f"Skipping overdue lender mail for {person} (pk={person.pk}): no email address")
@@ -56,8 +61,7 @@ def create_overdue_lender_messages(*, now=None) -> list[Message]:
             "person": person,
             "records": records,
             "records_count": len(records),
-            "contact_email": settings.DEFAULT_FROM_EMAIL,
-            **email_footer_context(),
+            **email_footer_context(tenant=tenant),
         }
         message = Message.objects.create(
             recipient_email=recipient,

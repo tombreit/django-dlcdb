@@ -14,6 +14,7 @@ from django.template.loader import get_template
 # from django.utils import timezone
 
 from dlcdb.core.models import Inventory, Person
+from dlcdb.core.utils.helpers import get_contact_email
 from dlcdb.inventory.utils import update_inventory_note
 from dlcdb.notifications.email_footer import email_footer_context
 import logging
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = f"Send emails (TO: lender, BCC: {settings.DEFAULT_FROM_EMAIL}) about all lented devices without an current inventory stamp or generate a report file."
+    help = "Send emails (TO: lender, CC: resolved IT contact) about all lented devices without an current inventory stamp or generate a report file."
 
     MAILTO_KEYWORD_LENDER = "to_lender"
     SEPARATOR = 80 * "*"
@@ -92,13 +93,16 @@ class Command(BaseCommand):
         email_template_subject = get_template("inventory/email/verify_lendings_subject.txt")
         email_template_body = get_template("inventory/email/verify_lendings_body.txt")
 
+        # Shared contact resolver (Branding IT dept email -> DEFAULT_FROM_EMAIL);
+        # email_footer_context() supplies the same value to the footer template.
+        contact_email = get_contact_email()
+
         email_context = {
             "subject_prefix": settings.EMAIL_SUBJECT_PREFIX,
             "devices": devices,
             "person": person,
             "lender_email": person.get_email,
             "deadline": deadline,
-            "contact_email": settings.DEFAULT_FROM_EMAIL,
             **email_footer_context(),
         }
         subject = email_template_subject.render(email_context)
@@ -109,7 +113,7 @@ class Command(BaseCommand):
             body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
             to=[recipient],  # expects a list
-            cc=[settings.DEFAULT_FROM_EMAIL],
+            cc=[contact_email],
         )
 
         return email_obj

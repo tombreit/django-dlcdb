@@ -13,6 +13,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import Room
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.organization.models import Branding
 
 
 _PLAIN_STATIC_STORAGE = {
@@ -62,3 +63,16 @@ class StickyHintsTests(BaseTest):
         self.assertContains(response, "is_external")
         self.assertContains(response, "is_auto_return_room")
         self.assertContains(response, reverse("rooms:index"))
+
+    def test_branding_it_email_hint_nags_until_configured(self):
+        # Unconfigured Branding IT dept email: the hint nags with a CTA.
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, "No IT department contact email configured in Branding!")
+        self.assertContains(response, reverse("admin:organization_branding_changelist"))
+
+        # Once set, the nag disappears.
+        branding = Branding.load()
+        branding.organization_it_dept_email = "it-dept@example.org"
+        branding.save()
+        response = self.client.get(self.dashboard_url)
+        self.assertNotContains(response, "No IT department contact email configured in Branding!")

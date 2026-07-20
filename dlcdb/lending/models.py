@@ -44,7 +44,10 @@ class LendingConfiguration(SingletonBaseModel):
         max_length=20,
         choices=OverdueNotificationRecipient.choices,
         default=OverdueNotificationRecipient.LENDER,
-        help_text="Who receives the weekly overdue-lending reminder mails. IT = DEFAULT_FROM_EMAIL.",
+        help_text=(
+            "Who receives the weekly overdue-lending reminder mails. The IT address is "
+            "resolved per tenant: tenant contact email → Branding IT dept email → DEFAULT_FROM_EMAIL."
+        ),
     )
 
     def __str__(self):

@@ -23,6 +23,16 @@ class Tenant(models.Model):
         help_text="The groups which define this tenant.",
     )
 
+    contact_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Responsible contact/IT address for this tenant. Receives the overdue-"
+            "lending copies (CC or reroute) for this tenant's devices and is shown in "
+            "email footers. Falls back to the Branding IT dept email, then "
+            "DEFAULT_FROM_EMAIL."
+        ),
+    )
+
     # is_super_tenant = models.BooleanField(
     #     default=False,
     #     help_text="If set to True, users of this tenant could view and edit all assets.",

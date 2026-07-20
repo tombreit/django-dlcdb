@@ -45,6 +45,9 @@ SPDX-License-Identifier: EUPL-1.2
                 </td>
                 <td>
                     <a href="mailto:{{ branding.organization_it_dept_email }}">{{ branding.organization_it_dept_email }}</a><br>
+                    {% if record.device.tenant.contact_email and record.device.tenant.contact_email != branding.organization_it_dept_email %}
+                    <a href="mailto:{{ record.device.tenant.contact_email }}">{{ record.device.tenant.contact_email }}</a><br>
+                    {% endif %}
                     <a href="{{ branding.organization_url }}">{{ branding.organization_url }}</a>
                 </td>
                 <td>

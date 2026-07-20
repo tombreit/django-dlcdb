@@ -21,6 +21,8 @@ from huey.contrib import djhuey
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, Person
 from dlcdb.lending.models import LendingConfiguration
+from dlcdb.organization.models import Branding
+from dlcdb.tenants.models import Tenant
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
 from dlcdb.notifications.tasks import notify_overdue_lenders, queue_messages_for_interval, send_message
@@ -260,9 +262,13 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
             setattr(config, key, value)
         config.save()
 
-    def create_lent_record(self, person, edv_id, overdue_days):
+    def create_lent_record(self, person, edv_id, overdue_days, tenant=None):
+        device = create_device(edv_id=edv_id)
+        if tenant is not None:
+            device.tenant = tenant
+            device.save(update_fields=["tenant"])
         return LentRecord.objects.create(
-            device=create_device(edv_id=edv_id),
+            device=device,
             person=person,
             lent_start_date=timezone.localdate() - timedelta(days=100),
             lent_desired_end_date=timezone.localdate() - timedelta(days=overdue_days),
@@ -355,3 +361,54 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
         notify_overdue_lenders.call_local()
 
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_it_cc_is_routed_per_tenant(self):
+        # A single lender with overdue devices in two tenants gets one mail per
+        # tenant, each CCing that tenant's own contact_email and listing only
+        # that tenant's devices.
+        self.set_lending_config(overdue_notifications_recipient="lender_and_it")
+        tenant_a = Tenant.objects.create(name="Tenant A", contact_email="it-a@example.org")
+        tenant_b = Tenant.objects.create(name="Tenant B", contact_email="it-b@example.org")
+        self.create_lent_record(self.lender1, edv_id="ntb120", overdue_days=10, tenant=tenant_a)
+        self.create_lent_record(self.lender1, edv_id="ntb121", overdue_days=10, tenant=tenant_b)
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual(len(mail.outbox), 2)
+        for email in mail.outbox:
+            self.assertEqual(email.to, ["max@example.org"])
+        by_cc = {email.cc[0]: email for email in mail.outbox}
+        self.assertEqual(set(by_cc), {"it-a@example.org", "it-b@example.org"})
+        self.assertIn("ntb120", by_cc["it-a@example.org"].body)
+        self.assertNotIn("ntb121", by_cc["it-a@example.org"].body)
+        self.assertIn("ntb121", by_cc["it-b@example.org"].body)
+        self.assertNotIn("ntb120", by_cc["it-b@example.org"].body)
+
+    def test_it_cc_falls_back_to_branding_then_default(self):
+        self.set_lending_config(overdue_notifications_recipient="lender_and_it")
+        branding = Branding.load()
+        branding.organization_it_dept_email = "it-dept@example.org"
+        branding.save()
+        # Tenant without a contact_email -> Branding IT dept email.
+        tenant = Tenant.objects.create(name="Tenant C")
+        self.create_lent_record(self.lender1, edv_id="ntb122", overdue_days=10, tenant=tenant)
+        # Device without a tenant -> Branding IT dept email as well.
+        self.create_lent_record(self.lender2, edv_id="ntb123", overdue_days=10)
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual(len(mail.outbox), 2)
+        for email in mail.outbox:
+            self.assertEqual(email.cc, ["it-dept@example.org"])
+
+    def test_it_cc_last_resort_is_default_from_email(self):
+        from django.conf import settings
+
+        self.set_lending_config(overdue_notifications_recipient="lender_and_it")
+        # No tenant contact_email and no Branding IT dept email configured.
+        self.create_lent_record(self.lender1, edv_id="ntb124", overdue_days=10)
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].cc, [settings.DEFAULT_FROM_EMAIL])

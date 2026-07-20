@@ -45,6 +45,28 @@ def get_user_email(user):
     return email
 
 
+def get_contact_email(tenant=None):
+    """
+    Responsible contact/IT email, resolved through a single fallback chain:
+
+    1. ``tenant.contact_email`` (per-tenant responsible address)
+    2. ``Branding.organization_it_dept_email`` (global IT dept address)
+    3. ``settings.DEFAULT_FROM_EMAIL`` (last-resort safety net)
+
+    Shared resolver so notification routing, email footers etc. all agree on
+    which address to use.
+    """
+    # Local import to avoid a circular import (organization.models -> core).
+    from dlcdb.organization.models import Branding
+
+    # `or` short-circuits, so Branding is only loaded when no tenant address.
+    return (
+        (tenant.contact_email if tenant else "")
+        or Branding.load().organization_it_dept_email
+        or settings.DEFAULT_FROM_EMAIL
+    )
+
+
 def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
     try:
         image_string = re.sub("^data:.+;base64,", "", base64string)

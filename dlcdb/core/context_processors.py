@@ -120,6 +120,19 @@ def hints(request):
                 )
             )
 
+        # Local import to avoid a circular import (organization -> core).
+        from dlcdb.organization.models import Branding
+
+        if not Branding.load().organization_it_dept_email:
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=_("No IT department contact email configured in Branding!"),
+                    cta_link=reverse("admin:organization_branding_changelist"),
+                    cta_text=_("Configure it?"),
+                )
+            )
+
     for message in sticky_messages:
         # Only add current message if not already exists in messages display
         current_messages_content = [msg.message for msg in list(messages.get_messages(request))]
