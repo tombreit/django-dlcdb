@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .abstracts import AuditBaseModel
+from .. import lifecycle
 
 
 # Whereabouts of the device after decommissioning.
@@ -44,20 +45,14 @@ class RecordManager(models.Manager):
         return self.get_queryset().active_records()
 
 
-# Moved the RECORD_TYPE_LIST to module level to have them available
-# in the CheckContraints.
-#
-# The keys are the stable identifiers: they are written to the database, checked
-# by the CheckConstraint below and exposed verbatim by the API. Only the labels
-# are translated.
-RECORD_TYPE_LIST = [
-    ("ORDERED", _("Ordered")),
-    ("INROOM", _("In room")),
-    ("LENT", _("Lent")),
-    ("LOST", _("Not locatable")),
-    ("REMOVED", _("Removed")),
-]
-RECORD_TYPE_KEYS = [choice[0] for choice in RECORD_TYPE_LIST]
+# The state vocabulary now lives in ``dlcdb.core.lifecycle``, the single source of
+# truth for states and transitions. These names are re-exported here because the
+# ``record_type`` field choices and the CheckConstraint (below) need them at
+# class-body evaluation time, and many call sites import them from this module.
+# The keys are stable identifiers: written to the database, checked by the
+# CheckConstraint and exposed verbatim by the API. Only the labels are translated.
+RECORD_TYPE_LIST = lifecycle.RECORD_TYPE_LIST
+RECORD_TYPE_KEYS = lifecycle.RECORD_TYPE_KEYS
 
 # The rule "a device that cannot be located cannot be lent" is enforced in more
 # than one place (the admin form and the lending form). Keep the wording in one
@@ -85,16 +80,6 @@ class Record(AuditBaseModel):
     REMOVED = "REMOVED"
 
     RECORD_TYPE_CHOICES = RECORD_TYPE_LIST
-
-    # (current_state: [allowed_next_states])
-    STATE_TRANSITIONS = {
-        None: [INROOM],
-        # ORDERED: [INROOM],
-        INROOM: [INROOM, LENT, LOST, REMOVED],
-        LENT: [INROOM, LOST],
-        LOST: [INROOM, REMOVED],
-        REMOVED: [None],
-    }
 
     device = models.ForeignKey(
         "core.Device",
@@ -281,23 +266,7 @@ class Record(AuditBaseModel):
 
     @staticmethod
     def get_proxy_model_by_record_type(record_type):
-        from . import (
-            OrderedRecord,
-            InRoomRecord,
-            LentRecord,
-            LostRecord,
-            RemovedRecord,
-        )
-
-        RECORD_TYPE_CLASSES = {
-            "ORDERED": OrderedRecord,
-            "INROOM": InRoomRecord,
-            "LENT": LentRecord,
-            "LOST": LostRecord,
-            "REMOVED": RemovedRecord,
-        }
-
-        return RECORD_TYPE_CLASSES[record_type]
+        return lifecycle.proxy_for(record_type)
 
     def get_proxy_model(self):
         return Record.get_proxy_model_by_record_type(self.record_type)
@@ -319,21 +288,6 @@ class Record(AuditBaseModel):
     @property
     def is_type_lent(self):
         return self.record_type == Record.LENT
-
-    def get_current_state(self):
-        """
-        Returns the current state based on the record_type.
-        Could be as simple as returning self.record_type,
-        or more complex if states are different from record_types.
-        """
-        return self.record_type
-
-    def get_allowed_next_states(self):
-        """
-        Returns a list of record_types (states) this record can transition to.
-        """
-        current_state = self.get_current_state()
-        return self.STATE_TRANSITIONS.get(current_state, [])
 
     def get_last_found(self) -> Optional[datetime]:
         RECORD_TYPES_FOUND = [Record.INROOM, Record.LENT]

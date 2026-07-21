@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from .. import lifecycle
 from ..models.record import Record
 
 
@@ -91,17 +92,11 @@ def get_device_state_data(device, *, user=None, app_name=None):
     # Possible actions based on the current state
     actions = []
 
-    if active_record:
-        allowed_next_states = active_record.get_allowed_next_states()
-    else:
-        # No active record - use initial states from STATE_TRANSITIONS
-        allowed_next_states = Record.STATE_TRANSITIONS.get(None, [])
+    # The transitions the lifecycle offers as UI actions from the current state.
+    allowed_next_states = [t.target for t in lifecycle.transitions_from(lifecycle.state_of(device)) if t.offered]
 
     # Generate actions for each allowed next state
     for next_state in allowed_next_states:
-        if next_state is None:
-            continue
-
         proxy_model = Record.get_proxy_model_by_record_type(next_state)
 
         # Construct the permission string: <app_label>.add_<model_name>

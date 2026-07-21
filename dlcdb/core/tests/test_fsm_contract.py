@@ -22,6 +22,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import Record
 from dlcdb.core.models.record import RECORD_TYPE_COLORS, RECORD_TYPE_KEYS, RECORD_TYPE_LIST
 
@@ -55,6 +56,11 @@ def test_record_type_constants_match_the_choice_list():
 # --- Table shape ---------------------------------------------------------
 
 
+def _targets(state):
+    """The set of target states reachable from ``state`` per the lifecycle table."""
+    return {t.target for t in lifecycle.transitions_from(state)}
+
+
 @pytest.mark.parametrize(
     "state, expected_targets",
     [
@@ -66,39 +72,39 @@ def test_record_type_constants_match_the_choice_list():
 )
 def test_known_transitions_are_allowed(state, expected_targets):
     """
-    Subset, not equality: a corrected table may legitimately gain targets.
+    Subset, not equality: the corrected table legitimately has extra targets
+    (e.g. LENT -> LOST, REMOVED -> LOST/INROOM).
     """
-    assert expected_targets <= set(Record.STATE_TRANSITIONS[state])
+    assert expected_targets <= _targets(state)
 
 
 def test_inroom_is_reachable_from_every_operational_state():
     """
     INROOM is the hub of the machine -- a device can always be brought back to
-    "located in a room" from any state a live device can be in.
+    "located in a room" from any state a live device can be in (including REMOVED,
+    via the inventory ``recover`` transition).
     """
-    for state in (None, Record.INROOM, Record.LENT, Record.LOST):
-        assert Record.INROOM in Record.STATE_TRANSITIONS[state]
+    for state in (None, Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED):
+        assert Record.INROOM in _targets(state)
 
 
-def test_get_allowed_next_states_agrees_with_the_table():
-    for state in (Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED):
-        assert _unsaved(state).get_allowed_next_states() == Record.STATE_TRANSITIONS[state]
+def test_can_transition_agrees_with_the_table():
+    for state in (None, Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED):
+        for target in _targets(state):
+            assert lifecycle.can_transition(state, target)
 
 
-def test_ordered_is_currently_a_dead_end():
+def test_ordered_can_be_located_or_removed():
     """
-    ORDERED is a valid record_type (``procure_forms`` creates them and it passes
-    the CheckConstraint) but it is commented out of STATE_TRANSITIONS, so the UI
-    offers no way forward. Documented here as current behaviour; a corrected
-    table is expected to add ORDERED -> INROOM.
+    ORDERED used to be a dead end (commented out of the old STATE_TRANSITIONS).
+    The corrected table gives it a way forward: an ordered device is located when
+    it arrives, or removed if the order is cancelled.
     """
-    assert Record.ORDERED not in Record.STATE_TRANSITIONS
-    # .get(..., []) default -- must not raise.
-    assert _unsaved(Record.ORDERED).get_allowed_next_states() == []
+    assert _targets(Record.ORDERED) == {Record.INROOM, Record.REMOVED}
 
 
 def test_unknown_state_yields_no_transitions_instead_of_raising():
-    assert _unsaved("NO_SUCH_STATE").get_allowed_next_states() == []
+    assert lifecycle.transitions_from("NO_SUCH_STATE") == ()
 
 
 # --- Registry completeness ----------------------------------------------
