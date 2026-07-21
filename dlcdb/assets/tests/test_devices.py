@@ -58,7 +58,7 @@ class DeviceFrontendTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "<table")
         self.assertContains(response, "EDV-AVAILABLE")
-        self.assertContains(response, "LOKALISIERT")
+        self.assertContains(response, "In room")
         self.assertContains(response, "Add device")
 
     def test_index_htmx_response_is_fragment_only(self):

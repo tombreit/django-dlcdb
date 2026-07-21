@@ -49,26 +49,29 @@ class LentRecord(Record):
             self.device.save()
 
         if not self.lent_desired_end_date:
-            raise ValidationError({"lent_desired_end_date": "lent_desired_end_date must be set!"})
+            raise ValidationError({"lent_desired_end_date": _("A desired return date must be set!")})
 
         if not self.lent_start_date:
-            raise ValidationError({"lent_start_date": "lent_start_date must be set!"})
+            raise ValidationError({"lent_start_date": _("A lending start date must be set!")})
 
         if self.lent_desired_end_date < self.lent_start_date:
-            raise ValidationError({"lent_desired_end_date": "lent_desired_end_date can not be before lent_start_date!"})
+            raise ValidationError(
+                {"lent_desired_end_date": _("The desired return date cannot be before the lending start date!")}
+            )
 
         if self.lent_end_date and self.lent_end_date > datetime.date(now()):
-            raise ValidationError({"lent_end_date": "lent_end_date can not be in the future!"})
+            raise ValidationError({"lent_end_date": _("The return date cannot be in the future!")})
 
         if self.lent_end_date and self.lent_end_date < self.lent_start_date:
-            raise ValidationError({"lent_end_date": "lent_end_date can not be before lent_start_date!"})
+            raise ValidationError({"lent_end_date": _("The return date cannot be before the lending start date!")})
 
         if self.lent_desired_end_date > datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d").date():
+            # Interpolate *outside* gettext: an f-string inside _() cannot be
+            # extracted by makemessages and its msgid would vary at runtime.
             raise ValidationError(
                 {
-                    "lent_desired_end_date": _(
-                        f"The end date (lend_desired_end_date) cannot be after {settings.MAX_FUTURE_LENT_DESIRED_END_DATE}!"
-                    )
+                    "lent_desired_end_date": _("The desired return date cannot be after %(max_date)s!")
+                    % {"max_date": settings.MAX_FUTURE_LENT_DESIRED_END_DATE}
                 }
             )
 
@@ -76,17 +79,20 @@ class LentRecord(Record):
             try:
                 extern_room = Room.objects.get(is_external=True)
             except Room.DoesNotExist as e:
-                raise ValidationError('No extern room set! "{}"'.format(e), code="invalid")
+                raise ValidationError(_('No extern room set! "%(error)s"') % {"error": e}, code="invalid")
             raise ValidationError(
                 {
-                    "room": f"A room must be set! If the location is unclear, the extern room `{extern_room}` room can be selected."
+                    "room": _(
+                        "A room must be set! If the location is unclear, the extern room `%(room)s` can be selected."
+                    )
+                    % {"room": extern_room}
                 }
             )
 
         try:
             Room.objects.get(is_auto_return_room=True)
         except Room.DoesNotExist as e:
-            raise ValidationError('No auto return room set! "{}"'.format(e), code="invalid")
+            raise ValidationError(_('No auto return room set! "%(error)s"') % {"error": e}, code="invalid")
 
     def save(self, *args, **kwargs):
         self.record_type = Record.LENT

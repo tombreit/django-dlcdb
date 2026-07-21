@@ -213,11 +213,34 @@ deployment steps above.
 
 ### Localization
 
+Source strings are English and wrapped in `gettext_lazy`; German is supplied
+by the catalog in `dlcdb/locale/de/`. There is deliberately **no `en`
+catalog** — an empty `msgstr` falls back to the msgid, and the msgids already
+are the English source, so such a catalog would be an identity mapping whose
+only effect is diff noise on every `makemessages` run.
+
+Extract and compile with:
+
 ```bash
-./manage.py makemessages --locale de --ignore=.venv/*
-poedit dlcdb/locale/de/LC_MESSAGES/django.po
-./manage.py compilemessages --ignore=.venv/*
+make messages
 ```
+
+which wraps:
+
+```bash
+./manage.py makemessages -l de \
+    --ignore=node_modules --ignore=.venv --ignore=run --ignore=docs --ignore=temp --ignore=frontend
+poedit dlcdb/locale/de/LC_MESSAGES/django.po
+./manage.py compilemessages -l de
+```
+
+The `--ignore` list matters: without it `makemessages` walks `node_modules/`
+and the built docs in `run/`.
+
+Entries flagged `#, fuzzy` are gettext's *guesses* from similar strings. They
+are excluded from the compiled `.mo`, so a fuzzy entry renders as the English
+source until a translator confirms it — check the guess before clearing the
+flag, it is often wrong.
 
 ### Requirements
 

@@ -48,13 +48,18 @@ Die möglichen Record-Typen und ihre erlaubten Übergänge:
       ENTFERNT --> [*]
 ```
 
-| Record-Typ | Bedeutung |
-|---|---|
-| **LOKALISIERT** (`INROOM`) | Das Device befindet sich in einem Raum. |
-| **VERLIEHEN** (`LENT`) | Das Device ist an eine Person verliehen. |
-| **NICHT AUFFINDBAR** (`LOST`) | Das Device konnte (z.B. bei einer Inventur) nicht aufgefunden werden. |
-| **ENTFERNT** (`REMOVED`) | Das Device wurde ausgemustert (verkauft, verschrottet, …). Endzustand. |
-| **BESTELLT** (`ORDERED`) | Sonderfall für bestellte, noch nicht in Betrieb genommene Geräte; wird nur über den Django-Admin gepflegt. |
+Maßgeblich ist jeweils der **Schlüssel** (`INROOM`, `LENT`, …): er steht so in
+der Datenbank, wird von der `CheckConstraint` geprüft und von der API
+unverändert ausgeliefert. Die Beschriftungen daneben sind übersetzbar
+(`gettext`) und können sich je nach Sprache ändern.
+
+| Schlüssel | Beschriftung (de) | Bedeutung |
+|---|---|---|
+| `INROOM` | Lokalisiert | Das Device befindet sich in einem Raum. |
+| `LENT` | Verliehen | Das Device ist an eine Person verliehen. |
+| `LOST` | Nicht auffindbar | Das Device konnte (z.B. bei einer Inventur) nicht aufgefunden werden. |
+| `REMOVED` | Entfernt | Das Device wurde ausgemustert (verkauft, verschrottet, …). Endzustand. |
+| `ORDERED` | Bestellt | Sonderfall für bestellte, noch nicht in Betrieb genommene Geräte; wird nur über den Django-Admin gepflegt. |
 
 Daneben existiert der Typ *Lizenz-Record* für Software-Lizenzen und
 Verträge — siehe [Lizenzen](guides/lizenzen.md).

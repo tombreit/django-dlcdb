@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.utils.translation import gettext_lazy as _
 
 from ..models import InRoomRecord, Room
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
@@ -41,7 +42,10 @@ class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
             redirect_url = reverse("admin:core_device_changelist")
             device = obj.device
             room = Room.objects.get(pk=request.POST.get("room"))
-            messages.success(request, f"Raumänderung nach Raum “{room}” für Device “{device}” durchgeführt.")
+            messages.success(
+                request,
+                _("Device “%(device)s” moved to room “%(room)s”.") % {"device": device, "room": room},
+            )
             return HttpResponseRedirect(redirect_url)
         else:
             return super().response_change(request, obj, post_url_continue=post_url_continue)

@@ -46,14 +46,23 @@ class RecordManager(models.Manager):
 
 # Moved the RECORD_TYPE_LIST to module level to have them available
 # in the CheckContraints.
+#
+# The keys are the stable identifiers: they are written to the database, checked
+# by the CheckConstraint below and exposed verbatim by the API. Only the labels
+# are translated.
 RECORD_TYPE_LIST = [
-    ("ORDERED", "BESTELLT"),
-    ("INROOM", "LOKALISIERT"),
-    ("LENT", "VERLIEHEN"),
-    ("LOST", "NICHT AUFFINDBAR"),
-    ("REMOVED", "ENTFERNT"),
+    ("ORDERED", _("Ordered")),
+    ("INROOM", _("In room")),
+    ("LENT", _("Lent")),
+    ("LOST", _("Not locatable")),
+    ("REMOVED", _("Removed")),
 ]
 RECORD_TYPE_KEYS = [choice[0] for choice in RECORD_TYPE_LIST]
+
+# The rule "a device that cannot be located cannot be lent" is enforced in more
+# than one place (the admin form and the lending form). Keep the wording in one
+# place so the copies cannot drift.
+LOST_DEVICE_NOT_LENDABLE = _('Device is currently "not locatable". It must be located before it can be lent.')
 
 # Bootstrap contextual colour per record type, used for state badges.
 RECORD_TYPE_COLORS = {
@@ -144,8 +153,8 @@ class Record(AuditBaseModel):
         on_delete=models.SET_NULL,
         limit_choices_to={"deleted_at__isnull": True},
     )
-    lent_start_date = models.DateField(null=True, blank=True, verbose_name="Verleihbeginn")
-    lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name="Soll-Rückgabedatum")
+    lent_start_date = models.DateField(null=True, blank=True, verbose_name=_("Lent from"))
+    lent_desired_end_date = models.DateField(null=True, blank=True, verbose_name=_("Desired return date"))
     sync_lent_end_date = models.BooleanField(
         default=False,
         verbose_name=_("Sync return date with contract end"),
@@ -186,7 +195,7 @@ class Record(AuditBaseModel):
         limit_choices_to={"deleted_at__isnull": True},
     )
     # Bestellvorgang
-    date_of_purchase = models.DateField(null=True, blank=True, verbose_name="Bestelldatum")
+    date_of_purchase = models.DateField(null=True, blank=True, verbose_name=_("Order date"))
 
     # REMOVED
     disposition_state = models.CharField(
@@ -195,8 +204,8 @@ class Record(AuditBaseModel):
         blank=True,
         verbose_name=_("Whereabouts after decommissioning"),
     )
-    removed_info = models.TextField(null=True, blank=True, verbose_name="Verbleib (removed_info)")
-    removed_date = models.DateTimeField(null=True, blank=True, editable=False, verbose_name="Entfernt am")
+    removed_info = models.TextField(null=True, blank=True, verbose_name=_("Whereabouts"))
+    removed_date = models.DateTimeField(null=True, blank=True, editable=False, verbose_name=_("Removed on"))
     attachments = models.ManyToManyField(
         "core.Attachment",
         blank=True,

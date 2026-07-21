@@ -111,7 +111,7 @@ def test_no_active_inventory_alert(su_client, room_1):
     assert response.status_code == 200
     html = response.content.decode()
     assert "No active inventory" in html  # red navbar badge
-    assert "Keine aktive Inventur gefunden" in html  # alert
+    assert "No active inventory found" in html  # alert
 
 
 @pytest.mark.django_db

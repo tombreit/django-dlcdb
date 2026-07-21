@@ -164,7 +164,9 @@ def compare_sap(sap_list_obj):
                         {
                             "TENANT": record_for_sap.device.tenant,
                             "CURRENT INVENTORY": record_inventory,
-                            "TYPE": record_for_sap.get_record_type_display(),
+                            # The stable record-type key, not the display label:
+                            # this column must not change with the UI language.
+                            "TYPE": record_for_sap.record_type,
                             "LAST_FOUND": f"{last_found:%Y-%m-%d}",
                             "OLD ROOM": old_room,
                             "NEW ROOM": new_room,

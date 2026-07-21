@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
+
 from ..models import Record
 from .proxyrecord_admin_form import ProxyRecordAdminForm
 
@@ -13,5 +15,5 @@ class RemovedRecordAdminForm(ProxyRecordAdminForm):
         active_record_type = device.active_record.record_type
 
         if active_record_type == Record.REMOVED:
-            raise forms.ValidationError('Record already of type "REMOVED" - can not be removed again!')
+            raise forms.ValidationError(_('Record already of type "REMOVED" - can not be removed again!'))
         return self.cleaned_data

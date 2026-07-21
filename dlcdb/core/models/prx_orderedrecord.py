@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
@@ -20,8 +21,8 @@ class OrderedRecordManager(models.Manager):
 class OrderedRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = "Bestellung"
-        verbose_name_plural = "Bestellungen"
+        verbose_name = _("Order")
+        verbose_name_plural = _("Orders")
 
     objects = OrderedRecordManager()
 

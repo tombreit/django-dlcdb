@@ -11,6 +11,7 @@ from django.forms import ValidationError
 from django.http import HttpResponseRedirect
 from django.db.models import Case, CharField, Value, When
 from django.utils.formats import date_format
+from django.utils.translation import gettext_lazy as _
 from django.contrib import messages
 
 from dlcdb.tenants.admin import TenantScopedAdmin
@@ -92,7 +93,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
     fieldsets = (
         (
-            "Device",
+            _("Device"),
             {
                 "fields": (
                     "get_device_ids",
@@ -101,7 +102,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
             },
         ),
         (
-            "Ausleihe",
+            _("Lending"),
             {
                 "fields": (
                     (
@@ -116,9 +117,9 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
                 )
             },
         ),
-        ("Rückgabe", {"fields": ("lent_end_date",)}),
+        (_("Return"), {"fields": ("lent_end_date",)}),
         (
-            "Notes",
+            _("Notes"),
             {
                 "classes": ("collapse",),
                 "fields": (
@@ -162,7 +163,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    @admin.display(description="Verleihgerät")
+    @admin.display(description=_("Lent device"))
     @admin.display(ordering="device__edv_id")
     def get_device(self, obj):
         return format_html(
@@ -192,7 +193,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
             obj.device.sap_id,
         )
 
-    @admin.display(description="Hersteller")
+    @admin.display(description=_("Manufacturer"))
     @admin.display(ordering="device__manufacturer")
     def get_manufacturer(self, obj):
         return obj.device.manufacturer
@@ -206,7 +207,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     def get_tenant(self, obj):
         return obj.device.tenant
 
-    @admin.display(description="Soll-Rückgabedatum")
+    @admin.display(description=_("Desired return date"))
     @admin.display(ordering="lent_desired_end_date")
     def get_lent_desired_end_date(self, obj):
         return format_html(
@@ -217,14 +218,14 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
             lent_state=obj.lent_state,
         )
 
-    @admin.display(description="Bezeichnung")
+    @admin.display(description=_("Description"))
     def get_device_human_readable(self, obj):
         return "{} - {}".format(
             obj.device.manufacturer,
             obj.device.series,
         )
 
-    @admin.display(description="Verliehen")
+    @admin.display(description=_("Lent"))
     @admin.display(boolean=True)
     def get_is_currently_lented(self, obj):
         return obj.is_type_lent
@@ -248,11 +249,13 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
         contract_end_date = obj.person.udb_contract_planned_checkout
 
         if not contract_end_date:
-            messages.warning(request, f"Warnung: Kein HR-Vertragsablaufdatum für {obj.person} gefunden!")
+            messages.warning(
+                request, _("Warning: No HR contract end date found for %(person)s!") % {"person": obj.person}
+            )
 
         if contract_end_date:
             if desired_lent_end_date > contract_end_date:
-                messages.warning(request, "Warnung: Vertragsende vor Soll-Rückgabedatum!")
+                messages.warning(request, _("Warning: Contract ends before the desired return date!"))
 
         # Save logic
         user, username = get_denormalized_user(request.user)
@@ -308,16 +311,25 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
         is_return_action = bool(obj.lent_end_date)
 
         if is_return_action:
-            msg = f"Verleih von “{self.get_device_human_readable(obj)}” an “{obj.person}” beendet."
+            msg = _("Return of “%(device)s” from “%(person)s” acknowledged.") % {
+                "device": self.get_device_human_readable(obj),
+                "person": obj.person,
+            }
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
         elif is_new_lending_action:
-            msg = f"Verleih von “{self.get_device_human_readable(obj)}” für “{obj.person}” hinzugefügt."
+            msg = _("Device “%(device)s” lent to “%(person)s”.") % {
+                "device": self.get_device_human_readable(obj),
+                "person": obj.person,
+            }
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = reverse("admin:core_lentrecord_change", args=(session["new_instance_pk"],))
             return HttpResponseRedirect(redirect_url)
         else:
-            msg = f"Verleih von “{self.get_device_human_readable(obj)}” an “{obj.person}” gespeichert."
+            msg = _("Lending of “%(device)s” to “%(person)s” saved.") % {
+                "device": self.get_device_human_readable(obj),
+                "person": obj.person,
+            }
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = request.path
             return HttpResponseRedirect(redirect_url)

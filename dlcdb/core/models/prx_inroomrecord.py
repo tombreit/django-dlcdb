@@ -4,6 +4,7 @@
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
@@ -21,14 +22,14 @@ class InRoomRecordManager(models.Manager):
 class InRoomRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = "Raumzuweisung"
-        verbose_name_plural = "Raumzuweisungen"
+        verbose_name = _("Room assignment")
+        verbose_name_plural = _("Room assignments")
 
     objects = InRoomRecordManager()
 
     def clean(self):
         if self.room is None:
-            raise ValidationError("A room must be set!")
+            raise ValidationError(_("A room must be set!"))
 
     def save(self, *args, **kwargs):
         self.record_type = Record.INROOM

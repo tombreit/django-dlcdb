@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-.PHONY: requirements tests format lint docs assets
+.PHONY: requirements tests format lint docs assets messages
+
+# Directories that must never be scanned for translatable strings.
+i18n_ignores = --ignore=node_modules --ignore=.venv --ignore=run --ignore=docs --ignore=temp --ignore=frontend
 
 # include .env
 
@@ -14,6 +17,7 @@ help:
 	@echo "test - run test suite"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "assets - build static assets with npm"
+	@echo "messages - extract translatable strings and compile the message catalogs"
 
 requirements:
 	mkdir -p requirements
@@ -25,6 +29,12 @@ requirements:
 
 tests:
 	pytest
+
+# Source strings are English, so only non-English catalogs are maintained.
+messages:
+	python3 manage.py makemessages -l de $(i18n_ignores)
+	@echo "Now translate the empty msgstr entries in dlcdb/locale/de/LC_MESSAGES/django.po, then re-run 'make messages'."
+	python3 manage.py compilemessages -l de $(i18n_ignores)
 
 docs:
 	make --directory=docs clean

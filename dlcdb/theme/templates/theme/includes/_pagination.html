@@ -82,9 +82,7 @@ would otherwise hide the only way back.
       <li class="page-item">
         <a class="page-link" href="{{ all_href }}" hx-get="{{ all_href }}">
           <i class="bi bi-chevron-expand"></i>
-          {% blocktranslate count counter=page_obj.paginator.count %}
-            Show all {{ counter }} item{% plural %}Show all {{ counter }} items
-          {% endblocktranslate %}
+          {% blocktranslate count counter=page_obj.paginator.count %}Show all {{ counter }} item{% plural %}Show all {{ counter }} items{% endblocktranslate %}
         </a>
       </li>
     </ul>

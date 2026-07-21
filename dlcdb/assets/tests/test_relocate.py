@@ -32,9 +32,9 @@ _PLAIN_STATIC_STORAGE = {
 
 
 # Pin English so the UI-string assertions below are deterministic whether or not
-# the German message catalog happens to be compiled (LANGUAGE_CODE is de-de). The
-# record-type labels asserted here (LOKALISIERT/VERLIEHEN) are hardcoded German in
-# the model choices, so they stay German regardless.
+# the German message catalog happens to be compiled (LANGUAGE_CODE is de-de).
+# The record-type labels are translatable, so they resolve to the English
+# msgid here.
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en-us")
 class RelocateViewTests(BaseTest):
     @classmethod
@@ -218,7 +218,7 @@ class RelocateViewTests(BaseTest):
         self.assertContains(response, 'data-lent="1"')
         # Consolidated state badge: record-type display label + lender, amber.
         self.assertContains(response, "text-bg-warning")
-        self.assertContains(response, "VERLIEHEN")
+        self.assertContains(response, "Lent")
         self.assertContains(response, "Mustermann")
 
     def test_device_search_shows_record_type_badge(self):
@@ -227,7 +227,7 @@ class RelocateViewTests(BaseTest):
         )
         # INROOM device -> green badge with the display label and the room number.
         self.assertContains(response, "text-bg-success")
-        self.assertContains(response, "LOKALISIERT")
+        self.assertContains(response, "In room")
         self.assertContains(response, "A1.01")
         # The old separate "Current room" line is gone.
         self.assertNotContains(response, "Current room")

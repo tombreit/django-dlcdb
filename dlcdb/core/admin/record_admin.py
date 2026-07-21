@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.template import Template, Context
 from django.urls import reverse
 from django.utils.html import format_html_join
+from django.utils.translation import gettext_lazy as _
 
 from ..models import Record
 from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin, get_has_note_badge
@@ -153,7 +154,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     # Custom admin actions
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/actions/
-    @admin.display(description="Ausgewählte Records auf 'ENTFERNT' und 'VERKAUFT' setzen")
+    @admin.display(description=_("Set selected records to 'Removed' / 'Sold'"))
     def set_removed_sold_record(self, request, queryset):
         for item in queryset:
             # Set new removed record for item:
@@ -166,9 +167,9 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             )
             record_obj.save()
 
-        self.message_user(request, "{} records auf ENTFERNT und VERKAUFT gesetzt.".format(queryset.count()))
+        self.message_user(request, _("%(count)s records set to 'Removed' / 'Sold'.") % {"count": queryset.count()})
 
-    @admin.display(description="Ausgewählte Records auf 'ENTFERNT' und 'VERSCHROTTET' setzen")
+    @admin.display(description=_("Set selected records to 'Removed' / 'Scrapped'"))
     def set_removed_scrapped_record(self, request, queryset):
         for item in queryset:
             # Set new removed record for item:
@@ -181,7 +182,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
             )
             record_obj.save()
 
-        self.message_user(request, "{} records auf ENTFERNT und VERSCHROTTET gesetzt.".format(queryset.count()))
+        self.message_user(request, _("%(count)s records set to 'Removed' / 'Scrapped'.") % {"count": queryset.count()})
 
     def changelist_view(self, request, extra_context=None):
         """

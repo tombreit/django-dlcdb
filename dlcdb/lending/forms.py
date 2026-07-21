@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, LentRecord, Person, Record, Room
+from dlcdb.core.models.record import LOST_DEVICE_NOT_LENDABLE
 from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
 
 from .pickers import lend_queryset
@@ -71,7 +72,7 @@ class LentingForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if self.record_type == Record.LOST:
-            raise ValidationError(_('Device is currently "not locatable". It must be located before it can be lent.'))
+            raise ValidationError(LOST_DEVICE_NOT_LENDABLE)
         return cleaned_data
 
     class Meta:

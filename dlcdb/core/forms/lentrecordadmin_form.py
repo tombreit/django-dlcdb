@@ -6,6 +6,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from ..models import LentRecord, Record
+from ..models.record import LOST_DEVICE_NOT_LENDABLE
 
 
 class LentRecordAdminForm(forms.ModelForm):
@@ -26,7 +27,7 @@ class LentRecordAdminForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()  # NOQA
         if self.record_type == Record.LOST:
-            raise ValidationError('Device gilt aktuell als "Nicht auffindbar". Device muss zuerst lokalisiert werden.')
+            raise ValidationError(LOST_DEVICE_NOT_LENDABLE)
 
     class Meta:
         model = LentRecord
