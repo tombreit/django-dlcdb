@@ -6,7 +6,6 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -17,13 +16,9 @@ from .room import Room
 
 class LentRecordManager(models.Manager):
     def get_queryset(self):
-        non_lentable_filter = Q(
-            Q(record_type=Record.REMOVED)
-            |
-            # Q(record_type=Record.LOST) |
-            Q(device__is_licence=True)
-        )
-
+        # Lendability is decided by is_lentable alone (see the ``lend``
+        # transition in ``dlcdb.core.lifecycle``): a lentable licence can be
+        # lent, so its lending must be visible here like any other.
         qs = (
             super()
             .get_queryset()
@@ -32,7 +27,7 @@ class LentRecordManager(models.Manager):
                 is_active=True,
                 device__is_lentable=True,
             )
-            .exclude(non_lentable_filter)
+            .exclude(record_type=Record.REMOVED)
             .order_by("-modified_at")
         )
 

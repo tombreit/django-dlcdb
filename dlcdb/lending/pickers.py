@@ -24,9 +24,9 @@ def lend_queryset(request):
     """Tenant-scoped queryset of the devices that can be lent right now.
 
     The "which devices are lendable" rule is defined once, in the lifecycle
-    (``lend`` transition: an INROOM device that ``is_lentable`` and is not a
-    licence). Sourcing it from ``devices_for`` keeps this picker in lockstep with
-    the transition guard and the action buttons instead of re-stating the rule.
+    (``lend`` transition: an INROOM device that ``is_lentable``). Sourcing it
+    from ``devices_for`` keeps this picker in lockstep with the transition guard
+    and the action buttons instead of re-stating the rule.
     """
     qs = (
         lifecycle.devices_for("lend")
