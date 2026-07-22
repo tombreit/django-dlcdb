@@ -84,6 +84,28 @@ def test_removed_offers_nothing():
 
 
 @pytest.mark.django_db
+def test_a_lentable_licence_is_lendable(room):
+    """Lendability is decided by is_lentable alone -- a licence flagged lentable
+    is offered for lending like any other device."""
+    from dlcdb.core.models import Device
+
+    licence = Device.objects.create(edv_id="LIC-LEND", is_lentable=True, is_licence=True)
+    InRoomRecord.objects.create(device=licence, room=room)
+
+    assert licence.pk in lifecycle.devices_for("lend").values_list("pk", flat=True)
+
+
+@pytest.mark.django_db
+def test_a_non_lentable_device_is_not_lendable(room):
+    from dlcdb.core.models import Device
+
+    device = Device.objects.create(edv_id="NOLEND", is_lentable=False)
+    InRoomRecord.objects.create(device=device, room=room)
+
+    assert device.pk not in lifecycle.devices_for("lend").values_list("pk", flat=True)
+
+
+@pytest.mark.django_db
 def test_illegal_insert_is_rejected(plain_device, room):
     """A device with no record cannot jump straight to LENT."""
     with pytest.raises(lifecycle.IllegalTransition):

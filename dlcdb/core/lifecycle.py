@@ -100,7 +100,9 @@ TRANSITIONS = (
         sources=(INROOM,),
         target=LENT,
         label=_("Lend"),
-        device_q=Q(is_lentable=True, is_licence=False),
+        # Lendability is decided by is_lentable alone: a device flagged lentable
+        # can be lent even if it is a licence.
+        device_q=Q(is_lentable=True),
     ),
     Transition(name="return_lending", sources=(LENT,), target=INROOM, label=_("Return")),
     Transition(name="lose", sources=(INROOM, LENT, LOST), target=LOST, label=_("Not locatable")),
