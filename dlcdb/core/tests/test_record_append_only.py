@@ -182,17 +182,6 @@ def test_removed_record_preserves_a_given_removal_date(lentable_device):
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "Known defect: Record.save() stamps effective_until on ALL previous "
-        "records of the device, not just the one being superseded, so a record's "
-        "close timestamp is rewritten every time the device changes state again. "
-        "dashboard/stats.py documents this in a comment and works around it. "
-        "Kept as xfail so it flips to green once a consolidated FSM closes only "
-        "the record it supersedes."
-    ),
-)
 def test_closing_timestamp_reflects_when_a_record_actually_ended(lentable_device, room):
     first = InRoomRecord.objects.create(device=lentable_device, room=room)
     establish_state(LostRecord, device=lentable_device)

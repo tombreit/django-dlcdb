@@ -232,12 +232,15 @@ class Record(AuditBaseModel):
         if is_new_record and check_transition:
             lifecycle.check_state(self.device, self.record_type)
         if is_new_record:
-            # Set all existing records to non active
+            # Close only the record being superseded (the currently active one).
+            # Scoping by is_active=True keeps already-closed records' original
+            # effective_until intact -- filtering by device alone would rewrite
+            # every prior record's close timestamp on each append.
             # qs.update() does not call the custom save method, does not
             # emit any signals and did not update the auto_now field so we
             # need to explictly set the modified_at field.
             # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#django.db.models.query.QuerySet.update
-            Record.objects.filter(device=self.device).update(
+            Record.objects.filter(device=self.device, is_active=True).update(
                 is_active=False,
                 effective_until=timezone.now(),
             )

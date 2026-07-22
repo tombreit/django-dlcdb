@@ -76,7 +76,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
             title = _("Edit lending")
         elif active_record.record_type == Record.REMOVED:
             css_classes = "btn btn-warning"
-            url = reverse("admin:core_record_change", args=[active_record.device.pk])
+            url = reverse("admin:core_record_change", args=[active_record.pk])
             title = _("Show removal record")
         elif active_record.record_type == Record.LOST:
             css_classes = "btn btn-danger"

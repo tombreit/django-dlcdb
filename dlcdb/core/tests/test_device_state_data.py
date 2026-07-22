@@ -317,15 +317,6 @@ def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(
-    strict=False,
-    reason=(
-        "Known defect: the REMOVED badge links to admin:core_record_change with "
-        "the *device* pk instead of the record pk (core/utils/device_methods.py), "
-        "so it opens an unrelated record or 404s. Kept as xfail so it flips to "
-        "green once the link is built from the record."
-    ),
-)
 def test_removed_badge_links_to_the_removal_record(lentable_device, room, superuser):
     # Push the record pk sequence past the device pk sequence, otherwise the two
     # coincide and the assertion cannot tell the defect from correct behaviour.
