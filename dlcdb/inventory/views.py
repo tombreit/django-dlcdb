@@ -53,6 +53,7 @@ from django_filters.views import FilterView
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Room, Device, Inventory, Note
 from dlcdb.core.utils.helpers import get_user_email
+from dlcdb.core.utils.htmx import htmx_permission_required
 
 from .sap import create_sap_list_comparison
 from .filters import RoomFilter, DeviceFilter
@@ -60,6 +61,7 @@ from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList
 
 
+@login_required
 def update_session_qrtoggle(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -307,6 +309,7 @@ class SapCompareListView(DetailView):
 
 
 @login_required
+@htmx_permission_required("core.can_inventorize")
 def get_note_btn(request, obj_type, obj_uuid):
     if obj_type == "device":
         obj = Inventory.objects.tenant_unaware_device_objects().get(uuid=obj_uuid)
@@ -317,6 +320,7 @@ def get_note_btn(request, obj_type, obj_uuid):
 
 
 @login_required
+@htmx_permission_required("core.can_inventorize")
 def update_note_view(request, obj_type, obj_uuid):
     inventory = Inventory.objects.active_inventory()
     request_user_email = get_user_email(request.user)
@@ -398,6 +402,7 @@ def update_note_view(request, obj_type, obj_uuid):
 
 
 @login_required
+@htmx_permission_required("core.can_inventorize")
 def delete_note_view(request, pk):
     if request.method == "POST":
         note = Note.objects.filter(pk=pk)
