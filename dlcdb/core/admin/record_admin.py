@@ -8,7 +8,9 @@ from django.urls import reverse
 from django.utils.html import format_html_join
 from django.utils.translation import gettext_lazy as _
 
+from .. import lifecycle
 from ..models import Record
+from ..models.record import SCRAPPED, SOLD
 from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin, get_has_note_badge
 
 
@@ -154,35 +156,32 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
 
     # Custom admin actions
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/actions/
+    def _bulk_remove(self, request, queryset, disposition_state, label):
+        """Append a REMOVED record for each selected record's device via the
+        lifecycle. Devices not in a removable state are skipped, not errored."""
+        removed = 0
+        for item in queryset:
+            device = item.device
+            if not lifecycle.can_transition(lifecycle.state_of(device), Record.REMOVED):
+                continue
+            lifecycle.transition_remove(
+                device,
+                disposition_state=disposition_state,
+                removed_info="Removed via custom django admin action.",
+                user=request.user,
+            )
+            removed += 1
+        self.message_user(
+            request, _("%(count)s records set to 'Removed' / %(label)s.") % {"count": removed, "label": label}
+        )
+
     @admin.display(description=_("Set selected records to 'Removed' / 'Sold'"))
     def set_removed_sold_record(self, request, queryset):
-        for item in queryset:
-            # Set new removed record for item:
-            record_obj = Record(
-                record_type=Record.REMOVED,
-                disposition_state=Record.SOLD,
-                device=item.device,
-                room=None,
-                removed_info="Removed via custom django admin action.",
-            )
-            record_obj.save()
-
-        self.message_user(request, _("%(count)s records set to 'Removed' / 'Sold'.") % {"count": queryset.count()})
+        self._bulk_remove(request, queryset, SOLD, _("Sold"))
 
     @admin.display(description=_("Set selected records to 'Removed' / 'Scrapped'"))
     def set_removed_scrapped_record(self, request, queryset):
-        for item in queryset:
-            # Set new removed record for item:
-            record_obj = Record(
-                record_type=Record.REMOVED,
-                disposition_state=Record.SCRAPPED,
-                device=item.device,
-                room=None,
-                removed_info="Removed via custom django admin action.",
-            )
-            record_obj.save()
-
-        self.message_user(request, _("%(count)s records set to 'Removed' / 'Scrapped'.") % {"count": queryset.count()})
+        self._bulk_remove(request, queryset, SCRAPPED, _("Scrapped"))
 
     def changelist_view(self, request, extra_context=None):
         """

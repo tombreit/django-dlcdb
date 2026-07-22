@@ -105,15 +105,17 @@ TRANSITIONS = (
     Transition(name="return_lending", sources=(LENT,), target=INROOM, label=_("Return")),
     Transition(name="lose", sources=(INROOM, LENT, LOST), target=LOST, label=_("Not locatable")),
     Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found")),
-    # Removing a lent device (decommission while on loan) is legal but only via the
-    # admin -- the frontend does not surface a "Remove" button on a lending. The
-    # audit against production found 8 real LENT -> REMOVED chains.
+    # A device can be decommissioned from any live state, and also straight away
+    # (source None) -- the bulk remover imports bare devices that never got a
+    # record. Removing a lent device (decommission while on loan) is legal but
+    # only via the admin, and a record-less device only offers "locate" on the
+    # frontend, so LENT and None are legal-but-not-offered.
     Transition(
         name="remove",
-        sources=(INROOM, LENT, LOST, ORDERED),
+        sources=(None, INROOM, LENT, LOST, ORDERED),
         target=REMOVED,
         label=_("Remove"),
-        not_offered_from=(LENT,),
+        not_offered_from=(None, LENT),
     ),
     Transition(name="restore", sources=(REMOVED,), target=LOST, label=_("Restore"), offered=False),
     Transition(name="recover", sources=(REMOVED,), target=INROOM, label=_("Recover"), offered=False),

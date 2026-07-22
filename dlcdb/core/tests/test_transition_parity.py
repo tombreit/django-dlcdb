@@ -21,7 +21,6 @@ fail. They compare outcomes only, so the merge itself is invisible to them.
 
 import datetime
 
-from unittest import expectedFailure
 
 from django.contrib.auth import get_user_model
 from django.forms import modelform_factory
@@ -332,14 +331,13 @@ class RemoveTwiceTests(BaseTest):
 
         self.assertTrue(form.is_valid(), form.errors)
 
-    @expectedFailure
     def test_removing_a_device_without_any_record_is_rejected_gracefully(self):
         """
-        Known defect: ``RemovedRecordAdminForm.clean()`` reads
-        ``device.active_record.record_type`` unguarded, so a device that has no
-        record yet raises AttributeError instead of failing validation. A
-        consolidated FSM guard (which treats "no active record" as a state)
-        fixes this, at which point this test flips to green.
+        Previously a known defect: ``RemovedRecordAdminForm.clean()`` read
+        ``device.active_record.record_type`` unguarded, so a device with no record
+        yet raised AttributeError. The consolidated FSM guard treats "no active
+        record" as a state (``state_of`` returns None), so this now fails
+        validation cleanly.
         """
         device = self._create_device(edv_id="EDV-RM-NONE", sap_id="17-17")
         self.assertIsNone(device.active_record)

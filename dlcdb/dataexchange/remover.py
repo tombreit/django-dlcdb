@@ -11,11 +11,11 @@ import logging
 from io import StringIO
 from django.utils import timezone
 from django.db.transaction import atomic
-from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from dlcdb.core.models import Device, Record
+from dlcdb.core import lifecycle
+from dlcdb.core.models import Device
 from dlcdb.core.utils.helpers import rollback_atomic
 
 from .models import RemoverList
@@ -90,40 +90,32 @@ def set_removed_record(csvfile, *, username=None, write=False):
             except Device.DoesNotExist as does_not_exist_error:
                 raise Device.DoesNotExist(f"Device {SAP_ID=} or {EDV_ID=} does not exist. {does_not_exist_error}")
 
-            # Check if the current record for this device is already a 'removed' record
-            _already_removed_record = Record.objects.filter(
-                Q(is_active=True),
-                Q(device=device),
-                Q(record_type=Record.REMOVED),
-            ).first()
-
-            if _already_removed_record:
-                raise ValidationError(
-                    f'[Row {idx}] Device already "removed": {EDV_ID=}, {SAP_ID=}, Record PK: "{_already_removed_record.pk}".'
-                )
-
-            # Create new record for this device
+            # Append a REMOVED record via the lifecycle. transition_remove routes
+            # through the RemovedRecord proxy (which nulls the room and defaults
+            # removed_date -- the old get_or_create on a plain Record did neither),
+            # and its source-state check rejects removing an already-removed device.
             try:
-                record, created = Record.objects.get_or_create(
-                    device=device,
-                    record_type=Record.REMOVED,
-                    note=row["NOTE"],
-                    username=username,
-                    user=user,
+                record = lifecycle.transition_remove(
+                    device,
                     disposition_state=row["DISPOSITION_STATE"],
                     removed_info=row["REMOVED_INFO"],
+                    note=row["NOTE"],
                     removed_date=row["REMOVED_DATE"] if row["REMOVED_DATE"] else timezone.now(),
+                    user=user,
+                )
+            except lifecycle.IllegalTransition:
+                raise ValidationError(
+                    f"[Row {idx}] Device cannot be removed (already removed or not in a removable state): "
+                    f"{EDV_ID=}, {SAP_ID=}."
                 )
             except KeyError as key_error:
                 raise KeyError(f"KeyError {key_error} for {device}")
-            except Exception as ex:
-                raise Exception(f"Error creating record for {device}: {ex}")
-            else:
-                report.add(
-                    row=idx,
-                    identifier=identifier,
-                    outcome=Outcome.REMOVED,
-                    detail=f"new REMOVED record: {record.pk}",
-                )
+
+            report.add(
+                row=idx,
+                identifier=identifier,
+                outcome=Outcome.REMOVED,
+                detail=f"new REMOVED record: {record.pk}",
+            )
 
     return report

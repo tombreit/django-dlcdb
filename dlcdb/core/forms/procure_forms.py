@@ -4,9 +4,9 @@
 
 from django import forms
 
+from .. import lifecycle
 from ..models.device import Device
 from ..models.note import Note
-from ..models.prx_orderedrecord import OrderedRecord
 
 
 class ProcureForm(forms.ModelForm):
@@ -19,8 +19,11 @@ class ProcureForm(forms.ModelForm):
 
     def save(self):
         self.instance.save()
-        record = OrderedRecord(device=self.instance, date_of_purchase=self.cleaned_data["date_of_purchase"])
-        record.save()
+        record = lifecycle.transition_order(
+            self.instance,
+            date_of_purchase=self.cleaned_data["date_of_purchase"],
+            user=None,
+        )
 
         if self.cleaned_data["note"]:
             n = Note(text=self.cleaned_data["note"], device=self.instance)

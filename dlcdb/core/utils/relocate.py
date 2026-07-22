@@ -3,12 +3,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Single source of truth for moving one device to a new room.
+Moving one device to a new room: dispatch to the right lifecycle transition and
+return a display message.
 
 Both the django-admin bulk relocate action
 (``dlcdb.core.views.relocate_views.DevicesRelocateView``) and the frontend
-relocate view (via ``dlcdb.assets.move``) call ``relocate_device`` so the
-record-type state machine cannot drift between them.
+relocate view (``dlcdb.assets.views.relocate``) call ``relocate_device``, which
+delegates the actual record writing to ``dlcdb.core.lifecycle`` so the two entry
+points cannot drift.
 """
 
 from dataclasses import dataclass
@@ -16,7 +18,8 @@ from dataclasses import dataclass
 from django.contrib import messages
 from django.utils.translation import gettext as _
 
-from ..models import InRoomRecord, Record
+from .. import lifecycle
+from ..models import Record
 
 
 @dataclass
@@ -29,20 +32,23 @@ class RelocateResult:
 
 def relocate_device(device, new_room, user):
     """
-    Move ``device`` to ``new_room`` on behalf of ``user``:
+    Move ``device`` to ``new_room`` on behalf of ``user``, dispatching to the
+    right lifecycle transition for the device's current state and returning a
+    ready-to-display message. This is orchestration + presentation; the record
+    writing itself lives in ``dlcdb.core.lifecycle``.
 
-    - active record is LENT      -> update the room on the existing LENT record
-    - active record is REMOVED   -> skip (device should no longer be here)
-    - already in ``new_room``    -> skip (nothing to do)
-    - otherwise (INROOM/LOST/...) -> create a new InRoomRecord, which becomes the
-      device's active record via ``Record.save()``.
+    - LENT     -> ``relocate_lending`` (update the room in place; lending continues)
+    - REMOVED  -> refuse (the device should no longer be located)
+    - same room -> no-op
+    - LOST     -> ``transition_find`` (the device turned up in a room again)
+    - INROOM   -> ``transition_relocate`` (append a new room record)
+    - no record / ORDERED -> ``transition_locate`` (first localisation)
     """
+    state = lifecycle.state_of(device)
     active_record = device.active_record
-    record_type = getattr(active_record, "record_type", None)
 
-    if record_type == Record.LENT:
-        active_record.room = new_room
-        active_record.save()
+    if state == Record.LENT:
+        lifecycle.relocate_lending(active_record, room=new_room, user=user)
         return RelocateResult(
             level=messages.WARNING,
             message=_(
@@ -52,7 +58,7 @@ def relocate_device(device, new_room, user):
             % {"device": device, "room": new_room},
         )
 
-    if record_type == Record.REMOVED:
+    if state == Record.REMOVED:
         return RelocateResult(
             level=messages.WARNING,
             message=_("Device “%(device)s” is removed and was not relocated.") % {"device": device},
@@ -64,15 +70,16 @@ def relocate_device(device, new_room, user):
             message=_("Device “%(device)s” is already in room “%(room)s”.") % {"device": device, "room": new_room},
         )
 
-    # Records are append-only history, so always create a fresh InRoomRecord:
-    # get_or_create would match an older record from a previous stay in this room
-    # and silently skip the move.
-    InRoomRecord.objects.create(
-        device=device,
-        room=new_room,
-        user=user,
-        username=user.username,
-    )
+    # Append a fresh localisation record. Pick the transition that matches the
+    # current state so the record history names what actually happened (a LOST
+    # device turning up is a "find", a fresh device is a "locate").
+    if state == Record.LOST:
+        lifecycle.transition_find(device, room=new_room, user=user)
+    elif state == Record.INROOM:
+        lifecycle.transition_relocate(device, room=new_room, user=user)
+    else:  # no active record or ORDERED
+        lifecycle.transition_locate(device, room=new_room, user=user)
+
     return RelocateResult(
         level=messages.SUCCESS,
         message=_("Device “%(device)s” moved to room “%(room)s”.") % {"device": device, "room": new_room},

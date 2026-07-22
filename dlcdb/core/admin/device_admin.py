@@ -19,7 +19,8 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 
-from ..models import Device, Record, LostRecord
+from .. import lifecycle
+from ..models import Device, Record
 from ..utils.helpers import get_superuser_list
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
@@ -347,12 +348,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         restored_devices = []
         with transaction.atomic():
             for device in queryset.select_for_update():
-                active = getattr(device, "active_record", None)
-                if active and active.record_type == Record.REMOVED:
-                    LostRecord.objects.create(
-                        device=device,
+                if lifecycle.state_of(device) == Record.REMOVED:
+                    lifecycle.transition_restore(
+                        device,
+                        user=request.user,
                         note=f"Restored from REMOVED by {request.user.username}",
-                        record_type=Record.LOST,
                     )
                     restored_devices.append(device)
 

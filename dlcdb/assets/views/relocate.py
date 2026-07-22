@@ -12,8 +12,8 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core.models import Record, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.relocate import relocate_device
 
-from .. import move
 from ..forms import RelocateForm
 from ..pickers import move_queryset
 
@@ -74,7 +74,7 @@ def relocate(request):
         if form.is_valid():
             new_room = form.cleaned_data["new_room"]
             for device in form.cleaned_data["devices"]:
-                result = move.relocate_device(device=device, new_room=new_room, user=request.user)
+                result = relocate_device(device=device, new_room=new_room, user=request.user)
                 messages.add_message(request, result.level, result.message)
             return redirect("assets:relocate")
 

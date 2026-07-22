@@ -20,7 +20,8 @@ from django.db.models import OuterRef, Subquery
 
 from django_htmx.http import HttpResponseClientRedirect
 
-from dlcdb.core.models import LicenceRecord, InRoomRecord, Room, Device
+from dlcdb.core import lifecycle
+from dlcdb.core.models import LicenceRecord, Room, Device
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
 from .forms import LicenseForm
@@ -167,16 +168,10 @@ def new(request):
                     device.is_licence = True
                     device.save()
 
-                    # Set record and room for device
+                    # Set record and room for device -- a new licence's first
+                    # record locates it in the default licence room.
                     room = Room.objects.get(is_default_license_room=True)
-
-                    record = InRoomRecord(
-                        device=device,
-                        room=room,
-                        user=request.user,
-                        username=request.user.username,
-                    )
-                    record.save()
+                    lifecycle.transition_locate(device, room=room, user=request.user)
 
             except Room.DoesNotExist:
                 errors.append("No license room/location defined. Define a license room first.")
