@@ -18,7 +18,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from dlcdb.core.models import InRoomRecord, LentRecord, Person, Record, Room
+from dlcdb.core import lifecycle
+from dlcdb.core.models import LentRecord, Person, Record, Room
 from dlcdb.core.models.record import RECORD_TYPE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
@@ -191,36 +192,28 @@ def _lending_soft_warnings(request, form):
 
 def _apply_state_machine(record, form, user, username):
     """
-    Replicates the state machine of ``LentRecordAdmin.save_model``:
+    Dispatch a lend/return/edit to the lifecycle transitions:
 
-    - INROOM (available) -> create a new LENT record (lend the device).
-    - LENT + return date -> save the LENT record, then create an auto-return
-      InRoomRecord (device becomes available again).
-    - LENT, no return date -> just save the edited LENT record.
+    - INROOM (available) -> ``transition_lend`` (append a new LENT record).
+    - LENT + return date -> ``transition_return_lending`` (stamp the return, then
+      auto-return the device to its room).
+    - LENT, no return date -> a plain in-place save of the edited LENT record
+      (editing a lending is not a transition).
     """
     obj = form.save(commit=False)
 
     if record.record_type == Record.LENT and obj.lent_end_date:
-        obj.user, obj.username = user, username
-        obj.save()
-        InRoomRecord(
-            device=obj.device,
-            room=Room.objects.get(is_auto_return_room=True),
-            user=user,
-            username=username,
-        ).save()
+        lifecycle.transition_return_lending(obj, user=user, lent_end_date=obj.lent_end_date)
 
     elif record.record_type == Record.LENT:
         obj.user, obj.username = user, username
         obj.save()
 
     elif record.record_type == Record.INROOM:
-        # Build a fresh LentRecord instead of saving the INROOM proxy, whose
-        # save() would force-flip the existing INROOM record to LENT.
-        LentRecord(
-            device=record.device,
-            room=form.cleaned_data["room"],
+        lifecycle.transition_lend(
+            record.device,
             person=form.cleaned_data["person"],
+            room=form.cleaned_data["room"],
             lent_start_date=form.cleaned_data["lent_start_date"],
             lent_desired_end_date=form.cleaned_data["lent_desired_end_date"],
             sync_lent_end_date=form.cleaned_data.get("sync_lent_end_date", False),
@@ -228,8 +221,7 @@ def _apply_state_machine(record, form, user, username):
             lent_reason=form.cleaned_data.get("lent_reason", ""),
             lent_accessories=form.cleaned_data.get("lent_accessories", ""),
             user=user,
-            username=username,
-        ).save()
+        )
 
     else:
         raise ValidationError(_("Lent state unknown - please report this issue!"))

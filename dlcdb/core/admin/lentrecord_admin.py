@@ -16,7 +16,8 @@ from django.contrib import messages
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 from dlcdb.lending.models import LendingConfiguration
-from ..models import LentRecord, InRoomRecord, Room, Record
+from .. import lifecycle
+from ..models import LentRecord, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
 from .filters.lentstate_filter import LentStateRecordFilter
@@ -257,26 +258,17 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
             if desired_lent_end_date > contract_end_date:
                 messages.warning(request, _("Warning: Contract ends before the desired return date!"))
 
-        # Save logic
+        # Save logic -- the same lend/return/edit dispatch as the lending
+        # frontend, routed through the lifecycle transitions.
         user, username = get_denormalized_user(request.user)
 
         if obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
-            # War ein LENT record und hat jetzt einen Rückgabe-Timestamp,
-            # muss gespeichert werden und ein neuer INROOM record angelegt werden:
-            # print("Trigger returning of item, setting new InRoomRecord...")
-            super().save_model(request, obj, form, change)
-
-            instance = InRoomRecord(
-                device=obj.device,
-                room=Room.objects.get(is_auto_return_room=True),
-                user=user,
-                username=username,
-            )
-            instance.save()
+            # War ein LENT record und hat jetzt einen Rückgabe-Timestamp: Rückgabe
+            # stempeln und das Gerät in seinen Raum zurückführen.
+            lifecycle.transition_return_lending(obj, user=request.user, lent_end_date=obj.lent_end_date)
 
         elif obj.record_type == Record.LENT:
-            # War schon ein LENT record, wird lediglich geändert:
-            # print(f"Already a LENT record, possibly changed. record pk: {obj.pk}.")
+            # War schon ein LENT record, wird lediglich geändert (kein Übergang):
             super().save_model(request, obj, form, change)
             # Force redirect to this pk to avoid redirects to a pk stored in a
             # previous session:
@@ -284,23 +276,18 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
         elif obj.record_type == Record.INROOM:
             # War ein INROOM record, muss als neuer LENT record gespeichert werden:
-            # print("Trigger lent action: was INROOM record...")
-
-            instance = LentRecord(
-                device=obj.device,
-                room=obj.room if obj.room else 0,
-                user=user,
-                username=username,
-                # Lent specific fields:
+            instance = lifecycle.transition_lend(
+                obj.device,
                 person=obj.person,
+                room=obj.room,
                 lent_start_date=obj.lent_start_date,
                 lent_desired_end_date=obj.lent_desired_end_date,
                 sync_lent_end_date=obj.sync_lent_end_date,
                 lent_note=obj.lent_note,
                 lent_reason=obj.lent_reason,
                 lent_accessories=obj.lent_accessories,
+                user=request.user,
             )
-            instance.save()
             session["new_instance_pk"] = instance.pk
 
         else:
