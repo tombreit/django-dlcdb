@@ -46,6 +46,7 @@ from dlcdb.core.models import (
 from dlcdb.core.models.record import SCRAPPED
 from dlcdb.dataexchange.records import create_record
 from dlcdb.dataexchange.remover import set_removed_record
+from dlcdb.core.tests.testingutils import establish_state
 
 
 @pytest.fixture
@@ -92,7 +93,7 @@ def test_inventory_found_relocates_a_located_device(inventory_1, inventory_rooms
 def test_inventory_found_recovers_a_lost_device(inventory_1, inventory_rooms, inventory_user):
     """Finding a device during stocktaking brings it back from LOST."""
     device = Device.objects.create(edv_id="EDV-INV-LOST")
-    LostRecord.objects.create(device=device)
+    establish_state(LostRecord, device=device)
 
     record = _inventorize(device, "dev_state_found", inventory_rooms["target"], inventory_user)
 
@@ -151,7 +152,8 @@ def test_inventory_not_found_preserves_a_lending(inventory_1, inventory_rooms, i
     """
     device = Device.objects.create(edv_id="EDV-INV-LENT", is_lentable=True)
     person = Person.objects.create(first_name="Max", last_name="Mustermann")
-    LentRecord.objects.create(
+    establish_state(
+        LentRecord,
         device=device,
         person=person,
         room=inventory_rooms["target"],
@@ -329,8 +331,10 @@ def test_import_of_a_completed_loan_yields_lent_then_inroom():
 
     assert [type(r) for r in records] == [LentRecord, InRoomRecord]
 
+    # The import replays a historical chain (LENT then INROOM); the live lifecycle
+    # would reject LENT as a first record, so save with the importer's escape hatch.
     for record in records:
-        record.save()
+        record.save(check_transition=False)
 
     device.refresh_from_db()
     assert device.active_record.record_type == Record.INROOM

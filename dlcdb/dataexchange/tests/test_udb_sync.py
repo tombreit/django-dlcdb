@@ -27,6 +27,7 @@ from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.dataexchange import udb_sync
 from dlcdb.dataexchange.reporting import Outcome
+from dlcdb.core.tests.testingutils import establish_state
 
 
 def _enable_sync():
@@ -442,7 +443,8 @@ def _make_lending(person, *, sync, desired_end, start=datetime.date(2024, 1, 1))
         sap_id=f"SAP-{person.pk}-{int(sync)}",
     )
     room = Room.objects.get_or_create(number="A1.23", nickname="Theke")[0]
-    return LentRecord.objects.create(
+    return establish_state(
+        LentRecord,
         device=device,
         person=person,
         room=room,

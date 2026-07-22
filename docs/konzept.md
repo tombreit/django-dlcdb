@@ -29,24 +29,37 @@ eines Devices wird aber nicht am Device selbst gespeichert, sondern als
 - Records sind damit **append-only**: Es kommt immer nur etwas dazu,
   nichts wird überschrieben.
 
-Die möglichen Record-Typen und ihre erlaubten Übergänge:
+Die möglichen Record-Typen und ihre erlaubten Übergänge sind zentral in
+`dlcdb/core/lifecycle.py` definiert — dort liegen die Zustände, die
+Übergangstabelle und die Funktionen, die einen Übergang ausführen. Jeder neue
+Record läuft über diese eine Stelle; `Record.save()` weist unerlaubte Übergänge
+zurück. Das folgende Diagramm lässt sich aus der Tabelle erzeugen
+(`python manage.py audit_transitions --mermaid`):
 
 ```{eval-rst}
 .. mermaid::
 
    stateDiagram-v2
       direction LR
-      [*] --> LOKALISIERT
+      [*] --> LOKALISIERT : locate
+      [*] --> BESTELLT : order
+      BESTELLT --> LOKALISIERT : locate
       LOKALISIERT --> LOKALISIERT : Umzug
       LOKALISIERT --> VERLIEHEN : Ausleihe
       LOKALISIERT --> NICHT_AUFFINDBAR
       LOKALISIERT --> ENTFERNT : Ausmusterung
       VERLIEHEN --> LOKALISIERT : Rückgabe
       VERLIEHEN --> NICHT_AUFFINDBAR
+      VERLIEHEN --> ENTFERNT
       NICHT_AUFFINDBAR --> LOKALISIERT : wiedergefunden
       NICHT_AUFFINDBAR --> ENTFERNT
-      ENTFERNT --> [*]
+      ENTFERNT --> NICHT_AUFFINDBAR : restore
+      ENTFERNT --> LOKALISIERT : recover
 ```
+
+Einige Übergänge (z.B. `ENTFERNT → …` oder `VERLIEHEN → ENTFERNT`) sind zwar
+erlaubt, werden im Frontend aber nicht als Aktion angeboten — sie entstehen nur
+über den Admin, die Inventur oder den Import.
 
 Maßgeblich ist jeweils der **Schlüssel** (`INROOM`, `LENT`, …): er steht so in
 der Datenbank, wird von der `CheckConstraint` geprüft und von der API

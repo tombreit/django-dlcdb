@@ -278,8 +278,9 @@ def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
     ``LentRecord.clean()``, so we re-check here the two bounds the form/DB would
     otherwise enforce, and skip (with a log) rather than raise mid-sync:
     - a contract end before the lending's start date makes no sense;
-    - a contract end beyond ``MAX_FUTURE_LENT_DESIRED_END_DATE`` would violate the
-      ``valid_lent_desired_end_date`` CheckConstraint and raise IntegrityError.
+    - a contract end beyond ``MAX_FUTURE_LENT_DESIRED_END_DATE`` (the bound that
+      ``LentRecord.clean()`` enforces; the old ``valid_lent_desired_end_date``
+      CheckConstraint was removed in migration 0069).
 
     ``new_checkout`` is None-safe: a cleared contract end is not propagated (we
     never blank out a desired return date).

@@ -217,6 +217,22 @@ def check(device, name):
         )
 
 
+def check_state(device, target_state):
+    """Backstop guard used by ``Record.save()`` on insert: is ``target_state`` a
+    legal next state for ``device``?
+
+    Weaker than ``check``: it only knows the resulting record_type, not which
+    transition produced it (e.g. it cannot tell a ``find`` from a ``recover``).
+    Raises IllegalTransition otherwise.
+    """
+    current = state_of(device)
+    if not can_transition(current, target_state):
+        raise IllegalTransition(
+            _("Illegal state change for device %(device)s: %(current)s -> %(target)s.")
+            % {"device": device, "current": current or _("no record"), "target": target_state}
+        )
+
+
 def _actor(user):
     """The ``user`` / ``username`` denormalisation pair every write needs."""
     denorm = get_denormalized_user(user)

@@ -168,16 +168,18 @@ def test_record_type_color_falls_back_for_unknown_states():
 
 @pytest.mark.django_db
 def test_check_constraint_rejects_an_empty_record_type(plain_device):
+    # Bypass the lifecycle check so the DB CheckConstraint (defense in depth) is
+    # what rejects the row, not the transition guard.
     with pytest.raises(IntegrityError):
         with transaction.atomic():
-            Record.objects.create(device=plain_device, record_type="")
+            Record(device=plain_device, record_type="").save(check_transition=False)
 
 
 @pytest.mark.django_db
 def test_check_constraint_rejects_an_unknown_record_type(plain_device):
     with pytest.raises(IntegrityError):
         with transaction.atomic():
-            Record.objects.create(device=plain_device, record_type="NO_SUCH_STATE")
+            Record(device=plain_device, record_type="NO_SUCH_STATE").save(check_transition=False)
 
 
 @pytest.mark.django_db

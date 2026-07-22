@@ -30,6 +30,7 @@ from dlcdb.core.models import (
     Person,
     RemovedRecord,
 )
+from dlcdb.core.tests.testingutils import establish_state
 
 ALL_ADD_PERMISSIONS = [
     "add_inroomrecord",
@@ -97,7 +98,8 @@ def test_inroom_badge_shows_the_room(lentable_device, room, superuser):
 @pytest.mark.django_db
 def test_lent_badge_shows_room_and_person(lentable_device, room, superuser):
     person = Person.objects.create(first_name="Max", last_name="Mustermann")
-    record = LentRecord.objects.create(
+    record = establish_state(
+        LentRecord,
         device=lentable_device,
         room=room,
         person=person,
@@ -115,7 +117,7 @@ def test_lent_badge_shows_room_and_person(lentable_device, room, superuser):
 
 @pytest.mark.django_db
 def test_lost_badge_is_danger_coloured(lentable_device, superuser):
-    LostRecord.objects.create(device=lentable_device)
+    establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
     assert "btn-danger" in lentable_device.get_state_data(user=superuser).css_classes
@@ -160,7 +162,8 @@ def test_inroom_offers_move_lend_lost_and_removed(lentable_device, room, superus
 @pytest.mark.django_db
 def test_lent_offers_return_and_lost_but_not_removal(lentable_device, room, superuser):
     """LENT -> REMOVED is not a legal transition; a lending must be ended first."""
-    LentRecord.objects.create(
+    establish_state(
+        LentRecord,
         device=lentable_device,
         room=room,
         lent_start_date=datetime.date(2026, 1, 1),
@@ -177,7 +180,7 @@ def test_lent_offers_return_and_lost_but_not_removal(lentable_device, room, supe
 
 @pytest.mark.django_db
 def test_lost_offers_found_and_removal_but_not_lending(lentable_device, superuser):
-    LostRecord.objects.create(device=lentable_device)
+    establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
     state_data = lentable_device.get_state_data(user=superuser)

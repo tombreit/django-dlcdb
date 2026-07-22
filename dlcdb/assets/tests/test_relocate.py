@@ -22,6 +22,7 @@ from dlcdb.core.models import (
     Room,
 )
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.core.tests.testingutils import establish_state
 
 # Plain static storage so tests do not require a built staticfiles manifest
 # (mirrors dlcdb.lending.tests.test_views).
@@ -184,7 +185,8 @@ class RelocateViewTests(BaseTest):
     def _create_lent_device(self, edv_id, sap_id, room):
         person = Person.objects.create(first_name="Max", last_name="Mustermann")
         device = self._create_device(edv_id=edv_id, sap_id=sap_id)
-        LentRecord.objects.create(
+        establish_state(
+            LentRecord,
             device=device,
             person=person,
             room=room,
@@ -305,7 +307,7 @@ class RelocateViewTests(BaseTest):
 
     def test_search_includes_lost_device(self):
         lost = self._create_device(edv_id="EDV-LOST", sap_id="5-5")
-        LostRecord.objects.create(device=lost)
+        establish_state(LostRecord, device=lost)
         response = self.client.post(
             reverse("theme:device_search"), {"source": "move", "q_device": "EDV-LOST"}, headers={"HX-Request": "true"}
         )
@@ -328,7 +330,7 @@ class RelocateViewTests(BaseTest):
 
     def test_can_relocate_lost_device(self):
         lost = self._create_device(edv_id="EDV-LOST", sap_id="5-5")
-        LostRecord.objects.create(device=lost)
+        establish_state(LostRecord, device=lost)
         before = InRoomRecord.objects.filter(device=lost).count()
 
         response = self.client.post(self.url, {"devices": [lost.pk], "new_room": self.room_b.pk})

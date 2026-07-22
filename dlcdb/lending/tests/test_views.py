@@ -12,6 +12,7 @@ from django.urls import reverse
 from dlcdb.core.models import DeviceType, InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.lending.models import LendingProfile
+from dlcdb.core.tests.testingutils import establish_state
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -41,7 +42,8 @@ class LendingIndexViewTests(BaseTest):
         lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
         lent_device.is_lentable = True
         lent_device.save()
-        LentRecord.objects.create(
+        establish_state(
+            LentRecord,
             device=lent_device,
             person=cls.person,
             room=cls.room,
@@ -53,7 +55,8 @@ class LendingIndexViewTests(BaseTest):
         overdue_device = cls()._create_device(edv_id="EDV-OVERDUE", sap_id="3-3")
         overdue_device.is_lentable = True
         overdue_device.save()
-        LentRecord.objects.create(
+        establish_state(
+            LentRecord,
             device=overdue_device,
             person=cls.person,
             room=cls.room,
@@ -214,7 +217,8 @@ class LendingDetailViewTests(BaseTest):
         cls.lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
         cls.lent_device.is_lentable = True
         cls.lent_device.save()
-        cls.lent_record = LentRecord.objects.create(
+        cls.lent_record = establish_state(
+            LentRecord,
             device=cls.lent_device,
             person=cls.person,
             room=cls.room,
@@ -515,7 +519,8 @@ class LendingDeviceSearchTests(BaseTest):
         cls.lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
         cls.lent_device.is_lentable = True
         cls.lent_device.save()
-        LentRecord.objects.create(
+        establish_state(
+            LentRecord,
             device=cls.lent_device,
             person=Person.objects.create(first_name="Max", last_name="Mustermann"),
             room=cls.room,
@@ -573,7 +578,8 @@ class QuickLendViewTests(BaseTest):
         cls.lent_device = cls()._create_device(edv_id="EDV-LENT", sap_id="2-2")
         cls.lent_device.is_lentable = True
         cls.lent_device.save()
-        cls.lent_record = LentRecord.objects.create(
+        cls.lent_record = establish_state(
+            LentRecord,
             device=cls.lent_device,
             person=cls.person,
             room=cls.room,

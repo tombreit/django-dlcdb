@@ -20,6 +20,7 @@ from django.utils import timezone
 from huey.contrib import djhuey
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, Person
+from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingConfiguration
 from dlcdb.organization.models import Branding
 from dlcdb.tenants.models import Tenant
@@ -267,7 +268,10 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
         if tenant is not None:
             device.tenant = tenant
             device.save(update_fields=["tenant"])
-        return LentRecord.objects.create(
+        # Establish the lending directly (this suite tests overdue mails, not the
+        # lend transition), bypassing the source-state check for setup.
+        return establish_state(
+            LentRecord,
             device=device,
             person=person,
             lent_start_date=timezone.localdate() - timedelta(days=100),

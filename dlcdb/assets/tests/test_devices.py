@@ -16,6 +16,7 @@ from dlcdb.assets.forms import DeviceForm
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.tenants.models import Tenant
+from dlcdb.core.tests.testingutils import establish_state
 
 
 _PLAIN_STATIC_STORAGE = {
@@ -103,7 +104,8 @@ class DeviceFrontendTests(BaseTest):
         device = self._create_device(edv_id="EDV-LENT", sap_id="6-6")
         device.is_lentable = True
         device.save()
-        LentRecord.objects.create(
+        establish_state(
+            LentRecord,
             device=device,
             room=self.room,
             person=Person.objects.create(first_name="Max", last_name="Mustermann"),

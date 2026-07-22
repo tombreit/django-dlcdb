@@ -23,6 +23,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.models.record import RECORD_TYPE_KEYS
+from dlcdb.core.tests.testingutils import establish_state
 
 pytestmark = pytest.mark.django_db
 
@@ -49,7 +50,8 @@ def devices(db):
     InRoomRecord.objects.create(device=located, room=room)
 
     lent = Device.objects.create(edv_id="EDV-API-LENT", is_lentable=True)
-    LentRecord.objects.create(
+    establish_state(
+        LentRecord,
         device=lent,
         person=person,
         room=room,

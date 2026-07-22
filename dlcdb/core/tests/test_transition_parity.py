@@ -34,6 +34,7 @@ from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.utils.relocate import relocate_device
 from dlcdb.lending.forms import LentingForm
+from dlcdb.core.tests.testingutils import establish_state
 
 # Plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -90,7 +91,8 @@ class LendReturnParityTests(BaseTest):
         device = self._create_device(edv_id=edv_id, sap_id=sap_id)
         device.is_lentable = True
         device.save()
-        record = LentRecord.objects.create(
+        record = establish_state(
+            LentRecord,
             device=device,
             person=self.person,
             room=self.room,
@@ -248,7 +250,7 @@ class LostDeviceCannotBeLentTests(BaseTest):
         device = self._create_device(edv_id=edv_id, sap_id=sap_id)
         device.is_lentable = True
         device.save()
-        lost = LostRecord.objects.create(device=device)
+        lost = establish_state(LostRecord, device=device)
         return LentRecord.objects.get(pk=lost.pk)
 
     def test_admin_form_rejects_lending_a_lost_device(self):
@@ -285,7 +287,7 @@ class LostDeviceCannotBeLentTests(BaseTest):
         device = self._create_device(edv_id="EDV-LOST-LEND", sap_id="11-11")
         device.is_lentable = True
         device.save()
-        record = LostRecord.objects.create(device=device)
+        record = establish_state(LostRecord, device=device)
 
         self.client.force_login(self.user)
         response = self.client.post(reverse("lending:detail", args=[record.pk]), self._form_data())
@@ -367,7 +369,8 @@ class RelocateBranchTests(BaseTest):
         device = self._create_device(edv_id="EDV-MOVE-LENT", sap_id="14-14")
         device.is_lentable = True
         device.save()
-        record = LentRecord.objects.create(
+        record = establish_state(
+            LentRecord,
             device=device,
             person=self.person,
             room=self.room_a,

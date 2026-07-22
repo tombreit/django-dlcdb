@@ -44,8 +44,11 @@ The record represents the localization state of a given device where a device ma
 have multiple subsequent records over time. Records are append-only:
 saving a new record deactivates the previous one (setting its
 `effective_until` timestamp) and becomes the device's `active_record`.
-Allowed state changes are enforced by the `STATE_TRANSITIONS` state
-machine in `dlcdb/core/models/record.py`.
+Allowed state changes are defined and enforced by the finite state machine in
+`dlcdb/core/lifecycle.py`: it owns the states, the transition table and the
+transition functions that write records, and `Record.save()` rejects an illegal
+transition on insert (importers and repair commands opt out with
+`save(check_transition=False)`).
 
 Concrete records are represented by proxies. Thus the Record model provides the union of all
 fields over all types. Potential constraints or validations are implemented either in the

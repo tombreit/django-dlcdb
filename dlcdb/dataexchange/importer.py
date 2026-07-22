@@ -53,7 +53,7 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                 logger.debug("Device %s already exists in tenant %s. Updating record only.", device_obj, tenant)
                 for record_obj in records:
                     record_obj.device = already_existing_device
-                    record_obj.save()
+                    record_obj.save(check_transition=False)
                 report.add(
                     row=import_obj.row,
                     identifier=import_obj.identifier,
@@ -74,7 +74,7 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                 device_obj.save()
                 device_objs.append(device_obj)
                 for record_obj in records:
-                    record_obj.save()
+                    record_obj.save(check_transition=False)
                 report.add(
                     row=import_obj.row,
                     identifier=import_obj.identifier,
@@ -102,8 +102,11 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
             device_objs.append(import_obj.device)
             # Save records in order; the last one saved becomes the active record
             # (e.g. for a completed loan: LENT first, then the active INROOM).
+            # check_transition=False: the import replays arbitrary historical
+            # chains (a device may be imported straight into any state), which the
+            # live lifecycle would reject.
             for record_obj in import_obj.records:
-                record_obj.save()
+                record_obj.save(check_transition=False)
             report.add(row=import_obj.row, identifier=import_obj.identifier, outcome=Outcome.CREATED)
 
     return device_objs

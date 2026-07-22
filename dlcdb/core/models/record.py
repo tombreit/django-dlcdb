@@ -231,14 +231,20 @@ class Record(AuditBaseModel):
                 "Records must be created via a proxy model. Creating plain records is not allowed. Hint: Create a new record."
             )
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, check_transition=True, **kwargs):
         """
         Always set the most recent record (the one which is created) as active for
         the related device.
+
+        On insert, the lifecycle enforces that the new ``record_type`` is a legal
+        next state for the device (``check_transition``). Importers and repair
+        commands that replay historical chains pass ``check_transition=False``.
         """
 
         # set is active if instance is created
         is_new_record = self._state.adding
+        if is_new_record and check_transition:
+            lifecycle.check_state(self.device, self.record_type)
         if is_new_record:
             # Set all existing records to non active
             # qs.update() does not call the custom save method, does not

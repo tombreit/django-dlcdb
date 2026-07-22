@@ -80,7 +80,9 @@ class Command(BaseCommand):
                         new_record.user = None
                         new_record.username = "via management command fix_inventory_lost_lendings"
                         new_record._state.adding = True
-                        new_record.save()
+                        # Repair command: re-append a historical LENT record over a
+                        # LOST one, a chain the live lifecycle would reject.
+                        new_record.save(check_transition=False)
 
         print(80 * "=")
         for r in result:

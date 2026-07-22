@@ -21,6 +21,7 @@ import pytest
 from django.utils import timezone
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Record, RemovedRecord
+from dlcdb.core.tests.testingutils import establish_state
 
 
 @pytest.mark.django_db
@@ -28,7 +29,7 @@ def test_appending_deactivates_the_previous_record(lentable_device, room):
     first = InRoomRecord.objects.create(device=lentable_device, room=room)
     assert Record.objects.get(pk=first.pk).is_active
 
-    second = LostRecord.objects.create(device=lentable_device)
+    second = establish_state(LostRecord, device=lentable_device)
 
     assert not Record.objects.get(pk=first.pk).is_active
     assert Record.objects.get(pk=second.pk).is_active
@@ -39,9 +40,9 @@ def test_exactly_one_record_is_active_along_a_chain(lentable_device, room):
     """Walk a realistic lifecycle, checking the invariant after every step."""
     steps = [
         lambda: InRoomRecord.objects.create(device=lentable_device, room=room),
-        lambda: LentRecord.objects.create(device=lentable_device, room=room),
+        lambda: establish_state(LentRecord, device=lentable_device, room=room),
         lambda: InRoomRecord.objects.create(device=lentable_device, room=room),
-        lambda: LostRecord.objects.create(device=lentable_device),
+        lambda: establish_state(LostRecord, device=lentable_device),
         lambda: RemovedRecord.objects.create(device=lentable_device),
     ]
 
@@ -65,7 +66,7 @@ def test_device_active_record_matches_the_active_row(lentable_device, room):
     is_active=True". The two must never disagree.
     """
     InRoomRecord.objects.create(device=lentable_device, room=room)
-    latest = LentRecord.objects.create(device=lentable_device, room=room)
+    latest = establish_state(LentRecord, device=lentable_device, room=room)
 
     lentable_device.refresh_from_db()
     active_row = Record.objects.get(device=lentable_device, is_active=True)
@@ -79,7 +80,7 @@ def test_appending_closes_the_previous_record(lentable_device, room):
     assert first.effective_until is None
 
     before = timezone.now()
-    LostRecord.objects.create(device=lentable_device)
+    establish_state(LostRecord, device=lentable_device)
     after = timezone.now()
 
     first.refresh_from_db()
@@ -90,7 +91,7 @@ def test_appending_closes_the_previous_record(lentable_device, room):
 @pytest.mark.django_db
 def test_the_active_record_is_open_ended(lentable_device, room):
     InRoomRecord.objects.create(device=lentable_device, room=room)
-    latest = LostRecord.objects.create(device=lentable_device)
+    latest = establish_state(LostRecord, device=lentable_device)
 
     latest.refresh_from_db()
     assert latest.is_active
@@ -105,7 +106,7 @@ def test_appending_does_not_touch_other_devices(room):
 
     record_a = InRoomRecord.objects.create(device=device_a, room=room)
     InRoomRecord.objects.create(device=device_b, room=room)
-    LostRecord.objects.create(device=device_b)
+    establish_state(LostRecord, device=device_b)
 
     record_a.refresh_from_db()
     assert record_a.is_active
@@ -121,7 +122,8 @@ def test_editing_a_record_does_not_append(lentable_device, room):
     a transition: it must not create a record, flip activity or close anything.
     The distinction is ``_state.adding`` in ``Record.save()``.
     """
-    record = LentRecord.objects.create(
+    record = establish_state(
+        LentRecord,
         device=lentable_device,
         room=room,
         lent_start_date=datetime.date(2026, 1, 1),
@@ -145,7 +147,7 @@ def test_editing_a_record_does_not_append(lentable_device, room):
 def test_history_is_preserved_not_overwritten(lentable_device, room):
     """The whole point of the chain: superseded records stay readable."""
     inroom = InRoomRecord.objects.create(device=lentable_device, room=room)
-    LostRecord.objects.create(device=lentable_device)
+    establish_state(LostRecord, device=lentable_device)
 
     inroom.refresh_from_db()
     assert inroom.record_type == Record.INROOM
@@ -159,7 +161,9 @@ def test_history_is_preserved_not_overwritten(lentable_device, room):
 @pytest.mark.django_db
 @pytest.mark.parametrize("proxy", [LostRecord, RemovedRecord])
 def test_lost_and_removed_records_have_no_room(lentable_device, room, proxy):
-    record = proxy.objects.create(device=lentable_device, room=room)
+    # Establish the state directly: LOST is not a legal first record for a device
+    # (you lose a located device), so bypass the transition check for setup.
+    record = establish_state(proxy, device=lentable_device, room=room)
     assert record.room is None
     assert Record.objects.get(pk=record.pk).room is None
 
@@ -191,7 +195,7 @@ def test_removed_record_preserves_a_given_removal_date(lentable_device):
 )
 def test_closing_timestamp_reflects_when_a_record_actually_ended(lentable_device, room):
     first = InRoomRecord.objects.create(device=lentable_device, room=room)
-    LostRecord.objects.create(device=lentable_device)
+    establish_state(LostRecord, device=lentable_device)
 
     first.refresh_from_db()
     closed_at = first.effective_until
