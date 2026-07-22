@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 
 from .. import lifecycle
 from ..models import Record
+from .links import linked_message
 
 
 @dataclass
@@ -27,7 +28,7 @@ class RelocateResult:
     """Outcome of a relocation attempt, ready to surface as a Django message."""
 
     level: int  # one of django.contrib.messages levels
-    message: str
+    message: str  # a SafeString: the device and room are rendered as links
 
 
 def relocate_device(device, new_room, user):
@@ -51,23 +52,26 @@ def relocate_device(device, new_room, user):
         lifecycle.relocate_lending(active_record, room=new_room, user=user)
         return RelocateResult(
             level=messages.WARNING,
-            message=_(
-                "Device “%(device)s” is currently lent — updated the room of its "
-                "active lending to “%(room)s”. The lending was not ended."
-            )
-            % {"device": device, "room": new_room},
+            message=linked_message(
+                _(
+                    "Device “{device}” is currently lent — updated the room of its "
+                    "active lending to “{room}”. The lending was not ended."
+                ),
+                device=device,
+                room=new_room,
+            ),
         )
 
     if state == Record.REMOVED:
         return RelocateResult(
             level=messages.WARNING,
-            message=_("Device “%(device)s” is removed and was not relocated.") % {"device": device},
+            message=linked_message(_("Device “{device}” is removed and was not relocated."), device=device),
         )
 
     if active_record is not None and active_record.room_id == new_room.pk:
         return RelocateResult(
             level=messages.INFO,
-            message=_("Device “%(device)s” is already in room “%(room)s”.") % {"device": device, "room": new_room},
+            message=linked_message(_("Device “{device}” is already in room “{room}”."), device=device, room=new_room),
         )
 
     # Append a fresh localisation record, picking the transition that matches the
@@ -77,5 +81,5 @@ def relocate_device(device, new_room, user):
 
     return RelocateResult(
         level=messages.SUCCESS,
-        message=_("Device “%(device)s” moved to room “%(room)s”.") % {"device": device, "room": new_room},
+        message=linked_message(_("Device “{device}” moved to room “{room}”."), device=device, room=new_room),
     )

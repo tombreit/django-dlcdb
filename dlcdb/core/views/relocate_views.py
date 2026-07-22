@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 from ..forms.adminactions_forms import RelocateActionForm
 from ..models import Device
+from ..utils.links import linked_message
 from ..utils.relocate import relocate_device
 
 
@@ -60,14 +61,20 @@ class DevicesRelocateView(FormView):
                 device.tenant = new_tenant
                 device.save()
 
-                update_msg = f"Device <{device}>: Set new tenant to {new_tenant}."
+                update_msg = linked_message(
+                    "Device {device}: Set new tenant to {tenant}.", device=device, tenant=new_tenant
+                )
                 messages.add_message(self.request, messages.INFO, update_msg)
 
             if new_device_type:
                 device.device_type = new_device_type
                 device.save()
 
-                update_msg = f"Device <{device}>: Set device type to {new_device_type}."
+                update_msg = linked_message(
+                    "Device {device}: Set device type to {device_type}.",
+                    device=device,
+                    device_type=new_device_type,
+                )
                 messages.add_message(self.request, messages.INFO, update_msg)
 
             if new_room:

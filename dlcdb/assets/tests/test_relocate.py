@@ -118,6 +118,17 @@ class RelocateViewTests(BaseTest):
         self.assertEqual(self.device.active_record.record_type, Record.INROOM)
         self.assertEqual(InRoomRecord.objects.filter(device=self.device).count(), before + 1)
 
+    def test_move_message_links_the_device_and_the_room(self):
+        # The result message is a jumping-off point: both named objects link to
+        # their detail views.
+        response = self.client.post(self.url, {"devices": [self.device.pk], "new_room": self.room_b.pk}, follow=True)
+        move_msgs = [str(m) for m in response.context["messages"] if m.level == messages.SUCCESS]
+        self.assertEqual(len(move_msgs), 1)
+        self.assertIn(f'<a href="{reverse("assets:device_detail", args=[self.device.pk])}">EDV-MOVE</a>', move_msgs[0])
+        self.assertIn(f'<a href="{reverse("rooms:detail", args=[self.room_b.pk])}">B2.02 (Lab)</a>', move_msgs[0])
+        # Rendered as markup, not as escaped text.
+        self.assertContains(response, f'href="{reverse("assets:device_detail", args=[self.device.pk])}">EDV-MOVE</a>')
+
     def test_prefill_preselects_device_without_record(self):
         # The device detail "Set state" action links here as ?device=<pk> also
         # for a device that has no record yet (INROOM is a valid initial state).

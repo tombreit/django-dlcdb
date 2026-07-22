@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ..models import InRoomRecord, Room
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
+from ..utils.links import linked_message
 from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 
 
@@ -44,7 +45,7 @@ class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
             room = Room.objects.get(pk=request.POST.get("room"))
             messages.success(
                 request,
-                _("Device “%(device)s” moved to room “%(room)s”.") % {"device": device, "room": room},
+                linked_message(_("Device “{device}” moved to room “{room}”."), device=device, room=room),
             )
             return HttpResponseRedirect(redirect_url)
         else:

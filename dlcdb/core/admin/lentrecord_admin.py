@@ -20,6 +20,7 @@ from .. import lifecycle
 from ..models import LentRecord, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
+from ..utils.links import linked_message, obj_link
 from .filters.lentstate_filter import LentStateRecordFilter
 from .base_admin import CustomBaseModelAdmin, ExportCsvMixin
 
@@ -297,26 +298,33 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
         is_new_lending_action = bool(session.get("new_instance_pk"))
         is_return_action = bool(obj.lent_end_date)
 
+        # Keep the "manufacturer - series" wording this admin has always used for
+        # the device, but make it a link to the device detail.
+        device_link = obj_link(obj.device, label=self.get_device_human_readable(obj))
+
         if is_return_action:
-            msg = _("Return of “%(device)s” from “%(person)s” acknowledged.") % {
-                "device": self.get_device_human_readable(obj),
-                "person": obj.person,
-            }
+            msg = linked_message(
+                _("Return of “{device}” from “{person}” acknowledged."),
+                device=device_link,
+                person=obj.person,
+            )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
         elif is_new_lending_action:
-            msg = _("Device “%(device)s” lent to “%(person)s”.") % {
-                "device": self.get_device_human_readable(obj),
-                "person": obj.person,
-            }
+            msg = linked_message(
+                _("Device “{device}” lent to “{person}”."),
+                device=device_link,
+                person=obj.person,
+            )
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = reverse("admin:core_lentrecord_change", args=(session["new_instance_pk"],))
             return HttpResponseRedirect(redirect_url)
         else:
-            msg = _("Lending of “%(device)s” to “%(person)s” saved.") % {
-                "device": self.get_device_human_readable(obj),
-                "person": obj.person,
-            }
+            msg = linked_message(
+                _("Lending of “{device}” to “{person}” saved."),
+                device=device_link,
+                person=obj.person,
+            )
             self.message_user(request, msg, messages.SUCCESS)
             redirect_url = request.path
             return HttpResponseRedirect(redirect_url)

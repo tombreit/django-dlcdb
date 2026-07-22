@@ -310,6 +310,23 @@ class LendingDetailViewTests(BaseTest):
         self.assertEqual(self.available_device.active_record.record_type, Record.LENT)
         self.assertEqual(self.available_device.active_record.person, self.person)
 
+    @override_settings(LANGUAGE_CODE="en")
+    def test_lend_message_links_the_device_and_the_person(self):
+        # The success message names a device and a person; both are links to
+        # their detail views so the message is actionable.
+        response = self.client.post(
+            reverse("lending:detail", args=[self.available_record.pk]),
+            self._lend_payload(),
+            follow=True,
+        )
+        msg = next(str(m) for m in response.context["messages"] if "lent to" in str(m))
+        self.assertIn(
+            f'<a href="{reverse("assets:device_detail", args=[self.available_device.pk])}">EDV-AVAIL</a>', msg
+        )
+        self.assertIn(f'<a href="{reverse("persons:detail", args=[self.person.pk])}">Mustermann, Max</a>', msg)
+        # Rendered as markup, not escaped into the page.
+        self.assertContains(response, f'href="{reverse("persons:detail", args=[self.person.pk])}">Mustermann, Max</a>')
+
     def test_return_creates_auto_return_inroom_record(self):
         inroom_before = InRoomRecord.objects.filter(device=self.lent_device).count()
         response = self.client.post(

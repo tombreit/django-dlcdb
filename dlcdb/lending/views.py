@@ -22,6 +22,7 @@ from dlcdb.core import lifecycle
 from dlcdb.core.models import LentRecord, Person, Record, Room
 from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.core.utils.links import linked_message
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 
@@ -250,12 +251,15 @@ def _save_lending(request, record, form):
         return False
 
     if record.record_type == Record.INROOM:
-        msg = _("Device “%(device)s” lent to “%(person)s”.")
+        msg = _("Device “{device}” lent to “{person}”.")
     elif record.lent_end_date or form.cleaned_data.get("lent_end_date"):
-        msg = _("Return of “%(device)s” from “%(person)s” acknowledged.")
+        msg = _("Return of “{device}” from “{person}” acknowledged.")
     else:
-        msg = _("Lending of “%(device)s” to “%(person)s” saved.")
-    messages.success(request, msg % {"device": record.device, "person": form.cleaned_data.get("person")})
+        msg = _("Lending of “{device}” to “{person}” saved.")
+    messages.success(
+        request,
+        linked_message(msg, device=record.device, person=form.cleaned_data.get("person")),
+    )
     return True
 
 
