@@ -50,6 +50,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from django_filters.views import FilterView
 
+from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Room, Device, Inventory, Note
 from dlcdb.core.utils.helpers import get_user_email
 
@@ -156,6 +157,10 @@ class InventorizeRoomView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 Inventory.inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
             else:
                 messages.add_message(request, messages.WARNING, "Nothing marked as inventorized.")
+        except IllegalTransition as illegal_transition:
+            # inventorize_uuids_for_room is atomic, so nothing of this scan was
+            # saved. Tell the user instead of failing with a server error.
+            messages.error(request, " ".join(illegal_transition.messages))
         except RuntimeError as runtime_error:
             return HttpResponseServerError(runtime_error)
         except ObjectDoesNotExist as object_does_not_exist:

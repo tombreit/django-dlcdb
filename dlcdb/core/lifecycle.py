@@ -88,7 +88,7 @@ class Transition:
     offered: bool = True  # surfaced as a UI action button at all?
     not_offered_from: tuple = ()  # sources where it is legal but NOT surfaced as a button
     permission: str | None = None  # defaults to "core.add_<target proxy>"
-    device_q: Q | None = None  # extra precondition on the Device itself
+    device_precondition: Q | None = None  # a Q on Device that must hold for the transition
 
 
 TRANSITIONS = (
@@ -102,10 +102,18 @@ TRANSITIONS = (
         label=_("Lend"),
         # Lendability is decided by is_lentable alone: a device flagged lentable
         # can be lent even if it is a licence.
-        device_q=Q(is_lentable=True),
+        device_precondition=Q(is_lentable=True),
     ),
     Transition(name="return_lending", sources=(LENT,), target=INROOM, label=_("Return")),
-    Transition(name="lose", sources=(INROOM, LENT, LOST), target=LOST, label=_("Not locatable")),
+    # Legal from LOST so the inventory can re-mark a still-missing device, but not
+    # offered there -- a "Not locatable" button on an already-lost device is noise.
+    Transition(
+        name="lose",
+        sources=(INROOM, LENT, LOST),
+        target=LOST,
+        label=_("Not locatable"),
+        not_offered_from=(LOST,),
+    ),
     Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found")),
     # A device can be decommissioned from any live state, and also straight away
     # (source None) -- the bulk remover imports bare devices that never got a
@@ -167,20 +175,28 @@ def permission_for(transition):
     return f"{proxy._meta.app_label}.add_{proxy._meta.model_name}"
 
 
-def available(device, *, user=None, app_name=None):
+def device_precondition_met(device, transition):
+    """True if ``device`` satisfies the transition's ``device_precondition`` (or none is set)."""
+    if transition.device_precondition is None:
+        return True
+    Device = apps.get_model("core.Device")
+    return Device.objects.filter(pk=device.pk).filter(transition.device_precondition).exists()
+
+
+def available(device, *, user=None):
     """The transitions offered to ``user`` on ``device`` right now.
 
-    A transition is available when it is ``offered``, the user holds its
-    permission, and the device satisfies its ``device_q`` precondition.
+    A transition is available when it is ``offered`` from the current state, the
+    user holds its permission, and the device satisfies its
+    ``device_precondition``. This is the single gate for rendering transition
+    actions in any UI (see ``core.utils.device_methods``).
     """
     result = []
     for transition in offered_transitions_from(state_of(device)):
         if not (user and user.has_perm(permission_for(transition))):
             continue
-        if transition.device_q is not None:
-            model = apps.get_model("core.Device")
-            if not model.objects.filter(pk=device.pk).filter(transition.device_q).exists():
-                continue
+        if not device_precondition_met(device, transition):
+            continue
         result.append(transition)
     return result
 
@@ -197,7 +213,7 @@ def devices_for(name):
     qs = Device.objects.filter(active_record__record_type__in=concrete_sources)
     if None in t.sources:
         qs = qs | Device.objects.filter(active_record__isnull=True)
-    return qs.filter(t.device_q) if t.device_q is not None else qs
+    return qs.filter(t.device_precondition) if t.device_precondition is not None else qs
 
 
 # ── Enforcement ─────────────────────────────────────────────────────────────
@@ -206,7 +222,8 @@ def devices_for(name):
 def check(device, name):
     """Front-door guard: is transition ``name`` legal for ``device`` right now?
 
-    Raises IllegalTransition otherwise. Stricter than the ``Record.save()``
+    Checks both the source state and the transition's ``device_precondition``,
+    and raises IllegalTransition otherwise. Stricter than the ``Record.save()``
     backstop, which only knows the resulting record_type, not which transition
     produced it.
     """
@@ -214,8 +231,13 @@ def check(device, name):
     current = state_of(device)
     if current not in transition.sources:
         raise IllegalTransition(
-            _("Cannot %(action)s a device whose state is %(state)s.")
-            % {"action": name, "state": current or _("not yet recorded")}
+            _("“%(action)s” is not allowed for a device in state “%(state)s”.")
+            % {"action": transition.label, "state": STATES[current].label if current else _("not yet recorded")}
+        )
+    if not device_precondition_met(device, transition):
+        raise IllegalTransition(
+            _("“%(action)s” is not allowed for device “%(device)s” in its current configuration.")
+            % {"action": transition.label, "device": device}
         )
 
 
@@ -302,6 +324,8 @@ def transition_return_lending(record, *, user, lent_end_date):
     not a transition), then an InRoomRecord is appended in the auto-return room.
     """
     check(record.device, "return_lending")
+    if record.record_type != LENT or not record.is_active:
+        raise IllegalTransition(_("Only the active lending record of a device can be returned."))
     Room = apps.get_model("core.Room")
     InRoomRecord = apps.get_model("core.InRoomRecord")
     actor = _actor(user)
@@ -353,7 +377,9 @@ def transition_find(device, *, room, user, inventory=None, note=""):
 
 
 def transition_remove(device, *, user, disposition_state="", removed_info="", note="", removed_date=None):
-    """INROOM/LOST/ORDERED -> REMOVED. Decommission the device (sold, scrapped, ...)."""
+    """Any state (including a device with no record yet) -> REMOVED. Decommission
+    the device (sold, scrapped, ...). See the transition table for which sources
+    are offered on the frontend."""
     check(device, "remove")
     RemovedRecord = apps.get_model("core.RemovedRecord")
     return RemovedRecord.objects.create(
@@ -393,6 +419,8 @@ def relocate_lending(record, *, room, user, inventory=None):
     The lending continues and no record is appended. Optionally stamps the
     current inventory (used when a lent device is found during stocktaking).
     """
+    if record.record_type != LENT or not record.is_active:
+        raise IllegalTransition(_("Only the active lending record of a device can be moved in place."))
     actor = _actor(user)
     record.room = room
     if inventory is not None:

@@ -42,14 +42,9 @@ def get_device_state_data(device, *, user=None, app_name=None):
         ]
     }
 
-    As these possible actions depend on the current state of the device, this could
-    be modeled as finite state machine:
-
-    none -> inroom
-    inroom -> inroom, lent, lost, removed
-    lent -> inroom, lost
-    lost -> inroom, removed
-    removed -> none
+    Which actions are possible is decided by the state machine in
+    ``dlcdb.core.lifecycle`` (via ``lifecycle.available``); this function only
+    presents them for the requesting app.
     """
 
     active_record = device.active_record
@@ -89,38 +84,27 @@ def get_device_state_data(device, *, user=None, app_name=None):
             label = active_record.get_record_type_display()
             title = _("Previous records for this device")
 
-    # Possible actions based on the current state
+    # Possible actions: whether a transition is offered here -- state, user
+    # permission and device precondition -- is decided solely by
+    # ``lifecycle.available``. This function only maps each offered transition
+    # to a URL and label for the requesting app.
     actions = []
+    for transition in lifecycle.available(device, user=user):
+        proxy_model = lifecycle.proxy_for(transition.target)
 
-    # The transitions the lifecycle offers as UI actions from the current state.
-    allowed_next_states = [t.target for t in lifecycle.offered_transitions_from(lifecycle.state_of(device))]
-
-    # Generate actions for each allowed next state
-    for next_state in allowed_next_states:
-        proxy_model = Record.get_proxy_model_by_record_type(next_state)
-
-        # Construct the permission string: <app_label>.add_<model_name>
-        perm_str = f"{proxy_model._meta.app_label}.add_{proxy_model._meta.model_name}"
-
-        if not (user and user.has_perm(perm_str)):
-            continue
-
-        # Default target: the proxy model's admin add-view. Admin add-views
-        # require is_staff, so mark these as "external" links; surfaces that
-        # gate on is_staff (see the assets frontend) use this flag.
+        # Default target: the target proxy model's admin add-view. Admin
+        # add-views require is_staff, so mark these as "external" links;
+        # surfaces that gate on is_staff (see the assets frontend) use this flag.
         action_url = f"{proxy_model.get_admin_action_url()}?device={device.pk}"
-        action_label = dict(Record.RECORD_TYPE_CHOICES).get(next_state, next_state)
+        action_label = transition.label
         external = True
 
-        if next_state == Record.INROOM and app_name == "assets":
+        if transition.target == Record.INROOM and app_name == "assets":
             # Native "Move" module (single-device prefill via ?device=).
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
             action_label = _("Move")
             external = False
-        elif next_state == Record.LENT:
-            if not device.is_lentable:
-                continue
-            action_label = _("Lend")
+        elif transition.target == Record.LENT:
             if app_name == "assets" and active_record:
                 # Native frontend lending flow. LENT is only reachable from an
                 # INROOM active record, so active_record.pk is always valid here.

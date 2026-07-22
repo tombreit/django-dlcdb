@@ -183,12 +183,14 @@ def test_plain_records_bypass_the_proxy_guard_on_save(plain_device):
     """
     Current behaviour, and a finding worth pinning: ``Record.clean()`` forbids
     non-proxy records, but neither ``save()`` nor ``objects.create()`` calls
-    ``clean()``. Two production paths rely on this hole --
-    ``core/admin/record_admin.py`` and ``dataexchange/remover.py`` both write
-    plain ``Record`` rows.
+    ``clean()``, so a plain ``Record`` row can still be written directly. No
+    production path uses this hole any more (``record_admin`` and the
+    dataexchange remover now route through the lifecycle transitions); what
+    ``save()`` does enforce is the lifecycle state check -- None -> REMOVED is a
+    legal initial transition, which is why this insert passes it.
 
-    A future FSM is expected to close this. When it does, this test should be
-    updated to assert the rejection rather than deleted.
+    If ``save()`` ever rejects non-proxy records outright, update this test to
+    assert the rejection rather than deleting it.
     """
     record = Record.objects.create(device=plain_device, record_type=Record.REMOVED)
     assert record.pk is not None

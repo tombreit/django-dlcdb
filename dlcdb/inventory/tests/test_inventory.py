@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Inventory, InRoomRecord, Record, Note
 from dlcdb.inventory.utils import update_inventory_note
 
@@ -126,6 +127,33 @@ def test_inventorize_uuids_for_room(device_1, device_2, room_1, external_room, i
     device_2.refresh_from_db()
     assert device_2.active_record.record_type == Record.LOST
     assert device_2.active_record.inventory == inventory_1
+
+
+@pytest.mark.django_db
+def test_inventorize_uuids_rolls_back_on_illegal_transition(
+    device_1, device_2, room_1, external_room, inventory_1, user
+):
+    """A scan batch is atomic: if one device's state change is illegal, the whole
+    batch is rejected and no partial results are saved (the view surfaces the
+    IllegalTransition as an error message).
+
+    device_2 has no record at all, so marking it "not found" (-> LOST) is not a
+    legal lifecycle transition.
+    """
+    device_1_record = InRoomRecord.objects.create(device=device_1, room=room_1)
+
+    uuids_states = {
+        str(device_1.uuid): "dev_state_found",  # processed first, must roll back
+        str(device_2.uuid): "dev_state_notfound",  # illegal: device has no record yet
+    }
+
+    with pytest.raises(IllegalTransition):
+        Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
+
+    device_1.refresh_from_db()
+    assert device_1.active_record.pk == device_1_record.pk
+    assert device_1.active_record.room == room_1
+    assert device_1.active_record.inventory is None
 
 
 @pytest.mark.django_db

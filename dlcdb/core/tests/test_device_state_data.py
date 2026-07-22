@@ -188,6 +188,9 @@ def test_lost_offers_found_and_removal_but_not_lending(lentable_device, superuse
     assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
     assert _offers(state_data, reverse("admin:core_removedrecord_add"))
     assert not _offers(state_data, "lentrecord")
+    # LOST -> LOST is legal (inventory re-marks a still-missing device) but a
+    # "Not locatable" button on an already-lost device would be noise.
+    assert not _offers(state_data, reverse("admin:core_lostrecord_add"))
 
 
 @pytest.mark.django_db

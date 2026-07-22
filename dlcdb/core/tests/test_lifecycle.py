@@ -80,6 +80,14 @@ def test_removed_offers_nothing():
     assert lifecycle.offered_transitions_from(lifecycle.REMOVED) == ()
 
 
+def test_lose_is_legal_from_lost_but_not_offered_there():
+    """The inventory may re-mark a still-missing device as lost (LOST -> LOST),
+    but an already-lost device gets no "Not locatable" button."""
+    assert lifecycle.can_transition(lifecycle.LOST, lifecycle.LOST)
+    offered_targets = {t.target for t in lifecycle.offered_transitions_from(lifecycle.LOST)}
+    assert lifecycle.LOST not in offered_targets
+
+
 # --- Enforcement ---------------------------------------------------------
 
 
@@ -103,6 +111,61 @@ def test_a_non_lentable_device_is_not_lendable(room):
     InRoomRecord.objects.create(device=device, room=room)
 
     assert device.pk not in lifecycle.devices_for("lend").values_list("pk", flat=True)
+
+
+@pytest.mark.django_db
+def test_a_lent_licence_is_visible_to_the_lending_manager(room):
+    """The flip side of lending licences: once lent, the lending must show up in
+    ``LentRecord.objects`` -- the queryset behind the lending frontend, the API,
+    the admin changelist and the dashboard. Lending a device its own list views
+    cannot see again would strand it."""
+    from dlcdb.core.models import Device
+
+    licence = Device.objects.create(edv_id="LIC-LENT", is_lentable=True, is_licence=True)
+    InRoomRecord.objects.create(device=licence, room=room)
+    licence.refresh_from_db()
+
+    record = lifecycle.transition_lend(
+        licence,
+        person=None,
+        room=room,
+        lent_start_date="2026-01-01",
+        lent_desired_end_date="2099-01-01",
+        user=None,
+    )
+
+    assert record.pk in LentRecord.objects.values_list("pk", flat=True)
+
+
+@pytest.mark.django_db
+def test_lending_a_non_lentable_device_is_rejected(room):
+    """``device_precondition`` is enforced by the transition itself, not only
+    when offering UI actions."""
+    from dlcdb.core.models import Device
+
+    device = Device.objects.create(edv_id="NOLEND-WRITE", is_lentable=False)
+    InRoomRecord.objects.create(device=device, room=room)
+    device.refresh_from_db()
+
+    with pytest.raises(lifecycle.IllegalTransition):
+        lifecycle.transition_lend(
+            device,
+            person=None,
+            room=room,
+            lent_start_date="2026-01-01",
+            lent_desired_end_date="2099-01-01",
+            user=None,
+        )
+
+
+@pytest.mark.django_db
+def test_relocate_lending_rejects_a_non_lending_record(lentable_device, room):
+    """The in-place move is only for the active LENT record; handing it any
+    other record must not silently edit history."""
+    record = InRoomRecord.objects.create(device=lentable_device, room=room)
+
+    with pytest.raises(lifecycle.IllegalTransition):
+        lifecycle.relocate_lending(record, room=room, user=None)
 
 
 @pytest.mark.django_db
