@@ -33,28 +33,44 @@ Die möglichen Record-Typen und ihre erlaubten Übergänge sind zentral in
 `dlcdb/core/lifecycle.py` definiert — dort liegen die Zustände, die
 Übergangstabelle und die Funktionen, die einen Übergang ausführen. Jeder neue
 Record läuft über diese eine Stelle; `Record.save()` weist unerlaubte Übergänge
-zurück. Das folgende Diagramm lässt sich aus der Tabelle erzeugen
-(`python manage.py audit_transitions --mermaid`):
+zurück. Das folgende Diagramm gibt die Übergangstabelle wieder — wird
+`TRANSITIONS` geändert, gehört es mitgepflegt:
 
 ```{eval-rst}
 .. mermaid::
 
    stateDiagram-v2
-      direction LR
-      [*] --> LOKALISIERT : locate
-      [*] --> BESTELLT : order
-      BESTELLT --> LOKALISIERT : locate
-      LOKALISIERT --> LOKALISIERT : Umzug
-      LOKALISIERT --> VERLIEHEN : Ausleihe
-      LOKALISIERT --> NICHT_AUFFINDBAR
-      LOKALISIERT --> ENTFERNT : Ausmusterung
-      VERLIEHEN --> LOKALISIERT : Rückgabe
-      VERLIEHEN --> NICHT_AUFFINDBAR
-      VERLIEHEN --> ENTFERNT
-      NICHT_AUFFINDBAR --> LOKALISIERT : wiedergefunden
-      NICHT_AUFFINDBAR --> ENTFERNT
-      ENTFERNT --> NICHT_AUFFINDBAR : restore
-      ENTFERNT --> LOKALISIERT : recover
+      direction TB
+
+      state "Bestellt · ORDERED" as ORDERED
+      state "Lokalisiert · INROOM" as INROOM
+      state "Verliehen · LENT" as LENT
+      state "Nicht auffindbar · LOST" as LOST
+      state "Entfernt · REMOVED" as REMOVED
+
+      [*] --> ORDERED : Bestellung
+      [*] --> INROOM : Lokalisieren
+      ORDERED --> INROOM : Lokalisieren
+      INROOM --> LENT : Ausleihe
+      LENT --> INROOM : Rückgabe
+      INROOM --> LOST : nicht auffindbar
+      LENT --> LOST : nicht auffindbar
+      LOST --> INROOM : gefunden
+      INROOM --> REMOVED : Ausmusterung
+      LENT --> REMOVED : Ausmusterung
+      LOST --> REMOVED : Ausmusterung
+      REMOVED --> INROOM : recover
+      REMOVED --> LOST : restore
+
+      note left of INROOM
+        Umzug: neuer Record,
+        Zustand bleibt INROOM
+      end note
+
+      classDef start fill:#eaf2fb,stroke:#3a6ea5,color:#1a1a1a
+      classDef terminal fill:#ededed,stroke:#8a8a8a,color:#1a1a1a
+      class ORDERED start
+      class REMOVED terminal
 ```
 
 Einige Übergänge (z.B. `ENTFERNT → …` oder `VERLIEHEN → ENTFERNT`) sind zwar
