@@ -11,7 +11,6 @@ allow. Run this against a copy of production **before** turning on write-time
 enforcement, so the table is known to match reality.
 
     python manage.py audit_transitions            # report illegal pairs
-    python manage.py audit_transitions --mermaid  # print the state diagram instead
 """
 
 from collections import Counter
@@ -25,18 +24,7 @@ from dlcdb.core.models import Device, Record
 class Command(BaseCommand):
     help = "Report device record chains that violate the lifecycle transition table."
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "--mermaid",
-            action="store_true",
-            help="Print the lifecycle as a mermaid stateDiagram-v2 and exit (docs source).",
-        )
-
     def handle(self, *args, **options):
-        if options["mermaid"]:
-            self.stdout.write(self._mermaid())
-            return
-
         offenders = Counter()
         devices_with_issues = 0
         total = 0
@@ -65,14 +53,3 @@ class Command(BaseCommand):
                 self.stdout.write(f"  {frm} -> {to}: {count}")
         else:
             self.stdout.write(self.style.SUCCESS("No illegal transitions found -- enforcement is safe to enable."))
-
-    @staticmethod
-    def _mermaid():
-        lines = ["stateDiagram-v2", "    direction LR"]
-        for t in lifecycle.TRANSITIONS:
-            label = "" if t.name in {"order", "locate", "relocate"} else f" : {t.name}"
-            for source in t.sources:
-                src = "[*]" if source is None else source
-                lines.append(f"    {src} --> {t.target}{label}")
-        lines.append(f"    {lifecycle.REMOVED} --> [*]")
-        return "\n".join(lines)
