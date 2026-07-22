@@ -93,7 +93,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
     actions = []
 
     # The transitions the lifecycle offers as UI actions from the current state.
-    allowed_next_states = [t.target for t in lifecycle.transitions_from(lifecycle.state_of(device)) if t.offered]
+    allowed_next_states = [t.target for t in lifecycle.offered_transitions_from(lifecycle.state_of(device))]
 
     # Generate actions for each allowed next state
     for next_state in allowed_next_states:

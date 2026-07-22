@@ -85,7 +85,8 @@ class Transition:
     sources: tuple  # legal source state keys; None == "device has no record yet"
     target: str  # a STATES key -- its proxy does the writing
     label: str  # gettext_lazy; the *action* ("Lend", "Move")
-    offered: bool = True  # surfaced as a UI action button?
+    offered: bool = True  # surfaced as a UI action button at all?
+    not_offered_from: tuple = ()  # sources where it is legal but NOT surfaced as a button
     permission: str | None = None  # defaults to "core.add_<target proxy>"
     device_q: Q | None = None  # extra precondition on the Device itself
 
@@ -104,7 +105,16 @@ TRANSITIONS = (
     Transition(name="return_lending", sources=(LENT,), target=INROOM, label=_("Return")),
     Transition(name="lose", sources=(INROOM, LENT, LOST), target=LOST, label=_("Not locatable")),
     Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found")),
-    Transition(name="remove", sources=(INROOM, LOST, ORDERED), target=REMOVED, label=_("Remove")),
+    # Removing a lent device (decommission while on loan) is legal but only via the
+    # admin -- the frontend does not surface a "Remove" button on a lending. The
+    # audit against production found 8 real LENT -> REMOVED chains.
+    Transition(
+        name="remove",
+        sources=(INROOM, LENT, LOST, ORDERED),
+        target=REMOVED,
+        label=_("Remove"),
+        not_offered_from=(LENT,),
+    ),
     Transition(name="restore", sources=(REMOVED,), target=LOST, label=_("Restore"), offered=False),
     Transition(name="recover", sources=(REMOVED,), target=INROOM, label=_("Recover"), offered=False),
 )
@@ -130,6 +140,16 @@ def can_transition(from_state, to_state):
     return any(t.target == to_state for t in transitions_from(from_state))
 
 
+def offered_transitions_from(state):
+    """The transitions surfaced as UI action buttons from ``state``.
+
+    A transition is offered when it is ``offered`` at all and ``state`` is not in
+    its ``not_offered_from`` (e.g. ``remove`` is legal from LENT but not offered
+    there -- a lent device is returned or lost, not removed, from the frontend).
+    """
+    return tuple(t for t in transitions_from(state) if t.offered and state not in t.not_offered_from)
+
+
 def proxy_for(state):
     """The proxy model class that writes ``state``."""
     return apps.get_model(STATES[state].proxy)
@@ -150,9 +170,7 @@ def available(device, *, user=None, app_name=None):
     permission, and the device satisfies its ``device_q`` precondition.
     """
     result = []
-    for transition in transitions_from(state_of(device)):
-        if not transition.offered:
-            continue
+    for transition in offered_transitions_from(state_of(device)):
         if not (user and user.has_perm(permission_for(transition))):
             continue
         if transition.device_q is not None:
