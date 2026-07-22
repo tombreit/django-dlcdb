@@ -84,6 +84,7 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
 
 # Tweak some settings in DEV mode
 if env.str("SETTINGS_MODE") == "dev":
+    # Disabled custom LDAP options for dev for now to mimic the production environment
     pass
     # ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
     # ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
