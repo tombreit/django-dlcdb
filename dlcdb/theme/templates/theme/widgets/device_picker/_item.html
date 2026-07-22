@@ -80,7 +80,7 @@ Params:
       <div class="small">
         {% with rec=device.active_record %}
           {% if rec %}
-            <span class="badge text-bg-{{ rec.record_type_color }}">
+            <span class="badge text-bg-{{ device.state_color|default:"secondary" }}">
               {{ rec.get_record_type_display }}{% if rec.record_type == 'INROOM' and rec.room %} · {{ rec.room.number }}{% elif rec.record_type == 'LENT' and rec.person %} · {{ rec.person }}{% endif %}
             </span>
           {% else %}

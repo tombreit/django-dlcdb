@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if device.active_record %}
-  <span class="badge text-bg-{{ device.active_record.record_type_color }}">
+  <span class="badge text-bg-{{ device.state_color|default:"secondary" }}">
     {{ device.active_record.get_record_type_display }}
   </span>
   <br>

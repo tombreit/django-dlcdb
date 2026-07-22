@@ -13,7 +13,7 @@ with ``has_lending_profile`` so the card can expose whether an Ausleihzettel
 
 from django.db.models import Exists, OuterRef
 
-from dlcdb.core.models import Device, Record
+from dlcdb.core import lifecycle
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.pickers import PickerSource, register_picker_source
 
@@ -21,13 +21,15 @@ from .models import LendingProfile
 
 
 def lend_queryset(request):
-    """Tenant-scoped queryset of available, lentable devices to lend."""
+    """Tenant-scoped queryset of the devices that can be lent right now.
+
+    The "which devices are lendable" rule is defined once, in the lifecycle
+    (``lend`` transition: an INROOM device that ``is_lentable`` and is not a
+    licence). Sourcing it from ``devices_for`` keeps this picker in lockstep with
+    the transition guard and the action buttons instead of re-stating the rule.
+    """
     qs = (
-        Device.objects.filter(
-            active_record__record_type=Record.INROOM,
-            is_lentable=True,
-            is_licence=False,
-        )
+        lifecycle.devices_for("lend")
         .select_related("active_record__room", "manufacturer", "device_type")
         .annotate(has_lending_profile=Exists(LendingProfile.objects.filter(device_type=OuterRef("device_type"))))
     )

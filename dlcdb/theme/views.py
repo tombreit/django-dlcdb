@@ -23,6 +23,7 @@ from django_htmx.http import HttpResponseClientRefresh
 
 from dlcdb.core.utils.device_search import search_devices
 
+from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
 
 
@@ -45,7 +46,7 @@ def device_search(request):
         return HttpResponseClientRefresh()
 
     value = (request.POST.get(source.search_param) or "").strip()
-    devices = search_devices(source.get_queryset(request), value)
+    devices = search_devices(source.get_queryset(request), value).annotate(state_color=active_record_color_case())
 
     # Multi-select: drop devices already chosen in the picker (their hidden inputs
     # ride along via hx-include) so the dropdown only offers fresh choices.

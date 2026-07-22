@@ -21,6 +21,7 @@ from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
 
 from ..filters import DeviceFilter
@@ -48,7 +49,7 @@ def _device_queryset(request):
         "supplier",
         "contact_person_internal",
         "tenant",
-    )
+    ).annotate(state_color=active_record_color_case())
     return tenant_scoped_queryset(queryset, request, tenant_field="tenant")
 
 

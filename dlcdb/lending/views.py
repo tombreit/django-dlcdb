@@ -20,7 +20,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import LentRecord, Person, Record, Room
-from dlcdb.core.models.record import RECORD_TYPE_COLORS
+from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
@@ -68,11 +68,11 @@ def _annotate_lent_state(queryset):
         When(record_type=Record.LENT, then=Value(STATE_LENT)),
         When(record_type=Record.INROOM, then=Value(STATE_AVAILABLE)),
     ]
-    # Derive badge colours from the single record_type→colour map so the lending
-    # list and the asset card cannot disagree (see core.models.record).
+    # Derive badge colours from the single state→colour map (theme.lifecycle_display)
+    # so the lending list and the asset card cannot disagree.
     color_whens += [
-        When(record_type=Record.LENT, then=Value(RECORD_TYPE_COLORS[Record.LENT])),
-        When(record_type=Record.INROOM, then=Value(RECORD_TYPE_COLORS[Record.INROOM])),
+        When(record_type=Record.LENT, then=Value(STATE_COLORS[Record.LENT])),
+        When(record_type=Record.INROOM, then=Value(STATE_COLORS[Record.INROOM])),
     ]
     sort_whens += [
         When(record_type=Record.INROOM, then=Value(1)),

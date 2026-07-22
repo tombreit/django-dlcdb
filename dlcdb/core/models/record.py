@@ -59,15 +59,6 @@ RECORD_TYPE_KEYS = lifecycle.RECORD_TYPE_KEYS
 # place so the copies cannot drift.
 LOST_DEVICE_NOT_LENDABLE = _('Device is currently "not locatable". It must be located before it can be lent.')
 
-# Bootstrap contextual colour per record type, used for state badges.
-RECORD_TYPE_COLORS = {
-    "ORDERED": "info",
-    "INROOM": "success",
-    "LENT": "warning",
-    "LOST": "danger",
-    "REMOVED": "secondary",
-}
-
 
 class Record(AuditBaseModel):
     # New record types/proxys must be added to:
@@ -219,11 +210,6 @@ class Record(AuditBaseModel):
 
     def __str__(self):
         return str(self.pk)
-
-    @property
-    def record_type_color(self):
-        """Bootstrap contextual colour for this record's state badge."""
-        return RECORD_TYPE_COLORS.get(self.record_type, "secondary")
 
     def clean(self):
         if not self._meta.proxy:

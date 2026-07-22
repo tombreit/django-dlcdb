@@ -24,7 +24,7 @@ from django.db import IntegrityError, transaction
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Record
-from dlcdb.core.models.record import RECORD_TYPE_COLORS, RECORD_TYPE_KEYS, RECORD_TYPE_LIST
+from dlcdb.core.models.record import RECORD_TYPE_KEYS, RECORD_TYPE_LIST
 
 
 def _unsaved(record_type):
@@ -147,20 +147,8 @@ def test_get_proxy_instance_returns_the_concrete_proxy(plain_device, room):
     assert type(base.get_proxy_instance()) is InRoomRecord
 
 
-# --- Presentation metadata ----------------------------------------------
-
-
-def test_colour_map_covers_every_record_type():
-    assert set(RECORD_TYPE_COLORS) == set(RECORD_TYPE_KEYS)
-
-
-@pytest.mark.parametrize("key", RECORD_TYPE_KEYS)
-def test_record_type_color_matches_the_map(key):
-    assert _unsaved(key).record_type_color == RECORD_TYPE_COLORS[key]
-
-
-def test_record_type_color_falls_back_for_unknown_states():
-    assert _unsaved("NO_SUCH_STATE").record_type_color == "secondary"
+# Presentation metadata (badge colours) has moved to dlcdb.theme.lifecycle_display;
+# see dlcdb/theme/tests/test_lifecycle_display.py.
 
 
 # --- Guards --------------------------------------------------------------
