@@ -233,18 +233,18 @@ def transition_order(device, *, user, date_of_purchase=None):
     return OrderedRecord.objects.create(device=device, date_of_purchase=date_of_purchase, **_actor(user))
 
 
-def transition_locate(device, *, room, user, note=""):
+def transition_locate(device, *, room, user, inventory=None, note=""):
     """None/ORDERED -> INROOM. The device's first localisation in a room."""
     check(device, "locate")
     InRoomRecord = apps.get_model("core.InRoomRecord")
-    return InRoomRecord.objects.create(device=device, room=room, note=note, **_actor(user))
+    return InRoomRecord.objects.create(device=device, room=room, inventory=inventory, note=note, **_actor(user))
 
 
-def transition_relocate(device, *, room, user):
+def transition_relocate(device, *, room, user, inventory=None, note=""):
     """INROOM -> INROOM. Move a located device to another room (appends a new record)."""
     check(device, "relocate")
     InRoomRecord = apps.get_model("core.InRoomRecord")
-    return InRoomRecord.objects.create(device=device, room=room, **_actor(user))
+    return InRoomRecord.objects.create(device=device, room=room, inventory=inventory, note=note, **_actor(user))
 
 
 def transition_lend(
@@ -298,6 +298,28 @@ def transition_return_lending(record, *, user, lent_end_date):
         )
 
 
+def localise(device, *, room, user, inventory=None, note=""):
+    """Put ``device`` in ``room``, choosing the INROOM-targeting transition that
+    matches its current state (locate / relocate / find / recover).
+
+    A convenience over the four transitions for callers that just want "this
+    device is in this room now" regardless of where it came from -- the relocate
+    dispatcher and the inventory found/unknown actions. Not a transition itself,
+    so it carries no ``transition_`` prefix.
+    """
+    state = state_of(device)
+    if state == INROOM:
+        return transition_relocate(device, room=room, user=user, inventory=inventory, note=note)
+    if state == LENT:
+        # A lent device found in a room: move the lending there, keep it lent.
+        return relocate_lending(device.active_record, room=room, user=user, inventory=inventory)
+    if state == LOST:
+        return transition_find(device, room=room, user=user, inventory=inventory, note=note)
+    if state == REMOVED:
+        return transition_recover(device, room=room, user=user, inventory=inventory, note=note)
+    return transition_locate(device, room=room, user=user, inventory=inventory, note=note)
+
+
 def transition_lose(device, *, user, inventory=None, note=""):
     """INROOM/LENT/LOST -> LOST. The device could not be located."""
     check(device, "lose")
@@ -347,13 +369,16 @@ def transition_recover(device, *, room, user, inventory=None, note=""):
 # live here, without the ``transition_`` prefix, so the distinction is visible.
 
 
-def relocate_lending(record, *, room, user):
+def relocate_lending(record, *, room, user, inventory=None):
     """Move a *lent* device: update the room on the active LentRecord in place.
 
-    The lending continues and no record is appended.
+    The lending continues and no record is appended. Optionally stamps the
+    current inventory (used when a lent device is found during stocktaking).
     """
     actor = _actor(user)
     record.room = room
+    if inventory is not None:
+        record.inventory = inventory
     record.user, record.username = actor["user"], actor["username"]
     record.save()
     return record

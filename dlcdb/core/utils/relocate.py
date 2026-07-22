@@ -70,15 +70,10 @@ def relocate_device(device, new_room, user):
             message=_("Device “%(device)s” is already in room “%(room)s”.") % {"device": device, "room": new_room},
         )
 
-    # Append a fresh localisation record. Pick the transition that matches the
+    # Append a fresh localisation record, picking the transition that matches the
     # current state so the record history names what actually happened (a LOST
     # device turning up is a "find", a fresh device is a "locate").
-    if state == Record.LOST:
-        lifecycle.transition_find(device, room=new_room, user=user)
-    elif state == Record.INROOM:
-        lifecycle.transition_relocate(device, room=new_room, user=user)
-    else:  # no active record or ORDERED
-        lifecycle.transition_locate(device, room=new_room, user=user)
+    lifecycle.localise(device, room=new_room, user=user)
 
     return RelocateResult(
         level=messages.SUCCESS,

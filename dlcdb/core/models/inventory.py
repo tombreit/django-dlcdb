@@ -10,14 +10,24 @@ from django.db.models import Count, Q, OuterRef, Subquery, Exists
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.inventory.utils import update_inventory_note
 
+from .. import lifecycle
 from .room import Room
 from .device import Device
 from .note import Note
 from .record import Record
-from .prx_lostrecord import LostRecord
+
+
+def _found_inventory_note(active_record):
+    """The audit note stamped on the new INROOM record when a device is found,
+    describing where it came back from."""
+    record_type = getattr(active_record, "record_type", None)
+    if record_type == Record.LOST:
+        return "Was: LOST, now: INROOM, cause: INVENTORY"
+    if record_type == Record.REMOVED:
+        return "Was: REMOVED, now: INROOM, cause: INVENTORY"
+    return ""
 
 
 class InventoryQuerySet(models.QuerySet):
@@ -327,7 +337,6 @@ class Inventory(models.Model):
             raise ObjectDoesNotExist("No room is flagged with 'is_external'. Please contact your it staff.")
 
         current_inventory = Inventory.objects.active_inventory()
-        user, username = get_denormalized_user(user)
         uuids_states_dict = json.loads(uuids)
 
         for uuid, state in uuids_states_dict.items():
@@ -338,138 +347,61 @@ class Inventory(models.Model):
 
             active_record = device.active_record
 
-            # print(f"uuid: {uuid}, state: {state}, device: {device}, active_record: {active_record}")
-
-            new_record = False
-
-            # TODO: Refactor these inventory actions to be part of the Inventory model
-            # WARNING: As "cloning" an instance with "new_obj = old_obj" does not
-            # automatically set m2m related fields, we need to ensure these related
-            # fields are set correctly (if any on Record). Also check unique constraints
-            # for OneToOne relations manually.
-            # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
-
             if state == "dev_state_found":
-                new_record = active_record
-                new_record.room = room
-                new_record.inventory = current_inventory
-                new_record.user = user
-                new_record.username = username
-
-                # As we copied a previous record, we need to do some
-                # cleanup in fields which doest not match the new
-                # record type:
-                if new_record.record_type == Record.LOST:
-                    new_record.record_type = Record.INROOM
-                    new_record.note = "Was: LOST, now: INROOM, cause: INVENTORY"
-                elif new_record.record_type == Record.REMOVED:
-                    new_record.record_type = Record.INROOM
-                    new_record.disposition_state = ""
-                    new_record.removed_info = ""
-                    new_record.removed_date = None
-                    new_record.note = "Was: REMOVED, now: INROOM, cause: INVENTORY"
+                # The device is here now: localise it in this room and stamp the
+                # inventory. lifecycle.localise picks the right transition for the
+                # device's current state (relocate / find / recover / locate), so
+                # a found LOST/REMOVED device is brought back to INROOM and its
+                # stale removal fields are cleared by the proxy's save().
+                note = _found_inventory_note(active_record)
+                lifecycle.localise(device, room=room, user=user, inventory=current_inventory, note=note)
 
             elif state == "dev_state_notfound":
-                # If an expected device is not found in a given room, we need
-                # to check if it is currently lended. When lended, we do not
-                # set this device as "not found", but instead move it to an
-                # "external room".
-
-                if all(
-                    [
-                        active_record.record_type == Record.LENT,
-                        active_record.room != external_room,
-                    ]
+                # A lent device missing from its room is with its borrower, not
+                # lost: keep the lending, just move it to the external room.
+                if (
+                    active_record is not None
+                    and active_record.record_type == Record.LENT
+                    and active_record.room != external_room
                 ):
                     previous_room = active_record.room
-                    active_record.room = external_room
-                    active_record.save()
+                    lifecycle.relocate_lending(active_record, room=external_room, user=user)
 
-                    # Set inventory note
-                    # TODO: Fix multiple injections of same note string
-                    lent_not_found_msg = f"Lented asset not found in expected location `{previous_room}. Changed to `{active_record.room}`."
+                    lent_not_found_msg = (
+                        f"Lented asset not found in expected location `{previous_room}. "
+                        f"Changed to `{active_record.room}`."
+                    )
                     note_obj, note_obj_created = Note.objects.get_or_create(
                         inventory=current_inventory,
                         device=active_record.device,
-                        # room=external_room,
                     )
                     note_obj.text = f"{note_obj.text} *** {lent_not_found_msg}"
                     note_obj.save()
                 else:
-                    new_record = LostRecord(
-                        device=device,
-                        inventory=current_inventory,
-                        user=user,
-                        username=username,
-                    )
+                    lifecycle.transition_lose(device, inventory=current_inventory, user=user)
 
             elif state == "dev_state_unknown":
-                # This could happen if a device is added to a room via add_device
-                # but that device is not marked as "found" or "not found".
-                # That device should be added to current room, but without
-                # an inventory record.
-                # Or if an already inventorized device is marked as "unknown", for
-                # whatever reason.
-
-                new_record = active_record
-                new_record.room = room
-                new_record.user = user
-                new_record.username = username
-                new_record_note = "Marked as 'unknown state' during inventory."
-
-                # How to handle devices which already have an inventory record
-                # but are marked as "unknown" during inventory?
-                # Keeping the current inventory value vs. removing the inventory
-                # As we count a device as inventorized if we have any record with
-                # a inventory stamp for the current inventory, the UI will still
-                # show this device as inventorized.
-                new_record.inventory = None
-
+                # A device added to a room but marked neither found nor not-found,
+                # or an already-inventorized device re-marked "unknown": localise
+                # it in the room but WITHOUT an inventory stamp, and strip any
+                # existing stamp so it no longer counts as inventorized.
                 already_inventorized_records = device.get_current_inventory_records
                 if already_inventorized_records:
-                    # The device was already inventorized, but is now marked as "unknown".
-                    # This could happen if a user previously falsely marked a device as "inventorized"
-                    # and now wants to remove this inventory stamp.
-
-                    # Not using batch update mode here, as we need to be sure that
-                    # the models save() method is called.
-                    # already_inventorized_records.update(inventory=None)
+                    # Save one at a time (not a bulk update) so Record.save() runs.
                     for _record in already_inventorized_records:
                         _record.inventory = None
                         _record.save()
 
-                    # ...and add an audit trail inventory note
                     msg = f"Device marked as 'unknown state' during inventory by {user}. Removed existing inventory stamp."
-                    _inventory_note_obj = update_inventory_note(
-                        inventory=current_inventory,
-                        device=device,
-                        msg=msg,
-                    )
+                    update_inventory_note(inventory=current_inventory, device=device, msg=msg)
 
-                # As we copied a previous record, we need to do some
-                # cleanup in fields which doest not match the new
-                # record type:
-                if new_record.record_type == Record.LOST:
-                    new_record.record_type = Record.INROOM
-                    new_record.note = new_record_note
-                elif new_record.record_type == Record.REMOVED:
-                    new_record.record_type = Record.INROOM
-                    new_record.disposition_state = ""
-                    new_record.removed_info = ""
-                    new_record.note = new_record_note
-                    new_record.removed_date = None
-                elif new_record.record_type == Record.INROOM:
-                    new_record.note = new_record_note
+                lifecycle.localise(
+                    device,
+                    room=room,
+                    user=user,
+                    inventory=None,
+                    note="Marked as 'unknown state' during inventory.",
+                )
 
             else:
-                msg = f"This should never happen: given state `{state}` not recognized! Raising 500."
-                print(msg)
-                raise RuntimeError(msg)
-
-            if new_record:
-                # Copying model instances
-                # https://docs.djangoproject.com/en/4.2/topics/db/queries/#copying-model-instances
-                new_record.pk = None
-                new_record.id = None
-                new_record._state.adding = True
-                new_record.save()
+                raise RuntimeError(f"This should never happen: given state `{state}` not recognized! Raising 500.")

@@ -121,9 +121,11 @@ def test_inventory_found_recovers_a_removed_device_and_clears_removal_fields(
 
     assert record.record_type == Record.INROOM
     assert record.room == inventory_rooms["target"]
-    # The removal-specific fields must not leak into the new state.
-    assert record.disposition_state == ""
-    assert record.removed_info == ""
+    # The removal-specific fields must not leak into the new state. The recovered
+    # device now gets a fresh InRoomRecord (rather than a cloned-and-blanked
+    # REMOVED record), so these are simply unset -- None or empty, not populated.
+    assert not record.disposition_state
+    assert not record.removed_info
     assert record.removed_date is None
 
 
