@@ -6,9 +6,12 @@ pages:
   stage: deploy
   image: python:3.13-slim
   before_script:
-  - apt-get --assume-yes update && apt-get --assume-yes --no-install-recommends install libmagic1
+  - apt-get --assume-yes update && apt-get --assume-yes --no-install-recommends install libmagic1 nodejs npm
   script:
   - pip install --upgrade pip setuptools wheel && pip install -r requirements/prod.txt
+  # docs/_static/vendor/ is gitignored; without this the pages artifact would
+  # ship no mermaid at all and the diagrams would stay blank.
+  - npm ci --ignore-scripts && npm run docs:copy-mermaid
   - printf "SETTINGS_MODE=production\nDJANGO_DEBUG=false\n" > .env
   - sphinx-build -b html docs public
   artifacts:

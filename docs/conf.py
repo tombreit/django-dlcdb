@@ -135,6 +135,18 @@ myst_enable_extensions = ["colon_fence", "substitution", "attrs_inline", "html_i
 myst_heading_anchors = 6
 
 # https://github.com/mgaitan/sphinxcontrib-mermaid#directive-options
-mermaid_use_local = "staticfiles/vendor/mermaid/mermaid.min.js"
-mermaid_elk_use_local = "staticfiles/vendor/mermaid/mermaid-layout-elk.esm.min.mjs"
-mermaid_d3_use_local = "staticfiles/vendor/mermaid/d3.min.mjs"
+#
+# All assets come from docs/_static/vendor/mermaid/, populated by
+# `npm run docs:copy-mermaid` -- the built pages must not reach out to a CDN.
+# The option is named d3_use_local (not mermaid_d3_use_local); with the wrong
+# name it is silently ignored and the extension falls back to jsdelivr.
+# d3 is only used for the optional zoom feature, but sphinxcontrib-mermaid adds
+# the script unconditionally, so it has to be served locally either way.
+d3_use_local = "vendor/mermaid/d3.min.js"
+#
+# Diagrams are rendered by the plain <script> in html_js_files above, which is
+# the IIFE build (it assigns globalThis.mermaid). mermaid_use_local must still
+# point at a local file: left unset, the extension's own ES-module loader would
+# import mermaid from jsdelivr. That loader stays inert either way -- it wants
+# mermaid.esm.min.mjs plus its chunks/, which docs:copy-mermaid does not vendor.
+mermaid_use_local = "vendor/mermaid/mermaid.min.js"

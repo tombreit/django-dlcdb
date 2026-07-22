@@ -36,7 +36,17 @@ messages:
 	@echo "Now translate the empty msgstr entries in dlcdb/locale/de/LC_MESSAGES/django.po, then re-run 'make messages'."
 	python3 manage.py compilemessages -l de $(i18n_ignores)
 
-docs:
+# The mermaid assets are gitignored and only exist once npm has copied them out
+# of node_modules. Without them the diagrams render blank, so 'make docs' pulls
+# them in itself -- as a file target, so it is a no-op once they are there.
+mermaid_assets = docs/_static/vendor/mermaid/mermaid.min.js
+
+$(mermaid_assets):
+	@command -v npm >/dev/null 2>&1 || (echo "npm is not installed. Please install npm." && exit 1)
+	npm install --loglevel=error
+	npm run docs:copy-mermaid --loglevel=error
+
+docs: $(mermaid_assets)
 	make --directory=docs clean
 	make --directory=docs html
 
