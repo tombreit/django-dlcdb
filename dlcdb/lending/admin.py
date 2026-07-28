@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db import models
 from django.forms import Textarea
 from django.template.loader import render_to_string
@@ -17,6 +17,7 @@ from .models import (
     LendingProfile,
     LendingProfileRegulation,
 )
+from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
 
 
 class RegulationInline(admin.TabularInline):
@@ -105,7 +106,8 @@ class LendingProfileAdmin(SimpleHistoryAdmin):
                     "Django template syntax (HTML). "
                     "Should extend 'lending/printout_base.html'. "
                     "Available context: record, lending_profile. The sheet body and the checklist "
-                    "are included from 'lending/includes/', parameterized with sheet_for and pagebreak."
+                    "are included from 'lending/includes/', parameterized with sheet_for and pagebreak. "
+                    "Clear the field and save to restore the shipped starter content."
                 ),
             },
         ),
@@ -113,12 +115,38 @@ class LendingProfileAdmin(SimpleHistoryAdmin):
             "Preparation Checklist",
             {
                 "fields": ("lending_preparation_checklist",),
+                "description": "Clear the field and save to restore the shipped starter content.",
             },
         ),
     )
 
     inlines = [ProfileRegulationInline]
     exclude = ["mandatory_regulations"]
+
+    # Both fields default to shipped starter content, but a `default` only fires
+    # on instantiation — clearing the textarea would otherwise persist "" forever,
+    # which for lent_sheet_template is precisely the unprintable state. Treat a
+    # cleared field as "reset me".
+    starter_fields = {
+        "lent_sheet_template": get_starter_lent_sheet_template,
+        "lending_preparation_checklist": get_starter_lending_preparation_checklist,
+    }
+
+    def save_model(self, request, obj, form, change):
+        for field_name, get_starter in self.starter_fields.items():
+            if getattr(obj, field_name):
+                continue
+            starter = get_starter()
+            if not starter:
+                # Starter file unreadable (see starter._read) — leave the field
+                # empty rather than claiming a restore that did not happen.
+                continue
+            setattr(obj, field_name, starter)
+            messages.info(
+                request,
+                f'"{obj._meta.get_field(field_name).verbose_name}" was empty — restored the starter content.',
+            )
+        super().save_model(request, obj, form, change)
 
     @admin.display(boolean=True, description="Has template")
     def has_template(self, obj):

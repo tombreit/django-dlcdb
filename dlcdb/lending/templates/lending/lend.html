@@ -191,12 +191,12 @@ SPDX-License-Identifier: EUPL-1.2
       {% if is_lend_flow %}{% translate "Lend device" %}{% else %}{% translate "Save" %}{% endif %}
     </button>
 
-    {% if picker_mode or has_lending_profile %}
-      {% comment %}
-        Prints the slip from the unsaved form data. The print endpoint is keyed
-         on the device pk; in picker mode JS sets formaction once a device is
-         chosen, in record mode it is rendered server-side.
-      {% endcomment %}
+    {% comment %}
+      Prints the slip from the unsaved form data. The print endpoint is keyed
+      on the device pk; in picker mode JS sets formaction once a device is
+      chosen, in record mode it is rendered server-side.
+    {% endcomment %}
+    {% if can_print_slip %}
       <button
         type="submit"
         id="quick-lend-print"
@@ -207,6 +207,10 @@ SPDX-License-Identifier: EUPL-1.2
       >
         <i class="bi bi-printer"></i> {% translate "Print lending slip" %}
       </button>
+    {% elif is_lend_flow %}
+      <a href="{% url 'admin:lending_lendingprofile_add' %}?device_type={{ device.device_type_id }}" class="btn btn-secondary">
+        <i class="bi bi-printer"></i> {% translate "No lending slip template found. Add one?" %}
+      </a>
     {% endif %}
 
     <a href="{{ index_url }}" class="btn btn-outline-secondary ms-auto">
@@ -234,13 +238,14 @@ SPDX-License-Identifier: EUPL-1.2
     const printBtn = document.getElementById("quick-lend-print");
     const roomSelect = document.getElementById("{{ form.room.id_for_label }}");
     const devicePicker = document.getElementById("device-picker");
-    let deviceHasProfile = false;
 
     function sync() {
       submitBtn.disabled = !(deviceInput.value && personInput.value);
-      // A slip can only be printed once a device with a lending profile is set.
+      // The slip endpoint is keyed on a device, so printing needs one. Whether
+      // that device's type has a slip template is the endpoint's call — it 404s
+      // if not.
       if (printBtn) {
-        printBtn.disabled = !(deviceInput.value && deviceHasProfile);
+        printBtn.disabled = !deviceInput.value;
       }
     }
 
@@ -260,7 +265,6 @@ SPDX-License-Identifier: EUPL-1.2
         }
 
         // Point the print button at this device's print endpoint.
-        deviceHasProfile = option.dataset.hasProfile === "1";
         if (printBtn) {
           const template = printBtn.dataset.printUrlTemplate || "";
           printBtn.formAction = template.replace("/0/print/", "/" + option.dataset.optionId + "/print/");

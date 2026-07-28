@@ -293,6 +293,15 @@ class LendingDetailViewTests(BaseTest):
         # The slip endpoint is keyed on the device pk, not the record pk.
         self.assertContains(response, reverse("lending:print_sheet", args=[self.available_device.pk]))
 
+    def test_lend_flow_without_slip_template_offers_profile_admin(self):
+        # A profile row with an empty template cannot render a slip (the database
+        # template loader rejects it), so offer to fix the profile instead of a
+        # print button that would 404.
+        LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="")
+        response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
+        self.assertNotContains(response, 'id="quick-lend-print"')
+        self.assertContains(response, reverse("admin:lending_lendingprofile_add"))
+
     def test_return_flow_has_no_print_button(self):
         # A profile exists, but the return flow cannot print a slip (print_sheet
         # 404s for non-INROOM records), so the button must be absent.
@@ -518,6 +527,13 @@ class LendingPrintSheetTests(BaseTest):
         response = self.client.post(self.url, self._payload())
         self.assertEqual(response.status_code, 404)
 
+    def test_print_404_when_profile_has_no_slip_template(self):
+        # A profile without a template is not printable: the endpoint must 404
+        # rather than blow up in the database template loader.
+        LendingProfile.objects.update(lent_sheet_template="")
+        response = self.client.post(self.url, self._payload())
+        self.assertEqual(response.status_code, 404)
+
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingDeviceSearchTests(BaseTest):
@@ -635,12 +651,6 @@ class QuickLendViewTests(BaseTest):
         self.assertContains(response, 'id="quick-lend-print"')
         # The print endpoint is keyed on the device pk, substituted by JS.
         self.assertContains(response, "/0/print/")
-
-    def test_device_option_exposes_lending_profile_flag(self):
-        # A profile exists for the available device's type -> option flag is "1".
-        LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
-        response = self.client.post(reverse("theme:device_search"), {"source": "lend", "q": "AVAIL"})
-        self.assertContains(response, 'data-has-profile="1"')
 
     def test_print_sheet_works_from_quick_lend_payload(self):
         LendingProfile.objects.create(

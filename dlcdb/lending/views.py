@@ -340,6 +340,16 @@ def lend(request, pk=None):
     is_lend_flow = picker_mode or record.record_type == Record.INROOM
     is_return_flow = (not picker_mode) and record.record_type == Record.LENT
 
+    # A slip needs the lend flow (print_sheet resolves an INROOM record and 404s
+    # otherwise) *and* a device type whose profile carries a slip template — an
+    # empty one is rejected by the database template loader (see loader.py). In
+    # picker mode the device is chosen client-side, so the button renders
+    # disabled and the inline JS enables it once a device is set.
+    can_print_slip = picker_mode or (
+        record.record_type == Record.INROOM
+        and LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
+    )
+
     # Carry the index filters through the POST (and any failed-POST re-render) by
     # appending ?next= to the form action.
     form_action = reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk])
@@ -359,11 +369,7 @@ def lend(request, pk=None):
         if picker_mode
         else (_("Lend device") if record.record_type == Record.INROOM else _("Lending")),
         "obj_admin_url": None if picker_mode else reverse("admin:core_lentrecord_change", args=[record.pk]),
-        # Only the lend flow can print a slip (print_sheet resolves an INROOM
-        # record and 404s otherwise), so gate the button on it here.
-        "has_lending_profile": is_lend_flow
-        and not picker_mode
-        and LendingProfile.objects.filter(device_type=device.device_type).exists(),
+        "can_print_slip": can_print_slip,
         "form_action": form_action,
         "index_url": index_url,
     }
@@ -429,9 +435,9 @@ def print_sheet(request, pk):
         raise Http404("Device has no device type assigned.")
 
     try:
-        profile = LendingProfile.objects.get(device_type=device_type)
+        profile = LendingProfile.objects.exclude(lent_sheet_template="").get(device_type=device_type)
     except LendingProfile.DoesNotExist:
-        raise Http404(f"No lending profile configured for device type '{device_type}'.")
+        raise Http404(f"No lending slip template configured for device type '{device_type}'.")
 
     return TemplateResponse(
         request,
@@ -454,9 +460,9 @@ def print_lent_sheet(request, pk):
         raise Http404("Device has no device type assigned.")
 
     try:
-        profile = LendingProfile.objects.get(device_type=device_type)
+        profile = LendingProfile.objects.exclude(lent_sheet_template="").get(device_type=device_type)
     except LendingProfile.DoesNotExist:
-        raise Http404(f"No lending profile configured for device type '{device_type}'.")
+        raise Http404(f"No lending slip template configured for device type '{device_type}'.")
 
     template_name = f"lending/db/{profile.pk}.html"
     context = {

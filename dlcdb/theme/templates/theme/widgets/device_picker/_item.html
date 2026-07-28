@@ -17,9 +17,6 @@ Generic device data attributes are emitted unconditionally; a consumer's glue JS
 reads only the ones it needs:
   data-room-id / data-room-label  the device's current room (lending prefills the
                                   target room select from it).
-  data-has-profile                "1" when the device's type has a lending profile
-                                  (only the lending source annotates this; absent
-                                  -> falsy for other sources).
   data-lent                       "1" when the device is currently lent (relocate
                                   warns about moving a lent device).
 
@@ -39,7 +36,6 @@ Params:
   data-option-label="{{ device.edv_id|default:device.sap_id|default:device.serial_number|default:device }}"
   data-room-id="{{ device.active_record.room_id|default:'' }}"
   data-room-label="{{ device.active_record.room|default:'' }}"
-  data-has-profile="{{ device.has_lending_profile|yesno:'1,' }}"
   data-lent="{% if device.active_record.record_type == 'LENT' %}1{% endif %}"
 >
   <div class="card-body d-flex align-items-center gap-2 px-1 py-2">
