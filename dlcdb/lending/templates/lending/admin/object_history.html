@@ -1,0 +1,18 @@
+{# SPDX-FileCopyrightText: 2026 Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% extends "simple_history/object_history.html" %}
+
+{# simple_history's history_view() puts no `media` in the context, so ModelAdmin.Media #}
+{# never reaches this page — the styles for it live here rather than in a static file. #}
+{% block extrastyle %}{{ block.super }}
+  <style>
+    /* Shrink every column to its content, let the last one ("Changes") take the rest. */
+    #change-history { width: 100%; }
+    #change-history th,
+    #change-history td { width: 1%; white-space: nowrap; }
+    #change-history th:last-child,
+    #change-history td:last-child { width: 100%; white-space: normal; }
+
+    .lending-history-value textarea { width: 100%; min-width: 30em; font-family: monospace; }
+  </style>
+{% endblock %}

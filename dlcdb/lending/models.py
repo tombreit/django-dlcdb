@@ -5,6 +5,8 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.template import Template, TemplateSyntaxError
+from simple_history.models import HistoricalRecords
+
 from ..core.models.abstracts import SingletonBaseModel
 
 
@@ -95,6 +97,8 @@ class LendingProfile(models.Model):
             "Available context: record, lending_profile, sheet_for, pagebreak."
         ),
     )
+
+    history = HistoricalRecords()
 
     class Meta:
         verbose_name = "Lending Profile"

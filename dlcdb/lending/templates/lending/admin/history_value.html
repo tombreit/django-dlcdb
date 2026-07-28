@@ -1,0 +1,8 @@
+{# SPDX-FileCopyrightText: 2026 Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{# Django comments, not HTML ones: this snippet is rendered into a table cell. #}
+<details class="lending-history-value">
+  <summary>{{ label }} <small>({{ value|length }} characters)</small></summary>
+  {# Keep the value flush against the tags: whitespace inside a textarea is preserved. #}
+  <textarea readonly rows="{{ rows }}" spellcheck="false">{{ value }}</textarea>
+</details>
