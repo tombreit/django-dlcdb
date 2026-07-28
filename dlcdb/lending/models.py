@@ -8,6 +8,7 @@ from django.template import Template, TemplateSyntaxError
 from simple_history.models import HistoricalRecords
 
 from ..core.models.abstracts import SingletonBaseModel
+from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
 
 
 class LendingConfigurationRegulation(models.Model):
@@ -82,6 +83,7 @@ class LendingProfile(models.Model):
     )
     lending_preparation_checklist = models.TextField(
         blank=True,
+        default=get_starter_lending_preparation_checklist,
         help_text="Basic Markdown supported. '[ ]' converted to checkbox input.",
     )
     mandatory_regulations = models.ManyToManyField(
@@ -92,9 +94,11 @@ class LendingProfile(models.Model):
     )
     lent_sheet_template = models.TextField(
         blank=True,
+        default=get_starter_lent_sheet_template,
         help_text=(
             "Django template syntax. Should {% extends 'lending/printout_base.html' %}. "
-            "Available context: record, lending_profile, sheet_for, pagebreak."
+            "Available context: record, lending_profile. The sheet body and the checklist "
+            "are {% include %}d from 'lending/includes/', parameterized with sheet_for and pagebreak."
         ),
     )
 

@@ -7,7 +7,7 @@ SPDX-License-Identifier: EUPL-1.2
 {% load markdown_extras %}
 
 
-{% if lending_configuration.lending_preparation_checklist %}
+{% if lending_profile.lending_preparation_checklist %}
 <style>
     .checklist {
         font-family: monospace;
@@ -26,7 +26,7 @@ SPDX-License-Identifier: EUPL-1.2
         for {{ record.person }}
     </h2>
     <hr>
-    {{ lending_configuration.lending_preparation_checklist | from_markdown | safe }}
+    {{ lending_profile.lending_preparation_checklist | from_markdown | safe }}
     <hr>
 </div>
 {% endif %}

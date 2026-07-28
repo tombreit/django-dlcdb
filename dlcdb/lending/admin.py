@@ -104,7 +104,8 @@ class LendingProfileAdmin(SimpleHistoryAdmin):
                 "description": (
                     "Django template syntax (HTML). "
                     "Should extend 'lending/printout_base.html'. "
-                    "Available context: record, lending_profile, sheet_for, pagebreak."
+                    "Available context: record, lending_profile. The sheet body and the checklist "
+                    "are included from 'lending/includes/', parameterized with sheet_for and pagebreak."
                 ),
             },
         ),

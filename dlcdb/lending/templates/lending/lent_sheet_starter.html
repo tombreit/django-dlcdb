@@ -1,16 +1,8 @@
-<!--
-SPDX-FileCopyrightText: 2024 Thomas Breitner
+{# Starter content seeded into LendingProfile.lent_sheet_template. Not rendered directly. #}
+{% extends "lending/printout_base.html" %}
 
-SPDX-License-Identifier: EUPL-1.2
--->
-
-{% extends "print_base.html" %}
-
-
-{% block print_extra_css %}
-{% if lending_configuration.lending_preparation_checklist %}
+{% block extra_css %}
 <style>
-
     .pagebreak {
         break-before: page;
     }
@@ -29,7 +21,6 @@ SPDX-License-Identifier: EUPL-1.2
         display: block;
         padding: .5rem 1rem;
         margin: -1rem;
-        margin-bottom: -1rem;
         margin-bottom: 1rem;
         color: #fff;
         background-color: #313131;
@@ -39,17 +30,16 @@ SPDX-License-Identifier: EUPL-1.2
         background-color: #5cb85c;
     }
 </style>
-{% endif %}
 {% endblock %}
 
-{% block main %}
+{% block sheet_content %}
+{% include "lending/includes/lent_sheet.html" with sheet_for="den/die Ausleiher/-in" %}
+{% endblock %}
 
-    {% include 'core/lentrecord/includes/lent_sheet.html' with sheet_for="den/die Ausleiher/-in" %}
+{% block sheet_content_copy %}
+{% include "lending/includes/lent_sheet.html" with sheet_for="das Institut" pagebreak="before" %}
+{% endblock %}
 
-    {% include 'core/lentrecord/includes/interleaf.html' %}
-
-    {% include 'core/lentrecord/includes/lent_sheet.html' with sheet_for="das Institut" pagebreak="before" %}
-
-    {% include 'core/lentrecord/includes/lent_checklist.html' with pagebreak="before" %}
-
+{% block checklist %}
+{% include "lending/includes/lent_checklist.html" with pagebreak="before" %}
 {% endblock %}

@@ -1,0 +1,19 @@
+## Vorbereitung
+
+[ ] Gerät auf Werkseinstellungen zurückgesetzt
+[ ] Betriebssystem installiert und aktualisiert
+[ ] Festplattenverschlüsselung aktiviert
+[ ] Virenschutz eingerichtet
+[ ] Benutzerkonto für die ausleihende Person angelegt
+[ ] Zubehör vollständig (Netzteil, Kabel, Tasche)
+[ ] Äußerer Zustand geprüft und dokumentiert
+
+## Rückgabe
+
+[ ] Zubehör vollständig zurückerhalten
+[ ] Daten gesichert bzw. gelöscht
+[ ] Gerät für die nächste Ausleihe zurückgesetzt
+
+!!! note "Hinweis"
+    Diese Checkliste ist eine Vorlage. Passen Sie sie an die Anforderungen
+    Ihres Standorts und des jeweiligen Gerätetyps an.

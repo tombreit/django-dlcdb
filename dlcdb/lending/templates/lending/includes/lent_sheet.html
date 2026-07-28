@@ -104,10 +104,10 @@ SPDX-License-Identifier: EUPL-1.2
                     <!--Die Ausführung in <b>Anlage 1</b> zum Geräteverleih habe ich zur Kenntnis genommen. -->
                 </p>
 
-                {% if lending_configuration.mandatory_regulations.all %}
+                {% if lending_profile.mandatory_regulations.all %}
                     Ich bestätige, die folgenden Ordnungen zur Kenntnis genommen zu haben:
                     <ul>
-                    {% for regulation in lending_configuration.mandatory_regulations.all %}
+                    {% for regulation in lending_profile.mandatory_regulations.all %}
                     <li style="margin-bottom: 0.5rem;">
                         ☑ {{ regulation.linktext}}
                         <br>
