@@ -365,7 +365,7 @@ def lend(request, pk=None):
         "picker_mode": picker_mode,
         "is_lend_flow": is_lend_flow,
         "is_return_flow": is_return_flow,
-        "title": _("Quick lend")
+        "title": _("Lend")
         if picker_mode
         else (_("Lend device") if record.record_type == Record.INROOM else _("Lending")),
         "obj_admin_url": None if picker_mode else reverse("admin:core_lentrecord_change", args=[record.pk]),

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-22 13:19+0200\n"
-"PO-Revision-Date: 2026-07-22 13:28+0200\n"
+"POT-Creation-Date: 2026-07-28 23:50+0200\n"
+"PO-Revision-Date: 2026-07-28 23:52+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -315,7 +315,7 @@ msgstr "Änderungen speichern"
 #: dlcdb/dataexchange/templates/dataexchange/import.html:46
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:9
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:62
-#: dlcdb/lending/templates/lending/lend.html:214
+#: dlcdb/lending/templates/lending/lend.html:218
 #: dlcdb/licenses/templates/licenses/form_partial.html:81
 #: dlcdb/persons/templates/persons/detail.html:35
 #: dlcdb/persons/templates/persons/form.html:9
@@ -531,8 +531,8 @@ msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
 #: dlcdb/assets/templates/assets/includes/_room_list_item.html:40
 #: dlcdb/lending/templates/lending/includes/_person_list_item.html:57
 #: dlcdb/theme/templates/theme/includes/_picker.html:57
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:97
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:98
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:93
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:94
 msgid "Change"
 msgstr "Ändern"
 
@@ -724,7 +724,7 @@ msgstr "Gerät “{device}” verschoben nach Raum “{room}”."
 #: dlcdb/core/admin/lentrecord_admin.py:107
 #: dlcdb/core/models/prx_lentrecord.py:98 dlcdb/lending/navigation.py:12
 #: dlcdb/lending/templates/lending/index.html:5
-#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:360
+#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:370
 msgid "Lending"
 msgstr "Ausleihe"
 
@@ -879,7 +879,7 @@ msgid "Locate"
 msgstr "Lokalisieren"
 
 #: dlcdb/core/lifecycle.py:102 dlcdb/lending/templates/lending/index.html:13
-#: dlcdb/lending/templates/lending/index.html:79
+#: dlcdb/lending/templates/lending/index.html:79 dlcdb/lending/views.py:368
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -889,8 +889,8 @@ msgstr "Gefunden"
 
 #: dlcdb/core/lifecycle.py:127
 #: dlcdb/theme/templates/theme/includes/_picker.html:58
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:97
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:98
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:93
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:94
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -1666,7 +1666,7 @@ msgstr "Zubehör, Notizen etc."
 msgid "Accessories / condition"
 msgstr "Zubehör/Zustand"
 
-#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:360
+#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:370
 msgid "Lend device"
 msgstr "Gerät verleihen"
 
@@ -1678,6 +1678,10 @@ msgstr "Speichern"
 #: dlcdb/lending/templates/lending/lend.html:209
 msgid "Print lending slip"
 msgstr "Verleihzettel drucken"
+
+#: dlcdb/lending/templates/lending/lend.html:213
+msgid "No lending slip template found. Add one?"
+msgstr "Keine Ausleihschein-Vorlage gefunden. Hinzufügen?"
 
 #: dlcdb/lending/views.py:129
 msgid "Search device, person, note..."
@@ -1699,10 +1703,6 @@ msgstr "Gerät muss zuerst lokalisiert werden."
 #: dlcdb/lending/views.py:313
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
-
-#: dlcdb/lending/views.py:358
-msgid "Quick lend"
-msgstr "Schnellverleih"
 
 #: dlcdb/licenses/apps.py:11
 msgid "License Management"
@@ -2546,19 +2546,19 @@ msgstr "Auto"
 msgid "Open device detail"
 msgstr "Geräte-Details"
 
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:71
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:67
 msgid "EDV"
 msgstr "EDV"
 
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:73
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:69
 msgid "Inv."
 msgstr "Inventar-Nr."
 
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:75
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:71
 msgid "SN"
 msgstr ""
 
-#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:87
+#: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:83
 msgid "No record"
 msgstr "Kein Record"
 
@@ -2585,6 +2585,9 @@ msgstr "Zugriff verweigert."
 #: dlcdb/theme/widgets.py:37 dlcdb/theme/widgets.py:56
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
+
+#~ msgid "Quick lend"
+#~ msgstr "Schnellverleih"
 
 #, fuzzy
 #~| msgid "Back to devices"
