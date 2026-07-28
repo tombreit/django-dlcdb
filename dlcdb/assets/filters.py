@@ -121,6 +121,9 @@ class DeviceFilter(django_filters.FilterSet):
             | Q(manufacturer__name__icontains=value)
             | Q(series__icontains=value)
             | Q(order_number__icontains=value)
+            | Q(active_record__person__first_name__icontains=value)
+            | Q(active_record__person__last_name__icontains=value)
+            | Q(active_record__person__email__icontains=value)
         )
 
     def state_filter(self, queryset, name, value):
