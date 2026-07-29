@@ -192,9 +192,10 @@ SPDX-License-Identifier: EUPL-1.2
     </button>
 
     {% comment %}
-      Prints the slip from the unsaved form data. The print endpoint is keyed
-      on the device pk; in picker mode JS sets formaction once a device is
-      chosen, in record mode it is rendered server-side.
+      Prints the slip from the unsaved form data, in every flow: lending a
+      device and reprinting an active lending. The print endpoint is keyed on
+      the device pk; in picker mode JS sets formaction once a device is chosen,
+      in record mode it is rendered server-side.
     {% endcomment %}
     {% if can_print_slip %}
       <button
@@ -207,7 +208,7 @@ SPDX-License-Identifier: EUPL-1.2
       >
         <i class="bi bi-printer"></i> {% translate "Print lending slip" %}
       </button>
-    {% elif is_lend_flow %}
+    {% elif not picker_mode %}
       <a href="{% url 'admin:lending_lendingprofile_add' %}?device_type={{ device.device_type_id }}" class="btn btn-secondary">
         <i class="bi bi-printer"></i> {% translate "No lending slip template found. Add one?" %}
       </a>

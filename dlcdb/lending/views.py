@@ -340,14 +340,14 @@ def lend(request, pk=None):
     is_lend_flow = picker_mode or record.record_type == Record.INROOM
     is_return_flow = (not picker_mode) and record.record_type == Record.LENT
 
-    # A slip needs the lend flow (print_sheet resolves an INROOM record and 404s
-    # otherwise) *and* a device type whose profile carries a slip template — an
-    # empty one is rejected by the database template loader (see loader.py). In
-    # picker mode the device is chosen client-side, so the button renders
-    # disabled and the inline JS enables it once a device is set.
+    # A slip needs a device type whose profile carries a slip template — an empty
+    # one is rejected by the database template loader (see loader.py). Independent
+    # of the record type: print_sheet renders the submitted form data for an
+    # available device and for an active lending alike. In picker mode the device
+    # is chosen client-side, so the button renders disabled and the inline JS
+    # enables it once a device is set.
     can_print_slip = picker_mode or (
-        record.record_type == Record.INROOM
-        and LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
+        LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
     )
 
     # Carry the index filters through the POST (and any failed-POST re-render) by
@@ -412,15 +412,22 @@ def _build_unsaved_lentrecord(device, form):
 def print_sheet(request, pk):
     """
     Render the "Ausleihzettel" (lending slip) from the *unsaved* form data, so
-    helpdesk can print and have it signed before committing the lending.
+    helpdesk can print and have it signed before committing the lending — and so
+    an active lending can be reprinted with the edits currently on screen.
     Generalizes ``print_lent_sheet`` (below), which renders a saved record.
 
     ``pk`` is the device pk (the device picker's option id); the slip is built
-    from the device's available INROOM record plus the submitted form data.
+    from the device's current record plus the submitted form data.
     """
-    record = _get_scoped_inroom_record(request, pk)
-    if record is None:
-        raise Http404("Device is not available for lending.")
+    # The device's current, tenant-visible record — INROOM (about to be lent) or
+    # LENT (reprint for an active lending). LOST must be located first.
+    record = (
+        _tenant_scoped(LentRecord.objects.select_related("device", "person", "room"), request)
+        .filter(device_id=pk)
+        .first()
+    )
+    if record is None or record.record_type == Record.LOST:
+        raise Http404("No printable lending record for this device.")
     device = record.device
 
     form = LentingForm(request.POST, instance=record, record_type=record.record_type)

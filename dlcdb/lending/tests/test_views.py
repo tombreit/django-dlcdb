@@ -302,13 +302,6 @@ class LendingDetailViewTests(BaseTest):
         self.assertNotContains(response, 'id="quick-lend-print"')
         self.assertContains(response, reverse("admin:lending_lendingprofile_add"))
 
-    def test_return_flow_has_no_print_button(self):
-        # A profile exists, but the return flow cannot print a slip (print_sheet
-        # 404s for non-INROOM records), so the button must be absent.
-        LendingProfile.objects.create(device_type=self.lent_device.device_type, lent_sheet_template="x")
-        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
-        self.assertNotContains(response, 'id="quick-lend-print"')
-
     def test_lend_creates_new_lent_record(self):
         response = self.client.post(
             reverse("lending:detail", args=[self.available_record.pk]),
