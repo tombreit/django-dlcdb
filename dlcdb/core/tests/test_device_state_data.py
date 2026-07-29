@@ -32,12 +32,16 @@ from dlcdb.core.models import (
 )
 from dlcdb.core.tests.testingutils import establish_state
 
-ALL_ADD_PERMISSIONS = [
-    "add_inroomrecord",
-    "add_lentrecord",
-    "add_lostrecord",
-    "add_removedrecord",
-    "add_orderedrecord",
+ALL_LIFECYCLE_PERMISSIONS = [
+    "can_order_device",
+    "can_locate_device",
+    "can_relocate_device",
+    "can_lend_device",
+    "can_lose_device",
+    "can_find_device",
+    "can_remove_device",
+    "can_restore_device",
+    "can_recover_device",
 ]
 
 
@@ -72,13 +76,29 @@ def _offers(state_data, fragment):
 
 
 @pytest.mark.django_db
-def test_device_without_a_record_offers_only_inroom(plain_device, superuser):
+def test_device_without_a_record_offers_every_legal_first_step(plain_device, superuser):
+    """A device with no record can be located, ordered or written off unseen.
+
+    All three are legal from the initial state; a superuser holds every
+    permission, so all three are offered.
+    """
     state_data = plain_device.get_state_data(user=superuser)
 
     assert state_data.label == "No active record"
     assert "disabled" in state_data.css_classes
-    assert len(state_data.actions) == 1
     assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
+    assert _offers(state_data, reverse("admin:core_orderedrecord_add"))
+    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
+    assert len(state_data.actions) == 3
+
+
+@pytest.mark.django_db
+def test_a_record_less_device_offers_only_what_the_user_may_do(plain_device, make_user):
+    """The same device, seen by someone who may only take devices into service."""
+    user = make_user("can_locate_device")
+    state_data = plain_device.get_state_data(user=user)
+
+    assert _targets(state_data) == [f"{reverse('admin:core_inroomrecord_add')}?device={plain_device.pk}"]
 
 
 # --- Current-state badge -------------------------------------------------
@@ -160,9 +180,14 @@ def test_inroom_offers_move_lend_lost_and_removed(lentable_device, room, superus
 
 
 @pytest.mark.django_db
-def test_lent_offers_return_and_lost_but_not_removal(lentable_device, room, superuser):
-    """LENT -> REMOVED is not a legal transition; a lending must be ended first."""
-    establish_state(
+def test_lent_offers_return_loss_and_removal(lentable_device, room, superuser):
+    """Decommissioning a device while it is on loan is legal, so it is offered.
+
+    The return goes to the lending form rather than an InRoomRecord add-view: a
+    return stamps the lending's end date first and only then puts the device
+    back, which creating a room record on its own would not do.
+    """
+    record = establish_state(
         LentRecord,
         device=lentable_device,
         room=room,
@@ -173,13 +198,14 @@ def test_lent_offers_return_and_lost_but_not_removal(lentable_device, room, supe
 
     state_data = lentable_device.get_state_data(user=superuser)
 
-    assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
+    assert _offers(state_data, reverse("admin:core_lentrecord_change", args=[record.pk]))
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
-    assert not _offers(state_data, reverse("admin:core_removedrecord_add"))
+    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
+    assert not _offers(state_data, reverse("admin:core_inroomrecord_add"))
 
 
 @pytest.mark.django_db
-def test_lost_offers_found_and_removal_but_not_lending(lentable_device, superuser):
+def test_lost_offers_found_removal_and_re_marking_but_not_lending(lentable_device, superuser):
     establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
@@ -188,25 +214,45 @@ def test_lost_offers_found_and_removal_but_not_lending(lentable_device, superuse
     assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
     assert _offers(state_data, reverse("admin:core_removedrecord_add"))
     assert not _offers(state_data, "lentrecord")
-    # LOST -> LOST is legal (inventory re-marks a still-missing device) but a
-    # "Not locatable" button on an already-lost device would be noise.
-    assert not _offers(state_data, reverse("admin:core_lostrecord_add"))
+    # LOST -> LOST is legal, so an inventory can re-mark a device that is still
+    # missing. Whether that is worth a button is now the operator's call, made by
+    # granting can_lose_device -- not something the state machine decides.
+    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
 
 
 @pytest.mark.django_db
-def test_removed_is_terminal_and_offers_nothing(lentable_device, superuser):
-    """
-    A decommissioned device is a dead end in the UI.
+def test_removed_offers_the_two_ways_back_to_a_holder_of_both(lentable_device, superuser):
+    """A decommissioned device is no longer a hardcoded dead end.
 
-    Note this asserts that nothing is *offered*, not that no transition exists:
-    ``restore_removed_to_lost`` (superuser bulk action) and the inventory
-    "found again" flow both move devices out of REMOVED today. A consolidated
-    FSM is expected to keep those legal but unsurfaced, which keeps this green.
+    ``restore`` and ``recover`` were always legal -- the superuser bulk action
+    and the inventory "found again" flow both used them -- but nothing surfaced
+    them. They are now offered to whoever holds their permissions, which ship
+    granted to nobody (see ``test_removed_is_still_a_dead_end_for_ordinary_users``).
     """
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
 
-    assert lentable_device.get_state_data(user=superuser).actions == []
+    state_data = lentable_device.get_state_data(user=superuser)
+
+    labels = {action["label"] for action in state_data.actions}
+    assert labels == {"Restore", "Recover"}
+
+
+@pytest.mark.django_db
+def test_removed_is_still_a_dead_end_for_ordinary_users(lentable_device, make_user):
+    """The case the old ``add_<target proxy>`` derivation could not express.
+
+    ``recover`` writes an InRoomRecord and ``restore`` a LostRecord, so they used
+    to be gated by the very permissions an ordinary inventory user needs for
+    everyday work. Now someone who may move and lose devices still cannot bring a
+    decommissioned one back.
+    """
+    RemovedRecord.objects.create(device=lentable_device)
+    lentable_device.refresh_from_db()
+
+    user = make_user("can_relocate_device", "can_lose_device", "can_find_device")
+
+    assert lentable_device.get_state_data(user=user).actions == []
 
 
 # --- Permission gating ---------------------------------------------------
@@ -221,11 +267,11 @@ def test_no_user_means_no_actions(lentable_device, room):
 
 
 @pytest.mark.django_db
-def test_actions_are_gated_by_the_add_permission(lentable_device, room, make_user):
+def test_actions_are_gated_by_the_transition_permission(lentable_device, room, make_user):
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    user = make_user("add_lostrecord")
+    user = make_user("can_lose_device")
     state_data = lentable_device.get_state_data(user=user)
 
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
@@ -234,12 +280,33 @@ def test_actions_are_gated_by_the_add_permission(lentable_device, room, make_use
 
 
 @pytest.mark.django_db
+def test_one_permission_covers_both_lending_and_returning(lentable_device, room, make_user):
+    """``can_lend_device`` is the whole lending competence, both directions."""
+    user = make_user("can_lend_device")
+
+    record = InRoomRecord.objects.create(device=lentable_device, room=room)
+    lentable_device.refresh_from_db()
+    assert [a["label"] for a in lentable_device.get_state_data(user=user).actions] == ["Lend"]
+
+    lending = establish_state(
+        LentRecord,
+        device=lentable_device,
+        room=room,
+        lent_start_date=datetime.date(2026, 1, 1),
+        lent_desired_end_date=datetime.date(2099, 1, 1),
+    )
+    lentable_device.refresh_from_db()
+    assert [a["label"] for a in lentable_device.get_state_data(user=user).actions] == ["Return"]
+    assert record.pk != lending.pk
+
+
+@pytest.mark.django_db
 def test_non_lentable_devices_are_never_offered_lending(room, make_user):
     device = Device.objects.create(edv_id="EDV-NOLEND", is_lentable=False)
     InRoomRecord.objects.create(device=device, room=room)
     device.refresh_from_db()
 
-    user = make_user(*ALL_ADD_PERMISSIONS)
+    user = make_user(*ALL_LIFECYCLE_PERMISSIONS)
     state_data = device.get_state_data(user=user)
 
     assert not _offers(state_data, "lentrecord")
@@ -275,6 +342,64 @@ def test_assets_rewrites_lend_to_the_native_lending_view(lentable_device, room, 
     assert len(lend) == 1
     assert lend[0]["url"] == reverse("lending:detail", args=[record.pk])
     assert lend[0]["external"] is False
+
+
+@pytest.mark.django_db
+def test_assets_keeps_each_move_labelled_as_itself(lentable_device, room, superuser):
+    """Routing is by transition name, so the moves that end in a room keep their
+    own labels instead of all reading "Move"."""
+    establish_state(LostRecord, device=lentable_device)
+    lentable_device.refresh_from_db()
+
+    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+
+    found = [a for a in state_data.actions if a["url"].startswith(reverse("assets:relocate"))]
+    assert len(found) == 1
+    assert found[0]["label"] == "Found"
+    assert found[0]["external"] is False
+
+
+@pytest.mark.django_db
+def test_recovery_does_not_route_into_the_move_module(lentable_device, superuser):
+    """The Move module's picker excludes REMOVED devices.
+
+    ``assets.pickers.MOVEABLE_RECORD_TYPES`` restates the moveable states by
+    hand, so sending a recovery there yields a form that rejects the device
+    ("not a valid choice"). Recovery goes to the admin add-view instead, which
+    the lifecycle accepts. If that picker is ever derived from the transition
+    table, this can move back into the Move module.
+    """
+    RemovedRecord.objects.create(device=lentable_device)
+    lentable_device.refresh_from_db()
+
+    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+
+    recover = [a for a in state_data.actions if a["label"] == "Recover"]
+    assert len(recover) == 1
+    assert recover[0]["url"].startswith(reverse("admin:core_inroomrecord_add"))
+    assert recover[0]["external"] is True
+    assert not _offers(state_data, reverse("assets:relocate"))
+
+
+@pytest.mark.django_db
+def test_assets_routes_a_return_to_the_lending_form(lentable_device, room, superuser):
+    """A return is not a relocation -- it must not land in the "Move" module."""
+    record = establish_state(
+        LentRecord,
+        device=lentable_device,
+        room=room,
+        lent_start_date=datetime.date(2026, 1, 1),
+        lent_desired_end_date=datetime.date(2099, 1, 1),
+    )
+    lentable_device.refresh_from_db()
+
+    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+
+    returns = [a for a in state_data.actions if a["label"] == "Return"]
+    assert len(returns) == 1
+    assert returns[0]["url"] == reverse("lending:detail", args=[record.pk])
+    assert returns[0]["external"] is False
+    assert not _offers(state_data, reverse("assets:relocate"))
 
 
 @pytest.mark.django_db

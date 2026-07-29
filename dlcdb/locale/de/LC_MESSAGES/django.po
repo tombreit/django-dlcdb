@@ -900,7 +900,7 @@ msgstr "Wiederherstellen"
 
 #: dlcdb/core/lifecycle.py:131
 msgid "Recover"
-msgstr "Recover"
+msgstr "Wiedereingliedern"
 
 #: dlcdb/core/lifecycle.py:234
 #, python-format

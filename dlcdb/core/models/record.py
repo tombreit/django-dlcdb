@@ -193,6 +193,23 @@ class Record(AuditBaseModel):
     class Meta:
         verbose_name = "Record"
         verbose_name_plural = "Records"
+        # One permission per lifecycle transition (see ``dlcdb.core.lifecycle``),
+        # which is what decides whether a user is offered that action. They are
+        # declared here rather than relying on the proxies' ``add_*`` permissions
+        # because five proxies cannot express ten distinct moves. The labels are
+        # what an operator reads in the admin permission picker, so they say what
+        # the move does rather than which record it writes.
+        permissions = [
+            ("can_order_device", "Can record a device as ordered"),
+            ("can_locate_device", "Can localise a device for the first time"),
+            ("can_relocate_device", "Can move a device to another room"),
+            ("can_lend_device", "Can lend a device and take it back"),
+            ("can_lose_device", "Can mark a device as not locatable"),
+            ("can_find_device", "Can mark a lost device as found"),
+            ("can_remove_device", "Can remove (decommission) a device"),
+            ("can_restore_device", "Can restore a removed device to not-locatable"),
+            ("can_recover_device", "Can recover a removed device into a room"),
+        ]
         constraints = [
             models.CheckConstraint(
                 name="%(app_label)s_%(class)s_valid_record_type_required",

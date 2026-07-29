@@ -15,8 +15,17 @@ It has three parts:
    proxy model that writes it. ``None`` is the implicit initial state (a device
    with no record yet).
 2. **The transition table** (``TRANSITIONS``) -- named moves, each listing the
-   states it may start from. "Which states may follow this one" is *derived* from
-   this table (``transitions_from``), never written down a second time.
+   states it may start from and the permission that lets a user make the move.
+   "Which states may follow this one" is *derived* from this table
+   (``transitions_from``), never written down a second time.
+
+   Note the two separate questions the table answers. *Legality* -- may this move
+   happen at all -- is fixed here in ``sources``/``target`` and enforced on every
+   write. *Offering* -- is this user invited to make it -- is deployment policy,
+   so it lives in ``permission`` and is administered per group in the Django
+   admin. Earlier versions hardcoded the offering as ``offered`` /
+   ``not_offered_from`` flags; those are gone, and a transition no operator should
+   see is now expressed by granting its permission to nobody.
 3. **The transition functions** (``transition_*``) -- one per table row, the only
    sanctioned way to append a record. They check the source state, then let the
    proxy model do the actual writing (the proxies already stamp ``record_type``,
@@ -85,50 +94,69 @@ class Transition:
     sources: tuple  # legal source state keys; None == "device has no record yet"
     target: str  # a STATES key -- its proxy does the writing
     label: str  # gettext_lazy; the *action* ("Lend", "Move")
-    offered: bool = True  # surfaced as a UI action button at all?
-    not_offered_from: tuple = ()  # sources where it is legal but NOT surfaced as a button
-    permission: str | None = None  # defaults to "core.add_<target proxy>"
+    permission: str  # the permission that lets a user make this move; see Record.Meta
     device_precondition: Q | None = None  # a Q on Device that must hold for the transition
 
 
+# Every row carries its own permission, declared in ``Record.Meta.permissions``.
+# They are deliberately *not* derived from the target state's proxy model: five
+# proxies cannot express ten distinct moves, and the collisions are exactly the
+# ones that matter -- relocate, locate, find and recover all write an
+# InRoomRecord, so "may move a device" and "may un-remove a device" would be the
+# same grant. ``lend`` and ``return_lending`` do share a permission, because
+# handing a device out and taking it back are one competence.
 TRANSITIONS = (
-    Transition(name="order", sources=(None,), target=ORDERED, label=_("Order"), offered=False),
-    Transition(name="locate", sources=(None, ORDERED), target=INROOM, label=_("Locate")),
-    Transition(name="relocate", sources=(INROOM,), target=INROOM, label=_("Move")),
+    Transition(name="order", sources=(None,), target=ORDERED, label=_("Order"), permission="core.can_order_device"),
+    Transition(
+        name="locate", sources=(None, ORDERED), target=INROOM, label=_("Locate"), permission="core.can_locate_device"
+    ),
+    Transition(
+        name="relocate", sources=(INROOM,), target=INROOM, label=_("Move"), permission="core.can_relocate_device"
+    ),
     Transition(
         name="lend",
         sources=(INROOM,),
         target=LENT,
         label=_("Lend"),
+        permission="core.can_lend_device",
         # Lendability is decided by is_lentable alone: a device flagged lentable
         # can be lent even if it is a licence.
         device_precondition=Q(is_lentable=True),
     ),
-    Transition(name="return_lending", sources=(LENT,), target=INROOM, label=_("Return")),
-    # Legal from LOST so the inventory can re-mark a still-missing device, but not
-    # offered there -- a "Not locatable" button on an already-lost device is noise.
+    Transition(
+        name="return_lending",
+        sources=(LENT,),
+        target=INROOM,
+        label=_("Return"),
+        permission="core.can_lend_device",
+    ),
+    # Legal from LOST too, so an inventory can re-mark a device that is still missing.
     Transition(
         name="lose",
         sources=(INROOM, LENT, LOST),
         target=LOST,
         label=_("Not locatable"),
-        not_offered_from=(LOST,),
+        permission="core.can_lose_device",
     ),
-    Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found")),
+    Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found"), permission="core.can_find_device"),
     # A device can be decommissioned from any live state, and also straight away
-    # (source None) -- the bulk remover imports bare devices that never got a
-    # record. Removing a lent device (decommission while on loan) is legal but
-    # only via the admin, and a record-less device only offers "locate" on the
-    # frontend, so LENT and None are legal-but-not-offered.
+    # (source None) -- the bulk remover imports bare devices that never got a record.
     Transition(
         name="remove",
         sources=(None, INROOM, LENT, LOST, ORDERED),
         target=REMOVED,
         label=_("Remove"),
-        not_offered_from=(None, LENT),
+        permission="core.can_remove_device",
     ),
-    Transition(name="restore", sources=(REMOVED,), target=LOST, label=_("Restore"), offered=False),
-    Transition(name="recover", sources=(REMOVED,), target=INROOM, label=_("Recover"), offered=False),
+    # The two ways out of REMOVED. Their permissions ship granted to nobody, which
+    # is what keeps a decommissioned device a dead end unless an operator decides
+    # otherwise.
+    Transition(
+        name="restore", sources=(REMOVED,), target=LOST, label=_("Restore"), permission="core.can_restore_device"
+    ),
+    Transition(
+        name="recover", sources=(REMOVED,), target=INROOM, label=_("Recover"), permission="core.can_recover_device"
+    ),
 )
 
 BY_NAME = {t.name: t for t in TRANSITIONS}
@@ -152,27 +180,18 @@ def can_transition(from_state, to_state):
     return any(t.target == to_state for t in transitions_from(from_state))
 
 
-def offered_transitions_from(state):
-    """The transitions surfaced as UI action buttons from ``state``.
-
-    A transition is offered when it is ``offered`` at all and ``state`` is not in
-    its ``not_offered_from`` (e.g. ``remove`` is legal from LENT but not offered
-    there -- a lent device is returned or lost, not removed, from the frontend).
-    """
-    return tuple(t for t in transitions_from(state) if t.offered and state not in t.not_offered_from)
-
-
 def proxy_for(state):
     """The proxy model class that writes ``state``."""
     return apps.get_model(STATES[state].proxy)
 
 
 def permission_for(transition):
-    """The permission string guarding ``transition`` (explicit, or derived from the target proxy)."""
-    if transition.permission:
-        return transition.permission
-    proxy = proxy_for(transition.target)
-    return f"{proxy._meta.app_label}.add_{proxy._meta.model_name}"
+    """The permission string guarding ``transition``.
+
+    Every row declares its own; nothing is derived. Kept as a function because it
+    is the seam the UI and the tests go through.
+    """
+    return transition.permission
 
 
 def device_precondition_met(device, transition):
@@ -186,13 +205,17 @@ def device_precondition_met(device, transition):
 def available(device, *, user=None):
     """The transitions offered to ``user`` on ``device`` right now.
 
-    A transition is available when it is ``offered`` from the current state, the
-    user holds its permission, and the device satisfies its
-    ``device_precondition``. This is the single gate for rendering transition
-    actions in any UI (see ``core.utils.device_methods``).
+    A transition is available when it is legal from the current state, the user
+    holds its permission, and the device satisfies its ``device_precondition``.
+    Those three conditions are the whole rule -- there is no separate notion of a
+    move being legal but deliberately unsurfaced. This is the single gate for
+    rendering transition actions in any UI (see ``core.utils.device_methods``).
+
+    Note that a superuser passes every permission check, and so is offered every
+    legal transition from the current state.
     """
     result = []
-    for transition in offered_transitions_from(state_of(device)):
+    for transition in transitions_from(state_of(device)):
         if not (user and user.has_perm(permission_for(transition))):
             continue
         if not device_precondition_met(device, transition):
@@ -378,8 +401,7 @@ def transition_find(device, *, room, user, inventory=None, note=""):
 
 def transition_remove(device, *, user, disposition_state="", removed_info="", note="", removed_date=None):
     """Any state (including a device with no record yet) -> REMOVED. Decommission
-    the device (sold, scrapped, ...). See the transition table for which sources
-    are offered on the frontend."""
+    the device (sold, scrapped, ...)."""
     check(device, "remove")
     RemovedRecord = apps.get_model("core.RemovedRecord")
     return RemovedRecord.objects.create(

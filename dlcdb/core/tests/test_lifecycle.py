@@ -86,25 +86,61 @@ def test_legality_matrix_covers_every_state_pair():
         assert set(row) == set(lifecycle.RECORD_TYPE_KEYS)
 
 
-# --- Offering vs legality -----------------------------------------------
+# --- Offering is permissions, and nothing else ---------------------------
+# Whether a legal move is surfaced used to be hardcoded here as ``offered`` /
+# ``not_offered_from`` flags. It is now entirely a question of who holds the
+# transition's permission, so what these tests pin is the declaration itself --
+# that every row names a permission, and that the permissions it names are ones
+# the project actually creates. A typo'd permission string fails closed: the
+# button silently disappears for everyone, which no other test would catch.
 
 
-def test_remove_is_legal_from_lent_but_not_offered_there():
-    assert lifecycle.can_transition(lifecycle.LENT, lifecycle.REMOVED)
-    offered_targets = {t.target for t in lifecycle.offered_transitions_from(lifecycle.LENT)}
-    assert lifecycle.REMOVED not in offered_targets
+def test_every_transition_declares_a_permission():
+    for t in lifecycle.TRANSITIONS:
+        assert t.permission, f"transition {t.name!r} has no permission"
+        assert t.permission.startswith("core."), f"transition {t.name!r} has an unscoped permission"
 
 
-def test_removed_offers_nothing():
-    assert lifecycle.offered_transitions_from(lifecycle.REMOVED) == ()
+def test_permission_for_returns_the_declared_permission():
+    for t in lifecycle.TRANSITIONS:
+        assert lifecycle.permission_for(t) == t.permission
 
 
-def test_lose_is_legal_from_lost_but_not_offered_there():
-    """The inventory may re-mark a still-missing device as lost (LOST -> LOST),
-    but an already-lost device gets no "Not locatable" button."""
-    assert lifecycle.can_transition(lifecycle.LOST, lifecycle.LOST)
-    offered_targets = {t.target for t in lifecycle.offered_transitions_from(lifecycle.LOST)}
-    assert lifecycle.LOST not in offered_targets
+def test_lending_and_returning_share_one_permission():
+    """Handing a device out and taking it back are one competence."""
+    assert lifecycle.BY_NAME["lend"].permission == lifecycle.BY_NAME["return_lending"].permission
+
+
+def test_the_ways_out_of_removed_have_permissions_of_their_own():
+    """The point of the whole exercise.
+
+    ``restore`` and ``recover`` write a LostRecord and an InRoomRecord, so under
+    the old ``add_<target proxy>`` derivation they were indistinguishable from
+    ``lose`` and ``relocate`` -- anyone who could move a device could un-remove
+    one. Nothing else may share their permissions.
+    """
+    exclusive = {lifecycle.BY_NAME["restore"].permission, lifecycle.BY_NAME["recover"].permission}
+    others = {t.permission for t in lifecycle.TRANSITIONS if t.name not in {"restore", "recover"}}
+    assert not exclusive & others
+
+
+def test_transition_permissions_are_declared_on_the_record_model():
+    """Every permission the table names is one ``Record.Meta`` actually creates."""
+    declared = {f"core.{codename}" for codename, _ in Record._meta.permissions}
+    referenced = {t.permission for t in lifecycle.TRANSITIONS}
+    assert referenced <= declared, f"undeclared: {sorted(referenced - declared)}"
+
+
+@pytest.mark.django_db
+def test_transition_permissions_exist_in_the_database():
+    """The declaration is not enough -- the rows must be there to be granted."""
+    from django.contrib.auth.models import Permission
+
+    for t in lifecycle.TRANSITIONS:
+        codename = t.permission.removeprefix("core.")
+        assert Permission.objects.filter(codename=codename, content_type__app_label="core").exists(), (
+            f"transition {t.name!r} names {t.permission!r}, which no Permission row provides"
+        )
 
 
 # --- Enforcement ---------------------------------------------------------

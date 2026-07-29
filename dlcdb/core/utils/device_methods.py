@@ -9,6 +9,21 @@ from django.utils.translation import gettext_lazy as _
 from .. import lifecycle
 from ..models.record import Record
 
+# The transitions the assets frontend serves with its own "Move" module rather
+# than an admin add-view. The module works out which one applies from the
+# device's current state (see ``lifecycle.localise``).
+#
+# ``recover`` is deliberately absent even though it also ends with the device in
+# a room: the Move module's device picker is scoped by
+# ``assets.pickers.MOVEABLE_RECORD_TYPES``, which restates the moveable states by
+# hand and excludes REMOVED, so the view rejects the device before the lifecycle
+# ever sees it. Recovery therefore goes to the admin add-view, which works.
+# ``locate`` has the same gap for its ORDERED source (the picker admits only
+# record-less devices), which is why deriving that picker from the transition
+# table is worth doing -- until then, do not add a transition here without
+# checking it against ``MOVEABLE_RECORD_TYPES``.
+RELOCATE_TRANSITIONS = {"locate", "relocate", "find"}
+
 
 @dataclass
 class DeviceStateData:
@@ -99,12 +114,17 @@ def get_device_state_data(device, *, user=None, app_name=None):
         action_label = transition.label
         external = True
 
-        if transition.target == Record.INROOM and app_name == "assets":
-            # Native "Move" module (single-device prefill via ?device=).
+        # Routing is by transition *name*, not by target state: four different
+        # moves write an InRoomRecord, and dispatching on the target would
+        # collapse them into one button -- labelling a device's recovery from
+        # decommission as "Move", say. The label always stays the transition's own.
+        if transition.name in RELOCATE_TRANSITIONS and app_name == "assets":
+            # Native "Move" module (single-device prefill via ?device=). It
+            # dispatches through ``lifecycle.localise``, which picks the right
+            # transition for the device's current state.
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
-            action_label = _("Move")
             external = False
-        elif transition.target == Record.LENT:
+        elif transition.name == "lend":
             if app_name == "assets" and active_record:
                 # Native frontend lending flow. LENT is only reachable from an
                 # INROOM active record, so active_record.pk is always valid here.
@@ -112,6 +132,16 @@ def get_device_state_data(device, *, user=None, app_name=None):
                 external = False
             else:
                 action_url = f"{reverse('admin:core_lentrecord_changelist')}?q={device.uuid}"
+        elif transition.name == "return_lending":
+            # Returning is not a relocation: it stamps the lending's end date and
+            # only then puts the device back. Both surfaces route to the lending
+            # form that does that. The source state is LENT, so active_record is
+            # always the lending in question.
+            if app_name == "assets":
+                action_url = reverse("lending:detail", args=[active_record.pk])
+                external = False
+            else:
+                action_url = reverse("admin:core_lentrecord_change", args=[active_record.pk])
 
         actions.append(
             {

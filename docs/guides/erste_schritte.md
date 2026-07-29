@@ -15,7 +15,7 @@
    * *Can delete*
    * *Can view*
 
-   Zudem existieren spezielle Berechtigungen, z.B. zum Durchführen von Inventuren (*Can inventorize*)
+   Zudem existieren spezielle Berechtigungen, z.B. zum Durchführen von Inventuren (*Can inventorize*) sowie für die einzelnen Statuswechsel eines Geräts (siehe [Statuswechsel über Berechtigungen steuern](#statuswechsel-uber-berechtigungen-steuern)).
 
 1. User einrichten + Gruppen zuordnen
 
@@ -76,6 +76,42 @@ Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem 
 
 :::{tip}
 Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **gespiegelten Gruppen** zu (siehe LDAP-Hinweis oben unter „Benutzer, Gruppen und Tenants einrichten“). Manuell in der DLCDB angelegte Gruppenzugehörigkeiten können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.
+:::
+
+## Statuswechsel über Berechtigungen steuern
+
+Welche Statuswechsel (*Records*) einem Benutzer für ein Gerät angeboten werden, ist an Berechtigungen gebunden. Jeder Übergang im Gerätelebenszyklus hat eine eigene Berechtigung; angeboten wird ein Übergang genau dann, wenn er vom aktuellen Status aus überhaupt zulässig ist **und** der Benutzer die zugehörige Berechtigung besitzt.
+
+Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktionen eine Gruppe im Alltag sieht. Alle Berechtigungen sind in der Gruppen-Auswahl unter **Core | record** gelistet.
+
+| Aktion | Übergang | Berechtigung (Django-Admin-Anzeige) | codename |
+|---|---|---|---|
+| Bestellt | *(kein Record)* → Bestellt | Core \| record \| Can record a device as ordered | `core.can_order_device` |
+| Lokalisieren | *(kein Record)*/Bestellt → Im Raum | Core \| record \| Can localise a device for the first time | `core.can_locate_device` |
+| Umziehen | Im Raum → Im Raum | Core \| record \| Can move a device to another room | `core.can_relocate_device` |
+| Verleihen und Zurücknehmen | Im Raum ↔ Verliehen | Core \| record \| Can lend a device and take it back | `core.can_lend_device` |
+| Nicht auffindbar | Im Raum/Verliehen/Nicht auffindbar → Nicht auffindbar | Core \| record \| Can mark a device as not locatable | `core.can_lose_device` |
+| Wiedergefunden | Nicht auffindbar → Im Raum | Core \| record \| Can mark a lost device as found | `core.can_find_device` |
+| Ausmustern | fast jeder Status → Entfernt | Core \| record \| Can remove (decommission) a device | `core.can_remove_device` |
+| Ausmusterung rückgängig | Entfernt → Nicht auffindbar | Core \| record \| Can restore a removed device to not-locatable | `core.can_restore_device` |
+| Wiedereingliedern | Entfernt → Im Raum | Core \| record \| Can recover a removed device into a room | `core.can_recover_device` |
+
+:::{warning}
+**Superuser sehen alle zulässigen Statuswechsel** – auch die beiden Wege aus dem Status *Entfernt* heraus. Zum Prüfen einer Rechtevergabe daher immer einen **Nicht-Superuser** verwenden.
+:::
+
+:::{admonition} **Ausmusterung rückgängig machen**
+:class: note
+
+`can_restore_device` und `can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**. Ein ausgemustertes Gerät ist damit standardmäßig ein Endpunkt. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst zu – üblicherweise nur einer eng gefassten Gruppe.
+
+Beide Übergänge waren technisch immer zulässig (Inventur, Superuser-Aktion im Admin), wurden bisher aber nirgends angeboten.
+:::
+
+:::{admonition} **Umstellung bestehender Installationen**
+:class: note
+
+Früher wurden Statuswechsel über die *Can add*-Berechtigung des jeweils geschriebenen Records gesteuert (z.B. `core.add_inroomrecord`). Bei der Migration erhalten alle Gruppen und Benutzer automatisch die neuen Berechtigungen, die ihren bisherigen Rechten entsprechen – niemand verliert oder gewinnt dabei eine Fähigkeit. Die alten `add_*`-Berechtigungen bleiben bestehen, steuern die angebotenen Statuswechsel aber nicht mehr.
 :::
 
 ## Branding
