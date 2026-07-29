@@ -49,22 +49,41 @@ def test_transition_targets_are_valid_states():
 
 # --- can_transition matrix ----------------------------------------------
 
+# The complete legality graph, written out by hand rather than derived from
+# ``TRANSITIONS`` -- a test that computes its expectation from the code under
+# test would pass no matter how that code changed. Every one of the 6 sources
+# (``None`` plus the five states) is crossed with every one of the 5 targets, so
+# there is no pair this table leaves unsaid.
+#
+# This is the *legality* contract, not the *offering* contract: which of these
+# moves a given user is invited to make is decided separately, by permissions.
+# Changing a cell here changes what the database will accept. Do not edit it to
+# make another test pass.
+LEGALITY_MATRIX = {
+    #  from            ORDERED  INROOM   LENT    LOST   REMOVED
+    None: {"ORDERED": True, "INROOM": True, "LENT": False, "LOST": False, "REMOVED": True},
+    "ORDERED": {"ORDERED": False, "INROOM": True, "LENT": False, "LOST": False, "REMOVED": True},
+    "INROOM": {"ORDERED": False, "INROOM": True, "LENT": True, "LOST": True, "REMOVED": True},
+    "LENT": {"ORDERED": False, "INROOM": True, "LENT": False, "LOST": True, "REMOVED": True},
+    "LOST": {"ORDERED": False, "INROOM": True, "LENT": False, "LOST": True, "REMOVED": True},
+    "REMOVED": {"ORDERED": False, "INROOM": True, "LENT": False, "LOST": True, "REMOVED": False},
+}
+
 
 @pytest.mark.parametrize(
     "frm, to, allowed",
-    [
-        (None, lifecycle.INROOM, True),  # locate
-        (None, lifecycle.LENT, False),  # cannot lend a device with no record
-        (lifecycle.INROOM, lifecycle.LENT, True),  # lend
-        (lifecycle.LENT, lifecycle.INROOM, True),  # return
-        (lifecycle.LENT, lifecycle.REMOVED, True),  # decommission while lent (admin)
-        (lifecycle.REMOVED, lifecycle.INROOM, True),  # recover (inventory)
-        (lifecycle.REMOVED, lifecycle.LENT, False),  # cannot lend a removed device
-        (lifecycle.LOST, lifecycle.LENT, False),  # cannot lend a lost device
-    ],
+    [(frm, to, allowed) for frm, row in LEGALITY_MATRIX.items() for to, allowed in row.items()],
 )
 def test_can_transition_matrix(frm, to, allowed):
     assert lifecycle.can_transition(frm, to) is allowed
+
+
+def test_legality_matrix_covers_every_state_pair():
+    """The matrix above is exhaustive -- if a state is ever added, this fails
+    until the new row and column are filled in."""
+    assert set(LEGALITY_MATRIX) == {None, *lifecycle.RECORD_TYPE_KEYS}
+    for row in LEGALITY_MATRIX.values():
+        assert set(row) == set(lifecycle.RECORD_TYPE_KEYS)
 
 
 # --- Offering vs legality -----------------------------------------------
