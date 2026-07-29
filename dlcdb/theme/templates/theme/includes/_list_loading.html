@@ -16,10 +16,12 @@ while opacity is still 0 and the fade never starts. Inline wins over htmx's own
 {% endcomment %}
 <div class="htmx-indicator position-absolute top-0 start-0 w-100 h-100 bg-body bg-opacity-75 pe-none"
      style="z-index:5; transition:opacity 150ms ease-in 400ms" aria-hidden="true">
-  {# Centering lives on this wrapper: the spinner element must carry no `transform`
-     utility (e.g. translate-middle-x), because Bootstrap sets those `!important`,
-     and an !important transform overrides the spinner-border rotate animation —
-     freezing the spinner. Flexbox centers it without touching transform. #}
+    {% comment %}
+      Centering lives on this wrapper: the spinner element must carry no `transform`
+      utility (e.g. translate-middle-x), because Bootstrap sets those `!important`,
+      and an !important transform overrides the spinner-border rotate animation —
+      freezing the spinner. Flexbox centers it without touching transform.
+    {% endcomment %}
   <div class="position-sticky d-flex justify-content-center" style="top:40vh">
     <span class="spinner-border text-secondary" role="status">
       <span class="visually-hidden">{% translate "Loading..." %}</span>
