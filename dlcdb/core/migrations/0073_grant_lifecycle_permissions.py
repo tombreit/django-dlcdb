@@ -14,7 +14,7 @@ old scheme was coarser than the new one it is resolved *downwards*, never
 upwards -- a migration must not hand anyone a capability they did not have:
 
 * ``return_lending`` used to be gated on ``add_inroomrecord`` (its target is
-  INROOM) but now shares ``can_lend_device`` with ``lend``. It is migrated from
+  INROOM) but now shares ``transition_can_lend_device`` with ``lend``. It is migrated from
   ``add_lentrecord``, the narrower of the two. Someone who could move devices but
   not lend them therefore loses the Return button rather than gaining the Lend
   one.
@@ -29,27 +29,28 @@ from django.db import migrations
 
 # new codename -> the old permission whose holders should receive it
 MAPPING = {
-    "can_order_device": "add_orderedrecord",
-    "can_locate_device": "add_inroomrecord",
-    "can_relocate_device": "add_inroomrecord",
-    "can_find_device": "add_inroomrecord",
-    "can_lend_device": "add_lentrecord",
-    "can_lose_device": "add_lostrecord",
-    "can_remove_device": "add_removedrecord",
-    # can_restore_device and can_recover_device: deliberately nobody, see above.
+    "transition_can_order_device": "add_orderedrecord",
+    "transition_can_locate_device": "add_inroomrecord",
+    "transition_can_relocate_device": "add_inroomrecord",
+    "transition_can_find_device": "add_inroomrecord",
+    "transition_can_lend_device": "add_lentrecord",
+    "transition_can_lose_device": "add_lostrecord",
+    "transition_can_remove_device": "add_removedrecord",
+    # transition_can_restore_device and transition_can_recover_device:
+    # deliberately nobody, see above.
 }
 
 # Must match Record.Meta.permissions.
 NEW_PERMISSIONS = [
-    ("can_order_device", "Can record a device as ordered"),
-    ("can_locate_device", "Can localise a device for the first time"),
-    ("can_relocate_device", "Can move a device to another room"),
-    ("can_lend_device", "Can lend a device and take it back"),
-    ("can_lose_device", "Can mark a device as not locatable"),
-    ("can_find_device", "Can mark a lost device as found"),
-    ("can_remove_device", "Can remove (decommission) a device"),
-    ("can_restore_device", "Can restore a removed device to not-locatable"),
-    ("can_recover_device", "Can recover a removed device into a room"),
+    ("transition_can_order_device", "Transition: Can record a device as ordered"),
+    ("transition_can_locate_device", "Transition: Can localise a device for the first time"),
+    ("transition_can_relocate_device", "Transition: Can move a device to another room"),
+    ("transition_can_lend_device", "Transition: Can lend a device and take it back"),
+    ("transition_can_lose_device", "Transition: Can mark a device as not locatable"),
+    ("transition_can_find_device", "Transition: Can mark a lost device as found"),
+    ("transition_can_remove_device", "Transition: Can remove (decommission) a device"),
+    ("transition_can_restore_device", "Transition: Can restore a removed device to not-locatable"),
+    ("transition_can_recover_device", "Transition: Can recover a removed device into a room"),
 ]
 
 

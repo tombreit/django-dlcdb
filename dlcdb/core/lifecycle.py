@@ -106,19 +106,29 @@ class Transition:
 # same grant. ``lend`` and ``return_lending`` do share a permission, because
 # handing a device out and taking it back are one competence.
 TRANSITIONS = (
-    Transition(name="order", sources=(None,), target=ORDERED, label=_("Order"), permission="core.can_order_device"),
     Transition(
-        name="locate", sources=(None, ORDERED), target=INROOM, label=_("Locate"), permission="core.can_locate_device"
+        name="order", sources=(None,), target=ORDERED, label=_("Order"), permission="core.transition_can_order_device"
     ),
     Transition(
-        name="relocate", sources=(INROOM,), target=INROOM, label=_("Move"), permission="core.can_relocate_device"
+        name="locate",
+        sources=(None, ORDERED),
+        target=INROOM,
+        label=_("Locate"),
+        permission="core.transition_can_locate_device",
+    ),
+    Transition(
+        name="relocate",
+        sources=(INROOM,),
+        target=INROOM,
+        label=_("Move"),
+        permission="core.transition_can_relocate_device",
     ),
     Transition(
         name="lend",
         sources=(INROOM,),
         target=LENT,
         label=_("Lend"),
-        permission="core.can_lend_device",
+        permission="core.transition_can_lend_device",
         # Lendability is decided by is_lentable alone: a device flagged lentable
         # can be lent even if it is a licence.
         device_precondition=Q(is_lentable=True),
@@ -128,7 +138,7 @@ TRANSITIONS = (
         sources=(LENT,),
         target=INROOM,
         label=_("Return"),
-        permission="core.can_lend_device",
+        permission="core.transition_can_lend_device",
     ),
     # Legal from LOST too, so an inventory can re-mark a device that is still missing.
     Transition(
@@ -136,9 +146,11 @@ TRANSITIONS = (
         sources=(INROOM, LENT, LOST),
         target=LOST,
         label=_("Not locatable"),
-        permission="core.can_lose_device",
+        permission="core.transition_can_lose_device",
     ),
-    Transition(name="find", sources=(LOST,), target=INROOM, label=_("Found"), permission="core.can_find_device"),
+    Transition(
+        name="find", sources=(LOST,), target=INROOM, label=_("Found"), permission="core.transition_can_find_device"
+    ),
     # A device can be decommissioned from any live state, and also straight away
     # (source None) -- the bulk remover imports bare devices that never got a record.
     Transition(
@@ -146,16 +158,24 @@ TRANSITIONS = (
         sources=(None, INROOM, LENT, LOST, ORDERED),
         target=REMOVED,
         label=_("Remove"),
-        permission="core.can_remove_device",
+        permission="core.transition_can_remove_device",
     ),
     # The two ways out of REMOVED. Their permissions ship granted to nobody, which
     # is what keeps a decommissioned device a dead end unless an operator decides
     # otherwise.
     Transition(
-        name="restore", sources=(REMOVED,), target=LOST, label=_("Restore"), permission="core.can_restore_device"
+        name="restore",
+        sources=(REMOVED,),
+        target=LOST,
+        label=_("Restore"),
+        permission="core.transition_can_restore_device",
     ),
     Transition(
-        name="recover", sources=(REMOVED,), target=INROOM, label=_("Recover"), permission="core.can_recover_device"
+        name="recover",
+        sources=(REMOVED,),
+        target=INROOM,
+        label=_("Recover"),
+        permission="core.transition_can_recover_device",
     ),
 )
 

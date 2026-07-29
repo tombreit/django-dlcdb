@@ -53,7 +53,7 @@ Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem 
 |---|---|---|
 | Ausleihe (Hauptmenü) | Core \| lent record \| Can view lent record | `core.view_lentrecord` |
 | Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
-| Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.can_locate_device`, `core.can_relocate_device` oder `core.can_find_device` |
+| Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.transition_can_locate_device`, `core.transition_can_relocate_device` oder `core.transition_can_find_device` |
 | Inventarisieren (Hauptmenü) | Core \| … \| Can inventorize | `core.can_inventorize` |
 | Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
 | Lizenzen (Hauptmenü) | *nur Anmeldung erforderlich* | — |
@@ -86,15 +86,15 @@ Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktio
 
 | Aktion | Übergang | Berechtigung (Django-Admin-Anzeige) | codename |
 |---|---|---|---|
-| Bestellt | *(kein Record)* → Bestellt | Core \| record \| Can record a device as ordered | `core.can_order_device` |
-| Lokalisieren | *(kein Record)*/Bestellt → Im Raum | Core \| record \| Can localise a device for the first time | `core.can_locate_device` |
-| Umziehen | Im Raum → Im Raum | Core \| record \| Can move a device to another room | `core.can_relocate_device` |
-| Verleihen und Zurücknehmen | Im Raum ↔ Verliehen | Core \| record \| Can lend a device and take it back | `core.can_lend_device` |
-| Nicht auffindbar | Im Raum/Verliehen/Nicht auffindbar → Nicht auffindbar | Core \| record \| Can mark a device as not locatable | `core.can_lose_device` |
-| Wiedergefunden | Nicht auffindbar → Im Raum | Core \| record \| Can mark a lost device as found | `core.can_find_device` |
-| Ausmustern | fast jeder Status → Entfernt | Core \| record \| Can remove (decommission) a device | `core.can_remove_device` |
-| Ausmusterung rückgängig | Entfernt → Nicht auffindbar | Core \| record \| Can restore a removed device to not-locatable | `core.can_restore_device` |
-| Wiedereingliedern | Entfernt → Im Raum | Core \| record \| Can recover a removed device into a room | `core.can_recover_device` |
+| Bestellt | *(kein Record)* → Bestellt | Core \| record \| Transition: Can record a device as ordered | `core.transition_can_order_device` |
+| Lokalisieren | *(kein Record)*/Bestellt → Im Raum | Core \| record \| Transition: Can localise a device for the first time | `core.transition_can_locate_device` |
+| Umziehen | Im Raum → Im Raum | Core \| record \| Transition: Can move a device to another room | `core.transition_can_relocate_device` |
+| Verleihen und Zurücknehmen | Im Raum ↔ Verliehen | Core \| record \| Transition: Can lend a device and take it back | `core.transition_can_lend_device` |
+| Nicht auffindbar | Im Raum/Verliehen/Nicht auffindbar → Nicht auffindbar | Core \| record \| Transition: Can mark a device as not locatable | `core.transition_can_lose_device` |
+| Wiedergefunden | Nicht auffindbar → Im Raum | Core \| record \| Transition: Can mark a lost device as found | `core.transition_can_find_device` |
+| Ausmustern | fast jeder Status → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
+| Ausmusterung rückgängig | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to not-locatable | `core.transition_can_restore_device` |
+| Wiedereingliedern | Entfernt → Im Raum | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
 
 :::{warning}
 **Superuser sehen alle zulässigen Statuswechsel** – auch die beiden Wege aus dem Status *Entfernt* heraus. Zum Prüfen einer Rechtevergabe daher immer einen **Nicht-Superuser** verwenden.
@@ -103,7 +103,7 @@ Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktio
 :::{admonition} **Ausmusterung rückgängig machen**
 :class: note
 
-`can_restore_device` und `can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**. Ein ausgemustertes Gerät ist damit standardmäßig ein Endpunkt. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst zu – üblicherweise nur einer eng gefassten Gruppe.
+`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**. Ein ausgemustertes Gerät ist damit standardmäßig ein Endpunkt. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst zu – üblicherweise nur einer eng gefassten Gruppe.
 
 Beide Übergänge waren technisch immer zulässig (Inventur, Superuser-Aktion im Admin), wurden bisher aber nirgends angeboten.
 :::
@@ -117,7 +117,7 @@ Früher wurden Statuswechsel über die *Can add*-Berechtigung des jeweils geschr
 :::{admonition} **Die Berechtigung gilt für die ganze Aktion**
 :class: tip
 
-Eine Berechtigung schaltet nicht nur den Button auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur `core.can_find_device` besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen. Ein Button, der anschließend in einer Fehlermeldung endet, kann so nicht mehr entstehen.
+Eine Berechtigung schaltet nicht nur den Button auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur `core.transition_can_find_device` besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen. Ein Button, der anschließend in einer Fehlermeldung endet, kann so nicht mehr entstehen.
 :::
 
 ## Branding

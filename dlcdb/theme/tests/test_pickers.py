@@ -48,28 +48,30 @@ def _source(*permissions):
 
 
 def test_any_one_of_the_permissions_grants_access(make_user):
-    source = _source("core.can_locate_device", "core.can_relocate_device", "core.can_find_device")
+    source = _source(
+        "core.transition_can_locate_device", "core.transition_can_relocate_device", "core.transition_can_find_device"
+    )
 
-    assert source.grants_access(make_user("can_find_device"))
-    assert source.grants_access(make_user("can_relocate_device", email="b@example.com"))
+    assert source.grants_access(make_user("transition_can_find_device"))
+    assert source.grants_access(make_user("transition_can_relocate_device", email="b@example.com"))
 
 
 def test_holding_none_of_them_is_refused(make_user):
-    source = _source("core.can_locate_device", "core.can_find_device")
+    source = _source("core.transition_can_locate_device", "core.transition_can_find_device")
 
-    assert not source.grants_access(make_user("can_relocate_device"))
+    assert not source.grants_access(make_user("transition_can_relocate_device"))
 
 
 def test_a_single_permission_source_still_behaves_as_before(make_user):
-    source = _source("core.can_lend_device")
+    source = _source("core.transition_can_lend_device")
 
-    assert source.grants_access(make_user("can_lend_device"))
-    assert not source.grants_access(make_user("can_relocate_device", email="b@example.com"))
+    assert source.grants_access(make_user("transition_can_lend_device"))
+    assert not source.grants_access(make_user("transition_can_relocate_device", email="b@example.com"))
 
 
 def test_an_empty_permission_tuple_grants_nobody(make_user):
     """Fail closed: a source that forgot to declare permissions opens to no one."""
-    assert not _source().grants_access(make_user("can_relocate_device"))
+    assert not _source().grants_access(make_user("transition_can_relocate_device"))
 
 
 # --- the registered sources track the lifecycle --------------------------

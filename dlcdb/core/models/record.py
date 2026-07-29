@@ -199,16 +199,20 @@ class Record(AuditBaseModel):
         # because five proxies cannot express ten distinct moves. The labels are
         # what an operator reads in the admin permission picker, so they say what
         # the move does rather than which record it writes.
+        # The ``transition_`` prefix names the category: it tells an operator that
+        # these nine gate lifecycle moves rather than ordinary model access, and
+        # since Django orders permissions by codename it also keeps them together
+        # as one block in the picker instead of scattered among the model's own.
         permissions = [
-            ("can_order_device", "Can record a device as ordered"),
-            ("can_locate_device", "Can localise a device for the first time"),
-            ("can_relocate_device", "Can move a device to another room"),
-            ("can_lend_device", "Can lend a device and take it back"),
-            ("can_lose_device", "Can mark a device as not locatable"),
-            ("can_find_device", "Can mark a lost device as found"),
-            ("can_remove_device", "Can remove (decommission) a device"),
-            ("can_restore_device", "Can restore a removed device to not-locatable"),
-            ("can_recover_device", "Can recover a removed device into a room"),
+            ("transition_can_order_device", "Transition: Can record a device as ordered"),
+            ("transition_can_locate_device", "Transition: Can localise a device for the first time"),
+            ("transition_can_relocate_device", "Transition: Can move a device to another room"),
+            ("transition_can_lend_device", "Transition: Can lend a device and take it back"),
+            ("transition_can_lose_device", "Transition: Can mark a device as not locatable"),
+            ("transition_can_find_device", "Transition: Can mark a lost device as found"),
+            ("transition_can_remove_device", "Transition: Can remove (decommission) a device"),
+            ("transition_can_restore_device", "Transition: Can restore a removed device to not-locatable"),
+            ("transition_can_recover_device", "Transition: Can recover a removed device into a room"),
         ]
         constraints = [
             models.CheckConstraint(

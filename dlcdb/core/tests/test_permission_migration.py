@@ -72,7 +72,7 @@ def test_mapping_covers_every_transition_permission():
     assert referenced <= declared
 
     unmigrated = referenced - set(MAPPING)
-    assert unmigrated == {"can_restore_device", "can_recover_device"}, (
+    assert unmigrated == {"transition_can_restore_device", "transition_can_recover_device"}, (
         "a lifecycle permission is granted to nobody on upgrade; either map it in "
         "MAPPING or add it to this deliberate exception list"
     )
@@ -80,7 +80,9 @@ def test_mapping_covers_every_transition_permission():
 
 @pytest.mark.django_db(transaction=True)
 def test_the_new_permissions_do_not_exist_before_the_migration(at_0072):
-    assert not Permission.objects.filter(codename="can_relocate_device", content_type__app_label="core").exists()
+    assert not Permission.objects.filter(
+        codename="transition_can_relocate_device", content_type__app_label="core"
+    ).exists()
 
 
 @pytest.mark.django_db(transaction=True)
@@ -102,18 +104,18 @@ def test_an_edv_shaped_group_keeps_what_it_could_already_do(at_0072):
 
     granted = set(group.permissions.values_list("codename", flat=True))
     assert {
-        "can_order_device",
-        "can_locate_device",
-        "can_relocate_device",
-        "can_find_device",
-        "can_lend_device",
-        "can_lose_device",
+        "transition_can_order_device",
+        "transition_can_locate_device",
+        "transition_can_relocate_device",
+        "transition_can_find_device",
+        "transition_can_lend_device",
+        "transition_can_lose_device",
     } <= granted
     # It never held add_removedrecord, so removal stays out of reach ...
-    assert "can_remove_device" not in granted
+    assert "transition_can_remove_device" not in granted
     # ... and the two ways out of REMOVED are granted to nobody by this migration.
-    assert "can_restore_device" not in granted
-    assert "can_recover_device" not in granted
+    assert "transition_can_restore_device" not in granted
+    assert "transition_can_recover_device" not in granted
 
 
 @pytest.mark.django_db(transaction=True)
@@ -121,7 +123,7 @@ def test_a_group_that_can_only_move_devices_does_not_gain_lending(at_0072):
     """The narrowing decision, pinned.
 
     ``return_lending`` used to be gated on ``add_inroomrecord`` but now shares
-    ``can_lend_device`` with ``lend``. Migrating from ``add_inroomrecord`` would
+    ``transition_can_lend_device`` with ``lend``. Migrating from ``add_inroomrecord`` would
     hand every group that can move a device the right to lend one; the migration
     deliberately maps from ``add_lentrecord`` instead.
     """
@@ -131,8 +133,8 @@ def test_a_group_that_can_only_move_devices_does_not_gain_lending(at_0072):
     _migrate(AFTER)
 
     granted = set(group.permissions.values_list("codename", flat=True))
-    assert "can_relocate_device" in granted
-    assert "can_lend_device" not in granted
+    assert "transition_can_relocate_device" in granted
+    assert "transition_can_lend_device" not in granted
 
 
 @pytest.mark.django_db(transaction=True)
@@ -142,7 +144,7 @@ def test_direct_user_permissions_are_migrated_too(at_0072, django_user_model):
 
     _migrate(AFTER)
 
-    assert "can_lose_device" in set(user.user_permissions.values_list("codename", flat=True))
+    assert "transition_can_lose_device" in set(user.user_permissions.values_list("codename", flat=True))
 
 
 @pytest.mark.django_db(transaction=True)
@@ -169,7 +171,7 @@ def test_migrating_backwards_revokes_the_new_permissions(at_0072, django_user_mo
     user.user_permissions.add(_core_permission("add_lentrecord"))
 
     _migrate(AFTER)
-    assert "can_lend_device" in set(group.permissions.values_list("codename", flat=True))
+    assert "transition_can_lend_device" in set(group.permissions.values_list("codename", flat=True))
 
     _migrate(BEFORE)
 

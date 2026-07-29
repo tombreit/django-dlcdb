@@ -441,7 +441,7 @@ class RelocatePermissionTests(BaseTest):
         self.assertEqual(self.client.get(self.url).status_code, 403)
 
     def test_any_one_of_the_moves_opens_the_module(self):
-        self._user("can_find_device")
+        self._user("transition_can_find_device")
         self.assertEqual(self.client.get(self.url).status_code, 200)
 
     def test_the_device_search_refuses_a_user_with_none_of_the_moves(self):
@@ -453,13 +453,13 @@ class RelocatePermissionTests(BaseTest):
     # --- what each of them is offered -------------------------------------
 
     def test_a_finder_is_offered_lost_devices_only(self):
-        self._user("can_find_device")
+        self._user("transition_can_find_device")
         response = self._search()
         self.assertContains(response, "EDV-LOST")
         self.assertNotContains(response, "EDV-INROOM")
 
     def test_a_relocator_is_not_offered_lost_devices(self):
-        self._user("can_relocate_device")
+        self._user("transition_can_relocate_device")
         response = self._search()
         self.assertContains(response, "EDV-INROOM")
         self.assertNotContains(response, "EDV-LOST")
@@ -467,7 +467,7 @@ class RelocatePermissionTests(BaseTest):
     # --- and the move itself goes through ---------------------------------
 
     def test_a_finder_can_move_the_lost_device(self):
-        self._user("can_find_device")
+        self._user("transition_can_find_device")
 
         response = self.client.post(self.url, {"devices": [self.lost.pk], "new_room": self.room_b.pk})
         self.assertRedirects(response, self.url)
@@ -478,7 +478,7 @@ class RelocatePermissionTests(BaseTest):
 
     def test_a_finder_cannot_move_a_device_the_picker_never_offered(self):
         """The form shares ``move_queryset``, so POSTing a pk is not a way round it."""
-        self._user("can_find_device")
+        self._user("transition_can_find_device")
         before = self.inroom.record_set.count()
 
         response = self.client.post(self.url, {"devices": [self.inroom.pk], "new_room": self.room_b.pk})

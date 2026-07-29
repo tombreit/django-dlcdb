@@ -203,10 +203,10 @@ def test_localisable_states_are_scoped_to_what_the_user_may_do(make_lifecycle_us
     A user who may only mark lost devices as found is offered the lost ones and
     nothing else -- previously a single coarse permission covered all of them.
     """
-    finder = make_lifecycle_user("can_find_device")
+    finder = make_lifecycle_user("transition_can_find_device")
     assert lifecycle.localisable_states_for(finder) == {lifecycle.LOST}
 
-    mover = make_lifecycle_user("can_relocate_device", email="mover@example.com")
+    mover = make_lifecycle_user("transition_can_relocate_device", email="mover@example.com")
     assert lifecycle.localisable_states_for(mover) == {lifecycle.INROOM, lifecycle.LENT}
 
     nobody = make_lifecycle_user(email="nobody@example.com")

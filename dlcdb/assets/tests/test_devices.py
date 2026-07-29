@@ -374,7 +374,7 @@ class DeviceDetailLendingLinkTests(BaseTest):
         return self.client.get(reverse("assets:device_detail", args=[device.pk]))
 
     def test_a_lent_device_links_to_its_lending(self):
-        self._login("can_lend_device")
+        self._login("transition_can_lend_device")
 
         response = self._detail(self.device)
 
@@ -398,7 +398,7 @@ class DeviceDetailLendingLinkTests(BaseTest):
         self.assertContains(response, str(self.person))
 
     def test_a_device_that_is_not_lent_has_no_lending_link(self):
-        self._login("can_lend_device")
+        self._login("transition_can_lend_device")
 
         response = self._detail(self.inroom_device)
 
@@ -406,7 +406,7 @@ class DeviceDetailLendingLinkTests(BaseTest):
 
     def test_the_device_list_does_not_link_the_borrower(self):
         """The shared state snippet stays a plain badge in list rows."""
-        self._login("can_lend_device")
+        self._login("transition_can_lend_device")
 
         response = self.client.get(reverse("assets:device_index"))
 

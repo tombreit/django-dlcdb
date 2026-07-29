@@ -34,15 +34,15 @@ from dlcdb.core.models import (
 from dlcdb.core.tests.testingutils import establish_state
 
 ALL_LIFECYCLE_PERMISSIONS = [
-    "can_order_device",
-    "can_locate_device",
-    "can_relocate_device",
-    "can_lend_device",
-    "can_lose_device",
-    "can_find_device",
-    "can_remove_device",
-    "can_restore_device",
-    "can_recover_device",
+    "transition_can_order_device",
+    "transition_can_locate_device",
+    "transition_can_relocate_device",
+    "transition_can_lend_device",
+    "transition_can_lose_device",
+    "transition_can_find_device",
+    "transition_can_remove_device",
+    "transition_can_restore_device",
+    "transition_can_recover_device",
 ]
 
 
@@ -96,7 +96,7 @@ def test_device_without_a_record_offers_every_legal_first_step(plain_device, sup
 @pytest.mark.django_db
 def test_a_record_less_device_offers_only_what_the_user_may_do(plain_device, make_user):
     """The same device, seen by someone who may only take devices into service."""
-    user = make_user("can_locate_device")
+    user = make_user("transition_can_locate_device")
     state_data = plain_device.get_state_data(user=user)
 
     assert _targets(state_data) == [f"{reverse('admin:core_inroomrecord_add')}?device={plain_device.pk}"]
@@ -217,7 +217,7 @@ def test_lost_offers_found_removal_and_re_marking_but_not_lending(lentable_devic
     assert not _offers(state_data, "lentrecord")
     # LOST -> LOST is legal, so an inventory can re-mark a device that is still
     # missing. Whether that is worth a button is now the operator's call, made by
-    # granting can_lose_device -- not something the state machine decides.
+    # granting transition_can_lose_device -- not something the state machine decides.
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
 
 
@@ -251,7 +251,7 @@ def test_removed_is_still_a_dead_end_for_ordinary_users(lentable_device, make_us
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
 
-    user = make_user("can_relocate_device", "can_lose_device", "can_find_device")
+    user = make_user("transition_can_relocate_device", "transition_can_lose_device", "transition_can_find_device")
 
     assert lentable_device.get_state_data(user=user).actions == []
 
@@ -272,7 +272,7 @@ def test_actions_are_gated_by_the_transition_permission(lentable_device, room, m
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    user = make_user("can_lose_device")
+    user = make_user("transition_can_lose_device")
     state_data = lentable_device.get_state_data(user=user)
 
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
@@ -282,8 +282,8 @@ def test_actions_are_gated_by_the_transition_permission(lentable_device, room, m
 
 @pytest.mark.django_db
 def test_one_permission_covers_both_lending_and_returning(lentable_device, room, make_user):
-    """``can_lend_device`` is the whole lending competence, both directions."""
-    user = make_user("can_lend_device")
+    """``transition_can_lend_device`` is the whole lending competence, both directions."""
+    user = make_user("transition_can_lend_device")
 
     record = InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()

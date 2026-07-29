@@ -80,13 +80,13 @@ def test_a_logged_in_user_without_the_move_permission_is_refused(client, url, ma
 
 
 def test_the_relocate_permission_opens_the_view(client, url, device, make_user):
-    client.force_login(make_user("can_relocate_device"))
+    client.force_login(make_user("transition_can_relocate_device"))
     assert client.get(f"{url}?ids={device.pk}").status_code == 200
 
 
 def test_a_bare_get_without_ids_does_not_error(client, url, make_user):
     """The admin action always sends ?ids=, but a hand-typed URL must not 500."""
-    client.force_login(make_user("can_relocate_device"))
+    client.force_login(make_user("transition_can_relocate_device"))
     assert client.get(url).status_code == 200
 
 
@@ -95,7 +95,7 @@ def test_a_bare_get_without_ids_does_not_error(client, url, make_user):
 
 def test_a_permitted_user_can_move_a_device(client, url, device, rooms, make_user):
     _, room_b = rooms
-    client.force_login(make_user("can_relocate_device"))
+    client.force_login(make_user("transition_can_relocate_device"))
 
     client.post(f"{url}?ids={device.pk}", _payload(device, room_b))
 
@@ -118,7 +118,7 @@ def test_device_type_is_left_alone_without_change_device(client, url, device, ro
     _, room_b = rooms
     device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
     original_type = device.device_type
-    client.force_login(make_user("can_relocate_device"))
+    client.force_login(make_user("transition_can_relocate_device"))
 
     client.post(f"{url}?ids={device.pk}", _payload(device, room_b, new_device_type=device_type.pk))
 
@@ -135,7 +135,7 @@ def test_a_non_superuser_cannot_reassign_the_tenant(client, url, device, rooms, 
     """
     _, room_b = rooms
     tenant = Tenant.objects.create(name="OtherTenant")
-    client.force_login(make_user("can_relocate_device", "change_device"))
+    client.force_login(make_user("transition_can_relocate_device", "change_device"))
 
     response = client.post(f"{url}?ids={device.pk}", _payload(device, room_b, new_tenant=tenant.pk))
 
@@ -148,7 +148,7 @@ def test_a_non_superuser_cannot_reassign_the_tenant(client, url, device, rooms, 
 def test_change_device_permits_the_reassignment(client, url, device, rooms, make_user):
     _, room_b = rooms
     device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
-    client.force_login(make_user("can_relocate_device", "change_device"))
+    client.force_login(make_user("transition_can_relocate_device", "change_device"))
 
     client.post(
         f"{url}?ids={device.pk}",

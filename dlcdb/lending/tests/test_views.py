@@ -451,7 +451,7 @@ class LendingDetailViewTests(BaseTest):
         lifecycle, so a grant could open the button without opening the view (or
         the other way round).
         """
-        self._plain_user_with("can_lend_device")
+        self._plain_user_with("transition_can_lend_device")
 
         response = self._post_lend()
 
