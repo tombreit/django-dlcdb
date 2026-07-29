@@ -16,7 +16,8 @@ from django.utils.translation import gettext as _
 from django.utils.http import urlencode
 from django.views.decorators.http import require_POST
 
-from dlcdb.core.models import Device, Person
+from dlcdb.core import lifecycle
+from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
@@ -159,8 +160,24 @@ def device_detail(request, pk):
             # Shared state-machine data (same builder the admin uses); the
             # "assets" surface swaps in native frontend URLs for Move/Lend.
             "state_data": device.get_state_data(user=request.user, app_name="assets"),
+            "lending_url": _lending_url(request.user, device),
         },
     )
+
+
+def _lending_url(user, device):
+    """The lending this device is currently out on, or None.
+
+    Gated on the same permission the lending view itself requires, so the link
+    never leads somewhere the user is refused. The device state card renders the
+    borrower as a link when this is set.
+    """
+    record = device.active_record
+    if not record or record.record_type != Record.LENT:
+        return None
+    if not user.has_perm(lifecycle.BY_NAME["lend"].permission):
+        return None
+    return reverse("lending:detail", args=[record.pk])
 
 
 @require_POST

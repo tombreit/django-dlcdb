@@ -8,7 +8,16 @@
     <span class="ms-1"><i class="bi bi-door-open"></i> {{ device.active_record.room }}</span>
   {% endif %}
   {% if device.active_record.person %}
-    <span class="ms-1"><i class="bi bi-person"></i> {{ device.active_record.person }}</span>
+    {# The borrower links to the lending itself, but only where the caller
+       supplies lending_url -- it is set for a lent device whose viewer may open
+       the lending page, so the link never leads to a refusal. #}
+    {% if lending_url %}
+      <a class="ms-1" href="{{ lending_url }}" title="{% translate 'Show this lending' %}">
+        <i class="bi bi-person"></i> {{ device.active_record.person }}
+      </a>
+    {% else %}
+      <span class="ms-1"><i class="bi bi-person"></i> {{ device.active_record.person }}</span>
+    {% endif %}
   {% endif %}
 {% else %}
   <span class="badge text-bg-secondary">{% translate "No active record" %}</span>

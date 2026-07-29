@@ -324,3 +324,91 @@ class DeviceFrontendTests(BaseTest):
 
         self.assertContains(response, 'aria-expanded="true"')
         self.assertContains(response, "collapse show")
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class DeviceDetailLendingLinkTests(BaseTest):
+    """The "Current state" card links a lent device to the lending it is out on.
+
+    The same state snippet renders in the device list, where the link would be
+    noise, so the URL is passed in by the detail view rather than derived in the
+    template -- and only for a viewer who may actually open the lending page.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.room = Room.objects.create(number="A1.01")
+        cls.person = Person.objects.create(first_name="Max", last_name="Mustermann")
+
+        # Non-superusers only see devices of their own tenant.
+        cls.group = Group.objects.create(name="lending-viewers")
+        cls.tenant = Tenant.objects.create(name="LinkTenant")
+        cls.tenant.groups.add(cls.group)
+
+        cls.device = cls()._create_device(edv_id="EDV-ON-LOAN", sap_id="5-1")
+        cls.device.is_lentable = True
+        cls.device.save()
+        cls.record = establish_state(
+            LentRecord,
+            device=cls.device,
+            room=cls.room,
+            person=cls.person,
+            lent_start_date=datetime.date(2026, 1, 1),
+            lent_desired_end_date=datetime.date(2099, 1, 1),
+        )
+
+        cls.inroom_device = cls()._create_device(edv_id="EDV-IN-ROOM", sap_id="5-2")
+        InRoomRecord.objects.create(device=cls.inroom_device, room=cls.room)
+
+        Device.objects.update(tenant=cls.tenant)
+
+    def _login(self, *codenames):
+        user = get_user_model().objects.create_user(username="viewer", email="viewer@example.com", password="secret")
+        user.groups.add(self.group)
+        for codename in ("view_device", *codenames):
+            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        self.client.force_login(user)
+        return user
+
+    def _detail(self, device):
+        return self.client.get(reverse("assets:device_detail", args=[device.pk]))
+
+    def test_a_lent_device_links_to_its_lending(self):
+        self._login("can_lend_device")
+
+        response = self._detail(self.device)
+
+        self.assertEqual(response.context["lending_url"], reverse("lending:detail", args=[self.record.pk]))
+        self.assertContains(response, f'href="{reverse("lending:detail", args=[self.record.pk])}"')
+        self.assertContains(response, str(self.person))
+
+    def test_the_link_is_withheld_from_users_who_may_not_open_the_lending(self):
+        """A link to a 403 is worse than no link.
+
+        ``lending:detail`` requires the ``lend`` transition's permission, so the
+        borrower stays plain text without it.
+        """
+        self._login()
+
+        response = self._detail(self.device)
+
+        self.assertIsNone(response.context["lending_url"])
+        self.assertNotContains(response, reverse("lending:detail", args=[self.record.pk]))
+        # The borrower is still shown, just not as a link.
+        self.assertContains(response, str(self.person))
+
+    def test_a_device_that_is_not_lent_has_no_lending_link(self):
+        self._login("can_lend_device")
+
+        response = self._detail(self.inroom_device)
+
+        self.assertIsNone(response.context["lending_url"])
+
+    def test_the_device_list_does_not_link_the_borrower(self):
+        """The shared state snippet stays a plain badge in list rows."""
+        self._login("can_lend_device")
+
+        response = self.client.get(reverse("assets:device_index"))
+
+        self.assertContains(response, str(self.person))
+        self.assertNotContains(response, reverse("lending:detail", args=[self.record.pk]))
