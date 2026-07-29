@@ -9,4 +9,4 @@ from django.utils.translation import gettext_lazy as _
 class DataexchangeConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.dataexchange"
-    verbose_name = _("Data exchange")
+    verbose_name = _("Data Exchange")

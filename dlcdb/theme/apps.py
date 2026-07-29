@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
 
 
 class ThemeConfig(AppConfig):
     name = "dlcdb.theme"
-    verbose_name = "Theme"
+    verbose_name = _("Theme")

@@ -219,7 +219,7 @@ def nav(request):
             continue
 
         for nav_entry in getattr(nav_module, "nav_entries", []):
-            # name: dlcdb.reporting; verbose_name: DLCDB Reporting; label: reporting
+            # name: dlcdb.reporting; verbose_name: Reporting; label: reporting
             # for a concrete permission string we need the app name without the project prefix
             # so 'app.label' seems to fit
             required_permission = nav_entry.get("required_permission")

@@ -39,10 +39,10 @@ Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt ersc
 **Superuser sehen alle Menüpunkte** – unabhängig von den zugewiesenen Berechtigungen. Um zu prüfen, ob ein Menüpunkt tatsächlich durch eine Berechtigung sichtbar wird, verwenden Sie einen **Nicht-Superuser** (sonst erscheint der Menüpunkt auch ohne die Berechtigung).
 :::
 
-:::{admonition} **Berechtigung unter *DLCDB Core* finden**
+:::{admonition} **Berechtigung unter *Core* finden**
 :class: note
 
-Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt die Berechtigung **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
+Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt die Berechtigung **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
 :::
 
 <!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
@@ -65,14 +65,14 @@ Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem 
 | Datenhaltung › Records / Entfernt-Records | Core \| record \| Can view record | `core.view_record` |
 | Datenhaltung › Inventuren | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Datenhaltung › Notizen | Core \| note \| Can view note | `core.view_note` |
-| Prozesse › Bulk Import | Dataexchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
-| Prozesse › Bulk Ausmusterung | Dataexchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
+| Prozesse › Bulk Import | Data Exchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
+| Prozesse › Bulk Ausmusterung | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
 | Prozesse › SAP-Abgleich | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
 | Einstellungen › Ausleih-Profile | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
 | Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
-| Einstellungen › HR-API-Sync-Konfiguration | Dataexchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
+| Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 
 :::{tip}
 Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **gespiegelten Gruppen** zu (siehe LDAP-Hinweis oben unter „Benutzer, Gruppen und Tenants einrichten“). Manuell in der DLCDB angelegte Gruppenzugehörigkeiten können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.

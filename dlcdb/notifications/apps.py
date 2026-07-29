@@ -8,5 +8,4 @@ from django.utils.translation import gettext_lazy as _
 
 class NotificationsConfig(AppConfig):
     name = "dlcdb.notifications"
-    verbose_name = _("Notification")
-    verbose_name_plural = _("Notifications")
+    verbose_name = _("Notifications")
