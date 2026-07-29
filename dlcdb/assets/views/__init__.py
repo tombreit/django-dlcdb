@@ -10,7 +10,7 @@ frontend. Each module owns one view area; this file re-exports their public
 callables so ``urls.py`` (``from . import views``) keeps working unchanged.
 """
 
-from .devices import device_add, device_detail, device_index, person_search
+from .devices import device_add, device_detail, device_export_csv, device_index, person_search
 from .masterdata import (
     device_type_add,
     device_type_detail,
@@ -26,6 +26,7 @@ from .relocate import relocate, room_search
 
 __all__ = [
     "device_index",
+    "device_export_csv",
     "device_add",
     "device_detail",
     "device_type_index",

@@ -36,6 +36,24 @@
           {% blocktranslate count counter=device_filtered_count with total=device_total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
         </span>
         {% include "theme/filterbar/chips.html" with bar=filterbar %}
+        {% if device_filtered_count %}
+          {% comment %}
+            A plain link on purpose: an hx-get here would swap the CSV body into
+            the page. The fragment root's hx-target/hx-swap are inherited only by
+            elements that already issue an HTMX request, and hx-boost is used
+            nowhere, so a bare href cannot be ajax-ified.
+
+            Living inside the swapped fragment is what keeps the label honest:
+            count and href are re-rendered from the same request on every filter
+            change, so the button always states the scope it will actually export.
+            The href is built in the view: the builtin querystring tag would keep
+            this page's path rather than the export endpoint's.
+          {% endcomment %}
+          <a class="btn btn-sm btn-outline-secondary ms-auto" href="{{ export_href }}">
+            <i class="bi bi-filetype-csv"></i>
+            {% blocktranslate count counter=device_filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
+          </a>
+        {% endif %}
       </div>
 
       <div class="table-responsive">

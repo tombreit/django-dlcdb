@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -21,6 +22,7 @@ from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.dataexchange.device_export import device_csv_response, legacy_device_columns
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
@@ -32,6 +34,11 @@ from ..forms import DeviceForm
 # paging keeps the HTMX payload and template render small (the SQL was never the
 # problem — see _device_queryset).
 DEVICES_PER_PAGE = 25
+
+# Applied when the request names no ordering. Set as a default on the incoming
+# data rather than on the FilterSet so an explicit ?ordering= — a column header,
+# the sort dropdown — still wins.
+DEFAULT_ORDERING = "-modified"
 
 # Distinct search-input name so the person picker cannot collide with the device
 # form's own fields, and a cap so the "*" / live-search dropdown stays usable.
@@ -54,17 +61,49 @@ def _device_queryset(request):
     return tenant_scoped_queryset(queryset, request, tenant_field="tenant")
 
 
+def _device_filter(request):
+    """The bound ``DeviceFilter`` this request's GET parameters select.
+
+    Shared by the index and the CSV export so a download can never disagree
+    with the list it was started from: same tenant scoping, same search, same
+    filters, same ordering. ``.qs`` is the filtered queryset, ``.queryset`` the
+    unfiltered one.
+    """
+    data = request.GET.copy()
+    data.setdefault("ordering", DEFAULT_ORDERING)
+    return DeviceFilter(data, queryset=_device_queryset(request), request=request)
+
+
+def _export_href(request):
+    """The export URL carrying the list's current search, filters and ordering.
+
+    Two kinds of parameter are left out. ``page`` and ``show_all`` are pagination
+    state, meaningless for an export that always covers every matching row. Empty
+    values are dropped because every filter reads them as "not filtering" anyway,
+    and the filterbar submits its whole form -- so without this the href collects
+    a dozen ``&device_type=&state=&...`` pairs on every swap. The result is a URL
+    worth copying and sharing.
+
+    Built here rather than with the builtin ``{% querystring %}`` tag: that tag
+    rebuilds ``request.path``, which is the list endpoint, and the export lives
+    at a different one.
+    """
+    query = QueryDict(mutable=True)
+    for param, values in request.GET.lists():
+        if param in {"page", "show_all"}:
+            continue
+        query.setlist(param, [value for value in values if value])
+
+    encoded = query.urlencode()
+    url = reverse("assets:device_export_csv")
+    return f"{url}?{encoded}" if encoded else url
+
+
 @permission_required("core.view_device", raise_exception=True)
 def device_index(request):
     """Tenant-scoped Device overview, with progressive HTMX filtering."""
     template = "assets/devices/index.html#device-list" if request.htmx else "assets/devices/index.html"
-    base_queryset = _device_queryset(request)
-
-    # The filter always receives an ordering. This makes a direct page visit
-    # predictable while preserving explicit links and column-header choices.
-    data = request.GET.copy()
-    data.setdefault("ordering", "-modified")
-    device_filter = DeviceFilter(data, queryset=base_queryset, request=request)
+    device_filter = _device_filter(request)
 
     page_obj = paginate(request, device_filter.qs, DEVICES_PER_PAGE)
 
@@ -78,17 +117,37 @@ def device_index(request):
             search_placeholder=_("Search IT ID, serial number, model, person name/email..."),
             secondary_fields={"is_imported", "duplicate", "supplier", "active_record__inventory"},
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": device_filter.data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here instead of
         # a second device_filter.qs.count().
         "device_filtered_count": page_obj.paginator.count,
-        "device_total_count": base_queryset.count(),
+        "device_total_count": device_filter.queryset.count(),
+        "export_href": _export_href(request),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
         # Mirrors dlcdb.lending.views.index.
         "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
     }
     return TemplateResponse(request, template, context)
+
+
+@permission_required("core.view_device", raise_exception=True)
+def device_export_csv(request):
+    """The current device list as a CSV download.
+
+    Every row the active search, filters and ordering select — pagination
+    ignored on purpose: this page has no row selection, so "export" can only
+    mean "export what I am looking at". Shares ``_device_filter`` with the index
+    so the two cannot drift apart.
+
+    Columns come from ``legacy_device_columns``, which is what the admin action
+    has always emitted. Curating that set is a separate change.
+    """
+    return device_csv_response(
+        _device_filter(request).qs,
+        legacy_device_columns(),
+        slug="core-device",
+    )
 
 
 def _get_device(request, pk):

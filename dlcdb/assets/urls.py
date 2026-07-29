@@ -10,6 +10,7 @@ app_name = "assets"
 
 urlpatterns = [
     path("devices/", views.device_index, name="device_index"),
+    path("devices/export.csv", views.device_export_csv, name="device_export_csv"),
     path("devices/add/", views.device_add, name="device_add"),
     path("devices/<int:pk>/", views.device_detail, name="device_detail"),
     path("device-types/", views.device_type_index, name="device_type_index"),

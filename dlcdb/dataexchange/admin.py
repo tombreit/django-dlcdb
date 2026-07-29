@@ -6,10 +6,41 @@ from django import forms
 from django.contrib import admin
 from django.contrib import messages
 
+from dlcdb.core.models import Device, LentRecord
+
 from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import run_device_import
 from .remover import set_removed_record
+from .device_export import device_csv_response, legacy_device_columns
+
+
+class ExportCsvMixin:
+    """Changelist action exporting the selected devices as CSV.
+
+    Mixed into ``core.admin.DeviceAdmin`` and ``core.admin.LentRecordAdmin``.
+    The rows themselves are built in ``device_export``, which the assets
+    frontend export shares, so both surfaces emit the same file.
+    """
+
+    @admin.action(description="Export selected as CSV")
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+
+        if meta.model is LentRecord:
+            # The action hangs off the LentRecord changelist but exports the
+            # devices behind the selected records.
+            devices = Device.objects.filter(pk__in=queryset.values_list("device", flat=True))
+            columns = legacy_device_columns(extra=["person", "lent_desired_end_date"])
+        else:
+            devices = queryset
+            columns = legacy_device_columns()
+
+        # Most exported columns resolve through the active record; without this
+        # the export ran several queries per row.
+        devices = devices.select_related("active_record__room", "active_record__person")
+
+        return device_csv_response(devices, columns, slug=f"{meta.app_label}-{meta.model_name}")
 
 
 @admin.register(ImporterList)

@@ -16,13 +16,14 @@ from django.contrib import messages
 
 from dlcdb.tenants.admin import TenantScopedAdmin
 from dlcdb.lending.models import LendingConfiguration
+from dlcdb.dataexchange.admin import ExportCsvMixin
 from .. import lifecycle
 from ..models import LentRecord, Record
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..utils.helpers import get_denormalized_user
 from ..utils.links import linked_message, obj_link
 from .filters.lentstate_filter import LentStateRecordFilter
-from .base_admin import CustomBaseModelAdmin, ExportCsvMixin
+from .base_admin import CustomBaseModelAdmin
 
 # Create a session store to pass the new created instance.pk from save_model()
 # to response_change(). Considered a dirty hack.

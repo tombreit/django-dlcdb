@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* The device list in the `assets` frontend can now be exported as CSV, covering every device the active search and filters match (not just the current page). The export code moved out of `core.admin` into the `dataexchange` app, where the legacy admin action now shares it; the file itself is unchanged, except that devices without an active record no longer break the export
 * All notifications (device events and periodic record reports) are now managed as *Subscriptions* in the `notifications` app; existing notification rules must be re-created in the admin. The `reporting` app only generates the report artifacts (xlsx)
 * Renamed `.env` variables: `REPORTING_NOTIFY_OVERDUE_LENDERS` → `NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS`, `REPORTING_NOTIFY_OVERDUE_LENDERS_TO_IT` → `NOTIFICATIONS_NOTIFY_OVERDUE_LENDERS_TO_IT`
 * Dedicated `dataexchange` app with a rewritten CSV-based importer that now also supports `LENT` records
