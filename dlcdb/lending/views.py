@@ -264,7 +264,7 @@ def _save_lending(request, record, form):
 
 
 @login_required
-@htmx_permission_required("core.change_lentrecord")
+@htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def lend(request, pk=None):
     """
     Single lending screen. Two entry points share one form and one save path:
@@ -377,7 +377,7 @@ def lend(request, pk=None):
 
 
 @login_required
-@htmx_permission_required("core.change_lentrecord")
+@htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def person_search(request):
     """HTMX live-search backing the person picker on the detail view."""
     # Start from an empty queryset: django-filter skips empty filter values, so
@@ -407,7 +407,7 @@ def _build_unsaved_lentrecord(device, form):
 
 
 @login_required
-@htmx_permission_required("core.change_lentrecord")
+@htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 @require_POST
 def print_sheet(request, pk):
     """
@@ -453,6 +453,7 @@ def print_sheet(request, pk):
     )
 
 
+@login_required
 @permission_required("core.view_lentrecord", raise_exception=True)
 def print_lent_sheet(request, pk):
     """

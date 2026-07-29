@@ -2,23 +2,43 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import functools
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import Record, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.relocate import relocate_device
 
 from ..forms import RelocateForm
-from ..pickers import move_queryset
+from ..pickers import MOVE_PERMISSIONS, move_queryset
 
-# Permission required to create the InRoomRecord that a relocation produces.
-RELOCATE_PERM = "core.add_inroomrecord"
+
+def move_permission_required(view_func):
+    """Refuse users who may make none of the moves this module performs.
+
+    The module fronts locate, relocate and find, which carry three separate
+    permissions, so there is no single string to require -- holding any one of
+    them opens the view, and ``move_queryset`` then narrows what it offers to
+    the moves that user may actually make.
+    """
+
+    @functools.wraps(view_func)
+    def wrapped_view(request, *args, **kwargs):
+        if not lifecycle.localisable_states_for(request.user):
+            raise PermissionDenied
+        return view_func(request, *args, **kwargs)
+
+    return wrapped_view
+
 
 # Distinct search-input name so the room picker can share the relocate <form>
 # with the device picker without HTMX mixing their query terms.
@@ -32,7 +52,7 @@ SEARCH_RESULT_LIMIT = 25
 
 @require_POST
 @htmx_login_required
-@htmx_permission_required(RELOCATE_PERM)
+@htmx_permission_required(*MOVE_PERMISSIONS)
 def room_search(request):
     """HTMX live-search backing the room picker. Empty query yields nothing."""
     value = (request.POST.get(ROOM_SEARCH_PARAM) or "").strip()
@@ -52,7 +72,7 @@ def room_search(request):
 
 
 @login_required
-@permission_required(RELOCATE_PERM, raise_exception=True)
+@move_permission_required
 def relocate(request):
     """
     Move one or more devices to a new room: pick the devices, pick a single
@@ -64,9 +84,10 @@ def relocate(request):
     selected_devices = []
     selected_room = None
 
-    # Scope the device field to the moveable, tenant-visible set so a user cannot
-    # relocate another tenant's device — or an ORDERED/REMOVED one — by POSTing
-    # its pk. Built once and reused for both the form and the re-render lookup.
+    # Scope the device field to the tenant-visible devices this user may actually
+    # move, so neither another tenant's device, a REMOVED one, nor one whose move
+    # needs a permission they lack can be relocated by POSTing its pk. Built once
+    # and reused for both the form and the re-render lookup.
     moveable_devices = move_queryset(request)
 
     if request.method == "POST":

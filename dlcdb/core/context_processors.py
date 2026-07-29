@@ -182,6 +182,13 @@ def nav(request):
         if not user or not permission:
             return False
 
+        if isinstance(permission, (list, tuple)):
+            # Several permissions, any one of which reveals the entry. Needed for
+            # menus that front more than one lifecycle move: "Move" serves locate,
+            # relocate and find, so requiring a single permission would hide it
+            # from users who legitimately hold one of the others.
+            return any(_get_has_permission(user, entry) for entry in permission)
+
         if permission == "true":
             # The string "true" disables *model-permission* checking but still
             # requires an authenticated user (matches @login_required on such

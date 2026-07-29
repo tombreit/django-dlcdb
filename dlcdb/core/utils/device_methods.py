@@ -13,16 +13,12 @@ from ..models.record import Record
 # than an admin add-view. The module works out which one applies from the
 # device's current state (see ``lifecycle.localise``).
 #
-# ``recover`` is deliberately absent even though it also ends with the device in
-# a room: the Move module's device picker is scoped by
-# ``assets.pickers.MOVEABLE_RECORD_TYPES``, which restates the moveable states by
-# hand and excludes REMOVED, so the view rejects the device before the lifecycle
-# ever sees it. Recovery therefore goes to the admin add-view, which works.
-# ``locate`` has the same gap for its ORDERED source (the picker admits only
-# record-less devices), which is why deriving that picker from the transition
-# table is worth doing -- until then, do not add a transition here without
-# checking it against ``MOVEABLE_RECORD_TYPES``.
-RELOCATE_TRANSITIONS = {"locate", "relocate", "find"}
+# This mirrors ``lifecycle.LOCALISING_MOVES``, which is what the module's picker
+# and ``relocate_device`` are built from -- so ``recover`` is absent here for the
+# same reason REMOVED is absent there: bringing a decommissioned device back is a
+# separate act with its own permission, offered from the admin. A test pins the
+# two against each other.
+RELOCATE_TRANSITIONS = set(lifecycle.LOCALISING_MOVES)
 
 
 @dataclass

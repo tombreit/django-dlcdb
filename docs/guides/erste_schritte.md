@@ -53,7 +53,7 @@ Einige Menüpunkte gehören technisch zur App *DLCDB Core*, obwohl sie in einem 
 |---|---|---|
 | Ausleihe (Hauptmenü) | Core \| lent record \| Can view lent record | `core.view_lentrecord` |
 | Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
-| Umziehen (Hauptmenü) | Core \| in room record \| Can add in room record | `core.add_inroomrecord` |
+| Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.can_locate_device`, `core.can_relocate_device` oder `core.can_find_device` |
 | Inventarisieren (Hauptmenü) | Core \| … \| Can inventorize | `core.can_inventorize` |
 | Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
 | Lizenzen (Hauptmenü) | *nur Anmeldung erforderlich* | — |
@@ -111,7 +111,13 @@ Beide Übergänge waren technisch immer zulässig (Inventur, Superuser-Aktion im
 :::{admonition} **Umstellung bestehender Installationen**
 :class: note
 
-Früher wurden Statuswechsel über die *Can add*-Berechtigung des jeweils geschriebenen Records gesteuert (z.B. `core.add_inroomrecord`). Bei der Migration erhalten alle Gruppen und Benutzer automatisch die neuen Berechtigungen, die ihren bisherigen Rechten entsprechen – niemand verliert oder gewinnt dabei eine Fähigkeit. Die alten `add_*`-Berechtigungen bleiben bestehen, steuern die angebotenen Statuswechsel aber nicht mehr.
+Früher wurden Statuswechsel über die *Can add*-Berechtigung des jeweils geschriebenen Records gesteuert (z.B. `core.add_inroomrecord`), die Ausleihe zusätzlich über `core.change_lentrecord`. Bei der Migration erhalten alle Gruppen und Benutzer automatisch die neuen Berechtigungen, die ihren bisherigen Rechten entsprechen – niemand verliert oder gewinnt dabei eine Fähigkeit. Die alten `add_*`- und `change_*`-Berechtigungen bleiben bestehen, steuern die Statuswechsel aber nicht mehr.
+:::
+
+:::{admonition} **Die Berechtigung gilt für die ganze Aktion**
+:class: tip
+
+Eine Berechtigung schaltet nicht nur den Button auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur `core.can_find_device` besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen. Ein Button, der anschließend in einer Fehlermeldung endet, kann so nicht mehr entstehen.
 :::
 
 ## Branding

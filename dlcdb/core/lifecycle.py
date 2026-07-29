@@ -162,6 +162,30 @@ TRANSITIONS = (
 BY_NAME = {t.name: t for t in TRANSITIONS}
 
 
+# ── Localisation: the "put this device in a room" flow ──────────────────────
+# The Move module (assets) and the admin bulk relocate both end with a device in
+# a room, but they can get there by more than one move. Mapping each move to the
+# states it starts from, once, is what lets the device picker, the view gate and
+# ``core.utils.relocate.relocate_device`` agree instead of each restating which
+# states it accepts -- a drift that used to produce buttons the view then refused.
+#
+# LENT rides along with ``relocate``: moving a lent device updates the room on
+# its active lending in place (``relocate_lending``) and is not a transition at
+# all, so it has no permission of its own.
+#
+# REMOVED is absent on purpose. Recovering a decommissioned device is a separate
+# act with its own permission, offered from the admin rather than folded into a
+# bulk mover.
+LOCALISING_MOVES = {
+    "locate": (None, ORDERED),
+    "relocate": (INROOM, LENT),
+    "find": (LOST,),
+}
+
+# The states ``relocate_device`` accepts; everything else it refuses.
+RELOCATABLE_STATES = tuple({state for sources in LOCALISING_MOVES.values() for state in sources})
+
+
 # ── Query API ───────────────────────────────────────────────────────────────
 
 
@@ -192,6 +216,21 @@ def permission_for(transition):
     is the seam the UI and the tests go through.
     """
     return transition.permission
+
+
+def localisable_states_for(user):
+    """The source states from which ``user`` may put a device in a room.
+
+    The union of the ``LOCALISING_MOVES`` entries whose permission the user
+    holds, so a user who may only mark lost devices as found sees exactly the
+    lost ones. An empty set means the user may make none of these moves; callers
+    refuse access on that rather than rendering an empty picker.
+    """
+    states = set()
+    for name, sources in LOCALISING_MOVES.items():
+        if user and user.has_perm(BY_NAME[name].permission):
+            states.update(sources)
+    return states
 
 
 def device_precondition_met(device, transition):

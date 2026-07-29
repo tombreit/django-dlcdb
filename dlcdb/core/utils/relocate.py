@@ -39,14 +39,24 @@ def relocate_device(device, new_room, user):
     writing itself lives in ``dlcdb.core.lifecycle``.
 
     - LENT     -> ``relocate_lending`` (update the room in place; lending continues)
-    - REMOVED  -> refuse (the device should no longer be located)
     - same room -> no-op
     - LOST     -> ``transition_find`` (the device turned up in a room again)
     - INROOM   -> ``transition_relocate`` (append a new room record)
     - no record / ORDERED -> ``transition_locate`` (first localisation)
+
+    Anything outside ``lifecycle.RELOCATABLE_STATES`` is refused -- in practice a
+    REMOVED device, which should no longer be located. Reading that set rather
+    than restating it keeps this function and the device pickers that feed it
+    from disagreeing about what is moveable.
     """
     state = lifecycle.state_of(device)
     active_record = device.active_record
+
+    if state not in lifecycle.RELOCATABLE_STATES:
+        return RelocateResult(
+            level=messages.WARNING,
+            message=linked_message(_("Device “{device}” is removed and was not relocated."), device=device),
+        )
 
     if state == Record.LENT:
         lifecycle.relocate_lending(active_record, room=new_room, user=user)
@@ -60,12 +70,6 @@ def relocate_device(device, new_room, user):
                 device=device,
                 room=new_room,
             ),
-        )
-
-    if state == Record.REMOVED:
-        return RelocateResult(
-            level=messages.WARNING,
-            message=linked_message(_("Device “{device}” is removed and was not relocated."), device=device),
         )
 
     if active_record is not None and active_record.room_id == new_room.pk:

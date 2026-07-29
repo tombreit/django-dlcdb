@@ -6,6 +6,7 @@ import datetime
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.test import override_settings
 from django.urls import reverse
 
@@ -23,6 +24,7 @@ from dlcdb.core.models import (
 )
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.tenants.models import Tenant
 
 # Plain static storage so tests do not require a built staticfiles manifest
 # (mirrors dlcdb.lending.tests.test_views).
@@ -302,7 +304,12 @@ class RelocateViewTests(BaseTest):
 
     # --- moveable filter --------------------------------------------------
 
-    def test_search_excludes_removed_and_ordered_devices(self):
+    def test_search_excludes_removed_but_offers_ordered_devices(self):
+        """An ordered device is moveable: putting it in a room is its delivery.
+
+        A decommissioned one is not -- recovering it is a separate act with its
+        own permission, offered from the admin rather than folded in here.
+        """
         removed = self._create_device(edv_id="EDV-REMOVED", sap_id="3-3")
         RemovedRecord.objects.create(device=removed)
         ordered = self._create_device(edv_id="EDV-ORDERED", sap_id="4-4")
@@ -312,9 +319,21 @@ class RelocateViewTests(BaseTest):
             reverse("theme:device_search"), {"source": "move", "q_device": "*"}, headers={"HX-Request": "true"}
         )
         self.assertNotContains(response, "EDV-REMOVED")
-        self.assertNotContains(response, "EDV-ORDERED")
+        self.assertContains(response, "EDV-ORDERED")
         # The plain INROOM device is still offered.
         self.assertContains(response, "EDV-MOVE")
+
+    def test_can_relocate_ordered_device(self):
+        """The counterpart to the picker: the move itself goes through."""
+        ordered = self._create_device(edv_id="EDV-ORDERED", sap_id="4-4")
+        OrderedRecord.objects.create(device=ordered)
+
+        response = self.client.post(self.url, {"devices": [ordered.pk], "new_room": self.room_b.pk})
+        self.assertRedirects(response, self.url)
+
+        ordered.refresh_from_db()
+        self.assertEqual(ordered.active_record.record_type, Record.INROOM)
+        self.assertEqual(ordered.active_record.room, self.room_b)
 
     def test_search_includes_lost_device(self):
         lost = self._create_device(edv_id="EDV-LOST", sap_id="5-5")
@@ -366,3 +385,105 @@ class RelocateViewTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Please select at least one device to move.")
         self.assertContains(response, "Please select a target room.")
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en-us")
+class RelocatePermissionTests(BaseTest):
+    """The Move module fronts three moves with three separate permissions.
+
+    A single coarse permission used to open it, so a user who could only mark
+    lost devices as found either saw every moveable device or, once the buttons
+    became permission-driven, got a "Found" button the view then refused. What is
+    offered now follows from which of the three the user actually holds.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.room_a = Room.objects.create(number="A1.01", nickname="Office")
+        cls.room_b = Room.objects.create(number="B2.02", nickname="Lab")
+
+        # Non-superusers only ever see devices of their own tenant, so give the
+        # test users one -- otherwise every assertion below would pass for the
+        # wrong reason (an empty queryset rather than a missing permission).
+        cls.group = Group.objects.create(name="movers")
+        tenant = Tenant.objects.create(name="TestTenant")
+        tenant.groups.add(cls.group)
+
+        cls.inroom = cls()._create_device(edv_id="EDV-INROOM", sap_id="9-1")
+        InRoomRecord.objects.create(device=cls.inroom, room=cls.room_a)
+
+        cls.lost = cls()._create_device(edv_id="EDV-LOST", sap_id="9-2")
+        establish_state(LostRecord, device=cls.lost)
+
+        Device.objects.update(tenant=tenant)
+
+    def setUp(self):
+        self.url = reverse("assets:relocate")
+
+    def _user(self, *codenames, email="mover@example.com"):
+        user = get_user_model().objects.create_user(email=email, password="secret", username=email.split("@")[0])
+        user.groups.add(self.group)
+        for codename in codenames:
+            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        user = get_user_model().objects.get(pk=user.pk)  # reset the perm cache
+        self.client.force_login(user)
+        return user
+
+    def _search(self):
+        return self.client.post(
+            reverse("theme:device_search"), {"source": "move", "q_device": "*"}, headers={"HX-Request": "true"}
+        )
+
+    # --- who may open the module -----------------------------------------
+
+    def test_a_user_with_none_of_the_moves_is_refused(self):
+        self._user()
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+    def test_any_one_of_the_moves_opens_the_module(self):
+        self._user("can_find_device")
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+
+    def test_the_device_search_refuses_a_user_with_none_of_the_moves(self):
+        self._user()
+        response = self._search()
+        self.assertNotContains(response, "EDV-INROOM")
+        self.assertNotContains(response, "EDV-LOST")
+
+    # --- what each of them is offered -------------------------------------
+
+    def test_a_finder_is_offered_lost_devices_only(self):
+        self._user("can_find_device")
+        response = self._search()
+        self.assertContains(response, "EDV-LOST")
+        self.assertNotContains(response, "EDV-INROOM")
+
+    def test_a_relocator_is_not_offered_lost_devices(self):
+        self._user("can_relocate_device")
+        response = self._search()
+        self.assertContains(response, "EDV-INROOM")
+        self.assertNotContains(response, "EDV-LOST")
+
+    # --- and the move itself goes through ---------------------------------
+
+    def test_a_finder_can_move_the_lost_device(self):
+        self._user("can_find_device")
+
+        response = self.client.post(self.url, {"devices": [self.lost.pk], "new_room": self.room_b.pk})
+        self.assertRedirects(response, self.url)
+
+        self.lost.refresh_from_db()
+        self.assertEqual(self.lost.active_record.record_type, Record.INROOM)
+        self.assertEqual(self.lost.active_record.room, self.room_b)
+
+    def test_a_finder_cannot_move_a_device_the_picker_never_offered(self):
+        """The form shares ``move_queryset``, so POSTing a pk is not a way round it."""
+        self._user("can_find_device")
+        before = self.inroom.record_set.count()
+
+        response = self.client.post(self.url, {"devices": [self.inroom.pk], "new_room": self.room_b.pk})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["form"].is_valid())
+        self.assertIn("devices", response.context["form"].errors)
+        self.assertEqual(self.inroom.record_set.count(), before)

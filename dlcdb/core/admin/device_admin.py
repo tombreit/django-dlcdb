@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import json
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.urls import reverse
@@ -326,13 +327,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         """
         selected = queryset.values_list("pk", flat=True)
         ct = ContentType.objects.get_for_model(queryset.model, for_concrete_model=False)
-        return HttpResponseRedirect(
-            "/core/devices/relocate/?ct=%s&ids=%s"
-            % (
-                ct.pk,
-                ",".join(str(pk) for pk in selected),
-            )
-        )
+        query = urlencode({"ct": ct.pk, "ids": ",".join(str(pk) for pk in selected)})
+        return HttpResponseRedirect(f"{reverse('core:core_devices_relocate')}?{query}")
 
     @admin.action(description=_("Restore devices from REMOVED to LOST"))
     def restore_removed_to_lost(self, request, queryset):

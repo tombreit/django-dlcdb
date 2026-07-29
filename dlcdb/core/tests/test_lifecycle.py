@@ -13,6 +13,21 @@ from dlcdb.core import lifecycle
 from dlcdb.core.models import InRoomRecord, LentRecord, Record, Room
 
 
+@pytest.fixture
+def make_lifecycle_user(db):
+    """A non-superuser carrying only the named ``core`` lifecycle permissions."""
+    from django.contrib.auth import get_user_model
+    from django.contrib.auth.models import Permission
+
+    def _make(*codenames, email="staff@example.com"):
+        user = get_user_model().objects.create_user(email=email, password="secret", username=email.split("@")[0])
+        for codename in codenames:
+            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        return get_user_model().objects.get(pk=user.pk)  # reset the perm cache
+
+    return _make
+
+
 # --- The module is the whole picture ------------------------------------
 
 
@@ -141,6 +156,65 @@ def test_transition_permissions_exist_in_the_database():
         assert Permission.objects.filter(codename=codename, content_type__app_label="core").exists(), (
             f"transition {t.name!r} names {t.permission!r}, which no Permission row provides"
         )
+
+
+# --- The localisation flow -----------------------------------------------
+# ``LOCALISING_MOVES`` is what the Move module's picker, its view gate and
+# ``relocate_device`` all read, so that a device the picker offers cannot be one
+# the writer refuses. These tests pin the declaration against the transition
+# table it summarises.
+
+
+def test_localising_moves_name_real_transitions():
+    for name in lifecycle.LOCALISING_MOVES:
+        assert name in lifecycle.BY_NAME
+
+
+def test_localising_move_sources_are_legal_sources_of_their_transition():
+    """Each state listed must actually be one that transition may start from.
+
+    The single exception is LENT under ``relocate``: moving a lent device edits
+    the room on its active lending in place (``relocate_lending``) and is not a
+    transition at all, so it appears in no ``sources`` tuple.
+    """
+    in_place = {("relocate", lifecycle.LENT)}
+    for name, sources in lifecycle.LOCALISING_MOVES.items():
+        for source in sources:
+            if (name, source) in in_place:
+                continue
+            assert source in lifecycle.BY_NAME[name].sources, f"{name!r} cannot start from {source!r}"
+
+
+def test_relocatable_states_admit_ordered_and_refuse_removed():
+    """A device that has arrived can be put in a room; a decommissioned one cannot.
+
+    Recovering a REMOVED device is a separate act with its own permission,
+    offered from the admin rather than folded into a bulk mover.
+    """
+    assert lifecycle.ORDERED in lifecycle.RELOCATABLE_STATES
+    assert None in lifecycle.RELOCATABLE_STATES
+    assert lifecycle.REMOVED not in lifecycle.RELOCATABLE_STATES
+
+
+@pytest.mark.django_db
+def test_localisable_states_are_scoped_to_what_the_user_may_do(make_lifecycle_user):
+    """The point of the declaration: one Move module, three permissions.
+
+    A user who may only mark lost devices as found is offered the lost ones and
+    nothing else -- previously a single coarse permission covered all of them.
+    """
+    finder = make_lifecycle_user("can_find_device")
+    assert lifecycle.localisable_states_for(finder) == {lifecycle.LOST}
+
+    mover = make_lifecycle_user("can_relocate_device", email="mover@example.com")
+    assert lifecycle.localisable_states_for(mover) == {lifecycle.INROOM, lifecycle.LENT}
+
+    nobody = make_lifecycle_user(email="nobody@example.com")
+    assert lifecycle.localisable_states_for(nobody) == set()
+
+
+def test_localisable_states_for_anonymous_is_empty():
+    assert lifecycle.localisable_states_for(None) == set()
 
 
 # --- Enforcement ---------------------------------------------------------

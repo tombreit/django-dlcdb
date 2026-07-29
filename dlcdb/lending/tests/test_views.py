@@ -434,6 +434,38 @@ class LendingDetailViewTests(BaseTest):
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 
+    def _plain_user_with(self, *codenames):
+        user = get_user_model().objects.create_user(email="gated@example.com", password="secret", username="gated")
+        for codename in codenames:
+            user.user_permissions.add(Permission.objects.get(content_type__app_label="core", codename=codename))
+        self.client.force_login(user)  # refresh the cached permission set
+        return user
+
+    def _post_lend(self):
+        return self.client.post(reverse("lending:detail", args=[self.available_record.pk]), self._lend_payload())
+
+    def test_the_lend_transition_permission_opens_the_view(self):
+        """Lending is guarded by the permission the ``lend`` transition declares.
+
+        Previously it was ``core.change_lentrecord``, chosen independently of the
+        lifecycle, so a grant could open the button without opening the view (or
+        the other way round).
+        """
+        self._plain_user_with("can_lend_device")
+
+        response = self._post_lend()
+
+        self.assertNotIn("HX-Refresh", response.headers)
+
+    def test_the_old_crud_permission_no_longer_opens_the_view(self):
+        self._plain_user_with("change_lentrecord")
+
+        response = self._post_lend()
+
+        self.assertEqual(response["HX-Refresh"], "true")
+        self.available_device.refresh_from_db()
+        self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
+
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingPersonSearchTests(BaseTest):

@@ -30,7 +30,7 @@ def register():
     register_picker_source(
         PickerSource(
             name="lend",
-            permission="core.change_lentrecord",
+            permissions=(lifecycle.BY_NAME["lend"].permission,),
             get_queryset=lend_queryset,
             search_param="q",
             multiple=False,

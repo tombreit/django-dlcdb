@@ -7,7 +7,7 @@ Registry of device-picker *data sources*.
 
 The device picker (widget, card, results partial, JS, search helper) is generic
 and only ever handles ``core.Device`` querysets. The one thing that differs
-between callers — which devices are offered and which permission guards them —
+between callers — which devices are offered and which permissions guard them —
 is described here as a ``PickerSource`` and registered by the owning app at
 ``AppConfig.ready()``. The shared search endpoint (``theme.views.device_search``)
 looks the source up by its ``name`` (a POST ``source`` token), so ``theme`` never
@@ -28,7 +28,13 @@ from django.http import HttpRequest
 @dataclass(frozen=True)
 class PickerSource:
     name: str  # POST `source` token, e.g. "lend" / "move"
-    permission: str  # required perm, e.g. "core.change_lentrecord"
+    # The permissions that open this picker, any one of which suffices. A tuple
+    # rather than a single string because a picker can serve several lifecycle
+    # moves at once: the "move" source covers locate, relocate and find, which
+    # carry three different permissions. Sources whose queryset varies by
+    # permission must still scope it themselves -- this only decides whether the
+    # search endpoint answers at all.
+    permissions: tuple[str, ...]
     get_queryset: Callable[[HttpRequest], QuerySet]  # tenant-scoped Device queryset
     search_param: str  # name of the search input, e.g. "q" / "q_device"
     multiple: bool  # single- vs multi-select picker
@@ -36,6 +42,10 @@ class PickerSource:
     # picked pks, sent along with each live search (hx-include) so they drop out
     # of the results.
     exclude_param: Optional[str] = None
+
+    def grants_access(self, user) -> bool:
+        """True if ``user`` holds any of this source's permissions."""
+        return any(user.has_perm(permission) for permission in self.permissions)
 
 
 _REGISTRY: dict[str, PickerSource] = {}

@@ -6,15 +6,26 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.utils.translation import gettext as _
 
+from .. import lifecycle
 from ..forms.adminactions_forms import RelocateActionForm
 from ..models import Device
 from ..utils.links import linked_message
 from ..utils.relocate import relocate_device
 
+# Reassigning a tenant or a device type is a plain device edit, not a lifecycle
+# move -- and a tenant change moves a device between organisational scopes -- so
+# it is gated separately from the relocation itself.
+EDIT_DEVICE_PERM = "core.change_device"
+
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(
+    permission_required(lifecycle.BY_NAME["relocate"].permission, raise_exception=True),
+    name="dispatch",
+)
 class DevicesRelocateView(FormView):
     success_url = reverse_lazy("admin:core_device_changelist")
     template_name = "core/actions/relocate.html"
@@ -29,7 +40,9 @@ class DevicesRelocateView(FormView):
     def get_initial(self):
         initial = super().get_initial()
 
-        device_ids = self.request.GET.get("ids").split(",")
+        # A bare GET without ?ids= is a 404-shaped mistake, not a 500: treat a
+        # missing or blank parameter as "no devices selected".
+        device_ids = [pk for pk in (self.request.GET.get("ids") or "").split(",") if pk]
         devices = Device.objects.filter(pk__in=device_ids)
 
         initial.update(
@@ -54,6 +67,15 @@ class DevicesRelocateView(FormView):
         return super().form_valid(form)
 
     def relocate_devices(self, devices, new_room, user, new_tenant, new_device_type):
+        may_edit_device = user.has_perm(EDIT_DEVICE_PERM)
+        if (new_tenant or new_device_type) and not may_edit_device:
+            messages.add_message(
+                self.request,
+                messages.WARNING,
+                _("Tenant and device type were left unchanged: you may move devices but not edit them."),
+            )
+            new_tenant = new_device_type = None
+
         for device in devices:
             # print(f"Processing device: {device}...")
 

@@ -22,6 +22,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import (
     Device,
     InRoomRecord,
@@ -357,6 +358,20 @@ def test_assets_keeps_each_move_labelled_as_itself(lentable_device, room, superu
     assert len(found) == 1
     assert found[0]["label"] == "Found"
     assert found[0]["external"] is False
+
+
+def test_frontend_move_routing_matches_the_localisation_declaration():
+    """The buttons routed to the Move module are exactly the moves it performs.
+
+    ``device_methods`` decides which actions link to ``assets:relocate``; the
+    module's picker and ``relocate_device`` are built from
+    ``lifecycle.LOCALISING_MOVES``. If the two ever diverge the result is a
+    button that the view then refuses, which is how ``recover`` first went wrong.
+    """
+    from dlcdb.core.utils.device_methods import RELOCATE_TRANSITIONS
+
+    assert RELOCATE_TRANSITIONS == set(lifecycle.LOCALISING_MOVES)
+    assert "recover" not in RELOCATE_TRANSITIONS
 
 
 @pytest.mark.django_db

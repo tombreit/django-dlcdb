@@ -36,21 +36,29 @@ def htmx_login_required(view_func):
     return wrapped_view
 
 
-def htmx_permission_required(perm):
+def htmx_permission_required(*perms):
     """
     Permission guard that plays nicely with HTMX requests: on a missing
     permission it flashes a message and triggers a client-side refresh instead
     of rendering Django's plain 403 page.
+
+    Several permissions mean *any one of them* suffices, for views that front
+    more than one lifecycle move (the room picker serves locate, relocate and
+    find). Django's own ``permission_required`` requires all of a list, which is
+    the opposite of what those views need.
     """
 
     def decorator(view_func):
         @functools.wraps(view_func)
         def wrapped_view(request, *args, **kwargs):
-            if not request.user.has_perm(perm):
+            if not any(request.user.has_perm(perm) for perm in perms):
                 # codename is not unique across apps, so a bare get() can raise
                 # MultipleObjectsReturned — first() is enough for a message.
-                perm_obj = Permission.objects.filter(codename=perm.split(".")[-1]).first()
-                messages.error(request, f"Permission denied. You need the permission: {perm_obj or perm}")
+                names = []
+                for perm in perms:
+                    perm_obj = Permission.objects.filter(codename=perm.split(".")[-1]).first()
+                    names.append(str(perm_obj or perm))
+                messages.error(request, f"Permission denied. You need the permission: {' or '.join(names)}")
                 return HttpResponseClientRefresh()
             return view_func(request, *args, **kwargs)
 

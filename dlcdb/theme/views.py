@@ -41,7 +41,7 @@ def device_search(request):
         if getattr(request, "htmx", False):
             return HttpResponseClientRefresh()
         return redirect_to_login(request.get_full_path())
-    if not request.user.has_perm(source.permission):
+    if not source.grants_access(request.user):
         messages.error(request, _("Permission denied."))
         return HttpResponseClientRefresh()
 
