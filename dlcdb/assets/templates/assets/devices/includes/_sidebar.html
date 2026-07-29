@@ -20,8 +20,7 @@ and mirror the admin's read-only status.
       <h2 class="device-card-title">{% translate "Current state" %}</h2>
     </div>
     <div class="card-body">
-      {# lending_url turns the borrower into a link to the lending. Only this
-         card passes it; the device list includes the same snippet without it. #}
+      {# lending_url turns the borrower into a link to the lending. Only this card passes it; the device list includes the same snippet without it. #}
       {% include "assets/devices/includes/_state.html" with device=device lending_url=lending_url %}
       {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
     </div>
