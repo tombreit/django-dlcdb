@@ -12,15 +12,15 @@ from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import run_device_import
 from .remover import set_removed_record
-from .device_export import device_csv_response, legacy_device_columns
+from .device_export import EXPORT_RELATIONS, device_csv_response
 
 
 class ExportCsvMixin:
     """Changelist action exporting the selected devices as CSV.
 
     Mixed into ``core.admin.DeviceAdmin`` and ``core.admin.LentRecordAdmin``.
-    The rows themselves are built in ``device_export``, which the assets
-    frontend export shares, so both surfaces emit the same file.
+    Rows are built in ``device_export``, which the assets frontend export shares,
+    so both surfaces emit the same file.
     """
 
     @admin.action(description="Export selected as CSV")
@@ -29,18 +29,17 @@ class ExportCsvMixin:
 
         if meta.model is LentRecord:
             # The action hangs off the LentRecord changelist but exports the
-            # devices behind the selected records.
+            # devices behind the selected records. No extra columns needed: the
+            # borrower and the lending dates are part of every device row.
             devices = Device.objects.filter(pk__in=queryset.values_list("device", flat=True))
-            columns = legacy_device_columns(extra=["person", "lent_desired_end_date"])
         else:
             devices = queryset
-            columns = legacy_device_columns()
 
-        # Most exported columns resolve through the active record; without this
-        # the export ran several queries per row.
-        devices = devices.select_related("active_record__room", "active_record__person")
+        # The changelist queryset joins only what the changelist renders; the
+        # export reads more relations than that.
+        devices = devices.select_related(*EXPORT_RELATIONS)
 
-        return device_csv_response(devices, columns, slug=f"{meta.app_label}-{meta.model_name}")
+        return device_csv_response(devices, slug=f"{meta.app_label}-{meta.model_name}")
 
 
 @admin.register(ImporterList)

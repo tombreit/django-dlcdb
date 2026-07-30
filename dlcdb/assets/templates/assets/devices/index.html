@@ -49,7 +49,7 @@
             The href is built in the view: the builtin querystring tag would keep
             this page's path rather than the export endpoint's.
           {% endcomment %}
-          <a class="btn btn-sm btn-outline-secondary ms-auto" href="{{ export_href }}">
+          <a class="ms-4" href="{{ export_href }}">
             <i class="bi bi-filetype-csv"></i>
             {% blocktranslate count counter=device_filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
           </a>

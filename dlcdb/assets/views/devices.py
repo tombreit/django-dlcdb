@@ -22,7 +22,7 @@ from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
-from dlcdb.dataexchange.device_export import device_csv_response, legacy_device_columns
+from dlcdb.dataexchange.device_export import device_csv_response
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
@@ -140,14 +140,9 @@ def device_export_csv(request):
     mean "export what I am looking at". Shares ``_device_filter`` with the index
     so the two cannot drift apart.
 
-    Columns come from ``legacy_device_columns``, which is what the admin action
-    has always emitted. Curating that set is a separate change.
+    Columns come from ``device_export``, the same set the admin action emits.
     """
-    return device_csv_response(
-        _device_filter(request).qs,
-        legacy_device_columns(),
-        slug="core-device",
-    )
+    return device_csv_response(_device_filter(request).qs, slug="core-device")
 
 
 def _get_device(request, pk):
