@@ -8,7 +8,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -22,7 +21,8 @@ from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
-from dlcdb.dataexchange.device_export import device_csv_response
+from dlcdb.dataexchange.csv_export import csv_response
+from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
@@ -74,31 +74,6 @@ def _device_filter(request):
     return DeviceFilter(data, queryset=_device_queryset(request), request=request)
 
 
-def _export_href(request):
-    """The export URL carrying the list's current search, filters and ordering.
-
-    Two kinds of parameter are left out. ``page`` and ``show_all`` are pagination
-    state, meaningless for an export that always covers every matching row. Empty
-    values are dropped because every filter reads them as "not filtering" anyway,
-    and the filterbar submits its whole form -- so without this the href collects
-    a dozen ``&device_type=&state=&...`` pairs on every swap. The result is a URL
-    worth copying and sharing.
-
-    Built here rather than with the builtin ``{% querystring %}`` tag: that tag
-    rebuilds ``request.path``, which is the list endpoint, and the export lives
-    at a different one.
-    """
-    query = QueryDict(mutable=True)
-    for param, values in request.GET.lists():
-        if param in {"page", "show_all"}:
-            continue
-        query.setlist(param, [value for value in values if value])
-
-    encoded = query.urlencode()
-    url = reverse("assets:device_export_csv")
-    return f"{url}?{encoded}" if encoded else url
-
-
 @permission_required("core.view_device", raise_exception=True)
 def device_index(request):
     """Tenant-scoped Device overview, with progressive HTMX filtering."""
@@ -122,7 +97,7 @@ def device_index(request):
         # a second device_filter.qs.count().
         "device_filtered_count": page_obj.paginator.count,
         "device_total_count": device_filter.queryset.count(),
-        "export_href": _export_href(request),
+        "export_href": export_href(request, "assets:device_export_csv"),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
         # Mirrors dlcdb.lending.views.index.
@@ -140,9 +115,9 @@ def device_export_csv(request):
     mean "export what I am looking at". Shares ``_device_filter`` with the index
     so the two cannot drift apart.
 
-    Columns come from ``device_export``, the same set the admin action emits.
+    Columns come from ``csv_export``, the same set the admin action emits.
     """
-    return device_csv_response(_device_filter(request).qs, slug="core-device")
+    return csv_response(_device_filter(request).qs, slug="core-device")
 
 
 def _get_device(request, pk):

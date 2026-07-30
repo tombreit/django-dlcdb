@@ -12,15 +12,15 @@ from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import run_device_import
 from .remover import set_removed_record
-from .device_export import EXPORT_RELATIONS, device_csv_response
+from .csv_export import EXPORT_RELATIONS, csv_response
 
 
 class ExportCsvMixin:
     """Changelist action exporting the selected devices as CSV.
 
     Mixed into ``core.admin.DeviceAdmin`` and ``core.admin.LentRecordAdmin``.
-    Rows are built in ``device_export``, which the assets frontend export shares,
-    so both surfaces emit the same file.
+    Rows are built in ``csv_export``, which the assets frontend export shares, so
+    both surfaces emit the same file.
     """
 
     @admin.action(description="Export selected as CSV")
@@ -39,7 +39,7 @@ class ExportCsvMixin:
         # export reads more relations than that.
         devices = devices.select_related(*EXPORT_RELATIONS)
 
-        return device_csv_response(devices, slug=f"{meta.app_label}-{meta.model_name}")
+        return csv_response(devices, slug=f"{meta.app_label}-{meta.model_name}")
 
 
 @admin.register(ImporterList)

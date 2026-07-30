@@ -31,6 +31,23 @@
       ({% blocktranslate with available=lent_available_count lent=lent_lent_count %}{{ available }} available, {{ lent }} lent{% endblocktranslate %})
     </span>
     {% include "theme/filterbar/chips.html" with bar=filterbar %}
+    {% if lent_filtered_count %}
+      {% comment %}
+        A plain link on purpose: an hx-get here would swap the CSV body into the
+        page. The fragment root's hx-target/hx-swap are inherited only by elements
+        that already issue an HTMX request, and hx-boost is used nowhere, so a bare
+        href cannot be ajax-ified.
+
+        Living inside the swapped fragment keeps the label honest: count and href
+        are re-rendered from the same request on every filter change. "devices" is
+        the right noun even though the file is lending-shaped -- the count beside
+        it counts devices, and available ones are listed here too.
+      {% endcomment %}
+      <a class="ms-4" href="{{ export_href }}">
+        <i class="bi bi-filetype-csv"></i>
+        {% blocktranslate count counter=lent_filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
+      </a>
+    {% endif %}
   </div>
 
   <div class="table-responsive">

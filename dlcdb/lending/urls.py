@@ -10,6 +10,7 @@ app_name = "lending"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("export.csv", views.lending_export_csv, name="export_csv"),
     path("lend/", views.lend, name="lend"),
     path("person-search/", views.person_search, name="person_search"),
     path("<int:pk>/", views.lend, name="detail"),

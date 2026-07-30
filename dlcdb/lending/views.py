@@ -24,6 +24,12 @@ from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.links import linked_message
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.dataexchange.csv_export import (
+    LENDING_EXPORT_RELATIONS,
+    csv_response,
+    lending_export_columns,
+)
+from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 
 from .decorators import htmx_permission_required
@@ -36,6 +42,10 @@ from .filters import (
 )
 from .forms import LentingForm, QuickLendDeviceForm
 from .models import LendingConfiguration, LendingProfile
+
+
+# Applied when the request names no ordering; an explicit ?ordering= still wins.
+DEFAULT_ORDERING = "-modified"
 
 
 def _tenant_scoped(queryset, request):
@@ -90,15 +100,14 @@ def _annotate_lent_state(queryset):
     ).order_by("lent_state_sort", "device__edv_id")
 
 
-@login_required
-@permission_required("core.view_lentrecord", raise_exception=True)
-def index(request):
-    """
-    Overview of lendable devices: what is currently lent to whom and what is
-    available, with live HTMX search/filtering and bookmarkable URLs.
-    """
-    template = "lending/index.html#lent-list" if request.htmx else "lending/index.html"
+def _lending_filter(request):
+    """The bound ``LentRecordFilter`` this request's GET parameters select.
 
+    Shared by the index and the CSV export, so a download can never disagree
+    with the list it was started from: same tenant scoping, same annotations,
+    same filters, same ordering. ``.qs`` is the filtered queryset, ``.queryset``
+    the unfiltered one.
+    """
     base_qs = _annotate_lent_state(
         _tenant_scoped(
             LentRecord.objects.select_related("device__manufacturer", "device__device_type", "person", "room"),
@@ -110,9 +119,21 @@ def index(request):
     # and using setdefault means the OrderingFilter always applies an ordering,
     # so the default view is modified-desc while explicit clicks still win.
     data = request.GET.copy()
-    data.setdefault("ordering", "-modified")
+    data.setdefault("ordering", DEFAULT_ORDERING)
 
-    lent_record_filter = LentRecordFilter(data, queryset=base_qs, request=request)
+    return LentRecordFilter(data, queryset=base_qs, request=request)
+
+
+@login_required
+@permission_required("core.view_lentrecord", raise_exception=True)
+def index(request):
+    """
+    Overview of lendable devices: what is currently lent to whom and what is
+    available, with live HTMX search/filtering and bookmarkable URLs.
+    """
+    template = "lending/index.html#lent-list" if request.htmx else "lending/index.html"
+
+    lent_record_filter = _lending_filter(request)
 
     counts = lent_record_filter.qs.aggregate(
         total=Count("pk"),
@@ -128,17 +149,38 @@ def index(request):
             target="#lent-list",
             search_placeholder=_("Search device, person, note..."),
         ),
-        "current_ordering": data.get("ordering"),
+        "current_ordering": lent_record_filter.data.get("ordering"),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
         "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
         "lent_filtered_count": counts["total"],
-        "lent_total_count": base_qs.count(),
+        "lent_total_count": lent_record_filter.queryset.count(),
         "lent_available_count": counts["available"],
         "lent_lent_count": counts["lent"],
+        # No pagination on this page, so the export covers exactly what is shown.
+        "export_href": export_href(request, "lending:export_csv", drop=()),
     }
 
     return TemplateResponse(request, template, context)
+
+
+@login_required
+@permission_required("core.view_lentrecord", raise_exception=True)
+def lending_export_csv(request):
+    """The current lending list as a CSV download.
+
+    Every row the active search, filters and ordering select. This page is
+    unpaginated, so that is exactly what is on screen. Shares ``_lending_filter``
+    with the index so the two cannot drift apart.
+
+    Lending-shaped columns rather than the device set: on this page the borrower,
+    their email and the loan's reason and accessories are the point.
+    """
+    return csv_response(
+        _lending_filter(request).qs.select_related(*LENDING_EXPORT_RELATIONS),
+        columns=lending_export_columns(),
+        slug="core-lentrecord",
+    )
 
 
 def _get_scoped_record(request, pk):
