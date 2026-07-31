@@ -9,6 +9,7 @@ from django.db.models import Count
 from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .abstracts import SoftDeleteAuditBaseModel, AuditBaseModel
 
@@ -90,12 +91,13 @@ class ActiveContractObjectsBaseModel(models.Model):
 
 
 class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
-    first_name = models.CharField(max_length=255, verbose_name="Vorname")
-    last_name = models.CharField(max_length=255, verbose_name="Nachname")
+    first_name = models.CharField(max_length=255, verbose_name=_("First name"))
+    last_name = models.CharField(max_length=255, verbose_name=_("Last name"))
     email = models.EmailField(
         blank=False,
         null=True,
         unique=True,
+        verbose_name=_("E-mail"),
         help_text="IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht anschreiben können.",
     )
     organizational_unit = models.ForeignKey(

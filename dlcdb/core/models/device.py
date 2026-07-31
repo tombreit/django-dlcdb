@@ -421,7 +421,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     def get_edv_id(self):
         return self.edv_id or "----"
 
-    get_edv_id.short_description = "EDV ID"
+    get_edv_id.short_description = _("IT ID")
 
     def get_absolute_url(self):
         if self.is_licence:

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class AuditBaseModel(models.Model):
@@ -23,11 +24,11 @@ class AuditBaseModel(models.Model):
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
-        verbose_name="Erstellt",
+        verbose_name=_("Created"),
     )
     modified_at = models.DateTimeField(
         auto_now=True,
-        verbose_name="Geändert",
+        verbose_name=_("Modified"),
     )
 
     class Meta:

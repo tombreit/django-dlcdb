@@ -14,10 +14,12 @@ class DeviceType(SoftDeleteAuditBaseModel):
     name = models.CharField(
         max_length=255,
         blank=False,
+        verbose_name=_("Name"),
     )
     prefix = models.CharField(
         max_length=255,
         blank=True,
+        verbose_name=_("Prefix"),
     )
     icon = models.CharField(
         max_length=64,

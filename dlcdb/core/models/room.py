@@ -28,11 +28,13 @@ class Room(SoftDeleteAuditBaseModel):
     number = models.CharField(
         max_length=30,
         unique=True,
+        verbose_name=_("Room number"),
     )
     nickname = models.CharField(
         max_length=255,
         null=True,
         blank=True,
+        verbose_name=_("Nickname"),
     )
     description = models.TextField(
         blank=True,
