@@ -98,7 +98,7 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         null=True,
         unique=True,
         verbose_name=_("E-mail"),
-        help_text="IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht anschreiben können.",
+        help_text=_("ALWAYS provide an email address, otherwise we won't be able to contact the borrowers."),
     )
     organizational_unit = models.ForeignKey(
         "core.OrganizationalUnit",

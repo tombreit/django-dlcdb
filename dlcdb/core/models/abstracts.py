@@ -20,7 +20,7 @@ class AuditBaseModel(models.Model):
     username = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="Benutzername (denormalized)",
+        verbose_name=_("Username (denormalized)"),
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
