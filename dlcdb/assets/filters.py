@@ -93,6 +93,12 @@ class DeviceFilter(django_filters.FilterSet):
             ("modified_at", "modified"),
             ("tenant__name", "tenant"),
         ),
+        # Keyed by model field name, not by the exposed parameter. Without these,
+        # django-filter derives the labels from the parameter: "It id", "Inventory id".
+        field_labels={
+            "edv_id": _("IT ID"),
+            "sap_id": _("Inventory ID"),
+        },
     )
 
     class Meta:
