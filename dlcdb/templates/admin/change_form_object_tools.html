@@ -2,7 +2,9 @@
 {% block object-tools-items %}
 <li>
     {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-    <a href="{% add_preserved_filters history_url %}" class="historylink">{% translate "History" %}</a>
+    <a href="{% add_preserved_filters history_url %}" class="historylink">
+        <i class="bi bi-arrow-counterclockwise"></i> {% translate "Field history" %}
+    </a>
 </li>
 {% if has_absolute_url %}
 <li>

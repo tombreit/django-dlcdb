@@ -51,8 +51,8 @@ SPDX-License-Identifier: EUPL-1.2
 
     <li>
         <a class="small" href="{% url "admin:core_record_changelist" %}?device__id__exact={{ original.id }}">
-            <i class="bi bi-stack"></i>
-            {% translate "Show all records" %} {{ has_record_notes_badge|default:"" }}
+            <i class="bi bi-list-ul"></i>
+            {% translate "Records history" %} {{ has_record_notes_badge|default:"" }}
         </a>
     </li>
     {{ block.super }}
