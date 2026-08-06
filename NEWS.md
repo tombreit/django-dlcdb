@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* New device attribute: "URL", an optional link to e.g. a device's own management web interface
 * The device list and the lendings list frontend apps can now be exported as CSV, covering every device the active search and filters match (not just the current page).
 * The device CSV export changed shape: the machine and backup encryption keys are no longer exported, nor are the qrcode path, internal ids. Timestamps are rendered in local time instead of UTC.
 * All notifications (device events and periodic record reports) are now managed as *Subscriptions* in the `notifications` app; existing notification rules must be re-created in the admin. The `reporting` app only generates the report artifacts (xlsx)

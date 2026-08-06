@@ -78,7 +78,7 @@
   </div>
 </details>
 
-<details class="card device-card mb-3"{% if form.nick_name.errors or form.mac_address.errors or form.extra_mac_addresses.errors %} open{% endif %}>
+<details class="card device-card mb-3"{% if form.url.errors or form.nick_name.errors or form.mac_address.errors or form.extra_mac_addresses.errors %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-ethernet"></i>
     <h2 class="device-card-title">{% translate "Names and network" %}</h2>
@@ -86,6 +86,7 @@
   </summary>
   <div class="card-body">
     <div class="row g-3">
+      {% include "assets/devices/includes/_field.html" with field=form.url col="col-12" %}
       {% include "assets/devices/includes/_field.html" with field=form.nick_name col="col-md-4" %}
       {% include "assets/devices/includes/_field.html" with field=form.mac_address col="col-md-4" %}
       {% include "assets/devices/includes/_field.html" with field=form.extra_mac_addresses col="col-md-4" %}

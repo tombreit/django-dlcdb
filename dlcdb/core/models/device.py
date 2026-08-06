@@ -176,6 +176,14 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     )
 
     note = models.TextField(null=True, blank=True, verbose_name=_("Note"))
+    url = models.URLField(
+        blank=True,
+        verbose_name=_("URL"),
+        help_text=_(
+            "Optional link to a web resource for this device - for example its own "
+            "management web interface, a vendor support page or an online manual. "
+        ),
+    )
     mac_address = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Main MAC address"))
     extra_mac_addresses = models.TextField(null=True, blank=True, verbose_name=_("Further MAC addresses"))
     nick_name = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Nickname / C-Name"))

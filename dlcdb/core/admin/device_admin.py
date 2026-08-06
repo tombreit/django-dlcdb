@@ -163,6 +163,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             {
                 "classes": ("collapse",),
                 "fields": (
+                    "url",
                     "nick_name",
                     "mac_address",
                     "extra_mac_addresses",

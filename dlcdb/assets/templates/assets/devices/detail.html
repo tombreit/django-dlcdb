@@ -69,6 +69,13 @@
               <dd class="col-sm-8">{{ device.series|default:"—" }}</dd>
               <dt class="col-sm-4 text-secondary fw-medium">{% translate "Serial number" %}</dt>
               <dd class="col-sm-8 font-monospace">{{ device.serial_number|default:"—" }}</dd>
+              {% if device.url %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "URL" %}</dt>
+                <dd class="col-sm-8">
+                  <a href="{{ device.url }}" rel="noopener">{{ device.url }}
+                    <i class="bi bi-box-arrow-up-right small text-muted"></i></a>
+                </dd>
+              {% endif %}
               {% if device.note %}
                 <dt class="col-sm-4 text-secondary fw-medium">{% translate "Note" %}</dt>
                 <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ device.note }}</dd>

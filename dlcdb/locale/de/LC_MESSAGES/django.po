@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-06 10:53+0200\n"
-"PO-Revision-Date: 2026-08-06 11:01+0200\n"
+"POT-Creation-Date: 2026-08-06 11:51+0200\n"
+"PO-Revision-Date: 2026-08-06 11:52+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -119,7 +119,7 @@ msgid "Any state..."
 msgstr "Status..."
 
 #: dlcdb/assets/filters.py:47 dlcdb/assets/filters.py:49
-#: dlcdb/assets/templates/assets/devices/index.html:85
+#: dlcdb/assets/templates/assets/devices/index.html:92
 msgid "Loanable"
 msgstr "Verleihbar"
 
@@ -201,7 +201,7 @@ msgstr "Kein Duplikate Filter..."
 
 #: dlcdb/assets/filters.py:99
 #: dlcdb/assets/templates/assets/devices/detail.html:60
-#: dlcdb/core/models/device.py:94 dlcdb/core/models/device.py:424
+#: dlcdb/core/models/device.py:94 dlcdb/core/models/device.py:432
 msgid "IT ID"
 msgstr "IT ID"
 
@@ -225,7 +225,7 @@ msgid "No note"
 msgstr "Kein Notiz"
 
 #: dlcdb/assets/filters.py:172
-#: dlcdb/assets/templates/assets/devices/detail.html:73
+#: dlcdb/assets/templates/assets/devices/detail.html:80
 #: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
 #: dlcdb/core/models/record.py:150 dlcdb/dataexchange/forms.py:72
 #: dlcdb/lending/templates/lending/lend.html:172
@@ -250,7 +250,7 @@ msgstr "Bitte mindestens ein zu verschiebendes Gerät auswählen."
 msgid "Please select a target room."
 msgstr "Bitte einen Zielraum auswählen."
 
-#: dlcdb/assets/forms.py:150
+#: dlcdb/assets/forms.py:151
 msgid "Loanability cannot be changed while this device is lent."
 msgstr "Verleih-Attribut kann während des Verleihs nicht geändert werden."
 
@@ -307,7 +307,7 @@ msgid "No device types match these filters."
 msgstr "Keine Gerätetypen gefunden, die diesen Filtern entsprechen."
 
 #: dlcdb/assets/templates/assets/device_types/index.html:60
-#: dlcdb/assets/templates/assets/devices/index.html:103
+#: dlcdb/assets/templates/assets/devices/index.html:110
 #: dlcdb/assets/templates/assets/manufacturers/index.html:57
 #: dlcdb/assets/templates/assets/suppliers/index.html:59
 #: dlcdb/licenses/templates/licenses/index.html:140
@@ -378,6 +378,11 @@ msgstr "Modellbezeichnung"
 msgid "Serial number"
 msgstr "Seriennummer"
 
+#: dlcdb/assets/templates/assets/devices/detail.html:73
+#: dlcdb/core/models/device.py:181
+msgid "URL"
+msgstr "URL"
+
 #: dlcdb/assets/templates/assets/devices/includes/_device_teaser.html:15
 msgid "View device details"
 msgstr "Geräte-Details aufrufen"
@@ -407,11 +412,11 @@ msgstr "Suche Person via Name oder Email, oder \"*\" für Alle..."
 msgid "Names and network"
 msgstr "Namen und Netzwerk"
 
-#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:100
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:101
 msgid "Sensitive credentials"
 msgstr "Vertrauliche Daten"
 
-#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:104
+#: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:105
 msgid ""
 "Only store credentials here when this is required by your operating "
 "procedure."
@@ -550,7 +555,7 @@ msgstr "Geändert"
 msgid "Tenant"
 msgstr "Mandant"
 
-#: dlcdb/assets/templates/assets/devices/index.html:102
+#: dlcdb/assets/templates/assets/devices/index.html:109
 msgid "No devices match these filters."
 msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
 
@@ -731,11 +736,11 @@ msgstr "%(model)s “%(obj)s” erstellt."
 msgid "%(model)s “%(obj)s” was updated."
 msgstr "%(model)s “%(obj)s” geändert."
 
-#: dlcdb/core/admin/device_admin.py:323
+#: dlcdb/core/admin/device_admin.py:324
 msgid "Relocate selected devices"
 msgstr "Ausgewählte Geräte umziehen"
 
-#: dlcdb/core/admin/device_admin.py:334
+#: dlcdb/core/admin/device_admin.py:335
 msgid "Restore devices from REMOVED to LOST"
 msgstr "Wiederherstellung von REMOVED auf LOST"
 
@@ -1027,50 +1032,63 @@ msgstr ""
 msgid "Contact (internal)"
 msgstr "Kontakt (intern)"
 
-#: dlcdb/core/models/device.py:179
+#: dlcdb/core/models/device.py:183
+#, fuzzy
+#| msgid ""
+#| "Optional link to a web resource for this device — for example its own "
+#| "management web interface, a vendor support page or an online manual. "
+msgid ""
+"Optional link to a web resource for this device - for example its own "
+"management web interface, a vendor support page or an online manual. "
+msgstr ""
+"Optionaler Link zu einer Webressource für dieses Gerät – beispielsweise zu "
+"dessen eigener Verwaltungs-Weboberfläche, einer Support-Seite des "
+"Herstellers oder einem Online-Handbuch."
+
+#: dlcdb/core/models/device.py:187
 msgid "Main MAC address"
 msgstr "MAC-Adresse"
 
-#: dlcdb/core/models/device.py:180
+#: dlcdb/core/models/device.py:188
 msgid "Further MAC addresses"
 msgstr "Weiter MAC Adressen"
 
-#: dlcdb/core/models/device.py:181
+#: dlcdb/core/models/device.py:189
 msgid "Nickname / C-Name"
 msgstr "Nickname / C-Name"
 
-#: dlcdb/core/models/device.py:182
+#: dlcdb/core/models/device.py:190
 msgid "Legacy device"
 msgstr "Legacy Gerät"
 
-#: dlcdb/core/models/device.py:187
+#: dlcdb/core/models/device.py:195
 msgid "Is loanable?"
 msgstr "Ist verleihbar?"
 
-#: dlcdb/core/models/device.py:189
+#: dlcdb/core/models/device.py:197
 msgid "Added via CSV import?"
 msgstr "Via CSV-Import angelegt?"
 
-#: dlcdb/core/models/device.py:206
+#: dlcdb/core/models/device.py:214
 msgid "Order number"
 msgstr "Bestellnummer"
 
-#: dlcdb/core/models/device.py:210
+#: dlcdb/core/models/device.py:218
 msgid "Password Hard Disk Encryption"
 msgstr "Passwort Festplattenverschlüsselung"
 
-#: dlcdb/core/models/device.py:211
+#: dlcdb/core/models/device.py:219
 msgid ""
 "E.g. Bitlocker recovery key or macOS FileVault password for system hard disk."
 msgstr ""
 "Z.B. Bitlocker Recovery Key oder macOS FileVault Passwort für "
 "Systemfestplatte."
 
-#: dlcdb/core/models/device.py:215
+#: dlcdb/core/models/device.py:223
 msgid "Password backup encryption"
 msgstr "Passwort Backupverschlüsselung"
 
-#: dlcdb/core/models/device.py:216
+#: dlcdb/core/models/device.py:224
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 

@@ -114,6 +114,7 @@ DEVICE_EXPORT_COLUMNS = [
     # People and notes. The device's own note, not the active record's -- the
     # export this replaced silently substituted the record's.
     Column("contact_person_internal", "contact_person_internal"),
+    Column("url", "url"),
     Column("note", "note"),
     # The active record, flattened onto the device row under a record_ prefix so
     # no column is ambiguous about which model it came from. Room by number and

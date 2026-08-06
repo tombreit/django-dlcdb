@@ -77,6 +77,7 @@ class DeviceForm(forms.ModelForm):
             "contract_termination_date",
             "procurement_note",
             "contact_person_internal",
+            "url",
             "nick_name",
             "mac_address",
             "extra_mac_addresses",

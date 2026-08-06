@@ -72,11 +72,20 @@
           <tbody>
             {% for device in page_obj %}
               <tr>
-                <td class="position-relative">
+                <td>
+                  <div class="position-relative">
                   {% include "assets/devices/includes/_device_teaser.html" with device=device link="stretched" %}
                   <div class="d-lg-none mt-1">
                     {% include "assets/devices/includes/_state.html" with device=device %}
                   </div>
+                  </div>
+                  {% if device.url %}
+                    <div class="mt-1">
+                      <a href="{{ device.url }}" rel="noopener" target="_blank" class="small text-muted">
+                        <i class="bi bi-box-arrow-up-right"></i> {{ device.url }}
+                      </a>
+                    </div>
+                  {% endif %}
                 </td>
                 <td class="d-none d-md-table-cell">
                   {{ device.device_type|default:"—" }}
