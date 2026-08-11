@@ -289,9 +289,21 @@ LOGOUT_REDIRECT_URL = "logout"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    # Copied from Django's DEFAULT_LOGGING, for the mail_admins handler below.
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+    },
     "formatters": {
         "simple": {
             "format": "{levelname} {name} {message}",
+            "style": "{",
+        },
+        # Copied from Django's DEFAULT_LOGGING, for the runserver access log.
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
             "style": "{",
         },
     },
@@ -300,12 +312,41 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+        # Copied from Django's DEFAULT_LOGGING. Its own "level" is what gates
+        # email — only ERROR and above are sent, regardless of the level on the
+        # loggers that feed it.
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+        # Copied from Django's DEFAULT_LOGGING.
+        "django.server": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+        },
     },
     "root": {
         "handlers": ["console"],
         "level": "INFO",
     },
     "loggers": {
+        # Django's DEFAULT_LOGGING attaches its own unformatted console handler
+        # here. Claim the logger, or every request is logged twice: once bare by
+        # that handler, once via root.
+        "django": {
+            "handlers": ["console", "mail_admins"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # Claiming "django" above resets its child loggers, so restore Django's
+        # own entry verbatim to keep the runserver access log timestamped.
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "dlcdb": {
             "handlers": ["console"],
             "level": "DEBUG" if DEBUG else "WARNING",
