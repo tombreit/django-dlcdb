@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-06 11:51+0200\n"
-"PO-Revision-Date: 2026-08-06 11:52+0200\n"
+"POT-Creation-Date: 2026-08-13 12:15+0200\n"
+"PO-Revision-Date: 2026-08-13 12:17+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -119,7 +119,7 @@ msgid "Any state..."
 msgstr "Status..."
 
 #: dlcdb/assets/filters.py:47 dlcdb/assets/filters.py:49
-#: dlcdb/assets/templates/assets/devices/index.html:92
+#: dlcdb/assets/templates/assets/devices/index.html:94
 msgid "Loanable"
 msgstr "Verleihbar"
 
@@ -228,7 +228,7 @@ msgstr "Kein Notiz"
 #: dlcdb/assets/templates/assets/devices/detail.html:80
 #: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
 #: dlcdb/core/models/record.py:150 dlcdb/dataexchange/forms.py:72
-#: dlcdb/lending/templates/lending/lend.html:172
+#: dlcdb/lending/templates/lending/lend.html:227
 #: dlcdb/licenses/templates/licenses/index.html:93 dlcdb/rooms/filters.py:34
 #: dlcdb/rooms/templates/rooms/detail.html:68
 msgid "Note"
@@ -307,7 +307,7 @@ msgid "No device types match these filters."
 msgstr "Keine Gerätetypen gefunden, die diesen Filtern entsprechen."
 
 #: dlcdb/assets/templates/assets/device_types/index.html:60
-#: dlcdb/assets/templates/assets/devices/index.html:110
+#: dlcdb/assets/templates/assets/devices/index.html:112
 #: dlcdb/assets/templates/assets/manufacturers/index.html:57
 #: dlcdb/assets/templates/assets/suppliers/index.html:59
 #: dlcdb/licenses/templates/licenses/index.html:140
@@ -337,7 +337,7 @@ msgstr "Änderungen speichern"
 #: dlcdb/dataexchange/templates/dataexchange/import.html:46
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:9
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:62
-#: dlcdb/lending/templates/lending/lend.html:219
+#: dlcdb/lending/templates/lending/lend.html:274
 #: dlcdb/licenses/templates/licenses/form_partial.html:81
 #: dlcdb/persons/templates/persons/detail.html:35
 #: dlcdb/persons/templates/persons/form.html:9
@@ -404,7 +404,7 @@ msgid "Procurement"
 msgstr "Beschaffung"
 
 #: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:68
-#: dlcdb/lending/templates/lending/lend.html:81
+#: dlcdb/lending/templates/lending/lend.html:86
 msgid "Search person by name or e-mail, or “*” for all…"
 msgstr "Suche Person via Name oder Email, oder \"*\" für Alle..."
 
@@ -555,7 +555,7 @@ msgstr "Geändert"
 msgid "Tenant"
 msgstr "Mandant"
 
-#: dlcdb/assets/templates/assets/devices/index.html:109
+#: dlcdb/assets/templates/assets/devices/index.html:111
 msgid "No devices match these filters."
 msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
 
@@ -756,12 +756,13 @@ msgstr "Gerät “{device}” verschoben nach Raum “{room}”."
 #: dlcdb/core/admin/lentrecord_admin.py:108
 #: dlcdb/core/models/prx_lentrecord.py:98 dlcdb/lending/apps.py:12
 #: dlcdb/lending/navigation.py:12 dlcdb/lending/templates/lending/index.html:5
-#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:412
+#: dlcdb/lending/templates/lending/index.html:11 dlcdb/lending/views.py:432
 msgid "Lending"
 msgstr "Ausleihe"
 
 #: dlcdb/core/admin/lentrecord_admin.py:123 dlcdb/core/lifecycle.py:140
 #: dlcdb/lending/templates/lending/index.html:101
+#: dlcdb/lending/templates/lending/lend.html:111
 msgid "Return"
 msgstr "Zurückgeben"
 
@@ -774,7 +775,8 @@ msgid "Lent device"
 msgstr "Ausleihgerät"
 
 #: dlcdb/core/admin/lentrecord_admin.py:213 dlcdb/core/models/record.py:133
-#: dlcdb/lending/templates/lending/lend.html:119
+#: dlcdb/lending/templates/lending/lend.html:146
+#: dlcdb/lending/templates/lending/lend.html:180
 msgid "Desired return date"
 msgstr "Verleihende"
 
@@ -915,7 +917,7 @@ msgid "Locate"
 msgstr "Lokalisieren"
 
 #: dlcdb/core/lifecycle.py:130 dlcdb/lending/templates/lending/index.html:13
-#: dlcdb/lending/templates/lending/index.html:97 dlcdb/lending/views.py:410
+#: dlcdb/lending/templates/lending/index.html:97 dlcdb/lending/views.py:432
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -1033,17 +1035,13 @@ msgid "Contact (internal)"
 msgstr "Kontakt (intern)"
 
 #: dlcdb/core/models/device.py:183
-#, fuzzy
-#| msgid ""
-#| "Optional link to a web resource for this device — for example its own "
-#| "management web interface, a vendor support page or an online manual. "
 msgid ""
 "Optional link to a web resource for this device - for example its own "
 "management web interface, a vendor support page or an online manual. "
 msgstr ""
 "Optionaler Link zu einer Webressource für dieses Gerät – beispielsweise zu "
 "dessen eigener Verwaltungs-Weboberfläche, einer Support-Seite des "
-"Herstellers oder einem Online-Handbuch."
+"Herstellers oder einem Online-Handbuch. "
 
 #: dlcdb/core/models/device.py:187
 msgid "Main MAC address"
@@ -1288,7 +1286,8 @@ msgid "Assigned device"
 msgstr "Zugeordnetes Gerät"
 
 #: dlcdb/core/models/record.py:132
-#: dlcdb/lending/templates/lending/lend.html:110
+#: dlcdb/lending/templates/lending/lend.html:143
+#: dlcdb/lending/templates/lending/lend.html:171
 msgid "Lent from"
 msgstr "Verliehen von"
 
@@ -1318,7 +1317,7 @@ msgstr "Notiz (Ausleihe, nur intern)"
 
 #. Translators: label for the reason a device is lent out
 #: dlcdb/core/models/record.py:156
-#: dlcdb/lending/templates/lending/lend.html:178
+#: dlcdb/lending/templates/lending/lend.html:233
 msgid "Reason"
 msgstr "Grund"
 
@@ -1645,7 +1644,7 @@ msgstr "Verfügbar"
 msgid "Device type..."
 msgstr "Geräteklasse..."
 
-#: dlcdb/lending/filters.py:57 dlcdb/lending/templates/lending/lend.html:81
+#: dlcdb/lending/filters.py:57 dlcdb/lending/templates/lending/lend.html:86
 #: dlcdb/persons/templates/persons/detail.html:51
 #: dlcdb/persons/templates/persons/includes/_form_fields.html:11
 msgid "Person"
@@ -1663,7 +1662,7 @@ msgstr "Verfügbares Gerät"
 msgid "Search by EDV/Inv. no., manufacturer…"
 msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
 
-#: dlcdb/lending/forms.py:31 dlcdb/lending/views.py:351
+#: dlcdb/lending/forms.py:31 dlcdb/lending/views.py:366
 msgid "Please select a device to lend."
 msgstr "Bitte ein Gerät zum verleihen auswählen."
 
@@ -1714,60 +1713,80 @@ msgstr "Zurück zur Übersicht"
 msgid "Pick an available device and a person, choose a room, then lend."
 msgstr "Wähle Gerät und Person für den Verleih."
 
-#: dlcdb/lending/templates/lending/lend.html:78
+#: dlcdb/lending/templates/lending/lend.html:79
+msgid "Returned by"
+msgstr "Zurückgegeben von"
+
+#: dlcdb/lending/templates/lending/lend.html:79
 msgid "Person and room"
 msgstr "Person und Raum"
 
-#: dlcdb/lending/templates/lending/lend.html:86
+#: dlcdb/lending/templates/lending/lend.html:91
+#: dlcdb/lending/templates/lending/lend.html:149
 msgid "Room / location"
 msgstr "Raum/Standort"
 
-#: dlcdb/lending/templates/lending/lend.html:91
+#: dlcdb/lending/templates/lending/lend.html:96
 msgid "Prefilled from the device's current location."
 msgstr "Vorausgefüllt mit dem aktuellen Standort."
 
-#: dlcdb/lending/templates/lending/lend.html:103
-msgid "Dates"
-msgstr ""
-
-#: dlcdb/lending/templates/lending/lend.html:123
-msgid "Defaults to the person's contract end date."
-msgstr "Standardmäßig das Vertragsende der Person."
-
-#: dlcdb/lending/templates/lending/lend.html:127
-msgid "Keep in sync with contract end"
-msgstr "Synchronisiere mit Vertragsenddatum"
-
-#: dlcdb/lending/templates/lending/lend.html:136
+#: dlcdb/lending/templates/lending/lend.html:117
 msgid "Return date"
 msgstr "Rückgabedatum"
 
-#: dlcdb/lending/templates/lending/lend.html:140
-msgid "Set this to acknowledge the return."
-msgstr "Rückgabe bestätigen."
+#: dlcdb/lending/templates/lending/lend.html:121
+msgid "Prefilled with today. Saving acknowledges the return."
+msgstr "Mit heutigem Datum vorausgefüllt. Speichern bestätigt die Rückgabe."
 
-#: dlcdb/lending/templates/lending/lend.html:158
+#: dlcdb/lending/templates/lending/lend.html:137
+msgid "Lending details"
+msgstr "Verleih-Details"
+
+#: dlcdb/lending/templates/lending/lend.html:153
+#, python-format
+msgid ""
+"To change these, cancel and open the lending via <a "
+"href=\"%(edit_url)s\">“Edit”</a>."
+msgstr ""
+
+#: dlcdb/lending/templates/lending/lend.html:164
+msgid "Dates"
+msgstr ""
+
+#: dlcdb/lending/templates/lending/lend.html:184
+msgid "Defaults to the person's contract end date."
+msgstr "Standardmäßig das Vertragsende der Person."
+
+#: dlcdb/lending/templates/lending/lend.html:188
+msgid "Keep in sync with contract end"
+msgstr "Synchronisiere mit Vertragsenddatum"
+
+#: dlcdb/lending/templates/lending/lend.html:213
 msgid "Accessories, notes & more"
 msgstr "Zubehör, Notizen etc."
 
-#: dlcdb/lending/templates/lending/lend.html:166
+#: dlcdb/lending/templates/lending/lend.html:221
 msgid "Accessories / condition"
 msgstr "Zubehör/Zustand"
 
-#: dlcdb/lending/templates/lending/lend.html:191 dlcdb/lending/views.py:412
+#: dlcdb/lending/templates/lending/lend.html:246 dlcdb/lending/views.py:432
 msgid "Lend device"
 msgstr "Gerät verleihen"
 
-#: dlcdb/lending/templates/lending/lend.html:191
+#: dlcdb/lending/templates/lending/lend.html:246 dlcdb/lending/views.py:429
+msgid "Return device"
+msgstr "Gerät zurückgeben"
+
+#: dlcdb/lending/templates/lending/lend.html:246
 #: dlcdb/licenses/templates/licenses/form_partial.html:74
 msgid "Save"
 msgstr "Speichern"
 
-#: dlcdb/lending/templates/lending/lend.html:210
+#: dlcdb/lending/templates/lending/lend.html:265
 msgid "Print lending slip"
 msgstr "Verleihzettel drucken"
 
-#: dlcdb/lending/templates/lending/lend.html:214
+#: dlcdb/lending/templates/lending/lend.html:269
 msgid "No lending slip template found. Add one?"
 msgstr "Keine Ausleihschein-Vorlage gefunden. Hinzufügen?"
 
@@ -1784,11 +1803,11 @@ msgstr ""
 msgid "Configuration error: %(err)s"
 msgstr ""
 
-#: dlcdb/lending/views.py:344
+#: dlcdb/lending/views.py:346
 msgid "Device is currently \"not locatable\" and must be located first."
 msgstr "Gerät muss zuerst lokalisiert werden."
 
-#: dlcdb/lending/views.py:355
+#: dlcdb/lending/views.py:370
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
 
@@ -2414,13 +2433,13 @@ msgstr "Kleinkram Personen Suche"
 msgid "Loading..."
 msgstr "Lädt..."
 
-#: dlcdb/templates/403.html:23
+#: dlcdb/templates/403.html:27
 msgid "You do not have permission to access this page or perform this action."
 msgstr ""
 "Sie haben nicht die notwendige Berechtigung um auf diese Seite zuzugreifen "
 "oder diese Aktion auszuführen."
 
-#: dlcdb/templates/403.html:25
+#: dlcdb/templates/403.html:29
 #, python-format
 msgid ""
 "If you believe this is an error, please contact <a href=\"mailto:"
@@ -2429,11 +2448,11 @@ msgstr ""
 "Falls Sie dies für einen Fehler halten, kontaktieren Sie bitte <a "
 "href=\"mailto:%(email)s\">%(email)s</a>."
 
-#: dlcdb/templates/403.html:30
+#: dlcdb/templates/403.html:34
 msgid "If you are not logged in, please log in:"
 msgstr "Wenn Sie nicht angemeldet sind melden Sie sich bitte an:"
 
-#: dlcdb/templates/403.html:32
+#: dlcdb/templates/403.html:36
 msgid "Log in"
 msgstr "Anmelden"
 
@@ -2518,25 +2537,25 @@ msgstr "Filter Optionen..."
 msgid "Clear all"
 msgstr "Alle zurücksetzen"
 
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:52
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:58
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:53
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:59
 msgid "Filters"
 msgstr "Filter"
 
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:59
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:60
 msgid "Close"
 msgstr "Schließen"
 
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:74
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:76
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:75
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:77
 msgid "Sort"
 msgstr "Sortieren"
 
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:107
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:108
 msgid "More filters"
 msgstr "Weitere Filter"
 
-#: dlcdb/theme/templates/theme/filterbar/filterbar.html:123
+#: dlcdb/theme/templates/theme/filterbar/filterbar.html:124
 msgid "Apply"
 msgstr "Anwenden"
 
