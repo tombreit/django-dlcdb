@@ -134,7 +134,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
             # form that does that. The source state is LENT, so active_record is
             # always the lending in question.
             if app_name == "assets":
-                action_url = reverse("lending:detail", args=[active_record.pk])
+                action_url = f"{reverse('lending:detail', args=[active_record.pk])}?flow=return"
                 external = False
             else:
                 action_url = reverse("admin:core_lentrecord_change", args=[active_record.pk])

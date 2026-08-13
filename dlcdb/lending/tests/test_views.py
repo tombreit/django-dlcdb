@@ -242,6 +242,22 @@ class LendingDetailViewTests(BaseTest):
         payload.update(overrides)
         return payload
 
+    def _return_url(self, record=None):
+        """The Return action's URL: the detail route plus the return flow marker."""
+        return f"{reverse('lending:detail', args=[(record or self.lent_record).pk])}?flow=return"
+
+    def _return_payload(self, **overrides):
+        # The return form is narrow on purpose: who borrowed the device, from
+        # where and for how long are not part of it (see LendingReturnForm).
+        payload = {
+            "lent_end_date": "2026-06-23",
+            "lent_accessories": "",
+            "lent_reason": "",
+            "lent_note": "",
+        }
+        payload.update(overrides)
+        return payload
+
     def test_get_lend_flow_renders(self):
         response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
         self.assertEqual(response.status_code, 200)
@@ -259,24 +275,40 @@ class LendingDetailViewTests(BaseTest):
         self.assertTrue(response.context["is_lend_flow"])
 
     def test_get_return_flow_renders_with_person_and_return_field(self):
-        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
+        response = self.client.get(self._return_url())
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mustermann")
         self.assertContains(response, 'name="lent_end_date"')
         self.assertTrue(response.context["is_return_flow"])
+        # The free-text fields are editable here too, and both cards start open.
+        for field in ("lent_accessories", "lent_reason", "lent_note"):
+            self.assertContains(response, f'name="{field}"')
+        self.assertContains(response, 'class="collapse show" id="lending-details"')
+        self.assertContains(response, 'class="collapse show" id="misc-fields"')
+        # The read-only lending data points at the edit form for changing it.
+        self.assertContains(response, f'href="{reverse("lending:detail", args=[self.lent_record.pk])}"')
 
-    def test_return_action_prefills_todays_return_date(self):
+    def test_edit_flow_keeps_the_misc_card_collapsed(self):
+        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
+        self.assertContains(response, 'class="collapse" id="misc-fields"')
+
+    def test_return_flow_prefills_todays_return_date(self):
         from django.utils import timezone
 
-        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]), {"action": "return"})
+        response = self.client.get(self._return_url())
         self.assertEqual(
             response.context["form"]["lent_end_date"].value(),
             timezone.localdate(),
         )
 
-    def test_return_flow_without_action_does_not_prefill(self):
+    def test_edit_flow_has_no_return_date_field(self):
+        # Opening a lending without the return marker edits it; ending it is the
+        # return flow's job, so the field is not even on the form.
         response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
-        self.assertFalse(response.context["form"]["lent_end_date"].value())
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["is_edit_flow"])
+        self.assertNotIn("lent_end_date", response.context["form"].fields)
+        self.assertNotContains(response, 'name="lent_end_date"')
 
     def test_lend_flow_renders_locked_device_card(self):
         # Record mode shows the device as a read-only card: no live device picker
@@ -289,7 +321,7 @@ class LendingDetailViewTests(BaseTest):
     def test_lend_flow_print_button_uses_device_pk(self):
         LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
         response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
-        self.assertContains(response, 'id="quick-lend-print"')
+        self.assertContains(response, 'id="lend-form-print"')
         # The slip endpoint is keyed on the device pk, not the record pk.
         self.assertContains(response, reverse("lending:print_sheet", args=[self.available_device.pk]))
 
@@ -299,7 +331,7 @@ class LendingDetailViewTests(BaseTest):
         # print button that would 404.
         LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="")
         response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
-        self.assertNotContains(response, 'id="quick-lend-print"')
+        self.assertNotContains(response, 'id="lend-form-print"')
         self.assertContains(response, reverse("admin:lending_lendingprofile_add"))
 
     def test_lend_creates_new_lent_record(self):
@@ -331,15 +363,58 @@ class LendingDetailViewTests(BaseTest):
 
     def test_return_creates_auto_return_inroom_record(self):
         inroom_before = InRoomRecord.objects.filter(device=self.lent_device).count()
+        response = self.client.post(self._return_url(), self._return_payload())
+        self.assertRedirects(response, reverse("lending:index"))
+        self.lent_device.refresh_from_db()
+        self.assertEqual(self.lent_device.active_record.record_type, Record.INROOM)
+        self.assertEqual(self.lent_device.active_record.room, self.auto_return_room)
+        self.assertEqual(InRoomRecord.objects.filter(device=self.lent_device).count(), inroom_before + 1)
+
+    def test_return_leaves_the_lendings_own_fields_untouched(self):
+        # The return form carries neither room nor the lending's dates, so they
+        # must survive the return unchanged instead of being reset to empty.
+        self.client.post(
+            self._return_url(),
+            self._return_payload(lent_note="Scratched lid", lent_accessories="Charger missing"),
+        )
+        self.lent_record.refresh_from_db()
+        self.assertEqual(self.lent_record.lent_end_date, datetime.date(2026, 6, 23))
+        # The free-text fields are editable while returning: the condition the
+        # device came back in belongs to the return.
+        self.assertEqual(self.lent_record.lent_note, "Scratched lid")
+        self.assertEqual(self.lent_record.lent_accessories, "Charger missing")
+        self.assertEqual(self.lent_record.room, self.room)
+        self.assertEqual(self.lent_record.person, self.person)
+        self.assertEqual(self.lent_record.lent_start_date, datetime.date(2026, 1, 1))
+        self.assertEqual(self.lent_record.lent_desired_end_date, datetime.date(2099, 1, 1))
+
+    def test_return_without_a_date_redisplays_the_form(self):
+        response = self.client.post(self._return_url(), self._return_payload(lent_end_date=""))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("lent_end_date", response.context["form"].errors)
+        self.lent_device.refresh_from_db()
+        self.assertEqual(self.lent_device.active_record.record_type, Record.LENT)
+
+    def test_edit_flow_cannot_end_a_lending(self):
+        # A return date submitted to the edit form is not a field there and must
+        # be ignored -- returning goes through the Return action.
         response = self.client.post(
             reverse("lending:detail", args=[self.lent_record.pk]),
             self._lend_payload(lent_end_date="2026-06-23"),
         )
         self.assertRedirects(response, reverse("lending:index"))
         self.lent_device.refresh_from_db()
-        self.assertEqual(self.lent_device.active_record.record_type, Record.INROOM)
-        self.assertEqual(self.lent_device.active_record.room, self.auto_return_room)
-        self.assertEqual(InRoomRecord.objects.filter(device=self.lent_device).count(), inroom_before + 1)
+        self.assertEqual(self.lent_device.active_record.record_type, Record.LENT)
+        self.lent_record.refresh_from_db()
+        self.assertIsNone(self.lent_record.lent_end_date)
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_return_message_names_the_borrower(self):
+        # The borrower is not submitted by the return form; the message must
+        # still name them (from the record).
+        response = self.client.post(self._return_url(), self._return_payload(), follow=True)
+        msg = next(str(m) for m in response.context["messages"] if "acknowledged" in str(m).lower())
+        self.assertIn(f'<a href="{reverse("persons:detail", args=[self.person.pk])}">Mustermann, Max</a>', msg)
 
     def test_edit_lent_record_without_end_date_keeps_it_lent(self):
         response = self.client.post(
@@ -390,14 +465,10 @@ class LendingDetailViewTests(BaseTest):
         # device is coming back, so contract-vs-desired-return checks are moot.
         self.person.udb_contract_planned_checkout = datetime.date(2026, 6, 30)
         self.person.save()
-        response = self.client.post(
-            reverse("lending:detail", args=[self.lent_record.pk]),
-            # Desired return (2026-07-23) runs past the contract end (2026-06-30) —
-            # the condition that warns in the lend flow — but this is a return
-            # (a valid, non-future return date), so no warning should appear.
-            self._lend_payload(lent_desired_end_date="2026-07-23", lent_end_date="2026-06-23"),
-            follow=True,
-        )
+        # The lending's desired return (2099-01-01) runs past the contract end
+        # (2026-06-30) — the condition that warns in the lend flow — but this is a
+        # return (a valid, non-future return date), so no warning should appear.
+        response = self.client.post(self._return_url(), self._return_payload(), follow=True)
         messages = [str(m) for m in response.context["messages"]]
         self.assertFalse(any("contract ends before" in m.lower() for m in messages))
         self.assertFalse(any("contract end date" in m.lower() for m in messages))
@@ -405,11 +476,7 @@ class LendingDetailViewTests(BaseTest):
 
     def test_missing_auto_return_room_errors_and_rolls_back(self):
         self.auto_return_room.delete()
-        self.client.post(
-            reverse("lending:detail", args=[self.lent_record.pk]),
-            self._lend_payload(lent_end_date="2026-06-23"),
-            follow=True,
-        )
+        self.client.post(self._return_url(), self._return_payload(), follow=True)
         self.lent_device.refresh_from_db()
         # Still lent, no auto-return InRoomRecord created.
         self.assertEqual(self.lent_device.active_record.record_type, Record.LENT)
@@ -426,10 +493,26 @@ class LendingDetailViewTests(BaseTest):
         self.assertIn("/accounts/login/", response.url)
 
     def test_permission_required(self):
+        # A plain navigation must get a real 403 naming the missing permission --
+        # not an empty 200 body that renders as a blank page.
         plain = get_user_model().objects.create_user(email="plain@example.com", password="secret", username="plain")
         self.client.force_login(plain)
         response = self.client.post(reverse("lending:detail", args=[self.available_record.pk]), self._lend_payload())
-        # htmx_permission_required short-circuits with a client refresh, no save.
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, "Can lend a device and take it back", status_code=403)
+        self.available_device.refresh_from_db()
+        self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
+
+    def test_permission_required_over_htmx_refreshes_the_client(self):
+        # Over HTMX the guard keeps flashing a message and refreshing the page,
+        # so the error is not swapped into a fragment container.
+        plain = get_user_model().objects.create_user(email="plain2@example.com", password="secret", username="plain2")
+        self.client.force_login(plain)
+        response = self.client.post(
+            reverse("lending:detail", args=[self.available_record.pk]),
+            self._lend_payload(),
+            headers={"HX-Request": "true"},
+        )
         self.assertEqual(response["HX-Refresh"], "true")
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
@@ -462,7 +545,7 @@ class LendingDetailViewTests(BaseTest):
 
         response = self._post_lend()
 
-        self.assertEqual(response["HX-Refresh"], "true")
+        self.assertEqual(response.status_code, 403)
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 
@@ -609,7 +692,7 @@ class LendingDeviceSearchTests(BaseTest):
         self.assertNotContains(response, "EDV-LENT")
 
     def test_device_search_uses_q_not_search(self):
-        # On the quick-lend page both pickers sit in one <form>; HTMX includes a
+        # In picker mode both pickers sit in one <form>; HTMX includes a
         # stray (empty) "search" from the person picker. Device search must key
         # off "q" only, so the stray param does not blank the results.
         response = self.client.post(self.url, {"source": "lend", "q": "*", "search": ""})
@@ -617,7 +700,7 @@ class LendingDeviceSearchTests(BaseTest):
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
-class QuickLendViewTests(BaseTest):
+class LendingPickerModeViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
@@ -673,11 +756,11 @@ class QuickLendViewTests(BaseTest):
 
     def test_get_renders_print_button(self):
         response = self.client.get(self.url)
-        self.assertContains(response, 'id="quick-lend-print"')
+        self.assertContains(response, 'id="lend-form-print"')
         # The print endpoint is keyed on the device pk, substituted by JS.
         self.assertContains(response, "/0/print/")
 
-    def test_print_sheet_works_from_quick_lend_payload(self):
+    def test_print_sheet_works_from_picker_mode_payload(self):
         LendingProfile.objects.create(
             device_type=self.available_device.device_type,
             lent_sheet_template="{% load i18n %}Slip {{ record.person }}",
@@ -727,6 +810,6 @@ class QuickLendViewTests(BaseTest):
         plain = get_user_model().objects.create_user(email="plain@example.com", password="secret", username="plain")
         self.client.force_login(plain)
         response = self.client.post(self.url, self._payload())
-        self.assertEqual(response["HX-Refresh"], "true")
+        self.assertEqual(response.status_code, 403)
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)

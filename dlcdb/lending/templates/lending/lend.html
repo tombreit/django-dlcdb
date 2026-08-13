@@ -47,8 +47,8 @@ SPDX-License-Identifier: EUPL-1.2
 <form method="POST" action="{{ form_action }}" novalidate id="lend-form">
   {% csrf_token %}
 
-  {# Person hidden field kept outside any HTMX swap region, driven by the person picker. The device picker widget renders its own hidden field. #}
-  {{ form.person }}
+  {# Person hidden field kept outside any HTMX swap region, driven by the person picker. The device picker widget renders its own hidden field. Absent while returning: the borrower cannot change there. #}
+  {% if not is_return_flow %}{{ form.person }}{% endif %}
 
   {% url 'lending:person_search' as person_search_url %}
 
@@ -75,27 +75,88 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="col-lg-6">
       <div class="card h-100">
         <div class="card-header fw-semibold">
-          <i class="bi bi-person-vcard"></i> {% translate "Person and room" %}
+          <i class="bi bi-person-vcard"></i>
+          {% if is_return_flow %}{% translate "Returned by" %}{% else %}{% translate "Person and room" %}{% endif %}
         </div>
         <div class="card-body">
-          {% include "theme/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_return_flow fill_date_target=form.lent_desired_end_date.id_for_label sync_toggle_target=form.sync_lent_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
+          {% if is_return_flow %}
+            {# Neither borrower nor room are fields of the return form: the return puts the device back into the auto-return room. Show the borrower read-only. #}
+            {% include "lending/includes/_person_list_item.html" with person=record.person selectable=False locked=True %}
+          {% else %}
+            {% include "theme/includes/_picker.html" with picker_id="person" field_id=form.person.id_for_label search_url=person_search_url label=_("Person") placeholder=_("Search person by name or e-mail, or “*” for all…") required=is_lend_flow locked=is_edit_flow fill_date_target=form.lent_desired_end_date.id_for_label sync_toggle_target=form.sync_lent_end_date.id_for_label errors=form.person.errors has_selected=selected_person selected_item_template="lending/includes/_person_list_item.html" person=selected_person selectable=False %}
 
-          <div class="row g-3">
-            <div class="col-12">
-              <label for="{{ form.room.id_for_label }}" class="form-label fw-semibold">
-                {% translate "Room / location" %} <span class="text-danger">*</span>
-              </label>
-              {{ form.room }}
-              {{ form.room.errors }}
-              {% if picker_mode %}
-                <div class="form-text">{% translate "Prefilled from the device's current location." %}</div>
-              {% endif %}
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="{{ form.room.id_for_label }}" class="form-label fw-semibold">
+                  {% translate "Room / location" %} <span class="text-danger">*</span>
+                </label>
+                {{ form.room }}
+                {{ form.room.errors }}
+                {% if picker_mode %}
+                  <div class="form-text">{% translate "Prefilled from the device's current location." %}</div>
+                {% endif %}
+              </div>
             </div>
-          </div>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
+
+{% if is_return_flow %}
+
+  {# --- Return date + note ---------------------------------------------- #}
+  <div class="card border-success my-4">
+    <div class="card-header fw-semibold bg-success-subtle">
+      <i class="bi bi-box-arrow-in-left"></i> {% translate "Return" %}
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="{{ form.lent_end_date.id_for_label }}" class="form-label fw-semibold">
+            {% translate "Return date" %} <span class="text-danger">*</span>
+          </label>
+          {{ form.lent_end_date }}
+          {{ form.lent_end_date.errors }}
+          <div class="form-text">{% translate "Prefilled with today. Saving acknowledges the return." %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# --- The lending itself: not editable while returning ---------------- #}
+  <div class="card mb-4">
+    <button
+      class="btn card-header fw-semibold w-100 text-start d-flex align-items-center justify-content-between"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#lending-details"
+      aria-expanded="true"
+      aria-controls="lending-details"
+    >
+      <span><i class="bi bi-calendar-range"></i> {% translate "Lending details" %}</span>
+      <i class="bi bi-chevron-down"></i>
+    </button>
+    <div class="collapse show" id="lending-details">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">{% translate "Lent from" %}</dt>
+          <dd class="col-sm-9">{{ record.lent_start_date|default:"—" }}</dd>
+
+          <dt class="col-sm-3">{% translate "Desired return date" %}</dt>
+          <dd class="col-sm-9">{{ record.lent_desired_end_date|default:"—" }}</dd>
+
+          <dt class="col-sm-3">{% translate "Room / location" %}</dt>
+          <dd class="col-sm-9">{{ record.room|default:"—" }}</dd>
+        </dl>
+        <div class="form-text mt-3">
+          {% blocktranslate %}To change these, cancel and open the lending via <a href="{{ edit_url }}">“Edit”</a>.{% endblocktranslate %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% else %}
 
   {# --- Dates ---------------------------------------------------------- #}
   <div class="card my-4">
@@ -129,36 +190,29 @@ SPDX-License-Identifier: EUPL-1.2
             </div>
           </div>
         </div>
-        {% if is_return_flow %}
-          <div class="col-md-4">
-            <div class="alert alert-info mb-0">
-              <label for="{{ form.lent_end_date.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-box-arrow-in-left"></i> {% translate "Return date" %}
-              </label>
-              {{ form.lent_end_date }}
-              {{ form.lent_end_date.errors }}
-              <div class="form-text">{% translate "Set this to acknowledge the return." %}</div>
-            </div>
-          </div>
-        {% endif %}
       </div>
     </div>
   </div>
 
-  {# --- Misc (collapsed) ----------------------------------------------- #}
+{% endif %}
+
+  {% comment %}
+    Misc: collapsed while lending/editing, open while returning, where recording
+    the condition the device came back in is part of the job.
+  {% endcomment %}
   <div class="card mb-4">
     <button
-      class="btn card-header fw-semibold w-100 text-start collapsed d-flex align-items-center justify-content-between"
+      class="btn card-header fw-semibold w-100 text-start {% if not is_return_flow %}collapsed {% endif %}d-flex align-items-center justify-content-between"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#misc-fields"
-      aria-expanded="false"
+      aria-expanded="{% if is_return_flow %}true{% else %}false{% endif %}"
       aria-controls="misc-fields"
     >
       <span><i class="bi bi-sliders"></i> {% translate "Accessories, notes & more" %}</span>
       <i class="bi bi-chevron-down"></i>
     </button>
-    <div class="collapse" id="misc-fields">
+    <div class="collapse{% if is_return_flow %} show{% endif %}" id="misc-fields">
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-6">
@@ -186,9 +240,9 @@ SPDX-License-Identifier: EUPL-1.2
 
   {# --- Actions -------------------------------------------------------- #}
   <div class="d-flex flex-wrap gap-2 mt-4">
-    <button type="submit" id="quick-lend-submit" class="btn btn-primary"{% if picker_mode %} disabled{% endif %}>
+    <button type="submit" id="lend-form-submit" class="btn btn-primary"{% if picker_mode %} disabled{% endif %}>
       <i class="bi bi-check-lg"></i>
-      {% if is_lend_flow %}{% translate "Lend device" %}{% else %}{% translate "Save" %}{% endif %}
+      {% if is_lend_flow %}{% translate "Lend device" %}{% elif is_return_flow %}{% translate "Return device" %}{% else %}{% translate "Save" %}{% endif %}
     </button>
 
     {% comment %}
@@ -200,7 +254,7 @@ SPDX-License-Identifier: EUPL-1.2
     {% if can_print_slip %}
       <button
         type="submit"
-        id="quick-lend-print"
+        id="lend-form-print"
         class="btn btn-outline-secondary"
         formmethod="post"
         formtarget="_blank"
@@ -235,8 +289,8 @@ SPDX-License-Identifier: EUPL-1.2
     "use strict";
     const deviceInput = document.getElementById("id_device");
     const personInput = document.getElementById("id_person");
-    const submitBtn = document.getElementById("quick-lend-submit");
-    const printBtn = document.getElementById("quick-lend-print");
+    const submitBtn = document.getElementById("lend-form-submit");
+    const printBtn = document.getElementById("lend-form-print");
     const roomSelect = document.getElementById("{{ form.room.id_for_label }}");
     const devicePicker = document.getElementById("device-picker");
 
