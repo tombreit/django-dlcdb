@@ -37,7 +37,9 @@ def room_note(db, room_1, inventory_1):
 @pytest.mark.django_db
 def test_delete_note_denied_without_permission(client, plain_user, room_note):
     client.force_login(plain_user)
-    response = client.post(reverse("inventory:note-delete", kwargs={"pk": room_note.pk}))
+    response = client.post(
+        reverse("inventory:note-delete", kwargs={"pk": room_note.pk}), headers={"HX-Request": "true"}
+    )
 
     assert response["HX-Refresh"] == "true"
     assert Note.objects.filter(pk=room_note.pk).exists()
@@ -56,7 +58,7 @@ def test_delete_note_allowed_with_permission(client, inventorizing_user, room_no
 def test_update_note_denied_without_permission(client, plain_user, room_1, inventory_1):
     client.force_login(plain_user)
     url = reverse("inventory:note-update", kwargs={"obj_type": "room", "obj_uuid": room_1.uuid})
-    response = client.post(url, {"text": "sneaky"})
+    response = client.post(url, {"text": "sneaky"}, headers={"HX-Request": "true"})
 
     assert response["HX-Refresh"] == "true"
     assert not Note.objects.exists()
@@ -66,7 +68,7 @@ def test_update_note_denied_without_permission(client, plain_user, room_1, inven
 def test_get_note_btn_denied_without_permission(client, plain_user, room_1):
     client.force_login(plain_user)
     url = reverse("inventory:get_note_btn", kwargs={"obj_type": "room", "obj_uuid": room_1.uuid})
-    response = client.get(url)
+    response = client.get(url, headers={"HX-Request": "true"})
 
     assert response["HX-Refresh"] == "true"
 
@@ -77,4 +79,20 @@ def test_note_endpoints_require_login(client, room_note):
 
     assert response.status_code == 302
     assert "/accounts/login/" in response.url
+    assert Note.objects.filter(pk=room_note.pk).exists()
+
+
+@pytest.mark.django_db
+def test_note_endpoint_without_htmx_returns_403(client, plain_user, room_note, settings):
+    # Not an HTMX request: the guard must produce a real 403 instead of the
+    # client-refresh response, whose empty body renders as a blank page.
+    # Plain static storage so rendering 403.html needs no staticfiles manifest.
+    settings.STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    client.force_login(plain_user)
+    response = client.post(reverse("inventory:note-delete", kwargs={"pk": room_note.pk}))
+
+    assert response.status_code == 403
     assert Note.objects.filter(pk=room_note.pk).exists()

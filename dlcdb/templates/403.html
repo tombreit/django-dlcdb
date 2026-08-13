@@ -19,6 +19,10 @@ SPDX-License-Identifier: EUPL-1.2
     403 Forbidden
 </h1>
 
+{% if exception %}
+<p class="alert alert-warning">{{ exception }}</p>
+{% endif %}
+
 <p>
 {% translate "You do not have permission to access this page or perform this action." %}
 <br>

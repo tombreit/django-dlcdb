@@ -40,7 +40,7 @@ from .filters import (
     STATE_LENT,
     STATE_AVAILABLE,
 )
-from .forms import LentingForm, QuickLendDeviceForm
+from .forms import LendingReturnForm, LentingForm, QuickLendDeviceForm
 from .models import LendingConfiguration, LendingProfile
 
 
@@ -300,7 +300,9 @@ def _save_lending(request, record, form):
         msg = _("Lending of “{device}” to “{person}” saved.")
     messages.success(
         request,
-        linked_message(msg, device=record.device, person=form.cleaned_data.get("person")),
+        # The return form does not carry the borrower (it cannot be changed while
+        # returning), so fall back to the one stored on the record.
+        linked_message(msg, device=record.device, person=form.cleaned_data.get("person") or record.person),
     )
     return True
 
@@ -315,9 +317,10 @@ def lend(request, pk=None):
       via the live device picker and a person, then lend in one submit — the
       "quick lend" assistant.
     - **record mode** (``pk`` given, ``lending:detail``): open a device's active
-      ``LentRecord`` to lend it (INROOM), or acknowledge its return / edit it
-      (LENT). The device is shown locked; ``?action=return`` prefills today's
-      return date.
+      ``LentRecord`` to lend it (INROOM), or -- for a LENT one -- to acknowledge
+      its return (``?flow=return``, ``LendingReturnForm``) or to edit the lending
+      without ending it (no querystring, ``LentingForm``). The device is shown
+      locked in both.
 
     Both resolve to a ``LentRecord`` and run the same ``_save_lending`` state
     machine. Replaces the django-admin LentRecord change view.
@@ -344,6 +347,19 @@ def lend(request, pk=None):
             messages.error(request, _('Device is currently "not locatable" and must be located first.'))
             return redirect(index_url)
 
+    # The three flows of this screen, resolved once. A LENT record is "returned"
+    # only when the user asked for it via ?flow=return (the Return button in the
+    # list and on the device card); without it, opening a lending just edits it.
+    # Read from request.GET so the flow survives the POST, which form_action
+    # carries it in.
+    is_lend_flow = picker_mode or record.record_type == Record.INROOM
+    is_return_flow = not is_lend_flow and request.GET.get("flow") == "return"
+    is_edit_flow = not is_lend_flow and not is_return_flow
+
+    # Returning ends the lending, lending and editing do not: two disjoint forms
+    # over the same record, so neither flow can perform the other's write.
+    form_class = LendingReturnForm if is_return_flow else LentingForm
+
     if request.method == "POST":
         if picker_mode:
             device_pk = request.POST.get("device")
@@ -356,19 +372,13 @@ def lend(request, pk=None):
                 return redirect("lending:lend")
             device = record.device
 
-        form = LentingForm(request.POST, instance=record, record_type=record.record_type)
+        form_kwargs = {} if is_return_flow else {"record_type": record.record_type}
+        form = form_class(request.POST, instance=record, **form_kwargs)
         if form.is_valid() and _save_lending(request, record, form):
             return redirect(index_url)
     else:
-        form = LentingForm(
-            instance=record,
-            record_type=record.record_type if record else Record.INROOM,
-        )
-        # A "return" quick action lands here with today's date prefilled; guarded
-        # on LENT so a stale ?action=return on an already-returned device is inert
-        # (and the field is not rendered outside the return flow anyway).
-        if not picker_mode and record.record_type == Record.LENT and request.GET.get("action") == "return":
-            form.initial["lent_end_date"] = timezone.localdate()
+        form_kwargs = {} if is_return_flow else {"record_type": record.record_type if record else Record.INROOM}
+        form = form_class(instance=record, **form_kwargs)
 
     # Keep the visually selected person card in sync after a failed POST, where
     # the picked person lives only in the submitted (hidden) person field. In
@@ -378,9 +388,6 @@ def lend(request, pk=None):
         submitted_person_id = request.POST.get("person")
         if submitted_person_id:
             selected_person = Person.objects.filter(pk=submitted_person_id).first() or selected_person
-
-    is_lend_flow = picker_mode or record.record_type == Record.INROOM
-    is_return_flow = (not picker_mode) and record.record_type == Record.LENT
 
     # A slip needs a device type whose profile carries a slip template — an empty
     # one is rejected by the database template loader (see loader.py). Independent
@@ -392,11 +399,23 @@ def lend(request, pk=None):
         LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
     )
 
-    # Carry the index filters through the POST (and any failed-POST re-render) by
-    # appending ?next= to the form action.
+    # Carry the flow and the index filters through the POST (and any failed-POST
+    # re-render) by appending them to the form action: ?flow= decides which form
+    # the POST is bound to, ?next= where the save redirects to.
     form_action = reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk])
+    form_action_query = {}
+    if is_return_flow:
+        form_action_query["flow"] = "return"
     if index_query:
-        form_action += "?" + urlencode({"next": index_query})
+        form_action_query["next"] = index_query
+    if form_action_query:
+        form_action += "?" + urlencode(form_action_query)
+
+    # Same route without the flow marker: where the return screen sends a user
+    # who wants to change the lending itself rather than end it.
+    edit_url = None if picker_mode else reverse("lending:detail", args=[record.pk])
+    if edit_url and index_query:
+        edit_url += "?" + urlencode({"next": index_query})
 
     context = {
         "form": form,
@@ -407,12 +426,16 @@ def lend(request, pk=None):
         "picker_mode": picker_mode,
         "is_lend_flow": is_lend_flow,
         "is_return_flow": is_return_flow,
-        "title": _("Lend")
-        if picker_mode
-        else (_("Lend device") if record.record_type == Record.INROOM else _("Lending")),
+        "is_edit_flow": is_edit_flow,
+        "title": _("Return device")
+        if is_return_flow
+        else (
+            _("Lend") if picker_mode else (_("Lend device") if record.record_type == Record.INROOM else _("Lending"))
+        ),
         "obj_admin_url": None if picker_mode else reverse("admin:core_lentrecord_change", args=[record.pk]),
         "can_print_slip": can_print_slip,
         "form_action": form_action,
+        "edit_url": edit_url,
         "index_url": index_url,
     }
     return TemplateResponse(request, "lending/lend.html", context)
@@ -433,18 +456,24 @@ def person_search(request):
 
 
 def _build_unsaved_lentrecord(device, form):
-    """Construct an unsaved LentRecord from (possibly partial) form data."""
+    """
+    Construct an unsaved LentRecord from (possibly partial) form data, falling
+    back to the record the form was bound to. The fallback carries the reprint of
+    an active lending: the return screen submits only the return fields, so
+    everything the slip shows about the lending itself comes from the record.
+    """
+    record = form.instance
     person_id = form.data.get("person")
-    person = Person.objects.filter(pk=person_id).first() if person_id else None
+    person = Person.objects.filter(pk=person_id).first() if person_id else record.person
     return LentRecord(
         device=device,
         person=person,
-        room=form.cleaned_data.get("room"),
-        lent_start_date=form.cleaned_data.get("lent_start_date"),
-        lent_desired_end_date=form.cleaned_data.get("lent_desired_end_date"),
-        lent_accessories=form.data.get("lent_accessories", ""),
-        lent_note=form.data.get("lent_note", ""),
-        lent_reason=form.data.get("lent_reason", ""),
+        room=form.cleaned_data.get("room") or record.room,
+        lent_start_date=form.cleaned_data.get("lent_start_date") or record.lent_start_date,
+        lent_desired_end_date=form.cleaned_data.get("lent_desired_end_date") or record.lent_desired_end_date,
+        lent_accessories=form.data.get("lent_accessories", record.lent_accessories),
+        lent_note=form.data.get("lent_note", record.lent_note),
+        lent_reason=form.data.get("lent_reason", record.lent_reason),
     )
 
 

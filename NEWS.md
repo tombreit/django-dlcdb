@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Lending: "Return" is its own screen now, with the return date prefilled; the lending edit form can no longer end a lending
 * New device attribute: "URL", an optional link to e.g. a device's own management web interface
 * The device list and the lendings list frontend apps can now be exported as CSV, covering every device the active search and filters match (not just the current page).
 * The device CSV export changed shape: the machine and backup encryption keys are no longer exported, nor are the qrcode path, internal ids. Timestamps are rendered in local time instead of UTC.

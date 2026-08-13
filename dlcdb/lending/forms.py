@@ -50,6 +50,10 @@ class LentingForm(forms.ModelForm):
     person picker (see ``theme/js/picker.js``); ``record_type`` carries the
     device's current state so ``clean()`` can block lending a "lost" device,
     mirroring ``LentRecordAdminForm``.
+
+    Ending a lending is not part of this form: ``lent_end_date`` lives in
+    ``LendingReturnForm``, so editing a lending can never (accidentally or via a
+    hand-crafted POST) return the device.
     """
 
     def __init__(self, *args, record_type=None, **kwargs):
@@ -83,7 +87,6 @@ class LentingForm(forms.ModelForm):
             "lent_start_date",
             "lent_desired_end_date",
             "sync_lent_end_date",
-            "lent_end_date",
             "lent_reason",
             "lent_accessories",
             "lent_note",
@@ -97,8 +100,48 @@ class LentingForm(forms.ModelForm):
             "lent_desired_end_date": forms.DateInput(
                 format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}
             ),
-            "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "room": TomSelectWidget(),
+            "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "lent_note": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+        }
+
+
+class LendingReturnForm(forms.ModelForm):
+    """
+    Acknowledge the return of an active lending: the end date (prefilled with
+    today when the return screen is opened) plus the free-text fields, so the
+    device's condition can be recorded while it is handed back.
+
+    Deliberately narrow. Returning is a lifecycle transition, not an edit of the
+    lending itself: who borrowed it, from where and for how long are only
+    editable through ``LentingForm``, are not fields here, and so
+    ``save(commit=False)`` leaves their columns at their stored values -- no
+    disabled inputs to round-trip, and a lending with e.g. no desired return date
+    stays returnable.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["lent_end_date"].required = True
+
+        # Opening the return screen means "this comes back now"; a date already
+        # stored on the record wins (re-opening an acknowledged return).
+        if not self.instance.lent_end_date:
+            self.initial["lent_end_date"] = timezone.localdate()
+
+    class Meta:
+        model = LentRecord
+        fields = [
+            "lent_end_date",
+            "lent_reason",
+            "lent_accessories",
+            "lent_note",
+        ]
+        widgets = {
+            # The format pairing is required to populate native date inputs from
+            # the model instance (see LentingForm for the same gotcha).
+            "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_note": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),

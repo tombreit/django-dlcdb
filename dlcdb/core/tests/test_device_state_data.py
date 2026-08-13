@@ -412,7 +412,8 @@ def test_assets_routes_a_return_to_the_lending_form(lentable_device, room, super
 
     returns = [a for a in state_data.actions if a["label"] == "Return"]
     assert len(returns) == 1
-    assert returns[0]["url"] == reverse("lending:detail", args=[record.pk])
+    # Same return screen the lending list's "Return" button opens.
+    assert returns[0]["url"] == f"{reverse('lending:detail', args=[record.pk])}?flow=return"
     assert returns[0]["external"] is False
     assert not _offers(state_data, reverse("assets:relocate"))
 

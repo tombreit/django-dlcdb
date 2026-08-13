@@ -123,6 +123,15 @@ class LendReturnParityTests(BaseTest):
     def _post_frontend(self, record, **overrides):
         return self.client.post(reverse("lending:detail", args=[record.pk]), self._payload(**overrides))
 
+    def _post_frontend_return(self, record, **overrides):
+        """
+        The frontend return screen (``?flow=return``) posts only the return
+        fields; the admin submits the whole change form for the same transition.
+        """
+        payload = {"lent_end_date": RETURN_DATE, "lent_note": ""}
+        payload.update(overrides)
+        return self.client.post(f"{reverse('lending:detail', args=[record.pk])}?flow=return", payload)
+
     # --- lend ------------------------------------------------------------
 
     def test_lend_via_admin_and_via_frontend_agree(self):
@@ -160,7 +169,7 @@ class LendReturnParityTests(BaseTest):
         front_device, front_record = self._lent_device("EDV-FE-RET", "6-6")
 
         self._post_admin(admin_record, lent_end_date=RETURN_DATE)
-        self._post_frontend(front_record, lent_end_date=RETURN_DATE)
+        self._post_frontend_return(front_record)
 
         admin_state = snapshot(admin_device)
         # Returning ends the lending and parks the device in the auto-return room.
@@ -175,7 +184,7 @@ class LendReturnParityTests(BaseTest):
         front_device, front_record = self._lent_device("EDV-FE-STAMP", "8-8")
 
         self._post_admin(admin_record, lent_end_date=RETURN_DATE)
-        self._post_frontend(front_record, lent_end_date=RETURN_DATE)
+        self._post_frontend_return(front_record)
 
         expected = datetime.date.fromisoformat(RETURN_DATE)
         for record in (admin_record, front_record):
