@@ -33,7 +33,7 @@ from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Pers
 from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.utils.relocate import relocate_device
-from dlcdb.lending.forms import LentingForm
+from dlcdb.lending.forms import LendingForm
 from dlcdb.core.tests.testingutils import establish_state
 
 # Plain static storage so tests do not require a built staticfiles manifest.
@@ -272,7 +272,7 @@ class LostDeviceCannotBeLentTests(BaseTest):
 
     def test_lending_form_rejects_lending_a_lost_device(self):
         instance = self._lost_lentable_record("EDV-LOST-FE", "21-21")
-        form = LentingForm(data=self._form_data(), instance=instance, record_type=Record.LOST)
+        form = LendingForm(data=self._form_data(), instance=instance, record_type=Record.LOST)
 
         self.assertFalse(form.is_valid())
         self.assertIn("not locatable", str(form.errors))
@@ -289,7 +289,7 @@ class LostDeviceCannotBeLentTests(BaseTest):
         admin_form.record_type = Record.INROOM
         self.assertTrue(admin_form.is_valid(), admin_form.errors)
 
-        lending_form = LentingForm(data=self._form_data(), instance=instance, record_type=Record.INROOM)
+        lending_form = LendingForm(data=self._form_data(), instance=instance, record_type=Record.INROOM)
         self.assertTrue(lending_form.is_valid(), lending_form.errors)
 
     def test_lending_view_rejects_lending_a_lost_device(self):

@@ -40,7 +40,7 @@ from .filters import (
     STATE_LENT,
     STATE_AVAILABLE,
 )
-from .forms import LendingReturnForm, LentingForm, QuickLendDeviceForm
+from .forms import LendableDeviceSelectForm, LendingForm, LendingReturnForm
 from .models import LendingConfiguration, LendingProfile
 
 
@@ -274,8 +274,8 @@ def _save_lending(request, record, form):
     """
     Run the soft warnings and the lend/return/edit state machine in one
     transaction. Returns True on success (caller should redirect) or False if a
-    form error was added (caller should re-render). Shared by ``detail`` and
-    ``quick_lend``.
+    form error was added (caller should re-render). Shared by all three flows of
+    ``lend``.
     """
     user, username = get_denormalized_user(request.user)
     # Soft warnings sanity-check a lending's dates against the borrower's contract;
@@ -314,19 +314,18 @@ def lend(request, pk=None):
     Single lending screen. Two entry points share one form and one save path:
 
     - **picker mode** (``pk`` is None, ``lending:lend``): pick an available device
-      via the live device picker and a person, then lend in one submit — the
-      "quick lend" assistant.
+      via the live device picker and a person, then lend in one submit.
     - **record mode** (``pk`` given, ``lending:detail``): open a device's active
       ``LentRecord`` to lend it (INROOM), or -- for a LENT one -- to acknowledge
       its return (``?flow=return``, ``LendingReturnForm``) or to edit the lending
-      without ending it (no querystring, ``LentingForm``). The device is shown
+      without ending it (no querystring, ``LendingForm``). The device is shown
       locked in both.
 
     Both resolve to a ``LentRecord`` and run the same ``_save_lending`` state
     machine. Replaces the django-admin LentRecord change view.
     """
     picker_mode = pk is None
-    device_form = QuickLendDeviceForm(request.POST or None, request=request) if picker_mode else None
+    device_form = LendableDeviceSelectForm(request.POST or None, request=request) if picker_mode else None
 
     # Filters/search on the index live in its querystring; the row links carry it
     # here as ?next=. Thread it back into the post-save redirect and the
@@ -358,7 +357,7 @@ def lend(request, pk=None):
 
     # Returning ends the lending, lending and editing do not: two disjoint forms
     # over the same record, so neither flow can perform the other's write.
-    form_class = LendingReturnForm if is_return_flow else LentingForm
+    form_class = LendingReturnForm if is_return_flow else LendingForm
 
     if request.method == "POST":
         if picker_mode:
@@ -501,7 +500,7 @@ def print_sheet(request, pk):
         raise Http404("No printable lending record for this device.")
     device = record.device
 
-    form = LentingForm(request.POST, instance=record, record_type=record.record_type)
+    form = LendingForm(request.POST, instance=record, record_type=record.record_type)
     # Populate cleaned_data without hard-blocking on validation: a slip should
     # print even from a partially filled form.
     form.is_valid()

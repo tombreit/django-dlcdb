@@ -321,7 +321,7 @@ class LendingDetailViewTests(BaseTest):
     def test_lend_flow_print_button_uses_device_pk(self):
         LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="x")
         response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
-        self.assertContains(response, 'id="quick-lend-print"')
+        self.assertContains(response, 'id="lend-form-print"')
         # The slip endpoint is keyed on the device pk, not the record pk.
         self.assertContains(response, reverse("lending:print_sheet", args=[self.available_device.pk]))
 
@@ -331,7 +331,7 @@ class LendingDetailViewTests(BaseTest):
         # print button that would 404.
         LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="")
         response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
-        self.assertNotContains(response, 'id="quick-lend-print"')
+        self.assertNotContains(response, 'id="lend-form-print"')
         self.assertContains(response, reverse("admin:lending_lendingprofile_add"))
 
     def test_lend_creates_new_lent_record(self):
@@ -692,7 +692,7 @@ class LendingDeviceSearchTests(BaseTest):
         self.assertNotContains(response, "EDV-LENT")
 
     def test_device_search_uses_q_not_search(self):
-        # On the quick-lend page both pickers sit in one <form>; HTMX includes a
+        # In picker mode both pickers sit in one <form>; HTMX includes a
         # stray (empty) "search" from the person picker. Device search must key
         # off "q" only, so the stray param does not blank the results.
         response = self.client.post(self.url, {"source": "lend", "q": "*", "search": ""})
@@ -700,7 +700,7 @@ class LendingDeviceSearchTests(BaseTest):
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
-class QuickLendViewTests(BaseTest):
+class LendingPickerModeViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
@@ -756,11 +756,11 @@ class QuickLendViewTests(BaseTest):
 
     def test_get_renders_print_button(self):
         response = self.client.get(self.url)
-        self.assertContains(response, 'id="quick-lend-print"')
+        self.assertContains(response, 'id="lend-form-print"')
         # The print endpoint is keyed on the device pk, substituted by JS.
         self.assertContains(response, "/0/print/")
 
-    def test_print_sheet_works_from_quick_lend_payload(self):
+    def test_print_sheet_works_from_picker_mode_payload(self):
         LendingProfile.objects.create(
             device_type=self.available_device.device_type,
             lent_sheet_template="{% load i18n %}Slip {{ record.person }}",

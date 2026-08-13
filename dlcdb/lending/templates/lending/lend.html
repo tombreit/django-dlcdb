@@ -240,7 +240,7 @@ SPDX-License-Identifier: EUPL-1.2
 
   {# --- Actions -------------------------------------------------------- #}
   <div class="d-flex flex-wrap gap-2 mt-4">
-    <button type="submit" id="quick-lend-submit" class="btn btn-primary"{% if picker_mode %} disabled{% endif %}>
+    <button type="submit" id="lend-form-submit" class="btn btn-primary"{% if picker_mode %} disabled{% endif %}>
       <i class="bi bi-check-lg"></i>
       {% if is_lend_flow %}{% translate "Lend device" %}{% elif is_return_flow %}{% translate "Return device" %}{% else %}{% translate "Save" %}{% endif %}
     </button>
@@ -254,7 +254,7 @@ SPDX-License-Identifier: EUPL-1.2
     {% if can_print_slip %}
       <button
         type="submit"
-        id="quick-lend-print"
+        id="lend-form-print"
         class="btn btn-outline-secondary"
         formmethod="post"
         formtarget="_blank"
@@ -289,8 +289,8 @@ SPDX-License-Identifier: EUPL-1.2
     "use strict";
     const deviceInput = document.getElementById("id_device");
     const personInput = document.getElementById("id_person");
-    const submitBtn = document.getElementById("quick-lend-submit");
-    const printBtn = document.getElementById("quick-lend-print");
+    const submitBtn = document.getElementById("lend-form-submit");
+    const printBtn = document.getElementById("lend-form-print");
     const roomSelect = document.getElementById("{{ form.room.id_for_label }}");
     const devicePicker = document.getElementById("device-picker");
 

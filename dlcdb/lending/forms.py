@@ -14,13 +14,13 @@ from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
 from .pickers import lend_queryset
 
 
-class QuickLendDeviceForm(forms.Form):
+class LendableDeviceSelectForm(forms.Form):
     """
-    Device selection for the quick-lend assistant: a single-select device picker
-    (see ``dlcdb.theme.widgets.DevicePickerWidget``). Kept separate from
-    ``LentingForm`` because it picks a ``core.Device`` while ``LentingForm`` edits
-    the resulting ``LentRecord``; the view resolves the device's available INROOM
-    record before lending.
+    The "which device?" step of the lending screen's picker mode: a single-select
+    picker (see ``dlcdb.theme.widgets.DevicePickerWidget``) over the devices that
+    can be lent right now. Kept separate from ``LendingForm`` because it picks a
+    ``core.Device`` while ``LendingForm`` edits the resulting ``LentRecord``; the
+    view resolves the device's available INROOM record before lending.
     """
 
     device = DevicePickerField(
@@ -41,7 +41,7 @@ class QuickLendDeviceForm(forms.Form):
             self.fields["device"].widget.user = request.user
 
 
-class LentingForm(forms.ModelForm):
+class LendingForm(forms.ModelForm):
     """
     Lend / return / edit form for a single lending, used by the standalone
     lending detail view. Replaces ``LentRecordAdminForm``.
@@ -115,7 +115,7 @@ class LendingReturnForm(forms.ModelForm):
 
     Deliberately narrow. Returning is a lifecycle transition, not an edit of the
     lending itself: who borrowed it, from where and for how long are only
-    editable through ``LentingForm``, are not fields here, and so
+    editable through ``LendingForm``, are not fields here, and so
     ``save(commit=False)`` leaves their columns at their stored values -- no
     disabled inputs to round-trip, and a lending with e.g. no desired return date
     stays returnable.
@@ -140,7 +140,7 @@ class LendingReturnForm(forms.ModelForm):
         ]
         widgets = {
             # The format pairing is required to populate native date inputs from
-            # the model instance (see LentingForm for the same gotcha).
+            # the model instance (see LendingForm for the same gotcha).
             "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
