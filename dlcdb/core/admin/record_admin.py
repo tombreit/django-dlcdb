@@ -68,6 +68,7 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
         "device",
         "is_active",
         "room",
+        "get_lender",
         "inventory",
         "has_note",
         "user",
@@ -153,6 +154,10 @@ class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
                 )
             )
         )
+
+    @admin.display(description=_("Lender"))
+    def get_lender(self, obj):
+        return obj.person
 
     # Custom admin actions
     # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/actions/
