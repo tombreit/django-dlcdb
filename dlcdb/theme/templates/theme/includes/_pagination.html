@@ -10,6 +10,11 @@ fallback) plus hx-get; hx-target / hx-swap / hx-push-url are inherited from the
 fragment root the pager is rendered inside (same trick as _sort_th.html), so a
 page click swaps the list fragment and pushes the URL.
 
+The first/last chevrons are a convenience, not a reachability fix: paginate()
+uses on_ends=1, so elided_page_range always carries page 1 and the last page as
+numbers already. What they add is a jump target in a fixed position, since the
+edge numbers shift as you page through.
+
 Beneath the pager a manual override toggles `?show_all=1`: unconditionally show
 every object, or return to the paginated view. It lives outside the num_pages
 guard because show-all collapses everything onto one page (num_pages == 1), which
@@ -23,6 +28,19 @@ would otherwise hide the only way back.
   {% if page_obj.paginator.num_pages > 1 %}
   <nav aria-label="{% translate 'List pages' %}">
     <ul class="pagination">
+      {# No rel="first"/"last": the HTML spec's link types for <a> have no such values. #}
+      <li class="page-item{% if not page_obj.has_previous %} disabled{% endif %}">
+        {% if page_obj.has_previous %}
+        {% querystring page=1 as first_href %}
+        <a class="page-link" href="{{ first_href }}" hx-get="{{ first_href }}"
+          aria-label="{% translate 'First page' %}">
+          <i class="bi bi-chevron-double-left"></i>
+        </a>
+        {% else %}
+        <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-double-left"></i></span>
+        {% endif %}
+      </li>
+
       <li class="page-item{% if not page_obj.has_previous %} disabled{% endif %}">
         {% if page_obj.has_previous %}
         {% querystring page=page_obj.previous_page_number as prev_href %}
@@ -55,6 +73,18 @@ would otherwise hide the only way back.
           </a>
         {% else %}
           <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+        {% endif %}
+      </li>
+
+      <li class="page-item{% if not page_obj.has_next %} disabled{% endif %}">
+        {% if page_obj.has_next %}
+          {% querystring page=page_obj.paginator.num_pages as last_href %}
+          <a class="page-link" href="{{ last_href }}" hx-get="{{ last_href }}"
+            aria-label="{% translate 'Last page' %}">
+            <i class="bi bi-chevron-double-right"></i>
+          </a>
+        {% else %}
+          <span class="page-link" aria-hidden="true"><i class="bi bi-chevron-double-right"></i></span>
         {% endif %}
       </li>
     </ul>
