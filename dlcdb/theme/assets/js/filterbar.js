@@ -41,7 +41,10 @@ function updateFormLabels(form) {
 
     const badge = form.querySelector('[data-filterbar-count]');
     if (badge) {
-        const count = [...form.querySelectorAll('.filterbar-filter:not(.filterbar-sort) input:checked')]
+        // The sort counts too: it modifies the viewset like any filter. Nothing
+        // in the sort group is checked until the user picks one (the view's own
+        // default is never rendered as a selection), so a pristine bar is 0.
+        const count = [...form.querySelectorAll('.filterbar-filter input:checked')]
             .filter((input) => input.value !== '').length;
         badge.textContent = count;
         badge.classList.toggle('d-none', count === 0);
@@ -49,7 +52,9 @@ function updateFormLabels(form) {
 }
 
 // Reset one input to its "off" state; for checkboxes, only when it carries
-// `value` (undefined = any value). Radios fall back to their empty "reset" choice.
+// `value` (undefined = any value). Radios fall back to their empty "reset"
+// choice — the sort group has none, so it ends up fully unchecked and submits
+// no `ordering`, which is exactly "back to the view's default sort".
 function resetInput(input, value) {
     if (input.type === 'radio') {
         input.checked = input.value === '';
@@ -83,14 +88,17 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    // "Clear all": reset search + every filter, keep the sort order.
+    // "Clear all": reset search, every filter and the sort — every modification
+    // the user made to the viewset. Clearing the sort submits no `ordering`, so
+    // the view re-injects its default; that matches what the no-JS
+    // bar.clear_all_href renders.
     const clearAll = event.target.closest('[data-filterbar-clear-all]');
     if (clearAll) {
         const form = ownerForm(clearAll);
         if (!form) return;
         event.preventDefault();
-        form.querySelectorAll('input[type="search"], .filterbar-filter:not(.filterbar-sort) input').forEach(
-            (input) => resetInput(input)
+        form.querySelectorAll('input[type="search"], .filterbar-filter input').forEach((input) =>
+            resetInput(input)
         );
         form.dispatchEvent(new Event('change', { bubbles: true }));
         return;

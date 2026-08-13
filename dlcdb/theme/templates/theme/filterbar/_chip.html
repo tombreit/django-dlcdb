@@ -1,7 +1,9 @@
 {% load i18n %}
 {% comment %}
-One removable filter chip. Expects ``chip`` (a Chip) and ``bar_id`` in context.
-Used by chips.html for both the search chip and the dropdown-filter chips.
+One removable chip. Expects ``chip`` (a Chip) and ``bar_id`` in context. Used by
+chips.html for the search chip, the dropdown-filter chips and the sort chip.
+``chip.icon`` is optional (a Bootstrap icon class, e.g. the sort direction); an
+empty value renders nothing.
 {% endcomment %}
 <a
   class="filterbar-chip badge rounded-pill text-decoration-none"
@@ -11,7 +13,7 @@ Used by chips.html for both the search chip and the dropdown-filter chips.
   data-filterbar-form="{{ bar_id }}"
   title="{% blocktranslate with label=chip.label %}Remove filter: {{ label }}{% endblocktranslate %}"
 >
-  <span class="filterbar-chip-label">{{ chip.label }}{% if chip.value_label %}: {{ chip.value_label }}{% endif %}</span>
+  <span class="filterbar-chip-label">{{ chip.label }}{% if chip.value_label %}: {{ chip.value_label }}{% endif %}{% if chip.icon %} <i class="bi {{ chip.icon }}"></i>{% endif %}</span>
   <i class="bi bi-x-lg"></i>
 </a>
 

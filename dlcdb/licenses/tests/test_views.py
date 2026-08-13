@@ -79,8 +79,11 @@ class LicensesIndexViewTests(BaseTest):
         response = self.client.get(self.url)
         content = response.content.decode()
         self.assertContains(response, "data-filterbar")
-        # The default ordering (-modified) is reflected as a checked sort radio.
-        self.assertRegex(content, r'value="-modified"\s+checked')
+        # The view's own default ordering is not a sort the user picked, so no
+        # radio is checked until they sort.
+        self.assertNotRegex(content, r'value="-modified"\s+checked')
+        sorted_content = self.client.get(self.url, {"ordering": "-modified"}).content.decode()
+        self.assertRegex(sorted_content, r'value="-modified"\s+checked')
         # Sortable column headers expose their ordering params.
         self.assertContains(response, "ordering=expiry")
 

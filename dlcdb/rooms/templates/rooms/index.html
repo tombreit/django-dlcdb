@@ -84,7 +84,7 @@
                 <td colspan="5" class="text-center text-muted py-4">
                   <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                   {% translate "No rooms match these filters." %}
-                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                  {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
                 </td>
               </tr>
             {% endfor %}

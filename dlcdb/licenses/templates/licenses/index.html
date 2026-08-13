@@ -137,7 +137,7 @@
                 {% if licenses_total == 0 %}
                   {% include "licenses/includes/add_button.html" with style="btn" %}
                 {% else %}
-                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                  {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
                 {% endif %}
               </td>
             </tr>

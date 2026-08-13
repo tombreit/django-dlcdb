@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}
+The bar's reset control: "Clear all" next to the chips, "Clear filters" in a
+list's empty state. Expects ``bar``; ``label`` and ``link_class`` are optional.
+
+It carries the attributes filterbar.js needs — with JS it resets the form's
+widgets and lets the form's own hx-get fire, so there is one request path and
+the widgets stay in sync; the href is the no-JS / middle-click fallback.
+
+Deliberately no hx-get of its own: htmx binds on the element, so it would issue
+its own request before the delegated handler can preventDefault — two requests,
+and a form still holding the values that were meant to be cleared. That is
+exactly how the eight empty-state copies of this anchor had drifted before it
+was factored out here.
+{% endcomment %}
+<a{% if link_class %} class="{{ link_class }}"{% endif %}
+  href="{{ bar.clear_all_href }}"
+  data-filterbar-clear-all
+  data-filterbar-form="{{ bar.bar_id }}"
+>{% if label %}{{ label }}{% else %}{% translate "Clear all" %}{% endif %}</a>

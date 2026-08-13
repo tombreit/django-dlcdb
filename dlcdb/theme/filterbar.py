@@ -23,12 +23,23 @@ The bar is derived by introspecting the FilterSet: the filter named
 dropdown, choice-ish filters become one dropdown each. Everything is plain
 data (frozen dataclasses of strings) — no state, no template tags, no mixins.
 
+A sort counts as a user modification of the viewset, exactly like a filter: it
+gets its own removable chip and "Clear all" undoes it. What separates "the page
+is sorted" from "the user sorted it" is whether ``?ordering=`` is in the
+request — the bar reads the selection from ``request.GET``, not from the
+FilterSet's data, which every view has already seeded with its own default.
+
 Conventions the consuming view/page must follow:
 - the list page is served at its own endpoint (the form submits to
   ``request.path``),
 - exactly one filterbar per page,
 - the HTMX-swapped fragment root carries hx-target/hx-swap/hx-push-url so the
-  sortable column headers (``_sort_th.html``) can inherit them.
+  sortable column headers (``_sort_th.html``) can inherit them,
+- the view injects its default ordering onto a copy of ``request.GET``
+  (``data.setdefault("ordering", ...)``). This is load-bearing, not advisory:
+  "Clear all" drops ``?ordering=`` and django-filter leaves the queryset
+  untouched for an empty ordering, so a view without that default would
+  paginate an unordered queryset.
 """
 
 from dataclasses import dataclass
@@ -52,13 +63,18 @@ class FilterSpec:
 
 @dataclass(frozen=True)
 class Chip:
-    """One active filter value, shown as a removable chip."""
+    """One user-made modification of the viewset, shown as a removable chip."""
 
     param: str
     value: str
     label: str
     value_label: str
     remove_href: str
+    icon: str = ""  # optional Bootstrap icon class rendered after the value
+    # Below md the filter and sort dropdowns fold into the offcanvas panel while
+    # the search input stays visible, so only the former are worth counting on
+    # the "Filters (n)" button that opens it.
+    in_panel: bool = True
 
 
 @dataclass(frozen=True)
@@ -73,14 +89,14 @@ class SortOption:
 class FilterBar:
     search_param: str  # "" when the FilterSet has no search filter
     search_value: str
-    search_chip: Chip | None  # the active search term as a removable chip
     specs: list[FilterSpec]
     secondary_specs: list[FilterSpec]  # demoted filters, tucked behind "More filters"
     secondary_active: bool  # a secondary spec has a selected value -> start expanded
     ordering_param: str  # "" when the FilterSet has no OrderingFilter
     sort_options: list[SortOption]
-    current_sort: SortOption | None
-    chips: list[Chip]  # dropdown-filter chips only (search is search_chip)
+    current_sort: SortOption | None  # the sort the user picked; None on the view's default
+    chips: list[Chip]  # everything the user changed, in display order
+    active_count: int  # how many of those sit behind the mobile "Filters (n)" button
     clear_all_href: str
     target: str
     search_placeholder: str
@@ -110,9 +126,9 @@ def build_filterbar(
     ``hidden_params`` names GET parameters that scope the whole page rather than
     filter it (``?device=`` on the record trail). The bar is a GET form, so a
     submit replaces the entire query string with the form's own fields: without
-    a hidden input the scope would be lost on the first keystroke. They are kept
-    by "Clear all" for the same reason — resetting the filters must not silently
-    widen the page to a different set of objects.
+    a hidden input the scope would be lost on the first keystroke. They are the
+    only parameters "Clear all" keeps, for the same reason — resetting the bar
+    must not silently widen the page to a different set of objects.
     """
     hidden_params = hidden_params or {}
     form = filterset.form
@@ -134,31 +150,42 @@ def build_filterbar(
 
         if isinstance(flt, django_filters.OrderingFilter):
             ordering_param = bound_field.html_name
-            sort_options = _sort_options(bound_field)
+            # From request.GET, not from the bound field: the view seeds its own
+            # default into the FilterSet's data, and that default is not a sort
+            # the user picked.
+            sort_options = _sort_options(bound_field, request.GET.get(ordering_param, ""))
             continue
 
         spec = _filter_spec(flt, bound_field)
         if spec is not None:
             (secondary_specs if name in secondary_fields else specs).append(spec)
 
-    chips = [chip for spec in specs + secondary_specs for chip in _spec_chips(spec, request)]
     secondary_active = any(spec.selected_values for spec in secondary_specs)
     current_sort = next((opt for opt in sort_options if opt.selected), None)
 
-    search_chip = None
+    # One list, in the order they read on screen: the search term, then the
+    # filters, then the sort.
+    chips = []
     if search_value:
-        search_chip = Chip(
-            param=search_param,
-            value=search_value,
-            label=_("Search"),
-            value_label=search_value,
-            remove_href=_remove_value_href(request, search_param, search_value),
+        chips.append(_chip(request, search_param, search_value, _("Search"), search_value, in_panel=False))
+    chips += [chip for spec in specs + secondary_specs for chip in _spec_chips(spec, request)]
+    if current_sort:
+        chips.append(
+            _chip(
+                request,
+                ordering_param,
+                current_sort.value,
+                _("Sort"),
+                current_sort.label,
+                # The same direction icons the sort dropdown uses, rather than a
+                # third vocabulary for "descending".
+                icon="bi-sort-down" if current_sort.descending else "bi-sort-up",
+            )
         )
 
     return FilterBar(
         search_param=search_param,
         search_value=search_value,
-        search_chip=search_chip,
         specs=specs,
         secondary_specs=secondary_specs,
         secondary_active=secondary_active,
@@ -166,7 +193,8 @@ def build_filterbar(
         sort_options=sort_options,
         current_sort=current_sort,
         chips=chips,
-        clear_all_href=_clear_all_href(request, keep_params={ordering_param, *hidden_params}),
+        active_count=sum(chip.in_panel for chip in chips),
+        clear_all_href=_clear_all_href(request, keep_params=set(hidden_params)),
         target=target,
         search_placeholder=search_placeholder,
         bar_id=bar_id,
@@ -225,31 +253,39 @@ def _raw_values(bound_field):
     return [str(raw)] if str(raw) else []
 
 
+def _chip(request, param, value, label, value_label, *, icon="", in_panel=True):
+    """One thing the user changed, with the href that undoes it."""
+    return Chip(
+        param=param,
+        value=value,
+        label=label,
+        value_label=value_label,
+        remove_href=_remove_value_href(request, param, value),
+        icon=icon,
+        in_panel=in_panel,
+    )
+
+
 def _spec_chips(spec, request):
     """One removable chip per selected value; unknown/invalid values yield none."""
     label_by_value = {value: label for value, label, _checked in spec.choices}
-    return [
-        Chip(
-            param=spec.param,
-            value=value,
-            label=spec.label,
-            value_label=label_by_value[value],
-            remove_href=_remove_value_href(request, spec.param, value),
-        )
-        for value in spec.selected_values
-    ]
+    return [_chip(request, spec.param, value, spec.label, label_by_value[value]) for value in spec.selected_values]
 
 
-def _sort_options(bound_field):
+def _sort_options(bound_field, current):
     """
     Pair the OrderingFilter's asc/desc choices ("device" / "-device") into
     SortOptions sharing the ascending label; direction is carried as a flag so
     the template can render an icon instead of the "(descending)" suffix.
+
+    ``current`` is the raw ``?ordering=`` value from the request — the sort the
+    user picked, which is not the same as the ordering in force: views seed a
+    default into the FilterSet's data. Nothing is selected on a default page, so
+    the bar shows a plain "Sort" button and no chip until the user sorts.
     """
-    raw = bound_field.value() or []
-    if isinstance(raw, str):
-        raw = raw.split(",")
-    current = raw[0].strip() if raw else ""
+    if isinstance(current, str):
+        current = current.split(",")
+    current = current[0].strip() if current else ""
 
     ascending_labels = {}
     for value, label in bound_field.field.choices:
@@ -277,8 +313,12 @@ def _remove_value_href(request, param, value):
 
 
 def _clear_all_href(request, keep_params):
-    """Current URL minus all filters; ordering is presentation, not a filter,
-    and the hidden scope params define which objects the page is about."""
+    """Current URL minus everything the user chose — search, filters *and* the
+    ordering: "Clear all" undoes every modification of the viewset, and a custom
+    sort is one of them. Dropping ``?ordering=`` lands on the view's own default
+    because the view re-injects it; django-filter alone would leave the queryset
+    unordered. Only the hidden scope params survive: they say which objects the
+    page is about, not how the user narrowed them."""
     query = request.GET.copy()
     for key in list(query.keys()):
         if key not in keep_params:

@@ -1,33 +1,27 @@
-{% load i18n %}
 {% comment %}
 Active-filter chips for the filterbar. Include INSIDE the HTMX-swapped list
 fragment so the chips refresh with every response:
 
     {% include "theme/filterbar/chips.html" with bar=filterbar %}
 
-Renders the active search term (search_chip) and each active dropdown filter
-(chips) as removable chips, plus a single "Clear all". The wrapper carries no
-outer margin, so a consuming template can drop it into its own status row
-(e.g. next to a result count) — the component itself knows nothing about counts.
+``bar.chips`` is everything the user changed — the search term, each active
+dropdown filter and a sort they picked — in the order they read on screen. The
+view's own default ordering is not a change and gets no chip. The wrapper
+carries no outer margin, so a consuming template can drop it into its own status
+row (e.g. next to a result count) — the component itself knows nothing about
+counts.
 
 With JS, clicking a chip clears the matching input in the bar's form and lets
-the form's own hx-get fire (one request path, widgets stay in sync). The href
-is the no-JS / middle-click fallback and reloads the page with that value
-removed. "Clear all" resets search + every filter but keeps the ordering.
+the form's own hx-get fire (one request path, widgets stay in sync). The href is
+the no-JS / middle-click fallback and reloads the page with that value removed.
+"Clear all" resets search, every filter and the sort; dropping the ordering
+lands on the view's default, not on an unordered list.
 {% endcomment %}
-{% if bar.search_chip or bar.chips %}
+{% if bar.chips %}
   <span class="filterbar-chips d-inline-flex flex-wrap align-items-center gap-2">
-    {% if bar.search_chip %}
-      {% include "theme/filterbar/_chip.html" with chip=bar.search_chip bar_id=bar.bar_id %}
-    {% endif %}
     {% for chip in bar.chips %}
       {% include "theme/filterbar/_chip.html" with chip=chip bar_id=bar.bar_id %}
     {% endfor %}
-    <a
-      class="small text-decoration-none"
-      href="{{ bar.clear_all_href }}"
-      data-filterbar-clear-all
-      data-filterbar-form="{{ bar.bar_id }}"
-    >{% translate "Clear all" %}</a>
+    {% include "theme/filterbar/_clear_all.html" with bar=bar link_class="small text-decoration-none" %}
   </span>
 {% endif %}

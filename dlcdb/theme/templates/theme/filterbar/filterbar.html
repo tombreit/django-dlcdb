@@ -59,7 +59,7 @@ behind a "Filters (n)" button; search stays visible.
       aria-controls="{{ bar.bar_id }}-panel"
     >
       <i class="bi bi-funnel"></i> {% translate "Filters" %}
-      <span data-filterbar-count class="badge text-bg-secondary {% if not bar.chips %}d-none{% endif %}">{{ bar.chips|length }}</span>
+      <span data-filterbar-count class="badge text-bg-secondary {% if not bar.active_count %}d-none{% endif %}">{{ bar.active_count }}</span>
     </button>
 
     <div class="offcanvas-md offcanvas-end" tabindex="-1" id="{{ bar.bar_id }}-panel" aria-labelledby="{{ bar.bar_id }}-panel-label">

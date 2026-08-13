@@ -53,6 +53,13 @@ class BuildFilterbarTests(TestCase):
         filterset = SampleFilter(request.GET, queryset=Person.objects.all(), request=request)
         return build_filterbar(filterset, request, target="#item-list")
 
+    def _chip(self, bar, param, value=None):
+        """The chip for one parameter (and value, for multi-value filters)."""
+        return next(
+            (chip for chip in bar.chips if chip.param == param and (value is None or chip.value == value)),
+            None,
+        )
+
     def test_classification(self):
         bar = self._bar()
         self.assertEqual(bar.search_param, "search")
@@ -84,34 +91,42 @@ class BuildFilterbarTests(TestCase):
 
     def test_chips_remove_exactly_one_value(self):
         bar = self._bar(f"?state=open&person={self.person.pk}&tags=a&tags=b&ordering=-modified")
-        self.assertEqual(len(bar.chips), 4)
+        # state, person, two tags, and the sort.
+        self.assertEqual(len(bar.chips), 5)
 
-        state_chip = next(chip for chip in bar.chips if chip.param == "state")
+        state_chip = self._chip(bar, "state")
         self.assertEqual(state_chip.value_label, "Open")
         self.assertNotIn("state=", state_chip.remove_href)
         self.assertIn(f"person={self.person.pk}", state_chip.remove_href)
         self.assertIn("ordering=-modified", state_chip.remove_href)
 
         # Removing one multiselect value keeps the sibling value.
-        tag_a_chip = next(chip for chip in bar.chips if chip.param == "tags" and chip.value == "a")
+        tag_a_chip = self._chip(bar, "tags", "a")
         self.assertNotIn("tags=a", tag_a_chip.remove_href)
         self.assertIn("tags=b", tag_a_chip.remove_href)
 
+    def test_chip_order_is_search_then_filters_then_sort(self):
+        bar = self._bar("?search=laptop&state=open&ordering=-modified")
+        self.assertEqual([chip.param for chip in bar.chips], ["search", "state", "ordering"])
+
     def test_search_chip(self):
         bar = self._bar("?search=laptop")
-        self.assertIsNotNone(bar.search_chip)
-        self.assertEqual(bar.search_chip.param, "search")
-        self.assertEqual(bar.search_chip.value_label, "laptop")
-        self.assertNotIn("search=", bar.search_chip.remove_href)
-        # The search chip is separate from the dropdown-filter chips.
-        self.assertEqual(bar.chips, [])
+        chip = self._chip(bar, "search")
+        self.assertEqual(chip.value_label, "laptop")
+        self.assertNotIn("search=", chip.remove_href)
+        # The search input stays visible on narrow screens, so it is not one of
+        # the selections the "Filters (n)" button counts.
+        self.assertFalse(chip.in_panel)
+        self.assertEqual(bar.active_count, 0)
 
     def test_no_search_chip_without_query(self):
-        self.assertIsNone(self._bar("?state=open").search_chip)
+        self.assertIsNone(self._chip(self._bar("?state=open"), "search"))
 
-    def test_clear_all_keeps_only_ordering(self):
+    def test_clear_all_drops_ordering_too(self):
+        # "Clear all" undoes every modification the user made to the viewset,
+        # sorting included; the view re-injects its own default ordering.
         bar = self._bar("?search=laptop&state=open&tags=a&ordering=-modified")
-        self.assertEqual(bar.clear_all_href, "/items/?ordering=-modified")
+        self.assertEqual(bar.clear_all_href, "/items/")
 
     def test_clear_all_without_ordering_is_bare_path(self):
         bar = self._bar("?state=open")
@@ -133,6 +148,44 @@ class BuildFilterbarTests(TestCase):
     def test_no_ordering_selected_without_param(self):
         bar = self._bar("?state=open")
         self.assertIsNone(bar.current_sort)
+
+    def test_sort_chip_for_a_chosen_ordering(self):
+        chip = self._chip(self._bar("?ordering=-modified"), "ordering")
+        self.assertEqual(chip.value, "-modified")
+        self.assertEqual(chip.label, "Sort")
+        self.assertEqual(chip.value_label, "Modified")
+        self.assertEqual(chip.icon, "bi-sort-down")
+        self.assertNotIn("ordering=", chip.remove_href)
+
+    def test_ascending_sort_chip_carries_the_up_icon(self):
+        self.assertEqual(self._chip(self._bar("?ordering=name"), "ordering").icon, "bi-sort-up")
+
+    def test_no_sort_chip_without_an_ordering(self):
+        self.assertIsNone(self._chip(self._bar("?state=open"), "ordering"))
+
+    def test_active_count_is_the_selections_behind_the_filters_button(self):
+        # The sort folds into the same offcanvas panel as the filters, so it
+        # counts; the search input stays visible, so it does not.
+        bar = self._bar("?search=laptop&state=open&ordering=-modified")
+        self.assertEqual(len(bar.chips), 3)
+        self.assertEqual(bar.active_count, 2)
+
+    def test_the_views_default_ordering_is_not_a_sort_chip(self):
+        # The real view shape: every list view seeds its default onto a copy of
+        # request.GET, so the FilterSet is ordered while the request names no
+        # ordering. That default is not something the user chose.
+        request = RequestFactory().get("/items/?state=open")
+        data = request.GET.copy()
+        data.setdefault("ordering", "-modified")
+        filterset = SampleFilter(data, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list")
+
+        self.assertIsNone(self._chip(bar, "ordering"))
+        self.assertIsNone(bar.current_sort)
+        self.assertEqual(bar.active_count, 1)  # the state filter, not the sort
+        # The sort is still offered, just not presented as a selection.
+        self.assertEqual(len(bar.sort_options), 4)
+        self.assertFalse(any(opt.selected for opt in bar.sort_options))
 
     def test_default_secondary_fields_is_empty_and_unchanged_behavior(self):
         bar = self._bar()

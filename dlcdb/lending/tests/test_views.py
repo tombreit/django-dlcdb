@@ -118,9 +118,14 @@ class LendingIndexViewTests(BaseTest):
         self.assertContains(response, "data-filterbar")
         # State, Type, Person dropdowns plus the sort dropdown.
         self.assertEqual(content.count("data-filterbar-label"), 4)
-        # The view's default ordering (-modified) is reflected as checked radio.
-        self.assertRegex(content, r'value="-modified"\s+checked')
+        # The view's own default ordering is not a sort the user picked, so
+        # nothing is checked until they sort.
+        self.assertNotRegex(content, r'value="-modified"\s+checked')
         self.assertContains(response, 'value="-due"')
+
+        # An explicit ordering is reflected as a checked radio.
+        sorted_content = self.client.get(self.url, {"ordering": "-due"}).content.decode()
+        self.assertRegex(sorted_content, r'value="-due"\s+checked')
 
     @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_chips_in_fragment(self):
@@ -140,12 +145,30 @@ class LendingIndexViewTests(BaseTest):
     def test_filterbar_chip_removal_hrefs(self):
         response = self.client.get(self.url, {"state": "overdue", "person": self.person.id, "ordering": "-due"})
         bar = response.context["filterbar"]
-        self.assertEqual(len(bar.chips), 2)
+        # state, person, and the explicit sort.
+        self.assertEqual(len(bar.chips), 3)
         state_chip = next(chip for chip in bar.chips if chip.param == "state")
         self.assertNotIn("state=", state_chip.remove_href)
         self.assertIn(f"person={self.person.id}", state_chip.remove_href)
         self.assertIn("ordering=-due", state_chip.remove_href)
-        self.assertEqual(bar.clear_all_href, f"{self.url}?ordering=-due")
+        # "Clear all" drops the sort along with the filters; the view re-injects
+        # its default ordering.
+        self.assertEqual(bar.clear_all_href, self.url)
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_custom_sort_is_a_removable_chip(self):
+        response = self.client.get(self.url, {"ordering": "-due"}, headers={"HX-Request": "true"})
+        content = response.content.decode()
+        self.assertIn("Sort: Due", content)
+        self.assertIn('data-filterbar-remove="ordering"', content)
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_default_sort_is_not_a_chip(self):
+        # The view injects ordering=-modified on every request, so a pristine
+        # list must still show no chips at all.
+        content = self.client.get(self.url, headers={"HX-Request": "true"}).content.decode()
+        self.assertNotIn('data-filterbar-remove="ordering"', content)
+        self.assertNotIn("Clear all", content)
 
     @override_settings(LANGUAGE_CODE="en")
     def test_show_all_badge_removed(self):
