@@ -55,4 +55,13 @@ nav_entries = [
         "required_permission": "core.view_devicetype",
         "active_url_names": {"device_type_index", "device_type_add", "device_type_detail"},
     },
+    {
+        "slot": "nav_masterdata",
+        "order": 60,
+        "label": _("Records"),
+        "icon": "bi bi-stack",
+        "url": "assets:record_index",
+        "required_permission": "core.view_record",
+        "active_url_names": {"record_index", "record_detail"},
+    },
 ]

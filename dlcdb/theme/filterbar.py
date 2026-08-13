@@ -85,6 +85,7 @@ class FilterBar:
     target: str
     search_placeholder: str
     bar_id: str
+    hidden_params: dict  # scope params carried through the bar's form, not rendered as filters
 
 
 def build_filterbar(
@@ -96,6 +97,7 @@ def build_filterbar(
     search_field="search",
     bar_id="filterbar",
     secondary_fields=(),
+    hidden_params=None,
 ):
     """
     Pure helper: derive a FilterBar from a bound FilterSet and the request's
@@ -104,7 +106,15 @@ def build_filterbar(
     ``secondary_fields`` names filters to demote into ``secondary_specs`` (a
     "More filters" tier the view considers less important) — the component
     itself has no notion of which filters matter more.
+
+    ``hidden_params`` names GET parameters that scope the whole page rather than
+    filter it (``?device=`` on the record trail). The bar is a GET form, so a
+    submit replaces the entire query string with the form's own fields: without
+    a hidden input the scope would be lost on the first keystroke. They are kept
+    by "Clear all" for the same reason — resetting the filters must not silently
+    widen the page to a different set of objects.
     """
+    hidden_params = hidden_params or {}
     form = filterset.form
 
     search_param = ""
@@ -156,10 +166,11 @@ def build_filterbar(
         sort_options=sort_options,
         current_sort=current_sort,
         chips=chips,
-        clear_all_href=_clear_all_href(request, keep_param=ordering_param),
+        clear_all_href=_clear_all_href(request, keep_params={ordering_param, *hidden_params}),
         target=target,
         search_placeholder=search_placeholder,
         bar_id=bar_id,
+        hidden_params=hidden_params,
     )
 
 
@@ -265,11 +276,12 @@ def _remove_value_href(request, param, value):
     return f"{request.path}?{encoded}" if encoded else request.path
 
 
-def _clear_all_href(request, keep_param):
-    """Current URL minus all filters; ordering is presentation, not a filter."""
+def _clear_all_href(request, keep_params):
+    """Current URL minus all filters; ordering is presentation, not a filter,
+    and the hidden scope params define which objects the page is about."""
     query = request.GET.copy()
     for key in list(query.keys()):
-        if key != keep_param:
+        if key not in keep_params:
             del query[key]
     encoded = query.urlencode()
     return f"{request.path}?{encoded}" if encoded else request.path

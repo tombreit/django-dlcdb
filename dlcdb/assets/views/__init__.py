@@ -22,6 +22,7 @@ from .masterdata import (
     supplier_detail,
     supplier_index,
 )
+from .records import record_detail, record_index
 from .relocate import relocate, room_search
 
 __all__ = [
@@ -38,6 +39,8 @@ __all__ = [
     "supplier_index",
     "supplier_add",
     "supplier_detail",
+    "record_index",
+    "record_detail",
     "person_search",
     "relocate",
     "room_search",

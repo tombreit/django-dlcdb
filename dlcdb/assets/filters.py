@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Filters used by the device overview.
+Filters used by the device and record overviews.
 
 Keeping these filters in the assets app makes the new frontend independent of
 the Django admin's ``SimpleListFilter`` implementations.
@@ -14,6 +14,7 @@ from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
+from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
 
 
 STATE_NO_RECORD = "no-record"
@@ -159,6 +160,108 @@ class DeviceFilter(django_filters.FilterSet):
             .values(value)
         )
         return queryset.filter(**{f"{value}__in": duplicates})
+
+
+class RecordFilter(django_filters.FilterSet):
+    """Search and filters for the read-only record trail.
+
+    Device and person are deliberately not dropdowns: both have far too many
+    rows to render as options. They are reachable through ``search`` instead,
+    and a single device is reachable as a page scope (``?device=``).
+    """
+
+    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
+
+    record_type = django_filters.ChoiceFilter(
+        choices=Record.RECORD_TYPE_CHOICES,
+        label=_("Record type"),
+        empty_label=_("Any record type..."),
+    )
+    # An explicit ChoiceFilter, not a BooleanFilter: the filterbar renders only
+    # choice-ish filters, so a BooleanFilter would show up as no dropdown at all.
+    is_active = django_filters.ChoiceFilter(
+        choices=[("true", _("Current")), ("false", _("Superseded"))],
+        method="active_filter",
+        label=_("Validity"),
+        empty_label=_("Current and superseded..."),
+    )
+    device__device_type = django_filters.ModelChoiceFilter(
+        queryset=DeviceType.objects.all(),
+        label=_("Device type"),
+        empty_label=_("Any device type..."),
+    )
+    room = django_filters.ModelChoiceFilter(
+        queryset=Room.objects.all(),
+        label=_("Room"),
+        empty_label=_("Any room..."),
+    )
+    inventory = django_filters.ModelChoiceFilter(
+        queryset=Inventory.objects.all(),
+        label=_("Inventory"),
+        empty_label=_("Any inventory..."),
+    )
+    device__manufacturer = django_filters.ModelChoiceFilter(
+        queryset=Manufacturer.objects.all(),
+        label=_("Manufacturer"),
+        empty_label=_("Any manufacturer..."),
+    )
+    disposition_state = django_filters.ChoiceFilter(
+        choices=DEVICE_DISPOSITION_CHOICES,
+        label=_("Whereabouts"),
+        empty_label=_("Any whereabouts..."),
+    )
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("created_at", "created"),
+            ("record_type", "type"),
+            ("device__edv_id", "device"),
+            ("room__number", "room"),
+            ("person__last_name", "person"),
+            ("effective_until", "valid_until"),
+        ),
+        # Keyed by model field path, not by the exposed parameter — same reason
+        # as DeviceFilter: otherwise the labels read "Created at", "Record type".
+        field_labels={
+            "created_at": _("Created"),
+            "record_type": _("Record type"),
+            "device__edv_id": _("Device"),
+            "room__number": _("Room"),
+            "person__last_name": _("Lender"),
+            "effective_until": _("Valid until"),
+        },
+    )
+
+    class Meta:
+        model = Record
+        fields = [
+            "search",
+            "record_type",
+            "is_active",
+            "device__device_type",
+            "room",
+            "inventory",
+            "device__manufacturer",
+            "disposition_state",
+            "ordering",
+        ]
+
+    def search_filter(self, queryset, name, value):
+        return queryset.filter(
+            Q(device__edv_id__icontains=value)
+            | Q(device__sap_id__icontains=value)
+            | Q(device__serial_number__icontains=value)
+            | Q(person__first_name__icontains=value)
+            | Q(person__last_name__icontains=value)
+            | Q(person__email__icontains=value)
+            | Q(room__number__icontains=value)
+            # The free-text fields are what make a trail searchable at all
+            # ("why was this scrapped", "where did it go").
+            | Q(note__icontains=value)
+            | Q(removed_info__icontains=value)
+        )
+
+    def active_filter(self, queryset, name, value):
+        return queryset.filter(is_active=value == "true") if value else queryset
 
 
 class DeviceTypeFilter(django_filters.FilterSet):

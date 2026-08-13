@@ -5,18 +5,11 @@
 from django.utils.translation import gettext_lazy as _
 
 
-# Rooms, Manufacturer, Distributor, Device types and People are owned by their
-# frontend apps (dlcdb.rooms, dlcdb.assets, dlcdb.persons navigation.py); core
-# only keeps the admin-changelist entries that have no frontend yet.
+# Rooms, Manufacturer, Distributor, Device types, People and Records are owned
+# by their frontend apps (dlcdb.rooms, dlcdb.assets, dlcdb.persons
+# navigation.py); core only keeps the admin-changelist entries that have no
+# frontend yet.
 nav_entries = [
-    {
-        "slot": "nav_masterdata",
-        "order": 60,
-        "label": _("Records"),
-        "icon": "bi bi-stack",
-        "url": "admin:core_record_changelist",
-        "required_permission": "core.view_record",
-    },
     {
         "slot": "nav_masterdata",
         "order": 70,

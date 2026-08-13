@@ -26,6 +26,14 @@ behind a "Filters (n)" button; search stays visible.
   hx-trigger="keyup changed delay:250ms, search, change"
   hx-indicator=".htmx-indicator"
 >
+  {% comment %}
+  Scope params (e.g. ?device= on the record trail) the bar has to carry: this is
+  a GET form, so a submit replaces the whole query string with the fields below.
+  {% endcomment %}
+  {% for name, value in bar.hidden_params.items %}
+    <input type="hidden" name="{{ name }}" value="{{ value }}">
+  {% endfor %}
+
   <div class="d-flex flex-wrap gap-2 align-items-start">
 
     {% if bar.search_param %}

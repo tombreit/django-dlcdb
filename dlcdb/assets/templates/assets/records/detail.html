@@ -1,0 +1,269 @@
+{% extends "theme/_base.html" %}
+{% load i18n humanize %}
+
+{% comment %}
+One record, read only. Records are written by the lifecycle transitions only,
+so there is deliberately no form and no {% templatetag openblock %} csrf_token {% templatetag closeblock %} anywhere on this page.
+
+The lending/order/removal sections are shown by their data, not by record_type:
+a superseded or imported row can carry removal data under another type, and
+hiding it would lose history.
+{% endcomment %}
+
+{% block title %}{{ record.get_record_type_display }} · {{ record.device }}{% endblock title %}
+
+{% block body %}
+<div>
+  {% comment %}
+  Same header shape as the record index: the "Records" heading, then one context
+  line naming what is being shown, closed by a hairline. Here that context is
+  the record itself — its type and the device it belongs to.
+  {% endcomment %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{% translate "Records" %}</h1>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary ms-auto">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to records" %}
+    </a>
+  </div>
+
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-4 pb-3 border-bottom text-secondary">
+    <i class="bi bi-stack"></i>
+    <span>{{ record.get_record_type_display }}</span>
+    <span>/</span>
+    <a class="fw-semibold text-body link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+       href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device }}</a>
+    {% if record.is_active %}
+      <span class="small fw-medium text-primary-emphasis">{% translate "Current" %}</span>
+    {% else %}
+      <span class="small">{% translate "Superseded" %}</span>
+    {% endif %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% comment %}
+      Device first: a record only means something against the device it belongs
+      to. Same field set and labels as the read-only Device card on the device
+      page, so the two read alike.
+      {% endcomment %}
+      <section class="card device-card mb-3">
+        <div class="card-header">
+          <i class="bi {{ record.device.device_type.icon_class|default:'bi-pc-display' }}"></i>
+          <h2 class="device-card-title">{% translate "Device" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "IT ID" %}</dt>
+            <dd class="col-sm-8 font-monospace">{{ record.device.edv_id|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Inventory ID" %}</dt>
+            <dd class="col-sm-8 font-monospace">{{ record.device.sap_id|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Device type" %}</dt>
+            <dd class="col-sm-8">{{ record.device.device_type|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Manufacturer" %}</dt>
+            <dd class="col-sm-8">{{ record.device.manufacturer|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Model name" %}</dt>
+            <dd class="col-sm-8">{{ record.device.series|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Serial number" %}</dt>
+            <dd class="col-sm-8 font-monospace mb-0">{{ record.device.serial_number|default:"—" }}</dd>
+          </dl>
+        </div>
+        <div class="list-group list-group-flush">
+          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+             href="{% url 'assets:device_detail' record.device.pk %}">
+            <i class="bi bi-pc-display text-primary"></i>
+            <span class="me-auto">{% translate "Open device" %}</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="card device-card mb-3">
+        <div class="card-header">
+          <i class="bi bi-stack"></i>
+          <h2 class="device-card-title">{% translate "Record" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Record type" %}</dt>
+            <dd class="col-sm-8">{{ record.get_record_type_display }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Validity" %}</dt>
+            <dd class="col-sm-8">
+              {% if record.is_active %}{% translate "Current" %}{% else %}{% translate "Superseded" %}{% endif %}
+            </dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
+            <dd class="col-sm-8">{{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Valid until" %}</dt>
+            <dd class="col-sm-8">{{ record.effective_until|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</dd>
+            {% if record.note %}
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Record note" %}</dt>
+              <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ record.note }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      </section>
+
+      <section class="card device-card mb-3">
+        <div class="card-header">
+          <i class="bi bi-geo-alt"></i>
+          <h2 class="device-card-title">{% translate "Location" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Room" %}</dt>
+            <dd class="col-sm-8">
+              {% if record.room %}
+                {% if perms.core.view_room %}
+                  <a href="{% url 'rooms:detail' record.room.pk %}">{{ record.room }}</a>
+                {% else %}{{ record.room }}{% endif %}
+              {% else %}—{% endif %}
+            </dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Inventory" %}</dt>
+            <dd class="col-sm-8">{{ record.inventory|default:"—" }}</dd>
+            {% if record.assigned_device %}
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Assigned device" %}</dt>
+              <dd class="col-sm-8 mb-0">
+                <a href="{% url 'assets:device_detail' record.assigned_device.pk %}">{{ record.assigned_device }}</a>
+              </dd>
+            {% endif %}
+          </dl>
+        </div>
+      </section>
+
+      {% if record.person or record.lent_start_date %}
+        <section class="card device-card mb-3">
+          <div class="card-header">
+            <i class="bi bi-person-badge"></i>
+            <h2 class="device-card-title">{% translate "Lending" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Lender" %}</dt>
+              <dd class="col-sm-8">
+                {% if record.person %}
+                  {% if perms.core.view_person %}
+                    <a href="{% url 'persons:detail' record.person.pk %}">{{ record.person }}</a>
+                  {% else %}{{ record.person }}{% endif %}
+                {% else %}—{% endif %}
+              </dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Lent from" %}</dt>
+              <dd class="col-sm-8">{{ record.lent_start_date|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Desired return date" %}</dt>
+              <dd class="col-sm-8">
+                {{ record.lent_desired_end_date|date:"SHORT_DATE_FORMAT"|default:"—" }}
+                {% if record.sync_lent_end_date %}
+                  <span class="badge text-bg-light border fw-normal">{% translate "Follows contract end" %}</span>
+                {% endif %}
+              </dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Returned on" %}</dt>
+              <dd class="col-sm-8">{{ record.lent_end_date|date:"SHORT_DATE_FORMAT"|default:"—" }}</dd>
+              {% if record.lent_reason %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "Reason for lending" %}</dt>
+                <dd class="col-sm-8" style="white-space: pre-line;">{{ record.lent_reason }}</dd>
+              {% endif %}
+              {% if record.lent_accessories %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "Accessories" %}</dt>
+                <dd class="col-sm-8" style="white-space: pre-line;">{{ record.lent_accessories }}</dd>
+              {% endif %}
+              {% if record.lent_note %}
+                <dt class="col-sm-4 text-secondary fw-medium">{% translate "Note (lending, internal only)" %}</dt>
+                <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ record.lent_note }}</dd>
+              {% endif %}
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+
+      {% if record.date_of_purchase %}
+        <section class="card device-card mb-3">
+          <div class="card-header">
+            <i class="bi bi-bag-check"></i>
+            <h2 class="device-card-title">{% translate "Order" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Order date" %}</dt>
+              <dd class="col-sm-8 mb-0">{{ record.date_of_purchase|date:"SHORT_DATE_FORMAT" }}</dd>
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+
+      {% if record.disposition_state or record.removed_date or record.removed_info %}
+        <section class="card device-card mb-3">
+          <div class="card-header">
+            <i class="bi bi-trash3"></i>
+            <h2 class="device-card-title">{% translate "Removal" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Disposition" %}</dt>
+              <dd class="col-sm-8">{{ record.get_disposition_state_display|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Removed" %}</dt>
+              <dd class="col-sm-8">{{ record.removed_date|date:"SHORT_DATETIME_FORMAT"|default:"—" }}</dd>
+              <dt class="col-sm-4 text-secondary fw-medium">{% translate "Whereabouts" %}</dt>
+              <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ record.removed_info|default:"—" }}</dd>
+            </dl>
+          </div>
+        </section>
+      {% endif %}
+
+      {% if record.attachments.all %}
+        <section class="card device-card mb-3">
+          <div class="card-header">
+            <i class="bi bi-paperclip"></i>
+            <h2 class="device-card-title">{% translate "Attachments" %}</h2>
+          </div>
+          <div class="list-group list-group-flush">
+            {% for attachment in record.attachments.all %}
+              {% if attachment.file %}
+                <a class="list-group-item list-group-item-action" href="{{ attachment.file.url }}">
+                  <i class="bi bi-file-earmark text-primary"></i> {{ attachment.title|default:attachment.file.name }}
+                </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <section class="card device-card mb-3">
+        <div class="card-header">
+          <i class="bi bi-info-circle"></i>
+          <h2 class="device-card-title">{% translate "Record details" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="device-meta">
+            <div>
+              <dt>{% translate "Created" %}</dt>
+              <dd>
+                {{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                {% if record.user or record.username %}
+                  <span class="text-muted">· {{ record.user|default:record.username }}</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div>
+              <dt>{% translate "Last modified" %}</dt>
+              <dd>
+                {% if record.modified_at %}
+                  <span title="{{ record.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ record.modified_at|naturaltime }}</span>
+                {% else %}—{% endif %}
+              </dd>
+            </div>
+            <div>
+              <dt>{% translate "ID" %}</dt>
+              <dd class="font-monospace small">{{ record.pk }}</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="list-group list-group-flush">
+          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{{ device_records_url }}">
+            <i class="bi bi-clock-history text-primary"></i>
+            <span class="me-auto">{% translate "All records for this device" %}</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock body %}

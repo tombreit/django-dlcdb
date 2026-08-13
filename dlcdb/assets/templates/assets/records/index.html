@@ -1,0 +1,116 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% comment %}
+The record trail. Read-only by design: no add button, no row actions, no form
+other than the filterbar's own GET form.
+{% endcomment %}
+
+{% block title %}{% translate "Records" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="mb-0">{% translate "Records" %}</h1>
+  </div>
+
+  {% comment %}
+  Device scope. Outside the swapped fragment on purpose: the scope is pinned by
+  a hidden input in the filterbar, so it cannot change while the page lives.
+  {% endcomment %}
+  {% if scope_device %}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3 pb-3 border-bottom text-secondary">
+      <i class="bi bi-clock-history"></i>
+      <span>{% translate "Records for" %}</span>
+      {# The device name is the link; a separate "open device" action would be one link too many. #}
+      <a class="fw-semibold text-body link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+         href="{% url 'assets:device_detail' scope_device.pk %}">{{ scope_device }}</a>
+      <a class="ms-auto small link-secondary link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+         href="{% url 'assets:record_index' %}"><i class="bi bi-x-lg"></i> {% translate "Show all records" %}</a>
+    </div>
+  {% endif %}
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef record-list inline %}
+    <div id="record-list" class="position-relative" hx-target="#record-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=record_filtered_count with total=record_total_count %}{{ counter }} of {{ total }} record{% plural %}{{ counter }} of {{ total }} records{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Record") asc="type" desc="-type" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Room") asc="room" desc="-room" th_class="d-none d-md-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Lender") asc="person" desc="-person" th_class="d-none d-lg-table-cell" %}
+              <th scope="col" class="d-none d-xl-table-cell">{% translate "Inventory" %}</th>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Created") asc="created" desc="-created" th_class="d-none d-md-table-cell text-nowrap text-end" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Valid until") asc="valid_until" desc="-valid_until" th_class="d-none d-xl-table-cell text-nowrap text-end" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in page_obj %}
+              <tr>
+                <td>
+                  {% comment %}
+                  Stacked, not inline: this is the narrowest column, and the
+                  "current" marker beside the badge was eating its width. The
+                  inner row stays position:static so the stretched link still
+                  resolves to the outer wrapper and the whole cell stays clickable.
+                  {% endcomment %}
+                  <div class="position-relative d-flex flex-column align-items-start gap-1">
+                    <div class="d-flex align-items-center gap-1">
+                      <a href="{% url 'assets:record_detail' record.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                         class="stretched-link text-reset link-underline link-underline-opacity-0">
+                        <span class="badge text-bg-{{ record.state_color|default:"secondary" }}">{{ record.get_record_type_display }}</span>
+                      </a>
+                      {% if record.note %}
+                        <i class="bi bi-sticky text-muted" title="{{ record.note }}"></i>
+                      {% endif %}
+                    </div>
+                    {% if record.is_active %}
+                      {# Superseded rows show nothing here — absence is the signal. #}
+                      <span class="small fw-medium text-primary-emphasis">{% translate "Current" %}</span>
+                    {% endif %}
+                    <div class="d-md-none small text-muted">{{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+                  </div>
+                </td>
+                <td>
+                  {% include "assets/devices/includes/_device_teaser.html" with device=record.device link="icon" %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ record.room|default:"—" }}</td>
+                <td class="d-none d-lg-table-cell">{{ record.person|default:"—" }}</td>
+                <td class="d-none d-xl-table-cell text-muted">{{ record.inventory|default:"—" }}</td>
+                <td class="d-none d-md-table-cell text-nowrap text-end text-muted">
+                  {{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                  {% if record.user or record.username %}
+                    <div class="small">{{ record.user|default:record.username }}</div>
+                  {% endif %}
+                </td>
+                <td class="d-none d-xl-table-cell text-nowrap text-end text-muted">
+                  {{ record.effective_until|date:"SHORT_DATETIME_FORMAT"|default:"—" }}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No records match these filters." %}
+                  <a href="{{ filterbar.clear_all_href }}" hx-get="{{ filterbar.clear_all_href }}">{% translate "Clear filters" %}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock body %}
