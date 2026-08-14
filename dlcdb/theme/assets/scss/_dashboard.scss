@@ -1,0 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+/* Dashboard tiles.
+
+   Each tile is a link wearing `.card`, and Bootstrap's card component has no
+   interactive state of its own (its only :hover is `.card-link`, which just
+   toggles text-decoration for links *inside* a card body). With
+   `text-decoration-none` on top, the tiles offered no hover feedback at all.
+
+   The tint is the same one `picker.css` uses for selectable result cards, and
+   both custom properties are remapped by Bootstrap per `data-bs-theme`, so this
+   works in light and dark without a per-theme override -- unlike the
+   `--app-elevation-*` tokens, whose shadows are hardcoded black.
+
+   :focus-visible is paired with :hover so keyboard users get the same feedback
+   (same pairing as .navbar-main and .filterbar-chip); the focus ring itself is
+   left to the browser. No transform, so there is no motion to guard behind
+   prefers-reduced-motion. */
+.dashboard-tile {
+  transition:
+    background-color var(--app-transition),
+    border-color var(--app-transition);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--bs-tertiary-bg);
+    border-color: var(--bs-primary);
+  }
+}
