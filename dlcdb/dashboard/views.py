@@ -5,15 +5,20 @@
 from datetime import date
 
 from django.apps import apps
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Inventory, LentRecord, Record
 from dlcdb.core.utils.helpers import get_icon_for_class
+from dlcdb.core.utils.htmx import htmx_login_required
 
 from . import stats
+from .search import run_search
+
+
+# GET parameter carrying the global search term.
+GLOBAL_SEARCH_PARAM = "q"
 
 
 # Map each dashboard model to the field path used to scope its queryset to a
@@ -83,12 +88,32 @@ def _build_tile(*, model_name, url, tenant):
     }
 
 
-@login_required
+@htmx_login_required
 def index(request):
     """
     Dashboard on the theme frontend: model tiles (counts + note badges) and
-    Plotly stats, scoped to the current tenant.
+    Plotly stats, scoped to the current tenant, plus the global search.
+
+    Search results are served from this same URL so that ``hx-push-url`` puts
+    ``/dashboard/?q=…`` in the address bar: a search is then shareable and
+    bookmarkable, and reloading it renders the very same page server-side. HTMX
+    gets only the results fragment -- the tile aggregates and the three Plotly
+    figures are far too expensive to rebuild on every keystroke.
+
+    Guarded HTMX-aware rather than with plain ``login_required``: on an expired
+    session a 302 would otherwise swap the whole login page into the results
+    panel. Per-source permissions are applied inside ``run_search``.
     """
+    term = (request.GET.get(GLOBAL_SEARCH_PARAM) or "").strip()
+    search_context = {
+        "search_param": GLOBAL_SEARCH_PARAM,
+        "search_term": term,
+        "groups": run_search(request, term),
+    }
+
+    if request.htmx:
+        return TemplateResponse(request, "dashboard/index.html#search-results", search_context)
+
     tenant = request.tenant
 
     tile_specs = [
@@ -131,5 +156,6 @@ def index(request):
         "record_fraction_html": stats.get_record_fraction_html(tenant=tenant),
         "device_type_html": stats.get_device_type_html(tenant=tenant),
         "record_timeline_html": stats.get_record_timeline_html(tenant=tenant),
+        **search_context,
     }
     return TemplateResponse(request, "dashboard/index.html", context)

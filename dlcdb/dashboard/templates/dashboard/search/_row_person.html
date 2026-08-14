@@ -1,0 +1,21 @@
+{% comment %}
+SPDX-FileCopyrightText: Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+
+One person result row. Expects: row (core.Person).
+{% endcomment %}
+{% load i18n %}
+
+<a href="{% url 'persons:detail' row.pk %}" class="list-group-item list-group-item-action">
+  <div class="d-flex flex-wrap align-items-baseline gap-2">
+    <span class="fw-semibold">
+      <i class="bi bi-person text-muted me-1"></i>{{ row }}
+    </span>
+    {% if row.organizational_unit %}
+      <span class="small text-muted ms-auto">{{ row.organizational_unit }}</span>
+    {% endif %}
+  </div>
+  {% if row.email %}
+    <div class="small text-muted">{{ row.email }}</div>
+  {% endif %}
+</a>

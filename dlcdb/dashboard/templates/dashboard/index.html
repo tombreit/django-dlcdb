@@ -15,6 +15,51 @@ SPDX-License-Identifier: EUPL-1.2
 
 <h1 class="mb-4">{% translate "Device Life Cycle Database" %}</h1>
 
+{% include "dashboard/includes/_search_bar.html" %}
+
+{% comment %}
+Global search results. Swapped by HTMX on every keystroke and rendered
+server-side on a page load carrying ?q=, so a search URL is shareable and
+reloads into exactly the same page. Empty without a term, which leaves the
+tiles and charts below as the landing page's content.
+{% endcomment %}
+{% partialdef search-results inline %}
+  <div id="global-search-results" class="position-relative">
+    {% if search_term %}{% include "theme/includes/_list_loading.html" %}{% endif %}
+
+    {% for group in groups %}
+      <div class="card mb-3">
+        <div class="card-header d-flex flex-wrap align-items-center gap-2">
+          <span class="fw-semibold">
+            <i class="{{ group.source.icon }} me-1"></i>{{ group.source.label }}
+          </span>
+          {% comment %}
+          Count and "open the full list" are one control, not two: the badge
+          states how many matched and is itself the link to the list showing
+          them all. The tooltip carries the wording the label used to.
+          {% endcomment %}
+          <a
+            href="{{ group.show_all_href }}"
+            class="badge text-bg-secondary text-decoration-none"
+            title="{% if group.has_more %}{% blocktranslate with total=group.total %}Show all {{ total }}{% endblocktranslate %}{% else %}{% translate 'Open list' %}{% endif %}"
+          >{{ group.total }} <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for row in group.rows %}
+            {% include group.source.row_template %}
+          {% endfor %}
+        </div>
+      </div>
+    {% empty %}
+      {% if search_term %}
+        <p class="text-muted">
+          {% blocktranslate with term=search_term %}Nothing found for “{{ term }}”.{% endblocktranslate %}
+        </p>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endpartialdef %}
+
 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
   {% for tile in tiles %}
     {% include "dashboard/includes/_tile.html" %}

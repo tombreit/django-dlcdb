@@ -1,0 +1,40 @@
+{% comment %}
+SPDX-FileCopyrightText: Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+
+Global search bar for the dashboard.
+
+Expects: search_param (GET parameter name), search_term (current value).
+
+Both the form and the live search point at the dashboard itself, which serves
+the results fragment to HTMX and the whole page otherwise. That is what makes
+hx-push-url honest: the URL it pushes (/dashboard/?q=…) is a real page, so a
+search can be shared, bookmarked and reloaded. Without JS the plain GET submit
+lands on that same URL.
+{% endcomment %}
+{% load i18n %}
+
+<form class="mb-3" action="{% url 'dashboard:index' %}" method="get" role="search">
+  <div class="input-group">
+    <span class="input-group-text"><i class="bi bi-search"></i></span>
+    <input
+      type="search"
+      class="form-control form-control-lg"
+      name="{{ search_param }}"
+      value="{{ search_term }}"
+      placeholder="{% translate 'Search devices, persons, rooms, lendings, licenses...' %}"
+      aria-label="{% translate 'Global search' %}"
+      autocomplete="off"
+      autofocus
+      hx-get="{% url 'dashboard:index' %}"
+      hx-target="#global-search-results"
+      hx-swap="outerHTML"
+      hx-trigger="keyup changed delay:300ms, search"
+      hx-indicator=".htmx-indicator"
+      hx-push-url="true"
+    >
+    <noscript>
+      <button type="submit" class="btn btn-primary">{% translate "Search" %}</button>
+    </noscript>
+  </div>
+</form>

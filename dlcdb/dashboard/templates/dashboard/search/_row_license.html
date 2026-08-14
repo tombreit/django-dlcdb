@@ -1,0 +1,30 @@
+{% comment %}
+SPDX-FileCopyrightText: Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+
+One licence result row. Expects: row (core.Device with is_licence=True).
+
+Links to licenses:edit, which is routed <int:license_id> and resolves a Device
+-- so the device pk is exactly what it wants. Same destination
+Device.get_absolute_url() picks for a licence.
+{% endcomment %}
+{% load i18n %}
+
+<a href="{% url 'licenses:edit' row.pk %}" class="list-group-item list-group-item-action">
+  <div class="d-flex flex-wrap align-items-baseline gap-2">
+    <span class="fw-semibold">
+      <i class="bi bi-bank2 text-muted me-1"></i>
+      {{ row.manufacturer|default:"" }} {{ row.series|default:row.edv_id|default:"—" }}
+    </span>
+    {% if row.contract_expiration_date %}
+      <span class="small text-muted ms-auto">
+        {% translate "Expires" %}: {{ row.contract_expiration_date|date:"Y-m-d" }}
+      </span>
+    {% endif %}
+  </div>
+  <div class="small text-muted">
+    {% if row.sap_id %}{% translate "Inventory ID" %}: {{ row.sap_id }}{% endif %}
+    {% if row.sap_id and row.supplier %} · {% endif %}
+    {% if row.supplier %}<i class="bi bi-truck"></i> {{ row.supplier }}{% endif %}
+  </div>
+</a>
