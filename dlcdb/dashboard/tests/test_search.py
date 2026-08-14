@@ -259,6 +259,17 @@ class GlobalSearchTests(TestCase):
         # The landing page is still the landing page.
         self.assertTrue(response.context["tiles"])
 
+    def test_the_search_box_is_wired_to_take_the_cursor_on_load(self):
+        """`autofocus` for the no-JS case, plus the script that puts the caret at the end."""
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertContains(response, "autofocus")
+        self.assertContains(response, 'id="global-search-input"')
+        self.assertContains(response, "setSelectionRange")
+        # Restores the typed term after an htmx Back/Forward, which snapshots
+        # attributes and so loses it.
+        self.assertContains(response, "htmx:historyRestore")
+
     def test_the_bar_pushes_the_dashboard_url_so_searches_are_shareable(self):
         response = self.client.get(reverse("dashboard:index"))
 

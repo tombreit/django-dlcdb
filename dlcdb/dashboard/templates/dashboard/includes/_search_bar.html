@@ -19,6 +19,7 @@ lands on that same URL.
     <span class="input-group-text"><i class="bi bi-search"></i></span>
     <input
       type="search"
+      id="global-search-input"
       class="form-control form-control-lg"
       name="{{ search_param }}"
       value="{{ search_term }}"
@@ -38,3 +39,35 @@ lands on that same URL.
     </noscript>
   </div>
 </form>
+
+<script>
+  // Put the caret in the search box, ready to type. `autofocus` above already
+  // focuses it (and is what works with JS disabled), but it leaves the caret at
+  // position 0 -- so on a shared /dashboard/?q=… link, typing would prepend to
+  // the existing term instead of extending it.
+  (function () {
+    const PARAM = "{{ search_param|escapejs }}";
+
+    function focusAtEnd(input) {
+      if (!input) return;
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+
+    focusAtEnd(document.getElementById("global-search-input"));
+
+    // htmx caches pages for Back/Forward by snapshotting innerHTML. A term the
+    // user typed lives in the input's *property*, not its attribute, so it is
+    // not in that snapshot: a restored page would come back with an empty box
+    // while the URL still reads ?q=…. Put the term back from the URL, which is
+    // the same value the server would have rendered on a reload.
+    // Listener sits on <body>, which htmx replaces the contents of but not
+    // itself -- this script is inside those contents and never runs twice.
+    document.body.addEventListener("htmx:historyRestore", function () {
+      const input = document.getElementById("global-search-input");
+      if (!input) return;
+      input.value = new URLSearchParams(window.location.search).get(PARAM) || "";
+      focusAtEnd(input);
+    });
+  })();
+</script>
