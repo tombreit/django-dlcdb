@@ -53,6 +53,11 @@ dependencies = [
 ldap = [
     "django-auth-ldap",
 ]
+# Only the container image serves via gunicorn; the Apache/mod_wsgi deployment
+# must not grow that dependency, hence a separate extra.
+container = [
+    "gunicorn",
+]
 dev = [
     "pre-commit",
     "ruff",

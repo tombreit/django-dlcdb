@@ -1,24 +1,33 @@
-# SPDX-FileCopyrightText: 2024 Thomas Breitner
+# SPDX-FileCopyrightText: Thomas Breitner
 #
 # SPDX-License-Identifier: CC0-1.0
 
 ######################################################################
 ### STAGE NPM
-FROM docker.io/library/node:20-bookworm-slim AS stagenpm
+# The only stage that needs Node. Everything it produces is copied into the
+# final image as plain files, so users of a built image never install npm.
+FROM docker.io/library/node:24-trixie-slim AS stagenpm
 
 WORKDIR /stagenpm
 
 COPY ./package-lock.json ./package.json ./
-RUN npm install
+# `ci` not `install`: a lockfile exists and image builds must be reproducible.
+RUN npm ci
+
+# `npm run build` compiles three independent asset trees (admin, theme,
+# inventory) and each needs its own sources. Copying only ./frontend used to
+# make the build fail outright at build:theme:scss.
 COPY ./frontend ./frontend
-RUN mkdir -p /stagenpm/dlcdb/static/dist
+COPY ./dlcdb/theme/assets ./dlcdb/theme/assets
+COPY ./dlcdb/inventory/assets ./dlcdb/inventory/assets
+
 RUN npm run build
 
 ######################################################################
 ### STAGE PYTHON
 # Note: The base image for preparing the python virtual environment
 # must be the same base image as the image that copies that venv.
-FROM docker.io/library/debian:bookworm-slim AS stagepython
+FROM docker.io/library/debian:trixie-slim AS stagepython
 
 WORKDIR /stagepython
 
@@ -26,12 +35,14 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system packages required by Django app
+# Build-time system packages: gcc + the LDAP/SASL headers to compile
+# python-ldap, libmagic for python-magic, make to drive the Sphinx build.
 RUN apt-get update --yes --quiet \
     && apt-get install --yes --quiet --no-install-recommends \
       python3 python3-venv python3-dev \
       libldap2-dev libsasl2-dev gcc \
-      libmagic1 make
+      libmagic1t64 make \
+    && rm -rf /var/lib/apt/lists/*
 
 # https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
 ENV VIRTUAL_ENV=/opt/venv
@@ -39,16 +50,23 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-COPY requirements/dev.txt /stagepython/requirements.txt
+# Production requirements plus gunicorn, not the dev requirements: pytest,
+# ruff, pre-commit and friends have no business in a shipped image.
+COPY requirements/container.txt /stagepython/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Generate Sphinx documentation
 COPY . /stagepython
+
+# Generate Sphinx documentation.
+# The mermaid assets are a prerequisite of `make docs` and are produced by npm,
+# which does not exist in this stage. Taking them from the npm stage keeps the
+# docs build from depending on whatever happens to sit on the build host.
+COPY --from=stagenpm /stagenpm/docs/_static/vendor /stagepython/docs/_static/vendor
 RUN make docs
 
 ######################################################################
 ### STAGE FINAL
-FROM docker.io/library/debian:bookworm-slim AS finalstage
+FROM docker.io/library/debian:trixie-slim AS finalstage
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -57,23 +75,32 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
+# Runtime libraries only. libldap2/libsasl2-2 are needed because the venv's
+# compiled python-ldap links against them -- without these the image dies on
+# import the moment someone sets AUTH_LDAP=true.
 RUN apt-get update --yes --quiet \
     && apt-get install --yes --quiet --no-install-recommends \
-      tree \
       bash \
-      libmagic1 \
-      # python3-minimal \
       python3 \
+      libmagic1t64 \
+      libldap2 \
+      libsasl2-2 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
-# copy npm generated assets
-COPY --from=stagenpm /stagenpm/dlcdb/static/dist /app/dlcdb/static/dist
+# Compiled frontend assets -- all three trees, not just the admin one. The
+# theme bundle is not merely cosmetic: dlcdb/theme/bootstrap_icons.py parses
+# the compiled theme.css at runtime to build the icon picker.
+COPY --from=stagenpm /stagenpm/dlcdb/static/dist                     /app/dlcdb/static/dist
+COPY --from=stagenpm /stagenpm/dlcdb/theme/static/theme/dist         /app/dlcdb/theme/static/theme/dist
+COPY --from=stagenpm /stagenpm/dlcdb/inventory/static/inventory/dist /app/dlcdb/inventory/static/inventory/dist
+
+# Rendered handbook. settings.MORE_WHITENOISE serves exactly this path at /docs/.
+COPY --from=stagepython /stagepython/run/docs/html /app/run/docs/html
 
 # copy prepared venv
 COPY --from=stagepython /opt/venv /opt/venv
 
-#COPY --from=stagepython /stagepython/docs /app/docs
-
 ENTRYPOINT ["container/entrypoint.sh"]
+CMD ["serve"]

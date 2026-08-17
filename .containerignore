@@ -19,3 +19,13 @@ Containerfile
 .venv/
 node_modules/
 /temp
+
+# Build artifacts. These must come from the npm and python stages, never from
+# the build host -- otherwise a stale local build silently ships in the image,
+# and a clean checkout builds differently from a dirty one.
+/dlcdb/static/dist/
+/dlcdb/theme/static/theme/dist/
+/dlcdb/inventory/static/inventory/dist/
+/docs/_static/vendor/
+/dist/
+*.egg-info/

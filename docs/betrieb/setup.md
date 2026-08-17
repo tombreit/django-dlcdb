@@ -32,17 +32,56 @@ podman run \
     dlcdb dev
 ```
 
-The same image (see `container/Containerfile` and `container/entrypoint.sh`)
-can be used for containerized production deployments.
+The image builds the frontend assets, ships the compiled message catalog and
+bundles the rendered handbook, so **running it needs neither npm nor gettext
+nor Sphinx** — only a container runtime.
+
+The same image serves production (see `container/Containerfile` and
+`container/entrypoint.sh`). It understands three commands:
+
+| Command | Does |
+|---|---|
+| `dev` | `migrate`, `collectstatic`, then Django's development server |
+| `serve` | `migrate`, `collectstatic`, then gunicorn (the default `CMD`) |
+| `huey` | the background task runner, nothing else |
+
+Anything else is executed verbatim, e.g. `podman run --rm dlcdb python3 manage.py createsuperuser`.
+
+For production, mount an `.env` and the data directory, and run the task
+runner as a second container against the same volume:
+
+```bash
+podman run \
+    --name dlcdb \
+    --detach \
+    --publish 8000:8000 \
+    --volume ./data:/app/data \
+    --volume ./.env:/app/.env:ro \
+    dlcdb serve
+
+podman run \
+    --name dlcdb-huey \
+    --detach \
+    --volume ./data:/app/data \
+    --volume ./.env:/app/.env:ro \
+    dlcdb huey
+```
+
+Without the second container, background tasks (notifications, report
+generation) silently never run. `INTERNAL_SERVER_PORT` (default 8000) and
+`GUNICORN_WORKERS` (default 3) are honoured as environment variables.
+
+Put a TLS-terminating reverse proxy in front of gunicorn; it is not meant to
+face the internet directly.
 
 ### Install from source
 
 **Prerequisites**
 
-- (assuming) Debian 12/13 (current stable)
+- (assuming) Debian 13
 - Python >= 3.13 (see `pyproject.toml`)
 - Django 6.x (installed via the requirements files)
-- npm
+- npm — for development and for building the container image, not for running a built image
 - for LDAP: libldap2-dev libsasl2-dev
 
 **Python**
@@ -112,6 +151,10 @@ Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/
 
 As a task runner/task schedular this projects uses [huey](https://github.com/coleifer/huey).
 
+For a containerized deployment run the task runner as a second container
+(`dlcdb huey`, see *Install with podman* above) instead of the systemd unit
+below.
+
 Add a systemd user service unit for huey (modify paths etc.):
 
 ```ini
@@ -144,6 +187,10 @@ systemctl --user status dlcdb_huey.service
 ```
 
 ### Deployment steps
+
+These are the steps for a **source checkout** deployment, which builds
+everything on the target machine. For a containerized deployment build the
+image instead and run `dlcdb serve` — see *Install with podman* above.
 
 ```bash
 npm install

@@ -22,6 +22,7 @@ requirements:
 	python3 -m piptools compile --upgrade --strip-extras              -o requirements/prod.txt pyproject.toml
 	python3 -m piptools compile --upgrade --strip-extras --extra ldap -o requirements/prod-ldap.txt pyproject.toml
 	python3 -m piptools compile --upgrade --strip-extras --extra dev  -o requirements/dev.txt pyproject.toml
+	python3 -m piptools compile --upgrade --strip-extras --extra ldap --extra container -o requirements/container.txt pyproject.toml
 	ln -s --force  $(default_requirements_file) requirements.txt
 
 tests:
