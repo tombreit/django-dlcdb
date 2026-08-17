@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: Thomas Breitner
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# Compiled gettext catalogs are committed so that a deployment needs neither
+# gettext nor a `compilemessages` step. They are generated artifacts: never
+# diff them and never try to merge them.
+*.mo binary

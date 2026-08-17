@@ -16,3 +16,14 @@ repos:
     rev: "1.29.1"
     hooks:
     -   id: django-upgrade
+  # The compiled catalog is committed, so it must never drift from its source.
+  # Recompiling here is what `compilemessages` does internally; if the .mo
+  # changes, pre-commit fails the commit and the rebuilt file has to be staged.
+  - repo: local
+    hooks:
+      - id: compilemessages
+        name: compile gettext catalog (.po -> .mo)
+        entry: msgfmt --check-format --output-file=dlcdb/locale/de/LC_MESSAGES/django.mo dlcdb/locale/de/LC_MESSAGES/django.po
+        language: system
+        files: ^dlcdb/locale/de/LC_MESSAGES/django\.po$
+        pass_filenames: false

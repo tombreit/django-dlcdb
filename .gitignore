@@ -23,7 +23,9 @@ nosetests.xml
 htmlcov/
 
 # Translations
-*.mo
+# The compiled catalog (*.mo) is committed on purpose, see .gitattributes and
+# docs/betrieb/setup.md -- deployments must not need gettext.
+# *.mo
 *.pot
 
 # Dependency directories

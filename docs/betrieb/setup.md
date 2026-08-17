@@ -131,16 +131,16 @@ WantedBy=default.target
 Enable the task runner as a systemd service unit for a given system user:
 
 ```bash
-$ sudo loginctl enable-linger USERNAME
-$ sudo systemctl daemon-reload
-$ sudo loginctl user-status USERNAME
-$ *login via USERNAME*
-$ export XDG_RUNTIME_DIR="/run/user/$UID"
-$ export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
-$ systemctl --user daemon-reload
-$ systemctl --user enable dlcdb_huey.service
-$ systemctl --user restart dlcdb_huey.service
-$ systemctl --user status dlcdb_huey.service
+sudo loginctl enable-linger USERNAME
+sudo systemctl daemon-reload
+sudo loginctl user-status USERNAME
+# *login via USERNAME*
+export XDG_RUNTIME_DIR="/run/user/$UID"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+systemctl --user daemon-reload
+systemctl --user enable dlcdb_huey.service
+systemctl --user restart dlcdb_huey.service
+systemctl --user status dlcdb_huey.service
 ```
 
 ### Deployment steps
@@ -152,7 +152,6 @@ source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements/prod-ldap.txt  # requirements/prod.txt
 python manage.py collectstatic --noinput
-python manage.py compilemessages -l de
 python manage.py migrate --noinput
 systemctl --user restart dlcdb_huey.service
 touch dlcdb/wsgi.py
@@ -216,31 +215,20 @@ deployment steps above.
 Source strings are English and wrapped in `gettext_lazy`; German is supplied
 by the catalog in `dlcdb/locale/de/`. There is deliberately **no `en`
 catalog** — an empty `msgstr` falls back to the msgid, and the msgids already
-are the English source, so such a catalog would be an identity mapping whose
-only effect is diff noise on every `makemessages` run.
+are the English source,
 
 Extract and compile with:
 
 ```bash
-make messages
-```
-
-which wraps:
-
-```bash
-./manage.py makemessages -l de \
-    --ignore=node_modules --ignore=.venv --ignore=run --ignore=docs --ignore=temp --ignore=frontend
+./manage.py makemessages --locale de --ignore=.venv/*
 poedit dlcdb/locale/de/LC_MESSAGES/django.po
-./manage.py compilemessages -l de
+./manage.py compilemessages --ignore=.venv/*
 ```
 
-The `--ignore` list matters: without it `makemessages` walks `node_modules/`
-and the built docs in `run/`.
-
-Entries flagged `#, fuzzy` are gettext's *guesses* from similar strings. They
-are excluded from the compiled `.mo`, so a fuzzy entry renders as the English
-source until a translator confirms it — check the guess before clearing the
-flag, it is often wrong.
+The compiled catalog `dlcdb/locale/de/LC_MESSAGES/django.mo` is **committed**.
+gettext reads only the `.mo`, never the `.po`, so shipping it means a
+deployment needs neither `compilemessages` nor gettext on the target machine —
+which is why that step is absent from the deployment steps above.
 
 ### Requirements
 

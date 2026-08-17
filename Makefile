@@ -4,9 +4,6 @@
 
 .PHONY: requirements tests format lint docs assets messages
 
-# Directories that must never be scanned for translatable strings.
-i18n_ignores = --ignore=node_modules --ignore=.venv --ignore=run --ignore=docs --ignore=temp --ignore=frontend
-
 # include .env
 
 default_requirements_file = requirements/prod-ldap.txt
@@ -29,12 +26,6 @@ requirements:
 
 tests:
 	pytest
-
-# Source strings are English, so only non-English catalogs are maintained.
-messages:
-	python3 manage.py makemessages -l de $(i18n_ignores)
-	@echo "Now translate the empty msgstr entries in dlcdb/locale/de/LC_MESSAGES/django.po, then re-run 'make messages'."
-	python3 manage.py compilemessages -l de $(i18n_ignores)
 
 # The mermaid assets are gitignored and only exist once npm has copied them out
 # of node_modules. Without them the diagrams render blank, so 'make docs' pulls
