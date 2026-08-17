@@ -28,7 +28,7 @@ certifi==2026.7.22
     # via requests
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.5.0
+charset-normalizer==3.5.1
     # via requests
 click==8.4.2
     # via pip-tools
@@ -36,7 +36,7 @@ coverage==7.15.4
     # via pytest-cov
 crispy-bootstrap5==2026.3
     # via django-dlcdb (pyproject.toml)
-deepmerge==2.1.0
+deepmerge==3.0
     # via sphinxcontrib-openapi
 distlib==0.4.3
     # via virtualenv
@@ -63,7 +63,7 @@ django-crispy-forms==2.7
     # via
     #   crispy-bootstrap5
     #   django-dlcdb (pyproject.toml)
-django-debug-toolbar==7.1.0
+django-debug-toolbar==7.1.1
     # via django-dlcdb (pyproject.toml)
 django-environ==0.14.0
     # via django-dlcdb (pyproject.toml)
@@ -96,7 +96,7 @@ et-xmlfile==2.0.0
     # via openpyxl
 faker==40.36.0
     # via django-dlcdb (pyproject.toml)
-filelock==3.32.2
+filelock==3.32.3
     # via
     #   python-discovery
     #   virtualenv
@@ -161,7 +161,7 @@ pillow==12.3.0
     # via django-dlcdb (pyproject.toml)
 pip-tools==7.6.1
     # via django-dlcdb (pyproject.toml)
-platformdirs==4.11.2
+platformdirs==4.11.3
     # via virtualenv
 plotly==6.9.0
     # via django-dlcdb (pyproject.toml)
@@ -179,7 +179,7 @@ pyasn1-modules==0.4.2
     # via python-ldap
 pydata-sphinx-theme==0.20.0
     # via sphinx-book-theme
-pygments==2.20.0
+pygments==2.21.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
@@ -228,7 +228,7 @@ rpds-py==2026.6.3
     # via
     #   jsonschema
     #   referencing
-ruff==0.16.2
+ruff==0.16.3
     # via django-dlcdb (pyproject.toml)
 segno==1.6.6
     # via django-dlcdb (pyproject.toml)
@@ -276,7 +276,7 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via
     #   django
     #   django-debug-toolbar

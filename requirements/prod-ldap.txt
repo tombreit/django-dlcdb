@@ -24,11 +24,11 @@ beautifulsoup4==4.15.0
     # via pydata-sphinx-theme
 certifi==2026.7.22
     # via requests
-charset-normalizer==3.5.0
+charset-normalizer==3.5.1
     # via requests
 crispy-bootstrap5==2026.3
     # via django-dlcdb (pyproject.toml)
-deepmerge==2.1.0
+deepmerge==3.0
     # via sphinxcontrib-openapi
 django==6.0.8
     # via
@@ -137,7 +137,7 @@ pyasn1-modules==0.4.2
     # via python-ldap
 pydata-sphinx-theme==0.20.0
     # via sphinx-book-theme
-pygments==2.20.0
+pygments==2.21.0
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
@@ -215,7 +215,7 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
-sqlparse==0.5.5
+sqlparse==0.6.0
     # via django
 typing-extensions==4.16.0
     # via beautifulsoup4
