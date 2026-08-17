@@ -147,7 +147,7 @@ $ systemctl --user status dlcdb_huey.service
 
 ```bash
 npm install
-npm run prod
+npm run build
 source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements/prod-ldap.txt  # requirements/prod.txt
