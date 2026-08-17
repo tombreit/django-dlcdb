@@ -82,8 +82,8 @@ AUTH_LDAP_USER_FLAGS_BY_GROUP = {
     "is_superuser": LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS")),
 }
 
-# Tweak some settings in DEV mode
-if env.str("SETTINGS_MODE") == "dev":
+# Tweak some settings in if running with DEBUG=True
+if env("DJANGO_DEBUG"):
     # Disabled custom LDAP options for dev for now to mimic the production environment
     pass
     # ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)

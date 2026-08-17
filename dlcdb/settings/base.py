@@ -23,15 +23,13 @@ Path(STATICFILES_DIR).mkdir(parents=True, exist_ok=True)
 
 # Take environment variables from .env file
 env = environ.Env(
-    SETTINGS_MODE=(str, "dev"),
-    DJANGO_DEBUG=(bool, True),
+    DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!"),
     ADMINS=(str, ""),
 )
 environ.Env.read_env(BASE_DIR / ".env")
 
-DEV_SETTINGS_MODE = True if env("SETTINGS_MODE") == "dev" else False
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DJANGO_DEBUG")
 SECRET_KEY = env("SECRET_KEY")
