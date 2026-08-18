@@ -70,8 +70,9 @@ class LicenseForm(forms.ModelForm):
                 Column(FloatingField("series"), css_class="col-md-6"),
             ),
             Row(
-                Column(FloatingField("supplier"), css_class="col-md-4"),
+                Column(FloatingField("supplier"), css_class="col-md-3"),
                 Column(FloatingField("order_number"), css_class="col-md-3"),
+                Column(FloatingField("book_value"), css_class="col-md-2"),
                 Column(FloatingField("device_type"), css_class="col-md-3"),
             ),
             Div(
@@ -97,10 +98,11 @@ class LicenseForm(forms.ModelForm):
     def save(self, commit=True):
         device = super().save(commit=False)
 
-        # The database field is a DateTimeField, so we cast the BoolenField to
-        # a DateTimeField.
+        # The checkbox stands in for the date column: checking it stamps the day
+        # of termination. An already terminated contract keeps the date it was
+        # terminated on -- re-saving the page must not move it to today.
         if self.cleaned_data.get("contract_termination"):
-            device.contract_termination_date = timezone.now()
+            device.contract_termination_date = device.contract_termination_date or timezone.localdate()
         else:
             device.contract_termination_date = None
 
@@ -137,10 +139,10 @@ class LicenseForm(forms.ModelForm):
             "contract_expiration_date": _("Expiration Date"),
         }
         widgets = {
-            # Must set the date format, otherwise the date input field
-            # is not populated from the model instance.
-            "contract_expiration_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
-            "contract_start_date": forms.DateInput(format=("%Y-%m-%d"), attrs={"type": "date"}),
+            # An <input type="date"> is ISO-only, whatever the locale; without
+            # `format` it renders empty and saves empty (test_native_date_widgets).
+            "contract_expiration_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "contract_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
         }

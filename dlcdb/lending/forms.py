@@ -94,8 +94,8 @@ class LendingForm(forms.ModelForm):
         widgets = {
             "person": forms.HiddenInput(),
             "sync_lent_end_date": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            # The format pairing is required to populate native date inputs from
-            # the model instance (see the licenses form for the same gotcha).
+            # An <input type="date"> is ISO-only, whatever the locale; without
+            # `format` it renders empty and saves empty (test_native_date_widgets).
             "lent_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "lent_desired_end_date": forms.DateInput(
                 format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}
@@ -139,8 +139,8 @@ class LendingReturnForm(forms.ModelForm):
             "lent_note",
         ]
         widgets = {
-            # The format pairing is required to populate native date inputs from
-            # the model instance (see LendingForm for the same gotcha).
+            # An <input type="date"> is ISO-only, whatever the locale; without
+            # `format` it renders empty and saves empty (test_native_date_widgets).
             "lent_end_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "form-control"}),
             "lent_reason": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),

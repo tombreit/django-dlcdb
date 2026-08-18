@@ -94,10 +94,8 @@ class DeviceForm(forms.ModelForm):
             "device_type": TomSelectWidget(),
             "manufacturer": TomSelectWidget(),
             "supplier": TomSelectWidget(),
-            # `format` is required, not cosmetic: an <input type="date"> only
-            # displays an ISO value, while the localized default renders
-            # "14.08.2026" under "de" -- which the browser shows as empty and
-            # submits back as empty, silently wiping a stored date on save.
+            # An <input type="date"> is ISO-only, whatever the locale; without
+            # `format` it renders empty and saves empty (test_native_date_widgets).
             "purchase_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             "warranty_expiration_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             "contract_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),

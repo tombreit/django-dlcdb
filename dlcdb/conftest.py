@@ -28,6 +28,15 @@ from dlcdb.tenants.models import Tenant
 
 
 @pytest.fixture
+def plain_static(settings):
+    """Plain static storage, so rendering tests need no built staticfiles manifest."""
+    settings.STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+
+
+@pytest.fixture
 def tenant():
     return Tenant.objects.create(name="PytestTenant")
 
