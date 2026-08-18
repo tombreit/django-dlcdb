@@ -16,6 +16,9 @@ from django.contrib.auth import get_user_model
 from django.db.transaction import atomic
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+from django.utils.formats import date_format
+from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, Record
 from dlcdb.core.utils.helpers import rollback_atomic
@@ -32,6 +35,44 @@ logger = logging.getLogger(__name__)
 
 
 TRUE_VALUES = ("yes", "ja", "true", "1")
+
+
+def _describe_records(records):
+    """One short, translated line saying what a CSV row writes.
+
+    Deliberately terse: the import preview should say what kind of record a row
+    produces plus the one or two facts that identify it, not repeat the row.
+
+    Call this only after the records have been saved -- the record proxies stamp
+    ``record_type`` in their ``save()``, so before that the type is still empty.
+    """
+    if not records:
+        return _("new device, no record")
+
+    record = records[0]
+
+    if record.record_type == Record.INROOM:
+        return _("new device, in room %(room)s") % {"room": record.room.number}
+
+    if record.record_type == Record.LENT:
+        # A returned loan is a LENT record followed by the INROOM record that
+        # brings the device back (see create_record).
+        template = (
+            _("new device, lent to %(lender)s (room %(room)s), returned")
+            if len(records) > 1
+            else _("new device, lent to %(lender)s (room %(room)s)")
+        )
+        return template % {"lender": record.person.email, "room": record.room.number}
+
+    if record.record_type == Record.LOST:
+        return _("new device, not locatable")
+
+    # RemovedRecord.save() always stamps a removed_date, so a saved removal has one.
+    if record.record_type == Record.REMOVED and record.removed_date:
+        removed_date = date_format(timezone.localtime(record.removed_date), format="DATE_FORMAT")
+        return _("new device, removed on %(date)s") % {"date": removed_date}
+
+    return _("new device, record %(record_type)s") % {"record_type": record.get_record_type_display()}
 
 
 def _import_transaction(*, import_objs, import_format, report, device_objs, tenant=None):
@@ -58,7 +99,7 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                     row=import_obj.row,
                     identifier=import_obj.identifier,
                     outcome=Outcome.UPDATED,
-                    detail=f"record only; device exists in tenant '{tenant}'",
+                    detail=_("record only; device exists in tenant '%(tenant)s'") % {"tenant": tenant},
                 )
 
             elif not already_existing_device:
@@ -68,7 +109,7 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                 if Device.objects.filter(edv_id=device_obj.edv_id).exists():
                     new_edv_id = f"{device_obj.edv_id}-UNIQ{secrets.token_hex(4)}"
                     logger.debug("edv_id %s already exists. Renaming to %s.", device_obj.edv_id, new_edv_id)
-                    detail = f"edv_id collision -> {new_edv_id}"
+                    detail = _("edv_id collision -> %(new_edv_id)s") % {"new_edv_id": new_edv_id}
                     device_obj.edv_id = new_edv_id
 
                 device_obj.save()
@@ -85,9 +126,9 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
             else:
                 other_tenant = already_existing_device.tenant
                 if other_tenant and other_tenant.name != tenant.name:
-                    detail = f"exists in other tenant '{other_tenant}'"
+                    detail = _("exists in other tenant '%(tenant)s'") % {"tenant": other_tenant}
                 else:
-                    detail = "already exists; no record to update"
+                    detail = _("already exists; no record to update")
                 logger.debug("Skipping device %s: %s", device_obj, detail)
                 report.add(
                     row=import_obj.row,
@@ -107,7 +148,12 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
             # live lifecycle would reject.
             for record_obj in import_obj.records:
                 record_obj.save(check_transition=False)
-            report.add(row=import_obj.row, identifier=import_obj.identifier, outcome=Outcome.CREATED)
+            report.add(
+                row=import_obj.row,
+                identifier=import_obj.identifier,
+                outcome=Outcome.CREATED,
+                detail=_describe_records(import_obj.records),
+            )
 
     return device_objs
 

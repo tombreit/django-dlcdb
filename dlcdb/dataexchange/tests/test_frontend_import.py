@@ -86,15 +86,19 @@ def test_import_page_renders_upload_form(superuser_client):
 
 @_PLAIN_STATICFILES
 def test_upload_dry_run_shows_preview_and_writes_nothing(superuser_client, tenant):
-    response = superuser_client.post(
-        reverse(IMPORT_URL),
-        {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk},
-    )
+    with translation.override("en"):
+        response = superuser_client.post(
+            reverse(IMPORT_URL),
+            {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk},
+        )
 
     assert response.status_code == 200
     content = response.content.decode()
     assert "Confirm import" in content
     assert "CREATED" in content
+    # The Detail column says what each row writes.
+    assert "new device, in room 355" in content
+    assert "new device, lent to ada.lovelace@example.com (room 355)" in content
 
     # The audit row exists with the archived file, but nothing was written:
     # status is only set by a confirmed (real) import.

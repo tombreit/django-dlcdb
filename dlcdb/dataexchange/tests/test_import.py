@@ -436,3 +436,57 @@ def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
     assert importer_list.status == "error"
     assert "Missing column(s):" in importer_list.messages
     assert importer_list.summary
+
+
+@pytest.mark.django_db
+def test_import_report_details_describe_the_records(tenant):
+    """Each preview row says which record it writes, not just "created"."""
+    import csv
+    from io import BytesIO, StringIO
+
+    buffer = StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=ImporterList.VALID_COL_HEADERS, restval="")
+    writer.writeheader()
+    writer.writerow({"EDV_ID": "DET0001", "ROOM": "101", "RECORD_TYPE": Record.INROOM})
+    writer.writerow(
+        {
+            "EDV_ID": "DET0002",
+            "ROOM": "102",
+            "RECORD_TYPE": Record.LENT,
+            "LENDER_EMAIL": "ada.lovelace@example.com",
+            "LENT_START_DATE": "2024-01-15",
+            "LENT_DESIRED_END_DATE": "2024-06-15",
+        }
+    )
+    writer.writerow(
+        {
+            "EDV_ID": "DET0003",
+            "ROOM": "103",
+            "RECORD_TYPE": Record.LENT,
+            "LENDER_EMAIL": "ada.lovelace@example.com",
+            "LENT_START_DATE": "2024-01-15",
+            "LENT_DESIRED_END_DATE": "2024-06-15",
+            "LENT_END_DATE": "2024-03-01",
+        }
+    )
+    writer.writerow({"EDV_ID": "DET0004", "RECORD_TYPE": Record.REMOVED, "REMOVED_DATE": "2024-05-01"})
+    writer.writerow({"EDV_ID": "DET0005", "RECORD_TYPE": Record.LOST})
+    writer.writerow({"EDV_ID": "DET0006"})
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=BytesIO(buffer.getvalue().encode("utf-8")),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+        assert [row.detail for row in report.rows] == [
+            "new device, in room 101",
+            "new device, lent to ada.lovelace@example.com (room 102)",
+            "new device, lent to ada.lovelace@example.com (room 103), returned",
+            "new device, removed on 2024-05-01",
+            "new device, not locatable",
+            "new device, no record",
+        ]

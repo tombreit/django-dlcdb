@@ -247,6 +247,32 @@ class DeviceFrontendTests(BaseTest):
         denied = self.client.post(url, {"edv_id": "EDV-TENANT", "sap_id": "7-7"})
         self.assertEqual(denied.status_code, 403)
 
+    def test_procurement_dates_survive_a_german_detail_page_round_trip(self):
+        """<input type="date"> only understands ISO, whatever the active locale.
+
+        With the localized default ("14.08.2026" under "de") the browser renders
+        an empty field and posts it back empty, wiping the stored date.
+        """
+        device = self.inroom_device
+        device.purchase_date = datetime.date(2026, 8, 14)
+        device.warranty_expiration_date = datetime.date(2029, 8, 14)
+        device.save()
+        url = reverse("assets:device_detail", args=[device.pk])
+
+        response = self.client.get(url, headers={"accept-language": "de"})
+
+        self.assertContains(response, 'name="purchase_date" value="2026-08-14"')
+        self.assertContains(response, 'name="warranty_expiration_date" value="2029-08-14"')
+
+        # Re-posting what the German page rendered must not clear the dates.
+        form = response.context["form"]
+        payload = {name: (form[name].value() or "") for name in form.fields}
+        self.client.post(url, payload, headers={"accept-language": "de"})
+
+        device.refresh_from_db()
+        self.assertEqual(device.purchase_date, datetime.date(2026, 8, 14))
+        self.assertEqual(device.warranty_expiration_date, datetime.date(2029, 8, 14))
+
     def test_device_outside_the_users_tenant_is_404(self):
         user, _tenant = self._tenant_viewer()
         # Untenanted device: invisible to a tenant-scoped, non-superuser viewer.

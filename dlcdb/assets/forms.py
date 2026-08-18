@@ -94,11 +94,15 @@ class DeviceForm(forms.ModelForm):
             "device_type": TomSelectWidget(),
             "manufacturer": TomSelectWidget(),
             "supplier": TomSelectWidget(),
-            "purchase_date": forms.DateInput(attrs={"type": "date"}),
-            "warranty_expiration_date": forms.DateInput(attrs={"type": "date"}),
-            "contract_start_date": forms.DateInput(attrs={"type": "date"}),
-            "contract_expiration_date": forms.DateInput(attrs={"type": "date"}),
-            "contract_termination_date": forms.DateInput(attrs={"type": "date"}),
+            # `format` is required, not cosmetic: an <input type="date"> only
+            # displays an ISO value, while the localized default renders
+            # "14.08.2026" under "de" -- which the browser shows as empty and
+            # submits back as empty, silently wiping a stored date on save.
+            "purchase_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "warranty_expiration_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "contract_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "contract_expiration_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "contract_termination_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             "note": forms.Textarea(attrs={"rows": 3}),
             "procurement_note": forms.Textarea(attrs={"rows": 3}),
             # Rendered as a hidden field driven by the live-search person picker
