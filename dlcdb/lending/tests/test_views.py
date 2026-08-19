@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
+from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -332,6 +333,41 @@ class LendingDetailViewTests(BaseTest):
         self.assertTrue(response.context["is_edit_flow"])
         self.assertNotIn("lent_end_date", response.context["form"].fields)
         self.assertNotContains(response, 'name="lent_end_date"')
+
+    def test_edit_flow_offers_the_return_action(self):
+        # Editing an active lending is the one flow returning follows on from, so
+        # the screen links to the return flow instead of sending the user back to
+        # the list.
+        response = self.client.get(reverse("lending:detail", args=[self.lent_record.pk]))
+        self.assertEqual(response.context["return_url"], self._return_url())
+        self.assertContains(response, f'href="{self._return_url()}"')
+        self.assertContains(response, 'id="lend-form-return"')
+
+    def test_edit_flow_return_action_keeps_the_index_filters(self):
+        # The index filters travel as ?next=; the return link must carry them on,
+        # so saving the return lands back on the filtered list.
+        index_query = "search=EDV-LENT&ordering=-modified"
+        response = self.client.get(
+            reverse("lending:detail", args=[self.lent_record.pk]),
+            {"next": index_query},
+        )
+        return_url = response.context["return_url"]
+        query = parse_qs(urlparse(return_url).query)
+        self.assertEqual(query["flow"], ["return"])
+        self.assertEqual(query["next"], [index_query])
+
+    def test_return_and_lend_flows_offer_no_return_action(self):
+        # Nothing to return on the return screen itself, on an available device,
+        # or in picker mode.
+        for url in (
+            self._return_url(),
+            reverse("lending:detail", args=[self.available_record.pk]),
+            reverse("lending:lend"),
+        ):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertIsNone(response.context["return_url"])
+                self.assertNotContains(response, 'id="lend-form-return"')
 
     def test_lend_flow_renders_locked_device_card(self):
         # Record mode shows the device as a read-only card: no live device picker

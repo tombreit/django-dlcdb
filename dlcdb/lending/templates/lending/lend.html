@@ -268,7 +268,23 @@ SPDX-License-Identifier: EUPL-1.2
       </a>
     {% endif %}
 
-    <a href="{{ index_url }}" class="btn btn-outline-secondary ms-auto">
+    {% comment %}
+      Return the device without a detour via the list. Only the edit flow gets a
+      return_url. Carries the ms-auto that pushes this group right; without it
+      Cancel does.
+    {% endcomment %}
+    {% if return_url %}
+      <a
+        href="{{ return_url }}"
+        id="lend-form-return"
+        class="btn btn-success ms-auto"
+        data-confirm="{% translate "Discard your unsaved changes and return the device?" %}"
+      >
+        <i class="bi bi-box-arrow-in-left"></i> {% translate "Return device" %}
+      </a>
+    {% endif %}
+
+    <a href="{{ index_url }}" class="btn btn-outline-secondary{% if not return_url %} ms-auto{% endif %}">
       <i class="bi bi-x-lg"></i> {% translate "Cancel" %}
     </a>
   </div>
@@ -331,6 +347,34 @@ SPDX-License-Identifier: EUPL-1.2
     document.addEventListener("picker:changed", sync);
     document.addEventListener("DOMContentLoaded", sync);
     sync();
+  })();
+</script>
+{% endif %}
+{% if return_url %}
+<script>
+  (function () {
+    "use strict";
+    // Returning happens on its own screen, so following the link drops whatever
+    // the user typed here. Snapshot the form once everything (TomSelect, the
+    // person picker) has initialised and compare on click, rather than trusting
+    // change events -- widget setup fires those too.
+    const form = document.getElementById("lend-form");
+    const returnBtn = document.getElementById("lend-form-return");
+    let pristine = null;
+
+    function serialize() {
+      return new URLSearchParams(new FormData(form)).toString();
+    }
+
+    window.addEventListener("load", function () {
+      pristine = serialize();
+    });
+
+    returnBtn.addEventListener("click", function (event) {
+      if (pristine !== null && serialize() !== pristine && !window.confirm(returnBtn.dataset.confirm)) {
+        event.preventDefault();
+      }
+    });
   })();
 </script>
 {% endif %}

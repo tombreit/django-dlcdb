@@ -416,6 +416,16 @@ def lend(request, pk=None):
     if edit_url and index_query:
         edit_url += "?" + urlencode({"next": index_query})
 
+    # Target of the "Return device" button on the edit screen: this same record
+    # with ?flow=return. Only an active lending can be returned, so it stays None
+    # in the other flows and the button is not rendered there.
+    return_url = None
+    if is_edit_flow:
+        return_query = {"flow": "return"}
+        if index_query:
+            return_query["next"] = index_query
+        return_url = f"{reverse('lending:detail', args=[record.pk])}?{urlencode(return_query)}"
+
     context = {
         "form": form,
         "device_form": device_form,
@@ -435,6 +445,7 @@ def lend(request, pk=None):
         "can_print_slip": can_print_slip,
         "form_action": form_action,
         "edit_url": edit_url,
+        "return_url": return_url,
         "index_url": index_url,
     }
     return TemplateResponse(request, "lending/lend.html", context)
