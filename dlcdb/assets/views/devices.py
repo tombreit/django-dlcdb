@@ -89,7 +89,7 @@ def device_index(request):
             device_filter,
             request,
             target="#device-list",
-            search_placeholder=_("Search IT ID, serial number, model, person name/email..."),
+            search_placeholder=_("Search IT ID, serial number, model, person name/email, note..."),
             secondary_fields={"is_imported", "duplicate", "supplier", "active_record__inventory"},
         ),
         "current_ordering": device_filter.data["ordering"],

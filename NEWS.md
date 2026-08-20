@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Device search now also matches the device note
 * The compiled German catalog (`django.mo`) is committed, so deployments no longer need to run `compilemessages`
 * Global search on the dashboard: one term across devices, persons, rooms, lendings, licenses and smallstuff, linking to the frontend detail views; the term lives in the URL, so a search is shareable and bookmarkable
 * Lending: "Return" is its own screen now, with the return date prefilled; the lending edit form can no longer end a lending

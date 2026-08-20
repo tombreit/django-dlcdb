@@ -37,6 +37,7 @@ class DeviceFrontendTests(BaseTest):
         cls.inroom_device.manufacturer = cls.manufacturer
         cls.inroom_device.series = "Notebook One"
         cls.inroom_device.is_lentable = True
+        cls.inroom_device.note = "Display flickers, RMA pending"
         cls.inroom_device.save()
         InRoomRecord.objects.create(device=cls.inroom_device, room=cls.room)
 
@@ -77,6 +78,14 @@ class DeviceFrontendTests(BaseTest):
         response = self.client.get(self.index_url, {"state": "no-record"}, headers={"HX-Request": "true"})
         self.assertContains(response, "EDV-NO-RECORD")
         self.assertNotContains(response, "EDV-AVAILABLE")
+
+    def test_search_matches_the_device_note(self):
+        # The note is the only place this term appears, so a hit can only come
+        # from the note leg of DeviceFilter.search_filter.
+        response = self.client.get(self.index_url, {"search": "RMA pending"}, headers={"HX-Request": "true"})
+
+        self.assertContains(response, "EDV-AVAILABLE")
+        self.assertNotContains(response, "EDV-NO-RECORD")
 
     def test_duplicate_serial_filter_uses_the_visible_queryset(self):
         response = self.client.get(

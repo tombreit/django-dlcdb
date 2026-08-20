@@ -66,6 +66,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "series",
         "serial_number",
         "order_number",
+        "note",
     ]
 
     def get_search_fields(self, request):
