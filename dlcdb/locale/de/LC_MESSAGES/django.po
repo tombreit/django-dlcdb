@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-27 21:52+0200\n"
-"PO-Revision-Date: 2026-08-27 21:53+0200\n"
+"POT-Creation-Date: 2026-08-27 23:07+0200\n"
+"PO-Revision-Date: 2026-08-27 23:11+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -268,7 +268,7 @@ msgstr "Kein Notiz"
 #: dlcdb/assets/filters.py:186 dlcdb/assets/filters.py:294
 #: dlcdb/assets/templates/assets/devices/detail.html:79
 #: dlcdb/core/models/device.py:178 dlcdb/core/models/manufacturer.py:21
-#: dlcdb/core/models/record.py:150 dlcdb/dataexchange/forms.py:72
+#: dlcdb/core/models/record.py:150 dlcdb/dataexchange/forms.py:71
 #: dlcdb/lending/templates/lending/lend.html:227
 #: dlcdb/licenses/templates/licenses/index.html:93 dlcdb/rooms/filters.py:34
 #: dlcdb/rooms/templates/rooms/detail.html:68
@@ -325,7 +325,7 @@ msgstr "Verbleib..."
 #: dlcdb/assets/templates/assets/records/detail.html:54
 #: dlcdb/assets/templates/assets/records/index.html:50
 #: dlcdb/core/admin/lentrecord_admin.py:99 dlcdb/core/models/record.py:77
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:32
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:44
 #: dlcdb/lending/templates/lending/index.html:59
 #: dlcdb/lending/templates/lending/lend.html:61
 msgid "Device"
@@ -342,7 +342,7 @@ msgstr "Ausleiher"
 #: dlcdb/assets/templates/assets/records/detail.html:96
 #: dlcdb/assets/templates/assets/records/index.html:55
 msgid "Valid until"
-msgstr ""
+msgstr "Gültig bis"
 
 #: dlcdb/assets/forms.py:31
 msgid "Search by EDV/Inv. no., manufacturer, serial…"
@@ -450,7 +450,7 @@ msgstr "Änderungen speichern"
 #: dlcdb/dataexchange/templates/dataexchange/import.html:9
 #: dlcdb/dataexchange/templates/dataexchange/import.html:46
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:9
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:62
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:74
 #: dlcdb/lending/templates/lending/lend.html:291
 #: dlcdb/licenses/templates/licenses/form_partial.html:81
 #: dlcdb/persons/templates/persons/detail.html:35
@@ -611,7 +611,7 @@ msgid "Toggle dropdown"
 msgstr "Dropdown umschalten"
 
 #: dlcdb/assets/templates/assets/devices/index.html:21
-#: dlcdb/dataexchange/views.py:103
+#: dlcdb/dataexchange/views.py:105
 msgid "Import devices"
 msgstr "Geräte importieren"
 
@@ -1113,6 +1113,7 @@ msgstr ""
 #: dlcdb/core/forms/removedrecord_form.py:31
 msgid "This device has no record yet and cannot be removed. Localize it first."
 msgstr ""
+"Dieses Gerät hat noch keinen Record und kann daher nicht entfernt werden. "
 
 #: dlcdb/core/forms/removedrecord_form.py:33
 msgid "This device cannot be removed in its current state."
@@ -1734,64 +1735,110 @@ msgstr "Ausgegeben"
 msgid "Overdue lendings"
 msgstr "Überfällige Ausleihen"
 
+#: dlcdb/dataexchange/admin.py:132 dlcdb/dataexchange/views.py:140
+#, python-format
+msgid "Import failed, nothing was written: %(error)s"
+msgstr "Import fehlgeschlagen, es wurde nichts geschrieben: %(error)s"
+
 #: dlcdb/dataexchange/apps.py:12
 msgid "Data Exchange"
 msgstr "Datenaustausch"
 
-#: dlcdb/dataexchange/forms.py:71
+#: dlcdb/dataexchange/fields.py:36
+#, python-format
+msgid "%(prefix)sincorrect date format, should be YYYY-MM-DD: '%(value)s'"
+msgstr ""
+
+#: dlcdb/dataexchange/fields.py:66
+#, python-format
+msgid "%(column)s: no %(model)s named '%(value)s' exists."
+msgstr ""
+
+#: dlcdb/dataexchange/fields.py:71
+#, python-format
+msgid ""
+"%(column)s: '%(value)s' is ambiguous, several %(model)s entries match it."
+msgstr ""
+
+#: dlcdb/dataexchange/fields.py:139
+msgid ""
+"LENDER_EMAIL: a lender email address is required to import a LENT record."
+msgstr ""
+
+#: dlcdb/dataexchange/fields.py:163
+#, python-format
+msgid ""
+"Could not import lender '%(email)s': a different person is already stored "
+"under the name '%(first_name)s %(last_name)s' (names must be unique). "
+"Original error: %(error)s"
+msgstr ""
+
+#: dlcdb/dataexchange/forms.py:70
 msgid "CSV file in the internal format (UTF-8)."
 msgstr "CSV-Datei im internen Format (UTF-8)."
 
-#: dlcdb/dataexchange/importer.py:50
+#: dlcdb/dataexchange/importer.py:67
+#, python-format
+msgid ""
+"a device with this EDV_ID or SAP_ID already exists. Original error: %(error)s"
+msgstr ""
+
+#: dlcdb/dataexchange/importer.py:82
 msgid "new device, no record"
 msgstr "Neues Gerät, kein Record"
 
-#: dlcdb/dataexchange/importer.py:55
+#: dlcdb/dataexchange/importer.py:87
 #, python-format
 msgid "new device, in room %(room)s"
 msgstr "Neues Gerät, in Raum %(room)s"
 
-#: dlcdb/dataexchange/importer.py:61
+#: dlcdb/dataexchange/importer.py:93
 #, python-format
 msgid "new device, lent to %(lender)s (room %(room)s), returned"
 msgstr "Neues Gerät, verliehen an %(lender)s (Raum %(room)s), zurückgegeben"
 
-#: dlcdb/dataexchange/importer.py:63
+#: dlcdb/dataexchange/importer.py:95
 #, python-format
 msgid "new device, lent to %(lender)s (room %(room)s)"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:68
+#: dlcdb/dataexchange/importer.py:100
 msgid "new device, not locatable"
 msgstr "Neues Gerät, nicht auffindbar"
 
-#: dlcdb/dataexchange/importer.py:73
+#: dlcdb/dataexchange/importer.py:105
 #, python-format
 msgid "new device, removed on %(date)s"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:75
+#: dlcdb/dataexchange/importer.py:107
 #, python-format
 msgid "new device, record %(record_type)s"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:102
+#: dlcdb/dataexchange/importer.py:139
 #, python-format
 msgid "record only; device exists in tenant '%(tenant)s'"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:112
+#: dlcdb/dataexchange/importer.py:149
 #, python-format
 msgid "edv_id collision -> %(new_edv_id)s"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:129
+#: dlcdb/dataexchange/importer.py:166
 #, python-format
 msgid "exists in other tenant '%(tenant)s'"
 msgstr ""
 
-#: dlcdb/dataexchange/importer.py:131
+#: dlcdb/dataexchange/importer.py:168
 msgid "already exists; no record to update"
+msgstr ""
+
+#: dlcdb/dataexchange/importer.py:467
+#, python-format
+msgid ""
+"Import aborted: %(count)s row(s) could not be imported. Nothing was written."
 msgstr ""
 
 #: dlcdb/dataexchange/models.py:94
@@ -1813,6 +1860,21 @@ msgstr "Bulk Ausmusterung"
 #: dlcdb/dataexchange/navigation.py:28
 msgid "HR API sync configuration"
 msgstr "HR-API-Sync-Konfiguration"
+
+#: dlcdb/dataexchange/records.py:67
+msgid "ROOM: a room number is required to import an INROOM record."
+msgstr ""
+
+#: dlcdb/dataexchange/records.py:80
+msgid "ROOM: a room number is required to import a LENT record."
+msgstr ""
+
+#: dlcdb/dataexchange/records.py:121
+#, python-format
+msgid ""
+"RECORD_TYPE: unknown value '%(value)s'. Expected one of: %(expected)s (or "
+"empty with a ROOM set)."
+msgstr ""
 
 #: dlcdb/dataexchange/templates/dataexchange/import.html:18
 msgid ""
@@ -1842,27 +1904,49 @@ msgstr "Testlauf"
 msgid "nothing has been written yet."
 msgstr "es wurde noch nichts geschrieben."
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:33
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:22
+#, python-format
+msgid "One row could not be imported and this file cannot be confirmed."
+msgid_plural ""
+"%(counter)s rows could not be imported and this file cannot be confirmed."
+msgstr[0] ""
+"Eine Zeile konnte nicht importiert werden und diese Importdatei kann daher "
+"nicht importiert werden."
+msgstr[1] ""
+"%(counter)s Zeilen konnten nicht importiert werden und diese Importdatei "
+"kann daher nicht importiert werden."
+
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:28
+msgid ""
+"Fix the lines listed below in your CSV file and upload it again. The line "
+"numbers match your spreadsheet."
+msgstr ""
+
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:45
 msgid "Outcome"
 msgstr "Ergebnis"
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:34
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:46
 msgid "Detail"
 msgstr "Detail"
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:44
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:56
 msgid "no details"
 msgstr "keine Details"
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:52
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:64
 msgid "No data rows found in this file."
 msgstr "Keine Datenzeilen in dieser Datei gefunden."
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:59
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:71
 msgid "Confirm import"
 msgstr "Import bestätigen"
 
-#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:63
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:77
+msgid "Confirming is disabled until every row above imports cleanly."
+msgstr ""
+
+#: dlcdb/dataexchange/templates/dataexchange/import_preview.html:79
 msgid "Confirming will write the rows shown above."
 msgstr "Mit der Bestätigung werden die oben angezeigten Zeilen geschrieben."
 
@@ -1875,18 +1959,13 @@ msgstr ""
 "Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende Spalte(n): "
 "%(missing)s. Erwartet werden: %(expected)s."
 
-#: dlcdb/dataexchange/views.py:95
+#: dlcdb/dataexchange/views.py:96
 msgid "Import preview"
 msgstr "Import-Vorschau"
 
-#: dlcdb/dataexchange/views.py:124
+#: dlcdb/dataexchange/views.py:126
 msgid "This import file has already been processed."
 msgstr "Diese Import-Datei wurde bereits verarbeitet."
-
-#: dlcdb/dataexchange/views.py:137
-#, python-format
-msgid "Import failed, nothing was written: %(error)s"
-msgstr "Import fehlgeschlagen, es wurde nichts geschrieben: %(error)s"
 
 #: dlcdb/inventory/navigation.py:12 dlcdb/inventory/navigation.py:21
 msgid "Inventorize"
