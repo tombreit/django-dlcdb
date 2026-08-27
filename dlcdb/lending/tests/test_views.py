@@ -112,6 +112,18 @@ class LendingIndexViewTests(BaseTest):
         self.assertLess(asc.index("EDV-AVAIL"), asc.index("EDV-LENT"))
         self.assertLess(desc.index("EDV-LENT"), desc.index("EDV-AVAIL"))
 
+    def test_timestamp_column_shows_both_stamps_and_sorts_by_each(self):
+        response = self.client.get(self.url)
+
+        # Both halves of the header are sort links.
+        self.assertContains(response, "ordering=created")
+        self.assertContains(response, "ordering=modified")
+        self.assertContains(response, 'title="Activity"')
+        # Records here are created by the lifecycle transitions and never edited
+        # afterwards, so their cells collapse to the "added" line alone.
+        self.assertContains(response, "added")
+        self.assertContains(response, "Created:")
+
     def test_ordering_by_created_is_offered_and_resolves_to_created_at(self):
         # The sort is dropdown-only (no column header), so assert the radio the
         # filterbar renders and that the param maps to the record's created_at.

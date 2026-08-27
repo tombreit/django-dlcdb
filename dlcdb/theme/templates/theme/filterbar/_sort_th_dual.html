@@ -1,0 +1,23 @@
+{% comment %}
+One column, two sorts. For a cell that shows two related values — created and
+modified timestamps, say — so both are sortable from the table without spending
+a second column on it.
+
+Caller passes:
+  label_a / asc_a / desc_a - the first sort control
+  label_b / asc_b / desc_b - the second one
+  column_label             - accessible name for the column as a whole; the two
+                             link words are what is actually printed
+  th_class                 - optional classes for the th itself
+Context conventions:
+  current_ordering - the active ordering param (the list view provides it)
+
+The idle "sortable" caret is suppressed on both links: two faint arrows beside
+two words read as clutter, and the direction caret on the active half already
+says which sort is in force.
+{% endcomment %}
+<th scope="col" title="{{ column_label }}"{% if th_class %} class="{{ th_class }}"{% endif %}>
+  {% include "theme/filterbar/_sort_link.html" with label=label_a asc=asc_a desc=desc_a hide_idle_caret=True %}
+  <span class="text-muted mx-1" aria-hidden="true">&middot;</span>
+  {% include "theme/filterbar/_sort_link.html" with label=label_b asc=asc_b desc=desc_b hide_idle_caret=True %}
+</th>

@@ -1,0 +1,35 @@
+{% comment %}
+One sort control: the link, its href and its direction caret. Extracted from
+_sort_th.html so a header can carry more than one of them (see
+_sort_th_dual.html) without duplicating the querystring and caret logic.
+
+Caller passes:
+  label           - visible link label
+  asc             - OrderingFilter param value for ascending (e.g. "device")
+  desc            - param value for descending (e.g. "-device")
+  hide_idle_caret - optional; drop the "sortable" marker while this control is
+                    not the active sort. Set it where several links share one
+                    header and a row of faint arrows would just be noise.
+Context conventions:
+  current_ordering - the active ordering param (the list view provides it)
+
+The hx-get is relative ("?ordering=..."), so hx-target/hx-swap/hx-push-url must
+be inherited from the fragment root element, and the list page must be served at
+its own endpoint. Preserves active search/filters via the built-in
+{% templatetag openblock %} querystring {% templatetag closeblock %} tag;
+data-filterbar-ordering lets filterbar.js sync the bar's sort radio when a
+header is clicked.
+{% endcomment %}
+{% with current=current_ordering %}
+  {% if current == asc %}{% querystring ordering=desc as sort_href %}
+  {% else %}{% querystring ordering=asc as sort_href %}{% endif %}
+  <a class="text-decoration-none text-reset d-inline-flex align-items-center gap-1"
+     href="{{ sort_href }}"
+     hx-get="{{ sort_href }}"
+     data-filterbar-ordering="{% if current == asc %}{{ desc }}{% else %}{{ asc }}{% endif %}">
+    {{ label }}
+    {% if current == asc %}<i class="bi bi-caret-up-fill"></i>
+    {% elif current == desc %}<i class="bi bi-caret-down-fill"></i>
+    {% elif not hide_idle_caret %}<i class="bi bi-arrow-down-up opacity-25"></i>{% endif %}
+  </a>
+{% endwith %}

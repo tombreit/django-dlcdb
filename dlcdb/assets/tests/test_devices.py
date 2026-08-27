@@ -355,15 +355,55 @@ class DeviceFrontendTests(BaseTest):
         self.assertContains(response, 'value="created"')
         self.assertContains(response, 'value="-created"')
 
+    def test_timestamp_cell_shows_created_and_drops_a_redundant_modified(self):
+        # Scope the page to a single row via search, so nothing here can match
+        # some other device's cell.
+        device = self._create_device(edv_id="EDV-STAMPS", sap_id="7-1")
+        pristine = self.client.get(self.index_url, {"search": "EDV-STAMPS"})
+
+        # Never edited: both stamps coincide, so printing them both would just
+        # repeat the same value. Only the "added" line renders.
+        self.assertContains(pristine, "added")
+        self.assertContains(pristine, "Created:")
+        self.assertNotContains(pristine, "Modified:")
+
+        # Once genuinely edited, the modified value joins it in the same cell.
+        Device.objects.filter(pk=device.pk).update(
+            created_at=timezone.now() - datetime.timedelta(days=30),
+            modified_at=timezone.now() - datetime.timedelta(hours=2),
+        )
+        edited = self.client.get(self.index_url, {"search": "EDV-STAMPS"})
+        self.assertContains(edited, "Modified:")
+        self.assertContains(edited, "Created:")
+        self.assertContains(edited, "added")
+
+    def test_timestamp_header_sorts_by_both_created_and_modified(self):
+        # One column, two sort targets -- the created ordering is reachable from
+        # the table itself, not only from the filterbar dropdown.
+        response = self.client.get(self.index_url)
+
+        self.assertContains(response, "ordering=created")
+        self.assertContains(response, "ordering=modified")
+        self.assertContains(response, 'title="Activity"')
+
     def test_modified_column_uses_naturaltime_for_recent_edits_only(self):
         # A device modified "just now" renders as "now", not "... ago", so give
         # the recent device an age that is unambiguously inside the cutoff.
-        # auto_now overrides a plain .save(), so backdate via .update().
+        # auto_now/auto_now_add override a plain .save(), so write both stamps via
+        # .update(). created_at has to stay older than modified_at: a row whose
+        # two stamps coincide counts as never edited and its cell then shows the
+        # "added" line alone, with no modified value to assert on.
         recent = self._create_device(edv_id="EDV-RECENT", sap_id="9-9")
-        Device.objects.filter(pk=recent.pk).update(modified_at=timezone.now() - datetime.timedelta(hours=2))
+        Device.objects.filter(pk=recent.pk).update(
+            created_at=timezone.now() - datetime.timedelta(weeks=10),
+            modified_at=timezone.now() - datetime.timedelta(hours=2),
+        )
         old = self._create_device(edv_id="EDV-OLD", sap_id="9-8")
         old_modified_at = timezone.now() - datetime.timedelta(weeks=10)
-        Device.objects.filter(pk=old.pk).update(modified_at=old_modified_at)
+        Device.objects.filter(pk=old.pk).update(
+            created_at=timezone.now() - datetime.timedelta(weeks=20),
+            modified_at=old_modified_at,
+        )
 
         response = self.client.get(self.index_url)
         content = response.content.decode()

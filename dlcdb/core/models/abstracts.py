@@ -2,11 +2,20 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import datetime
+
 from django.conf import settings
 from django.utils.timezone import now
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+
+# auto_now_add and auto_now issue two separate timezone.now() calls when a row is
+# inserted, so a freshly created object's timestamps differ by microseconds
+# rather than being equal. Anything inside this window counts as "never touched
+# since it was created".
+UNMODIFIED_TOLERANCE = datetime.timedelta(seconds=1)
 
 
 class AuditBaseModel(models.Model):
@@ -33,6 +42,19 @@ class AuditBaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def is_unmodified(self):
+        """
+        True when this object has not been edited since it was created.
+
+        Lets a list column show both timestamps without printing the same value
+        twice for a row nobody has touched yet.
+        """
+        if not self.created_at or not self.modified_at:
+            # Unsaved instance: neither auto stamp has been written yet.
+            return False
+        return self.modified_at - self.created_at < UNMODIFIED_TOLERANCE
 
 
 class SoftDeleteAuditBaseModelQuerySet(models.QuerySet):

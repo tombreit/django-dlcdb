@@ -1,5 +1,5 @@
 {% extends "theme/_base.html" %}
-{% load i18n humanize %}
+{% load i18n %}
 
 {% block title %}
   {% translate "Lending" %}
@@ -57,7 +57,7 @@
           {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="device" desc="-device" %}
           {% include "theme/filterbar/_sort_th.html" with label=_("Person / status") asc="person" desc="-person" %}
           {% include "theme/filterbar/_sort_th.html" with label=_("Due") asc="due" desc="-due" %}
-          {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" %}
+          {% include "theme/filterbar/_sort_th_dual.html" with column_label=_("Activity") label_a=_("Created") asc_a="created" desc_a="-created" label_b=_("Modified") asc_b="modified" desc_b="-modified" %}
           <th class="text-end">{% translate "Actions" %}</th>
         </tr>
       </thead>
@@ -87,7 +87,7 @@
               {{ record.lent_desired_end_date|date:"Y-m-d"|default:"—" }}
             </td>
             <td class="text-nowrap">
-              {% if record.modified_at >= recent_cutoff %}{{ record.modified_at|naturaltime }}{% else %}{{ record.modified_at|date:"Y-m-d" }}{% endif %}
+              {% include "theme/includes/_timestamps.html" with obj=record %}
             </td>
             <td class="text-end text-nowrap">
               {% if record.record_type == "INROOM" %}

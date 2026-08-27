@@ -1,0 +1,24 @@
+{% comment %}
+Both audit timestamps of a row in a single table cell: when it was last modified
+(the primary value, which is what this column has always shown) and when it was
+added (secondary, muted).
+
+A row nobody has edited yet would print the same value twice — auto_now_add and
+auto_now both stamp on insert — so it collapses to the "added" line alone, which
+then renders as the cell's only, unmuted value. See AuditBaseModel.is_unmodified.
+
+Caller passes:
+  obj - any AuditBaseModel instance (created_at / modified_at / is_unmodified)
+Context conventions:
+  recent_cutoff - the list view provides it; timestamps older than this fall
+                  back to an absolute date instead of "2 hours ago"
+
+Plain title= attributes rather than Bootstrap tooltips: the frontend bundle
+deliberately ships neither the tooltip CSS nor its initialiser.
+{% endcomment %}
+{% load i18n humanize %}
+{% if not obj.is_unmodified %}
+  <div title="{% translate "Modified" %}: {{ obj.modified_at|date:"SHORT_DATETIME_FORMAT" }}">{% if obj.modified_at >= recent_cutoff %}{{ obj.modified_at|naturaltime }}{% else %}{{ obj.modified_at|date:"Y-m-d" }}{% endif %}</div>
+{% endif %}
+{# Two blocktranslate blocks sharing one msgid, so a translator can move the date. #}
+<div{% if not obj.is_unmodified %} class="small text-muted"{% endif %} title="{% translate "Created" %}: {{ obj.created_at|date:"SHORT_DATETIME_FORMAT" }}">{% if obj.created_at >= recent_cutoff %}{% blocktranslate with value=obj.created_at|naturaltime %}added {{ value }}{% endblocktranslate %}{% else %}{% blocktranslate with value=obj.created_at|date:"Y-m-d" %}added {{ value }}{% endblocktranslate %}{% endif %}</div>

@@ -1,5 +1,5 @@
 {% extends "theme/_base.html" %}
-{% load i18n humanize %}
+{% load i18n %}
 
 {% block title %}{% translate "Devices" %}{% endblock title %}
 
@@ -63,7 +63,7 @@
               {% include "theme/filterbar/_sort_th.html" with label=_("Device") asc="it_id" desc="-it_id" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Type") asc="type" desc="-type" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("State / location") asc="state" desc="-state" th_class="d-none d-lg-table-cell" %}
-              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
+              {% include "theme/filterbar/_sort_th_dual.html" with column_label=_("Activity") label_a=_("Created") asc_a="created" desc_a="-created" label_b=_("Modified") asc_b="modified" desc_b="-modified" th_class="d-none d-lg-table-cell text-end" %}
               {% if request.user.is_superuser %}
                 {% include "theme/filterbar/_sort_th.html" with label=_("Tenant") asc="tenant" desc="-tenant" th_class="d-none d-xl-table-cell" %}
               {% endif %}
@@ -97,7 +97,7 @@
                   {% include "assets/devices/includes/_state.html" with device=device %}
                 </td>
                 <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">
-                  {% if device.modified_at >= recent_cutoff %}{{ device.modified_at|naturaltime }}{% else %}{{ device.modified_at|date:"Y-m-d" }}{% endif %}
+                  {% include "theme/includes/_timestamps.html" with obj=device %}
                 </td>
                 {% if request.user.is_superuser %}
                   <td class="d-none d-xl-table-cell text-muted">{{ device.tenant|default:"—" }}</td>
