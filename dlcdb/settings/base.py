@@ -41,6 +41,8 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    # Must be *before* django.contrib.staticfiles
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.humanize",
@@ -56,7 +58,6 @@ THIRD_PARTY_APPS = [
     "django_htmx",
     "huey.contrib.djhuey",
     "simple_history",
-    "whitenoise.runserver_nostatic",
 ]
 LOCAL_APPS = [
     "dlcdb.accounts",
