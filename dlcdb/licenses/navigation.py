@@ -12,7 +12,7 @@ nav_entries = [
         "label": _("Licenses"),
         "icon": "bi bi-bank2",
         "url": "licenses:index",
-        "required_permission": "true",
+        "required_permission": "core.view_licencerecord",
     },
     {
         "slot": "nav_settings",

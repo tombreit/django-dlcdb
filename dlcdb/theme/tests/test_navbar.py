@@ -66,3 +66,35 @@ class MasterdataNavbarTests(TestCase):
 
         self.assertContains(response, "dropdown-toggle active")
         self.assertContains(response, f'class="dropdown-item active" href="{reverse("rooms:index")}"')
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class MainNavPermissionTests(TestCase):
+    """Every nav entry names a real permission -- there is no login-only entry.
+
+    "Licenses" was the last one gated on nothing but a login (a literal "true"
+    in its navigation.py, honoured by a special case in the nav context
+    processor). Both are gone; this pins them down.
+    """
+
+    # Assert on the nav context rather than the rendered href: the dashboard's
+    # licences *tile* links to the same URL and is deliberately not
+    # permission-filtered, so a markup assertion would not be about the navbar.
+    def test_a_user_without_permissions_sees_no_licenses_entry(self):
+        user = get_user_model().objects.create_user(
+            username="nav-licenceless", email="licenceless@example.com", password="secret"
+        )
+        self.client.force_login(user)
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertNotIn("licenses:index", [item["url"] for item in response.context["nav_items_main"]])
+
+    def test_the_view_permission_reveals_the_licenses_entry(self):
+        user = get_user_model().objects.create_user(
+            username="nav-licencer", email="licencer@example.com", password="secret"
+        )
+        user.user_permissions.add(Permission.objects.get(codename="view_licencerecord", content_type__app_label="core"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertIn("licenses:index", [item["url"] for item in response.context["nav_items_main"]])

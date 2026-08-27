@@ -9,7 +9,7 @@ from operator import attrgetter
 
 from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
@@ -22,10 +22,10 @@ from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import LicenceRecord, Room, Device
+from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
 from .forms import LicenseForm
-from .decorators import htmx_permission_required
 from .filters import LicenceRecordFilter
 from .models import LicensesConfiguration, LicenseAsset
 
@@ -33,18 +33,7 @@ from .models import LicensesConfiguration, LicenseAsset
 LICENSES_PER_PAGE = 25
 
 
-@login_required
-def _playground(request):
-    """
-    Just a temporary playground view.
-    """
-    template = "licenses/playground.html"
-    context = {}
-
-    return TemplateResponse(request, template, context)
-
-
-@login_required
+@permission_required("core.view_licencerecord", raise_exception=True)
 def index(request):
     template = "licenses/index.html#licenses-list" if request.htmx else "licenses/index.html"
 
@@ -73,12 +62,16 @@ def index(request):
         # paginator.count runs the filtered COUNT once; reuse it here.
         "licenses_filtered": page_obj.paginator.count,
         "licenses_total": base_qs.count(),
+        # Reading the list and writing to it are separate permissions, so the
+        # write affordances are hidden rather than the whole page withheld.
+        "can_add": request.user.has_perm("core.add_licencerecord"),
+        "can_change": request.user.has_perm("core.change_licencerecord"),
     }
 
     return TemplateResponse(request, template, context)
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required("core.change_licencerecord")
 def edit(request, license_id):
     if request.htmx:
@@ -142,8 +135,8 @@ def edit(request, license_id):
     )
 
 
-@login_required
-@htmx_permission_required("core.change_licencerecord")
+@htmx_login_required
+@htmx_permission_required("core.add_licencerecord")
 def new(request):
     if request.htmx:
         template = "licenses/form_partial.html"
@@ -210,8 +203,7 @@ def new(request):
     )
 
 
-@login_required
-@htmx_permission_required("core.change_licencerecord")
+@permission_required("core.view_licencerecord", raise_exception=True)
 def history(request, license_id):
     device = get_object_or_404(LicenseAsset, id=license_id)
     device_history = device.history.all()

@@ -6,7 +6,7 @@ import datetime
 from urllib.parse import urlencode
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import BooleanField, Case, CharField, Count, IntegerField, Q, Value, When
@@ -23,6 +23,7 @@ from dlcdb.core.models import LentRecord, Person, Record, Room
 from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.links import linked_message
+from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.dataexchange.csv_export import (
     LENDING_EXPORT_RELATIONS,
@@ -32,7 +33,6 @@ from dlcdb.dataexchange.csv_export import (
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 
-from .decorators import htmx_permission_required
 from .filters import (
     LendingPersonFilter,
     LentRecordFilter,
@@ -124,7 +124,6 @@ def _lending_filter(request):
     return LentRecordFilter(data, queryset=base_qs, request=request)
 
 
-@login_required
 @permission_required("core.view_lentrecord", raise_exception=True)
 def index(request):
     """
@@ -164,7 +163,6 @@ def index(request):
     return TemplateResponse(request, template, context)
 
 
-@login_required
 @permission_required("core.view_lentrecord", raise_exception=True)
 def lending_export_csv(request):
     """The current lending list as a CSV download.
@@ -307,7 +305,7 @@ def _save_lending(request, record, form):
     return True
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def lend(request, pk=None):
     """
@@ -451,7 +449,7 @@ def lend(request, pk=None):
     return TemplateResponse(request, "lending/lend.html", context)
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def person_search(request):
     """HTMX live-search backing the person picker on the detail view."""
@@ -487,7 +485,7 @@ def _build_unsaved_lentrecord(device, form):
     )
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 @require_POST
 def print_sheet(request, pk):
@@ -534,7 +532,6 @@ def print_sheet(request, pk):
     )
 
 
-@login_required
 @permission_required("core.view_lentrecord", raise_exception=True)
 def print_lent_sheet(request, pk):
     """

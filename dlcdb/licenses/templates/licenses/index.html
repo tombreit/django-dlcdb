@@ -17,7 +17,7 @@
   <div class="d-flex align-items-center mb-3">
     <h1 class="mb-0">{% translate "Licenses" %}</h1>
     <div id="add-license" class="ms-auto">
-      {% include "licenses/includes/add_button.html" with style="btn btn-primary" %}
+      {% if can_add %}{% include "licenses/includes/add_button.html" with style="btn btn-primary" %}{% endif %}
     </div>
   </div>
 
@@ -121,12 +121,14 @@
                 {{ license.get_subscribers|default:""|linebreaksbr }}
               </td>
               <td>
+                {% if can_change %}
                 <a
                     href="{% url 'licenses:edit' license_id=license.device.id %}"
                     class="btn btn-primary btn-sm"
                 >
                     <i class="bi bi-pencil-square"></i>
                 </a>
+                {% endif %}
               </td>
             </tr>
             {% empty %}
@@ -135,7 +137,7 @@
                 <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                 {% translate "No licenses found." %}
                 {% if licenses_total == 0 %}
-                  {% include "licenses/includes/add_button.html" with style="btn" %}
+                  {% if can_add %}{% include "licenses/includes/add_button.html" with style="btn" %}{% endif %}
                 {% else %}
                   {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
                 {% endif %}

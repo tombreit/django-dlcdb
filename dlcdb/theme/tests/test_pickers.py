@@ -15,6 +15,7 @@ permissions and so cannot be expressed as one required string.
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.urls import reverse
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device
@@ -90,3 +91,37 @@ def test_the_registered_sources_use_lifecycle_permissions():
     move = get_picker_source("move")
     expected = {lifecycle.BY_NAME[name].permission for name in lifecycle.LOCALISING_MOVES}
     assert set(move.permissions) == expected
+
+
+# --- the endpoint's answer to an unauthorized request ----------------------
+
+
+def test_a_plain_unauthorized_request_gets_a_403(client, plain_static, make_user):
+    """Not a blank 200.
+
+    ``device_search`` answers an unauthorized HTMX request with a client
+    refresh, so no 403 page is swapped into the results container. A plain
+    navigation must get the ordinary 403 instead -- the client-refresh response
+    renders as an empty 200 body, i.e. a blank page whose reason only surfaces
+    on whatever page the user opens next.
+    """
+    client.force_login(make_user())
+    response = client.post(reverse("theme:device_search"), data={"source": "lend", "q": "x"})
+    assert response.status_code == 403
+
+
+def test_the_same_request_over_htmx_gets_a_client_refresh(client, make_user):
+    client.force_login(make_user())
+    response = client.post(
+        reverse("theme:device_search"),
+        data={"source": "lend", "q": "x"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+    assert response.headers["HX-Refresh"] == "true"
+
+
+def test_an_anonymous_request_is_sent_to_the_login_page(client):
+    response = client.post(reverse("theme:device_search"), data={"source": "lend", "q": "x"})
+    assert response.status_code == 302
+    assert "/accounts/login/" in response.url

@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Frontend permissions consolidated onto Django's default `view`/`add`/`change` permissions of the model each view touches. The license module now needs `core.view_licencerecord`; assign this permission to the groups that should keep access (likewise `smallstuff.view_assignedthing` and `smallstuff.add_assignedthing` for Kleinkram)
 * Device search now also matches the device note
 * The compiled German catalog (`django.mo`) is committed, so deployments no longer need to run `compilemessages`
 * Global search on the dashboard: one term across devices, persons, rooms, lendings, licenses and smallstuff, linking to the frontend detail views; the term lives in the URL, so a search is shareable and bookmarkable

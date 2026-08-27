@@ -5,6 +5,7 @@
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
 
@@ -107,8 +108,61 @@ class LicensesIndexViewTests(BaseTest):
         self.assertIn("License state: Active", content)
         self.assertNotIn("[invalid name]", content)
 
-    def test_login_required(self):
+    def test_anonymous_is_refused(self):
+        # An unauthorized request is a 403 whatever the reason; the 403 page
+        # offers anonymous visitors a log-in link.
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/accounts/login/", response.url)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class LicensesPermissionTests(BaseTest):
+    """Reading the licence list and writing to it are separate grants.
+
+    The module used to be open to every logged-in user, and its edit views asked
+    for ``change_licencerecord`` regardless of whether they read or wrote.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.room = Room.objects.create(number="B2.01", nickname="Lager")
+
+    @staticmethod
+    def _make_user(*codenames):
+        user = get_user_model().objects.create_user(
+            username=f"licences-{'-'.join(codenames) or 'nobody'}",
+            email=f"{'-'.join(codenames) or 'nobody'}@example.com",
+            password="secret",
+        )
+        for codename in codenames:
+            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        return user
+
+    def test_the_view_permission_opens_the_list(self):
+        self.client.force_login(self._make_user("view_licencerecord"))
+        self.assertEqual(self.client.get(reverse("licenses:index")).status_code, 200)
+
+    def test_without_it_the_list_is_refused(self):
+        self.client.force_login(self._make_user())
+        self.assertEqual(self.client.get(reverse("licenses:index")).status_code, 403)
+
+    def test_reading_does_not_allow_creating(self):
+        self.client.force_login(self._make_user("view_licencerecord"))
+        # licenses:new is an HTMX-only form. Over HTMX a refused request comes
+        # back as a client refresh so no 403 page lands in the modal; a plain
+        # navigation gets the ordinary 403.
+        self.assertEqual(self.client.get(reverse("licenses:new")).status_code, 403)
+
+        response = self.client.get(reverse("licenses:new"), headers={"HX-Request": "true"})
+        self.assertEqual(response.headers["HX-Refresh"], "true")
+
+    def test_creating_needs_the_add_permission(self):
+        self.client.force_login(self._make_user("add_licencerecord"))
+        response = self.client.get(reverse("licenses:new"), headers={"HX-Request": "true"})
+        self.assertEqual(response.status_code, 200)
+
+    def test_the_add_and_edit_buttons_are_hidden_from_a_read_only_user(self):
+        self.client.force_login(self._make_user("view_licencerecord"))
+        content = self.client.get(reverse("licenses:index")).content.decode()
+
+        self.assertNotIn(reverse("licenses:new"), content)

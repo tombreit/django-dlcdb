@@ -191,8 +191,8 @@ SEARCH_SOURCES = (
         key="licenses",
         label=_("Licenses"),
         icon="bi bi-bank2",
-        # licenses:index is login-only, but licenses:edit -- where these rows
-        # lead -- needs the change permission.
+        # These rows lead to licenses:edit, not to the index, so they need the
+        # change permission rather than the view permission the index asks for.
         permissions=("core.change_licencerecord",),
         get_queryset=_licence_queryset,
         search=lambda qs, term, request: _filtered(DeviceFilter, qs, term, request),
@@ -225,9 +225,7 @@ SEARCH_SOURCES = (
         key="smallstuff",
         label=_("Smallstuff"),
         icon="bi bi-handbag",
-        # The nav entry uses view_assignedthing, but smallstuff:person_detail
-        # requires change_assignedthing.
-        permissions=("smallstuff.change_assignedthing",),
+        permissions=("smallstuff.view_assignedthing",),
         get_queryset=_smallstuff_queryset,
         search=_smallstuff_search,
         row_template="dashboard/search/_row_smallstuff.html",

@@ -8,13 +8,14 @@ Shared HTMX endpoint backing the centralized device picker.
 A single ``device_search`` view serves every picker source (lending, relocate,
 …). The POST ``source`` token selects a registered :class:`theme.pickers.PickerSource`,
 which supplies the tenant-scoped ``Device`` queryset and the required permission;
-the ranking and rendering are shared. Login/permission are enforced dynamically
-(the permission varies per source) the same HTMX-friendly way as
-``core.utils.htmx``.
+the ranking and rendering are shared. The login guard is the shared
+``htmx_login_required``; the permission check has to stay inline because which
+permission applies is only known once the source is resolved, but it follows the
+same contract as ``htmx_permission_required``.
 """
 
 from django.contrib import messages
-from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
@@ -22,28 +23,30 @@ from django.views.decorators.http import require_POST
 from django_htmx.http import HttpResponseClientRefresh
 
 from dlcdb.core.utils.device_search import search_devices
+from dlcdb.core.utils.htmx import htmx_login_required
 
 from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
 
 
 @require_POST
+@htmx_login_required
 def device_search(request):
     """Live-search the devices of the requested picker source. Empty query -> none."""
     source = get_picker_source(request.POST.get("source"))
     if source is None:
         return HttpResponseBadRequest("Unknown device picker source.")
 
-    # Dynamic login/permission guard (perm depends on the source), HTMX-aware:
-    # an unauthenticated or unauthorized request triggers a full client refresh
-    # instead of swapping a login/403 page into the results container.
-    if not request.user.is_authenticated:
-        if getattr(request, "htmx", False):
-            return HttpResponseClientRefresh()
-        return redirect_to_login(request.get_full_path())
+    # The permission depends on the source, so it cannot be a static decorator.
+    # Same contract as core.utils.htmx.htmx_permission_required: an HTMX request
+    # gets a client refresh (never a 403 page swapped into the results
+    # container), a plain navigation gets the ordinary 403.
     if not source.grants_access(request.user):
-        messages.error(request, _("Permission denied."))
-        return HttpResponseClientRefresh()
+        message = _("Permission denied.")
+        if getattr(request, "htmx", False):
+            messages.error(request, message)
+            return HttpResponseClientRefresh()
+        raise PermissionDenied(message)
 
     value = (request.POST.get(source.search_param) or "").strip()
     devices = search_devices(source.get_queryset(request), value).annotate(state_color=active_record_color_case())

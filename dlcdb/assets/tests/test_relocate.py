@@ -70,11 +70,11 @@ class RelocateViewTests(BaseTest):
         # Live selected-device count badge in the Devices header.
         self.assertContains(response, 'id="device-count"')
 
-    def test_login_required(self):
+    def test_anonymous_is_refused(self):
+        # An unauthorized request is a 403 whatever the reason; the 403 page
+        # offers anonymous visitors a log-in link.
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/accounts/login/", response.url)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
 
     # --- search endpoints -------------------------------------------------
 

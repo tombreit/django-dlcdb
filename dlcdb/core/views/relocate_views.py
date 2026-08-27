@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.utils.translation import gettext as _
 
 from .. import lifecycle
@@ -21,7 +21,6 @@ from ..utils.relocate import relocate_device
 EDIT_DEVICE_PERM = "core.change_device"
 
 
-@method_decorator(login_required, name="dispatch")
 @method_decorator(
     permission_required(lifecycle.BY_NAME["relocate"].permission, raise_exception=True),
     name="dispatch",

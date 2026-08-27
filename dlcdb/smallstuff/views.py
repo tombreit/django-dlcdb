@@ -7,7 +7,7 @@
 from django.shortcuts import render
 from django.utils import timezone
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 
 from dlcdb.core.models import Person
 from .models import AssignedThing
@@ -15,7 +15,7 @@ from .filters import PersonFilter
 from .forms import AssignedThingsForm
 
 
-@login_required
+@permission_required("smallstuff.view_assignedthing", raise_exception=True)
 def person_search(request):
     # query = request.GET.get("q")
     filter = PersonFilter(request.POST)
@@ -28,8 +28,7 @@ def person_search(request):
     return render(request, template, context)
 
 
-@login_required
-@permission_required("smallstuff.change_assignedthing", raise_exception=True)
+@permission_required("smallstuff.view_assignedthing", raise_exception=True)
 def person_detail(request, person_id):
     try:
         person = Person.smallstuff_person_objects.get(id=person_id)
@@ -42,12 +41,12 @@ def person_detail(request, person_id):
     context = {
         "person": person,
         "assignments": assignments,
+        "can_add": request.user.has_perm("smallstuff.add_assignedthing"),
     }
     return render(request, template, context)
 
 
-@login_required
-@permission_required("smallstuff.change_assignedthing", raise_exception=True)
+@permission_required("smallstuff.view_assignedthing", raise_exception=True)
 def get_assignements(request, person_id, state):
     if state == "issued":
         assignments = AssignedThing.currently_assigned_objects.filter(person=person_id)
@@ -61,7 +60,6 @@ def get_assignements(request, person_id, state):
     return render(request, template, context)
 
 
-@login_required
 @permission_required("smallstuff.change_assignedthing", raise_exception=True)
 def remove_assignement(request, assignment_id):
     to_unassign_assignment = AssignedThing.currently_assigned_objects.get(id=assignment_id)
@@ -75,8 +73,7 @@ def remove_assignement(request, assignment_id):
     return response
 
 
-@login_required
-@permission_required("smallstuff.change_assignedthing", raise_exception=True)
+@permission_required("smallstuff.add_assignedthing", raise_exception=True)
 def add_assignement(request, person_id):
     if request.method == "POST":
         form = AssignedThingsForm(request.POST)

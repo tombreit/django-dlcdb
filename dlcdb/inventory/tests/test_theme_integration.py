@@ -14,6 +14,8 @@ from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
 
+from ..models import SapList
+
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -134,3 +136,49 @@ def test_qr_toggle_session_endpoint(su_client):
     )
     assert response.status_code == 200
     assert su_client.session["qrscanner_enabled"] == 1
+
+
+# --- permission gates ------------------------------------------------------
+# Every test above logs in as a superuser, which bypasses permission checks, so
+# these are the only ones that actually exercise the gates.
+
+
+@pytest.fixture
+def plain_user(db):
+    return CustomUser.objects.create_user(username="no_perms", email="no_perms@example.org", password="pw")
+
+
+@pytest.mark.django_db
+def test_lending_report_is_not_public(client, plain_user, room_1):
+    """It lists every lent device with its borrower, so it needs a permission."""
+    url = reverse("inventory:inventory-lending-report")
+
+    assert client.get(url).status_code == 403
+
+    client.force_login(plain_user)
+    assert client.get(url).status_code == 403
+
+
+@pytest.mark.django_db
+def test_inventorize_surfaces_require_can_inventorize(client, plain_user, room_1):
+    client.force_login(plain_user)
+
+    assert client.get(reverse("inventory:qr-room-printout", kwargs={"pk": room_1.pk})).status_code == 403
+    assert (
+        client.post(
+            reverse("inventory:update-qrtoggle"),
+            data='{"qrScanner": 1}',
+            content_type="application/json",
+        ).status_code
+        == 403
+    )
+
+
+@pytest.mark.django_db
+def test_sap_comparison_requires_change_inventory(client, plain_user):
+    sap_list = SapList.objects.create()
+    client.force_login(plain_user)
+
+    url = reverse("inventory:compare-sap-list", kwargs={"pk": sap_list.pk})
+    assert client.get(url).status_code == 403
+    assert client.post(url).status_code == 403

@@ -189,12 +189,6 @@ def nav(request):
             # from users who legitimately hold one of the others.
             return any(_get_has_permission(user, entry) for entry in permission)
 
-        if permission == "true":
-            # The string "true" disables *model-permission* checking but still
-            # requires an authenticated user (matches @login_required on such
-            # views, e.g. licenses:index).
-            return user.is_authenticated
-
         if "." not in permission:
             # One authoritative scheme: a nav entry's required_permission must be
             # the Django-canonical "app_label.codename" (what user.has_perm expects).

@@ -35,6 +35,7 @@ SPDX-License-Identifier: EUPL-1.2
                 </h4>
             </div>
             <div class="p-2">
+                {% if can_add %}
                 <span 
                     id="add-thing-button-or-form"
                     hx-trigger="load"
@@ -42,6 +43,7 @@ SPDX-License-Identifier: EUPL-1.2
                     hx-get="{% url 'smallstuff:add_assignement' person.id %}"
                 >
                 </span>
+                {% endif %}
 
             </div>
         </div>

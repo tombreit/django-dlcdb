@@ -39,9 +39,7 @@ from django.views.generic.base import TemplateView
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect, JsonResponse
 from django.template.response import TemplateResponse
 from django.template.loader import render_to_string
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
@@ -53,7 +51,7 @@ from django_filters.views import FilterView
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Room, Device, Inventory, Note
 from dlcdb.core.utils.helpers import get_user_email
-from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 
 from .sap import create_sap_list_comparison
 from .filters import RoomFilter, DeviceFilter
@@ -61,7 +59,7 @@ from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
 from .models import SapList
 
 
-@login_required
+@permission_required("core.can_inventorize", raise_exception=True)
 def update_session_qrtoggle(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -72,15 +70,14 @@ def update_session_qrtoggle(request):
         return HttpResponse("")
 
 
-class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
+# Not routed directly: only ever dispatched from InventorizeRoomView.post(),
+# which already carries the "core.can_inventorize" gate.
+class InventorizeRoomFormView(SingleObjectMixin, FormView):
     template_name = "inventory/inventorize_room_detail.html"
     form_class = InventorizeRoomForm
     model = Room
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponseForbidden()
-
         self.object = self.get_object()
         return super().post(request, *args, **kwargs)
 
@@ -88,7 +85,6 @@ class InventorizeRoomFormView(LoginRequiredMixin, SingleObjectMixin, FormView):
         return reverse("inventory:inventorize-room", kwargs={"pk": self.object.pk})
 
 
-@login_required
 @permission_required("core.can_inventorize", raise_exception=True)
 def inventorize_room(request, pk):
     template = "inventory/inventorize_room_detail.html"
@@ -141,7 +137,7 @@ def inventorize_room(request, pk):
     return TemplateResponse(request, template, context)
 
 
-class InventorizeRoomView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class InventorizeRoomView(PermissionRequiredMixin, View):
     permission_required = "core.can_inventorize"
     raise_exception = True
 
@@ -171,7 +167,7 @@ class InventorizeRoomView(LoginRequiredMixin, PermissionRequiredMixin, View):
         return view(request, *args, **kwargs)
 
 
-class InventorizeRoomListView(LoginRequiredMixin, PermissionRequiredMixin, FilterView):
+class InventorizeRoomListView(PermissionRequiredMixin, FilterView):
     model = Room
     context_object_name = "rooms"
     filterset_class = RoomFilter
@@ -226,7 +222,6 @@ class InventorizeRoomListView(LoginRequiredMixin, PermissionRequiredMixin, Filte
         return response
 
 
-@login_required
 @permission_required("core.can_inventorize", raise_exception=True)
 def search_devices(request):
     if request.htmx:
@@ -266,7 +261,9 @@ def search_devices(request):
     return TemplateResponse(request, template, context)
 
 
-class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
+class QrCodesForRoomDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = "core.can_inventorize"
+    raise_exception = True
     model = Room
     context_object_name = "room"
     template_name = "inventory/room_qrcodes_detail.html"
@@ -280,6 +277,10 @@ class QrCodesForRoomDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+@method_decorator(
+    permission_required("core.can_inventorize", raise_exception=True),
+    name="dispatch",
+)
 class InventoryReportView(TemplateView):
     template_name = "inventory/inventorize_report.html"
 
@@ -294,7 +295,10 @@ class InventoryReportView(TemplateView):
         return context
 
 
-@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    permission_required("core.change_inventory", raise_exception=True),
+    name="dispatch",
+)
 class SapCompareListView(DetailView):
     model = SapList
 
@@ -308,7 +312,7 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def get_note_btn(request, obj_type, obj_uuid):
     if obj_type == "device":
@@ -319,7 +323,7 @@ def get_note_btn(request, obj_type, obj_uuid):
     return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj": obj})
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def update_note_view(request, obj_type, obj_uuid):
     inventory = Inventory.objects.active_inventory()
@@ -401,7 +405,7 @@ def update_note_view(request, obj_type, obj_uuid):
     return render(request, template, context)
 
 
-@login_required
+@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def delete_note_view(request, pk):
     if request.method == "POST":

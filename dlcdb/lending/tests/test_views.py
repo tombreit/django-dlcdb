@@ -199,11 +199,11 @@ class LendingIndexViewTests(BaseTest):
         # A non-overdue lent row's due date is not styled red.
         self.assertNotRegex(content, r'class="text-danger fw-semibold"[^>]*>\s*2099-01-01')
 
-    def test_login_required(self):
+    def test_anonymous_is_refused(self):
+        # An unauthorized request is a 403 whatever the reason; the 403 page
+        # offers anonymous visitors a log-in link.
         self.client.logout()
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/accounts/login/", response.url)
+        self.assertEqual(self.client.get(self.url).status_code, 403)
 
     def test_permission_required(self):
         # A logged-in user without core.view_lentrecord is denied (403), matching

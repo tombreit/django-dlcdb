@@ -68,10 +68,10 @@ def _payload(device, room, **extra):
 # --- the guard -----------------------------------------------------------
 
 
-def test_anonymous_is_sent_to_the_login_page(client, url):
-    response = client.get(url)
-    assert response.status_code == 302
-    assert "/accounts/login/" in response.url
+def test_anonymous_is_refused(client, url):
+    # An unauthorized request is a 403 whatever the reason; the 403 page offers
+    # anonymous visitors a log-in link.
+    assert client.get(url).status_code == 403
 
 
 def test_a_logged_in_user_without_the_move_permission_is_refused(client, url, make_user):

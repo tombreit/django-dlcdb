@@ -5,7 +5,7 @@
 from datetime import timedelta
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import permission_required
 from django.template.loader import render_to_string
 from django.http import Http404
 
@@ -112,7 +112,7 @@ def _get_notification_content_for_event(device, event_type):
     return subject, body
 
 
-@login_required
+@permission_required("core.view_licencerecord", raise_exception=True)
 def license_calendar(request, license_uuid):
     """Generate an iCal file for a specific license"""
     device = get_object_or_404(LicenseAsset, uuid=license_uuid)

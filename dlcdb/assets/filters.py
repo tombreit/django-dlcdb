@@ -178,6 +178,12 @@ class RecordFilter(django_filters.FilterSet):
         label=_("Record type"),
         empty_label=_("Any record type..."),
     )
+    has_note = django_filters.ChoiceFilter(
+        choices=[("has_note", _("Has note")), ("has_no_note", _("No note"))],
+        method="note_filter",
+        label=_("Note"),
+        empty_label=_("Any note status..."),
+    )
     # An explicit ChoiceFilter, not a BooleanFilter: the filterbar renders only
     # choice-ish filters, so a BooleanFilter would show up as no dropdown at all.
     is_active = django_filters.ChoiceFilter(
@@ -238,6 +244,7 @@ class RecordFilter(django_filters.FilterSet):
             "search",
             "record_type",
             "is_active",
+            "has_note",
             "device__device_type",
             "room",
             "inventory",
@@ -263,6 +270,15 @@ class RecordFilter(django_filters.FilterSet):
 
     def active_filter(self, queryset, name, value):
         return queryset.filter(is_active=value == "true") if value else queryset
+
+    def note_filter(self, queryset, name, value):
+        # Same semantics as the admin's HasNoteFilter, and as the room and
+        # device-type list views.
+        if value == "has_note":
+            return queryset.exclude(note__exact="")
+        if value == "has_no_note":
+            return queryset.filter(note__exact="")
+        return queryset
 
 
 class DeviceTypeFilter(django_filters.FilterSet):

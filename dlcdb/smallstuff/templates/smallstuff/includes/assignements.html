@@ -15,7 +15,7 @@ SPDX-License-Identifier: EUPL-1.2
             {% endif %}
     ">
 
-        {% if not assignment.unassigned_at %}
+        {% if not assignment.unassigned_at and perms.smallstuff.change_assignedthing %}
         <a 
             hx-get="{% url 'smallstuff:remove_assignement' assignment.id %}"
             hx-trigger="click"

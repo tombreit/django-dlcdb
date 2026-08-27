@@ -47,7 +47,10 @@ Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem andere
 
 <!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
      dlcdb/*/navigation.py-Dateien wider. Bei Änderungen an den Menüs
-     (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen. -->
+     (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen.
+     Invariante: Die "required_permission" eines Menüeintrags ist immer
+     die Lese-Berechtigung der verlinkten Ansicht -- ein sichtbarer
+     Menüpunkt kann so nie in einer Fehlermeldung enden. -->
 
 | Menüpunkt (Bereich) | Berechtigung (Django-Admin-Anzeige) | codename |
 |---|---|---|
@@ -55,8 +58,8 @@ Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem andere
 | Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
 | Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.transition_can_locate_device`, `core.transition_can_relocate_device` oder `core.transition_can_find_device` |
 | Inventarisieren (Hauptmenü) | Core \| … \| Can inventorize | `core.can_inventorize` |
-| Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
-| Lizenzen (Hauptmenü) | *nur Anmeldung erforderlich* | — |
+| Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` [^kleinkram] |
+| Lizenzen (Hauptmenü) | Core \| licence record \| Can view licence record | `core.view_licencerecord` |
 | Datenhaltung › Räume | Core \| room \| Can view room | `core.view_room` |
 | Datenhaltung › Hersteller | Core \| manufacturer \| Can view manufacturer | `core.view_manufacturer` |
 | Datenhaltung › Zulieferer | Core \| supplier \| Can view supplier | `core.view_supplier` |
@@ -78,6 +81,14 @@ Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem andere
 Ist die Anmeldung via LDAP konfiguriert, weisen Sie diese Berechtigungen den **gespiegelten Gruppen** zu (siehe LDAP-Hinweis oben unter „Benutzer, Gruppen und Tenants einrichten“). Manuell in der DLCDB angelegte Gruppenzugehörigkeiten können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.
 :::
 
+[^kleinkram]: `smallstuff.view_assignedthing` öffnet die Ansicht. Zum Ausgeben eines Gegenstands wird zusätzlich `smallstuff.add_assignedthing` benötigt, zum Zurücknehmen `smallstuff.change_assignedthing`.
+
+:::{admonition} **Lesen und Bearbeiten sind getrennte Berechtigungen**
+:class: note
+
+Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeiten berechtigt, sollte ihr deshalb immer auch die passende *Can view*-Berechtigung geben. Beispiel Lizenzen: Mit `core.change_licencerecord` lässt sich eine Lizenz bearbeiten, aber die Schaltflächen *Verlauf* und *iCal* auf dem Bearbeitungsformular benötigen `core.view_licencerecord`.
+:::
+
 ## Statuswechsel über Berechtigungen steuern
 
 Welche Statuswechsel (*Records*) einem Benutzer für ein Gerät angeboten werden, ist an Berechtigungen gebunden. Jeder Übergang im Gerätelebenszyklus hat eine eigene Berechtigung; angeboten wird ein Übergang genau dann, wenn er vom aktuellen Status aus überhaupt zulässig ist **und** der Benutzer die zugehörige Berechtigung besitzt.
@@ -86,7 +97,7 @@ Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktio
 
 | Aktion | Übergang | Berechtigung (Django-Admin-Anzeige) | codename |
 |---|---|---|---|
-| Bestellt | *(kein Record)* → Bestellt | Core \| record \| Transition: Can record a device as ordered | `core.transition_can_order_device` |
+| Bestellt | *(kein Record)* → Bestellt | Core \| record \| Transition: Can record a device as ordered | `core.transition_can_order_device` [^bestellt] |
 | Lokalisieren | *(kein Record)*/Bestellt → Im Raum | Core \| record \| Transition: Can localise a device for the first time | `core.transition_can_locate_device` |
 | Umziehen | Im Raum → Im Raum | Core \| record \| Transition: Can move a device to another room | `core.transition_can_relocate_device` |
 | Verleihen und Zurücknehmen | Im Raum ↔ Verliehen | Core \| record \| Transition: Can lend a device and take it back | `core.transition_can_lend_device` |
@@ -95,6 +106,8 @@ Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktio
 | Ausmustern | fast jeder Status → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
 | Ausmusterung rückgängig | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to not-locatable | `core.transition_can_restore_device` |
 | Wiedereingliedern | Entfernt → Im Raum | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
+
+[^bestellt]: Diese Berechtigung schaltet neben dem Statuswechsel im Admin auch das Formular *Gerät bestellen* frei. Dieses Formular ist derzeit nur direkt über seine URL erreichbar, es gibt keinen Menüpunkt dafür.
 
 :::{warning}
 **Superuser sehen alle zulässigen Statuswechsel** – auch die beiden Wege aus dem Status *Entfernt* heraus. Zum Prüfen einer Rechtevergabe daher immer einen **Nicht-Superuser** verwenden.

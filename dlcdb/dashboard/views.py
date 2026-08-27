@@ -7,6 +7,7 @@ from datetime import date
 from django.apps import apps
 from django.db.models import Count, Q
 from django.template.response import TemplateResponse
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Inventory, LentRecord, Record
@@ -52,8 +53,13 @@ def _get_tenant_queryset(model_name, ModelClass, tenant):
     return ModelClass.objects.filter(**{filter_field: tenant})
 
 
-def _build_tile(*, model_name, url, tenant):
-    """Build the context dict for a single dashboard tile."""
+def _build_tile(*, model_name, url, tenant, base_params=None):
+    """Build the context dict for a single dashboard tile.
+
+    ``base_params`` are the GET parameters the tile's target needs to show the
+    same set the tile counts (e.g. the Lost tile scoping the record list to
+    LOST). The note filter is appended to them when the badge is shown.
+    """
     ModelClass = apps.get_model(model_name)
     qs = _get_tenant_queryset(model_name, ModelClass, tenant)
 
@@ -77,14 +83,23 @@ def _build_tile(*, model_name, url, tenant):
     elif model_name == "core.inventory":
         count = ModelClass.objects.filter(is_active=True).first()
 
+    show_badge = bool(note_count) and model_name not in NO_BADGE_MODELS
+
+    # Keyed off show_badge, not note_count: a tile whose badge is suppressed must
+    # not link to a note-filtered list either, or the link promises a filter the
+    # tile never advertised.
+    params = dict(base_params or {})
+    if show_badge:
+        params["has_note"] = "has_note"
+
     return {
         "label": human_name,
         "count": count,
         "note_count": note_count,
-        "show_badge": bool(note_count) and model_name not in NO_BADGE_MODELS,
+        "show_badge": show_badge,
         "icon": get_icon_for_class(model_name),
         "url": url,
-        "query_params": "has_note=has_note" if note_count else "",
+        "query_params": urlencode(params),
     }
 
 
@@ -116,19 +131,29 @@ def index(request):
 
     tenant = request.tenant
 
+    # (model, url name, GET params the target needs to show what the tile counts).
+    # Every target is a frontend view: the tiles are the last place that linked
+    # into the admin changelists the frontend apps have since replaced.
     tile_specs = [
-        ("core.device", "assets:device_index"),
-        ("core.lentrecord", "lending:index"),
-        ("core.room", "admin:core_room_changelist"),
-        ("core.devicetype", "admin:core_devicetype_changelist"),
-        ("core.licencerecord", "licenses:index"),
-        ("smallstuff.assignedthing", "smallstuff:person_search"),
-        ("core.lostrecord", "admin:core_lostrecord_changelist"),
+        ("core.device", "assets:device_index", {}),
+        ("core.lentrecord", "lending:index", {}),
+        ("core.room", "rooms:index", {}),
+        ("core.devicetype", "assets:device_type_index", {}),
+        ("core.licencerecord", "licenses:index", {}),
+        ("smallstuff.assignedthing", "smallstuff:person_search", {}),
+        # LostRecord.objects is Record filtered to LOST with no is_active filter,
+        # so the unfiltered-by-age record list under the same record_type matches
+        # the count exactly.
+        ("core.lostrecord", "assets:record_index", {"record_type": Record.LOST}),
     ]
     if Inventory.objects.filter(is_active=True).exists():
-        tile_specs.append(("core.inventory", "inventory:inventorize-room-list"))
+        tile_specs.append(("core.inventory", "inventory:inventorize-room-list", {}))
 
-    tiles = [_build_tile(model_name=name, url=url, tenant=tenant) for name, url in tile_specs]
+    # Deliberately not permission-filtered: every tile renders, and a user who
+    # may not open its target gets the ordinary 403 on click.
+    tiles = [
+        _build_tile(model_name=name, url=url, tenant=tenant, base_params=params) for name, url, params in tile_specs
+    ]
 
     # Overdue tile: same predicate as the lending list's "state=overdue" filter
     # (lending/filters.py), so the count always matches the linked list.
