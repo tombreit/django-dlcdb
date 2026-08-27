@@ -232,6 +232,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         ordering = ["-modified_at", "edv_id"]
         indexes = [
             models.Index(fields=["edv_id", "sap_id", "modified_at"]),
+            # Its own index, not a fourth column on the composite above: a
+            # B-tree is only usable from a leftmost prefix, so an "ORDER BY
+            # created_at" that does not also pin edv_id/sap_id could never
+            # reach it there. Backs the "created" sort in the device filterbar.
+            models.Index(fields=["created_at"]),
         ]
 
     def __repr__(self):

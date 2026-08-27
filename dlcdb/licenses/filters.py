@@ -62,7 +62,10 @@ class LicenceRecordFilter(django_filters.FilterSet):
             ("device__contract_start_date", "start"),
             ("device__contract_expiration_date", "expiry"),
             ("device__modified_at", "modified"),
+            ("device__created_at", "created"),
         ),
+        # Keyed by model field name, not by the exposed parameter.
+        field_labels={"device__created_at": _("Created")},
     )
 
     class Meta:

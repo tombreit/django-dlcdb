@@ -331,6 +331,30 @@ class DeviceFrontendTests(BaseTest):
         viewer_response = self.client.get(self.index_url)
         self.assertNotContains(viewer_response, "ordering=tenant")
 
+    def test_created_sort_orders_by_creation_not_modification(self):
+        # created_at is auto_now_add and modified_at auto_now, so neither can be
+        # assigned through save() (which would also write the stale in-memory
+        # created_at straight back); .update() sets them directly. The older
+        # device is deliberately the most recently *modified* one, so this fails
+        # if "created" silently falls back to modified_at.
+        newest = self._create_device(edv_id="EDV-NEWEST", sap_id="8-9")
+        oldest = self._create_device(edv_id="EDV-OLDEST", sap_id="8-8")
+        long_ago = timezone.now() - datetime.timedelta(days=30)
+        Device.objects.filter(pk=oldest.pk).update(created_at=long_ago, modified_at=timezone.now())
+        Device.objects.filter(pk=newest.pk).update(modified_at=long_ago)
+
+        desc = self.client.get(self.index_url, {"ordering": "-created"}).content.decode()
+        self.assertLess(desc.index("EDV-NEWEST"), desc.index("EDV-OLDEST"))
+
+        asc = self.client.get(self.index_url, {"ordering": "created"}).content.decode()
+        self.assertLess(asc.index("EDV-OLDEST"), asc.index("EDV-NEWEST"))
+
+    @override_settings(LANGUAGE_CODE="en")
+    def test_created_is_offered_in_the_sort_dropdown(self):
+        response = self.client.get(self.index_url)
+        self.assertContains(response, 'value="created"')
+        self.assertContains(response, 'value="-created"')
+
     def test_modified_column_uses_naturaltime_for_recent_edits_only(self):
         # A device modified "just now" renders as "now", not "... ago", so give
         # the recent device an age that is unambiguously inside the cutoff.

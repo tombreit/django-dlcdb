@@ -92,6 +92,7 @@ class DeviceFilter(django_filters.FilterSet):
             ("active_record__record_type", "state"),
             ("active_record__room__number", "room"),
             ("modified_at", "modified"),
+            ("created_at", "created"),
             ("tenant__name", "tenant"),
         ),
         # Keyed by model field name, not by the exposed parameter. Without these,
@@ -99,6 +100,7 @@ class DeviceFilter(django_filters.FilterSet):
         field_labels={
             "edv_id": _("IT ID"),
             "sap_id": _("Inventory ID"),
+            "created_at": _("Created"),
         },
     )
 
@@ -297,7 +299,9 @@ class DeviceTypeFilter(django_filters.FilterSet):
             ("name", "name"),
             ("prefix", "prefix"),
             ("assets_count", "assets"),
+            ("created_at", "created"),
         ),
+        field_labels={"created_at": _("Created")},
     )
 
     class Meta:

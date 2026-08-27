@@ -65,7 +65,10 @@ class LentRecordFilter(django_filters.FilterSet):
             ("room__number", "room"),
             ("lent_desired_end_date", "due"),
             ("modified_at", "modified"),
+            ("created_at", "created"),
         ),
+        # Keyed by model field name, not by the exposed parameter.
+        field_labels={"created_at": _("Created")},
     )
 
     class Meta:

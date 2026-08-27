@@ -112,6 +112,13 @@ class LendingIndexViewTests(BaseTest):
         self.assertLess(asc.index("EDV-AVAIL"), asc.index("EDV-LENT"))
         self.assertLess(desc.index("EDV-LENT"), desc.index("EDV-AVAIL"))
 
+    def test_ordering_by_created_is_offered_and_resolves_to_created_at(self):
+        # The sort is dropdown-only (no column header), so assert the radio the
+        # filterbar renders and that the param maps to the record's created_at.
+        response = self.client.get(self.url, {"ordering": "-created"})
+        self.assertContains(response, 'value="-created"')
+        self.assertEqual(response.context["filter"].qs.query.order_by, ("-created_at",))
+
     @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_renders_dropdowns_and_sort(self):
         response = self.client.get(self.url)
