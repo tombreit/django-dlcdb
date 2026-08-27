@@ -11,7 +11,6 @@ and is shared with the admin importer.
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -20,7 +19,7 @@ from django.views.decorators.http import require_POST
 
 from .csv_template import build_import_template_csv
 from .forms import DeviceImportForm
-from .importer import run_device_import
+from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
 from .reporting import Outcome
 
@@ -46,6 +45,8 @@ def _report_context(report):
     return {
         "summary": report.counts_summary(),
         "alert_class": ALERT_BY_LEVEL[report.level],
+        "error_count": report.counts[Outcome.ERROR],
+        "has_errors": bool(report.counts[Outcome.ERROR]),
         "counts": [
             {"outcome": outcome.value, "count": count, "badge": OUTCOME_BADGES[outcome]}
             for outcome, count in report.counts.items()
@@ -59,7 +60,7 @@ def _report_context(report):
                 "badge": OUTCOME_BADGES[row.outcome],
                 "detail": row.detail,
             }
-            for row in report.rows
+            for row in report.rows_in_file_order
         ],
     }
 
@@ -88,14 +89,15 @@ def device_import(request):
             )
         except ValidationError as error:
             form.add_error("file", error)
-        except (ValueError, IntegrityError) as error:
-            form.add_error("file", str(error))
+        except IMPORT_ERRORS as error:
+            form.add_error("file", import_error_message(error))
         else:
             context = {
                 "title": _("Import preview"),
                 "importer_list": importer_list,
                 "report": _report_context(report),
-                "can_confirm": bool(report.rows),
+                # Never offer to write a file that still has bad rows.
+                "can_confirm": bool(report.rows) and not report.counts[Outcome.ERROR],
             }
             return TemplateResponse(request, "dataexchange/import_preview.html", context)
 
@@ -133,8 +135,10 @@ def device_import_confirm(request, pk):
             importer_list=importer_list,
             write=True,
         )
-    except (ValidationError, ValueError, IntegrityError) as error:
-        messages.error(request, _("Import failed, nothing was written: %(error)s") % {"error": error})
+    except IMPORT_ERRORS as error:
+        messages.error(
+            request, _("Import failed, nothing was written: %(error)s") % {"error": import_error_message(error)}
+        )
         return redirect("dataexchange:device_import")
 
     getattr(messages, report.level)(request, report.short_html())

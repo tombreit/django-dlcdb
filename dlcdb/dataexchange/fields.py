@@ -14,43 +14,65 @@ from django.apps import apps
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils.timezone import make_aware
+from django.utils.translation import gettext as _
 
 
-def set_datetime_field(value):
+def set_datetime_field(value, *, column=None):
+    """Parse a CSV date cell (YYYY-MM-DD) into an aware `datetime`.
+
+    ``column`` names the CSV column in the error message. Without it a bad cell
+    only says *that* a date is malformed, leaving the user to guess which of the
+    seven date columns of the row it came from.
+    """
     result_value = None
 
     if value:
         try:
             result_value = datetime.strptime(value, "%Y-%m-%d")
             result_value = make_aware(result_value)
-        except ValueError as value_error:
-            raise ValueError(f"{value_error}: Incorrect date format, should be YYYY-MM-DD: {value}")
+        except ValueError:
+            prefix = f"{column}: " if column else ""
+            raise ValueError(
+                _("%(prefix)sincorrect date format, should be YYYY-MM-DD: '%(value)s'")
+                % {"prefix": prefix, "value": value}
+            )
 
     return result_value
 
 
-def set_date_field(value):
+def set_date_field(value, *, column=None):
     """Parse a CSV date cell (YYYY-MM-DD) into a `date` for DateField columns."""
-    result_value = set_datetime_field(value)
+    result_value = set_datetime_field(value, column=column)
     return result_value.date() if result_value else None
 
 
 def set_fk_field(row, key):
-    obj = None
     value = row[key]
+    # An empty cell means "no value": these FKs are nullable, so resolve to NULL
+    # rather than inventing a nameless DeviceType/Manufacturer/Supplier.
+    if not value:
+        return None
+
+    model_class_name = string.capwords(key, sep="_").replace("_", "")
+    # Resolved outside the try below: a lookup failure here is a coding error in
+    # the column list, not bad user data, and binding it inside would leave
+    # ModelClass undefined in the except clauses.
+    ModelClass = apps.get_model(f"core.{model_class_name}")
 
     try:
-        model_class_name = string.capwords(key, sep="_").replace("_", "")
-        ModelClass = apps.get_model(f"core.{model_class_name}")
         obj = ModelClass.objects.get(name__iexact=value)
-    except ModelClass.DoesNotExist as does_not_exist_error:
-        raise ObjectDoesNotExist(f"{does_not_exist_error} for {model_class_name} {value}")
-    except ModelClass.MultipleObjectsReturned as multiple_objects_returned_error:
-        raise IntegrityError(f"{multiple_objects_returned_error} for {model_class_name} {value}")
-    except IntegrityError as integrity_error:
-        raise IntegrityError(f"{integrity_error} for {model_class_name} {value}")
+    except ModelClass.DoesNotExist:
+        raise ObjectDoesNotExist(
+            _("%(column)s: no %(model)s named '%(value)s' exists.")
+            % {"column": key, "model": model_class_name, "value": value}
+        )
+    except ModelClass.MultipleObjectsReturned:
+        raise IntegrityError(
+            _("%(column)s: '%(value)s' is ambiguous, several %(model)s entries match it.")
+            % {"column": key, "model": model_class_name, "value": value}
+        )
 
-    return obj.id if obj else None
+    return obj.id
 
 
 def create_fk_obj(*, model_class, instance_key, instance_value):
@@ -90,7 +112,13 @@ def create_fk_objs(fk_field, rows):
     model_class = apps.get_model(f"core.{model_class_name}")
 
     for row in rows:
-        create_fk_obj(model_class=model_class, instance_key="name", instance_value=row[fk_field])
+        value = row.get(fk_field)
+        # Skip blanks (and the None a short CSV row yields): creating a nameless
+        # object here used to fail with a NOT NULL constraint error carrying no
+        # row context at all.
+        if not value:
+            continue
+        create_fk_obj(model_class=model_class, instance_key="name", instance_value=value)
 
     return
 
@@ -108,17 +136,41 @@ def get_or_create_person(*, first_name, last_name, email, organizational_unit=No
 
     email = (email or "").strip().lower()
     if not email:
-        raise ValidationError("A LENDER_EMAIL is required to import a LENT record.")
+        raise ValidationError(_("LENDER_EMAIL: a lender email address is required to import a LENT record."))
 
-    person, created = Person.with_softdeleted_objects.get_or_create(
-        email__iexact=email,
-        defaults={
-            "first_name": (first_name or "").strip(),
-            "last_name": (last_name or "").strip(),
-            "email": email,
-            "organizational_unit": organizational_unit,
-        },
-    )
+    first_name = (first_name or "").strip()
+    last_name = (last_name or "").strip()
+
+    try:
+        person, created = Person.with_softdeleted_objects.get_or_create(
+            email__iexact=email,
+            defaults={
+                "first_name": first_name,
+                "last_name": last_name,
+                "email": email,
+                "organizational_unit": organizational_unit,
+            },
+        )
+    except IntegrityError as integrity_error:
+        # Lookup is keyed on the email, but Person also carries a
+        # UniqueConstraint on lower(first_name) + lower(last_name). A new email
+        # for an existing name -- or two rows that both leave the name columns
+        # blank -- therefore hits the database rather than the lookup, and the
+        # bare constraint text names neither the person nor the row. Person.clean()
+        # phrases this well but get_or_create() never calls full_clean().
+        raise ValidationError(
+            _(
+                "Could not import lender '%(email)s': a different person is already "
+                "stored under the name '%(first_name)s %(last_name)s' "
+                "(names must be unique). Original error: %(error)s"
+            )
+            % {
+                "email": email,
+                "first_name": first_name or "—",
+                "last_name": last_name or "—",
+                "error": integrity_error,
+            }
+        ) from integrity_error
 
     # Ensure a previously soft-deleted person gets undeleted:
     if person.deleted_at or person.deleted_by:

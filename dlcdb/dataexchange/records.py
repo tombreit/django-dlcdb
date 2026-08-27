@@ -7,10 +7,16 @@ Record creation for CSV device imports.
 """
 
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 
 from dlcdb.core.models import OrganizationalUnit, Record, Room
 
 from .fields import create_fk_obj, get_or_create_person
+
+
+# The record types a CSV row can actually produce. Record.ORDERED has a proxy
+# model but no CSV columns to populate it, so it is deliberately not importable.
+IMPORTABLE_RECORD_TYPES = (Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED)
 
 
 def create_record(
@@ -58,7 +64,7 @@ def create_record(
 
     if record_type == Record.INROOM:
         if not room:
-            raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
+            raise ValidationError(_("ROOM: a room number is required to import an INROOM record."))
 
         room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
         records.append(InRoomRecord(**common, room=room_obj))
@@ -71,7 +77,7 @@ def create_record(
 
     elif record_type == Record.LENT:
         if not room:
-            raise ValidationError(f"No room number given for device {device} with record_type {record_type}!")
+            raise ValidationError(_("ROOM: a room number is required to import a LENT record."))
 
         room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
 
@@ -105,5 +111,15 @@ def create_record(
         # that becomes the active record.
         if lent_end_date:
             records.append(InRoomRecord(**common, room=room_obj))
+
+    elif record_type:
+        # An empty RECORD_TYPE with no ROOM stays valid: that is a device with no
+        # record yet. But a non-empty unrecognised value (a typo, or the
+        # non-importable ORDERED) used to match no branch and silently produce a
+        # device with no record at all.
+        raise ValidationError(
+            _("RECORD_TYPE: unknown value '%(value)s'. Expected one of: %(expected)s (or empty with a ROOM set).")
+            % {"value": record_type, "expected": ", ".join(IMPORTABLE_RECORD_TYPES)}
+        )
 
     return records

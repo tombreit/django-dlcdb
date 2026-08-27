@@ -5,12 +5,13 @@
 from django import forms
 from django.contrib import admin
 from django.contrib import messages
+from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, LentRecord
 
 from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .forms import ImporterAdminForm, RemoverListAdminForm
-from .importer import run_device_import
+from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .remover import set_removed_record
 from .csv_export import EXPORT_RELATIONS, csv_response
 
@@ -114,14 +115,24 @@ class ImporterListAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
-        report = run_device_import(
-            file=obj.file,
-            tenant=obj.tenant,
-            import_format=obj.import_format,
-            username=request.user.username,
-            importer_list=obj,
-            write=True,
-        )
+        try:
+            report = run_device_import(
+                file=obj.file,
+                tenant=obj.tenant,
+                import_format=obj.import_format,
+                username=request.user.username,
+                importer_list=obj,
+                write=True,
+            )
+        except IMPORT_ERRORS as error:
+            # Same failures, same wording as the frontend importer. Without this
+            # any import error here was an unhandled 500 with a traceback page.
+            messages.error(
+                request,
+                _("Import failed, nothing was written: %(error)s") % {"error": import_error_message(error)},
+            )
+            return
+
         getattr(messages, report.level)(request, report.short_html())
 
 

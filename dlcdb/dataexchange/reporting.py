@@ -46,6 +46,16 @@ class OperationReport:
         self.rows.append(RowResult(row=row, identifier=identifier, outcome=outcome, detail=detail))
 
     @property
+    def rows_in_file_order(self):
+        """Rows sorted by their source line.
+
+        The importer records a row when it fails (during the build pass) or when
+        it is written (during the write pass), so insertion order interleaves the
+        two. Readers want the order of the file in front of them.
+        """
+        return sorted(self.rows, key=lambda row: row.row)
+
+    @property
     def counts(self):
         result = {outcome: 0 for outcome in Outcome}
         for row in self.rows:
@@ -88,7 +98,7 @@ class OperationReport:
         counts_line = "  ".join(f"{outcome.value.title()}: {count}" for outcome, count in self.counts.items() if count)
 
         lines = [header, counts_line or "no rows", ""]
-        for row in self.rows:
+        for row in self.rows_in_file_order:
             if not verbose and row.outcome is Outcome.UNCHANGED:
                 continue
             detail = f" ({row.detail})" if row.detail else ""

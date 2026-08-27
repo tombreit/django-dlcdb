@@ -163,16 +163,34 @@ def test_missing_columns_show_form_error_and_record_failed_attempt(superuser_cli
 
 
 @_PLAIN_STATICFILES
-def test_wrong_date_format_shows_form_error_and_records_failed_attempt(superuser_client, tenant):
-    response = superuser_client.post(
-        reverse(IMPORT_URL),
-        {"file": _upload_file("devices.wrongdateformat.csv"), "tenant": tenant.pk},
-    )
+def test_wrong_date_format_is_shown_as_a_named_row_error(superuser_client, tenant):
+    """The preview names the line, the column and the offending value.
+
+    The user must be able to fix the CSV from this page alone -- previously this
+    was a generic field error that said only that *something* was wrong.
+    """
+    with translation.override("en"):
+        response = superuser_client.post(
+            reverse(IMPORT_URL),
+            {"file": _upload_file("devices.wrongdateformat.csv"), "tenant": tenant.pk},
+        )
 
     assert response.status_code == 200
-    # The ValueError from the date parser is surfaced as a field error.
-    assert "invalid-feedback" in response.content.decode()
-    assert ImporterList.objects.get().status == "error"
+    content = response.content.decode()
+
+    assert "PURCHASE_DATE" in content
+    assert "17.11.2023" in content
+    assert "NTB1282" in content
+
+    # Confirming a file with bad rows must not be offered.
+    assert response.context["can_confirm"] is False
+    assert response.context["report"]["has_errors"] is True
+    assert "disabled" in content
+
+    # The failed attempt is part of the import history, with its per-row reason.
+    importer_list = ImporterList.objects.get()
+    assert importer_list.status == "error"
+    assert "PURCHASE_DATE" in importer_list.messages
     assert Device.objects.count() == 0
 
 
@@ -228,3 +246,87 @@ def test_non_superuser_cannot_confirm_foreign_tenant_row(client, superuser_clien
 
     assert response.status_code == 404
     assert Device.objects.count() == 0
+
+
+@_PLAIN_STATICFILES
+def test_preview_lists_every_bad_row_and_blocks_confirm(superuser_client, tenant):
+    """The whole point of the dry run: see all the problems in one pass.
+
+    Every failing line is listed with its spreadsheet line number and reason, and
+    confirming is refused until they are fixed.
+    """
+    with translation.override("en"):
+        response = superuser_client.post(
+            reverse(IMPORT_URL),
+            {"file": _upload_file("devices.rowerrors.csv"), "tenant": tenant.pk},
+        )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    report = response.context["report"]
+
+    assert report["error_count"] == 4
+    assert report["has_errors"] is True
+    assert response.context["can_confirm"] is False
+
+    # Each failure is actionable from this page alone.
+    assert "17.11.2023" in content
+    assert "PURCHASE_DATE" in content
+    assert "LENDER_EMAIL" in content
+    assert "INROOOM" in content
+
+    # And the good rows are still shown as importable.
+    assert "ERR-OK-1" in content
+    assert "ERR-OK-2" in content
+    assert Device.objects.count() == 0
+
+
+@_PLAIN_STATICFILES
+def test_confirming_a_file_with_bad_rows_writes_nothing(superuser_client, tenant):
+    """The button is disabled, but a hand-posted confirm must be refused too."""
+    with translation.override("en"):
+        superuser_client.post(
+            reverse(IMPORT_URL),
+            {"file": _upload_file("devices.rowerrors.csv"), "tenant": tenant.pk},
+        )
+        importer_list = ImporterList.objects.get()
+
+        response = superuser_client.post(reverse(CONFIRM_URL, args=[importer_list.pk]), follow=True)
+
+    assert response.status_code == 200
+    assert Device.objects.count() == 0
+    assert any("nothing was written" in str(message).lower() for message in response.context["messages"])
+
+
+# --- Django admin importer ----------------------------------------------------
+# The admin and the frontend must fail the same way; save_model used to have no
+# error handling at all, so any import error there was a traceback page.
+
+ADMIN_ADD_URL = "admin:dataexchange_importerlist_add"
+
+
+@_PLAIN_STATICFILES
+def test_admin_import_with_bad_rows_reports_and_writes_nothing(superuser_client, tenant):
+    """The admin surfaces the same failure as the frontend, as a message.
+
+    save_model() had no error handling, so a failure that got past the form's dry
+    run (a write-time collision, or an exception type clean() did not catch)
+    rendered a traceback page.
+    """
+    with translation.override("en"):
+        response = superuser_client.post(
+            reverse(ADMIN_ADD_URL),
+            {
+                "file": _upload_file("devices.rowerrors.csv"),
+                "note": "pytest",
+                "import_format": ImporterList.ImportFormatChoices.INTERNALCSV,
+                "tenant": tenant.pk,
+            },
+            follow=True,
+        )
+
+    assert response.status_code == 200
+    assert Device.objects.count() == 0
+
+    rendered = " ".join(str(message) for message in response.context["messages"])
+    assert "nothing was written" in rendered.lower()

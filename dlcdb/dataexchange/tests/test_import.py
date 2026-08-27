@@ -21,6 +21,7 @@ from dlcdb.core.models import (
 from dlcdb.dataexchange.csv_template import build_import_template_csv
 from dlcdb.dataexchange.importer import import_data, run_device_import
 from dlcdb.dataexchange.models import ImporterList
+from dlcdb.dataexchange.reporting import Outcome
 
 TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
 
@@ -150,19 +151,56 @@ def test_get_or_create_person_requires_email():
 
 @pytest.mark.django_db
 def test_bulk_import_csv_wrongdate(tenant):
-    with pytest.raises(ValueError):
-        csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
+    """A bad date is an error *row*, naming the column, the value and the line.
 
+    It used to raise a bare ValueError for the whole file, so the user learned
+    that some date somewhere was malformed but not which row or which column.
+    """
+    csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
+
+    with translation.override("en"):
         with open(csv_path, "rb") as csv_file:
-            assert import_data(
+            report = import_data(
                 csv_file,
                 importer_inst_pk=None,
                 valid_col_headers=ImporterList.VALID_COL_HEADERS,
                 import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
                 tenant=tenant,
                 username="pytestuser",
-                write=True,
+                write=False,
             )
+
+    errors = [row for row in report.rows if row.outcome is Outcome.ERROR]
+    assert len(errors) == 1
+    error = errors[0]
+
+    # Line 2 of the file: the header is line 1.
+    assert error.row == 2
+    assert "NTB1282" in error.identifier
+    assert "PURCHASE_DATE" in error.detail
+    assert "17.11.2023" in error.detail
+
+
+@pytest.mark.django_db
+def test_bulk_import_csv_wrongdate_writes_nothing(tenant):
+    """A write over a file with bad rows is refused outright, not half-applied."""
+    csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
+
+    with translation.override("en"):
+        with pytest.raises(ValidationError) as excinfo:
+            with open(csv_path, "rb") as csv_file:
+                import_data(
+                    csv_file,
+                    importer_inst_pk=None,
+                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                    tenant=tenant,
+                    username="pytestuser",
+                    write=True,
+                )
+        assert "Nothing was written" in excinfo.value.messages[0]
+
+    assert Device.objects.count() == 0
 
 
 @pytest.mark.django_db
@@ -490,3 +528,267 @@ def test_import_report_details_describe_the_records(tenant):
             "new device, not locatable",
             "new device, no record",
         ]
+
+
+def _dry_run(tenant, filename="devices.rowerrors.csv"):
+    """Dry-run a fixture file and return its report."""
+    with open(TEST_DATA_DIR / filename, "rb") as csv_file:
+        return import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=False,
+        )
+
+
+def _errors_by_edv_id(report):
+    return {
+        row.identifier.split()[0].removeprefix("EDV_ID="): row for row in report.rows if row.outcome is Outcome.ERROR
+    }
+
+
+@pytest.mark.django_db
+def test_bad_rows_do_not_abort_the_good_ones(tenant):
+    """Every problem in the file is reported in one pass.
+
+    The importer used to stop at the first bad row, so a user fixed one line,
+    re-uploaded, and discovered the next -- one round trip per broken row.
+    """
+    with translation.override("en"):
+        report = _dry_run(tenant)
+
+    created = [row for row in report.rows if row.outcome is Outcome.CREATED]
+    errors = _errors_by_edv_id(report)
+
+    # Four broken rows, all reported together, and the good rows still import.
+    assert set(errors) == {"ERR-DATE", "ERR-NOMAIL", "ERR-NOROOM", "ERR-TYPO"}
+    assert {row.identifier.split()[0].removeprefix("EDV_ID=") for row in created} == {"ERR-OK-1", "ERR-OK-2"}
+
+
+@pytest.mark.django_db
+def test_row_errors_name_the_line_the_column_and_the_value(tenant):
+    """The regression test for the original report: no debugger required.
+
+    Each error must be actionable from the preview alone -- which line of the
+    spreadsheet, which device, which column, and what the offending value was.
+    """
+    with translation.override("en"):
+        report = _dry_run(tenant)
+
+    errors = _errors_by_edv_id(report)
+
+    # Line numbers match the spreadsheet: the header is line 1.
+    assert errors["ERR-DATE"].row == 3
+    assert errors["ERR-NOMAIL"].row == 4
+    assert errors["ERR-NOROOM"].row == 5
+    assert errors["ERR-TYPO"].row == 6
+
+    # The bad date names its column and quotes the value it could not parse.
+    assert "PURCHASE_DATE" in errors["ERR-DATE"].detail
+    assert "17.11.2023" in errors["ERR-DATE"].detail
+
+    assert "LENDER_EMAIL" in errors["ERR-NOMAIL"].detail
+    assert "ROOM" in errors["ERR-NOROOM"].detail
+
+    # An unknown record type names the bad value *and* the accepted ones.
+    typo_detail = errors["ERR-TYPO"].detail
+    assert "INROOOM" in typo_detail
+    assert "INROOM" in typo_detail and "LENT" in typo_detail
+
+
+@pytest.mark.django_db
+def test_a_file_with_bad_rows_writes_nothing(tenant):
+    """Not even the rows that would have imported cleanly."""
+    with translation.override("en"):
+        with pytest.raises(ValidationError):
+            with open(TEST_DATA_DIR / "devices.rowerrors.csv", "rb") as csv_file:
+                import_data(
+                    csv_file,
+                    importer_inst_pk=None,
+                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                    tenant=tenant,
+                    username="pytestuser",
+                    write=True,
+                )
+
+    assert Device.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_unknown_record_type_no_longer_creates_a_recordless_device(tenant):
+    """ "INROOOM" used to silently produce a device with no record at all."""
+    with translation.override("en"):
+        report = _dry_run(tenant)
+
+    assert "ERR-TYPO" in _errors_by_edv_id(report)
+
+
+def _csv_bytes(rows):
+    """Build an in-memory internal-format CSV from partial row dicts."""
+    import csv as _csv
+    from io import BytesIO, StringIO
+
+    buffer = StringIO()
+    writer = _csv.DictWriter(buffer, fieldnames=ImporterList.VALID_COL_HEADERS, restval="")
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
+    return BytesIO(buffer.getvalue().encode("utf-8"))
+
+
+@pytest.mark.django_db
+def test_lender_name_collision_is_reported_with_the_email(tenant):
+    """The original bug report, reproduced: a raw "UNIQUE constraint failed".
+
+    Lenders are resolved by email, but Person also carries a UniqueConstraint on
+    lower(first_name) + lower(last_name). A known name arriving under a new email
+    therefore fails in the database, and the constraint text names neither the
+    person nor the row. The message must name the email and the colliding name.
+    """
+    Person.objects.create(first_name="Ada", last_name="Lovelace", email="ada@example.com")
+
+    lent_row = {
+        "EDV_ID": "COLLIDE-1",
+        "ROOM": "355",
+        "RECORD_TYPE": Record.LENT,
+        "LENDER_FIRST_NAME": "Ada",
+        "LENDER_LAST_NAME": "Lovelace",
+        # Same human, different address -> lookup misses, insert collides.
+        "LENDER_EMAIL": "ada.lovelace@example.org",
+        "LENT_START_DATE": "2024-01-15",
+    }
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=_csv_bytes([lent_row]),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+    error = _errors_by_edv_id(report)["COLLIDE-1"]
+    assert error.row == 2
+    assert "ada.lovelace@example.org" in error.detail
+    assert "Ada" in error.detail and "Lovelace" in error.detail
+
+
+@pytest.mark.django_db
+def test_blank_lender_names_collide_and_are_reported(tenant):
+    """Two lenders with emails but no names both insert ("", "") -> collision."""
+    rows = [
+        {
+            "EDV_ID": f"BLANK-{index}",
+            "ROOM": "355",
+            "RECORD_TYPE": Record.LENT,
+            "LENDER_EMAIL": f"nameless{index}@example.com",
+            "LENT_START_DATE": "2024-01-15",
+        }
+        for index in (1, 2)
+    ]
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=_csv_bytes(rows),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+    errors = _errors_by_edv_id(report)
+    # The first row is fine; the second one collides and says whose email it was.
+    assert "BLANK-2" in errors
+    assert "nameless2@example.com" in errors["BLANK-2"].detail
+    assert "UNIQUE constraint" not in errors["BLANK-2"].detail.split("Original error:")[0]
+
+
+@pytest.mark.django_db
+def test_duplicate_edv_id_is_reported_against_its_row(tenant):
+    """The other route to the reported error: a repeated device id.
+
+    The internal-CSV branch had no duplicate check, so this surfaced as a bare
+    "UNIQUE constraint failed: core_device.edv_id" for the whole file.
+    """
+    rows = [
+        {"EDV_ID": "DUPE-1", "ROOM": "355", "RECORD_TYPE": Record.INROOM},
+        {"EDV_ID": "DUPE-1", "ROOM": "356", "RECORD_TYPE": Record.INROOM},
+    ]
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=_csv_bytes(rows),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+    errors = _errors_by_edv_id(report)
+    assert "DUPE-1" in errors
+    # Line 3 is the duplicate; line 2 imported fine.
+    assert errors["DUPE-1"].row == 3
+    assert "already exists" in errors["DUPE-1"].detail
+
+
+@pytest.mark.django_db
+def test_soft_deleted_lender_still_imports(tenant):
+    """Pins the variant of the report that was already fixed.
+
+    A soft-deleted Person holding the email must be reused and undeleted rather
+    than colliding on the unique email.
+    """
+    person = Person.objects.create(first_name="Alan", last_name="Turing", email="alan@example.com")
+    person.delete()  # soft delete
+
+    row = {
+        "EDV_ID": "SOFTDEL-1",
+        "ROOM": "355",
+        "RECORD_TYPE": Record.LENT,
+        "LENDER_FIRST_NAME": "Alan",
+        "LENDER_LAST_NAME": "Turing",
+        "LENDER_EMAIL": "alan@example.com",
+        "LENT_START_DATE": "2024-01-15",
+    }
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=_csv_bytes([row]),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=True,
+        )
+
+    assert not _errors_by_edv_id(report)
+    assert Device.objects.get(edv_id="SOFTDEL-1").active_record.person.email == "alan@example.com"
+
+
+@pytest.mark.django_db
+def test_ragged_row_is_an_error_row_not_a_crash(tenant):
+    """A short data row used to raise AttributeError that nothing caught.
+
+    DictReader fills the missing cells with None, so row["IS_LENTABLE"].lower()
+    blew up with no row context and, in the views, an HTTP 500.
+    """
+    from io import BytesIO
+
+    header = ",".join(ImporterList.VALID_COL_HEADERS)
+    # A row that stops after two columns; DictReader fills the rest with None.
+    payload = f"{header}\nRAGGED-1,355\n".encode("utf-8")
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=BytesIO(payload),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            write=False,
+        )
+
+    assert [row.outcome for row in report.rows] == [Outcome.ERROR]
+    assert report.rows[0].row == 2

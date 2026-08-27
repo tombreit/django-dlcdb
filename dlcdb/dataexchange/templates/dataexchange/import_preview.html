@@ -17,6 +17,18 @@
       {{ importer_list.file }}: {{ report.summary }}
     </div>
 
+    {% if report.has_errors %}
+      <div class="alert alert-danger">
+        {% blocktranslate count counter=report.error_count trimmed %}
+          One row could not be imported and this file cannot be confirmed.
+        {% plural %}
+          {{ counter }} rows could not be imported and this file cannot be confirmed.
+        {% endblocktranslate %}
+        <br>
+        {% translate "Fix the lines listed below in your CSV file and upload it again. The line numbers match your spreadsheet." %}
+      </div>
+    {% endif %}
+
     <p class="d-flex flex-wrap gap-2">
       {% for count in report.counts %}
         <span class="badge {{ count.badge }}">{{ count.count }} {{ count.outcome }}</span>
@@ -60,7 +72,13 @@
         </button>
       </form>
       <a class="btn btn-outline-secondary" href="{% url 'assets:device_index' %}">{% translate "Cancel" %}</a>
-      <span class="text-muted small ms-2">{% translate "Confirming will write the rows shown above." %}</span>
+      <span class="text-muted small ms-2">
+        {% if report.has_errors %}
+          {% translate "Confirming is disabled until every row above imports cleanly." %}
+        {% else %}
+          {% translate "Confirming will write the rows shown above." %}
+        {% endif %}
+      </span>
     </div>
 
   </div>

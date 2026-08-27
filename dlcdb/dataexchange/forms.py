@@ -4,10 +4,9 @@
 
 from django import forms
 from django.contrib import messages
-from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
 
-from .importer import run_device_import
+from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
 from .remover import set_removed_record
 
@@ -39,8 +38,8 @@ class ImporterAdminForm(forms.ModelForm):
                 username=username,
                 write=False,
             )
-        except (ValueError, IntegrityError) as error:
-            self.add_error(None, error)
+        except IMPORT_ERRORS as error:
+            self.add_error(None, import_error_message(error))
         else:
             _show_report(self.request, report_dryrun)
 
