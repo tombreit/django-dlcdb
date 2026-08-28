@@ -35,9 +35,9 @@
         <div class="alert alert-danger">{{ error }}</div>
       {% endfor %}
       <div class="row g-3">
-        {% include "assets/devices/includes/_field.html" with field=form.file %}
-        {% include "assets/devices/includes/_field.html" with field=form.tenant %}
-        {% include "assets/devices/includes/_field.html" with field=form.note %}
+        {% include "theme/includes/_field.html" with field=form.file %}
+        {% include "theme/includes/_field.html" with field=form.tenant %}
+        {% include "theme/includes/_field.html" with field=form.note %}
       </div>
       <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
         <button class="btn btn-primary" type="submit">

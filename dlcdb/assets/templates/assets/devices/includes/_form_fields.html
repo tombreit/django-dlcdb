@@ -12,10 +12,10 @@
   </div>
   <div class="card-body">
     <div class="row g-3">
-      {% include "assets/devices/includes/_field.html" with field=form.edv_id col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.sap_id col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.device_type col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.tenant col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.edv_id col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.sap_id col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.device_type col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.tenant col="col-md-6" %}
       <div class="col-12">
         <div class="d-flex flex-wrap gap-4 pt-1">
           <div class="form-check form-switch">
@@ -39,10 +39,10 @@
   </div>
   <div class="card-body">
     <div class="row g-3">
-      {% include "assets/devices/includes/_field.html" with field=form.manufacturer col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.series col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.serial_number col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.note col="col-12" %}
+      {% include "theme/includes/_field.html" with field=form.manufacturer col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.series col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.serial_number col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.note col="col-12" %}
     </div>
   </div>
 </section>
@@ -55,7 +55,7 @@
   </summary>
   <div class="card-body">
     <div class="row g-3">
-      {% include "assets/devices/includes/_field.html" with field=form.supplier col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.supplier col="col-md-6" %}
       <div class="col-md-6">
         {% comment %}
         Contact person: live-search picker instead of a full select of every
@@ -66,14 +66,14 @@
         {{ form.contact_person_internal }}
         {% include "theme/includes/_picker.html" with picker_id="contact_person" field_id=form.contact_person_internal.id_for_label search_url=person_search_url search_name="q_person" label=form.contact_person_internal.label placeholder=_("Search person by name or e-mail, or “*” for all…") errors=form.contact_person_internal.errors has_selected=form.instance.contact_person_internal selected_item_template="assets/includes/_person_list_item.html" person=form.instance.contact_person_internal selectable=False %}
       </div>
-      {% include "assets/devices/includes/_field.html" with field=form.order_number col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.cost_centre col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.purchase_date col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.warranty_expiration_date col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.contract_start_date col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.contract_expiration_date col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.contract_termination_date col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.procurement_note col="col-12" %}
+      {% include "theme/includes/_field.html" with field=form.order_number col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.cost_centre col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.purchase_date col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.warranty_expiration_date col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.contract_start_date col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.contract_expiration_date col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.contract_termination_date col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.procurement_note col="col-12" %}
     </div>
   </div>
 </details>
@@ -86,10 +86,10 @@
   </summary>
   <div class="card-body">
     <div class="row g-3">
-      {% include "assets/devices/includes/_field.html" with field=form.url col="col-12" %}
-      {% include "assets/devices/includes/_field.html" with field=form.nick_name col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.mac_address col="col-md-4" %}
-      {% include "assets/devices/includes/_field.html" with field=form.extra_mac_addresses col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.url col="col-12" %}
+      {% include "theme/includes/_field.html" with field=form.nick_name col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.mac_address col="col-md-4" %}
+      {% include "theme/includes/_field.html" with field=form.extra_mac_addresses col="col-md-4" %}
     </div>
   </div>
 </details>
@@ -103,8 +103,8 @@
   <div class="card-body">
     <p class="text-muted small">{% translate "Only store credentials here when this is required by your operating procedure." %}</p>
     <div class="row g-3">
-      {% include "assets/devices/includes/_field.html" with field=form.machine_encryption_key col="col-md-6" %}
-      {% include "assets/devices/includes/_field.html" with field=form.backup_encryption_key col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.machine_encryption_key col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.backup_encryption_key col="col-md-6" %}
     </div>
   </div>
 </details>
