@@ -1,0 +1,13 @@
+{% comment %}
+One Bootstrap 5 form switch field, rendered with label, optional help text,
+and validation feedback. The field is expected to already carry `.is-invalid`
+when validation has errored (set via dlcdb.theme.forms.add_bootstrap_classes).
+
+Params:
+  field  — a bound form field (e.g. form.is_lentable)
+{% endcomment %}
+<div class="form-check form-switch">
+    {{ field }}{{ field.label_tag }}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+</div>

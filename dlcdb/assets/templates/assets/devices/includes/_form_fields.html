@@ -18,14 +18,8 @@
       {% include "theme/includes/_field.html" with field=form.tenant col="col-md-6" %}
       <div class="col-12">
         <div class="d-flex flex-wrap gap-4 pt-1">
-          <div class="form-check form-switch">
-            {{ form.is_lentable }}{{ form.is_lentable.label_tag }}
-            {% for error in form.is_lentable.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-          </div>
-          <div class="form-check form-switch">
-            {{ form.is_licence }}{{ form.is_licence.label_tag }}
-            {% for error in form.is_licence.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-          </div>
+          {% include "theme/includes/_switch_field.html" with field=form.is_lentable %}
+          {% include "theme/includes/_switch_field.html" with field=form.is_licence %}
         </div>
       </div>
     </div>

@@ -28,21 +28,9 @@
   </div>
   <div class="card-body">
     <div class="d-flex flex-column gap-3">
-      <div class="form-check form-switch">
-        {{ form.is_auto_return_room }}{{ form.is_auto_return_room.label_tag }}
-        {% if form.is_auto_return_room.help_text %}<div class="form-text">{{ form.is_auto_return_room.help_text }}</div>{% endif %}
-        {% for error in form.is_auto_return_room.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-      </div>
-      <div class="form-check form-switch">
-        {{ form.is_external }}{{ form.is_external.label_tag }}
-        {% if form.is_external.help_text %}<div class="form-text">{{ form.is_external.help_text }}</div>{% endif %}
-        {% for error in form.is_external.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-      </div>
-      <div class="form-check form-switch">
-        {{ form.is_default_license_room }}{{ form.is_default_license_room.label_tag }}
-        {% if form.is_default_license_room.help_text %}<div class="form-text">{{ form.is_default_license_room.help_text }}</div>{% endif %}
-        {% for error in form.is_default_license_room.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-      </div>
+      {% include "theme/includes/_switch_field.html" with field=form.is_auto_return_room %}
+      {% include "theme/includes/_switch_field.html" with field=form.is_external %}
+      {% include "theme/includes/_switch_field.html" with field=form.is_default_license_room %}
     </div>
   </div>
 </section>
