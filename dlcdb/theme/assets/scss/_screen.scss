@@ -34,3 +34,24 @@ html {
         }
     }
 }
+
+// Logging out is a POST (Django 4.1+ dropped GET logout), so the control has to
+// be a form button. Strip the button chrome so it reads as just another
+// dropdown item. See theme/logout_link.html.
+.logout-form-link {
+    display: inline-block;
+
+    button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: inherit;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        font-family: inherit;
+    }
+}
