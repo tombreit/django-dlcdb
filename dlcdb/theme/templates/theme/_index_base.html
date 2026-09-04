@@ -17,6 +17,11 @@ variables, and a partial declared in this base is not reachable as
 ``<page>.html#<name>`` — so each page declares its own, and fills ``index_list``
 with it.
 
+Do not try to keep the fragment body here and wrap it from the page with
+{{ block.super }} either: rendering ``<page>.html#<name>`` then yields an empty
+string — silently, with no traceback — because ``block.super`` has no block
+context in a direct partial render. Both were checked against Django 6.0.8.
+
 Expects from the view: ``filterbar``.
 
 Blocks:
