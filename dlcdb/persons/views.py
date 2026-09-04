@@ -9,14 +9,13 @@ from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Person
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.navigation import detail_urls
 
 from .filters import PersonFilter
 from .forms import PersonForm
@@ -51,8 +50,8 @@ def person_index(request):
             search_placeholder=_("Search name or e-mail..."),
         ),
         "current_ordering": data["ordering"],
-        "person_filtered_count": page_obj.paginator.count,
-        "person_total_count": base_queryset.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": base_queryset.count(),
     }
     return TemplateResponse(request, template, context)
 
@@ -88,13 +87,7 @@ def person_detail(request, pk):
 
     # The index threads its active search/filter/sort here as ?next= so Save,
     # Back and Cancel return to the exact filtered list.
-    next_query = request.GET.get("next", "")
-    index_url = reverse("persons:index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-    form_action = reverse("persons:detail", args=[person.pk])
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
+    index_url, form_action = detail_urls(request, "persons:index", "persons:detail", person.pk)
 
     if request.method == "POST":
         if not can_change:

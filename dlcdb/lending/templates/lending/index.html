@@ -1,21 +1,16 @@
-{% extends "theme/_base.html" %}
+{% extends "theme/_index_base.html" %}
 {% load i18n %}
 
-{% block title %}
-  {% translate "Lending" %}
-{% endblock title %}
+{% block title %}{% translate "Lending" %}{% endblock title %}
+{% block index_title %}{% translate "Lending" %}{% endblock index_title %}
 
-{% block body %}
-
-<div class="d-flex align-items-center mb-3">
-  <h1 class="mb-0">{% translate "Lending" %}</h1>
+{% block object_tools %}
   <a href="{% url 'lending:lend' %}" class="btn btn-primary ms-auto">
     <i class="bi bi-lightning-charge"></i> {% translate "Lend" %}
   </a>
-</div>
+{% endblock object_tools %}
 
-{% include "theme/filterbar/filterbar.html" with bar=filterbar %}
-
+{% block index_list %}
 {% partialdef lent-list inline %}
 <div id="lent-list" class="position-relative" hx-target="#lent-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
   {% include "theme/includes/_list_loading.html" %}
@@ -27,11 +22,11 @@
   {% endcomment %}
   <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
     <span>
-      {% blocktranslate count counter=lent_filtered_count with total=lent_total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
+      {% blocktranslate count counter=filtered_count with total=total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
       ({% blocktranslate with available=lent_available_count lent=lent_lent_count %}{{ available }} available, {{ lent }} lent{% endblocktranslate %})
     </span>
     {% include "theme/filterbar/chips.html" with bar=filterbar %}
-    {% if lent_filtered_count %}
+    {% if filtered_count %}
       {% comment %}
         A plain link on purpose: an hx-get here would swap the CSV body into the
         page. The fragment root's hx-target/hx-swap are inherited only by elements
@@ -45,7 +40,7 @@
       {% endcomment %}
       <a class="ms-4" href="{{ export_href }}">
         <i class="bi bi-filetype-csv"></i>
-        {% blocktranslate count counter=lent_filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
+        {% blocktranslate count counter=filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
       </a>
     {% endif %}
   </div>
@@ -62,7 +57,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for record in filter.qs %}
+        {% for record in page_obj %}
           <tr>
             <td>
               {% include "assets/devices/includes/_device_teaser.html" with device=record.device link="icon" %}
@@ -115,7 +110,8 @@
     </table>
   </div>
 
+  {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+
 </div>
 {% endpartialdef %}
-
-{% endblock body %}
+{% endblock index_list %}

@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Integration tests for the shared theme partials.
+Integration tests for the shared theme partials and page frames.
 
-These cover the fragments that several apps now render through one template, so
-a change in `theme/includes/` cannot silently break a consumer. The picker
-partials in particular have no other coverage: they are swapped in by HTMX and
-never touched by the page-level tests.
+These cover the fragments and base templates that several apps now render
+through one file, so a change in `theme/` cannot silently break a consumer. The
+picker partials in particular have no other coverage: they are swapped in by
+HTMX and never touched by the page-level tests.
 """
 
 from django.contrib.auth import get_user_model
@@ -144,3 +144,39 @@ class InventoryThemePagerTests(BaseTest):
         content = self._get(show_all="1")
         self.assertEqual(content.count("inventory_row"), self.TOTAL)
         self.assertIn("Show paginated view", content)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en")
+class IndexFrameTests(BaseTest):
+    """theme/_index_base.html + theme/includes/_list_status.html."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser(email="frame@example.com", password="secret")
+        Room.objects.create(number="A1.01")
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_list_status_does_not_relabel_the_clear_all_link(self):
+        # _list_status.html includes chips.html without `only`, and
+        # theme/filterbar/_clear_all.html takes an optional `label` of its own.
+        # Passing the count sentence as `label` would leak down and rename
+        # "Clear all" to "1 of 1 room".
+        response = self.client.get(reverse("rooms:index"), {"search": "A1"}, headers={"HX-Request": "true"})
+        content = response.content.decode()
+
+        self.assertIn("Clear all", content)
+        self.assertIn("of 1 room", content)
+
+    def test_heading_stays_outside_the_licenses_swap_target(self):
+        # The "Add license" button swaps its form into #licenses-content-wrapper.
+        # If the shared frame wrapped the heading in that div too, opening the
+        # form would wipe out the h1 and the button itself.
+        content = self.client.get(reverse("licenses:index")).content.decode()
+
+        self.assertLess(
+            content.index("Add license"),
+            content.index('id="licenses-content-wrapper"'),
+            "the add button must render before (outside) its own swap target",
+        )

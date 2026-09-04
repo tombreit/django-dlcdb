@@ -1,11 +1,10 @@
-{% extends "theme/_base.html" %}
+{% extends "theme/_index_base.html" %}
 {% load i18n %}
 
 {% block title %}{% translate "Suppliers" %}{% endblock title %}
+{% block index_title %}{% translate "Suppliers" %}{% endblock index_title %}
 
-{% block body %}
-  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <h1 class="mb-0">{% translate "Suppliers" %}</h1>
+{% block object_tools %}
     {% if perms.core.add_supplier %}
       <div class="ms-auto">
         <a href="{% url 'assets:supplier_add' %}" class="btn btn-primary">
@@ -13,19 +12,14 @@
         </a>
       </div>
     {% endif %}
-  </div>
+{% endblock object_tools %}
 
-  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
-
+{% block index_list %}
   {% partialdef supplier-list inline %}
     <div id="supplier-list" class="position-relative" hx-target="#supplier-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
       {% include "theme/includes/_list_loading.html" %}
-      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
-        <span>
-          {% blocktranslate count counter=filtered_count with total=total_count %}{{ counter }} of {{ total }} supplier{% plural %}{{ counter }} of {{ total }} suppliers{% endblocktranslate %}
-        </span>
-        {% include "theme/filterbar/chips.html" with bar=filterbar %}
-      </div>
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} supplier{% plural %}{{ counter }} of {{ total }} suppliers{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
 
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -67,4 +61,4 @@
       {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
     </div>
   {% endpartialdef %}
-{% endblock body %}
+{% endblock index_list %}

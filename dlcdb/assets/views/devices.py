@@ -13,7 +13,6 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.utils.http import urlencode
 from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
@@ -26,6 +25,7 @@ from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.navigation import detail_urls
 
 from ..filters import DeviceFilter
 from ..forms import DeviceForm
@@ -95,8 +95,8 @@ def device_index(request):
         "current_ordering": device_filter.data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here instead of
         # a second device_filter.qs.count().
-        "device_filtered_count": page_obj.paginator.count,
-        "device_total_count": device_filter.queryset.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": device_filter.queryset.count(),
         "export_href": export_href(request, "assets:device_export_csv"),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
@@ -154,13 +154,7 @@ def device_detail(request, pk):
     # The index threads its active search/filter/sort here as ?next= so Save,
     # Back and Cancel return to the exact filtered list. Read from GET so it
     # survives both the render and the POST (form_action carries it forward).
-    next_query = request.GET.get("next", "")
-    index_url = reverse("assets:device_index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-    form_action = reverse("assets:device_detail", args=[device.pk])
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
+    index_url, form_action = detail_urls(request, "assets:device_index", "assets:device_detail", device.pk)
 
     if request.method == "POST":
         if not can_change:

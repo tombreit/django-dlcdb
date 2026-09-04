@@ -31,6 +31,7 @@ from dlcdb.dataexchange.csv_export import (
     lending_export_columns,
 )
 from dlcdb.theme.export import export_href
+from dlcdb.theme.pagination import paginate
 from dlcdb.theme.filterbar import build_filterbar
 
 from .filters import (
@@ -133,6 +134,7 @@ def index(request):
     template = "lending/index.html#lent-list" if request.htmx else "lending/index.html"
 
     lent_record_filter = _lending_filter(request)
+    page_obj = paginate(request, lent_record_filter.qs)
 
     counts = lent_record_filter.qs.aggregate(
         total=Count("pk"),
@@ -142,6 +144,7 @@ def index(request):
 
     context = {
         "filter": lent_record_filter,
+        "page_obj": page_obj,
         "filterbar": build_filterbar(
             lent_record_filter,
             request,
@@ -152,12 +155,13 @@ def index(request):
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
         "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
-        "lent_filtered_count": counts["total"],
-        "lent_total_count": lent_record_filter.queryset.count(),
+        "filtered_count": counts["total"],
+        "total_count": lent_record_filter.queryset.count(),
         "lent_available_count": counts["available"],
         "lent_lent_count": counts["lent"],
-        # No pagination on this page, so the export covers exactly what is shown.
-        "export_href": export_href(request, "lending:export_csv", drop=()),
+        # The export covers every filtered row, not just the current page, so the
+        # default drop of the pagination params is what we want here.
+        "export_href": export_href(request, "lending:export_csv"),
     }
 
     return TemplateResponse(request, template, context)
@@ -167,8 +171,8 @@ def index(request):
 def lending_export_csv(request):
     """The current lending list as a CSV download.
 
-    Every row the active search, filters and ordering select. This page is
-    unpaginated, so that is exactly what is on screen. Shares ``_lending_filter``
+    Every row the active search, filters and ordering select — the whole
+    filtered set, not the page currently on screen. Shares ``_lending_filter``
     with the index so the two cannot drift apart.
 
     Lending-shaped columns rather than the device set: on this page the borrower,

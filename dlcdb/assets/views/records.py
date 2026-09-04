@@ -25,6 +25,7 @@ from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.navigation import index_url as build_index_url
 
 from ..filters import RecordFilter
 
@@ -101,8 +102,8 @@ def record_index(request):
         "current_ordering": record_filter.data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here instead of
         # a second record_filter.qs.count().
-        "record_filtered_count": page_obj.paginator.count,
-        "record_total_count": record_filter.queryset.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": record_filter.queryset.count(),
         "scope_device": device,
     }
     return TemplateResponse(request, template, context)
@@ -120,10 +121,7 @@ def record_detail(request, pk):
 
     # The index threads its active search/filter/sort here as ?next= so Back
     # returns to the exact filtered list. Same idiom as device_detail.
-    next_query = request.GET.get("next", "")
-    index_url = reverse("assets:record_index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
+    index_url = build_index_url(request, "assets:record_index")
 
     return TemplateResponse(
         request,

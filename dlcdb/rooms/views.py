@@ -14,8 +14,6 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
@@ -24,6 +22,7 @@ from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.navigation import detail_urls
 
 from .filters import RoomFilter
 from .forms import RoomForm
@@ -62,8 +61,8 @@ def room_index(request):
             search_placeholder=_("Search number, nickname, description..."),
         ),
         "current_ordering": data["ordering"],
-        "room_filtered_count": page_obj.paginator.count,
-        "room_total_count": base_queryset.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": base_queryset.count(),
     }
     return TemplateResponse(request, template, context)
 
@@ -96,13 +95,7 @@ def room_detail(request, pk):
 
     # The index threads its active search/filter/sort here as ?next= so Save,
     # Back and Cancel return to the exact filtered list.
-    next_query = request.GET.get("next", "")
-    index_url = reverse("rooms:index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-    form_action = reverse("rooms:detail", args=[room.pk])
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
+    index_url, form_action = detail_urls(request, "rooms:index", "rooms:detail", room.pk)
 
     if request.method == "POST":
         if not can_change:

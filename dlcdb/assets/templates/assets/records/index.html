@@ -1,18 +1,10 @@
-{% extends "theme/_base.html" %}
+{% extends "theme/_index_base.html" %}
 {% load i18n %}
 
-{% comment %}
-The record trail. Read-only by design: no add button, no row actions, no form
-other than the filterbar's own GET form.
-{% endcomment %}
-
 {% block title %}{% translate "Records" %}{% endblock title %}
+{% block index_title %}{% translate "Records" %}{% endblock index_title %}
 
-{% block body %}
-  <div class="d-flex align-items-center mb-3">
-    <h1 class="mb-0">{% translate "Records" %}</h1>
-  </div>
-
+{% block index_prebar %}
   {% comment %}
   Device scope. Outside the swapped fragment on purpose: the scope is pinned by
   a hidden input in the filterbar, so it cannot change while the page lives.
@@ -28,18 +20,14 @@ other than the filterbar's own GET form.
          href="{% url 'assets:record_index' %}"><i class="bi bi-x-lg"></i> {% translate "Show all records" %}</a>
     </div>
   {% endif %}
+{% endblock index_prebar %}
 
-  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
-
+{% block index_list %}
   {% partialdef record-list inline %}
     <div id="record-list" class="position-relative" hx-target="#record-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
       {% include "theme/includes/_list_loading.html" %}
-      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
-        <span>
-          {% blocktranslate count counter=record_filtered_count with total=record_total_count %}{{ counter }} of {{ total }} record{% plural %}{{ counter }} of {{ total }} records{% endblocktranslate %}
-        </span>
-        {% include "theme/filterbar/chips.html" with bar=filterbar %}
-      </div>
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} record{% plural %}{{ counter }} of {{ total }} records{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
 
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -113,4 +101,4 @@ other than the filterbar's own GET form.
       {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
     </div>
   {% endpartialdef %}
-{% endblock body %}
+{% endblock index_list %}
