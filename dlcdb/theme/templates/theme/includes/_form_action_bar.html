@@ -1,0 +1,24 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+Submit + cancel button row closing an edit form. Shared by every form and detail
+page in the custom frontend.
+
+Params:
+  cancel_url    href for the Cancel link (usually ``index_url``).
+  submit_label  (optional) submit button text; defaults to "Save changes".
+{% endcomment %}
+
+<div class="mt-4 mb-5 d-flex flex-wrap gap-2">
+  <button class="btn btn-primary" type="submit">
+    <i class="bi bi-check-lg"></i>
+    {{ submit_label|default:_("Save changes") }}
+  </button>
+  <a class="btn btn-outline-secondary" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
+</div>

@@ -458,8 +458,10 @@ def person_search(request):
     person_filter = LendingPersonFilter(request.POST or None, queryset=Person.objects.none())
     return TemplateResponse(
         request,
-        "lending/includes/_person_search_results.html",
-        {"filter": person_filter},
+        "theme/includes/_person_search_results.html",
+        # Shared with the assets contact-person picker, so hand the template the
+        # plain (people, query) contract rather than the FilterSet itself.
+        {"people": person_filter.qs, "query": person_filter.data.get("search", "")},
     )
 
 

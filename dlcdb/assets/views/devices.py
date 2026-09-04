@@ -231,6 +231,6 @@ def person_search(request):
     people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(
         request,
-        "assets/includes/_person_search_results.html",
+        "theme/includes/_person_search_results.html",
         {"people": people, "query": value},
     )

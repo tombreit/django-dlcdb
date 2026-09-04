@@ -36,9 +36,7 @@
   {% translate "Pick one or more devices, choose the room to move them to, then press Move." %}
 </p>
 
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-{% endif %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
 
 <form method="POST" action="{% url 'assets:relocate' %}" novalidate id="relocate-form">
   {% csrf_token %}

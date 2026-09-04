@@ -1,9 +1,5 @@
 {% load i18n %}
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">
-    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
-  </div>
-{% endif %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
 
 <section class="card mb-3">
   <div class="card-header d-flex align-items-center gap-2">

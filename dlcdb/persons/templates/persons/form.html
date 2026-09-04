@@ -14,12 +14,8 @@
       <form method="post" novalidate>
         {% csrf_token %}
         {% include "persons/includes/_form_fields.html" with form=form %}
-        <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
-          <button class="btn btn-primary" type="submit">
-            <i class="bi bi-check-lg"></i> {{ submit_label }}
-          </button>
-          <a class="btn btn-outline-secondary" href="{% url 'persons:index' %}">{% translate "Cancel" %}</a>
-        </div>
+        {% url 'persons:index' as cancel_url %}
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=cancel_url submit_label=submit_label %}
       </form>
     </div>
   </div>

@@ -17,9 +17,7 @@
         {% endif %}
       </div>
     </div>
-    <a href="{{ index_url }}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left"></i> {% translate "Back to list" %}
-    </a>
+    {% include "theme/includes/_back_link.html" with url=index_url %}
   </div>
 
   <div class="row g-4">
@@ -28,23 +26,14 @@
         <form method="post" action="{{ form_action }}" novalidate>
           {% csrf_token %}
           {% include "persons/includes/_form_fields.html" with form=form %}
-          <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
-            <button class="btn btn-primary" type="submit">
-              <i class="bi bi-check-lg"></i> {% translate "Save changes" %}
-            </button>
-            <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
-          </div>
+          {% include "theme/includes/_form_action_bar.html" with cancel_url=index_url %}
         </form>
       {% else %}
-        <div class="alert alert-secondary d-flex align-items-center gap-2">
-          {% if is_udb_synced %}
-            <i class="bi bi-arrow-repeat"></i>
-            {% translate "This person is managed by the HR API sync and cannot be edited here." %}
-          {% else %}
-            <i class="bi bi-eye"></i>
-            {% translate "You may view this person but do not have permission to edit them." %}
-          {% endif %}
-        </div>
+        {% if is_udb_synced %}
+          {% include "theme/includes/_readonly_notice.html" with icon="bi-arrow-repeat" message=_("This person is managed by the HR API sync and cannot be edited here.") %}
+        {% else %}
+          {% include "theme/includes/_readonly_notice.html" with message=_("You may view this person but do not have permission to edit them.") %}
+        {% endif %}
         <section class="card mb-3">
           <div class="card-header d-flex align-items-center gap-2">
             <i class="bi bi-person text-primary"></i>
