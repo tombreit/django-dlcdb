@@ -81,6 +81,8 @@
         </div>
         <div class="card-body">
           <dl class="row mb-0 small">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Uploaded by" %}</dt>
+            <dd class="col-sm-8">{{ importer_list.user|default:importer_list.username|default:"—" }}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
             <dd class="col-sm-8">{{ importer_list.created_at|date:"Y-m-d H:i" }}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>

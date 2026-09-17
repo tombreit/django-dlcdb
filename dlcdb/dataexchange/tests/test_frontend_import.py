@@ -116,7 +116,7 @@ def test_confirm_writes_devices_and_persists_report(superuser_client, tenant):
     response = superuser_client.post(reverse(CONFIRM_URL, args=[importer_list.pk]))
 
     assert response.status_code == 302
-    assert response.url == reverse("assets:device_index")
+    assert response.url == reverse("dataexchange:importer_index")
 
     assert Device.objects.count() > 0
     device = Device.objects.get(edv_id="NTB1282")
@@ -230,6 +230,20 @@ def test_non_superuser_cannot_spoof_tenant(client, tenant, tenant_user):
     # The disabled tenant field ignores the submitted value and the view forces
     # the request tenant on the audit row.
     assert ImporterList.objects.get().tenant == tenant
+
+
+@_PLAIN_STATICFILES
+def test_confirm_without_history_permission_redirects_to_device_list(client, tenant, tenant_user):
+    """Importing needs only core.add_device; the import history would be a 403."""
+    client.force_login(tenant_user)
+    client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv")})
+    importer_list = ImporterList.objects.get()
+
+    response = client.post(reverse(CONFIRM_URL, args=[importer_list.pk]))
+
+    assert response.status_code == 302
+    assert response.url == reverse("assets:device_index")
+    assert Device.objects.exists()
 
 
 @_PLAIN_STATICFILES

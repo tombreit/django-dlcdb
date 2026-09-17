@@ -155,3 +155,40 @@ def test_import_pages_and_device_sidebar_link_to_the_frontend(superuser_client, 
     device = Device.objects.filter(imported_by=confirmed_import).first()
     response = superuser_client.get(reverse("assets:device_detail", args=[device.pk]))
     assert reverse(DETAIL_URL, args=[confirmed_import.pk]) in response.content.decode()
+
+
+@_PLAIN_STATICFILES
+def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_client, tenant):
+    superuser_client.post(
+        reverse("dataexchange:device_import"), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk}
+    )
+    importer_list = ImporterList.objects.get()
+    uploader = importer_list.user
+    assert uploader.username == "pytestadmin"
+    # The denormalized copy is str(user), like every other audit model.
+    assert importer_list.username == "admin@example.com"
+
+    other_admin = CustomUser.objects.create_superuser(email="other@example.com", password="secret", username="other")
+    client.force_login(other_admin)
+    client.post(reverse("dataexchange:device_import_confirm", args=[importer_list.pk]))
+
+    importer_list.refresh_from_db()
+    assert importer_list.status == "success"
+    assert importer_list.user == uploader
+
+    response = client.get(reverse(DETAIL_URL, args=[importer_list.pk]))
+    assert uploader.email in response.content.decode()
+
+
+@_PLAIN_STATICFILES
+def test_admin_import_records_the_uploader(superuser_client, tenant):
+    superuser_client.post(
+        reverse("admin:dataexchange_importerlist_add"),
+        {
+            "file": _upload_file("devices.correct.csv"),
+            "import_format": ImporterList.ImportFormatChoices.INTERNALCSV,
+            "tenant": tenant.pk,
+        },
+    )
+
+    assert ImporterList.objects.get().username == "admin@example.com"

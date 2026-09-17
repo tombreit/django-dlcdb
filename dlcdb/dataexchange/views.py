@@ -25,6 +25,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
+from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
@@ -88,6 +89,7 @@ def device_import(request):
         importer_list = form.save(commit=False)
         if not request.user.is_superuser:
             importer_list.tenant = getattr(request, "tenant", None)
+        importer_list.user, importer_list.username = get_denormalized_user(request.user)
         # Archive the file and create the audit row up front: failed attempts
         # are part of the import history (run_device_import marks the row with
         # status "error"); status stays empty until a confirmed write.
@@ -123,6 +125,18 @@ def device_import(request):
     return TemplateResponse(request, "dataexchange/import.html", context)
 
 
+def _after_import_redirect(request):
+    """Where a processed import leads: the import history, which shows the new
+    entry with its status and log.
+
+    Confirming only needs core.add_device, so a user who may import but not view
+    the history falls back to the device list instead of a 403.
+    """
+    if request.user.has_perm("dataexchange.view_importerlist"):
+        return redirect("dataexchange:importer_index")
+    return redirect("assets:device_index")
+
+
 @require_POST
 @permission_required("core.add_device", raise_exception=True)
 def device_import_confirm(request, pk):
@@ -138,7 +152,7 @@ def device_import_confirm(request, pk):
     # may be retried.
     if importer_list.status in (ImporterList.Status.SUCCESS, ImporterList.Status.WARNING):
         messages.warning(request, _("This import file has already been processed."))
-        return redirect("assets:device_index")
+        return _after_import_redirect(request)
 
     try:
         report = run_device_import(
@@ -156,7 +170,7 @@ def device_import_confirm(request, pk):
         return redirect("dataexchange:device_import")
 
     getattr(messages, report.level)(request, report.short_html())
-    return redirect("assets:device_index")
+    return _after_import_redirect(request)
 
 
 @permission_required("core.add_device", raise_exception=True)
@@ -169,7 +183,9 @@ def device_import_template(request):
 
 def _importer_list_queryset(request):
     """Imports visible in the frontend, each with the count of devices it created."""
-    queryset = ImporterList.objects.select_related("tenant").annotate(devices_count=Count("device", distinct=True))
+    queryset = ImporterList.objects.select_related("tenant", "user").annotate(
+        devices_count=Count("device", distinct=True)
+    )
     return tenant_scoped_queryset(queryset, request, tenant_field="tenant")
 
 
