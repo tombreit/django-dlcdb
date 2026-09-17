@@ -26,7 +26,6 @@ def get_current_tenant(request):
             _tenant_count = _tenant.count()
         except Exception as e:
             messages.error(f"Something went wrong getting a tenant from a request! Error was: {e}")
-            pass
 
         if _tenant_count >= 2:
             messages.add_message(

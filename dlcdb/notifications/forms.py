@@ -2,12 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Column, Layout, Row
 from django import forms
 from django.conf import settings
 from django.db.models.fields import BLANK_CHOICE_DASH
-
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Column, Layout, Row
 
 from .intervals import INTERVAL_DETAILS, NotificationInterval
 from .models import Subscription

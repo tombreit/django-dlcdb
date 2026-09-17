@@ -18,8 +18,8 @@ construction (including tenant scoping) lives entirely in the owning app's
 ``get_queryset`` callable.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 from django.db.models import QuerySet
 from django.http import HttpRequest
@@ -41,7 +41,7 @@ class PickerSource:
     # Multi-select only: name of the per-card hidden inputs carrying the already
     # picked pks, sent along with each live search (hx-include) so they drop out
     # of the results.
-    exclude_param: Optional[str] = None
+    exclude_param: str | None = None
 
     def grants_access(self, user) -> bool:
         """True if ``user`` holds any of this source's permissions."""
@@ -56,6 +56,6 @@ def register_picker_source(source: PickerSource) -> None:
     _REGISTRY[source.name] = source
 
 
-def get_picker_source(name) -> Optional[PickerSource]:
+def get_picker_source(name) -> PickerSource | None:
     """Return the registered source for ``name`` (or ``None`` if unknown)."""
     return _REGISTRY.get(name) if name else None

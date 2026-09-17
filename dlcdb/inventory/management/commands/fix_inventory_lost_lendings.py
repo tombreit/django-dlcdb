@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.core.management.base import BaseCommand
+
 from dlcdb.core.models import Device, Record
 from dlcdb.core.models.inventory import Inventory
 

@@ -18,13 +18,13 @@ from django.core.exceptions import ValidationError
 from django.utils import translation
 
 from dlcdb.accounts.models import CustomUser
-from dlcdb.tenants.models import Tenant
 from dlcdb.core.models import Device
 from dlcdb.dataexchange.importer import import_data
-from dlcdb.dataexchange.remover import set_removed_record
 from dlcdb.dataexchange.models import ImporterList
-from dlcdb.dataexchange.reporting import Outcome, OperationReport
+from dlcdb.dataexchange.remover import set_removed_record
+from dlcdb.dataexchange.reporting import OperationReport, Outcome
 from dlcdb.dataexchange.validators import validate_column_headers
+from dlcdb.tenants.models import Tenant
 
 TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
 

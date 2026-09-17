@@ -4,7 +4,6 @@
 
 from django.utils.translation import gettext_lazy as _
 
-
 # Rooms, Manufacturer, Distributor, Device types, People and Records are owned
 # by their frontend apps (dlcdb.rooms, dlcdb.assets, dlcdb.persons
 # navigation.py); core only keeps the admin-changelist entries that have no

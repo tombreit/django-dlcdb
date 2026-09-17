@@ -4,7 +4,7 @@
 
 from django.contrib import admin
 
-from .models import Thing, AssignedThing
+from .models import AssignedThing, Thing
 
 
 @admin.register(AssignedThing)

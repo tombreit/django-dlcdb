@@ -2,20 +2,21 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from operator import itemgetter
-from importlib import import_module
 from dataclasses import dataclass
-from django.contrib import messages
+from importlib import import_module
+from operator import itemgetter
+
 from django.apps import apps
+from django.conf import settings
+from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count, Min, Q
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
-from django.utils.html import format_html
-from django.urls import reverse
-from django.conf import settings
 
-from dlcdb.core.models import Room, Device
+from dlcdb.core.models import Device, Room
 from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 

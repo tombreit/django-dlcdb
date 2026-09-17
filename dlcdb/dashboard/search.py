@@ -21,8 +21,8 @@ lending/licenses/smallstuff URL names), so a plain module-level tuple costs
 nothing and hides nothing.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest

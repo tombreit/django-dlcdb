@@ -15,9 +15,8 @@ from django.utils import timezone
 from dlcdb.assets.forms import DeviceForm
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
-from dlcdb.tenants.models import Tenant
 from dlcdb.core.tests.testingutils import establish_state
-
+from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

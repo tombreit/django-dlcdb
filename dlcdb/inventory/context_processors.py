@@ -4,7 +4,6 @@
 
 from django.conf import settings
 from django.urls import reverse
-
 from rest_framework.authtoken.models import Token
 
 from dlcdb.core.models.inventory import get_active_inventory

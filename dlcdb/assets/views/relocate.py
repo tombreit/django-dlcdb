@@ -16,7 +16,6 @@ from dlcdb.core.utils.relocate import relocate_device
 from ..forms import RelocateForm
 from ..pickers import MOVE_PERMISSIONS, move_queryset
 
-
 # Distinct search-input name so the room picker can share the relocate <form>
 # with the device picker without HTMX mixing their query terms.
 ROOM_SEARCH_PARAM = "q_room"

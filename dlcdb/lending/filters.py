@@ -8,7 +8,7 @@ import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import LentRecord, Record, DeviceType, Person
+from dlcdb.core.models import DeviceType, LentRecord, Person, Record
 
 # Lending state keys. This filter is the single source of truth for lending
 # state in the standalone lending app; it intentionally does not import from

@@ -16,18 +16,17 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-
 from huey.contrib import djhuey
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, Person
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingConfiguration
-from dlcdb.organization.models import Branding
-from dlcdb.tenants.models import Tenant
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
 from dlcdb.notifications.tasks import notify_overdue_lenders, queue_messages_for_interval, send_message
+from dlcdb.organization.models import Branding
 from dlcdb.reporting.models import Report
+from dlcdb.tenants.models import Tenant
 
 TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="dlcdb-test-media-")
 

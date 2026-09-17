@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.db import models
-
 from django.core.validators import FileExtensionValidator
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models.abstracts import SingletonBaseModel

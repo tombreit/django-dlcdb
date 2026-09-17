@@ -6,29 +6,26 @@ import json
 from urllib.parse import urlencode
 
 from django.conf import settings
-from django.urls import reverse
-from django.utils.html import format_html, format_html_join
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin.options import ActionLocation
-from django.template.loader import render_to_string
-from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
-
 from simple_history.admin import SimpleHistoryAdmin
 
-from dlcdb.tenants.admin import TenantScopedAdmin
 from dlcdb.dataexchange.admin import ExportCsvMixin
+from dlcdb.tenants.admin import TenantScopedAdmin
 
 from .. import lifecycle
 from ..models import Device, Record
 from ..utils.helpers import get_superuser_list
+from .base_admin import CustomBaseModelAdmin, SoftDeleteModelAdmin, get_has_note_badge
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, get_has_note_badge
-
 
 # class NoteInline(admin.TabularInline):
 #     extra = 0

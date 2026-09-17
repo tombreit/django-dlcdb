@@ -3,17 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
-from django.contrib import admin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, LentRecord
 
-from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
+from .csv_export import EXPORT_RELATIONS, csv_response
 from .forms import ImporterAdminForm, RemoverListAdminForm
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
+from .models import ImporterList, RemoverList, UdbSyncConfiguration, UdbSyncRun
 from .remover import set_removed_record
-from .csv_export import EXPORT_RELATIONS, csv_response
 
 
 class ExportCsvMixin:
@@ -100,7 +99,7 @@ class ImporterListAdmin(admin.ModelAdmin):
 
     @admin.display(description="CSV-Datei")
     def get_change_link_display(self, obj):
-        return "{label}".format(label=obj.file)
+        return f"{obj.file}"
 
     def get_form(self, request, obj=None, **kwargs):
         """
@@ -206,7 +205,7 @@ class RemoverListAdmin(admin.ModelAdmin):
 
     @admin.display(description="CSV-Datei")
     def get_change_link_display(self, obj):
-        return "{label}".format(label=obj.file)
+        return f"{obj.file}"
 
     def get_form(self, request, obj=None, **kwargs):
         """

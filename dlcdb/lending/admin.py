@@ -7,7 +7,6 @@ from django.db import models
 from django.forms import Textarea
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-
 from simple_history.admin import SimpleHistoryAdmin
 from simple_history.template_utils import HistoricalRecordContextHelper
 
@@ -71,7 +70,7 @@ class LendingProfileHistoryContextHelper(HistoricalRecordContextHelper):
             return super().stringify_delta_change_values(change, old, new)
 
         return tuple(
-            mark_safe(  # noqa: S308 - the value itself is escaped by the template
+            mark_safe(
                 render_to_string(
                     "lending/admin/history_value.html",
                     {

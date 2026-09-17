@@ -6,22 +6,21 @@ import uuid
 from dataclasses import dataclass
 
 from django.conf import settings
-from django.db import models
-from django.db.models import Case, When, F, Value, CharField
-from django.db.models.functions import Concat, Cast, Coalesce, Trim
-from django.core.validators import RegexValidator
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-from django.urls import reverse
 from django.contrib.sites.models import Site
-
+from django.core.validators import RegexValidator
+from django.db import models
+from django.db.models import Case, CharField, F, Value, When
+from django.db.models.functions import Cast, Coalesce, Concat, Trim
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
 from dlcdb.inventory.utils import uuid2qrcode
 from dlcdb.tenants.models import TenantAwareModel
 
-from ..utils.device_methods import get_device_state_data
 from ..storage import OverwriteStorage
+from ..utils.device_methods import get_device_state_data
 from .abstracts import SoftDeleteAuditBaseModel
 from .supplier import Supplier
 

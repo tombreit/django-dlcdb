@@ -4,7 +4,6 @@
 
 from ..core.models import Record
 
-
 # object: Record
 EXPOSED_FIELDS = [
     # {

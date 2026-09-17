@@ -34,7 +34,6 @@ from simple_history.utils import update_change_reason
 
 from dlcdb.core.models import Device
 
-
 # Machine-managed or audit columns: a change here is not a user's data going
 # missing. `qrcode` matters most -- SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD stores
 # it as a bare filename, which must never be written back into a FileField (and

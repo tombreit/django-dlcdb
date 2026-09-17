@@ -20,10 +20,9 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import LentRecord, Person, Record, Room
-from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.core.utils.helpers import get_denormalized_user
-from dlcdb.core.utils.links import linked_message
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.links import linked_message
 from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.dataexchange.csv_export import (
     LENDING_EXPORT_RELATIONS,
@@ -32,17 +31,17 @@ from dlcdb.dataexchange.csv_export import (
 )
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.lifecycle_display import STATE_COLORS
 
 from .filters import (
+    STATE_AVAILABLE,
+    STATE_LENT,
+    STATE_OVERDUE,
     LendingPersonFilter,
     LentRecordFilter,
-    STATE_OVERDUE,
-    STATE_LENT,
-    STATE_AVAILABLE,
 )
 from .forms import LendableDeviceSelectForm, LendingForm, LendingReturnForm
 from .models import LendingConfiguration, LendingProfile
-
 
 # Applied when the request names no ordering; an explicit ?ordering= still wins.
 DEFAULT_ORDERING = "-modified"

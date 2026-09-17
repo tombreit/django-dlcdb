@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
+from django.db import models
 
 from .abstracts import AuditBaseModel
 

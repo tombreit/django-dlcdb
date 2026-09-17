@@ -2,21 +2,21 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import logging
 import datetime
+import logging
 from datetime import timedelta
 
+import huey
 from django.conf import settings
 from django.utils import timezone
-
-import huey
 from huey.contrib.djhuey import db_periodic_task, db_task, lock_task
 
 from dlcdb.core.models import Device
 from dlcdb.lending.models import LendingConfiguration
-from .models import Subscription, Message
+
 from .channels import send_via_all_channels
-from .intervals import NotificationInterval, INTERVAL_DETAILS
+from .intervals import INTERVAL_DETAILS, NotificationInterval
+from .models import Message, Subscription
 from .overdue_lenders import create_overdue_lender_messages
 from .reports import create_report_message, create_report_messages, get_window_start
 
@@ -213,7 +213,7 @@ def send_message(message_id):
         logger.error(f"Message with ID {message_id} not found")
         return False
     except Exception as e:
-        logger.exception(f"Error retrieving message {message_id}: {str(e)}")
+        logger.exception(f"Error retrieving message {message_id}: {e!s}")
         return False
 
     # Send via all configured channels

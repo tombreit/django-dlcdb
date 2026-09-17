@@ -3,25 +3,26 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from pathlib import Path
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.utils import translation
 
 from dlcdb.accounts.models import CustomUser
-from dlcdb.tenants.models import Tenant
 from dlcdb.core.models import (
-    InRoomRecord,
     Device,
-    Room,
-    RemovedRecord,
-    Record,
-    Person,
+    InRoomRecord,
     OrganizationalUnit,
+    Person,
+    Record,
+    RemovedRecord,
+    Room,
 )
 from dlcdb.dataexchange.csv_template import build_import_template_csv
 from dlcdb.dataexchange.importer import import_data, run_device_import
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.dataexchange.reporting import Outcome
+from dlcdb.tenants.models import Tenant
 
 TEST_DATA_DIR = Path("dlcdb/dataexchange/tests/test_data")
 
@@ -158,17 +159,16 @@ def test_bulk_import_csv_wrongdate(tenant):
     """
     csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
 
-    with translation.override("en"):
-        with open(csv_path, "rb") as csv_file:
-            report = import_data(
-                csv_file,
-                importer_inst_pk=None,
-                valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                tenant=tenant,
-                username="pytestuser",
-                write=False,
-            )
+    with translation.override("en"), open(csv_path, "rb") as csv_file:
+        report = import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=False,
+        )
 
     errors = [row for row in report.rows if row.outcome is Outcome.ERROR]
     assert len(errors) == 1
@@ -187,17 +187,16 @@ def test_bulk_import_csv_wrongdate_writes_nothing(tenant):
     csv_path = TEST_DATA_DIR / "devices.wrongdateformat.csv"
 
     with translation.override("en"):
-        with pytest.raises(ValidationError) as excinfo:
-            with open(csv_path, "rb") as csv_file:
-                import_data(
-                    csv_file,
-                    importer_inst_pk=None,
-                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                    tenant=tenant,
-                    username="pytestuser",
-                    write=True,
-                )
+        with pytest.raises(ValidationError) as excinfo, open(csv_path, "rb") as csv_file:
+            import_data(
+                csv_file,
+                importer_inst_pk=None,
+                valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                tenant=tenant,
+                username="pytestuser",
+                write=True,
+            )
         assert "Nothing was written" in excinfo.value.messages[0]
 
     assert Device.objects.count() == 0
@@ -209,17 +208,16 @@ def test_bulk_import_csv_incomplete_rowheader(tenant):
 
     # Read the (lazy) message inside the override so it resolves under "en".
     with translation.override("en"):
-        with pytest.raises(ValidationError) as excinfo:
-            with open(csv_path, "rb") as csv_file:
-                import_data(
-                    csv_file,
-                    importer_inst_pk=None,
-                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                    tenant=tenant,
-                    username="pytestuser",
-                    write=True,
-                )
+        with pytest.raises(ValidationError) as excinfo, open(csv_path, "rb") as csv_file:
+            import_data(
+                csv_file,
+                importer_inst_pk=None,
+                valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                tenant=tenant,
+                username="pytestuser",
+                write=True,
+            )
         # Friendly, human-readable message (no raw Python set-reprs).
         message = excinfo.value.messages[0]
     assert "Missing column(s):" in message
@@ -458,17 +456,15 @@ def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
     csv_path = TEST_DATA_DIR / "devices.incompleterowheader.csv"
     importer_list = ImporterList.objects.create(file="imported_csv/pytest-failed.csv", tenant=tenant)
 
-    with translation.override("en"):
-        with pytest.raises(ValidationError):
-            with open(csv_path, "rb") as csv_file:
-                run_device_import(
-                    file=csv_file,
-                    tenant=tenant,
-                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                    username="pytestuser",
-                    importer_list=importer_list,
-                    write=False,
-                )
+    with translation.override("en"), pytest.raises(ValidationError), open(csv_path, "rb") as csv_file:
+        run_device_import(
+            file=csv_file,
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            username="pytestuser",
+            importer_list=importer_list,
+            write=False,
+        )
 
     importer_list.refresh_from_db()
     assert importer_list.status == "error"
@@ -602,18 +598,17 @@ def test_row_errors_name_the_line_the_column_and_the_value(tenant):
 @pytest.mark.django_db
 def test_a_file_with_bad_rows_writes_nothing(tenant):
     """Not even the rows that would have imported cleanly."""
-    with translation.override("en"):
-        with pytest.raises(ValidationError):
-            with open(TEST_DATA_DIR / "devices.rowerrors.csv", "rb") as csv_file:
-                import_data(
-                    csv_file,
-                    importer_inst_pk=None,
-                    valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                    import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                    tenant=tenant,
-                    username="pytestuser",
-                    write=True,
-                )
+    with translation.override("en"), pytest.raises(ValidationError):
+        with open(TEST_DATA_DIR / "devices.rowerrors.csv", "rb") as csv_file:
+            import_data(
+                csv_file,
+                importer_inst_pk=None,
+                valid_col_headers=ImporterList.VALID_COL_HEADERS,
+                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+                tenant=tenant,
+                username="pytestuser",
+                write=True,
+            )
 
     assert Device.objects.count() == 0
 
@@ -779,7 +774,7 @@ def test_ragged_row_is_an_error_row_not_a_crash(tenant):
 
     header = ",".join(ImporterList.VALID_COL_HEADERS)
     # A row that stops after two columns; DictReader fills the rest with None.
-    payload = f"{header}\nRAGGED-1,355\n".encode("utf-8")
+    payload = f"{header}\nRAGGED-1,355\n".encode()
 
     with translation.override("en"):
         report = run_device_import(

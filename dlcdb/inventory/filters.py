@@ -5,7 +5,7 @@
 import django_filters
 from django.db.models import Q
 
-from ..core.models import Room, Device, DeviceType, Record, Inventory
+from ..core.models import Device, DeviceType, Inventory, Record, Room
 from .forms import DeviceSearchForm
 
 

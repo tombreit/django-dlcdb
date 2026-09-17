@@ -19,11 +19,10 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 """
 
 import pytest
-
 from django.contrib.sites.models import Site
 
 from dlcdb.accounts.models import CustomUser
-from dlcdb.core.models import Device, Room, Inventory
+from dlcdb.core.models import Device, Inventory, Room
 from dlcdb.tenants.models import Tenant
 
 

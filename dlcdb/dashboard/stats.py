@@ -4,18 +4,16 @@
 
 from collections import defaultdict
 
-from django.db.models import Count, Q
-from django.utils import timezone
-
 import plotly.graph_objects as go
 import plotly.io as pio
+from django.db.models import Count, Q
+from django.utils import timezone
 
 from dlcdb.core.models import (
     Device,
     DeviceType,
     Record,
 )
-
 
 # Shared plotly config: hide modebar entirely
 PLOTLY_CONFIG = {"displayModeBar": False}

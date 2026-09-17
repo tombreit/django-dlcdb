@@ -4,8 +4,8 @@
 
 import logging
 
-from .models import Subscription, Message
 from .intervals import NotificationInterval
+from .models import Message, Subscription
 
 logger = logging.getLogger(__name__)
 

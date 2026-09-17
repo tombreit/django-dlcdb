@@ -8,7 +8,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.db import models
-from django.utils import timezone, dateformat
+from django.utils import dateformat, timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -78,7 +78,7 @@ class Room(SoftDeleteAuditBaseModel):
     def __str__(self):
         if not self.nickname:
             return self.number
-        return "{} ({})".format(self.number, self.nickname)
+        return f"{self.number} ({self.nickname})"
 
     def save(self, *args, **kwargs):
         """
@@ -144,10 +144,7 @@ class Room(SoftDeleteAuditBaseModel):
 
         n_of_ns = f"{self.room_inventorized_devices_count} / {self.room_devices_count}"
 
-        if self.room_devices_count == self.room_inventorized_devices_count:
-            status_str = "completed"
-            css_class = "success"
-        elif self.room_devices_count == 0:
+        if self.room_devices_count == self.room_inventorized_devices_count or self.room_devices_count == 0:
             status_str = "completed"
             css_class = "success"
         elif self.room_devices_count and not self.room_inventorized_devices_count:

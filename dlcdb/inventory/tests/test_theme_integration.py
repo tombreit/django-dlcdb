@@ -9,13 +9,11 @@ the slim per-app asset bundle.
 """
 
 import pytest
-
 from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
 
 from ..models import SapList
-
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {

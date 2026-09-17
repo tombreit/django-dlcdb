@@ -6,7 +6,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .pickers import MOVE_PERMISSIONS
 
-
 nav_entries = [
     {
         "slot": "nav_main",

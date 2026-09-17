@@ -6,7 +6,6 @@ from collections import namedtuple
 from io import BytesIO
 
 import segno
-
 from django.conf import settings
 from django.core.files.base import ContentFile
 
@@ -20,7 +19,7 @@ def uuid2qrcode(uuid, infix=None):
         prefix=settings.QRCODE_PREFIX,
         infix=infix if infix else "",
     )
-    qr_filename = "{0}.svg".format(qr_text)
+    qr_filename = f"{qr_text}.svg"
     qr_fileobj = segno.make(qr_text)
 
     _fileobj_io = BytesIO()

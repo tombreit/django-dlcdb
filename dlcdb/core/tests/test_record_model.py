@@ -4,8 +4,9 @@
 
 import pytest
 from django.core.exceptions import ValidationError
-from dlcdb.core.models import Record, LentRecord, InRoomRecord, RemovedRecord, LostRecord, Person, Device
 from django.utils import timezone
+
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Person, Record, RemovedRecord
 
 
 @pytest.mark.django_db

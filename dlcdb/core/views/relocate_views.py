@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.generic import FormView
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
+from django.views.generic import FormView
 
 from .. import lifecycle
 from ..forms.adminactions_forms import RelocateActionForm
@@ -103,5 +103,3 @@ class DevicesRelocateView(FormView):
                 # so admin and frontend cannot diverge.
                 result = relocate_device(device, new_room, user)
                 messages.add_message(self.request, result.level, result.message)
-
-        return

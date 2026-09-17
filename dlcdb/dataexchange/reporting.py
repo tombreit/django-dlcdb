@@ -10,9 +10,9 @@ short, severity-aware summary for Django toast messages (``short_html``) and a
 detailed plaintext log for the stored ``messages`` field (``detailed``).
 """
 
-from enum import Enum
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
 
 from django.conf import settings
 from django.utils.html import format_html

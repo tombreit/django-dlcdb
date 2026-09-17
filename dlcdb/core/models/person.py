@@ -3,15 +3,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.conf import settings
-from django.db import models
-from django.db.models import Q
-from django.db.models import Count
-from django.db.models.functions import Lower
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import Count, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .abstracts import SoftDeleteAuditBaseModel, AuditBaseModel
+from .abstracts import AuditBaseModel, SoftDeleteAuditBaseModel
 
 
 class OrganizationalUnit(AuditBaseModel):

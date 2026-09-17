@@ -120,7 +120,7 @@ class ImporterList(OperationLogBase):
         ordering = ["-modified_at", "-created_at"]
 
     def __str__(self):
-        return "{}".format(self.file)
+        return f"{self.file}"
 
 
 class RemoverList(OperationLogBase):
@@ -150,7 +150,7 @@ class RemoverList(OperationLogBase):
         ordering = ["-modified_at", "-created_at"]
 
     def __str__(self):
-        return "{}".format(self.file)
+        return f"{self.file}"
 
 
 class UdbSyncConfiguration(SingletonBaseModel):

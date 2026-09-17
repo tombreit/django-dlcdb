@@ -6,18 +6,15 @@
 TODO: Get rid of our custom delete() and hard_delete() methods.
 """
 
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin.utils import unquote
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group as DjangoGroup
-from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import gettext_lazy as _
-from django.urls import path
-from django.contrib.admin.utils import unquote
 from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.contrib import messages
-
+from django.urls import path, reverse
+from django.utils.translation import gettext_lazy as _
 
 from .models import CustomUser
 

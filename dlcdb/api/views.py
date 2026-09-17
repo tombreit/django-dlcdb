@@ -2,17 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from rest_framework import viewsets
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-
-from django_filters import rest_framework as filters
-
 from django.db.models import Prefetch
+from django_filters import rest_framework as filters
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter
+from rest_framework.response import Response
 
-from ..core.models import Device, Person, LentRecord, Room
+from ..core.models import Device, LentRecord, Person, Room
 from . import serializers
 
 

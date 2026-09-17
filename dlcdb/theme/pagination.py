@@ -11,8 +11,8 @@ same convention the filterbar follows.
 """
 
 from django.core.paginator import Page, Paginator
-from django.http import HttpRequest
 from django.db.models import QuerySet
+from django.http import HttpRequest
 
 
 def paginate(

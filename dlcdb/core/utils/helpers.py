@@ -2,20 +2,17 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import logging
 import base64
+import logging
 import re
-from io import BytesIO
 from collections import namedtuple
 from collections.abc import Generator
-from contextlib import contextmanager
-from contextlib import suppress
+from contextlib import contextmanager, suppress
+from io import BytesIO
 
-from django.db.transaction import atomic
 from django.conf import settings
-
+from django.db.transaction import atomic
 from PIL import Image, UnidentifiedImageError
-
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +95,6 @@ class DoRollback(Exception):
     Dry-run mode
     https://adamj.eu/tech/2022/10/13/dry-run-mode-for-data-imports-in-django/
     """
-
-    pass
 
 
 @contextmanager

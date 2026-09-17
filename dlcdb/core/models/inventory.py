@@ -5,18 +5,18 @@
 import json
 from collections import namedtuple
 
-from django.db import models, transaction
-from django.db.models import Count, Q, OuterRef, Subquery, Exists
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import models, transaction
+from django.db.models import Count, Exists, OuterRef, Q, Subquery
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.inventory.utils import update_inventory_note
 
 from .. import lifecycle
-from .room import Room
 from .device import Device
 from .note import Note
 from .record import Record
+from .room import Room
 
 
 def _found_inventory_note(active_record):
@@ -149,7 +149,7 @@ class InventoryQuerySet(models.QuerySet):
                 room_inventorized_devices_count=Count(
                     "record",
                     filter=Q(
-                        Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                        Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
                         record__device__deleted_at__isnull=True,
                         record__inventory__is_active=True,
                         record__device__tenant=tenant,
@@ -179,7 +179,7 @@ class InventoryQuerySet(models.QuerySet):
                 room_inventorized_devices_count=Count(
                     "record",
                     filter=Q(
-                        Q((Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT))),
+                        Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
                         record__device__deleted_at__isnull=True,
                         record__inventory__is_active=True,
                     ),

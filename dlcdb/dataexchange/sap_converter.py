@@ -2,12 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import re
-import csv
 import codecs
-from io import StringIO
+import csv
+import re
 from datetime import datetime
-
+from io import StringIO
 
 SAP_COL_UNTERNUMMER_KEYS = ["Unternummer", "UNr."]
 

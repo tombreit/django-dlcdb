@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from dataclasses import dataclass
+
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 

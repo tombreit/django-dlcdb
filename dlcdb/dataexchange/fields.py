@@ -11,8 +11,8 @@ import string
 from datetime import datetime
 
 from django.apps import apps
-from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import IntegrityError
 from django.utils.timezone import make_aware
 from django.utils.translation import gettext as _
 
@@ -119,8 +119,6 @@ def create_fk_objs(fk_field, rows):
         if not value:
             continue
         create_fk_obj(model_class=model_class, instance_key="name", instance_value=value)
-
-    return
 
 
 def get_or_create_person(*, first_name, last_name, email, organizational_unit=None):

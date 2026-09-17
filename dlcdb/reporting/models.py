@@ -7,7 +7,7 @@ from django.utils import timezone
 
 
 def spreadsheet_directory_path(instance, filename):
-    return "reporting/spreadsheets/{0}".format(filename)
+    return f"reporting/spreadsheets/{filename}"
 
 
 class Report(models.Model):
@@ -39,11 +39,7 @@ class Report(models.Model):
     )
 
     def __str__(self):
-        return "{0}: {1} {2}".format(
-            self.pk,
-            timezone.localtime(self.created_at),
-            self.title,
-        )
+        return f"{self.pk}: {timezone.localtime(self.created_at)} {self.title}"
 
     class Meta:
         verbose_name = "Report"

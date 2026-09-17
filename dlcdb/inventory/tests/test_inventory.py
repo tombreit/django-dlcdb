@@ -7,7 +7,7 @@ import json
 import pytest
 
 from dlcdb.core.lifecycle import IllegalTransition
-from dlcdb.core.models import Inventory, InRoomRecord, Record, Note
+from dlcdb.core.models import InRoomRecord, Inventory, Note, Record
 from dlcdb.inventory.utils import update_inventory_note
 
 

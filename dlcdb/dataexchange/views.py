@@ -23,7 +23,6 @@ from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
 from .reporting import Outcome
 
-
 OUTCOME_BADGES = {
     Outcome.CREATED: "text-bg-success",
     Outcome.UPDATED: "text-bg-info",

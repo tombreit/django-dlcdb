@@ -6,7 +6,6 @@ from django.contrib import admin
 
 from ..models import Inventory
 
-
 # class RecordInline(admin.TabularInline):
 #     model = Record
 #     fields = ['record_type', 'device', 'person', 'room']

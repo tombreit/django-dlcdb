@@ -4,9 +4,9 @@
 
 from django.contrib import admin
 
-from ..models import RemovedRecord
 from ..forms.removedrecord_form import RemovedRecordAdminForm
-from .base_admin import RedirectToDeviceMixin, CustomBaseProxyModelAdmin
+from ..models import RemovedRecord
+from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 
 
 @admin.register(RemovedRecord)

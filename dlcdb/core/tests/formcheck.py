@@ -13,7 +13,6 @@ the stored one. These helpers therefore read the HTML, not the form object -- se
 
 import re
 
-
 # Django renders every attribute double-quoted, so a plain attribute scan is
 # enough here and keeps the helpers dependency-free.
 _TAG_RE = re.compile(r"<(?:input|select|textarea)\b[^>]*>", re.IGNORECASE)

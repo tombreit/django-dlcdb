@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import admin
-from django.template import Template, Context
+from django.template import Context, Template
 from django.urls import reverse
+
 from .models import SapList, SapListComparisonResult
 
 
@@ -19,7 +20,7 @@ class SapListAdmin(admin.ModelAdmin):
 
     @admin.display(description="Datei")
     def get_change_link_display(self, obj):
-        return "{label} öffnen".format(label=obj.get_file_name())
+        return f"{obj.get_file_name()} öffnen"
 
     @admin.display(description="Abgleich")
     def get_compare_button_display(self, obj):

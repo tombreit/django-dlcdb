@@ -9,7 +9,7 @@ import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import LicenceRecord, DeviceType, Supplier
+from dlcdb.core.models import DeviceType, LicenceRecord, Supplier
 
 
 class LicenceRecordFilter(django_filters.FilterSet):

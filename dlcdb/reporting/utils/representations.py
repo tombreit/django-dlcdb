@@ -3,16 +3,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
-
 from copy import copy
 from tempfile import NamedTemporaryFile
 
-from openpyxl import Workbook
-from openpyxl.styles import NamedStyle, Font, Alignment, PatternFill
-from openpyxl.utils import get_column_letter
-
 from django.core.files.base import ContentFile
 from django.utils.text import slugify
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, NamedStyle, PatternFill
+from openpyxl.utils import get_column_letter
 
 from ..settings import EXPOSED_FIELDS
 

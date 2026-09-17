@@ -2,22 +2,21 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import timedelta, date
+import logging
+from datetime import date, timedelta
 from smtplib import SMTPException
 
 from django.conf import settings
 from django.core import mail
-from django.core.validators import validate_email
 from django.core.management.base import BaseCommand, CommandError
-
+from django.core.validators import validate_email
 from django.template.loader import get_template
-# from django.utils import timezone
 
+# from django.utils import timezone
 from dlcdb.core.models import Inventory, Person
 from dlcdb.core.utils.helpers import get_contact_email
 from dlcdb.inventory.utils import update_inventory_note
 from dlcdb.notifications.email_footer import email_footer_context
-import logging
 
 logger = logging.getLogger(__name__)
 

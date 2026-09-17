@@ -3,16 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from datetime import timedelta
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import permission_required
-from django.template.loader import render_to_string
-from django.http import Http404
 
 import icalendar
+from django.contrib.auth.decorators import permission_required
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from icalendar import Calendar, Event
 
 from dlcdb.notifications.models import Subscription
+
 from .models import LicenseAsset
 
 

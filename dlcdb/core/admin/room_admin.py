@@ -3,14 +3,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import admin
-from django.utils.html import mark_safe
-from django.utils.html import format_html
 from django.urls import reverse
+from django.utils.html import format_html, mark_safe
 
 from ..models import Room
 from ..models.room import RoomReconcile
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin, get_has_note_badge
-from .base_admin import DeviceCountMixin
+from .base_admin import CustomBaseModelAdmin, DeviceCountMixin, SoftDeleteModelAdmin, get_has_note_badge
 from .filters.has_note_filter import HasNoteFilter
 
 
@@ -89,13 +87,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):
-        return mark_safe(
-            '<img src="{url}" width="{width}" height="{height}">'.format(
-                url=obj.qrcode.url,
-                width=200,
-                height=200,
-            )
-        )
+        return mark_safe(f'<img src="{obj.qrcode.url}" width="{200}" height="{200}">')
 
     @admin.display(description="Has Note?")
     def has_note(self, obj):
@@ -104,11 +96,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
     @admin.display(description="Website")
     def website_link(self, obj):
         if obj.website:
-            return mark_safe(
-                '<a href="{url}"><i class="bi bi-box-arrow-up-right"></i></a>'.format(
-                    url=obj.website,
-                )
-            )
+            return mark_safe(f'<a href="{obj.website}"><i class="bi bi-box-arrow-up-right"></i></a>')
 
 
 @admin.register(RoomReconcile)

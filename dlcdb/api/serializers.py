@@ -4,7 +4,7 @@
 
 from rest_framework import serializers
 
-from ..core.models import Device, Person, LentRecord, Room
+from ..core.models import Device, LentRecord, Person, Room
 
 
 class DeviceSerializer(serializers.HyperlinkedModelSerializer):

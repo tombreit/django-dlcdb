@@ -2,14 +2,13 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.contrib import admin
-from django.contrib import messages
-from django.urls import reverse
+from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from ..models import InRoomRecord, Room
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
+from ..models import InRoomRecord, Room
 from ..utils.links import linked_message
 from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 

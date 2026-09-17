@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from simple_history.utils import update_change_reason
-from django.utils import timezone
 from datetime import timedelta
 
+from django.utils import timezone
+from simple_history.utils import update_change_reason
+
 from dlcdb.core.models import Person
-from dlcdb.notifications.services import delete_license_subscriptions, create_license_subscriptions
-from dlcdb.notifications.models import Subscription
 from dlcdb.notifications.intervals import NotificationInterval
+from dlcdb.notifications.models import Subscription
+from dlcdb.notifications.services import create_license_subscriptions, delete_license_subscriptions
 
 
 def manage_subscribers(device, subscribers):

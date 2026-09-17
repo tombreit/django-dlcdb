@@ -4,27 +4,6 @@
 
 from datetime import datetime
 
-from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
-from django.forms import ValidationError
-from django.http import HttpResponseRedirect
-from django.db.models import Case, CharField, Value, When
-from django.utils.formats import date_format
-from django.utils.translation import gettext_lazy as _
-from django.contrib import messages
-
-from dlcdb.tenants.admin import TenantScopedAdmin
-from dlcdb.lending.models import LendingConfiguration
-from dlcdb.dataexchange.admin import ExportCsvMixin
-from .. import lifecycle
-from ..models import LentRecord, Record
-from ..forms.lentrecordadmin_form import LentRecordAdminForm
-from ..utils.helpers import get_denormalized_user
-from ..utils.links import linked_message, obj_link
-from .filters.lentstate_filter import LentStateRecordFilter
-from .base_admin import CustomBaseModelAdmin
-
 # Create a session store to pass the new created instance.pk from save_model()
 # to response_change(). Considered a dirty hack.
 # Ref: https://docs.djangoproject.com/en/dev/topics/http/sessions/#using-sessions-out-of-views
@@ -32,7 +11,28 @@ from .base_admin import CustomBaseModelAdmin
 # Todo: refactor, get rid of session store and handle the redirect in a
 # friendlier way.
 from importlib import import_module
+
 from django.conf import settings
+from django.contrib import admin, messages
+from django.db.models import Case, CharField, Value, When
+from django.forms import ValidationError
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.utils.formats import date_format
+from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
+
+from dlcdb.dataexchange.admin import ExportCsvMixin
+from dlcdb.lending.models import LendingConfiguration
+from dlcdb.tenants.admin import TenantScopedAdmin
+
+from .. import lifecycle
+from ..forms.lentrecordadmin_form import LentRecordAdminForm
+from ..models import LentRecord, Record
+from ..utils.helpers import get_denormalized_user
+from ..utils.links import linked_message, obj_link
+from .base_admin import CustomBaseModelAdmin
+from .filters.lentstate_filter import LentStateRecordFilter
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 session = SessionStore()
@@ -223,10 +223,7 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
     @admin.display(description=_("Description"))
     def get_device_human_readable(self, obj):
-        return "{} - {}".format(
-            obj.device.manufacturer,
-            obj.device.series,
-        )
+        return f"{obj.device.manufacturer} - {obj.device.series}"
 
     @admin.display(description=_("Lent"))
     @admin.display(boolean=True)

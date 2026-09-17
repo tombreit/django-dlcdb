@@ -17,9 +17,8 @@ from django.contrib.admin.sites import site
 from django.test import override_settings
 from django.urls import reverse
 
-from dlcdb.dataexchange.models import ImporterList, RemoverList
 from dlcdb.core.models import Device
-
+from dlcdb.dataexchange.models import ImporterList, RemoverList
 
 # The production-like settings use a hashed/manifest static files storage, which
 # requires a built manifest (collectstatic). For rendering tests we swap in the

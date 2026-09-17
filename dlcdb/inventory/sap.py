@@ -6,8 +6,8 @@ import csv
 import os
 
 from django.conf import settings
-from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from .utils import unique_seq
 
@@ -64,7 +64,7 @@ def create_sap_list_comparison(sap_list_obj):
         comparison.save()
 
         original_name = sap_list_obj.file.name.split("/")[-1]
-        file_name = "result_{id}_{org_name}".format(id=comparison.id, org_name=original_name)
+        file_name = f"result_{comparison.id}_{original_name}"
         file_path = os.path.join(settings.MEDIA_ROOT, settings.SAP_LIST_COMPARISON_RESULT_FOLDER, file_name)
 
         if not os.path.exists(os.path.dirname(file_path)):
@@ -99,7 +99,7 @@ def compare_sap(sap_list_obj):
     information (row) of the given SAP_ID in the spreadsheet (basically)
     appending columns).
     """
-    from dlcdb.core.models import Inventory, Device
+    from dlcdb.core.models import Device, Inventory
 
     file_path = sap_list_obj.file.path
     current_inventory = Inventory.objects.get(is_active=True)

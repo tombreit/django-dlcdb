@@ -2,19 +2,16 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.db.models import Q
 from django.contrib import admin
 from django.contrib.admin.options import ActionLocation
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils import timezone
-from django.db.models import Count
-from django.utils.http import urlencode
 from django.utils.html import format_html
-from django.urls import path
+from django.utils.http import urlencode
 
-
-from ..models import Device, Room, DeviceType, Supplier, Manufacturer
+from ..models import Device, DeviceType, Manufacturer, Room, Supplier
 from ..utils.helpers import get_denormalized_user, get_icon_for_class
 
 
@@ -228,7 +225,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 
-class NoModificationModelAdminMixin(object):
+class NoModificationModelAdminMixin:
     ordering = ["-modified_at"]
 
     def has_delete_permission(self, request, obj=None):
@@ -241,7 +238,7 @@ class NoModificationModelAdminMixin(object):
         return request.user.is_superuser
 
 
-class RedirectToDeviceMixin(object):
+class RedirectToDeviceMixin:
     """
     Most of our admins redirect to the admin instance changelist after adding
     a new record. But we like to be redirected to the corresponding device admin.

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import admin
-from django.template import Template, Context
+from django.template import Context, Template
 from django.urls import reverse
 from django.utils.html import format_html_join
 from django.utils.translation import gettext_lazy as _

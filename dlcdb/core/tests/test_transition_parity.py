@@ -21,7 +21,6 @@ fail. They compare outcomes only, so the merge itself is invisible to them.
 
 import datetime
 
-
 from django.contrib.auth import get_user_model
 from django.forms import modelform_factory
 from django.test import override_settings
@@ -32,9 +31,9 @@ from dlcdb.core.forms.removedrecord_form import RemovedRecordAdminForm
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Person, Record, RemovedRecord, Room
 from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.core.utils.relocate import relocate_device
 from dlcdb.lending.forms import LendingForm
-from dlcdb.core.tests.testingutils import establish_state
 
 # Plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {

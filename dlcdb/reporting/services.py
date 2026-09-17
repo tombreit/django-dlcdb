@@ -24,23 +24,14 @@ def create_report(*, records, event, condition="", window_start, window_end) -> 
     Create and persist a Report for the given records, covering the time
     window [window_start, window_end].
     """
-    title = "DLCDB Report: from {from_date} to {to_date} for {event} ({count})".format(
-        from_date=window_start.date(),
-        to_date=window_end.date(),
-        event=event,
-        count=records.count(),
-    )
+    title = f"DLCDB Report: from {window_start.date()} to {window_end.date()} for {event} ({records.count()})"
 
     # Spreadsheet titles must not exceed 31 characters.
-    spreadsheet_title = "{event}_{from_date:%Y%m%d}-{to_date:%Y%m%d}".format(
-        event=event,
-        from_date=window_start.date(),
-        to_date=window_end.date(),
-    )
+    spreadsheet_title = f"{event}_{window_start.date():%Y%m%d}-{window_end.date():%Y%m%d}"
 
     text_rows = get_records_as_text(records=records, title=title, event=event, condition=condition)
     spreadsheet = get_records_as_spreadsheet(records=records, title=spreadsheet_title, event=event)
-    filename = "{}_{}.xlsx".format(slugify(title), uuid.uuid1())
+    filename = f"{slugify(title)}_{uuid.uuid1()}.xlsx"
 
     return Report.objects.create(
         title=title,

@@ -2,10 +2,9 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django import forms
-
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, HTML
+from crispy_forms.layout import HTML, Layout
+from django import forms
 
 from .models import AssignedThing
 

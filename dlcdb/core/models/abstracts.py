@@ -5,11 +5,10 @@
 import datetime
 
 from django.conf import settings
-from django.utils.timezone import now
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-
 
 # auto_now_add and auto_now issue two separate timezone.now() calls when a row is
 # inserted, so a freshly created object's timestamps differ by microseconds

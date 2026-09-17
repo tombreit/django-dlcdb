@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from pathlib import Path
 from email.utils import getaddresses
-from django.contrib import messages
-import environ
-from huey import SqliteHuey
+from pathlib import Path
 
+import environ
+from django.contrib import messages
+from huey import SqliteHuey
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 RUN_DIR = BASE_DIR / "run"
@@ -512,7 +512,7 @@ THEME = {
 # ]
 
 if env("AUTH_LDAP"):
-    from .ldap import *  # NOQA
+    from .ldap import *
     # print("[i] AUTH_LDAP activated via .env")
 else:
     # print("[i] AUTH_LDAP disabled in .env")

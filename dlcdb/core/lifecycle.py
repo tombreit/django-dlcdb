@@ -47,7 +47,6 @@ from django.utils.translation import gettext_lazy as _
 
 from .utils.helpers import get_denormalized_user
 
-
 # ── State keys ──────────────────────────────────────────────────────────────
 # The literal strings stored in ``Record.record_type``. They are a frozen public
 # contract: baked into the DB CheckConstraint and served verbatim by the API, so

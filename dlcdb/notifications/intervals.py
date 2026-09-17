@@ -2,13 +2,13 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.utils.translation import gettext_lazy as _
 import datetime
+from datetime import timedelta
+from enum import Enum
+
 import huey
 from django.conf import settings
-from datetime import timedelta
-
-from enum import Enum
+from django.utils.translation import gettext_lazy as _
 
 
 class NotificationInterval(Enum):

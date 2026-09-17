@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.urls import path
-from .views import (
-    relocate_views,
-    procure_views,
-)
 
+from .views import (
+    procure_views,
+    relocate_views,
+)
 
 app_name = "core"
 

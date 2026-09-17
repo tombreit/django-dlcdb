@@ -7,7 +7,6 @@ import re
 from django.template import Origin, TemplateSyntaxError
 from django.template.loaders.base import Loader as BaseLoader
 
-
 # Matches template names like "lending/db/42.html"
 DB_TEMPLATE_RE = re.compile(r"^lending/db/(\d+)\.html$")
 

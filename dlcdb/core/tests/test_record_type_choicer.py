@@ -4,7 +4,6 @@
 
 import pytest
 
-
 """
 
     def get_proxy_instance(self):

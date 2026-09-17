@@ -5,14 +5,13 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.template.loader import render_to_string
-
 from simple_history.models import HistoricalRecords
 
 from .email_footer import email_footer_context
-from .intervals import NotificationInterval, INTERVAL_DETAILS
+from .intervals import INTERVAL_DETAILS, NotificationInterval
 
 
 class Subscription(models.Model):
@@ -344,7 +343,7 @@ class Message(models.Model):
         except Exception as e:
             return {
                 "subject": "Error: Could not generate subject",
-                "body": f"Error generating message content: {str(e)}",
+                "body": f"Error generating message content: {e!s}",
                 "error": str(e),
             }
 

@@ -2,10 +2,9 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django import forms
-
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Field
+from crispy_forms.layout import Column, Field, Layout, Row
+from django import forms
 
 from dlcdb.core.models import Note
 from dlcdb.theme.widgets import TomSelectWidget
@@ -28,7 +27,7 @@ class DeviceAddForm(forms.Form):
     def __init__(self, *args, **kwargs):
         add_devices_qs = kwargs.pop("add_devices_qs")
         device_choices = [("", "Add device")]
-        device_choices += [(f"{str(d.uuid)}", f"{d.edv_id} {d.sap_id}") for d in add_devices_qs]
+        device_choices += [(f"{d.uuid!s}", f"{d.edv_id} {d.sap_id}") for d in add_devices_qs]
         super().__init__(*args, **kwargs)
 
         self.fields["device"] = forms.ChoiceField(

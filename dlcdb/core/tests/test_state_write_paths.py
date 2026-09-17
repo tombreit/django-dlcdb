@@ -44,9 +44,9 @@ from dlcdb.core.models import (
     Room,
 )
 from dlcdb.core.models.record import SCRAPPED
+from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dataexchange.records import create_record
 from dlcdb.dataexchange.remover import set_removed_record
-from dlcdb.core.tests.testingutils import establish_state
 
 
 @pytest.fixture

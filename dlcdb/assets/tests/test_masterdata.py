@@ -11,7 +11,6 @@ from django.urls import reverse
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.tests.basetest import BaseTest
 
-
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},

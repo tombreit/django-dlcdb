@@ -12,8 +12,8 @@ from django.urls import reverse
 
 from dlcdb.core.models import DeviceType, InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
-from dlcdb.lending.models import LendingProfile
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.lending.models import LendingProfile
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {

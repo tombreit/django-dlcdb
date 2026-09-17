@@ -6,8 +6,8 @@ import logging
 import os
 
 from django.conf import settings
-from django.utils import timezone
 from django.core.mail import EmailMessage
+from django.utils import timezone
 
 from .models import Message
 
@@ -85,7 +85,7 @@ class EmailChannel(NotificationChannel):
 
         except Exception as e:
             mark_message_failed(message, str(e))  # Use the module-level function
-            logger.exception(f"Failed to send email for message {message.id}: {str(e)}")
+            logger.exception(f"Failed to send email for message {message.id}: {e!s}")
             return False
 
 
@@ -116,6 +116,6 @@ def send_via_all_channels(message):
             if channel_success:
                 success = True
         except Exception as e:
-            logger.exception(f"Error in {channel_name} channel for message {message.id}: {str(e)}")
+            logger.exception(f"Error in {channel_name} channel for message {message.id}: {e!s}")
 
     return success

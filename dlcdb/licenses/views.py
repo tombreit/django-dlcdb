@@ -3,31 +3,30 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import traceback
-
 from itertools import chain
 from operator import attrgetter
 
-from django.template.response import TemplateResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import permission_required
 from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
-from django.db import transaction, IntegrityError
+from django.db import IntegrityError, transaction
+from django.db.models import OuterRef, Subquery
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.db.models import OuterRef, Subquery
-
 from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core import lifecycle
-from dlcdb.core.models import LicenceRecord, Room, Device
+from dlcdb.core.models import Device, LicenceRecord, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
-from .forms import LicenseForm
+
 from .filters import LicenceRecordFilter
-from .models import LicensesConfiguration, LicenseAsset
+from .forms import LicenseForm
+from .models import LicenseAsset, LicensesConfiguration
 
 # Rows per page for the licenses list. Mirrors dlcdb.assets.views.devices.
 LICENSES_PER_PAGE = 25

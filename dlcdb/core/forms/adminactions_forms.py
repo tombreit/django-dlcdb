@@ -6,7 +6,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from dlcdb.tenants.models import Tenant
-from ..models import Room, DeviceType
+
+from ..models import DeviceType, Room
 
 
 class RelocateActionForm(forms.Form):

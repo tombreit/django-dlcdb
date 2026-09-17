@@ -13,7 +13,6 @@ from dlcdb.core.models import Record
 
 from .models import ImporterList
 
-
 # Two complete example rows so the template shows the expected value formats
 # (dates as YYYY-MM-DD, booleans as yes/no): a notebook placed in a room and a
 # smartphone that is currently lent. Both import cleanly as-is, which is

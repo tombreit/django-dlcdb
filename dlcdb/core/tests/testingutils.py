@@ -18,7 +18,7 @@ def establish_state(proxy_model, **kwargs):
     return record
 
 
-class DisableMigrations(object):
+class DisableMigrations:
     def __contains__(self, item):
         return True
 

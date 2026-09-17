@@ -6,14 +6,14 @@
 # see: http://django-auth-ldap.readthedocs.io/en/latest/index.html
 
 import logging
-import ldap
 
+import ldap
 from django.core.exceptions import ImproperlyConfigured
 from django_auth_ldap.config import (
-    LDAPSearch,
     ActiveDirectoryGroupType,
-    PosixGroupType,
     LDAPGroupQuery,
+    LDAPSearch,
+    PosixGroupType,
 )
 
 from .base import (

@@ -6,8 +6,8 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .base_admin import SoftDeleteModelAdmin, CustomBaseModelAdmin
-from ..models import Person, OrganizationalUnit
+from ..models import OrganizationalUnit, Person
+from .base_admin import CustomBaseModelAdmin, SoftDeleteModelAdmin
 
 
 @admin.register(OrganizationalUnit)

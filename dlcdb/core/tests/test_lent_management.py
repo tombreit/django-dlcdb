@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 
-from dlcdb.core.models import Room, Person, LentRecord, InRoomRecord
+from dlcdb.core.models import InRoomRecord, LentRecord, Person, Room
 from dlcdb.core.tests import basetest
 
 
@@ -12,7 +12,7 @@ class LentManagementTests(basetest.BaseTest):
         room = Room(number=234, nickname="Theke")
         room.save()
 
-        for i in range(0, 5):
+        for i in range(5):
             device = self._create_device()
             device.is_lentable = True
             device.save()

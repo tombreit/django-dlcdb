@@ -5,8 +5,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ..core.models.abstracts import SingletonBaseModel
 from ..core.models import Device
+from ..core.models.abstracts import SingletonBaseModel
 
 
 class LicenseAsset(Device):

@@ -30,33 +30,32 @@ import json
 from datetime import date
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, HttpResponseServerError, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, FormView
-from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import TemplateView
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseRedirect, JsonResponse
-from django.template.response import TemplateResponse
-from django.template.loader import render_to_string
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.decorators import permission_required
-from django.contrib import messages
-from django.utils.decorators import method_decorator
-from django.core.paginator import Paginator
-from django.core.exceptions import ObjectDoesNotExist
-
+from django.views.generic.detail import SingleObjectMixin
 from django_filters.views import FilterView
 
 from dlcdb.core.lifecycle import IllegalTransition
-from dlcdb.core.models import Room, Device, Inventory, Note
+from dlcdb.core.models import Device, Inventory, Note, Room
 from dlcdb.core.utils.helpers import get_user_email
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 
-from .sap import create_sap_list_comparison
-from .filters import RoomFilter, DeviceFilter
-from .forms import InventorizeRoomForm, DeviceAddForm, NoteForm
+from .filters import DeviceFilter, RoomFilter
+from .forms import DeviceAddForm, InventorizeRoomForm, NoteForm
 from .models import SapList
+from .sap import create_sap_list_comparison
 
 
 @permission_required("core.can_inventorize", raise_exception=True)

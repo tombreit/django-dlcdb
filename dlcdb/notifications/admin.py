@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import admin, messages
-from django.urls import path
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import path
 from django.utils.html import format_html
-
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Subscription, Message
+from .models import Message, Subscription
 from .reports import create_report_message
 from .tasks import send_message
 

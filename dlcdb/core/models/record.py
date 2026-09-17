@@ -2,19 +2,17 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from typing import Optional
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .abstracts import AuditBaseModel
 from .. import lifecycle
-
+from .abstracts import AuditBaseModel
 
 # Whereabouts of the device after decommissioning.
 SOLD = "SLD"
@@ -293,7 +291,7 @@ class Record(AuditBaseModel):
         Returns the admin add url. Whenever this method is called on a concrete
         proxy model it returns the add url of this proxy model.
         """
-        return reverse("admin:core_{model_name}_add".format(model_name=cls.__name__.lower()), args=[])
+        return reverse(f"admin:core_{cls.__name__.lower()}_add", args=[])
 
     def get_latest_note(self):
         """
@@ -305,7 +303,7 @@ class Record(AuditBaseModel):
     def is_type_lent(self):
         return self.record_type == Record.LENT
 
-    def get_last_found(self) -> Optional[datetime]:
+    def get_last_found(self) -> datetime | None:
         RECORD_TYPES_FOUND = [Record.INROOM, Record.LENT]
 
         found_records_for_device = self.device.record_set.filter(

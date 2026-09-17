@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import sys
 import csv
 import pathlib
+import sys
+
 from django.core.management.base import BaseCommand
 
-from ...models import Device
 from dlcdb.inventory.sap import get_match_for_sap_id
+
+from ...models import Device
 
 
 class Command(BaseCommand):

@@ -9,7 +9,6 @@ permission short-circuits with a client refresh instead of a 403 page.
 """
 
 import pytest
-
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 

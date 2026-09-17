@@ -182,7 +182,7 @@ def create_report_message(subscription, *, now=None, update_window=True) -> Mess
 
 def _render_report_body(subscription, report_records, record_rows):
     domain = Site.objects.get_current().domain
-    changelist_url = "https://{}{}".format(domain, reverse(get_admin_url_for_recordtype(subscription.event)))
+    changelist_url = f"https://{domain}{reverse(get_admin_url_for_recordtype(subscription.event))}"
     context = {
         "subscription": subscription,
         "records_count": len(record_rows),

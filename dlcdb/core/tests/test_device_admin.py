@@ -7,10 +7,9 @@ from django.contrib.auth.models import Group, Permission
 from django.test import override_settings
 from django.urls import reverse
 
-from dlcdb.tenants.models import Tenant
-from dlcdb.core.models import Person, LentRecord, InRoomRecord, Room
+from dlcdb.core.models import InRoomRecord, LentRecord, Person, Room
 from dlcdb.core.tests import basetest
-
+from dlcdb.tenants.models import Tenant
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {

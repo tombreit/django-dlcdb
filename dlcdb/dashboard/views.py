@@ -17,7 +17,6 @@ from dlcdb.core.utils.htmx import htmx_login_required
 from . import stats
 from .search import run_search
 
-
 # GET parameter carrying the global search term.
 GLOBAL_SEARCH_PARAM = "q"
 

@@ -11,7 +11,6 @@ from django.contrib import admin
 from ..core.models import Device
 from .models import Tenant
 
-
 # class TenantModelAdmin(admin.ModelAdmin):
 
 #     def has_change_permission(self, request, obj=None):

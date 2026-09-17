@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.db.models import Q
-
 import django_filters
+from django.db.models import Q
 
 from dlcdb.core.models import Person
 

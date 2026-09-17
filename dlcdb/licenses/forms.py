@@ -2,19 +2,20 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django import forms
-from django.db.models import Q
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
-# from django.core.validators import validate_email
-
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Div, HTML
 from crispy_bootstrap5.bootstrap5 import FloatingField
+
+# from django.core.validators import validate_email
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML, Column, Div, Layout, Row
+from django import forms
+from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Person
 from dlcdb.theme.widgets import TomSelectMultipleWidget
+
 from .subscribers import manage_subscribers
 
 

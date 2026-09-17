@@ -13,7 +13,6 @@ from dlcdb.core.models import OrganizationalUnit, Record, Room
 
 from .fields import create_fk_obj, get_or_create_person
 
-
 # The record types a CSV row can actually produce. Record.ORDERED has a proxy
 # model but no CSV columns to populate it, so it is deliberately not importable.
 IMPORTABLE_RECORD_TYPES = (Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED)

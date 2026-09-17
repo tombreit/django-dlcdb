@@ -22,8 +22,8 @@ widget renders its value is exactly where this class of bug hides.
 """
 
 import datetime
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import pytest
 from django.urls import reverse

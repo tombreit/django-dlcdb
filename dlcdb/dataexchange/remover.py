@@ -9,10 +9,11 @@ Bulk decommissioning: mark devices as "removed" from a CSV list.
 import csv
 import logging
 from io import StringIO
-from django.utils import timezone
-from django.db.transaction import atomic
-from django.core.exceptions import ValidationError
+
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db.transaction import atomic
+from django.utils import timezone
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device
@@ -21,7 +22,6 @@ from dlcdb.core.utils.helpers import rollback_atomic
 from .models import RemoverList
 from .reporting import OperationReport, Outcome
 from .validators import validate_column_headers
-
 
 logger = logging.getLogger(__name__)
 

@@ -4,15 +4,16 @@
 
 # from datetime import datetime
 
+from django.contrib.auth.decorators import permission_required
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.http import HttpResponse
-from django.contrib.auth.decorators import permission_required
 
 from dlcdb.core.models import Person
-from .models import AssignedThing
+
 from .filters import PersonFilter
 from .forms import AssignedThingsForm
+from .models import AssignedThing
 
 
 @permission_required("smallstuff.view_assignedthing", raise_exception=True)

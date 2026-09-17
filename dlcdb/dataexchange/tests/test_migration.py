@@ -20,7 +20,6 @@ import pytest
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 
-
 BEFORE_RENAME = [("dataexchange", "0001_initial")]
 AFTER_RENAME = [("dataexchange", "0002_rename_tables")]
 

@@ -4,8 +4,8 @@
 
 from django.contrib import admin
 
-from ..models import LostRecord
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
+from ..models import LostRecord
 from .base_admin import CustomBaseProxyModelAdmin, NoModificationModelAdminMixin, RedirectToDeviceMixin
 
 

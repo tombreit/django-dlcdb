@@ -5,9 +5,8 @@
 import uuid
 
 import pytest
-
-from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 
 
 @pytest.fixture
@@ -35,7 +34,7 @@ def create_user(db, django_user_model, test_password, settings):
     def make_user(**kwargs):
         kwargs["password"] = test_password
         if "email" not in kwargs:
-            kwargs["email"] = f"{str(uuid.uuid4())}@example.com"
+            kwargs["email"] = f"{uuid.uuid4()!s}@example.com"
         return django_user_model.objects.create_user(**kwargs)
 
     return make_user

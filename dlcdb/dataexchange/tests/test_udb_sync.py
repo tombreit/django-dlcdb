@@ -24,10 +24,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
 from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
-from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
-from dlcdb.dataexchange import udb_sync
-from dlcdb.dataexchange.reporting import Outcome
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.dataexchange import udb_sync
+from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
+from dlcdb.dataexchange.reporting import Outcome
 
 
 def _enable_sync():

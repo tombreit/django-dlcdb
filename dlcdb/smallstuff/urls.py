@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.urls import path
-from .views import (
-    person_search,
-    person_detail,
-    add_assignement,
-    remove_assignement,
-    get_assignements,
-)
 
+from .views import (
+    add_assignement,
+    get_assignements,
+    person_detail,
+    person_search,
+    remove_assignement,
+)
 
 app_name = "smallstuff"
 

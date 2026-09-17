@@ -5,7 +5,6 @@
 """Objects named in a Django message are rendered as links to their detail views."""
 
 import pytest
-
 from django.urls import reverse
 from django.utils.safestring import SafeString
 

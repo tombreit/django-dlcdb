@@ -15,7 +15,6 @@ from dlcdb.core.models import Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.organization.models import Branding
 
-
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
