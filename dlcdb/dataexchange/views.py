@@ -6,18 +6,31 @@
 Frontend views for the two-step device import: upload + dry run, preview,
 explicit confirm. The import logic itself lives in importer.run_device_import
 and is shared with the admin importer.
+
+Plus the read-only import history: an import is a one-off operation, so its
+list and detail pages offer no edit, delete or re-run.
 """
+
+import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
+
+from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.pagination import paginate
 
 from .csv_template import build_import_template_csv
+from .filters import ImporterListFilter
 from .forms import DeviceImportForm
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
@@ -31,6 +44,8 @@ OUTCOME_BADGES = {
     Outcome.REMOVED: "text-bg-secondary",
     Outcome.ERROR: "text-bg-danger",
 }
+
+IMPORTS_PER_PAGE = 25
 
 ALERT_BY_LEVEL = {
     "success": "alert-success",
@@ -150,3 +165,59 @@ def device_import_template(request):
     response = HttpResponse(build_import_template_csv(), content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="dlcdb-device-import-template.csv"'
     return response
+
+
+def _importer_list_queryset(request):
+    """Imports visible in the frontend, each with the count of devices it created."""
+    queryset = ImporterList.objects.select_related("tenant").annotate(devices_count=Count("device", distinct=True))
+    return tenant_scoped_queryset(queryset, request, tenant_field="tenant")
+
+
+@permission_required("dataexchange.view_importerlist", raise_exception=True)
+def importer_index(request):
+    """Read-only, tenant-scoped import history."""
+    template = "dataexchange/importer_index.html#importer-list" if request.htmx else "dataexchange/importer_index.html"
+    base_queryset = _importer_list_queryset(request)
+
+    data = request.GET.copy()
+    data.setdefault("ordering", "-created")
+    importer_filter = ImporterListFilter(data, queryset=base_queryset, request=request)
+
+    page_obj = paginate(request, importer_filter.qs, IMPORTS_PER_PAGE)
+
+    context = {
+        "filter": importer_filter,
+        "page_obj": page_obj,
+        "filterbar": build_filterbar(
+            importer_filter,
+            request,
+            target="#importer-list",
+            search_placeholder=_("Search file name, note..."),
+        ),
+        "current_ordering": data["ordering"],
+        "filtered_count": page_obj.paginator.count,
+        "total_count": base_queryset.count(),
+        # Mirrors assets.views.devices.device_index, for theme/includes/_timestamps.html.
+        "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),
+    }
+    return TemplateResponse(request, template, context)
+
+
+@require_GET
+@permission_required("dataexchange.view_importerlist", raise_exception=True)
+def importer_detail(request, pk):
+    """One import with its stored log. Read-only: there is nothing to change after the fact."""
+    importer_list = get_object_or_404(_importer_list_queryset(request), pk=pk)
+
+    # The index threads its active search/filter/sort here as ?next=.
+    next_query = request.GET.get("next", "")
+    index_url = reverse("dataexchange:importer_index")
+    if next_query:
+        index_url = f"{index_url}?{next_query}"
+
+    context = {
+        "importer_list": importer_list,
+        "index_url": index_url,
+        "devices_url": f"{reverse('assets:device_index')}?imported_by={importer_list.pk}",
+    }
+    return TemplateResponse(request, "dataexchange/importer_detail.html", context)

@@ -1,0 +1,93 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{{ importer_list }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    <div class="me-auto">
+      <h1 class="h3 mb-1">{{ importer_list }}</h1>
+      <div class="text-muted">{% translate "Import" %}</div>
+    </div>
+    <a href="{{ index_url }}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> {% translate "Back to list" %}
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-upload text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Import" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "File" %}</dt>
+            <dd class="col-sm-8">
+              {% if importer_list.file %}
+                <a href="{{ importer_list.file.url }}"><i class="bi bi-filetype-csv"></i> {{ importer_list.file }}</a>
+              {% else %}—{% endif %}
+            </dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Status" %}</dt>
+            <dd class="col-sm-8">{% include "dataexchange/includes/_status_badge.html" %}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Summary" %}</dt>
+            <dd class="col-sm-8">{{ importer_list.summary|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Format" %}</dt>
+            <dd class="col-sm-8">{{ importer_list.get_import_format_display }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Tenant" %}</dt>
+            <dd class="col-sm-8">{{ importer_list.tenant|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Note" %}</dt>
+            <dd class="col-sm-8 mb-0" style="white-space: pre-line;">{{ importer_list.note|default:"—" }}</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-journal-text text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Import log" %}</h2>
+        </div>
+        <div class="card-body">
+          {% if importer_list.messages %}
+            <pre class="small mb-0">{{ importer_list.messages }}</pre>
+          {% else %}
+            <span class="text-muted">{% translate "No log recorded." %}</span>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-pc-display text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Devices" %}</h2>
+        </div>
+        <div class="card-body">
+          {% blocktranslate count counter=importer_list.devices_count asvar devices_label %}{{ counter }} device{% plural %}{{ counter }} devices{% endblocktranslate %}
+          {% if perms.core.view_device and importer_list.devices_count %}
+            <a href="{{ devices_url }}">{{ devices_label }}</a>
+          {% else %}
+            {{ devices_label }}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-clock-history text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0 small">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
+            <dd class="col-sm-8">{{ importer_list.created_at|date:"Y-m-d H:i" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
+            <dd class="col-sm-8 mb-0">{{ importer_list.modified_at|date:"Y-m-d H:i" }}</dd>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock body %}

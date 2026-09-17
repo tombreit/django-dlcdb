@@ -93,7 +93,7 @@ and mirror the admin's read-only status.
           <dd>
             {% if device.is_imported %}
               {% if device.imported_by %}
-                <a class="badge text-bg-info" href="{% url 'admin:dataexchange_importerlist_change' device.imported_by.pk %}">
+                <a class="badge text-bg-info" href="{% url 'dataexchange:importer_detail' device.imported_by.pk %}">
                   {% translate "Imported" %} {{ device.imported_by.created_at }}
                 </a>
               {% else %}
