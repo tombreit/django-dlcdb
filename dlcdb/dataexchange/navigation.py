@@ -10,7 +10,7 @@ nav_entries = [
         "order": 20,
         "label": _("Bulk import"),
         "icon": "",
-        "url": "admin:dataexchange_importerlist_changelist",
+        "url": "dataexchange:importer_index",
         "required_permission": "dataexchange.view_importerlist",
     },
     {

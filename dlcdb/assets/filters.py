@@ -15,6 +15,8 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
 from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
+from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.dataexchange.models import ImporterList
 
 STATE_NO_RECORD = "no-record"
 STATE_CHOICES = [(STATE_NO_RECORD, _("No active record")), *Record.RECORD_TYPE_CHOICES]
@@ -25,6 +27,14 @@ DUPLICATE_CHOICES = [
     (DUPLICATE_SERIAL, _("Duplicate serial number")),
     (DUPLICATE_NICKNAME, _("Duplicate nickname")),
 ]
+
+
+def _imports_with_devices(request):
+    """The imports offered by the device list's import filter, tenant-scoped so
+    import file names never show up for another tenant."""
+    if request is None:
+        return ImporterList.objects.none()
+    return tenant_scoped_queryset(ImporterList.objects.filter(device__isnull=False).distinct(), request)
 
 
 class DeviceFilter(django_filters.FilterSet):
@@ -75,6 +85,11 @@ class DeviceFilter(django_filters.FilterSet):
         label=_("Import"),
         empty_label=_("Any import status..."),
     )
+    imported_by = django_filters.ModelChoiceFilter(
+        queryset=_imports_with_devices,
+        label=_("Import file"),
+        empty_label=_("Any import file..."),
+    )
     duplicate = django_filters.ChoiceFilter(
         method="duplicate_filter",
         choices=DUPLICATE_CHOICES,
@@ -115,6 +130,7 @@ class DeviceFilter(django_filters.FilterSet):
             "supplier",
             "active_record__inventory",
             "is_imported",
+            "imported_by",
             "duplicate",
             "ordering",
         ]

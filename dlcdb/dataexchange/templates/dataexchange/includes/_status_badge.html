@@ -1,0 +1,16 @@
+{% comment %}
+Status badge of one ImporterList. An empty status is a dry run that was
+previewed but never confirmed, so nothing was written.
+Caller passes:
+  importer_list - an ImporterList
+{% endcomment %}
+{% load i18n %}
+{% if importer_list.status == "success" %}
+  <span class="badge text-bg-success">{{ importer_list.get_status_display }}</span>
+{% elif importer_list.status == "warning" %}
+  <span class="badge text-bg-warning">{{ importer_list.get_status_display }}</span>
+{% elif importer_list.status == "error" %}
+  <span class="badge text-bg-danger">{{ importer_list.get_status_display }}</span>
+{% else %}
+  <span class="badge text-bg-light border">{% translate "Not confirmed" %}</span>
+{% endif %}

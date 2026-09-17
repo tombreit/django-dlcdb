@@ -6,15 +6,20 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ..core.models.abstracts import SingletonBaseModel
+from ..core.models.abstracts import AuditBaseModel, SingletonBaseModel
 
 
-class OperationLogBase(models.Model):
+class OperationLogBase(AuditBaseModel):
     """Shared persistence for an operation's result log.
 
     Holds the human-readable per-row log produced by ``OperationReport`` plus a
     severity and a one-line counts summary, so any import/sync workflow can store
     its outcome the same way (see ``OperationReport.persist``).
+
+    The audit ``user``/``username`` is whoever uploaded the file: they own the
+    run, so it is stamped once on creation and never overwritten later (e.g. by
+    the confirm step). Runs nobody triggered, like the scheduled HR sync, leave
+    it empty.
     """
 
     class Status(models.TextChoices):
@@ -37,14 +42,6 @@ class OperationLogBase(models.Model):
         blank=True,
         editable=False,
         verbose_name="DLCDB-Ausgaben",
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Erstellt",
-    )
-    modified_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Geändert",
     )
 
     class Meta:

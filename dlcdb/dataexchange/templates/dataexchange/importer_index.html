@@ -1,0 +1,81 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Imports" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "Imports" %}</h1>
+    {% if perms.core.add_device %}
+      <div class="ms-auto">
+        <a href="{% url 'dataexchange:device_import' %}" class="btn btn-primary">
+          <i class="bi bi-upload"></i> {% translate "Import devices" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+
+  {% partialdef importer-list inline %}
+    <div id="importer-list" class="position-relative" hx-target="#importer-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
+      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+        <span>
+          {% blocktranslate count counter=filtered_count with total=total_count %}{{ counter }} of {{ total }} import{% plural %}{{ counter }} of {{ total }} imports{% endblocktranslate %}
+        </span>
+        {% include "theme/filterbar/chips.html" with bar=filterbar %}
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("File") asc="file" desc="-file" %}
+              <th scope="col">{% translate "Status" %}</th>
+              <th scope="col" class="d-none d-md-table-cell">{% translate "Format" %}</th>
+              <th scope="col" class="d-none d-md-table-cell">{% translate "Tenant" %}</th>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Devices") asc="devices" desc="-devices" th_class="text-end" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for importer_list in page_obj %}
+              <tr>
+                <td class="position-relative">
+                  <a href="{% url 'dataexchange:importer_detail' importer_list.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                     class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
+                    {{ importer_list }}
+                  </a>
+                  {% if importer_list.summary %}<div class="small text-muted">{{ importer_list.summary }}</div>{% endif %}
+                  {% if importer_list.note %}<div class="small text-muted text-truncate" style="max-width: 40ch;">{{ importer_list.note }}</div>{% endif %}
+                </td>
+                <td>{% include "dataexchange/includes/_status_badge.html" %}</td>
+                <td class="d-none d-md-table-cell text-muted">{{ importer_list.get_import_format_display }}</td>
+                <td class="d-none d-md-table-cell text-muted">{{ importer_list.tenant|default:"—" }}</td>
+                <td class="text-end">
+                  <span class="badge text-bg-light border">{{ importer_list.devices_count }}</span>
+                </td>
+                <td class="small">{% include "theme/includes/_timestamps.html" with obj=importer_list %}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% if total_count == 0 %}
+                    {% translate "No imports yet." %}
+                  {% else %}
+                    {% translate "No imports match these filters." %}
+                    {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock body %}
