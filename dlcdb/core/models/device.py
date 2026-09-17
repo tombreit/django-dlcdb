@@ -304,46 +304,23 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         """
         Try to get the latest record which has an inventory stamp attached.
         """
-        from ..models import Inventory, Record
+        from ..models import Inventory
 
-        try:
-            current_inventory = Inventory.objects.get(is_active=True)
-            already_inventorized = self.record_set.order_by("pk").filter(
-                inventory=current_inventory,
-            )
+        current_inventory = Inventory.objects.active_inventory()
+        if current_inventory is None:
+            return None
 
-            # Did not use qs.last() convenience method as I want to
-            # catch an exception for no matching record found.
-            # already_inventorized = already_inventorized[:1].get()
-            # Use get_current_inventory_record property to get the latest record
-
-            # We are more flexibble if returning the queryset with matched
-            # inventorized records.
-
-        except Inventory.DoesNotExist:
-            already_inventorized = None
-        except Record.DoesNotExist:
-            already_inventorized = None
-        except Exception as e:
-            raise Exception(f"Exception: {e=}")
-
-        return already_inventorized
+        # Returning the queryset of all matched inventorized records is more
+        # flexible; use get_current_inventory_record for the latest one.
+        return self.record_set.order_by("pk").filter(inventory=current_inventory)
 
     @property
     def get_current_inventory_record(self):
         """
         Convenience method to get the latest record which has an inventory stamp attached.
         """
-
-        current_inventory_record = None
-        try:
-            current_inventory_record = self.get_current_inventory_records.last()
-        except AttributeError:
-            pass
-        except Exception:
-            pass
-
-        return current_inventory_record
+        records = self.get_current_inventory_records
+        return records.last() if records is not None else None
 
     def get_timeline(self):
         """
