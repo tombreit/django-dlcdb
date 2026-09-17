@@ -26,11 +26,11 @@ certifi==2026.7.22
     # via requests
 charset-normalizer==3.5.1
     # via requests
-crispy-bootstrap5==2026.3
+crispy-bootstrap5==2026.9
     # via django-dlcdb (pyproject.toml)
-deepmerge==3.0
+deepmerge==3.0.1
     # via sphinxcontrib-openapi
-django==6.0.8
+django==6.1.1
     # via
     #   crispy-bootstrap5
     #   django-appconf
@@ -58,7 +58,7 @@ django-select2==8.4.8
     # via django-dlcdb (pyproject.toml)
 django-simple-history==3.13.0
     # via django-dlcdb (pyproject.toml)
-djangorestframework==3.18.0
+djangorestframework==3.18.1
     # via
     #   django-dlcdb (pyproject.toml)
     #   drf-spectacular
@@ -73,13 +73,13 @@ drf-spectacular==0.30.0
     # via django-dlcdb (pyproject.toml)
 et-xmlfile==2.0.0
     # via openpyxl
-huey==3.3.4
+huey==3.4.0
     # via django-dlcdb (pyproject.toml)
-icalendar==7.2.2
+icalendar==7.3.0
     # via django-dlcdb (pyproject.toml)
-idna==3.18
+idna==3.19
     # via requests
-imagesize==2.0.0
+imagesize==2.0.1
     # via sphinx
 inflection==0.5.1
     # via drf-spectacular
@@ -111,7 +111,7 @@ mistune==3.3.4
     # via sphinx-mdinclude
 myst-parser==5.1.0
     # via django-dlcdb (pyproject.toml)
-narwhals==2.24.0
+narwhals==2.26.0
     # via plotly
 openpyxl==3.1.5
     # via django-dlcdb (pyproject.toml)
@@ -124,7 +124,7 @@ picobox==4.0.0
     # via sphinxcontrib-openapi
 pillow==12.3.0
     # via django-dlcdb (pyproject.toml)
-plotly==6.9.0
+plotly==7.1.0
     # via django-dlcdb (pyproject.toml)
 pydata-sphinx-theme==0.20.0
     # via sphinx-book-theme
@@ -196,7 +196,7 @@ sphinxcontrib-httpdomain==2.0.0
     # via sphinxcontrib-openapi
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-mermaid==2.1.0
+sphinxcontrib-mermaid==2.1.1
     # via django-dlcdb (pyproject.toml)
 sphinxcontrib-openapi==0.9.0
     # via django-dlcdb (pyproject.toml)
@@ -208,11 +208,11 @@ sqlparse==0.6.0
     # via django
 typing-extensions==4.16.0
     # via beautifulsoup4
-tzdata==2026.3
+tzdata==2026.4
     # via icalendar
 uritemplate==4.2.0
     # via drf-spectacular
-urllib3==2.7.0
+urllib3==2.8.0
     # via requests
 wheel==0.48.0
     # via sphinx-togglebutton
