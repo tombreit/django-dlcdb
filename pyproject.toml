@@ -101,6 +101,22 @@ line-length = 120
 target-version = "py311"
 extend-exclude = ["migrations"]
 
+[tool.ruff.lint]
+# TODO: Phase the following ignores out
+ignore = [
+    "RUF012",
+    "C408",
+    "BLE001",
+    "DTZ001",
+    "DTZ002",
+    "DTZ011",
+    "DTZ007",
+    "DTZ005",
+    "TRY401",
+    "SIM102",
+    "C400",
+]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "dlcdb.settings.test"
 # norecursedirs = [
