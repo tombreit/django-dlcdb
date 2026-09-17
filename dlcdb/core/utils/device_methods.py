@@ -110,6 +110,9 @@ def get_device_state_data(device, *, user=None, app_name=None):
         action_url = f"{proxy_model.get_admin_action_url()}?device={device.pk}"
         action_label = transition.label
         external = True
+        # How the dropdown submits the action: a plain link, or a POST form for
+        # native actions that change state directly without a form page.
+        method = "get"
 
         # Routing is by transition *name*, not by target state: four different
         # moves write an InRoomRecord, and dispatching on the target would
@@ -121,6 +124,12 @@ def get_device_state_data(device, *, user=None, app_name=None):
             # transition for the device's current state.
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
             external = False
+        elif transition.name == "order" and app_name == "assets":
+            # Native frontend action: a POST that writes the ORDERED record and
+            # returns to the device page.
+            action_url = reverse("assets:device_order", args=[device.pk])
+            external = False
+            method = "post"
         elif transition.name == "lend":
             if app_name == "assets" and active_record:
                 # Native frontend lending flow. LENT is only reachable from an
@@ -145,6 +154,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
                 "url": action_url,
                 "label": action_label,
                 "external": external,
+                "method": method,
             }
         )
 

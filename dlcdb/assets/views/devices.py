@@ -190,6 +190,25 @@ def device_detail(request, pk):
     )
 
 
+@require_POST
+@htmx_permission_required(lifecycle.BY_NAME["order"].permission)
+def device_order(request, pk):
+    """Record a device as ordered (None -> ORDERED) and return to its detail page.
+
+    The frontend counterpart of the admin OrderedRecord add-view, offered from
+    the device's "New state" menu. Gated on the transition's own permission only;
+    the order date is taken from the device's purchase date.
+    """
+    device = _get_device(request, pk)
+    try:
+        lifecycle.transition_order(device, user=request.user, date_of_purchase=device.purchase_date)
+    except lifecycle.IllegalTransition as error:
+        messages.error(request, " ".join(error.messages))
+    else:
+        messages.success(request, _("Device “%(device)s” was marked as ordered.") % {"device": device})
+    return redirect("assets:device_detail", pk=device.pk)
+
+
 def _lending_url(user, device):
     """The lending this device is currently out on, or None.
 

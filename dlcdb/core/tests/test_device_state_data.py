@@ -102,6 +102,21 @@ def test_a_record_less_device_offers_only_what_the_user_may_do(plain_device, mak
     assert _targets(state_data) == [f"{reverse('admin:core_inroomrecord_add')}?device={plain_device.pk}"]
 
 
+@pytest.mark.django_db
+def test_the_assets_surface_orders_natively_via_post(plain_device, make_user):
+    """On the frontend, Order is a POST to the assets view, not the admin add-view."""
+    user = make_user("transition_can_order_device")
+
+    [action] = plain_device.get_state_data(user=user, app_name="assets").actions
+    assert action["url"] == reverse("assets:device_order", args=[plain_device.pk])
+    assert action["external"] is False
+    assert action["method"] == "post"
+
+    [action] = plain_device.get_state_data(user=user).actions
+    assert action["url"] == f"{reverse('admin:core_orderedrecord_add')}?device={plain_device.pk}"
+    assert action["method"] == "get"
+
+
 # --- Current-state badge -------------------------------------------------
 
 

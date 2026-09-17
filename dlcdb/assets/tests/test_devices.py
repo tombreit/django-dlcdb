@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dlcdb.assets.forms import DeviceForm
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Room
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
@@ -151,6 +151,56 @@ class DeviceFrontendTests(BaseTest):
         self.assertIn("edv_id", response.context["form"].errors)
         self.assertIn("sap_id", response.context["form"].errors)
         self.assertEqual(Device.objects.count(), count)
+
+    def _tenant_device(self, tenant, **fields):
+        device = self._create_device(edv_id="EDV-TENANT-ORDER", sap_id="8-8")
+        device.tenant = tenant
+        for name, value in fields.items():
+            setattr(device, name, value)
+        device.save()
+        return device
+
+    def test_non_staff_user_with_order_permission_orders_from_the_detail_page(self):
+        user, tenant = self._tenant_viewer()
+        user.user_permissions.add(Permission.objects.get(codename="transition_can_order_device"))
+        device = self._tenant_device(tenant, purchase_date=datetime.date(2026, 9, 1))
+        order_url = reverse("assets:device_order", args=[device.pk])
+        detail_url = reverse("assets:device_detail", args=[device.pk])
+        self.client.force_login(user)
+
+        self.assertContains(self.client.get(detail_url), f'action="{order_url}"')
+        response = self.client.post(order_url)
+
+        self.assertRedirects(response, detail_url)
+        device.refresh_from_db()
+        self.assertEqual(device.active_record.record_type, Record.ORDERED)
+        self.assertEqual(device.active_record.user, user)
+        self.assertEqual(device.active_record.date_of_purchase, datetime.date(2026, 9, 1))
+
+    def test_ordering_from_the_detail_page_requires_the_order_permission(self):
+        user, tenant = self._tenant_viewer()
+        device = self._tenant_device(tenant)
+        self.client.force_login(user)
+
+        response = self.client.post(reverse("assets:device_order", args=[device.pk]))
+
+        self.assertEqual(response.status_code, 403)
+        device.refresh_from_db()
+        self.assertIsNone(device.active_record)
+
+    def test_ordering_from_the_detail_page_is_post_only(self):
+        response = self.client.get(reverse("assets:device_order", args=[self.untracked_device.pk]))
+        self.assertEqual(response.status_code, 405)
+
+    def test_ordering_a_device_that_already_has_a_record_is_refused(self):
+        record_count = self.inroom_device.record_set.count()
+
+        response = self.client.post(reverse("assets:device_order", args=[self.inroom_device.pk]))
+
+        self.assertRedirects(response, reverse("assets:device_detail", args=[self.inroom_device.pk]))
+        self.assertEqual(self.inroom_device.record_set.count(), record_count)
+        self.inroom_device.refresh_from_db()
+        self.assertEqual(self.inroom_device.active_record.record_type, Record.INROOM)
 
     def test_non_superuser_cannot_change_loanability_while_device_is_lent(self):
         device = self._create_device(edv_id="EDV-LENT", sap_id="6-6")

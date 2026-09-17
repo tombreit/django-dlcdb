@@ -6,8 +6,9 @@ just with the "assets" surface so Move/Lend point at the native frontend flows.
 Each action carries an `external` flag: True means it opens a Django admin
 add-view (needs is_staff), so those items are staff-gated and marked with an
 out-link icon — matching the "Trail" card convention. Native actions (Move,
-Lend) are already permission-filtered in the builder, so they render for anyone
-who got them.
+Lend, Order) are already permission-filtered in the builder, so they render for
+anyone who got them. A native action with method "post" (Order) changes state
+directly, so it is a form button rather than a link.
 {% endcomment %}
 {% load i18n %}
 {% if state_data.actions %}
@@ -26,6 +27,13 @@ who got them.
               </a>
             </li>
           {% endif %}
+        {% elif action.method == "post" %}
+          <li>
+            <form method="post" action="{{ action.url }}">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-item">{{ action.label|title }}</button>
+            </form>
+          </li>
         {% else %}
           <li>
             <a class="dropdown-item" href="{{ action.url }}">{{ action.label|title }}</a>
