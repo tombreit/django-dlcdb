@@ -1,0 +1,39 @@
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The status line at the top of a list fragment: how many rows the filters select,
+the active filter chips, and — where the view offers one — a CSV export link.
+
+``count_label`` is passed in already rendered, because the count sentence names the
+objects ("3 of 12 rooms") and {% templatetag openblock %} blocktranslate
+{% templatetag closeblock %} cannot take the noun as a parameter without
+breaking plural forms. Build it with ``asvar`` in the page:
+
+  {% templatetag openblock %} blocktranslate count counter=filtered_count with total=total_count asvar count_label {% templatetag closeblock %}…
+
+``export_href`` and ``filtered_count`` are read straight from the context, so a
+page that has no export simply does not set one.
+
+Params: bar (the filterbar), count_label.
+
+Deliberately not named ``label``: theme/filterbar/_clear_all.html takes an
+optional ``label`` of its own, and this include does not use ``only``, so the
+name would leak down and relabel the "Clear all" link.
+{% endcomment %}
+
+<div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
+  <span>{{ count_label }}</span>
+  {% include "theme/filterbar/chips.html" with bar=bar %}
+  {% if export_href and filtered_count %}
+    {% comment %}
+    The export covers every filtered row, not just this page, so the count in the
+    link is the filtered total rather than what is visible.
+    {% endcomment %}
+    <a class="ms-4" href="{{ export_href }}">
+      <i class="bi bi-filetype-csv"></i>
+      {% blocktranslate count counter=filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
+    </a>
+  {% endif %}
+</div>

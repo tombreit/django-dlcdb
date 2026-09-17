@@ -1,0 +1,22 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% comment %}
+Form-level (non-field) errors, rendered above the form body.
+
+Renders nothing when the form has none, so it is safe to include
+unconditionally. Include it exactly once per form — a second include renders the
+same errors twice.
+
+Params:
+  form  the bound form.
+{% endcomment %}
+
+{% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+  </div>
+{% endif %}

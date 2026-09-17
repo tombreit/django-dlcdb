@@ -1,0 +1,21 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+"Back to the list" button closing a detail page header band.
+
+Params:
+  url          href to return to (usually ``index_url``).
+  label        (optional) button text; defaults to "Back to list".
+  extra_class  (optional) extra classes on the <a> (e.g. "ms-auto" where the
+               header band has no spacer of its own).
+{% endcomment %}
+
+<a href="{{ url }}" class="btn btn-outline-secondary {{ extra_class }}">
+  <i class="bi bi-arrow-left"></i> {{ label|default:_("Back to list") }}
+</a>

@@ -1,0 +1,79 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+Shared frame for the editable detail pages (person, room, device, master data).
+
+Owns the header band, the two-column split and the ``can_change`` fork, so a page
+only supplies what is actually its own. Extension points are blocks with
+defaults, the way the Django admin exposes ``object-tools`` — override a block,
+or extend it with {{ block.super }}.
+
+Expects from the view: ``can_change``, ``form``, ``form_action``, ``index_url``.
+
+Blocks:
+  detail_page_class      full class attribute for the page wrapper, including
+                         the ``class=`` itself, so pages that need none emit a
+                         bare <div> (e.g. ' class="device-page"')
+  detail_leading         avatar / icon tile left of the title
+  detail_title_class     extra <h1> classes, with a leading space
+                         (e.g. ' font-monospace')
+  detail_title           the heading itself
+  detail_meta            badges and secondary text under the heading
+  object_tools           header-right actions; defaults to the back link
+  detail_form_class      full class attribute for the <form>, as above
+  detail_form_fields     the form body (an app's _form_fields.html)
+  detail_readonly_notice why the page is read-only; defaults to the permission
+                         wording, since that is the common case
+  detail_readonly        read-only rendering of the object
+  detail_sidebar         the col-lg-4 column
+
+Read-only pages that are read-only *by design* (assets/records) do not use this
+frame: their header carries a breadcrumb band instead and there is no form.
+{% endcomment %}
+
+{% block body %}
+<div{% block detail_page_class %}{% endblock %}>
+
+  {% block detail_header %}
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+      {% block detail_leading %}{% endblock detail_leading %}
+      <div class="me-auto">
+        <h1 class="h3 mb-1{% block detail_title_class %}{% endblock %}">{% block detail_title %}{% endblock %}</h1>
+        <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
+          {% block detail_meta %}{% endblock detail_meta %}
+        </div>
+      </div>
+      {% block object_tools %}
+        {% include "theme/includes/_back_link.html" with url=index_url %}
+      {% endblock object_tools %}
+    </div>
+  {% endblock detail_header %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% block detail_main %}
+        {% if can_change %}
+          <form{% block detail_form_class %}{% endblock %} method="post" action="{{ form_action }}" novalidate>
+            {% csrf_token %}
+            {% block detail_form_fields %}{% endblock detail_form_fields %}
+            {% include "theme/includes/_form_action_bar.html" with cancel_url=index_url %}
+          </form>
+        {% else %}
+          {% block detail_readonly_notice %}
+            {% include "theme/includes/_readonly_notice.html" with message=readonly_message %}
+          {% endblock detail_readonly_notice %}
+          {% block detail_readonly %}{% endblock detail_readonly %}
+        {% endif %}
+      {% endblock detail_main %}
+    </div>
+
+    <div class="col-lg-4">
+      {% block detail_sidebar %}{% endblock detail_sidebar %}
+    </div>
+  </div>
+
+</div>
+{% endblock body %}

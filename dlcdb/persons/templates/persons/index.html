@@ -1,11 +1,10 @@
-{% extends "theme/_base.html" %}
+{% extends "theme/_index_base.html" %}
 {% load i18n %}
 
 {% block title %}{% translate "People" %}{% endblock title %}
+{% block index_title %}{% translate "People" %}{% endblock index_title %}
 
-{% block body %}
-  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-    <h1 class="mb-0">{% translate "People" %}</h1>
+{% block object_tools %}
     {% if perms.core.add_person %}
       <div class="ms-auto">
         <a href="{% url 'persons:add' %}" class="btn btn-primary">
@@ -13,19 +12,14 @@
         </a>
       </div>
     {% endif %}
-  </div>
+{% endblock object_tools %}
 
-  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
-
+{% block index_list %}
   {% partialdef person-list inline %}
     <div id="person-list" class="position-relative" hx-target="#person-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
       {% include "theme/includes/_list_loading.html" %}
-      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
-        <span>
-          {% blocktranslate count counter=person_filtered_count with total=person_total_count %}{{ counter }} of {{ total }} person{% plural %}{{ counter }} of {{ total }} persons{% endblocktranslate %}
-        </span>
-        {% include "theme/filterbar/chips.html" with bar=filterbar %}
-      </div>
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} person{% plural %}{{ counter }} of {{ total }} persons{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
 
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -78,4 +72,4 @@
       {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
     </div>
   {% endpartialdef %}
-{% endblock body %}
+{% endblock index_list %}

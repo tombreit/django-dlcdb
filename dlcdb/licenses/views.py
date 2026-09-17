@@ -59,8 +59,8 @@ def index(request):
         ),
         "current_ordering": data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here.
-        "licenses_filtered": page_obj.paginator.count,
-        "licenses_total": base_qs.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": base_qs.count(),
         # Reading the list and writing to it are separate permissions, so the
         # write affordances are hidden rather than the whole page withheld.
         "can_add": request.user.has_perm("core.add_licencerecord"),

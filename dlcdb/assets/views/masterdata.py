@@ -18,13 +18,13 @@ from django.forms import ModelForm
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
 from ..filters import DeviceTypeFilter, ManufacturerFilter, SupplierFilter
@@ -181,13 +181,7 @@ def _masterdata_detail(request, spec, pk):
 
     # The index threads its active search/filter/sort here as ?next= so Save,
     # Back and Cancel return to the exact filtered list.
-    next_query = request.GET.get("next", "")
-    index_url = reverse(spec.index_url)
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-    form_action = reverse(spec.detail_url, args=[obj.pk])
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
+    index_url, form_action = detail_urls(request, spec.index_url, spec.detail_url, obj.pk)
 
     if request.method == "POST":
         if not can_change:

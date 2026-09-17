@@ -12,7 +12,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -25,6 +24,7 @@ from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
+from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
 from ..filters import DeviceFilter
@@ -95,8 +95,8 @@ def device_index(request):
         "current_ordering": device_filter.data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here instead of
         # a second device_filter.qs.count().
-        "device_filtered_count": page_obj.paginator.count,
-        "device_total_count": device_filter.queryset.count(),
+        "filtered_count": page_obj.paginator.count,
+        "total_count": device_filter.queryset.count(),
         "export_href": export_href(request, "assets:device_export_csv"),
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
@@ -154,13 +154,7 @@ def device_detail(request, pk):
     # The index threads its active search/filter/sort here as ?next= so Save,
     # Back and Cancel return to the exact filtered list. Read from GET so it
     # survives both the render and the POST (form_action carries it forward).
-    next_query = request.GET.get("next", "")
-    index_url = reverse("assets:device_index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-    form_action = reverse("assets:device_detail", args=[device.pk])
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
+    index_url, form_action = detail_urls(request, "assets:device_index", "assets:device_detail", device.pk)
 
     if request.method == "POST":
         if not can_change:
@@ -231,6 +225,6 @@ def person_search(request):
     people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(
         request,
-        "assets/includes/_person_search_results.html",
+        "theme/includes/_person_search_results.html",
         {"people": people, "query": value},
     )

@@ -1,0 +1,56 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+Shared frame for the filterbar list pages.
+
+Owns everything above the swapped list fragment: the heading band, the action
+slot and the filterbar. Extension points are blocks with defaults, the way the
+Django admin exposes ``object-tools`` — override a block, or extend it with
+{{ block.super }}.
+
+The fragment itself stays in the page. ``{% templatetag openblock %} partialdef
+{% templatetag closeblock %}`` names are read at compile time and cannot be
+variables, and a partial declared in this base is not reachable as
+``<page>.html#<name>`` — so each page declares its own, and fills ``index_list``
+with it.
+
+Do not try to keep the fragment body here and wrap it from the page with
+{{ block.super }} either: rendering ``<page>.html#<name>`` then yields an empty
+string — silently, with no traceback — because ``block.super`` has no block
+context in a direct partial render. Both were checked against Django 6.0.8.
+
+Expects from the view: ``filterbar``.
+
+Blocks:
+  index_content_id   full id attribute for the div wrapping the filterbar and
+                     the list, including the ``id=`` itself. Licenses swaps its
+                     "add license" form in here, which is why the heading stays
+                     outside it; everything else emits a bare <div>.
+  index_title        the <h1> text
+  object_tools       header-right actions; empty by default, since a read-only
+                     list legitimately has none
+  index_prebar       a band between the heading and the filterbar (the record
+                     index scopes itself to one device there)
+  index_list         the {% templatetag openblock %} partialdef {% templatetag closeblock %} fragment
+{% endcomment %}
+
+{% block body %}
+
+  {% block index_header %}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+      <h1 class="mb-0">{% block index_title %}{% endblock %}</h1>
+      {% block object_tools %}{% endblock object_tools %}
+    </div>
+  {% endblock index_header %}
+
+  {% block index_prebar %}{% endblock index_prebar %}
+
+  <div{% block index_content_id %}{% endblock %}>
+    {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
+    {% block index_list %}{% endblock index_list %}
+  </div>
+
+{% endblock body %}

@@ -34,7 +34,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, HttpResponseServerError, JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -51,6 +50,7 @@ from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, Inventory, Note, Room
 from dlcdb.core.utils.helpers import get_user_email
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.theme.pagination import paginate
 
 from .filters import DeviceFilter, RoomFilter
 from .forms import DeviceAddForm, InventorizeRoomForm, NoteForm
@@ -233,12 +233,7 @@ def search_devices(request):
     )
     filter_devices = DeviceFilter(request.GET, queryset=all_devices)
 
-    request_copy = request.GET.copy()
-    parameters = request_copy.pop("page", True) and request_copy.urlencode()
-
-    paginator = Paginator(filter_devices.qs, 25)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginate(request, filter_devices.qs)
 
     # Add a custom attribute to each device in the current page
     for device in page_obj:
@@ -255,7 +250,6 @@ def search_devices(request):
         "page_obj": page_obj,
         "filter_devices": filter_devices,
         "all_devices_count": all_devices.count(),
-        "parameters": parameters,
     }
     return TemplateResponse(request, template, context)
 

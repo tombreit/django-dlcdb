@@ -4,11 +4,7 @@ Generic form body for the simple master-data models (device type, manufacturer,
 supplier): non-field errors, then every visible field full-width in one card.
 Params: form, heading, icon (bi icon class for the card header).
 {% endcomment %}
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">
-    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
-  </div>
-{% endif %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
 
 <section class="card mb-3">
   <div class="card-header d-flex align-items-center gap-2">

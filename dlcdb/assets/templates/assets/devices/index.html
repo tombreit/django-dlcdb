@@ -1,60 +1,36 @@
-{% extends "theme/_base.html" %}
+{% extends "theme/_index_base.html" %}
 {% load i18n %}
 
 {% block title %}{% translate "Devices" %}{% endblock title %}
+{% block index_title %}{% translate "Devices" %}{% endblock index_title %}
 
-{% block body %}
-  <div class="d-flex align-items-center mb-3">
-    <h1 class="mb-0">{% translate "Devices" %}</h1>
-    {% if perms.core.add_device %}
-      <div class="btn-group ms-auto">
-        <a href="{% url 'assets:device_add' %}" class="btn btn-primary">
-          <i class="bi bi-plus-lg"></i> {% translate "Add device" %}
-        </a>
-        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown" aria-expanded="false">
-          <span class="visually-hidden">{% translate "Toggle dropdown" %}</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li>
-            <a class="dropdown-item" href="{% url 'dataexchange:device_import' %}">
-              <i class="bi bi-upload"></i> {% translate "Import devices" %}
-            </a>
-          </li>
-        </ul>
-      </div>
-    {% endif %}
-  </div>
+{% block object_tools %}
+  {% if perms.core.add_device %}
+    <div class="btn-group ms-auto">
+      <a href="{% url 'assets:device_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> {% translate "Add device" %}
+      </a>
+      <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="visually-hidden">{% translate "Toggle dropdown" %}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <a class="dropdown-item" href="{% url 'dataexchange:device_import' %}">
+            <i class="bi bi-upload"></i> {% translate "Import devices" %}
+          </a>
+        </li>
+      </ul>
+    </div>
+  {% endif %}
+{% endblock object_tools %}
 
-  {% include "theme/filterbar/filterbar.html" with bar=filterbar %}
-
+{% block index_list %}
   {% partialdef device-list inline %}
     <div id="device-list" class="position-relative" hx-target="#device-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
       {% include "theme/includes/_list_loading.html" %}
-      <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">
-        <span>
-          {% blocktranslate count counter=device_filtered_count with total=device_total_count %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
-        </span>
-        {% include "theme/filterbar/chips.html" with bar=filterbar %}
-        {% if device_filtered_count %}
-          {% comment %}
-            A plain link on purpose: an hx-get here would swap the CSV body into
-            the page. The fragment root's hx-target/hx-swap are inherited only by
-            elements that already issue an HTMX request, and hx-boost is used
-            nowhere, so a bare href cannot be ajax-ified.
-
-            Living inside the swapped fragment is what keeps the label honest:
-            count and href are re-rendered from the same request on every filter
-            change, so the button always states the scope it will actually export.
-            The href is built in the view: the builtin querystring tag would keep
-            this page's path rather than the export endpoint's.
-          {% endcomment %}
-          <a class="ms-4" href="{{ export_href }}">
-            <i class="bi bi-filetype-csv"></i>
-            {% blocktranslate count counter=device_filtered_count %}Export {{ counter }} device as CSV{% plural %}Export {{ counter }} devices as CSV{% endblocktranslate %}
-          </a>
-        {% endif %}
-      </div>
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} device{% plural %}{{ counter }} of {{ total }} devices{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
 
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -119,4 +95,4 @@
       {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
     </div>
   {% endpartialdef %}
-{% endblock body %}
+{% endblock index_list %}

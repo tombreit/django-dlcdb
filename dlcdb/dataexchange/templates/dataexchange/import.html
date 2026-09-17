@@ -39,12 +39,8 @@
         {% include "theme/includes/_field.html" with field=form.tenant %}
         {% include "theme/includes/_field.html" with field=form.note %}
       </div>
-      <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="submit">
-          <i class="bi bi-search"></i> {% translate "Check file (dry run)" %}
-        </button>
-        <a class="btn btn-outline-secondary" href="{% url 'assets:device_index' %}">{% translate "Cancel" %}</a>
-      </div>
+      {% url 'assets:device_index' as cancel_url %}
+      {% include "theme/includes/_form_action_bar.html" with cancel_url=cancel_url submit_label=_("Check file (dry run)") %}
     </form>
 
   </div>

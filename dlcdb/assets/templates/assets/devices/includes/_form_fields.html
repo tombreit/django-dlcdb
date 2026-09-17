@@ -1,9 +1,5 @@
 {% load i18n %}
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">
-    {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
-  </div>
-{% endif %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
 
 <section class="card device-card mb-3">
   <div class="card-header">
@@ -58,7 +54,7 @@
         {% endcomment %}
         {% url 'assets:person_search' as person_search_url %}
         {{ form.contact_person_internal }}
-        {% include "theme/includes/_picker.html" with picker_id="contact_person" field_id=form.contact_person_internal.id_for_label search_url=person_search_url search_name="q_person" label=form.contact_person_internal.label placeholder=_("Search person by name or e-mail, or “*” for all…") errors=form.contact_person_internal.errors has_selected=form.instance.contact_person_internal selected_item_template="assets/includes/_person_list_item.html" person=form.instance.contact_person_internal selectable=False %}
+        {% include "theme/includes/_picker.html" with picker_id="contact_person" field_id=form.contact_person_internal.id_for_label search_url=person_search_url search_name="q_person" label=form.contact_person_internal.label placeholder=_("Search person by name or e-mail, or “*” for all…") errors=form.contact_person_internal.errors has_selected=form.instance.contact_person_internal selected_item_template="theme/includes/_person_list_item.html" person=form.instance.contact_person_internal selectable=False %}
       </div>
       {% include "theme/includes/_field.html" with field=form.order_number col="col-md-6" %}
       {% include "theme/includes/_field.html" with field=form.cost_centre col="col-md-6" %}
