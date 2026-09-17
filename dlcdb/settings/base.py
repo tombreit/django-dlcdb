@@ -120,9 +120,14 @@ MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = env.str("EMAIL_SUBJECT_PREFIX", default="[DLCDB] ")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="mail@example.org")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
-EMAIL_BACKEND = env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-EMAIL_HOST = env.str("EMAIL_HOST", default="")
-EMAIL_PORT = env.int("EMAIL_PORT", default=0)
+MAILERS = {
+    "default": {
+        "BACKEND": env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"),
+    },
+}
+# Only SMTP-like backends accept host/port; the console backend rejects unknown OPTIONS.
+if env.str("EMAIL_HOST", default=""):
+    MAILERS["default"]["OPTIONS"] = {"host": env.str("EMAIL_HOST"), "port": env.int("EMAIL_PORT", default=25)}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

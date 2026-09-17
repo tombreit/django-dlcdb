@@ -9,6 +9,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.html import format_html, format_html_join
 from django.contrib import admin
+from django.contrib.admin.options import ActionLocation
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
@@ -116,8 +117,8 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "restore_removed_to_lost",
     ]
 
-    def get_actions(self, request):
-        actions = super().get_actions(request)
+    def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
+        actions = super().get_actions(request, action_location)
         if not request.user.is_superuser:
             # Remove the restore_to_inroom action for non-superusers
             actions.pop("restore_removed_to_lost", None)

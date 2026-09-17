@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 email_objs.append(email_obj)
 
         try:
-            connection = mail.get_connection(fail_silently=False)
+            connection = mail.mailers.default
             messages = email_objs
             connection.send_messages(messages)
             self.stdout.write(f"+++ verify loaned equipment: {len(email_objs)} emails sent +++")

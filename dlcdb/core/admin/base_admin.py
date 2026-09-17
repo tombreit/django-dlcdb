@@ -4,6 +4,7 @@
 
 from django.db.models import Q
 from django.contrib import admin
+from django.contrib.admin.options import ActionLocation
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -119,12 +120,12 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         # "is_not_soft_deleted",
     )
 
-    def get_actions(self, request):
+    def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
         """
         Only expose hard delete queryset option for superusers.
         https://docs.djangoproject.com/en/4.2/ref/contrib/admin/actions/#conditionally-enabling-or-disabling-actions
         """
-        actions = super().get_actions(request)
+        actions = super().get_actions(request, action_location)
         if not request.user.is_superuser:
             if "hard_delete_action" in actions:
                 del actions["hard_delete_action"]
