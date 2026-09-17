@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Devices can be copied in the frontend via "Save as new" on the detail page
 * Import history in the frontend: a read-only list of all device imports with status and log; the device list can be filtered by import file
 * Frontend permissions consolidated onto Django's default `view`/`add`/`change` permissions of the model each view touches. The license module now needs `core.view_licencerecord`; assign this permission to the groups that should keep access (likewise `smallstuff.view_assignedthing` and `smallstuff.add_assignedthing` for Kleinkram)
 * Device search now also matches the device note

@@ -13,6 +13,14 @@ page in the custom frontend.
 Params:
   cancel_url    href for the Cancel link (usually ``index_url``).
   submit_label  (optional) submit button text; defaults to "Save changes".
+  save_as_new_url
+                (optional) add URL of the same model, like the admin's "Save as
+                new". Set it only when the user may add. The button re-posts this
+                form there via ``formaction``; the add view then creates a fresh
+                object from the posted fields, or re-renders its add form with the
+                validation errors (e.g. a unique field that must change).
+                With two save buttons, Cancel moves to the right edge so it is
+                not read as a third save variant.
 {% endcomment %}
 
 <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
@@ -20,5 +28,11 @@ Params:
     <i class="bi bi-check-lg"></i>
     {{ submit_label|default:_("Save changes") }}
   </button>
-  <a class="btn btn-outline-secondary" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
+  {% if save_as_new_url %}
+    <button class="btn btn-outline-primary" type="submit" formaction="{{ save_as_new_url }}">
+      <i class="bi bi-copy"></i>
+      {% translate "Save as new" %}
+    </button>
+  {% endif %}
+  <a class="btn btn-outline-secondary{% if save_as_new_url %} ms-auto{% endif %}" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
 </div>

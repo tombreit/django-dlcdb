@@ -458,6 +458,10 @@ msgstr "Zurück zur Übersicht"
 msgid "Save changes"
 msgstr "Änderungen speichern"
 
+#: dlcdb/theme/templates/theme/includes/_form_action_bar.html:33
+msgid "Save as new"
+msgstr "Als neu speichern"
+
 #: dlcdb/assets/templates/assets/devices/detail.html:44
 #: dlcdb/assets/templates/assets/devices/form.html:15
 #: dlcdb/assets/templates/assets/devices/form.html:27

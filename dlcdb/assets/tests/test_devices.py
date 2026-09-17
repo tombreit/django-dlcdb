@@ -108,6 +108,50 @@ class DeviceFrontendTests(BaseTest):
         self.assertEqual(device.user, self.user)
         self.assertTrue(device.is_lentable)
 
+    def test_detail_offers_save_as_new_posting_to_the_add_view(self):
+        response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))
+        self.assertContains(response, f'formaction="{reverse("assets:device_add")}"')
+
+    def test_save_as_new_is_hidden_without_add_permission(self):
+        user, tenant = self._tenant_viewer()
+        user.user_permissions.add(Permission.objects.get(codename="change_device", content_type__app_label="core"))
+        device = self._create_device(edv_id="EDV-TENANT", sap_id="7-7")
+        device.tenant = tenant
+        device.save()
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("assets:device_detail", args=[device.pk]))
+        self.assertContains(response, '<form class="device-form" method="post"')
+        self.assertNotContains(response, "formaction=")
+
+    def test_save_as_new_creates_a_copy_and_leaves_the_original(self):
+        original = self.inroom_device
+        response = self.client.post(
+            reverse("assets:device_add"),
+            {"edv_id": "EDV-COPY", "manufacturer": original.manufacturer.pk, "series": original.series},
+        )
+
+        copy = Device.objects.get(edv_id="EDV-COPY")
+        self.assertRedirects(response, reverse("assets:device_detail", args=[copy.pk]))
+        self.assertNotEqual(copy.uuid, original.uuid)
+        self.assertEqual(copy.series, "Notebook One")
+        self.assertIsNone(copy.active_record)
+        original.refresh_from_db()
+        self.assertEqual(original.edv_id, "EDV-AVAILABLE")
+
+    def test_save_as_new_with_unchanged_unique_fields_shows_the_add_form_with_errors(self):
+        count = Device.objects.count()
+        response = self.client.post(
+            reverse("assets:device_add"),
+            {"edv_id": self.inroom_device.edv_id, "sap_id": self.inroom_device.sap_id},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "assets/devices/form.html")
+        self.assertIn("edv_id", response.context["form"].errors)
+        self.assertIn("sap_id", response.context["form"].errors)
+        self.assertEqual(Device.objects.count(), count)
+
     def test_non_superuser_cannot_change_loanability_while_device_is_lent(self):
         device = self._create_device(edv_id="EDV-LENT", sap_id="6-6")
         device.is_lentable = True

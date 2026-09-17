@@ -180,6 +180,8 @@ def device_detail(request, pk):
             "can_change": can_change,
             "index_url": index_url,
             "form_action": form_action,
+            # "Save as new" re-posts this form to the add view (see _form_action_bar.html).
+            "save_as_new_url": reverse("assets:device_add") if request.user.has_perm("core.add_device") else None,
             # Shared state-machine data (same builder the admin uses); the
             # "assets" surface swaps in native frontend URLs for Move/Lend.
             "state_data": device.get_state_data(user=request.user, app_name="assets"),
