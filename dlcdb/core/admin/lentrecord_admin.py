@@ -29,7 +29,6 @@ from dlcdb.tenants.admin import TenantScopedAdmin
 from .. import lifecycle
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..models import LentRecord, Record
-from ..utils.helpers import get_denormalized_user
 from ..utils.links import linked_message, obj_link
 from .base_admin import CustomBaseModelAdmin
 from .filters.lentstate_filter import LentStateRecordFilter
@@ -259,8 +258,6 @@ class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
 
         # Save logic -- the same lend/return/edit dispatch as the lending
         # frontend, routed through the lifecycle transitions.
-        user, username = get_denormalized_user(request.user)
-
         if obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
             # War ein LENT record und hat jetzt einen Rückgabe-Timestamp: Rückgabe
             # stempeln und das Gerät in seinen Raum zurückführen.

@@ -97,10 +97,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
             # No pre-filtering for superusers
             qs = super().get_queryset(request)
 
-        if not request.tenant:
-            # print("We have no tenant, returning an empty queryset")
-            qs = qs
-        else:
+        if request.tenant:
             qs = super().get_queryset(request)
 
             if self.model is Device:
@@ -127,7 +124,7 @@ class TenantScopedAdmin(admin.ModelAdmin):
         # print(f"TenantScopedAdmin form.base_fields: {form.base_fields=}")
 
         if form.base_fields.get("tenant"):
-            form.base_fields["tenant"].disabled = False if request.user.is_superuser else True
+            form.base_fields["tenant"].disabled = not request.user.is_superuser
 
         if not obj:
             if not request.user.is_superuser and request.tenant:

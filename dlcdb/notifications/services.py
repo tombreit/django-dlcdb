@@ -77,7 +77,7 @@ def delete_license_subscriptions(subscriber, device):
     result = []
 
     for license_event in Subscription.LICENSE_EVENTS:
-        deleted_count, deleted_objects = Subscription.objects.filter(
+        deleted_count, _deleted_objects = Subscription.objects.filter(
             event=license_event,
             subscriber=subscriber,
             device=device,

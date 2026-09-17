@@ -150,8 +150,8 @@ class LendReturnParityTests(BaseTest):
         self.assertEqual(admin_state, snapshot(front_device))
 
     def test_lend_closes_the_previous_inroom_record_on_both_paths(self):
-        admin_device, admin_record = self._available_device("EDV-ADM-CLOSE", "3-3")
-        front_device, front_record = self._available_device("EDV-FE-CLOSE", "4-4")
+        _admin_device, admin_record = self._available_device("EDV-ADM-CLOSE", "3-3")
+        _front_device, front_record = self._available_device("EDV-FE-CLOSE", "4-4")
 
         self._post_admin(admin_record)
         self._post_frontend(front_record)
@@ -179,8 +179,8 @@ class LendReturnParityTests(BaseTest):
         self.assertEqual(admin_state, snapshot(front_device))
 
     def test_return_stamps_the_end_date_on_the_lending_on_both_paths(self):
-        admin_device, admin_record = self._lent_device("EDV-ADM-STAMP", "7-7")
-        front_device, front_record = self._lent_device("EDV-FE-STAMP", "8-8")
+        _admin_device, admin_record = self._lent_device("EDV-ADM-STAMP", "7-7")
+        _front_device, front_record = self._lent_device("EDV-FE-STAMP", "8-8")
 
         self._post_admin(admin_record, lent_end_date=RETURN_DATE)
         self._post_frontend_return(front_record)

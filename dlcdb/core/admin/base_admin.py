@@ -166,7 +166,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         description="Not soft deleted",
     )
     def is_not_soft_deleted(self, obj):
-        return False if obj.deleted_at else True
+        return not obj.deleted_at
 
     # Do not expose standard delete admin method, instead we offer
     # deactivation and activation for the given object (see below).

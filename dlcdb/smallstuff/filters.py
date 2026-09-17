@@ -34,9 +34,7 @@ class PersonFilter(django_filters.FilterSet):
 
         if not value:
             qs = Person.objects.none()
-        elif value == "*":
-            qs = qs
-        else:
+        elif value != "*":
             qs = qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))
 
         return qs

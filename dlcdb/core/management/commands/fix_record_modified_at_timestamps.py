@@ -20,7 +20,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        write = True if options["mode"] == "write" else False
+        write = options["mode"] == "write"
         print(f"mode: {write=}")
 
         for device in Device.with_softdeleted_objects.all():

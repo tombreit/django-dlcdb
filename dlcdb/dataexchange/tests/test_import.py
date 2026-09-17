@@ -598,17 +598,20 @@ def test_row_errors_name_the_line_the_column_and_the_value(tenant):
 @pytest.mark.django_db
 def test_a_file_with_bad_rows_writes_nothing(tenant):
     """Not even the rows that would have imported cleanly."""
-    with translation.override("en"), pytest.raises(ValidationError):
-        with open(TEST_DATA_DIR / "devices.rowerrors.csv", "rb") as csv_file:
-            import_data(
-                csv_file,
-                importer_inst_pk=None,
-                valid_col_headers=ImporterList.VALID_COL_HEADERS,
-                import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-                tenant=tenant,
-                username="pytestuser",
-                write=True,
-            )
+    with (
+        translation.override("en"),
+        pytest.raises(ValidationError),
+        open(TEST_DATA_DIR / "devices.rowerrors.csv", "rb") as csv_file,
+    ):
+        import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=True,
+        )
 
     assert Device.objects.count() == 0
 

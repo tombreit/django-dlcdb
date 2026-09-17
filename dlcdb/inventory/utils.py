@@ -46,7 +46,7 @@ def update_inventory_note(*, inventory, device, msg):
 
     from dlcdb.core.models import Note
 
-    inventory_note_obj, inventory_note_obj_created = Note.objects.get_or_create(
+    inventory_note_obj, _inventory_note_obj_created = Note.objects.get_or_create(
         inventory=inventory,
         device=device,
     )

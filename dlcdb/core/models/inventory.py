@@ -371,7 +371,7 @@ class Inventory(models.Model):
                         f"Lented asset not found in expected location `{previous_room}. "
                         f"Changed to `{active_record.room}`."
                     )
-                    note_obj, note_obj_created = Note.objects.get_or_create(
+                    note_obj, _note_obj_created = Note.objects.get_or_create(
                         inventory=current_inventory,
                         device=active_record.device,
                     )

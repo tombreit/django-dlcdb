@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import os
 import sys
+
 import django
 from django.conf import settings
-
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -22,7 +20,7 @@ django.setup()
 # reference in docs/betrieb/api.md can never drift from the code. The file is
 # gitignored (see .gitignore) and regenerated on every sphinx-build, both
 # locally and in GitLab CI.
-from django.core.management import call_command  # noqa: E402
+from django.core.management import call_command
 
 _schema_path = os.path.join(os.path.dirname(__file__), "_generated", "openapi.yaml")
 os.makedirs(os.path.dirname(_schema_path), exist_ok=True)
@@ -122,7 +120,7 @@ html_title = "♻ DLCDB Docs"
 # html_logo = "path/to/logo.png"
 # html_favicon = "path/to/favicon.ico"
 
-base_url = getattr(settings, "DLCDB_BASE_URL")
+base_url = settings.DLCDB_BASE_URL
 myst_substitutions = {
     "base_url": base_url,
     "licenses_fe_link": f"[Lizenzen]({base_url}/licenses/)",

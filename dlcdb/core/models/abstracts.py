@@ -124,8 +124,8 @@ class SoftDeleteAuditBaseModel(AuditBaseModel):
     def delete(self, using=None, keep_parents=False):
         if self.pk is None:
             raise ValueError(
-                "%s object can't be deleted because its %s attribute is set "
-                "to None." % (self._meta.object_name, self._meta.pk.attname)
+                f"{self._meta.object_name} object can't be deleted because its "
+                f"{self._meta.pk.attname} attribute is set to None."
             )
         self.deleted_at = now()
         self.save()

@@ -37,7 +37,7 @@ class RemovedRecord(Record):
         super().save(**kwargs)
 
     def __str__(self):
-        return "{0}: {1}".format(
+        return "{}: {}".format(
             self.device,
             self.get_disposition_state_display() or "n/a",
         )

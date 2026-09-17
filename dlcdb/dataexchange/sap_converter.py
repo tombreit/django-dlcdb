@@ -93,12 +93,9 @@ def fix_room_notation(room: str) -> str:
     room = str(room)
     room = room.strip()
 
-    try:
-        pattern = re.compile(r"^(\d{1,2})$")
-        room = pattern.match(room).group(1)
+    # Zero-pad one- or two-digit room numbers, leave everything else as is.
+    if re.match(r"^\d{1,2}$", room):
         room = f"{room:0>3}"
-    except Exception:
-        pass
 
     return room
 
@@ -152,7 +149,7 @@ def guess_device_type(description, tenant=None):
         if type_key.lower() in description:
             # print(f"*** -> {type_key} or IN {description}!")
             guessed_device_type = type_key
-        elif any([alias.lower() in description for alias in type_aliases]):
+        elif any(alias.lower() in description for alias in type_aliases):
             # print(f"*** -> alias IN {description}!")
             guessed_device_type = type_key
 

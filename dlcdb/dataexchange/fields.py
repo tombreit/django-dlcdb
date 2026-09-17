@@ -87,7 +87,7 @@ def create_fk_obj(*, model_class, instance_key, instance_value):
     }
 
     if hasattr(model_class, "with_softdeleted_objects"):
-        instance, created = model_class.with_softdeleted_objects.get_or_create(
+        instance, _created = model_class.with_softdeleted_objects.get_or_create(
             **{instance_key_iexact: instance_value},
             # name__iexact=instance_value,
             defaults=defaults,
@@ -98,7 +98,7 @@ def create_fk_obj(*, model_class, instance_key, instance_value):
         instance.deleted_by = None
         instance.save()
     else:
-        instance, created = model_class.objects.get_or_create(
+        instance, _created = model_class.objects.get_or_create(
             # name__iexact=instance_value,
             **{instance_key_iexact: instance_value},
             defaults=defaults,
@@ -140,7 +140,7 @@ def get_or_create_person(*, first_name, last_name, email, organizational_unit=No
     last_name = (last_name or "").strip()
 
     try:
-        person, created = Person.with_softdeleted_objects.get_or_create(
+        person, _created = Person.with_softdeleted_objects.get_or_create(
             email__iexact=email,
             defaults={
                 "first_name": first_name,

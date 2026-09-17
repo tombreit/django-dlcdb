@@ -80,4 +80,4 @@ class Command(BaseCommand):
 
                 writer.writerow(row)
 
-            self.stdout.write(self.style.SUCCESS('Successfully generated file "%s"' % csv_output_file))
+            self.stdout.write(self.style.SUCCESS(f'Successfully generated file "{csv_output_file}"'))

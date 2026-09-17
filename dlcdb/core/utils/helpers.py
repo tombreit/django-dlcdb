@@ -75,8 +75,6 @@ def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
             img.save(to_filepath, "JPEG")
     except UnidentifiedImageError as unidentified_image_error:
         logger.warning(f"Unidentified Image Error for `{to_filepath}`: {unidentified_image_error}")
-    except BaseException as e:
-        raise e
 
 
 def get_icon_for_class(class_name):

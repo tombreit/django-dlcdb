@@ -377,9 +377,11 @@ def test_successful_run_is_persisted():
 @pytest.mark.django_db
 def test_failed_run_is_persisted_with_reason_and_reraises():
     _enable_sync()
-    with mock.patch.object(udb_sync, "_fetch_contracts", side_effect=RuntimeError("UDB unreachable")):
-        with pytest.raises(RuntimeError):
-            udb_sync.import_udb_persons()
+    with (
+        mock.patch.object(udb_sync, "_fetch_contracts", side_effect=RuntimeError("UDB unreachable")),
+        pytest.raises(RuntimeError),
+    ):
+        udb_sync.import_udb_persons()
 
     run = UdbSyncRun.objects.latest("created_at")
     assert run.status == "error"

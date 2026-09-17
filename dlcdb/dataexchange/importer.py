@@ -270,8 +270,8 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             # unusable on PostgreSQL, so the savepoint is required, not tidiness.
             with transaction.atomic():
                 # Booleans
-                is_lentable = True if row["IS_LENTABLE"].lower() in TRUE_VALUES else False
-                is_licence = True if row["IS_LICENCE"].lower() in TRUE_VALUES else False
+                is_lentable = row["IS_LENTABLE"].lower() in TRUE_VALUES
+                is_licence = row["IS_LICENCE"].lower() in TRUE_VALUES
 
                 device_obj = Device(
                     is_imported=True,
