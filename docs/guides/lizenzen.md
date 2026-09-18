@@ -34,15 +34,15 @@ Eine Lizenz kann:
 
 Eine Lizenz sollte:
 
-- Eine Datumsangabe bei *Advanced Options > Kaufdatum* haben
-- Eine Datumsangabe bei *Advanced Options > Ablaufdatum Lizenz- oder Wartungsvertrag* haben
+- Eine Datumsangabe bei *Beschaffung › Kaufdatum* haben
+- Eine Datumsangabe bei *Beschaffung › Ablaufdatum Lizenz- oder Wartungsvertrag* haben
 - Einen passenden Eintrag beim *Geräte-Typ* (z.B. *Lizenz - Grafik*) haben
 - Entsprechende Lizenzinformationen (Seriennummer, Ansprechpartner, Ablage Keyfile etc.) im Notizfeld haben
-- Eine Lizenzverlängerung, die eine neue SAP-Nummer bekommt, wird als neues Device eingetragen (z.B. via bisheriges Lizenz-Device öffnen und *Save as new*)
+- Eine Lizenzverlängerung, die eine neue SAP-Nummer bekommt, wird als neues Device eingetragen (z.B. bisheriges Lizenz-Device öffnen und *Als neu speichern*)
 
 Eine Lizenz gilt als ausgeben/genutzt, wenn sie:
 
-- einer Person zugeordnet ist (hier ist nicht der "Verleih" gemeint, sondern schlicht das Feld *Person* im Lizenz-Admin)
+- einer Person zugeordnet ist (hier ist nicht der "Verleih" gemeint, sondern schlicht das Feld *Person* im Lizenz-Formular)
 - einem Device zugeordnet ist
 
 Die Lizenzverwaltung ({{ licenses_fe_link }}) gibt Auskunft über:

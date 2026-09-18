@@ -105,7 +105,7 @@ cp env.template .env
 ```
 
 :::{note}
-**Permissions** should be assigned to Django groups. Only LDAP groups listet in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups.
+**Permissions** should be assigned to Django groups. Only LDAP groups listed in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups. Members of `AUTH_LDAP_GROUP_SUPERUSERS` become staff and superuser. See [Berechtigungen](../guides/berechtigungen.md).
 :::
 
 :::{note}
@@ -128,9 +128,13 @@ npm run build
 ./manage.py migrate
 ./manage.py createsuperuser
 ./manage.py runserver
-# or, runserver+https:
+# or, runserver+https (dev requirements only, django-extensions):
 ./manage.py runserver_plus --cert /tmp/cert
 ```
+
+The superuser is the only account after a fresh install. Continue with
+[Erste Schritte](../guides/erste_schritte.md) to set up branding, groups,
+tenant, users and rooms.
 
 ## Production deployment
 
@@ -144,7 +148,7 @@ Be sure to use one of the production requirement files:
 :::{tip}
 Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html) (one off command):
 
-`sqlite3 run/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
+`sqlite3 data/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
 :::
 
 ### Task runner
@@ -238,7 +242,7 @@ make docs
 
 ### Branding
 
-Get rid of the default DLCDB branding: Set your organization via *> Start > Organization > Branding*
+Get rid of the default DLCDB branding: Set your organization via *Start › Organization › Branding*
 
 ### Backup
 
@@ -262,7 +266,7 @@ deployment steps above.
 Source strings are English and wrapped in `gettext_lazy`; German is supplied
 by the catalog in `dlcdb/locale/de/`. There is deliberately **no `en`
 catalog** — an empty `msgstr` falls back to the msgid, and the msgids already
-are the English source,
+are the English source.
 
 Extract and compile with:
 

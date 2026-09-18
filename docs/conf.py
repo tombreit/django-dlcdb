@@ -46,9 +46,6 @@ extensions = [
     "sphinx_togglebutton",
 ]
 
-autosectionlabel_prefix_document = True
-autosectionlabel_maxdepth = 1
-
 templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and

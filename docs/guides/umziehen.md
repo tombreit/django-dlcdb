@@ -3,7 +3,7 @@
 ## Umzug eines einzelnen Gerätes
 
 - Umzuziehendes Gerät in der Geräte-Übersicht (*Hauptmenü › Geräte*) aufrufen. Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
-- Im Dropdown-Menü "Lokalisiert" auswählen.
+- Auf der Detailseite *Neuer Zustand › Umziehen* wählen (benötigt `core.transition_can_relocate_device`, siehe [Berechtigungen](berechtigungen.md#statuswechsel)).
 - Neuen Raum angeben.
 - Neue Raumzuordnung speichern.
 
@@ -17,7 +17,7 @@ Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", 
 - Menüpunkt *Umziehen* im Hauptmenü aufrufen.
 - Umzuziehende Geräte auswählen (Mehrfachauswahl; die Suche hilft bei der Auswahl).
 - Neuen Raum angeben.
-  - Nur für Superuser: Es kann auch ein neuer Tenant angegeben werden.
+  - Nur für Superuser: Es kann auch ein neuer Tenant angegeben werden (siehe [Tenants](berechtigungen.md#tenants)).
 - Umzug speichern.
 
 ![Umziehen mehrerer Geräte](/_static/relocate.webp){.sd-card}

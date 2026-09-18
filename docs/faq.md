@@ -2,24 +2,24 @@
 
 `````{dropdown} Warum kann ich keinen Hersteller oder Zulieferer bearbeiten oder zuordnen?
 
-Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigungen in der DLCDB. In den meisten Fällen fehlt eine entsprechende Berechtigung. Siehe [Berechtigungen](./guides/erste_schritte.md#benutzer-gruppen-und-tenants-einrichten)
+Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigungen in der DLCDB. In den meisten Fällen fehlt eine entsprechende Berechtigung (hier: *Can change manufacturer* bzw. *Can change supplier*). Siehe [Gruppen und Berechtigungen](./guides/berechtigungen.md#gruppen-und-berechtigungen)
 `````
 
 `````{dropdown} Warum sehe ich einen Menüpunkt nicht?
 
-Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt erscheint nur, wenn Ihre Gruppe die passende Berechtigung besitzt. Welche Berechtigung welchen Menüpunkt freischaltet (und warum manche Berechtigungen unter *Core* gelistet sind), zeigt [Navigation über Berechtigungen steuern](./guides/erste_schritte.md#navigation-über-berechtigungen-steuern). Hinweis: Superuser sehen alle Menüpunkte unabhängig von Berechtigungen.
+Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt erscheint nur, wenn Ihre Gruppe die passende Berechtigung besitzt. Welche Berechtigung welchen Menüpunkt freischaltet (und warum manche Berechtigungen unter *Core* gelistet sind), zeigt [Navigation](./guides/berechtigungen.md#navigation). Hinweis: Superuser sehen alle Menüpunkte unabhängig von Berechtigungen.
 `````
 
 `````{dropdown} No tenant set?
 
-Hinweis, dass dem aktuell angemeldeten Benutzer noch kein Tenant zugeordnet ist. Benutzer haben nur Zugriff auf Geräte, die dem selben Tenant zugeordnet sind. Superuser haben auf alle Geräte - unabhängig - von deren Tenant Zugriff.
+Hinweis, dass sich aus den Gruppen des angemeldeten Benutzers kein (oder mehr als ein) Tenant ergibt. Benutzer sehen nur Geräte ihres Tenants – ohne Tenant sehen sie keine Geräte. Superuser haben unabhängig vom Tenant Zugriff auf alle Geräte.
 
-Siehe [Tenant anlegen](./guides/erste_schritte.md#benutzer-gruppen-und-tenants-einrichten), [Tenant Model](./betrieb/model.md#tenant)
+Siehe [Tenants](./guides/berechtigungen.md#tenants), [Tenant anlegen](./guides/erste_schritte.md#4-tenant-anlegen), [Tenant Model](./betrieb/model.md#tenant)
 `````
 
 `````{dropdown} Wo finde ich weitere Django-Admin Module?
 
-Die Django-Admin Auflistung der verfügbaren Module ist unter https://fqdn/admin/ abrufbar.
+Die Django-Admin Auflistung der verfügbaren Module ist unter {{ base_url }}/admin/ abrufbar (Eintrag *Django Site-Verwaltung* im Benutzermenü; erfordert das Staff-Flag, siehe [Rolle des Django-Admins](./guides/berechtigungen.md#rolle-des-django-admins)).
 `````
 
 `````{dropdown} Wo ist die Historie eines Devices?
@@ -40,12 +40,12 @@ Siehe [Konzept](./konzept.md).
 
 `````{dropdown} Was ist ein "Auto-Return-Raum"?
 
-Siehe [Räume anlegen](./guides/erste_schritte.md#räume-anlegen)
+Siehe [Räume anlegen](./guides/erste_schritte.md#6-räume-anlegen)
 `````
 
 `````{dropdown} Was ist ein "Extern-Raum"?
 
-Siehe [Räume anlegen](./guides/erste_schritte.md#räume-anlegen)
+Siehe [Räume anlegen](./guides/erste_schritte.md#6-räume-anlegen)
 `````
 
 `````{dropdown} Was ist "Kleinkram"?

@@ -5,7 +5,7 @@ erreichbar. Der druckbare Ausleihzettel wird aus der Detailansicht einer
 Ausleihe generiert.
 
 :::{tip}
-In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *Ist Verleihgerät?* gesetzt ist.
+In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *Ist verleihbar?* gesetzt ist.
 :::
 
 ![Verleihansicht](/_static/lending-index.webp){.sd-card}
@@ -48,5 +48,5 @@ Für zurückgegebene Devices wird automatisch ein `INROOM`-Record mit dem defini
 :::
 
 :::{note}
-Als Erweiterung des Ausleihzettels können weitere Seiten ausgegeben/generiert werden. Der Inhalt dieser weiteren Seiten ist frei editierbar (Markdown wird unterstützt). Diese Erweiterung ist über die Ansicht *Verleihen > Checklist* zu erreichen.
+Als Erweiterung des Ausleihzettels können weitere Seiten ausgegeben/generiert werden. Der Inhalt dieser weiteren Seiten ist frei editierbar (Markdown wird unterstützt). Diese Erweiterung wird im Ausleih-Profil gepflegt: *Einstellungen › Ausleih-Profile*, Feld *Checkliste*.
 :::

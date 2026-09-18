@@ -8,9 +8,9 @@
 
 API requests must be authenticated by a valid token.
 
-Add user with unusable password and get a token that user:
+Add a user with an unusable password and create a token for that user (`./manage.py shell`):
 
-```bash
+```python
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 
@@ -21,6 +21,10 @@ apiuser.save()
 # Generate token for that user:
 Token.objects.create(user=apiuser)
 ```
+
+The API user needs neither the staff nor the superuser flag. Note that the API
+is **not** tenant-filtered: a token returns the devices of all tenants (see
+[Berechtigungen › Tenants](../guides/berechtigungen.md#tenants)).
 
 :::{note}
 In your queries the token must be present via HTTP header, e.g.:

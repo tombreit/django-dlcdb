@@ -11,6 +11,7 @@ SPDX-License-Identifier: CC0-1.0
 * Devices can be copied in the frontend via "Save as new" on the detail page
 * Import history in the frontend: a read-only list of all device imports with status and log; the device list can be filtered by import file
 * Frontend permissions consolidated onto Django's default `view`/`add`/`change` permissions of the model each view touches. The license module now needs `core.view_licencerecord`; assign this permission to the groups that should keep access (likewise `smallstuff.view_assignedthing` and `smallstuff.add_assignedthing` for Kleinkram)
+* Device state transitions are gated by dedicated `core.transition_can_*_device` permissions (Core | record); migration 0073 grants them to every group and user that held the corresponding `add_*record`/`change_lentrecord` permission, which no longer control transitions. `transition_can_restore_device` and `transition_can_recover_device` are granted to nobody
 * Device search now also matches the device note
 * The compiled German catalog (`django.mo`) is committed, so deployments no longer need to run `compilemessages`
 * Global search on the dashboard: one term across devices, persons, rooms, lendings, licenses and smallstuff, linking to the frontend detail views; the term lives in the URL, so a search is shareable and bookmarkable

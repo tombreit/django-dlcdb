@@ -22,7 +22,7 @@ The DLCDB manages the life cycle of IT assets: a device collects append-only rec
 - CSV bulk import with dry-run validation
 - Read-only REST API (`/api/v2/`) with OpenAPI schema and Swagger UI
 - Email notifications and periodic xlsx reports (subscription-based)
-- UDB person/contract synchronization
+- Person/contract synchronization from an HR system (HR API sync)
 - Multi-tenancy, optional LDAP authentication, customizable branding
 
 ## 👉 Getting started
@@ -39,6 +39,8 @@ python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
+
+Then log in as that superuser and follow [Erste Schritte](https://dlcdb.pages.gwdg.de/django-dlcdb/guides/erste_schritte.html) to set up groups, permissions, a tenant and rooms.
 
 [Detailed setup and installation docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html)
 

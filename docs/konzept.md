@@ -73,9 +73,12 @@ zurück. Das folgende Diagramm gibt die Übergangstabelle wieder — wird
       class REMOVED terminal
 ```
 
-Einige Übergänge (z.B. `ENTFERNT → …` oder `VERLIEHEN → ENTFERNT`) sind zwar
-erlaubt, werden im Frontend aber nicht als Aktion angeboten — sie entstehen nur
-über den Admin, die Inventur oder den Import.
+Ob ein zulässiger Übergang einem Benutzer auch angeboten wird, entscheidet
+seine Berechtigung: Jeder Übergang hat eine eigene, und die beiden Wege aus
+`ENTFERNT` heraus sind nach der Installation niemandem zugewiesen. Einige
+Übergänge (nicht auffindbar, entfernen, wiederherstellen, wiedereingliedern)
+öffnen zudem noch ein Formular des Django-Admins — siehe
+[Berechtigungen](guides/berechtigungen.md#statuswechsel).
 
 Maßgeblich ist jeweils der **Schlüssel** (`INROOM`, `LENT`, …): er steht so in
 der Datenbank, wird von der `CheckConstraint` geprüft und von der API
@@ -88,7 +91,7 @@ unverändert ausgeliefert. Die Beschriftungen daneben sind übersetzbar
 | `LENT` | Verliehen | Das Device ist an eine Person verliehen. |
 | `LOST` | Nicht auffindbar | Das Device konnte (z.B. bei einer Inventur) nicht aufgefunden werden. |
 | `REMOVED` | Entfernt | Das Device wurde ausgemustert (verkauft, verschrottet, …). Endzustand. |
-| `ORDERED` | Bestellt | Sonderfall für bestellte, noch nicht in Betrieb genommene Geräte; wird nur über den Django-Admin gepflegt. |
+| `ORDERED` | Bestellt | Bestelltes, noch nicht eingetroffenes Gerät. Optionaler Startzustand vor `INROOM`. |
 
 Daneben existiert der Typ *Lizenz-Record* für Software-Lizenzen und
 Verträge — siehe [Lizenzen](guides/lizenzen.md).

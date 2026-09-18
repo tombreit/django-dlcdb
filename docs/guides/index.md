@@ -4,6 +4,7 @@
 :maxdepth: 2
 
 erste_schritte
+berechtigungen
 devices
 import
 umziehen

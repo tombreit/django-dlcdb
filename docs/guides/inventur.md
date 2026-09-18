@@ -1,6 +1,6 @@
 # Inventur
 
-Inventur-Ansicht: *Prozesse > Inventur*
+Inventur-Ansicht: *Inventarisieren* (Hauptmenü bzw. *Prozesse › Inventarisieren*; der Menüpunkt erscheint nur bei aktiver Inventur und mit der Berechtigung *Can inventorize*, siehe [Berechtigungen](berechtigungen.md#navigation))
 
 ## Screenshots
 
@@ -57,12 +57,12 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 #### Verleihgeräte
 
-- Wird bei einem verliehenen Gerät auf "Ist nicht da ist" geklickt, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.
+- Wird bei einem verliehenen Gerät auf "Ist nicht da" geklickt, wird das verliehen Gerät automatisch in den Raum "Extern" verschoben, der Verleih bleibt jedoch bestehen. Erst im Raum "Extern" (Hint: Raumverwaltung > Raum: `is_external`) wird beim Klick auf "Ist nicht da" der Verleih abgebrochen und der Status "Nicht auffindbar" gesetzt.
 - Wird ein aktuell verliehenes Gerät in einem Raum gefunden und auf "Ist da" geklickt, wird die Raumzuordnung des Verleihs geändert, der Verleih bleibt jedoch weiterhin bestehen.
 - Die Existenz von Geräten, die aktuell verliehen sind müssen vom Leihenden bestätigt werden. Das *management command* `verify_lendings --help` kann das Anmailen der Leihenden übernehmen.
 - Die Rückmeldung des Leihenden muss als Inventur-Notiz beim Gerät eingetragen werden, z.B. "Besitz bestätigt durch Ausleiher\*in via Email vom YYYY-MM-DD".
 - Es muss sichergestellt sein, dass für jeden Verleih auch eine Unterschrift des Leihenden geleistet wurde. Die Verleihzettel sind daher ebenfalls auf Vollständigkeit zu kontrollieren.
-- Beim Abschluss der Inventur kann das Formblatt "Liste im Besitz von Mitarbeitern befindlicher Sachanlagen" über die Navigation der Inventur-App (*Misc > VG bei MAs*) generiert werden.
+- Beim Abschluss der Inventur kann das Formblatt "Liste im Besitz von Mitarbeitern befindlicher Sachanlagen" über die Navigation der Inventur-App (Eintrag *VG bei MAs* in der zweiten Navigationszeile) generiert werden.
 
 ### Nacharbeiten
 
@@ -70,7 +70,7 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ## Geräte-Übersicht
 
-Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant/Kunde eingeschränkt.
+Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant eingeschränkt (siehe [Tenants](berechtigungen.md#tenants)).
 
 Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurstatus ausstehend etc.).
 

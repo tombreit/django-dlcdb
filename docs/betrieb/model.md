@@ -100,12 +100,20 @@ Person data is enriched with contract data from the HR system.
 
 ## Room
 
-Rooms could be compared against a CSV file (e.g. from Archibus).
+A room a device can be located in. Two rooms carry a special flag: the
+*external* room (devices without a physical location, e.g. lent to a home
+office) and the *auto return* room (target of every returned lending).
 
 ## Tenant
 
-A tenant is kind of an organizational unit using the DLCDB, only able to
-manage his/her assets. DLCDB superusers are not tenant aware: they can edit devices from all tenants and can also change the tenant of a device. Standard users only have access to devices that are assigned to the user's tenant.
+A tenant is an organizational unit using the DLCDB, only able to manage its
+own assets. `Device` is the only tenant-aware model (`Device.tenant`); records,
+lendings and licences are scoped through their device. A tenant owns a set of
+`auth.Group`s, and a user's tenant is derived from the groups they belong to.
+Superusers are not tenant aware: they see devices from all tenants and may
+change the tenant of a device. Standard users only see devices of their own
+tenant. Tenants grant no permissions. See
+[Berechtigungen › Tenants](../guides/berechtigungen.md#tenants).
 
 ## SoftDelete
 
@@ -114,5 +122,5 @@ of this kind of model the instance will only be marked as deleted and does not
 show up in default querysets any more. This allows you to "hide" and then
 "unhide" assets — the function is labeled "Activate/Deactivate". Deactivated
 assets are no longer available for future assignments, but remain in place
-for existing assignments. This function is currently only available to
-Django admin users.
+for existing assignments. This function is only available in the Django admin
+and only to superusers.

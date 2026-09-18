@@ -17,7 +17,7 @@ Bestätigung wird tatsächlich importiert.
    - Spalte `DEVICETYPE` enthält den "menschenlesbaren" Bezeichner, z.B. `Notebook`
    - Spalte `SUPPLIER`: Schreibweise (Klein-/Großschreibung etc.) beachten. Der Zulieferer muss identisch wie unter *Datenhaltung › Zulieferer* notiert werden.
    - Tip: LibreOffice/OpenOffice zur Bearbeitung nutzen
-   - Devices, die keine EDV-ID oder SAP-ID haben, werden NICHT importiert
+   - Devices, die keine IT-ID oder SAP-ID haben, werden NICHT importiert
 
 2. CSV-Datei hochladen und prüfen
 
