@@ -306,8 +306,9 @@ class Inventory(models.Model):
         inventory_relevant_devices_count = _inventory_relevant_devices.count()
 
         done_percent = 0
-        done_percent = (inventory_relevant_devices_inventorized_count * 100) / inventory_relevant_devices_count
-        done_percent = int(round(done_percent, 0))
+        if inventory_relevant_devices_count:
+            done_percent = (inventory_relevant_devices_inventorized_count * 100) / inventory_relevant_devices_count
+            done_percent = int(round(done_percent, 0))
 
         return inventory_progress(
             done_percent, inventory_relevant_devices_count, inventory_relevant_devices_inventorized_count

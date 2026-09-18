@@ -57,6 +57,13 @@ def test_if_device_counts_as_inventorized(device_1, device_2, room_1, room_2, in
 
 
 @pytest.mark.django_db
+def test_inventory_progress_without_relevant_devices_is_zero(inventory_1):
+    """Regression: an empty inventory used to divide by zero."""
+    progress = inventory_1.get_inventory_progress(tenant=None, is_superuser=True)
+    assert (progress.done_percent, progress.all_devices_count, progress.inventorized_devices_count) == (0, 0, 0)
+
+
+@pytest.mark.django_db
 def test_get_is_already_inventorized(device_1, device_2, room_1, room_2, inventory_1):
     assert device_2.get_current_inventory_record is None
 
