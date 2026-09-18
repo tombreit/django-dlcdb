@@ -28,6 +28,7 @@ Device Lifecycle Database
 - If possible, do not introduce custom Django template tags
 - Write the code for human inspection, favour readability
 - If in doubt: ask me
+- `PLANS/` holds living design documents for work that is planned but not yet implemented
 - You may suggest commit messages, but do not commit on your own
 - If adding SPDX license headers: omit the year
 - Do not run `manage.py makemessages` and do not modify the po translation files. I will take care of the translation stuff. Just ensure that the user facing strings in the codebase are marked as "translateable".
