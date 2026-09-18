@@ -125,7 +125,8 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
 
                     already_existing_device = Device.objects.filter(sap_id=device_obj.sap_id).first()
 
-                    if already_existing_device and all([already_existing_device.tenant.name == tenant.name, records]):
+                    # Compare ids: an already existing device may have no tenant at all.
+                    if already_existing_device and all([already_existing_device.tenant_id == tenant.pk, records]):
                         logger.debug("Device %s already exists in tenant %s. Updating record only.", device_obj, tenant)
                         for record_obj in records:
                             record_obj.device = already_existing_device

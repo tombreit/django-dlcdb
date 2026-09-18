@@ -350,6 +350,29 @@ def test_bulk_import_csv_sap_update(tenant):
 
 
 @pytest.mark.django_db
+def test_sap_import_skips_an_existing_device_without_tenant(tenant):
+    """Regression: an existing device with ``tenant=None`` crashed the tenant comparison."""
+    untenanted = Device.objects.create(edv_id="PRE-EXISTING", sap_id="400003-0", tenant=None)
+    modified_at = untenanted.modified_at
+
+    with open(TEST_DATA_DIR / "devices-sap.correct.csv", "rb") as csv_file:
+        assert import_data(
+            csv_file,
+            importer_inst_pk=None,
+            valid_col_headers=ImporterList.VALID_COL_HEADERS,
+            import_format=ImporterList.ImportFormatChoices.SAPCSV,
+            tenant=tenant,
+            username="pytestuser",
+            write=True,
+        )
+
+    untenanted.refresh_from_db()
+    assert untenanted.tenant is None
+    assert untenanted.modified_at == modified_at
+    assert Device.objects.filter(sap_id="400003-0").count() == 1
+
+
+@pytest.mark.django_db
 def test_run_device_import_dry_run_does_not_persist(tenant):
     csv_path = TEST_DATA_DIR / "devices.correct.csv"
 
