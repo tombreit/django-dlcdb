@@ -12,7 +12,8 @@ def get_current_tenant(request):
 
     from .models import Tenant
 
-    tenant = request_user_groups = None
+    tenant = request_user_groups = _tenant = None
+    _tenant_count = 0
 
     if request.user.is_authenticated and not request.user.is_superuser:
         try:
@@ -25,13 +26,14 @@ def get_current_tenant(request):
             )
             _tenant_count = _tenant.count()
         except Exception as e:
-            messages.error(f"Something went wrong getting a tenant from a request! Error was: {e}")
+            messages.error(request, f"Something went wrong getting a tenant from a request! Error was: {e}")
+            return None
 
         if _tenant_count >= 2:
             messages.add_message(
                 request,
                 messages.ERROR,
-                f"Expected one matched tenant, but got mulitple: '{_tenant}'. Tenant-scoped querysets will not return any objects!",
+                f"Expected one matched tenant, but got multiple: '{_tenant}'. Tenant-scoped querysets will not return any objects!",
             )
         elif _tenant_count == 0:
             # Check if this message already exists to avoid duplicates
