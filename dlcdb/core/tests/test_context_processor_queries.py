@@ -5,7 +5,8 @@
 """
 The context processors run on every frontend page render, so they must not
 issue redundant queries: one aggregate for the room hints, one for the
-record-less device hint, and at most one (request-memoized) active-inventory
+record-less device hint, one count for the devices-without-tenant hint, and at
+most one (request-memoized) active-inventory
 lookup shared by nav() and the inventory context processor.
 See https://adamj.eu/tech/2023/03/23/django-context-processors-database-queries/
 """
@@ -42,7 +43,7 @@ class ContextProcessorQueryTests(BaseTest):
     def _table_queries(self, captured, table):
         return [query["sql"] for query in captured.captured_queries if table in query["sql"]]
 
-    def test_hints_issues_one_room_and_one_device_query(self):
+    def test_hints_issues_one_room_and_two_device_queries(self):
         device = self._create_device(edv_id="EDV-NO-RECORD", sap_id="1-1")
         request = self._request(self.superuser)
 
@@ -50,7 +51,9 @@ class ContextProcessorQueryTests(BaseTest):
             hints(request)
 
         self.assertEqual(len(self._table_queries(captured, "core_room")), 1)
-        self.assertEqual(len(self._table_queries(captured, "core_device")), 1)
+        # Record-less devices (tenant-scoped) and devices without tenant
+        # (global). Flexible tenants, step 1, folds both into one aggregate.
+        self.assertEqual(len(self._table_queries(captured, "core_device")), 2)
 
         # The single record-less device is still linked directly, without the
         # former extra .first() query.

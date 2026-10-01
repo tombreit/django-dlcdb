@@ -14,6 +14,7 @@ from django.urls import reverse
 from dlcdb.core.models import Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.organization.models import Branding
+from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -48,6 +49,36 @@ class StickyHintsTests(BaseTest):
 
         self.assertContains(response, "2 devices without record!")
         self.assertContains(response, f"{reverse('assets:device_index')}?state=no-record")
+
+    def test_devices_without_tenant_hint_links_to_the_tenant_admin(self):
+        tenant = Tenant.objects.create(name="Tenant One")
+        with_tenant = self._create_device(edv_id="EDV-WITH-TENANT", sap_id="1-1")
+        with_tenant.tenant = tenant
+        with_tenant.save()
+
+        response = self.client.get(self.dashboard_url)
+        self.assertNotContains(response, "without tenant!")
+
+        self._create_device(edv_id="EDV-NO-TENANT-1", sap_id="2-2")
+        self._create_device(edv_id="EDV-NO-TENANT-2", sap_id="3-3")
+
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, "2 devices without tenant!")
+        self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
+        self.assertContains(response, "Assign a tenant?")
+
+    def test_hints_are_not_shown_to_anonymous_users(self):
+        # Every hint condition holds: a device without tenant, no rooms, no
+        # Branding IT dept email.
+        self._create_device(edv_id="EDV-NO-TENANT", sap_id="2-2")
+        self.client.logout()
+
+        response = self.client.get("/accounts/login/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "without tenant!")
+        self.assertNotContains(response, "No rooms defined yet.")
+        self.assertNotContains(response, "No IT department contact email configured in Branding!")
 
     def test_room_hints_link_to_the_rooms_frontend(self):
         # No rooms at all: the hint offers the frontend add form.

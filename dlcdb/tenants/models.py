@@ -66,7 +66,10 @@ class Tenant(models.Model):
 class TenantAwareModel(models.Model):
     tenant = models.ForeignKey(
         "tenants.Tenant",
-        on_delete=models.SET_NULL,
+        # A tenant with devices cannot be deleted: SET_NULL would orphan its
+        # devices, which then are invisible to every tenant-scoped user.
+        on_delete=models.PROTECT,
+        # Nullable for legacy devices only; forms require a tenant.
         null=True,
         # blank=True,
     )

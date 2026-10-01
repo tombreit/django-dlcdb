@@ -109,6 +109,15 @@ def test_upload_dry_run_shows_preview_and_writes_nothing(superuser_client, tenan
 
 
 @_PLAIN_STATICFILES
+def test_superuser_cannot_import_without_tenant(superuser_client):
+    response = superuser_client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv")})
+
+    assert response.status_code == 200
+    assert "tenant" in response.context["form"].errors
+    assert not ImporterList.objects.exists()
+
+
+@_PLAIN_STATICFILES
 def test_confirm_writes_devices_and_persists_report(superuser_client, tenant):
     superuser_client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk})
     importer_list = ImporterList.objects.get()

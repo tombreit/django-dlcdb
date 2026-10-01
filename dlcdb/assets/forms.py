@@ -117,12 +117,10 @@ class DeviceForm(forms.ModelForm):
         self.request = request
 
         tenant_field = self.fields["tenant"]
-        if request.user.is_superuser:
-            # A superuser may deliberately create an unscoped device, matching
-            # the existing admin behaviour, so the field is optional and freely
-            # editable.
-            tenant_field.required = False
-        else:
+        # Superusers choose freely among all tenants. The field stays required
+        # (model blank=False), as in the admin: a device without a tenant is
+        # invisible to every tenant-scoped user.
+        if not request.user.is_superuser:
             # Non-superusers always SEE their tenant but cannot change it. The
             # tenant is authoritative from the request and (re)assigned on save
             # (see the views), so `disabled` is a display guard: Django ignores

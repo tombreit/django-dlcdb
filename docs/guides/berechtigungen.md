@@ -175,11 +175,24 @@ Nicht auf den Tenant eingeschränkt sind:
 - die *Geräte*-Übersicht innerhalb der Inventur-App (siehe [Inventur](inventur.md)),
 - die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Tenants.
 
+### Geräte ohne Tenant
+
+Jedes Gerät braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte ohne Tenant sieht nur ein Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!*. Zum Zuordnen:
+
+1. Dem Link *Assign a tenant?* folgen (*Start › Tenants › Tenant*).
+2. Den Ziel-Tenant auswählen und die Aktion *Assign devices without tenant* ausführen.
+3. Die folgende Seite listet alle Geräte ohne Tenant. Geräte, die zu einem anderen Tenant gehören, abwählen und bestätigen. Für die übrigen Geräte die Schritte mit deren Tenant wiederholen.
+
+Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.change_device`.
+
+Ein Tenant, dem noch Geräte zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen.
+
 ## Rolle des Django-Admins
 
 Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug, Inventur, Lizenzen, Import – läuft vollständig im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü, nur mit Staff-Flag) wird noch für Folgendes benötigt:
 
 - Benutzer, Gruppen, Berechtigungen und Tenants anlegen und zuordnen
+- Geräte ohne Tenant einem Tenant zuordnen (siehe [Geräte ohne Tenant](#geräte-ohne-tenant))
 - die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
 - Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
 - Stammdaten *aktivieren/deaktivieren* (Soft-Delete, nur Superuser) und endgültig löschen (nur Superuser)

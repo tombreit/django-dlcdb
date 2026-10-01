@@ -71,11 +71,10 @@ class DeviceImportForm(forms.ModelForm):
         self.fields["note"].label = _("Note")
 
         tenant_field = self.fields["tenant"]
-        if request.user.is_superuser:
-            # A superuser may deliberately import unscoped, matching the
-            # existing admin behaviour.
-            tenant_field.required = False
-        else:
+        # Superusers choose freely among all tenants. The field stays required
+        # (model blank=False): imported devices without a tenant would be
+        # invisible to every tenant-scoped user.
+        if not request.user.is_superuser:
             # Non-superusers always SEE their tenant but cannot change it. The
             # tenant is authoritative from the request and (re)assigned on save
             # (see the views), so `disabled` is a display guard: Django ignores

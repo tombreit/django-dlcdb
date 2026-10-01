@@ -112,7 +112,9 @@ lendings and licences are scoped through their device. A tenant owns a set of
 `auth.Group`s, and a user's tenant is derived from the groups they belong to.
 Superusers are not tenant aware: they see devices from all tenants and may
 change the tenant of a device. Standard users only see devices of their own
-tenant. Tenants grant no permissions. See
+tenant. Tenants grant no permissions. A tenant that still has devices cannot be
+deleted (`on_delete=PROTECT`); `Device.tenant` is nullable for legacy devices
+only, new devices always get one. See
 [Berechtigungen › Tenants](../guides/berechtigungen.md#tenants).
 
 ## SoftDelete

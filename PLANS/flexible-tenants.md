@@ -6,9 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Flexible tenants: users in several tenants, visibility only through groups
 
-**Status:** design document, not implemented. Living document: update it when decisions or the
-code change. Last revised 2026-10-01 (review against the code on branch `flexible-tenants`;
-"all tenants" permission dropped in favour of plain group attachment).
+**Status:** design document; step 0 implemented (2026-10-01), steps 1–3 open. Living
+document: update it when decisions or the code change. Last revised 2026-10-01 (review against
+the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
+group attachment).
 
 The behaviour this document wants to change is described (as it is today) in
 `docs/guides/berechtigungen.md`, section *Tenants*.
@@ -108,8 +109,8 @@ Write side:
   move any device by crafting the URL.
 - `dataexchange/views.py:device_import_confirm` filters `tenant=getattr(request, "tenant", None)`,
   i.e. `tenant IS NULL` for a tenant-less user.
-- `TenantAwareModel.tenant` (used by `Device`) is `on_delete=SET_NULL`: deleting a tenant orphans
-  its devices.
+- `TenantAwareModel.tenant` (used by `Device`) was `on_delete=SET_NULL`: deleting a tenant
+  orphaned its devices. Since step 0: `PROTECT` (migration `core/0077`).
 
 Display:
 - Tenant column and badges gated on `request.user.is_superuser` in
@@ -126,7 +127,7 @@ Other:
 - Dead code: `TenantManager.get_current` (calls a nonexistent method), the commented-out
   `TenantModelAdmin` in `tenants/admin.py`, `dashboard/stats.py:get_devices_by_series_data`.
 - `core/tests/test_context_processor_queries.py` pins the `hints` processor to one room and one
-  device query.
+  device query (two device queries since step 0, back to one in step 1).
 - Verified on Django 6.1.1: an empty `__in` inside `Count(filter=...)` compiles to the constant
   `0`; `__in` never matches NULL.
 
@@ -246,7 +247,7 @@ view we write (same pattern as `DeviceAdmin.relocate` → `core/views/relocate_v
 
 ## Implementation steps
 
-### Step 0: stop new orphans, report old ones (shippable now)
+### Step 0: stop new orphans, report old ones (implemented 2026-10-01)
 
 - Hint and Tenant admin action as designed. In step 0 the hint's count is its own query (the
   recordless aggregate is still scoped by the old `tenant_scoped_queryset`);

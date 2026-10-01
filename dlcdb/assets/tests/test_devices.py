@@ -98,15 +98,25 @@ class DeviceFrontendTests(BaseTest):
         self.assertNotContains(response, "EDV-AVAILABLE")
 
     def test_create_device_redirects_to_its_detail_page(self):
+        tenant = Tenant.objects.create(name="Tenant New")
         response = self.client.post(
             reverse("assets:device_add"),
-            {"edv_id": "EDV-NEW", "sap_id": "5-5", "is_lentable": "on"},
+            {"edv_id": "EDV-NEW", "sap_id": "5-5", "is_lentable": "on", "tenant": tenant.pk},
         )
 
         device = Device.objects.get(edv_id="EDV-NEW")
         self.assertRedirects(response, reverse("assets:device_detail", args=[device.pk]))
         self.assertEqual(device.user, self.user)
+        self.assertEqual(device.tenant, tenant)
         self.assertTrue(device.is_lentable)
+
+    def test_superuser_cannot_create_a_device_without_tenant(self):
+        count = Device.objects.count()
+        response = self.client.post(reverse("assets:device_add"), {"edv_id": "EDV-NO-TENANT", "sap_id": "5-6"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("tenant", response.context["form"].errors)
+        self.assertEqual(Device.objects.count(), count)
 
     def test_detail_offers_save_as_new_posting_to_the_add_view(self):
         response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))
@@ -126,9 +136,15 @@ class DeviceFrontendTests(BaseTest):
 
     def test_save_as_new_creates_a_copy_and_leaves_the_original(self):
         original = self.inroom_device
+        tenant = Tenant.objects.create(name="Tenant Copy")
         response = self.client.post(
             reverse("assets:device_add"),
-            {"edv_id": "EDV-COPY", "manufacturer": original.manufacturer.pk, "series": original.series},
+            {
+                "edv_id": "EDV-COPY",
+                "manufacturer": original.manufacturer.pk,
+                "series": original.series,
+                "tenant": tenant.pk,
+            },
         )
 
         copy = Device.objects.get(edv_id="EDV-COPY")
@@ -254,14 +270,14 @@ class DeviceFrontendTests(BaseTest):
         self.assertIn("disabled", html)
         self.assertIn(str(tenant), html)
 
-    def test_tenant_field_is_editable_for_superuser(self):
+    def test_tenant_field_is_editable_and_required_for_superuser(self):
         request = RequestFactory().get("/")
         request.user = self.user  # superuser (see setUpTestData)
 
         form = DeviceForm(instance=self.inroom_device, request=request)
         tenant_field = form.fields["tenant"]
         self.assertFalse(tenant_field.disabled)
-        self.assertFalse(tenant_field.required)
+        self.assertTrue(tenant_field.required)
         self.assertNotIn("disabled", str(form["tenant"]))
 
     def test_non_superuser_cannot_reassign_tenant_via_crafted_post(self):

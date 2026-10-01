@@ -24,6 +24,11 @@ from dlcdb.core.utils.tenants import tenant_scoped_queryset
 def hints(request):
     """Display some pre-defined messages as sticky messages"""
 
+    # Anonymous visitors (e.g. the login page) neither need the hints nor can
+    # act on them; this also spares their requests the hint queries.
+    if not request.user.is_authenticated:
+        return {}
+
     sticky_messages = []
 
     @dataclass
@@ -81,6 +86,25 @@ def hints(request):
                     % {"count": recordless_devices_count},
                     cta_link=cta_link,
                     cta_text=_("Add proper record?"),
+                )
+            )
+
+        # Deliberately not tenant-scoped: these devices belong to no tenant, so
+        # no tenant-scoped list shows them. The Tenant admin action
+        # "Assign devices without tenant" lists and assigns them.
+        devices_without_tenant_count = Device.objects.filter(tenant__isnull=True).count()
+        if devices_without_tenant_count:
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=ngettext(
+                        "%(count)d device without tenant!",
+                        "%(count)d devices without tenant!",
+                        devices_without_tenant_count,
+                    )
+                    % {"count": devices_without_tenant_count},
+                    cta_link=reverse("admin:tenants_tenant_changelist"),
+                    cta_text=_("Assign a tenant?"),
                 )
             )
 
