@@ -70,7 +70,7 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ## Geräte-Übersicht
 
-Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht enthält alle Devices und ist nicht auf den aktuellen Tenant eingeschränkt (siehe [Tenants](berechtigungen.md#tenants)).
+Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht zeigt die Devices der eigenen Tenants; ist bei der Inventur *Device search tenant aware* ausgeschaltet, zeigt sie alle Devices (siehe [Tenants](berechtigungen.md#tenants)).
 
 Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurstatus ausstehend etc.).
 

@@ -4,8 +4,11 @@
 
 import django_filters
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from ..core.models import Device, DeviceType, Inventory, Record, Room
+from ..core.models.inventory import get_active_inventory
+from ..tenants.models import Tenant
 from .forms import DeviceSearchForm
 
 
@@ -21,6 +24,20 @@ class RoomFilter(django_filters.FilterSet):
         model = Room
         # form = RoomSearchForm
         fields = ["q"]
+
+
+def search_tenants(request):
+    """
+    Tenant choices of the device search: the user's own tenants, unless the
+    active inventory searches across all tenants (``device_search_tenant_aware``
+    switched off).
+    """
+    if request is None:
+        return Tenant.objects.none()
+    inventory = get_active_inventory(request)
+    if inventory and not inventory.device_search_tenant_aware:
+        return Tenant.objects.all()
+    return Tenant.objects.filter(pk__in=[tenant.pk for tenant in request.tenants])
 
 
 class DeviceFilter(django_filters.FilterSet):
@@ -56,6 +73,7 @@ class DeviceFilter(django_filters.FilterSet):
         label="Outstanding",
         choices=OUTSTANDING_CHOICES,
     )
+    tenant = django_filters.ModelChoiceFilter(queryset=search_tenants, label=_("Tenant"))
 
     def string_search_filter(self, queryset, name, value):
         return self.queryset.filter(

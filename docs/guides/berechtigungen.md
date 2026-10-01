@@ -181,7 +181,7 @@ Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen 
 
 Nicht auf den Tenant eingeschränkt sind:
 
-- die *Geräte*-Übersicht innerhalb der Inventur-App (siehe [Inventur](inventur.md)),
+- die *Devices*-Übersicht der Inventur-App, wenn bei der Inventur *Device search tenant aware* ausgeschaltet ist (siehe [Inventur](inventur.md)),
 - die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Tenants,
 - die *Notizen* im Django-Admin (*Datenhaltung › Notizen*).
 

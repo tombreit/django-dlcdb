@@ -372,7 +372,7 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   Done: `TenantScopedAdmin` also limits every device FK (forged pks fail) and
   `CustomBaseProxyModelAdmin.add_view` scopes `?device=`. The non-admin views were already scoped.
   `NoteAdmin` stays unscoped (decision 2026-10-01; room notes have no tenant), attachments too.
-- Inventory device search: narrow the `tenant` filter choices to `request.tenants`, but only
+- *(done)* Inventory device search: narrow the `tenant` filter choices to `request.tenants`, but only
   when `device_search_tenant_aware` (otherwise the search spans all tenants).
 - *(deferred to a later release)* `Device.tenant` NOT NULL: once production shows no "devices
   without tenant" message, add the migration, give the ~62 tenant-less test device creations a

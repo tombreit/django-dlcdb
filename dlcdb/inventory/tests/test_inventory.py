@@ -5,7 +5,10 @@
 import json
 
 import pytest
+from django.contrib.auth.models import Permission
+from django.urls import reverse
 
+from dlcdb.accounts.models import CustomUser
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, InRoomRecord, Inventory, Note, Record
 from dlcdb.inventory.utils import update_inventory_note
@@ -206,3 +209,22 @@ def test_inventorize_uuids_unknown(device_1, room_1, external_room, inventory_1,
     assert inventory_note.count() == 1
 
     assert f"Device marked as 'unknown state' during inventory by {user}." in inventory_note.get().text
+
+
+@pytest.mark.django_db
+def test_device_search_offers_own_tenants_unless_tenant_unaware(client, plain_static, inventory_1, tenant, join_tenant):
+    foreign = Tenant.objects.create(name="Foreign tenant")
+    user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
+    user.user_permissions.add(Permission.objects.get(codename="can_inventorize", content_type__app_label="core"))
+    client.force_login(join_tenant(user))
+
+    def tenant_choices():
+        response = client.get(reverse("inventory:search-devices"))
+        return set(response.context["filter_devices"].form.fields["tenant"].queryset)
+
+    assert tenant_choices() == {tenant}
+
+    # A tenant-unaware search spans all tenants, so its filter does too.
+    inventory_1.device_search_tenant_aware = False
+    inventory_1.save()
+    assert tenant_choices() == {tenant, foreign}

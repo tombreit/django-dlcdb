@@ -218,7 +218,7 @@ def search_devices(request):
         template = "inventory/device_search.html"
 
     all_devices = Inventory.objects.inventory_relevant_devices(tenants=request.tenants)
-    filter_devices = DeviceFilter(request.GET, queryset=all_devices)
+    filter_devices = DeviceFilter(request.GET, queryset=all_devices, request=request)
 
     page_obj = paginate(request, filter_devices.qs)
 
