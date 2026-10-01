@@ -115,7 +115,6 @@ class DeviceForm(forms.ModelForm):
 
     def __init__(self, *args, request, **kwargs):
         super().__init__(*args, **kwargs)
-        self.request = request
 
         # Only the user's tenants are offered, so a crafted foreign tenant
         # fails validation; with a single tenant it is the only, preselected
@@ -130,7 +129,6 @@ class DeviceForm(forms.ModelForm):
         active_record = getattr(self.instance, "active_record", None)
         if (
             self.instance.pk
-            and not self.request.user.is_superuser
             and active_record
             and active_record.record_type == Record.LENT
             and is_lentable != self.instance.is_lentable

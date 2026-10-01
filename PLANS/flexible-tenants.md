@@ -378,7 +378,7 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   without tenant" message, add the migration, give the ~62 tenant-less test device creations a
   tenant, and remove the orphan message, the Tenant admin action and their docs in one go. Not
   on this branch: the migration would fail on instances that still have orphans.
-- Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
+- *(done)* Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
   `theme/includes/navbar.html` (staff-or-superuser link), `core/context_processors.py:nav`
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
   (`base_admin.py`, restore action) stay.

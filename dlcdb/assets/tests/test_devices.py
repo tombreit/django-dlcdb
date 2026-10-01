@@ -220,7 +220,8 @@ class DeviceFrontendTests(BaseTest):
         self.inroom_device.refresh_from_db()
         self.assertEqual(self.inroom_device.active_record.record_type, Record.INROOM)
 
-    def test_non_superuser_cannot_change_loanability_while_device_is_lent(self):
+    def test_nobody_can_change_loanability_while_device_is_lent(self):
+        """No superuser exception in the frontend; the admin override is separate."""
         device = self._create_device(edv_id="EDV-LENT", sap_id="6-6")
         device.is_lentable = True
         device.save()
@@ -230,23 +231,26 @@ class DeviceFrontendTests(BaseTest):
             room=self.room,
             person=Person.objects.create(first_name="Max", last_name="Mustermann"),
         )
-        user = get_user_model().objects.create_user(
+        operator = get_user_model().objects.create_user(
             username="device-operator",
             email="operator@example.com",
             password="secret",
         )
-        request = RequestFactory().post("/")
-        request.user = user
-        request.tenants = (device.tenant,)
 
-        form = DeviceForm(
-            {"edv_id": device.edv_id, "sap_id": device.sap_id, "tenant": device.tenant.pk},
-            instance=device,
-            request=request,
-        )
+        for user in (operator, self.user):  # self.user is a superuser
+            with self.subTest(user=user):
+                request = RequestFactory().post("/")
+                request.user = user
+                request.tenants = (device.tenant,)
 
-        self.assertFalse(form.is_valid())
-        self.assertIn("is_lentable", form.errors)
+                form = DeviceForm(
+                    {"edv_id": device.edv_id, "sap_id": device.sap_id, "tenant": device.tenant.pk},
+                    instance=device,
+                    request=request,
+                )
+
+                self.assertFalse(form.is_valid())
+                self.assertIn("is_lentable", form.errors)
 
     def test_single_tenant_user_gets_their_tenant_as_the_only_preselected_option(self):
         tenant = Tenant.objects.create(name="Tenant One")

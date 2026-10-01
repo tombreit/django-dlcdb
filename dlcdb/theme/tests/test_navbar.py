@@ -103,6 +103,30 @@ class MainNavPermissionTests(TestCase):
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class AdminLinkNavbarTests(TestCase):
+    """
+    The Django admin link (in the Settings dropdown) follows the staff flag:
+    the admin requires it, being a superuser is not enough.
+    """
+
+    def test_admin_link_follows_the_staff_flag(self):
+        admin_link = f'href="{reverse("admin:index")}"'
+        user = get_user_model().objects.create_user(username="link-user", email="link@example.com", password="secret")
+        # A Settings entry, so the dropdown holding the admin link renders.
+        user.user_permissions.add(Permission.objects.get(codename="view_branding"))
+        self.client.force_login(user)
+
+        user.is_superuser = True
+        user.save()
+        self.assertNotContains(self.client.get(reverse("dashboard:index")), admin_link)
+
+        user.is_superuser = False
+        user.is_staff = True
+        user.save()
+        self.assertContains(self.client.get(reverse("dashboard:index")), admin_link)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class TenantBadgeNavbarTests(TestCase):
     """The user menu names the user's tenant or counts several; no tenant is a sticky hint (see test_hints)."""
 

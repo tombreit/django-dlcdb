@@ -236,7 +236,7 @@ def nav(request):
             # instead of guessing an app label.
             raise ImproperlyConfigured(f"nav required_permission {permission!r} must be 'app_label.codename'")
 
-        return permission in user.get_all_permissions()
+        return user.has_perm(permission)
 
     # Namespace of the currently resolved view, used to mark the matching nav
     # entry as "active" (e.g. on /lending/* the "Lending" entry is highlighted).
@@ -258,7 +258,7 @@ def nav(request):
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, required_permission)
 
-            if has_permission or request.user.is_superuser:
+            if has_permission:
                 # Ugly hack to conditionally hide some nav_entries. Checked only
                 # after the permission gate so unpermitted users never trigger
                 # the underlying query.
