@@ -74,22 +74,7 @@
         </div>
       </section>
 
-      <section class="card mb-3">
-        <div class="card-header d-flex align-items-center gap-2">
-          <i class="bi bi-clock-history text-primary"></i>
-          <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
-        </div>
-        <div class="card-body">
-          <dl class="row mb-0 small">
-            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Uploaded by" %}</dt>
-            <dd class="col-sm-8">{{ importer_list.user|default:importer_list.username|default:"—" }}</dd>
-            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
-            <dd class="col-sm-8">{{ importer_list.created_at|date:"Y-m-d H:i" }}</dd>
-            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
-            <dd class="col-sm-8 mb-0">{{ importer_list.modified_at|date:"Y-m-d H:i" }}</dd>
-          </dl>
-        </div>
-      </section>
+      {% include "theme/includes/_audit_data.html" with object=importer_list %}
     </div>
   </div>
 {% endblock body %}

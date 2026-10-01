@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC0-1.0
 # Flexible tenants: users in several tenants, visibility only through groups
 
 **Status:** design document; steps 0–3 implemented (2026-10-01; NOT NULL deferred), step 4
-(tenant management in the frontend) proposed. Living
+(tenant management in the frontend) implemented. Living
 document: update it when decisions or the code change. Last revised 2026-10-01 (review against
 the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
 group attachment).
@@ -384,63 +384,91 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
   (`base_admin.py`, restore action) stay.
 
-### Step 4: tenant management in the frontend (proposed 2026-10-01)
+### Step 4: tenant management in the frontend (implemented 2026-10-01)
+
+Implemented as one commit. Deviation: `tenants/index.html` extends `theme/_base.html`, because
+`theme/_index_base.html` always renders a filter bar.
 
 Goal: configure tenants without the Django admin. Users, groups and permissions stay in the
-admin; with LDAP, the mirror groups supply the membership. No JS, no new dependency, start
-small. Expected size: up to ~15 tenants.
+admin; with LDAP, the mirror groups supply the membership. No custom JS, no new dependency
+(htmx, already used everywhere, saves each click), start small. Expected size: up to ~15
+tenants.
 
-`Tenant.groups` is a set of (group, tenant) pairs. One page shows all pairs as a matrix:
+`Tenant.groups` is a set of (group, tenant) pairs. One page shows all pairs as a matrix, built
+for the staff user's task: give user XY access to one or more tenants through XY's group.
 
 ```
-Settings › Tenants: who sees which tenant                    [Save]
+Settings › Tenants                                                       [Add tenant]
 
-                 Physik   Chemie   Biologie   Verwaltung   Members
-                 (412)    (230)    (95)       (61)
-ops-physik        [x]      [ ]      [ ]        [ ]           7
-ops-chemie        [ ]      [x]      [ ]        [ ]           5
-ops-bio           [ ]      [ ]      [x]        [ ]           4
-it                [x]      [x]      [ ]        [x]           3   ← hole: forgot Biologie
-audit             [x]      [x]      [x]        [x]           2   ← sees every tenant
-helpdesk          [ ]      [ ]      [ ]        [ ]           9   ← sees nothing
+Users get access to a tenant's devices through their groups: tick a group in a tenant's
+column to give all its members access. …
+
+Group                    Access to tenant
+                         Physik           Chemie           Biologie         Verwaltung
+                         412 devices      230 devices      95 devices       61 devices
+                         12 users with    10 users with    6 users with     5 users with
+                         access           access           access           access
+────────────────────────────────────────────────────────────────────────────────────────
+ops-physik · 7 members     [x]              [ ]              [ ]              [ ]        (striped)
+ops-chemie · 5 members     [ ]              [x]              [ ]              [ ]
+ops-bio · 4 members        [ ]              [ ]              [x]              [ ]        (striped)
+it · 3 members             [x]              [x]              [ ]              [x]   ← hole: forgot Biologie
+audit · 2 members          [x]              [x]              [x]              [x]   ← accesses every tenant
+helpdesk · 9 members       [ ]              [ ]              [ ]              [ ]   ← accesses nothing
 ```
 
 - **A row is what a group sees.**
   - A full row means "sees every tenant" (decision 2).
   - A hole in an otherwise full row is a forgotten new tenant (see *Pitfalls*).
   - An empty row is a group whose members get the "no tenant" hint.
-- **A column is who sees a tenant.** An empty column is a tenant nobody sees.
+- **A column is who sees a tenant.** Its header counts the distinct active users across the
+  ticked groups ("N users with access"). An empty column is a tenant nobody sees.
 - **Typical edits:** attaching a new admin group everywhere is one row of clicks; onboarding a
   tenant is one column of clicks.
 
-**Commit 1: the matrix.** `dlcdb/tenants/views.py:index`, url `tenants:index`
-(`dlcdb/tenants/urls.py`, mounted at `tenants/`). `dlcdb/tenants/navigation.py`: slot
-`nav_settings`, label "Tenants", `required_permission: "tenants.view_tenant"`.
+**The matrix:** `dlcdb/tenants/views.py:index`, url `tenants:index` (`dlcdb/tenants/urls.py`,
+mounted at `tenants/`). `dlcdb/tenants/navigation.py`: slot `nav_settings`, label "Tenants",
+`required_permission: "tenants.view_tenant"`.
 
 - **GET** (`tenants.view_tenant`):
   - **Data:**
-    - `tenants = Tenant.objects.annotate(device_count=Count("device", distinct=True))`;
+    - `tenants`, annotated with `device_count=Count("device", distinct=True)` and
+      `user_count=Count("groups__user", filter=Q(groups__user__is_active=True), distinct=True)`
+      (`distinct`, because the two joins multiply rows), ordered explicitly by `Lower("name")`:
+      Django ignores `Meta.ordering` in `GROUP BY` queries, so the columns came in arbitrary
+      order before;
     - `groups = Group.objects.annotate(member_count=Count("user", filter=Q(user__is_active=True))).order_by("name")`;
     - `pairs = set(Tenant.groups.through.objects.values_list("tenant_id", "group_id"))`.
   - **Rows:** the view builds
     `rows = [(group, [(tenant, (tenant.pk, group.pk) in pairs) for tenant in tenants]) for group in groups]`,
     so the template only loops: no dict lookups, no template tag.
-  - **Template:** `tenants/index.html` extends `theme/_index_base.html`:
-    - one form around a `table-responsive` table;
-    - column header: tenant name and device count;
-    - last column: the group's active members;
-    - cell: `<input type="checkbox" name="tenant-{{ tenant.pk }}" value="{{ group.pk }}">`;
-    - without `tenants.change_tenant`: checkboxes `disabled` and no Save button.
-- **POST** (`tenants.change_tenant`, else `PermissionDenied`), in `transaction.atomic()`:
-  ```python
-  # Only the columns that were on the page: a tenant created meanwhile keeps its groups.
-  for tenant in Tenant.objects.filter(pk__in=request.POST.getlist("tenant")):
-      tenant.groups.set(Group.objects.filter(pk__in=request.POST.getlist(f"tenant-{tenant.pk}")))
-  ```
-  - Each column carries a hidden `<input name="tenant" value="{{ tenant.pk }}">`.
-  - `set()` works out the difference itself; filtering through `Group.objects` ignores crafted
-    ids.
-  - Then `messages.success` and a redirect to `tenants:index`.
+  - **Template:** `tenants/index.html`:
+    - a `table-responsive` table, no form and no Save button;
+    - `table-striped table-hover`;
+    - header in two rows: "Group" (rowspan 2) and "Access to tenant" (colspan); then per tenant
+      its name (link to the detail page), "N devices" and "N users with access". The last line
+      is declared as `{% partialdef user-count inline %}`, so the toggle can render it alone;
+    - row header: the group name and "· N members" (active accounts; with LDAP as of each
+      user's last login, as a `title`);
+    - cell: `<input type="checkbox" name="sees" hx-post="{% url 'tenants:toggle' tenant.pk group.pk %}" hx-target="#user-count-{{ tenant.pk }}" hx-swap="outerHTML" hx-sync="closest table:queue all">`;
+    - without `tenants.change_tenant`: checkboxes `disabled`, no `hx-post`.
+    - feedback: `hx-indicator="closest td"` puts `.htmx-request` on the clicked cell while
+      saving; a page-level CSS rule gives it `--bs-success-bg-subtle` and fades it out (1s).
+      `background-color`, because Bootstrap paints stripes and hover as a translucent inset
+      box-shadow on top, so the hover stays untouched.
+- **Toggle** `tenants:toggle` (`<tenant>/<group>/`, POST only, `tenants.change_tenant`): every
+  click is saved at once.
+  - The checkbox posts the **desired** state: `sees=on` only when ticked. A repeated or late
+    request cannot invert the result, and `hx-sync` applies quick clicks in order.
+  - Only a real change is written: `groups.add()`/`remove()`, then the audit stamp
+    (`get_denormalized_user`) and `save()`. A no-op writes nothing, so no empty history entries.
+  - The response is the tenant's "N users with access" line, `tenants/index.html#user-count`,
+    swapped into the header
+    (the same `template#partial` pattern as persons, lending and licences). The clicked checkbox
+    is not replaced, so focus and scroll position stay put.
+  - No Django messages: in partial responses they would pile up until the next full page.
+    The feedback is the checkbox itself and the updated count.
+  - Unknown tenant or group ids → 404. CSRF comes from `hx-headers` on `<body>`.
 - **Unscoped on purpose:** all tenants and groups, for `tenants.view_tenant` holders. Whoever
   configures tenants must also see the tenants they are not in. Other tenants show counts only,
   never devices.
@@ -448,25 +476,96 @@ helpdesk          [ ]      [ ]      [ ]        [ ]           9   ← sees nothin
   link text "Assign groups to tenants?" now describes exactly this page). The "devices without
   tenant" hint keeps its admin link, because the action lives there.
 
-**Commit 2: add and edit a tenant.**
-- `TenantForm(ModelForm)` with `fields = ["name", "contact_email"]` and `add_bootstrap_classes`.
-- `tenants:add` (`tenants.add_tenant`) and `tenants:edit` (`tenants.change_tenant`), modelled on
-  `rooms/views.py:room_add` and `room_detail`.
-- The column header links to the edit page.
-- After adding, redirect to the matrix with the message "Tenant “X” created. Tick the groups that
-  should see it."
-- Groups are edited only in the matrix: one place for visibility.
+**Tenant pages:**
+- **Form:** `TenantForm(ModelForm)` with `fields = ["name", "contact_email"]` and
+  `add_bootstrap_classes`. Groups are edited only in the matrix: one place for visibility.
+- **`tenants:add`** (`tenants.add_tenant`): after adding, redirect to the matrix with "Tenant “X”
+  created. Tick the groups that should see it."
+- **`tenants:detail`** (`tenants.view_tenant`; editable with `tenants.change_tenant`): like
+  `rooms/views.py:room_detail`, on `theme/_detail_base.html`. Sidebar: *Usage* (devices, users
+  who see the tenant) and *Record data*.
+- **Delete button:** right-aligned in the form's button row (Save changes | Cancel … Delete).
+  `theme/includes/_form_action_bar.html` gets an optional `delete_url`, passed through by
+  `theme/_detail_base.html`. The view sets it only with `tenants.delete_tenant` and while the
+  tenant has no devices. Otherwise the *Usage* card says that a tenant with devices cannot be
+  deleted (only for users with the delete permission).
+- **`tenants:delete`** (`tenants.delete_tenant`): a GET confirmation page, then a POST hard
+  delete. A `ProtectedError` (devices added meanwhile) becomes an error message.
+
+**Audit trail:**
+- `Tenant(AuditBaseModel)` (created, modified, user).
+- `history = HistoricalRecords(m2m_fields=["groups"])`: simple-history records every create,
+  rename, group change and delete. `history_user` comes from `HistoryRequestMiddleware`. It is
+  viewable in the admin (`TenantAdmin(SimpleHistoryAdmin)`), like the device history.
+- Migration `tenants/0005`: existing tenants get the migration time as `created_at`.
+- **Import cycle:** `tenants` loads before `core`, so `TenantAwareModel` moved to
+  `dlcdb/tenants/abstracts.py`. Otherwise `tenants/models.py` → `core.models` → `device.py` →
+  `tenants.models` would import a half-loaded module.
+- **Sidebar include:** the audit card is one include, `theme/includes/_audit_data.html`
+  (*Created*, *Modified · user*; parameters `object` and an optional `title`, default "Record
+  data"). It is named after `AuditBaseModel`, because the card is not specific to records.
+  - Objects with a UUID (rooms) show it as the first row.
+  - It is used by tenants (`title=_("Changes")`: "Record" is a domain term here), master data,
+    persons, rooms and importer. The importer's "Uploaded by" row went away: the same `user`,
+    now at *Modified · user*.
+
+**Review 2026-10-01** (on the first implementation):
+- **Soft delete rejected:**
+  - it is an UPDATE, so `PROTECT` no longer applies;
+  - a "deleted" tenant would hide its devices from everyone, without the "devices without
+    tenant" hint;
+  - its unique name would make creating a tenant with that name fail with an `IntegrityError`
+    (`validate_unique` uses the default manager, which skips deleted rows).
+
+  A hard delete of an empty tenant plus the history record covers the audit need.
+- **"Active members" was unclear.** "Inactive" means an account with `is_active=False`:
+  deactivated in the admin, or, with LDAP, a user who was not in `AUTH_LDAP_REQUIRE_GROUP` at
+  their last login. They cannot log in, so they see nothing. Now: *Users* per group and *Users
+  who see this tenant* per column, both counting active accounts.
+- **"0 Geräten"** is a translation bug, not a template one. The template uses
+  `{% blocktranslate count %}`, and German uses the plural for 0. The German entry for
+  `"%(counter)s device"` has `msgstr[1] "%(counter)s Geräten"` (dative); it should be
+  `"%(counter)s Geräte"`. The entry is shared with other pages; to be fixed in the po file.
+- **The header was confusing:** "Group" sat in the same row as the tenant names. Now there are
+  two rows, and they read as a sentence.
+
+**Review 2 (2026-10-01):**
+- **htmx instead of the Save button.** The first version saved the whole matrix with one
+  button, and a CSS `:has()` rule dimmed the button until a tick changed. Saving each click
+  instead:
+  - drops the dirty-state question entirely;
+  - writes one pair per request, so concurrent editors no longer overwrite each other (the
+    old "last write wins" limitation and the hidden `tenant` inputs are gone);
+  - makes each history entry exactly one decision.
+- **No sticky header.** The scroll box with `max-height` and `sticky-top` was dropped as not
+  worth its complexity: a plain `table-responsive` table.
+- **Delete** moved from its own sidebar card into the button row.
+
+**Review 3 (2026-10-02):** the matrix was still not intuitive. Rethought from the staff user's
+task (give user XY access to a tenant through XY's group):
+- the spanning header "… see the devices of tenant" read as a stray fragment; now "Group" and
+  "Access to tenant";
+- the separate *Users* column sat far from the group it counted; the member count now follows
+  the group name;
+- the footer "Users who see this tenant" did not stand out and read like "users in this
+  tenant"; the count moved into the tenant's header as "N users with access", and the footer
+  is gone;
+- the rows are striped (`table-striped`);
+- no member list per group (decided against; finding user XY's group stays in the admin or
+  LDAP).
 
 **Limits:**
 - **Size:** fits up to ~15 tenants and a few dozen groups. Beyond that, see the alternatives.
-- **Concurrent edits:** the last write wins for the whole matrix; acceptable for rare
-  configuration.
+- **A misclick takes effect at once.** There is no "review, then save"; the history and
+  clicking again undo it. The usual trade-off for permission matrices.
+- **Errors leave a misleading checkbox.** On a 403, a 500 or an expired session, htmx does not
+  swap, so the box shows a state the server did not apply until the page is reloaded. Rare.
 - **Rows:** every group is a row, permission-only groups included (empty rows). Hide empty rows
   only if it gets noisy.
 
 **Stays in the admin:**
 - users, groups, permissions;
-- deleting a tenant: rare, blocked by `PROTECT`, and the admin lists the blocking devices;
+- the tenant history;
 - "Assign devices without tenant", which goes away with NOT NULL.
 
 | Alternative | Why not (now) |
@@ -477,22 +576,68 @@ helpdesk          [ ]      [ ]      [ ]        [ ]           9   ← sees nothin
 
 **Docs and NEWS:**
 - `berechtigungen.md`:
-  - *Einstellungen › Tenants* with the matrix: "Zeile = was eine Gruppe sieht, Spalte = wer
-    einen Tenant sieht";
+  - *Einstellungen › Tenants* with the matrix (members per group, users with access per
+    tenant);
   - "Alle Tenants sehen" = a full row;
+  - deleting only without devices;
+  - the tenant history in the admin;
   - *Rolle des Django-Admins*: tenants leave the list.
 - `erste_schritte.md` step 4 and `faq.md`: the new path.
-- NEWS: "Tenants: new page Settings › Tenants shows and edits which groups see which tenant".
+- NEWS: "Tenants: new page Settings › Tenants shows and edits which groups see which tenant;
+  tenants can be added, edited and deleted there too, with history".
 
 **Tests** (`dlcdb/tenants/tests/test_views.py`):
-- **GET:** needs `tenants.view_tenant` (403 without); the checked state matches the pairs.
-- **Without `tenants.change_tenant`:** the checkboxes are disabled and a POST returns 403.
-- **POST:**
-  - sets and clears pairs;
-  - ignores a crafted group id;
-  - keeps the groups of a tenant whose column was not posted.
-- **Add and edit:** the permission gates; the redirect after add goes to the matrix.
+- **Matrix GET:**
+  - needs `tenants.view_tenant` (403 without);
+  - the checked state matches the pairs;
+  - a user in two ticked groups counts once, inactive users not at all.
+- **Without `tenants.change_tenant`:** the checkboxes are disabled, carry no `hx-post`, and a
+  toggle POST returns 403.
+- **Toggle:**
+  - ticks and unticks one pair, stamps the tenant and records history with `history_user`;
+  - a no-op writes nothing;
+  - returns the updated "N users with access" line;
+  - GET → 405; unknown ids → 404.
+- **Add, detail, delete:**
+  - the permission gates;
+  - detail is read-only with the view permission only;
+  - the Delete button in the button row only without devices;
+  - add and delete leave history records with `history_user`;
+  - a tenant with devices cannot be deleted.
 - **Hint:** links to `tenants:index`.
+
+### Follow-up: creator in `AuditBaseModel` (proposed 2026-10-01, own commit)
+
+Found during step 4: *Created* in the audit card shows only a date. `AuditBaseModel` keeps
+one `user`/`username` pair, and every save overwrites it ("last changed by"), so the creator
+is lost. For imports this happens to be the uploader, because `user` is set only once at
+upload.
+
+- **Fields:** two new nullable fields on `AuditBaseModel` (`dlcdb/core/models/abstracts.py`):
+  `created_by` (FK to the user model, `SET_NULL`, `related_name="+"`) and `created_by_username`
+  (denormalized, like `username`).
+- **Filling them:** in `AuditBaseModel.save()`, copy the user on the first save:
+  `if self._state.adding: self.created_by, self.created_by_username = self.user, self.username`.
+  Every create path already stamps `user` before saving (frontend views,
+  `CustomBaseModelAdmin.save_model`, `TenantAdmin.save_model`), so no view or admin changes.
+  `bulk_create` would skip `save()`, but nothing uses it outside tests (the importer
+  deliberately saves one by one, `dataexchange/importer.py`).
+- **Display:** `theme/includes/_audit_data.html` shows *Created · user* like *Modified · user*.
+- **Migrations:** one per app with audit models, additive and nullable:
+  - core: Device, DeviceType, Room, Person, OrganizationalUnit, Record, Attachment, Link;
+  - dataexchange: the `OperationLogBase` models;
+  - smallstuff: Thing;
+  - tenants: Tenant.
+
+  The history models of Device and Tenant get the fields too.
+- **Existing rows:** no creator, so the card shows the date only. Optional data migration:
+  backfill from the `+` history entry (`history_user`) where one exists (Device, Tenant).
+- **Rejected:** reading the creator from simple-history in the include. It works only for
+  models with history and objects created after history was enabled, and costs a query per
+  page.
+- **Tests:**
+  - the first save copies `user`, a later save keeps `created_by`;
+  - the card shows the creator.
 
 ## Tests (`.venv/bin/pytest`)
 
@@ -600,6 +745,10 @@ tenant" (both linking to the Tenant admin). NEWS has one entry.
   `_mirror_groups` creates them with `get_or_create`). Until then they cannot be attached to a
   tenant, in the admin or the frontend (and do not appear as a row in the matrix). Workaround: create the group in the admin with the exact
   LDAP name. Possible follow-up: create the `AUTH_LDAP_MIRROR_GROUPS` groups in `post_migrate`.
+- **User counts on the tenant page follow LDAP only at login:** group membership is synced when
+  a user logs in, so the *Users* counts reflect each user's last login.
+- **Deleting a tenant nulls its imports' tenant** (`ImporterList.tenant` is `SET_NULL`): those
+  imports then appear in no scoped import list.
 
 ## Verification
 

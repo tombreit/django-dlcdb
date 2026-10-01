@@ -10,6 +10,7 @@ from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
+from simple_history.admin import SimpleHistoryAdmin
 
 from ..core.models import Device
 from ..core.utils.helpers import get_denormalized_user
@@ -48,15 +49,20 @@ class TenantScopedRecordAdmin(TenantScopedAdmin):
 
 
 @admin.register(Tenant)
-class TenantAdmin(admin.ModelAdmin):
+class TenantAdmin(SimpleHistoryAdmin):
     list_display = ("name", "group_names", "contact_email")
     search_fields = ("name",)
     ordering = ("name",)
     filter_horizontal = ("groups",)
+    readonly_fields = ("created_at", "modified_at", "user", "username")
     actions = ["assign_devices_without_tenant"]
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("groups")
+
+    def save_model(self, request, obj, form, change):
+        obj.user, obj.username = get_denormalized_user(request.user)
+        super().save_model(request, obj, form, change)
 
     @admin.display(description=_("Groups"))
     def group_names(self, obj):

@@ -28,6 +28,7 @@ urlpatterns = [
     path("notifications/", include("dlcdb.notifications.urls")),
     path("assets/", include("dlcdb.assets.urls")),
     path("rooms/", include("dlcdb.rooms.urls")),
+    path("tenants/", include("dlcdb.tenants.urls")),
     path("persons/", include("dlcdb.persons.urls")),
     path("dataexchange/", include("dlcdb.dataexchange.urls")),
     path("theme/", include("dlcdb.theme.urls")),

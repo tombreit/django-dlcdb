@@ -1,0 +1,56 @@
+{% extends "theme/_detail_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{{ tenant }}{% endblock title %}
+
+{% block detail_title %}{{ tenant.name }}{% endblock detail_title %}
+{% block detail_meta %}{% translate "Tenant" %}{% endblock detail_meta %}
+
+{% block detail_form_fields %}
+  {% include "tenants/includes/_form_fields.html" with form=form %}
+{% endblock detail_form_fields %}
+
+{% block detail_readonly_notice %}
+  {% include "theme/includes/_readonly_notice.html" with message=_("You may view this tenant but do not have permission to edit it.") %}
+{% endblock detail_readonly_notice %}
+
+{% block detail_readonly %}
+  <section class="card mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3 text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Tenant" %}</h2>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        {% for field in form.visible_fields %}
+          <dt class="col-sm-4 text-secondary fw-medium">{{ field.label }}</dt>
+          <dd class="col-sm-8">{{ field.value|default:"—" }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+  </section>
+{% endblock detail_readonly %}
+
+{% block detail_sidebar %}
+  <section class="card mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-pc-display text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Usage" %}</h2>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0 small">
+        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Devices" %}</dt>
+        <dd class="col-sm-6">{{ tenant.device_count }}</dd>
+        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Users who see this tenant" %}</dt>
+        <dd class="col-sm-6 mb-0">{{ tenant.user_count }}</dd>
+      </dl>
+      {% if perms.tenants.delete_tenant and tenant.device_count %}
+        <p class="small text-secondary mb-0 mt-3">{% translate "A tenant with devices cannot be deleted. Move its devices to another tenant first." %}</p>
+      {% endif %}
+    </div>
+  </section>
+
+  {% include "theme/includes/_audit_data.html" with object=tenant title=_("Changes") %}
+{% endblock detail_sidebar %}

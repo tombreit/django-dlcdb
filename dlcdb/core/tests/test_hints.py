@@ -76,7 +76,7 @@ class StickyHintsTests(BaseTest):
         self.client.force_login(viewer)
         response = self.client.get(self.dashboard_url)
         self.assertContains(response, hint)
-        self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
+        self.assertContains(response, reverse("tenants:index"))
 
         # Superusers see only the tenants of their groups, too.
         superuser = get_user_model().objects.create_superuser(

@@ -117,7 +117,7 @@ def hints(request):
                 StickyMessage(
                     level=messages.WARNING,
                     msg=_("None of your groups belongs to a tenant, so you see no devices."),
-                    cta_link=reverse("admin:tenants_tenant_changelist"),
+                    cta_link=reverse("tenants:index"),
                     cta_text=_("Assign groups to tenants?"),
                 )
             )

@@ -74,27 +74,7 @@
     </div>
   </section>
 
-  <section class="card mb-3">
-    <div class="card-header d-flex align-items-center gap-2">
-      <i class="bi bi-info-circle text-primary"></i>
-      <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
-    </div>
-    <div class="card-body">
-      <dl class="row mb-0 small">
-        <dt class="col-sm-4 text-secondary fw-medium">UUID</dt>
-        <dd class="col-sm-8 font-monospace text-break">{{ room.uuid }}</dd>
-        <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
-        <dd class="col-sm-8">{{ room.created_at|date:"Y-m-d H:i" }}</dd>
-        <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
-        <dd class="col-sm-8 mb-0">
-          {{ room.modified_at|date:"Y-m-d H:i" }}
-          {% if room.user or room.username %}
-            <span class="text-muted">· {{ room.user|default:room.username }}</span>
-          {% endif %}
-        </dd>
-      </dl>
-    </div>
-  </section>
+  {% include "theme/includes/_audit_data.html" with object=room %}
 
   {% if room.qrcode %}
     {# Collapsed by default — same native <details> mechanism as the device QR card. #}

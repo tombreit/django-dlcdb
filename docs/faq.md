@@ -12,7 +12,7 @@ Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt ersch
 
 `````{dropdown} None of your groups belongs to a tenant?
 
-Keine Gruppe des Benutzers ist einem Tenant zugeordnet, deshalb sieht er keine Geräte – auch als Superuser. Abhilfe: eine seiner Gruppen dem Tenant zuordnen (*Start › Tenants › Tenant › Gruppen*).
+Keine Gruppe des Benutzers ist einem Tenant zugeordnet, deshalb sieht er keine Geräte – auch als Superuser. Abhilfe: unter *Einstellungen › Tenants* in der Zeile einer seiner Gruppen den Tenant anhaken.
 
 Siehe [Tenants](./guides/berechtigungen.md#tenants), [Tenant anlegen](./guides/erste_schritte.md#4-tenant-anlegen), [Tenant Model](./betrieb/model.md#tenant)
 `````

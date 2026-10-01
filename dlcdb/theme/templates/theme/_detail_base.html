@@ -12,7 +12,7 @@ defaults, the way the Django admin exposes ``object-tools`` — override a block
 or extend it with {{ block.super }}.
 
 Expects from the view: ``can_change``, ``form``, ``form_action``, ``index_url``.
-Optional: ``save_as_new_url`` (see _form_action_bar.html).
+Optional: ``save_as_new_url`` and ``delete_url`` (see _form_action_bar.html).
 
 Blocks:
   detail_page_class      full class attribute for the page wrapper, including
@@ -60,7 +60,7 @@ frame: their header carries a breadcrumb band instead and there is no form.
           <form{% block detail_form_class %}{% endblock %} method="post" action="{{ form_action }}" novalidate>
             {% csrf_token %}
             {% block detail_form_fields %}{% endblock detail_form_fields %}
-            {% include "theme/includes/_form_action_bar.html" with cancel_url=index_url save_as_new_url=save_as_new_url %}
+            {% include "theme/includes/_form_action_bar.html" with cancel_url=index_url save_as_new_url=save_as_new_url delete_url=delete_url %}
           </form>
         {% else %}
           {% block detail_readonly_notice %}

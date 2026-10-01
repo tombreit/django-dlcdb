@@ -50,25 +50,7 @@
   </section>
 
   {% if has_audit_fields %}
-    <section class="card mb-3">
-      <div class="card-header d-flex align-items-center gap-2">
-        <i class="bi bi-clock-history text-primary"></i>
-        <h2 class="h6 mb-0">{% translate "Record data" %}</h2>
-      </div>
-      <div class="card-body">
-        <dl class="row mb-0 small">
-          <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
-          <dd class="col-sm-8">{{ object.created_at|date:"Y-m-d H:i" }}</dd>
-          <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
-          <dd class="col-sm-8 mb-0">
-            {{ object.modified_at|date:"Y-m-d H:i" }}
-            {% if object.user or object.username %}
-              <span class="text-muted">· {{ object.user|default:object.username }}</span>
-            {% endif %}
-          </dd>
-        </dl>
-      </div>
-    </section>
+    {% include "theme/includes/_audit_data.html" with object=object %}
   {% endif %}
 {% endblock detail_sidebar %}
 

@@ -57,7 +57,7 @@ Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeite
 :::{admonition} **LDAP**
 :class: note
 
-Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` (`.env`) genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Berechtigungen und Tenants werden dann diesen **gespiegelten Gruppen** zugewiesen. Die Mitgliedschaften in diesen gespiegelten Gruppen werden bei jeder Anmeldung aus LDAP übernommen; von Hand vergebene Mitgliedschaften in ihnen gehen dabei verloren. Mitgliedschaften in Gruppen, die nicht in `AUTH_LDAP_MIRROR_GROUPS` stehen (z.B. eine in der DLCDB angelegte Gruppe), bleiben unberührt.
+Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` (`.env`) genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Berechtigungen und Tenants werden dann diesen **gespiegelten Gruppen** zugewiesen. Die Mitgliedschaften in diesen gespiegelten Gruppen werden bei jeder Anmeldung aus LDAP übernommen; von Hand vergebene Mitgliedschaften in ihnen gehen dabei verloren. Mitgliedschaften in Gruppen, die nicht in `AUTH_LDAP_MIRROR_GROUPS` stehen (z.B. eine in der DLCDB angelegte Gruppe), bleiben unberührt. Eine gespiegelte Gruppe entsteht in der DLCDB erst beim ersten Login eines ihrer Mitglieder; vorher fehlt sie in der Tenant-Übersicht. Soll sie schon vorher einem Tenant zugeordnet werden, im Django-Admin eine Gruppe mit exakt dem LDAP-Namen anlegen.
 :::
 
 ## Navigation
@@ -91,6 +91,7 @@ Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt ersc
 | Prozesse › Bulk Ausmusterung | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
 | Prozesse › Inventarisieren (nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
 | Prozesse › SAP-Abgleich (nur bei aktiver Inventur) | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Einstellungen › Tenants | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
 | Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
 | Einstellungen › Ausleih-Profile | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
@@ -104,7 +105,7 @@ Steht bei einem Menüpunkt mehr als eine Berechtigung, genügt **eine** davon. S
 :::{admonition} **Menüpunkte, die in den Django-Admin führen**
 :class: note
 
-Die Einträge *Entfernt-Records*, *Inventuren*, *Notizen*, *Bulk Ausmusterung*, *SAP-Abgleich* und alle Einträge unter *Einstellungen* öffnen eine Django-Admin-Ansicht. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das **Staff-Flag**, sonst landet er auf der Admin-Anmeldeseite. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
+Die Einträge *Entfernt-Records*, *Inventuren*, *Notizen*, *Bulk Ausmusterung*, *SAP-Abgleich* und alle Einträge unter *Einstellungen* außer *Tenants* öffnen eine Django-Admin-Ansicht. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das **Staff-Flag**, sonst landet er auf der Admin-Anmeldeseite. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
 :::
 
 ## Statuswechsel
@@ -162,7 +163,7 @@ Eine Berechtigung schaltet nicht nur den Eintrag auf der Geräteseite frei, sond
 
 Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt und nur ihre eigenen Geräte verwaltet. Der Tenant hängt am **Gerät** (*Datenhaltung › Geräte › Mandant*); Records, Ausleihen und Lizenzen erben ihn über ihr Gerät.
 
-**Zuordnung zum Benutzer.** Ein Tenant besitzt eine oder mehrere **Gruppen** (*Start › Tenants › Tenant › Gruppen*). Der Tenant eines Benutzers ergibt sich aus dessen Gruppenmitgliedschaften:
+**Zuordnung zum Benutzer.** Ein Tenant besitzt eine oder mehrere **Gruppen**. Welche Gruppe welchen Tenant sieht, zeigt und ändert *Einstellungen › Tenants*: eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder, unter jedem Tenant die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins). Die Seite zeigt alle Tenants und Gruppen (`tenants.view_tenant`); Haken setzen und Tenants umbenennen erfordern `tenants.change_tenant`, Tenants anlegen `tenants.add_tenant`. Jede Änderung, auch an den Haken, steht in der *History* des Tenants im Django-Admin. Der Tenant eines Benutzers ergibt sich aus dessen Gruppenmitgliedschaften:
 
 - Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
 - Mehrere Tenants passen → der Benutzer sieht die Geräte **aller** dieser Tenants. Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*.
@@ -171,12 +172,16 @@ Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt un
 
 Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
 
-**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. Administratoren, IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wird das bei einem neuen Tenant vergessen, sieht die Gruppe ihn schlicht nicht. Wer *wen* sieht, steht damit immer vollständig in der Gruppen-Liste des Tenants (Spalte *Groups* in der Tenant-Übersicht).
+**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. Administratoren, IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wird das bei einem neuen Tenant vergessen, sieht die Gruppe ihn schlicht nicht. In der Tenant-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke in einer sonst vollen Zeile ist ein vergessener Tenant.
 
 Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
 
 :::{warning}
 **Berechtigungen gelten in allen Tenants eines Benutzers.** Wer über die Gruppe *ops-a* Geräte in Tenant A bearbeiten darf und über *audit-b* Tenant B nur ansehen soll, kann trotzdem auch die Geräte von B bearbeiten. Unterschiedliche Rollen je Tenant lassen sich nicht abbilden; dafür getrennte Benutzerkonten verwenden.
+:::
+
+:::{warning}
+**`tenants.change_tenant` entscheidet über die Sichtbarkeit – auch über die eigene.** Wer diese Berechtigung besitzt, kann die eigene Gruppe jedem Tenant zuordnen und so dessen Geräte sehen. Sie gehört deshalb wie die Gruppenverwaltung zu den Administrations-Berechtigungen, nicht in Bediener-Gruppen.
 :::
 
 Nicht auf den Tenant eingeschränkt sind:
@@ -197,18 +202,18 @@ Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.ch
 
 Reichen die Angaben auf der Bestätigungsseite nicht für die Entscheidung, hilft ein **Zwischen-Tenant**: einen Tenant *Unassigned* anlegen und der IT-Gruppe zuordnen, alle Geräte ohne Tenant per Aktion dorthin verschieben, dann jedes Gerät auf seiner Detailseite (Feld *Tenant*) dem richtigen Tenant zuordnen. Ist *Unassigned* leer, kann er gelöscht werden.
 
-Ein Tenant, dem noch Geräte zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen.
+Ein Tenant ohne Geräte lässt sich auf seiner Detailseite löschen (Schaltfläche *Delete* neben *Änderungen speichern*; `tenants.change_tenant` und `tenants.delete_tenant`). Ein Tenant, dem noch Geräte zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen.
 
 ## Rolle des Django-Admins
 
 Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug, Inventur, Lizenzen, Import – läuft vollständig im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü, nur mit Staff-Flag) wird noch für Folgendes benötigt:
 
-- Benutzer, Gruppen, Berechtigungen und Tenants anlegen und zuordnen
+- Benutzer, Gruppen und Berechtigungen anlegen und zuordnen
 - Geräte ohne Tenant einem Tenant zuordnen (siehe [Geräte ohne Tenant](#geräte-ohne-tenant))
 - die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
 - Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
 - Stammdaten *aktivieren/deaktivieren* (Soft-Delete, nur Superuser) und endgültig löschen (nur Superuser)
-- die feldgenaue Änderungs-*History* eines Geräts
+- die feldgenaue Änderungs-*History* eines Geräts oder Tenants
 - Bulk Ausmusterung, Entfernt-Records, Inventuren, Notizen, SAP-Abgleich, erzeugte Reports
 - alle Einträge unter *Einstellungen* (Ausleihe-Konfiguration, Ausleih-Profile, Lizenzmodul-Konfiguration, Branding, HR-API-Sync-Konfiguration)
 

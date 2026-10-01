@@ -21,6 +21,9 @@ Params:
                 validation errors (e.g. a unique field that must change).
                 With two save buttons, Cancel moves to the right edge so it is
                 not read as a third save variant.
+  delete_url    (optional) URL of the object's delete confirmation page. Set it
+                only when the user may delete. Rendered as a link at the right
+                edge, apart from the save actions.
 {% endcomment %}
 
 <div class="mt-4 mb-5 d-flex flex-wrap gap-2">
@@ -35,4 +38,10 @@ Params:
     </button>
   {% endif %}
   <a class="btn btn-outline-secondary{% if save_as_new_url %} ms-auto{% endif %}" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
+  {% if delete_url %}
+    <a class="btn btn-outline-danger{% if not save_as_new_url %} ms-auto{% endif %}" href="{{ delete_url }}">
+      <i class="bi bi-trash"></i>
+      {% translate "Delete" %}
+    </a>
+  {% endif %}
 </div>

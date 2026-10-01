@@ -4,9 +4,12 @@
 
 from django.db import models
 from django.db.models.functions import Lower
+from simple_history.models import HistoricalRecords
+
+from dlcdb.core.models.abstracts import AuditBaseModel
 
 
-class Tenant(models.Model):
+class Tenant(AuditBaseModel):
     name = models.CharField(
         max_length=150,
         unique=True,
@@ -49,23 +52,12 @@ class Tenant(models.Model):
     #     )
     #     return obj.pk
 
+    # Records every create, rename, group change and delete: the groups decide
+    # who sees this tenant's devices.
+    history = HistoricalRecords(m2m_fields=["groups"])
+
     def __str__(self):
         return f"{self.name}"
 
     class Meta:
         ordering = [Lower("name")]
-
-
-class TenantAwareModel(models.Model):
-    tenant = models.ForeignKey(
-        "tenants.Tenant",
-        # A tenant with devices cannot be deleted: SET_NULL would orphan its
-        # devices, which then are invisible to every tenant-scoped user.
-        on_delete=models.PROTECT,
-        # Nullable for legacy devices only; forms require a tenant.
-        null=True,
-        # blank=True,
-    )
-
-    class Meta:
-        abstract = True

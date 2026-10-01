@@ -1,0 +1,99 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Tenants" %}{% endblock title %}
+
+{% block extra_css %}
+  <style>
+    /* The clicked cell lights up while its change is saved (htmx sets
+       .htmx-request on the hx-indicator, the cell), then fades out. A
+       background colour shows through Bootstrap's translucent stripe and
+       hover shadows and leaves them alone. */
+    .tenant-matrix td { transition: background-color 1s ease-out; }
+    .tenant-matrix td.htmx-request { background-color: var(--bs-success-bg-subtle); transition: none; }
+  </style>
+{% endblock extra_css %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "Tenants" %}</h1>
+    {% if perms.tenants.add_tenant %}
+      <div class="ms-auto">
+        <a href="{% url 'tenants:add' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> {% translate "Add tenant" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <p class="text-secondary">
+    {% translate "Users get access to a tenant's devices through their groups: tick a group in a tenant's column to give all its members access. Every device belongs to exactly one tenant; what users may do with the devices is set by their groups' permissions. A group that should access all tenants needs a tick in every column, including the column of each new tenant." %}
+    {% if can_change %}{% translate "Each tick is saved immediately." %}{% endif %}
+  </p>
+
+  {% if tenants and rows %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle tenant-matrix">
+        <thead>
+          <tr>
+            <th scope="col" rowspan="2" class="align-bottom">{% translate "Group" %}</th>
+            <th scope="colgroup" colspan="{{ tenants|length }}" class="text-center">{% translate "Access to tenant" %}</th>
+          </tr>
+          <tr>
+            {% for tenant in tenants %}
+              <th scope="col" class="text-center">
+                <a href="{% url 'tenants:detail' tenant.pk %}">{{ tenant.name }}</a>
+                <div class="small text-secondary fw-normal">
+                  {% blocktranslate count counter=tenant.device_count %}{{ counter }} device{% plural %}{{ counter }} devices{% endblocktranslate %}
+                </div>
+                {% partialdef user-count inline %}
+                  <div id="user-count-{{ tenant.pk }}" class="small text-secondary fw-normal">
+                    {% blocktranslate count counter=tenant.user_count %}{{ counter }} user with access{% plural %}{{ counter }} users with access{% endblocktranslate %}
+                  </div>
+                {% endpartialdef %}
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        {% comment %}
+        Each click is saved by views.toggle: the checkbox posts "sees" only when
+        ticked, and the response replaces the tenant's "users with access" line
+        in the header (partial "user-count"). hx-sync applies quick clicks in order;
+        hx-indicator lets the cell light up while saving (see extra_css).
+        {% endcomment %}
+        <tbody>
+          {% for group, cells in rows %}
+            <tr>
+              <th scope="row">
+                {{ group.name }}
+                <span class="small text-secondary fw-normal" title="{% translate "Active user accounts; with LDAP as of each user's last login" %}">
+                  · {% blocktranslate count counter=group.member_count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktranslate %}
+                </span>
+              </th>
+              {% for tenant, checked in cells %}
+                <td class="text-center">
+                  <input class="form-check-input" type="checkbox" name="sees"
+                         aria-label="{% blocktranslate with group=group.name tenant=tenant.name %}Members of {{ group }} have access to {{ tenant }}{% endblocktranslate %}"
+                         {% if checked %}checked{% endif %}
+                         {% if can_change %}
+                           hx-post="{% url 'tenants:toggle' tenant.pk group.pk %}"
+                           hx-target="#user-count-{{ tenant.pk }}"
+                           hx-swap="outerHTML"
+                           hx-sync="closest table:queue all"
+                           hx-indicator="closest td"
+                         {% else %}
+                           disabled
+                         {% endif %}>
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-muted">{% translate "Tenants and groups are needed to decide who sees which devices." %}</p>
+  {% endif %}
+{% endblock body %}
