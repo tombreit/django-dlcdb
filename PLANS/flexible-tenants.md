@@ -6,7 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Flexible tenants: users in several tenants, visibility only through groups
 
-**Status:** design document; steps 0–2 implemented (2026-10-01), step 3 open. Living
+**Status:** design document; steps 0–3 implemented (2026-10-01; NOT NULL deferred), step 4
+(tenant management in the frontend) proposed. Living
 document: update it when decisions or the code change. Last revised 2026-10-01 (review against
 the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
 group attachment).
@@ -383,6 +384,116 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
   (`base_admin.py`, restore action) stay.
 
+### Step 4: tenant management in the frontend (proposed 2026-10-01)
+
+Goal: configure tenants without the Django admin. Users, groups and permissions stay in the
+admin; with LDAP, the mirror groups supply the membership. No JS, no new dependency, start
+small. Expected size: up to ~15 tenants.
+
+`Tenant.groups` is a set of (group, tenant) pairs. One page shows all pairs as a matrix:
+
+```
+Settings › Tenants: who sees which tenant                    [Save]
+
+                 Physik   Chemie   Biologie   Verwaltung   Members
+                 (412)    (230)    (95)       (61)
+ops-physik        [x]      [ ]      [ ]        [ ]           7
+ops-chemie        [ ]      [x]      [ ]        [ ]           5
+ops-bio           [ ]      [ ]      [x]        [ ]           4
+it                [x]      [x]      [ ]        [x]           3   ← hole: forgot Biologie
+audit             [x]      [x]      [x]        [x]           2   ← sees every tenant
+helpdesk          [ ]      [ ]      [ ]        [ ]           9   ← sees nothing
+```
+
+- **A row is what a group sees.**
+  - A full row means "sees every tenant" (decision 2).
+  - A hole in an otherwise full row is a forgotten new tenant (see *Pitfalls*).
+  - An empty row is a group whose members get the "no tenant" hint.
+- **A column is who sees a tenant.** An empty column is a tenant nobody sees.
+- **Typical edits:** attaching a new admin group everywhere is one row of clicks; onboarding a
+  tenant is one column of clicks.
+
+**Commit 1: the matrix.** `dlcdb/tenants/views.py:index`, url `tenants:index`
+(`dlcdb/tenants/urls.py`, mounted at `tenants/`). `dlcdb/tenants/navigation.py`: slot
+`nav_settings`, label "Tenants", `required_permission: "tenants.view_tenant"`.
+
+- **GET** (`tenants.view_tenant`):
+  - **Data:**
+    - `tenants = Tenant.objects.annotate(device_count=Count("device", distinct=True))`;
+    - `groups = Group.objects.annotate(member_count=Count("user", filter=Q(user__is_active=True))).order_by("name")`;
+    - `pairs = set(Tenant.groups.through.objects.values_list("tenant_id", "group_id"))`.
+  - **Rows:** the view builds
+    `rows = [(group, [(tenant, (tenant.pk, group.pk) in pairs) for tenant in tenants]) for group in groups]`,
+    so the template only loops: no dict lookups, no template tag.
+  - **Template:** `tenants/index.html` extends `theme/_index_base.html`:
+    - one form around a `table-responsive` table;
+    - column header: tenant name and device count;
+    - last column: the group's active members;
+    - cell: `<input type="checkbox" name="tenant-{{ tenant.pk }}" value="{{ group.pk }}">`;
+    - without `tenants.change_tenant`: checkboxes `disabled` and no Save button.
+- **POST** (`tenants.change_tenant`, else `PermissionDenied`), in `transaction.atomic()`:
+  ```python
+  # Only the columns that were on the page: a tenant created meanwhile keeps its groups.
+  for tenant in Tenant.objects.filter(pk__in=request.POST.getlist("tenant")):
+      tenant.groups.set(Group.objects.filter(pk__in=request.POST.getlist(f"tenant-{tenant.pk}")))
+  ```
+  - Each column carries a hidden `<input name="tenant" value="{{ tenant.pk }}">`.
+  - `set()` works out the difference itself; filtering through `Group.objects` ignores crafted
+    ids.
+  - Then `messages.success` and a redirect to `tenants:index`.
+- **Unscoped on purpose:** all tenants and groups, for `tenants.view_tenant` holders. Whoever
+  configures tenants must also see the tenants they are not in. Other tenants show counts only,
+  never devices.
+- **Hints:** the "None of your groups belongs to a tenant" hint links to `tenants:index` (its
+  link text "Assign groups to tenants?" now describes exactly this page). The "devices without
+  tenant" hint keeps its admin link, because the action lives there.
+
+**Commit 2: add and edit a tenant.**
+- `TenantForm(ModelForm)` with `fields = ["name", "contact_email"]` and `add_bootstrap_classes`.
+- `tenants:add` (`tenants.add_tenant`) and `tenants:edit` (`tenants.change_tenant`), modelled on
+  `rooms/views.py:room_add` and `room_detail`.
+- The column header links to the edit page.
+- After adding, redirect to the matrix with the message "Tenant “X” created. Tick the groups that
+  should see it."
+- Groups are edited only in the matrix: one place for visibility.
+
+**Limits:**
+- **Size:** fits up to ~15 tenants and a few dozen groups. Beyond that, see the alternatives.
+- **Concurrent edits:** the last write wins for the whole matrix; acceptable for rare
+  configuration.
+- **Rows:** every group is a row, permission-only groups included (empty rows). Hide empty rows
+  only if it gets noisy.
+
+**Stays in the admin:**
+- users, groups, permissions;
+- deleting a tenant: rare, blocked by `PROTECT`, and the admin lists the blocking devices;
+- "Assign devices without tenant", which goes away with NOT NULL.
+
+| Alternative | Why not (now) |
+|---|---|
+| Per-tenant pages with a dual-pane widget ([filtered-select-multiple-widget](https://github.com/tombreit/filtered-select-multiple-widget), the frontend twin of `filter_horizontal`) | Scales to many tenants, but needs JS and a new dependency, and answers "who sees what" only one tenant at a time. The fallback if an instance outgrows the matrix. |
+| TomSelect multi-select per tenant | Hides the unattached groups behind a dropdown. |
+| Improve the admin | Keeps the central configuration in the admin. |
+
+**Docs and NEWS:**
+- `berechtigungen.md`:
+  - *Einstellungen › Tenants* with the matrix: "Zeile = was eine Gruppe sieht, Spalte = wer
+    einen Tenant sieht";
+  - "Alle Tenants sehen" = a full row;
+  - *Rolle des Django-Admins*: tenants leave the list.
+- `erste_schritte.md` step 4 and `faq.md`: the new path.
+- NEWS: "Tenants: new page Settings › Tenants shows and edits which groups see which tenant".
+
+**Tests** (`dlcdb/tenants/tests/test_views.py`):
+- **GET:** needs `tenants.view_tenant` (403 without); the checked state matches the pairs.
+- **Without `tenants.change_tenant`:** the checkboxes are disabled and a POST returns 403.
+- **POST:**
+  - sets and clears pairs;
+  - ignores a crafted group id;
+  - keeps the groups of a tenant whose column was not posted.
+- **Add and edit:** the permission gates; the redirect after add goes to the matrix.
+- **Hint:** links to `tenants:index`.
+
 ## Tests (`.venv/bin/pytest`)
 
 Shared helper in `dlcdb/conftest.py`: `tenant_user(tenants=(), perms=())` building user,
@@ -481,6 +592,14 @@ tenant" (both linking to the Tenant admin). NEWS has one entry.
 - Scoping stays opt-in per view. A django-scopes-style enforced default is the natural hardening
   if more apps are added.
 - Overdue-lending notifications group by device tenant and use `Tenant.contact_email`; unchanged.
+- **`tenants.change_tenant` decides visibility for everyone, the holder included** (step 4):
+  attaching one's own group to a tenant reveals its devices. True in the admin today, but a
+  frontend makes the permission easier to hand out. Treat it like group administration, not as
+  an operator permission.
+- **Mirrored LDAP groups appear only at the first login of a member** (django-auth-ldap
+  `_mirror_groups` creates them with `get_or_create`). Until then they cannot be attached to a
+  tenant, in the admin or the frontend (and do not appear as a row in the matrix). Workaround: create the group in the admin with the exact
+  LDAP name. Possible follow-up: create the `AUTH_LDAP_MIRROR_GROUPS` groups in `post_migrate`.
 
 ## Verification
 
