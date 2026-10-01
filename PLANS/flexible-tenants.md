@@ -4,10 +4,11 @@ SPDX-FileCopyrightText: Thomas Breitner
 SPDX-License-Identifier: CC0-1.0
 -->
 
-# Flexible tenants: users in several tenants, plus an "all tenants" level
+# Flexible tenants: users in several tenants, visibility only through groups
 
 **Status:** design document, not implemented. Living document: update it when decisions or the
-code change. Last revised 2026-09-18.
+code change. Last revised 2026-10-01 (review against the code on branch `flexible-tenants`;
+"all tenants" permission dropped in favour of plain group attachment).
 
 The behaviour this document wants to change is described (as it is today) in
 `docs/guides/berechtigungen.md`, section *Tenants*.
@@ -23,22 +24,35 @@ permission. There is no intermediate level. Example, a research institution:
 
 - several research groups manage "their" devices autonomously (one tenant each);
 - administrative units (IT, purchasing, finance, audit) must see or manage devices of several,
-  possibly specific, tenants without being superusers.
+  possibly all, tenants without being superusers.
 
-## Decisions taken (2026-09-18)
+Goal beyond tenants: phase out `is_superuser` for everything that is not a Django admin feature.
 
-1. **Permissions are identical in every tenant a user can access.** Tenants grant no
-   permissions. Groups decide *what* a user may do, tenants decide *which devices* they see.
+## Decisions taken
+
+1. **Permissions are identical in every tenant a user can access** (2026-09-18). Tenants grant
+   no permissions. Groups decide *what* a user may do, tenants decide *which devices* they see.
    No per-tenant roles.
-2. **"All tenants" is a Django permission** `tenants.access_all_tenants` ("Can access devices of
-   all tenants") on the `Tenant` model, assigned to groups. Superusers hold it implicitly via
-   `user.has_perm`. Superuser keeps its meaning "all rights"; the permission only widens
-   visibility.
-3. **Write target** (new device, import, "save as new"): a `tenant` form field limited to the
-   user's tenants. One tenant: preselected, effectively locked. Several: the user must choose.
-   No session-level "active tenant" switcher.
-4. **Multi-tenant users may move a device between the tenants they can access** (today:
-   superuser only).
+2. **Visibility comes only from `Tenant.groups`** (revised 2026-10-01). Several matching tenants
+   mean their **union**. "All tenants" means attaching a group to every tenant, including each
+   new one. No "all tenants" permission, no unfiltered bypass, no special case for superusers
+   (after step 2). Escape hatch: a permission can be added later as one line in
+   `get_user_tenants` (`Tenant.objects.all()` for its holders) plus a migration; no consumer
+   changes.
+3. **Write target** (new device, import, licence, "save as new"): a `tenant` form field limited
+   to the user's tenants (2026-09-18). One tenant: preselected, the only option. Several: the
+   user must choose. No session-level "active tenant" switcher.
+4. **Multi-tenant users may move a device between the tenants they can access** (2026-09-18;
+   today: superuser only).
+5. **A tenant is required on every create, edit and import, for everyone** (2026-10-01). No new
+   devices with `tenant = NULL`.
+6. **Licences are tenant-scoped like devices** (2026-10-01): list, edit and history scoped;
+   "new" gets the tenant field.
+7. **Devices without a tenant are cleaned up by hand** (revised 2026-10-01). A sticky hint ("N
+   devices without tenant!") points to a Tenant admin action with an intermediate page listing
+   these devices; the user confirms the assignment there. No data migration. `Device.tenant`
+   stays nullable but becomes `on_delete=PROTECT`, so deleting a tenant cannot create new
+   orphans.
 
 ## Alternatives considered and rejected
 
@@ -48,276 +62,426 @@ permission. There is no intermediate level. Example, a research institution:
 | Explicit membership model with roles | django-organizations | Duplicates what groups already provide; LDAP mirror groups are the membership source here. |
 | Object-level permissions | django-guardian, django-rules | Only needed for per-tenant roles, which decision 1 rules out. Touches every permission check. |
 | Session "current tenant" plus allowed tenants | Odoo multi-company | Union semantics match, but a switcher adds UI state; decision 3 chose the form field instead. |
+| "Super tenant" flag on `Tenant` | former `Tenant.is_super_tenant` (removed in migration 0002) | Mixes membership with rights. |
+| Permission `tenants.access_all_tenants` with an unfiltered bypass | earlier revision of this plan | The bypass (`Q()` instead of `tenant__in`, to keep NULL-tenant devices visible) needs a second code path in every consumer, a value object, a migration, and a second place to answer "who sees tenant X". Can be added later without the bypass (see decision 2). |
 | Enforced default scoping (querysets refuse to evaluate without a scope) | django-scopes (pretix) | Good hardening, but a larger change; noted as follow-up. Today scoping is opt-in per view. |
 
-## Current state (facts, after the independent fixes of September 2026)
+## Current state (verified 2026-10-01)
 
-- Membership: `Tenant.groups` (M2M to `auth.Group`). No `User.tenant` field. A user's tenant is
-  computed per request by `dlcdb/tenants/shortcuts.py:get_current_tenant` and set as
+Membership and request attribute:
+- `Tenant.groups` (M2M to `auth.Group`). A user's tenant is computed per request by
+  `dlcdb/tenants/shortcuts.py:get_current_tenant` (with `messages` side effects) and set as
   `request.tenant` by `dlcdb/tenants/middleware.py`. `request.tenant is None` means three
   things: superuser, no matching tenant, or several matching tenants.
-- Read-side policy: `dlcdb/core/utils/tenants.py:tenant_scoped_queryset(queryset, request,
-  tenant_field)`: tenant set → filter; else superuser → all; else nothing. Used by the assets,
-  lending, dashboard, dataexchange apps and the `hints` context processor. The admin policy
-  lives in `dlcdb/tenants/admin.py:TenantScopedAdmin` (used by `DeviceAdmin` and
-  `LentRecordAdmin` only; the other record admins and `ImporterListAdmin` are unscoped).
+
+Read side:
+- `dlcdb/core/utils/tenants.py:tenant_scoped_queryset(queryset, request, tenant_field)`: tenant
+  set → filter; else superuser → all; else nothing. Used by assets (views, pickers, filters,
+  records), lending (views, pickers), `dashboard/search.py`, dataexchange (importer list) and
+  the `hints` context processor.
+- **Not** on the helper, and **unscoped when `request.tenant is None`** (zero or several
+  tenants, non-superuser):
+  - `dlcdb/dashboard/views.py` (`_get_tenant_queryset`, overdue tile) and
+    `dlcdb/dashboard/stats.py` (`tenant=None` → global counts and charts);
+  - `dlcdb/lending/filters.py:current_borrowers` (all borrowers' names);
+  - `InventoryQuerySet.tenant_aware_room_objects(tenant=None)` (global room counts).
 - `InventoryQuerySet` (`dlcdb/core/models/inventory.py`) has its own `(tenant, is_superuser)`
   parameter style; `Inventory.device_search_tenant_aware = False` disables scoping for the
   inventory device search on purpose.
-- Write side: forms (`dlcdb/assets/forms.py:DeviceForm`, `dlcdb/dataexchange/forms.py:DeviceImportForm`,
-  `TenantScopedAdmin.get_form`) render the tenant field `disabled` for non-superusers and the
-  views/admin overwrite `obj.tenant = request.tenant` on save
-  (`dlcdb/assets/views/devices.py`, `dlcdb/dataexchange/views.py`, `TenantScopedAdmin.save_model`).
-  The bulk relocate action (`dlcdb/core/forms/adminactions_forms.py`, `dlcdb/core/views/relocate_views.py`)
-  allows a tenant change for superusers only.
+- The licences frontend (`dlcdb/licenses/views.py`) is tenant-unaware: `index` lists all
+  `LicenceRecord`s, `edit` loads any `Device` by pk (not even restricted to `is_licence`),
+  `history` any `LicenseAsset`, `new` saves licence devices with `tenant = NULL`.
+- The admin policy lives in `dlcdb/tenants/admin.py:TenantScopedAdmin` (used by `DeviceAdmin`
+  and `LentRecordAdmin` only; the other record admins and `ImporterListAdmin` are unscoped).
+
+Write side:
+- `dlcdb/assets/forms.py:DeviceForm`, `dlcdb/dataexchange/forms.py:DeviceImportForm` and
+  `TenantScopedAdmin.get_form` render the tenant field `disabled` for non-superusers; views and
+  admin overwrite `obj.tenant = request.tenant` on save (`assets/views/devices.py`,
+  `dataexchange/views.py`, `TenantScopedAdmin.save_model`).
+- Superusers may leave the tenant empty in the frontend forms, but the admin already requires
+  it (model `blank=False`). Importing with `tenant=None` crashes on an existing device
+  (`dataexchange/importer.py`, `tenant.pk`).
+- Bulk relocate (`dlcdb/core/forms/adminactions_forms.py`, `dlcdb/core/views/relocate_views.py`):
+  tenant change for superusers only, but `DevicesRelocateView.get_initial` loads
+  `Device.objects.filter(pk__in=<?ids=>)` **unscoped**: anyone with the relocate permission can
+  move any device by crafting the URL.
+- `dataexchange/views.py:device_import_confirm` filters `tenant=getattr(request, "tenant", None)`,
+  i.e. `tenant IS NULL` for a tenant-less user.
+- `TenantAwareModel.tenant` (used by `Device`) is `on_delete=SET_NULL`: deleting a tenant orphans
+  its devices.
+
+Display:
+- Tenant column and badges gated on `request.user.is_superuser` in
+  `dlcdb/assets/templates/assets/devices/index.html`, `dlcdb/theme/templates/theme/includes/navbar.html`
+  and `dlcdb/tenants/templates/tenants/navbar_current_tenant.html`. The inventory search
+  (`inventory/partials/device_search_htmx.html`) always shows the column.
+- `DeviceAdmin.get_list_filter`/`get_list_display` use `core/utils/helpers.py:get_superuser_list`,
+  which mutates the class-level `list_filter`/`list_display` lists in place (state leaks across
+  requests and threads).
+
+Other:
 - Only `core.Device` and `dataexchange.ImporterList` carry a tenant FK. Records, rooms, persons,
-  notes, licences are scoped through `device__tenant`.
-- The REST API (`dlcdb/api`) is unscoped by design and documented as such.
-- Tenant column and badges are gated on `request.user.is_superuser` in templates
-  (`dlcdb/assets/templates/assets/devices/index.html`, `dlcdb/theme/templates/theme/includes/navbar.html`,
-  `dlcdb/tenants/templates/tenants/navbar_current_tenant.html`,
-  `dlcdb/inventory/templates/inventory/partials/device_search_htmx.html`).
+  notes, licences relate to a tenant through `device__tenant`.
+- Dead code: `TenantManager.get_current` (calls a nonexistent method), the commented-out
+  `TenantModelAdmin` in `tenants/admin.py`, `dashboard/stats.py:get_devices_by_series_data`.
+- `core/tests/test_context_processor_queries.py` pins the `hints` processor to one room and one
+  device query.
+- Verified on Django 6.1.1: an empty `__in` inside `Count(filter=...)` compiles to the constant
+  `0`; `__in` never matches NULL.
+
+Deliberately unscoped, unchanged by this plan (documented in `berechtigungen.md`):
+- the REST API (`dlcdb/api`, read-only);
+- inventory writes by uuid (`Inventory.inventorize_uuids_for_room`, `inventory/views.py:update_note_view`),
+  consistent with `device_search_tenant_aware = False`;
+- rooms frontend device counts (`rooms/views.py:_room_queryset`); rooms are shared;
+- notification reports (`notifications/reports.py`).
 
 ## Design
 
-Keep `Tenant.groups` as the membership mechanism. Several matches become valid and mean the
-**union** of those tenants. One small value object replaces the ambiguous `request.tenant`.
+A user's scope is the tuple of tenants whose groups they belong to. Every consumer filters with
+a plain `tenant__in`. All tenant policy lives in the `tenants` app.
 
 ### `dlcdb/tenants/shortcuts.py` (rewrite, no `messages` side effects)
 
 ```python
-@dataclass(frozen=True)
-class TenantScope:
-    tenants: tuple[Tenant, ...]   # via group membership; () when unrestricted
-    unrestricted: bool            # user.has_perm("tenants.access_all_tenants"); True for superusers
+def get_user_tenants(user):
+    """Tenants whose groups the user belongs to; several tenants mean their union."""
+    if not user.is_authenticated:
+        return ()
+    return tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
 
-    tenant_ids -> tuple[int, ...]
-    single     -> the one tenant when len(tenants) == 1 and not unrestricted, else None
-    multiple   -> unrestricted or len(tenants) > 1        # "show tenant column / selector"
-    allows(tenant) -> unrestricted or (tenant is not None and tenant.pk in tenant_ids)
-    q(tenant_field="tenant") -> Q() if unrestricted else Q(**{f"{tenant_field}__in": tenant_ids})
-    tenant_queryset -> Tenant.objects.all() if unrestricted else Tenant.objects.filter(pk__in=tenant_ids)
 
-ANONYMOUS_SCOPE = TenantScope((), False)
-UNRESTRICTED_SCOPE = TenantScope((), True)
+def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):
+    return queryset.filter(**{f"{tenant_field}__in": request.tenants})
 
-def get_tenant_scope(user) -> TenantScope:
-    # not authenticated -> ANONYMOUS_SCOPE
-    # user.has_perm("tenants.access_all_tenants") -> UNRESTRICTED_SCOPE
-    # else tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
 
-def scope_queryset(queryset, scope, *, tenant_field="tenant"):
-    # queryset if scope.unrestricted else queryset.filter(scope.q(tenant_field))
-
-def limit_tenant_field(field, scope):   # see "Forms"
+def limit_tenant_field(field, tenants):
+    """Offer only the given tenants; with exactly one, preselect it as the only option."""
+    field.queryset = Tenant.objects.filter(pk__in=[tenant.pk for tenant in tenants])
+    if len(tenants) == 1:
+        field.initial = tenants[0]
+        field.empty_label = None
 ```
 
-`q()` exists so callers can put the tenant condition into the *same* `filter()` call as other
-conditions on a multi-valued relation (rooms, persons via records). Scoping by ids is a plain
-`WHERE tenant_id IN (...)`, no join, no `distinct` for devices. An empty `tenant_ids` yields an
-empty result (`Count` annotations yield 0).
-
-Why a value object: it replaces the `(tenant, is_superuser)` parameter pairs in
-`InventoryQuerySet` and the three-way `None` in every consumer with one explicit type, built by
-a pure function of the user.
+- Consumers use plain lookups: `tenant_scoped_queryset` for querysets,
+  `Q(device__tenant__in=request.tenants)` inside `Count(filter=...)` and in the same `filter()`
+  call as sibling conditions on multi-valued relations, `tenant in request.tenants` for single
+  objects, `request.tenants|length > 1` in templates.
+- An empty tuple yields an empty result (`Count` annotations yield 0). Devices with
+  `tenant = NULL` are visible to nobody in the frontend and admin lists; see *Devices without a
+  tenant*.
+- `limit_tenant_field`: the field stays required (model `blank=False`, decision 5). One tenant:
+  one-option select, preselected, the POST carries the value. Several: the user must choose.
+  Zero: empty select, form invalid. A `ModelForm` without instance honours `field.initial`; with
+  an instance, the instance's tenant wins. Views and admin stop overwriting `obj.tenant`; the
+  limited queryset rejects foreign tenants.
 
 ### Middleware
 
-`CurrentTenantMiddleware.process_request` sets `request.tenant_scope = get_tenant_scope(request.user)`.
-`request.tenant` is **removed**, so stale consumers fail loudly instead of leaking. The
-middleware position is unchanged (needs only `AuthenticationMiddleware`; the `MessageMiddleware`
-dependency disappears with the messages).
+`CurrentTenantMiddleware.process_request` sets `request.tenants = get_user_tenants(request.user)`.
+`request.tenant` is **removed**. Position unchanged (needs only `AuthenticationMiddleware`; the
+`MessageMiddleware` dependency disappears with the messages).
 
-### Permission and migration
+Only Python attribute access `request.tenant` fails loudly. `getattr(request, "tenant", None)`
+and template lookups fail silently, so the grep in *Verification* is a required gate.
 
-`Tenant.Meta.permissions = [("access_all_tenants", "Can access devices of all tenants")]` plus
-`dlcdb/tenants/migrations/0005_alter_tenant_options.py`. The `Permission` row is created by
-`post_migrate`. Devices with `tenant = NULL` stay visible only to unrestricted users (unchanged:
-`__in` never matches NULL).
+### Admin: `TenantScopedAdmin`
 
-### `dlcdb/core/utils/tenants.py`
+- `tenant_lookup = "tenant"` class attribute; `get_queryset` →
+  `tenant_scoped_queryset(super().get_queryset(request), request, tenant_field=self.tenant_lookup)`
+  (chains on `SoftDeleteModelAdmin.get_queryset` in `dlcdb/core/admin/base_admin.py`).
+- `formfield_for_foreignkey`: `limit_tenant_field(formfield, request.tenants)` for
+  `db_field.name == "tenant"` (documented hook; replaces mutating `form.base_fields`).
+- Delete `get_readonly_fields` (readonly would block decision 4), `get_form` and `save_model`.
 
-Keep `tenant_scoped_queryset(queryset, request, *, tenant_field="tenant")` as the request-level
-wrapper (signature unchanged, all call sites untouched). Body:
-`scope_queryset(queryset, request.tenant_scope, tenant_field=tenant_field)` (plain attribute
-access, no `getattr` fallback). Update the docstring: the admin now calls this, not vice versa.
+### Display
 
-### Forms: `limit_tenant_field(field, scope)`
+- Tenant column (`assets/devices/index.html` incl. `colspan`, `inventory/partials/device_search_htmx.html`)
+  and the `DeviceAdmin` tenant column and filter (`("tenant", admin.RelatedOnlyFieldListFilter)`,
+  built as a new list, no class attribute mutation) only when `request.tenants|length > 1`.
+- Navbar badge (`theme/includes/navbar.html`, `tenants/navbar_current_tenant.html`): one tenant →
+  its name; several → "N tenants" with the names in the `title`; none → warning "No tenant" (the
+  admin navbar keeps its link to the tenant changelist). The red Superuser badge stays; from
+  step 2 on without the title "Superusers are not tenant aware". Strings translatable.
 
-One pure helper used by `DeviceForm`, `DeviceImportForm` and `TenantScopedAdmin.get_form`. It
-drops the `disabled` trick and lets queryset validation do the work:
+### Devices without a tenant: hint and Tenant admin action
 
-- unrestricted: `field.required = False` (unscoped devices remain possible, today's superuser
-  behaviour); queryset all tenants.
-- restricted: `field.queryset = scope.tenant_queryset`; field stays required (model
-  `blank=False`). One tenant → `field.initial = scope.single`, `field.empty_label = None`: a
-  one-option select, preselected; the POST carries the value; the queryset validates it.
-  Several → the user must choose. Zero → empty select, form invalid, so a tenant-less user can
-  no longer create devices that vanish into `tenant = NULL`.
-- Verified against Django 6.1: a `ModelForm` built without an instance has an empty `initial`,
-  so `field.initial` is honoured on add; with an instance the instance's tenant wins (edit
-  form). The admin re-instantiates the form on POST with the posted value, so neither
-  `disabled` nor `get_changeform_initial_data` is needed.
+**Hint** (`dlcdb/core/context_processors.py:hints`, same pattern as "N devices without
+record!", shown to everyone like the room and branding hints):
+- `StickyMessage(level=WARNING, msg=ngettext("%(count)d device without tenant!", ...),
+  cta_link=reverse("admin:tenants_tenant_changelist"), cta_text=_("Assign a tenant?"))`.
+- The count is global on purpose: these devices belong to no tenant. Same queryset as the
+  admin view: `Device.objects.filter(tenant__isnull=True)`.
+- From step 1 on, one aggregate serves both device hints, keeping the pinned query count:
+  `Device.objects.aggregate(recordless=Count("pk", filter=Q(tenant__in=request.tenants, active_record__isnull=True)), single_recordless_pk=Min(..., same filter), without_tenant=Count("pk", filter=Q(tenant__isnull=True)))`.
 
-Views and admin stop overwriting `obj.tenant`; the limited queryset rejects foreign tenants.
-`TenantScopedAdmin.save_model` keeps `scope.allows(obj.tenant)` as defence in depth
-(`PermissionDenied`, only for models with a `tenant` field).
+**Tenant admin action with an intermediate page** (`dlcdb/tenants/admin.py:TenantAdmin`),
+following the Django docs, *Actions that provide intermediate pages*: the action redirects to a
+view we write (same pattern as `DeviceAdmin.relocate` → `core/views/relocate_views.py`).
+- Action `assign_devices_without_tenant` ("Assign devices without tenant"): exactly one selected
+  tenant → `HttpResponseRedirect(reverse("admin:tenants_tenant_assign_devices", args=[tenant.pk]))`;
+  otherwise `message_user` "Please select exactly one tenant." (error).
+- Permission: `permissions=["assign_devices"]` plus `has_assign_devices_permission(request)`
+  checking `tenants.change_tenant` **and** `core.change_device` (several listed action
+  permissions are OR-ed, hence one method).
+- View: `TenantAdmin.get_urls()` adds `<int:tenant_id>/assign-devices/` wrapped in
+  `self.admin_site.admin_view(...)` (same as the deactivate/activate views in
+  `SoftDeleteModelAdmin.get_urls`).
+- `assign_devices_view(request, tenant_id)`: same permission check, else `PermissionDenied`;
+  `get_object_or_404(Tenant, pk=tenant_id)`; `devices = Device.objects.filter(tenant__isnull=True)`.
+  - GET: `TemplateResponse` with `tenants/actions/assign_devices.html` (extends
+    `admin/base_site.html` like `core/actions/relocate.html`; context includes
+    `self.admin_site.each_context(request)` and `opts`): the target tenant, a table of all
+    tenant-less devices (device, type, licence, room, record) with a **pre-checked checkbox**
+    each, an "Assign to <tenant>" button and a "No, take me back" link to the tenant changelist;
+    "No devices without tenant." when empty.
+  - POST: `devices.filter(pk__in=request.POST.getlist("device"))`: only the confirmed devices
+    that are still tenant-less; a crafted pk of a device with a tenant is ignored. In
+    `transaction.atomic()`, save each device (not `.update()`) with
+    `get_denormalized_user(request.user)`, so simple-history and the audit fields record it (as
+    the relocate view does). `message_user` with the count, redirect to the tenant changelist.
+  - Checkboxes: the user approves exactly the listed devices, and orphans belonging to
+    different tenants can be assigned one tenant at a time.
 
 ## Implementation steps
 
-### 1. Tenants app core
-- `dlcdb/tenants/models.py`: add `Meta.permissions`. Migration 0005.
-- `dlcdb/tenants/shortcuts.py`: as designed above; delete `get_current_tenant`.
-- `dlcdb/tenants/middleware.py`: set `request.tenant_scope`.
-- `dlcdb/core/utils/tenants.py`: delegate to `scope_queryset`.
-- `dlcdb/tenants/admin.py` `TenantScopedAdmin`: class attribute `tenant_lookup = "tenant"`;
-  `get_queryset` → `tenant_scoped_queryset(super().get_queryset(request), request,
-  tenant_field=self.tenant_lookup)` (one `super()` call; the MRO with
-  `SoftDeleteModelAdmin.get_queryset` in `dlcdb/core/admin/base_admin.py` is fine, filtering
-  chains on its ordered result). Remove `get_readonly_fields` (readonly excludes the field
-  from the form and would block decision 4). `get_form`:
-  `limit_tenant_field(form.base_fields["tenant"], request.tenant_scope)` when that field
-  exists. `save_model`: the `allows` check. `TenantAdmin.list_display += ("group_names",)` so
-  overlapping group assignments are visible.
-- `dlcdb/core/admin/lentrecord_admin.py`: `tenant_lookup = "device__tenant"`.
-- `dlcdb/core/admin/device_admin.py` `get_list_filter`/`get_list_display`: show the tenant
-  column and filter when `request.tenant_scope.multiple`; use
-  `("tenant", admin.RelatedOnlyFieldListFilter)`. Rename `get_superuser_list`
-  (`dlcdb/core/utils/helpers.py`) to take a `show: bool`.
+### Step 0: stop new orphans, report old ones (shippable now)
 
-### 2. Frontend write paths
-- `dlcdb/assets/forms.py` `DeviceForm.__init__`: replace the superuser branch with
-  `limit_tenant_field(self.fields["tenant"], request.tenant_scope)`.
-- `dlcdb/assets/views/devices.py` `device_add` / `device_detail`: delete the
-  `device.tenant = request.tenant` overwrites ("save as new" posts to `device_add`, so it is
-  covered).
-- `dlcdb/dataexchange/forms.py` `DeviceImportForm.__init__`: same replacement.
-  `dlcdb/dataexchange/views.py` `device_import`: delete the overwrite.
-- `dlcdb/core/forms/adminactions_forms.py` `RelocateActionForm(*args, scope, **kwargs)` instead
-  of `is_superuser`; `new_tenant.queryset = scope.tenant_queryset`; delete the `new_tenant`
-  field when `not scope.multiple`; `clean_new_tenant` raises unless `scope.allows(new_tenant)`.
-  `dlcdb/core/views/relocate_views.py`: pass `scope=self.request.tenant_scope` in
-  `get_form_kwargs`. The template renders the form generically; nothing to do there.
+- Hint and Tenant admin action as designed. In step 0 the hint's count is its own query (the
+  recordless aggregate is still scoped by the old `tenant_scoped_queryset`);
+  `test_context_processor_queries.py` is adjusted to two device queries and back to one in
+  step 1.
+- `dlcdb/tenants/models.py:TenantAwareModel.tenant` → `on_delete=models.PROTECT`; state-only
+  `AlterField` migration in `core` (`on_delete` is not part of the schema).
+- `DeviceForm` and `DeviceImportForm`: delete the superuser branch's `required = False`
+  (decision 5).
+- Operators assign the existing orphans (likely mostly licences, see *Current state*) with the
+  action: one run per target tenant, unchecking devices that belong elsewhere.
 
-### 3. Unify the read paths
-- `dlcdb/dashboard/views.py` and `dlcdb/dashboard/stats.py`: already on
-  `tenant_scoped_queryset`; only `distinct = ... and request.tenant is not None` becomes
-  `... and not request.tenant_scope.unrestricted`, and the `Count(filter=...)` `Q` in
-  `get_device_type_html` becomes `request.tenant_scope.q("device__tenant")`.
-- `dlcdb/lending/filters.py` `current_borrowers`: `scope.q("record__device__tenant")` inside the
-  single `filter()` call.
-- `dlcdb/core/models/inventory.py` (`InventoryQuerySet`), keyword-only `scope`:
-  `tenant_aware_device_objects(scope)`, `tenant_aware_device_objects_for_room(room_pk, scope)`,
-  `inventory_relevant_devices(scope)` (unchanged `device_search_tenant_aware` semantics),
-  `tenant_aware_room_objects(scope)` (one annotate branch:
-  `Count(..., filter=Q(...) & scope.q("record__device__tenant"))`),
-  `Inventory.get_inventory_progress(scope)`. Callers: `dlcdb/inventory/views.py`
-  (`inventorize_room`, `InventorizeRoomListView`, `search_devices`, `QrCodesForRoomDetailView`,
-  `get_note_btn`), `dlcdb/inventory/filters.py:RoomFilter`. In `search_devices`, narrow the
-  `tenant` filter choices: `filter_devices.form.fields["tenant"].queryset = scope.tenant_queryset`.
+### Step 1: prep, tuple model with today's rules (no migration, shippable alone)
 
-### 4. Templates (no template tags; `request.tenant_scope` is reachable through the request context processor)
-- Tenant column gating `is_superuser` → `request.tenant_scope.multiple`:
-  `dlcdb/assets/templates/assets/devices/index.html`,
-  `dlcdb/inventory/templates/inventory/partials/device_search_htmx.html`.
-- Navbar badge (`dlcdb/theme/templates/theme/includes/navbar.html`,
-  `dlcdb/tenants/templates/tenants/navbar_current_tenant.html`): three-way switch: unrestricted
-  → "All tenants" (keep the red Superuser badge); tenants → `{{ scope.tenants|join:", " }}`;
-  empty → warning "No tenant" (the admin navbar keeps its link to the tenant changelist).
-- `dlcdb/inventory/templates/inventory/includes/inventory_progress.html`: "for your tenants".
-- Afterwards `grep -rn 'request\.tenant\b\|request, "tenant"' dlcdb` must return nothing.
+`get_user_tenants` reproduces today's visibility with two marked lines, removed in step 2:
 
-### 5. Optional, separate commit: scope the remaining admins
-`RecordAdmin`, `OrderedRecordAdmin`, `InRoomRecordAdmin`, `LostRecordAdmin`, `RemovedRecordAdmin`,
-`LicenceRecordAdmin` (`tenant_lookup = "device__tenant"`) and `ImporterListAdmin`
-(`dlcdb/dataexchange/admin.py`, `"tenant"`) inherit `TenantScopedAdmin`. The record admins have
-no `tenant` form field, so only `get_queryset` takes effect. At minimum do `ImporterListAdmin`,
-so staff cannot import into arbitrary tenants from the admin. Behaviour change for staff users:
-needs a line in `docs/guides/berechtigungen.md`.
+```python
+    if user.is_superuser:  # step 1 only
+        return tuple(Tenant.objects.all())
+    tenants = tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
+    return tenants if len(tenants) == 1 else ()  # step 1 only: several stay ambiguous
+```
 
-### 6. Tests (`.venv/bin/pytest`)
-Shared helper in `dlcdb/conftest.py`: `tenant_user(tenants=(), perms=(), all_tenants=False)`
-building user, group(s) and `Tenant.groups` links; keep the `tenant` fixture. `RequestFactory`
-tests must set `request.tenant_scope = get_tenant_scope(request.user)`. `has_perm` is cached per
-user object; refetch after granting permissions.
+Tenants app (consolidation):
+- `dlcdb/tenants/shortcuts.py`: as designed; delete `get_current_tenant`.
+- Move `tenant_scoped_queryset` from `dlcdb/core/utils/tenants.py` into the tenants app and
+  delete the core module; update the imports (assets views/pickers/filters/records, lending
+  views/pickers, dashboard search, dataexchange views, `core/context_processors.py`).
+- `dlcdb/tenants/middleware.py`: set `request.tenants`.
+- `dlcdb/tenants/admin.py`: `TenantScopedAdmin` as designed; delete the commented
+  `TenantModelAdmin` block; `TenantAdmin.list_display += ("group_names",)` (with
+  `prefetch_related("groups")`) so operators can review overlaps before step 2.
+- `dlcdb/tenants/models.py`: delete `TenantManager` (its `get_current` is broken).
 
-- New `dlcdb/tenants/tests/test_scope.py`: `get_tenant_scope` for anonymous, zero, one (via two
-  groups → still single), two tenants, `access_all_tenants` group member (unrestricted, not
-  superuser), superuser; `allows`/`q`; `scope_queryset` hides NULL-tenant devices from
-  restricted users and returns nothing for an empty scope; middleware sets `tenant_scope` and
-  no `tenant`; `limit_tenant_field` for all four cases (queryset, required, initial, empty_label).
-- `dlcdb/assets/tests/test_devices.py`: adapt the `RequestFactory` tests (single-tenant: one
-  option, required, preselected; crafted foreign pk → form invalid). Add: add form saves the
-  single tenant without a view overwrite; multi-tenant user must pick one of their tenants
-  (missing → required, foreign → invalid choice, own second → saved); can move a device between
-  own tenants on the detail page; sees the union in index/detail/CSV/search; tenant column shown
-  for two-tenant and `access_all_tenants` users, hidden for single-tenant; zero-tenant user
-  cannot create; `access_all_tenants` user sees NULL-tenant devices.
-- `dlcdb/core/tests/test_device_admin.py`: changelist union and tenant column; add form offers
-  only own tenants and rejects a foreign pk; single-tenant posts the only option; multi-tenant
-  staff switches tenant on change; `access_all_tenants` staff sees everything.
-- `dlcdb/dashboard/tests/test_tiles.py` and `test_search.py`: union and all-tenants cases.
-- `dlcdb/inventory/tests/test_inventory.py`: replace `(tenant=None, is_superuser=True)` with
-  `UNRESTRICTED_SCOPE`; room counts for a two-tenant union; `inventory_relevant_devices`
-  respects the flag.
-- `dlcdb/core/tests/test_relocate_views.py`: single-tenant user has no `new_tenant` field;
-  multi-tenant user moves within own tenants, cannot pick a foreign one; `access_all_tenants`
-  may pick any.
+Read paths:
+- `dlcdb/dashboard/views.py`: `_build_tile` takes `request`; scoped models via
+  `tenant_scoped_queryset(ModelClass.objects.all(), request, tenant_field=TENANT_FILTERS[model])`;
+  `distinct = model_name in TENANT_DISTINCT`; overdue tile via the helper (`"device__tenant"`).
+  Delete `_get_tenant_queryset`.
+- `dlcdb/dashboard/stats.py`: the three chart functions take `tenants` and filter with
+  `device__tenant__in=tenants` (`Count(filter=Q(...))` for device types); delete
+  `get_devices_by_series_data`.
+- `dlcdb/lending/filters.py:current_borrowers`: one `filter(record__record_type=..., record__is_active=True, record__device__tenant__in=request.tenants)`;
+  no request → `Person.objects.none()`.
+- `dlcdb/core/models/inventory.py` (`InventoryQuerySet`), keyword-only `tenants` instead of
+  `(tenant, is_superuser)`: `tenant_aware_device_objects`, `tenant_aware_device_objects_for_room`,
+  `inventory_relevant_devices` (unchanged `device_search_tenant_aware` semantics),
+  `tenant_aware_room_objects` (one annotate branch with `record__device__tenant__in=tenants`
+  inside the `Count` filters), `Inventory.get_inventory_progress`. Callers:
+  `dlcdb/inventory/views.py` (`inventorize_room`, `InventorizeRoomListView`, `search_devices`,
+  `QrCodesForRoomDetailView`, `get_note_btn`), `dlcdb/inventory/filters.py:RoomFilter`.
+- `dlcdb/core/context_processors.py:hints`: one device aggregate (see *Hint*).
+
+Holes:
+- `dlcdb/core/views/relocate_views.py`: `get_initial` scopes the devices with
+  `tenant_scoped_queryset`; `get_form_kwargs` passes `tenants=self.request.tenants`.
+- `dlcdb/core/forms/adminactions_forms.py` `RelocateActionForm(*args, tenants, **kwargs)`:
+  `limit_tenant_field(self.fields["new_tenant"], tenants)` when `len(tenants) > 1`, else delete
+  the field; delete `clean_new_tenant` (queryset validation covers it).
+- `dlcdb/dataexchange/views.py:device_import_confirm`: look up via `_importer_list_queryset(request)`.
+- `dlcdb/licenses/views.py`: `index` via `tenant_scoped_queryset(..., tenant_field="device__tenant")`;
+  `edit` via `tenant_scoped_queryset(Device.objects.filter(is_licence=True), request)`;
+  `history` via `tenant_scoped_queryset(LicenseAsset.objects.all(), request)`.
+  `dlcdb/licenses/forms.py:LicenseForm`: add `"tenant"` to `fields` and a `Column("tenant")` to
+  the crispy layout; takes `tenants` and calls `limit_tenant_field`.
+
+Write paths:
+- `DeviceForm.__init__` and `DeviceImportForm.__init__`: replace the superuser branch with
+  `limit_tenant_field(self.fields["tenant"], request.tenants)`.
+- `dlcdb/assets/views/devices.py` (`device_add`, `device_detail`) and
+  `dlcdb/dataexchange/views.py:device_import`: delete the `obj.tenant = ...` overwrites ("save as
+  new" posts to `device_add`, so it is covered).
+
+Display: as designed. `dlcdb/core/admin/lentrecord_admin.py`: `tenant_lookup = "device__tenant"`.
+Delete `core/utils/helpers.py:get_superuser_list`.
+`dlcdb/inventory/templates/inventory/includes/inventory_progress.html`: "for your tenants".
+
+Intended behaviour changes (docs + NEWS):
+- Non-superusers with zero or several tenants see zeros on the dashboard instead of global
+  numbers, and no foreign borrowers.
+- Superusers no longer see devices without a tenant (the hint and the Tenant admin action
+  remain).
+- Tenant-less users can no longer create devices.
+- Licences are tenant-scoped.
+- No more red "no tenant"/"several tenants" message banners; the navbar badge is the hint.
+
+### Step 2: the switch (no migration)
+
+Delete the two marked lines in `get_user_tenants`, ideally as two commits:
+- 2a: several matching tenants mean their union;
+- 2b: superusers see the tenants of their groups like everyone else.
+
+Plus the Superuser badge title, docs, NEWS and the upgrade notes.
+
+### Step 3: optional follow-ups (separate commits)
+
+- Scope the remaining admins: `ImporterListAdmin` (`dlcdb/dataexchange/admin.py`, at minimum, so
+  staff cannot import into arbitrary tenants), `RecordAdmin`, `OrderedRecordAdmin`,
+  `InRoomRecordAdmin`, `LostRecordAdmin`, `RemovedRecordAdmin`, `LicenceRecordAdmin`
+  (`tenant_lookup = "device__tenant"`; no tenant form field, so only `get_queryset` applies).
+  Behaviour change for staff users: one line in `berechtigungen.md`.
+- Inventory device search: narrow the `tenant` filter choices to `request.tenants`, but only
+  when `device_search_tenant_aware` (otherwise the search spans all tenants).
+- Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
+  `theme/includes/navbar.html` (staff-or-superuser link), `core/context_processors.py:nav`
+  (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
+  (`base_admin.py`, restore action) stay.
+- Convenience: a "Tenants" multi-select on the Group admin (`dlcdb/accounts/admin.py`), so a
+  group can be attached to many tenants at once.
+- `Device.tenant` NOT NULL (touches about 66 test `Device.objects.create(...)` calls without a
+  tenant).
+
+## Tests (`.venv/bin/pytest`)
+
+Shared helper in `dlcdb/conftest.py`: `tenant_user(tenants=(), perms=())` building user,
+group(s) and `Tenant.groups` links; keep the `tenant` fixture. `RequestFactory` tests set
+`request.tenants = get_user_tenants(request.user)`. `has_perm` is cached per user object;
+refetch after granting permissions.
+
+Step 0:
+- `dlcdb/core/tests/test_hints.py`: "devices without tenant" hint with the right count when
+  NULL-tenant devices exist, absent otherwise.
+- `dlcdb/tenants/tests/test_admin.py` (new): action with one tenant → redirect to the page; zero
+  or several → error message; GET lists only tenant-less devices and the target tenant; POST
+  assigns only checked, still tenant-less devices, records history and the audit user, ignores
+  a crafted pk of a device with a tenant; without both permissions the action is hidden and the
+  view returns 403.
+- Deleting a tenant with devices raises `ProtectedError`.
+- `DeviceForm`/`DeviceImportForm`: superuser must choose a tenant.
+
+Step 1:
+- `dlcdb/tenants/tests/test_shortcuts.py` (rewrite; the message tests go): `get_user_tenants`
+  for anonymous, zero, one (via two groups → still one), two (→ empty, step 1 rule),
+  superuser (→ all tenant rows); `tenant_scoped_queryset` hides NULL-tenant devices and
+  returns nothing for an empty tuple; middleware sets `tenants` and no `tenant`;
+  `limit_tenant_field` for zero, one, several (queryset, initial, empty_label).
+- `dlcdb/assets/tests/test_devices.py`: single-tenant add form saves the only option without a
+  view overwrite; crafted foreign pk → invalid; zero-tenant user cannot create.
+- `dlcdb/core/tests/test_relocate_views.py`: crafted `?ids=` of a foreign device is ignored;
+  `new_tenant` only with several tenants.
 - `dlcdb/dataexchange/tests/test_frontend_import.py`: spoofing test passes without the
-  overwrite; multi-tenant importer must choose / cannot spoof. `test_importer_listing.py`: union.
-- Navbar badge rendering: "All tenants" / tenant names / "No tenant".
+  overwrite; tenant-less user cannot confirm a NULL-tenant import.
+- `dlcdb/dashboard/tests/test_tiles.py`: zero-tenant user sees 0 (was global).
+- `dlcdb/licenses/tests/test_views.py`: list/edit/history scoped; edit 404 for a non-licence
+  device; new requires a tenant.
+- `dlcdb/core/tests/test_device_admin.py`: add form offers only own tenants and rejects a foreign
+  pk; a request with several tenants does not leak the tenant column into a following
+  single-tenant request.
+- `dlcdb/inventory/tests/test_inventory.py`: replace `(tenant=None, is_superuser=True)` with
+  `tenants=(...)`; `inventory_relevant_devices` respects the flag.
+- `core/tests/test_context_processor_queries.py`: back to one device query.
+- Navbar badge: tenant name / "N tenants" / "No tenant".
+- Tests that view tenant-less devices as a superuser give those devices the `tenant` fixture.
 
-### 7. Docs and NEWS
-- `docs/guides/berechtigungen.md`, section *Tenants*: union semantics, tenant selector when
-  several, `access_all_tenants` (assign to groups; superusers implicit), zero tenants → "No
-  tenant" badge and no devices, tenant change between own tenants, which admin pages remain
-  unscoped; the superuser rows in the same page.
+Step 2:
+- Two tenants → union (flips the step 1 test); superuser without groups sees nothing.
+- Multi-tenant user: sees the union in device index/detail/CSV/search, dashboard, lending,
+  licences, importer listing, inventory room counts; tenant column shown; must pick one of their
+  tenants on add (missing → required, foreign → invalid, own second → saved); moves a device
+  between own tenants on the detail page, in the admin and via relocate, never into a foreign
+  one.
+- Superuser shortcut tests switch to `tenant_user(tenants=..., perms=...)` (matches the docs'
+  rule "never test permissions as a superuser").
+
+## Docs and NEWS
+
+- `docs/guides/berechtigungen.md`: *Tenants* section (union semantics, tenant selector when
+  several, "all tenants" = attach a group to every tenant and to each new one, zero tenants →
+  "No tenant" badge and no devices, tenant always required, tenant change between own tenants,
+  licences scoped, devices without a tenant: the hint and the Tenant admin action, permissions
+  apply in every accessible tenant (see *Pitfalls*), the deliberately unscoped areas); superuser
+  rows: all permissions, but only the tenants of their groups.
 - `docs/faq.md` ("No tenant?": no error banner any more; several tenants is valid),
-  `docs/guides/devices.md` (tenant column), `docs/guides/umziehen.md` (tenant change),
-  `docs/betrieb/model.md` (Tenant paragraph), `docs/guides/erste_schritte.md` and
+  `docs/guides/devices.md` (tenant column, tenant field), `docs/guides/lizenzen.md` (tenant
+  field), `docs/guides/umziehen.md` (tenant change), `docs/betrieb/model.md` (Tenant paragraph:
+  PROTECT), `docs/guides/erste_schritte.md` (step 4: attach the admin group too) and
   `docs/guides/inventur.md` (wording).
-- `NEWS.md`, one line each: users may belong to several tenants (union, tenant selector); new
-  permission `tenants.access_all_tenants`; tenant-less users can no longer create unscoped
-  devices.
+- `NEWS.md`, one short line each. Step 0: hint and admin action for devices without tenant;
+  tenants with devices can no longer be deleted; superusers must choose a tenant. Step 1:
+  dashboard/lending scoping fix; relocate action scoped; licences tenant-scoped. Step 2: users
+  may belong to several tenants (union); superusers see only their groups' tenants.
+
+Upgrade notes (NEWS and `berechtigungen.md`):
+- After step 0: assign the devices without tenant (hint → Tenant admin action), ideally before
+  step 1, while superusers can still open them individually.
+- Before step 2:
+  - attach the admin, IT and audit groups to every tenant they should see, e.g. in
+    `manage.py shell`: `group.tenant_set.add(*Tenant.objects.all())`;
+  - review groups attached to several tenants (`group_names` column): their users silently get
+    the union;
+  - LDAP: `AUTH_LDAP_GROUP_SUPERUSERS` only sets user flags. To attach the admins' LDAP group to
+    tenants it must also be listed in `AUTH_LDAP_MIRROR_GROUPS`, so it exists as a DB group.
 
 ## Pitfalls
 
-Existing instances:
-- Groups attached to several tenants currently produce an error banner and empty lists; after
-  the upgrade those users **silently see the union**. Operators should review `Tenant.groups`
-  overlaps before upgrading (the new `group_names` column in the Tenant admin; or in
-  `manage.py shell` list users whose matched tenant count is greater than 1). Say so in NEWS.
-- Users with no tenant could previously create devices with `tenant = NULL` (invisible to
-  them). Now blocked by validation. Existing NULL-tenant devices are unaffected and remain
-  visible only to unrestricted users.
-- The red "no tenant" messages disappear; the navbar badge is the only hint. Update the FAQ.
-- The `access_all_tenants` permission exists only after `migrate`; nobody holds it until a staff
-  user assigns it to a group. On LDAP mirror groups the permission sticks to the existing DB
-  group row, so it survives logins.
-- Templates or local customisations reading `request.tenant` break (intended, loud).
-- Tenant names appear in the tenant list filters; they were already shown in the navbar and are
-  not secrets. `RelatedOnlyFieldListFilter` and the inventory filter narrowing limit them anyway.
-
-New instances and in general:
-- Scoping stays opt-in per view. The API is deliberately unscoped and documented; the record
-  admins are unscoped unless step 5 is done. A django-scopes-style enforced default is the
-  natural hardening if more apps are added.
+- **Permissions carry over between tenants** (consequence of decision 1): a user in "ops-a"
+  (edit permissions, tenant A) and "audit-b" (view permissions, tenant B) can edit B devices
+  too. Per-tenant roles are not expressible; use separate accounts where it matters.
+- **New tenants are private until groups are attached.** Attach the IT/audit groups in the
+  Tenant add form. Forgetting fails closed: IT simply does not see the new tenant.
+- Groups attached to several tenants currently produce empty lists; after step 2 those users
+  **silently see the union**. See the upgrade notes.
+- LDAP admins (superusers) lose their device overview in step 2 until their mirrored group is
+  attached to the tenants.
+- Devices without a tenant are listed only on the Tenant admin action's intermediate page (and
+  reachable via shell and API).
+- Deleting a tenant with devices is blocked (`PROTECT`); move its devices first.
+- Templates and `getattr(request, "tenant", None)` fail silently after `request.tenant` is gone;
+  the grep gate catches them, including local customisations.
+- Fresh installs need a Tenant before the first device (decision 5); *Erste Schritte* step 4
+  already creates one.
 - Multi-valued joins (`record__device__tenant__in` on rooms, device types, persons) need
-  `distinct()` / `Count(distinct=True)` exactly as before, and the tenant condition must live in
-  the same `filter()` call as sibling conditions on the same relation.
-- Inventories with `device_search_tenant_aware = False` bypass scoping by design; unchanged.
+  `distinct()` / `Count(distinct=True)`, and the tenant condition must live in the same
+  `filter()` call as sibling conditions on the same relation.
+- Scoping stays opt-in per view. A django-scopes-style enforced default is the natural hardening
+  if more apps are added.
 - Overdue-lending notifications group by device tenant and use `Tenant.contact_email`; unchanged.
-- LDAP: group membership is rewritten at login by `AUTH_LDAP_MIRROR_GROUPS`; multi-tenant IT
-  staff need their LDAP group attached to each tenant, or the `access_all_tenants` permission.
 
 ## Verification
 
-- `.venv/bin/pytest dlcdb` green, including the new scope tests.
-- `.venv/bin/python manage.py makemigrations --check` shows nothing pending after 0005.
-- With the `verify` skill: create tenants A and B and groups `ops-a` (A), `ops-b` (B), `it` (A
-  and B), `audit` (`access_all_tenants` only, not superuser). Log in as each and check: device
-  index counts and tenant column, add form choices and preselection, "save as new" keeps the
-  chosen tenant, crafted POST with a foreign tenant rejected, detail page tenant switch for
-  `it`, relocate action tenant choices, dashboard tiles and stats, inventory room counts and
-  device search, CSV export, admin changelist/add/change, importer form, navbar badges.
-- `grep -rn 'request\.tenant\b\|request, "tenant"' dlcdb` returns nothing.
+- `.venv/bin/pytest dlcdb` green after each step.
+- After step 0: `.venv/bin/python manage.py makemigrations --check` shows nothing pending.
+- After step 1: `grep -rn --exclude-dir=tests 'request\.tenant\b\|request, "tenant"\|is_superuser=' dlcdb`
+  returns nothing.
+- With the `verify` skill:
+  - step 0: create a device without tenant → the hint shows, its link leads to the Tenant
+    changelist, the action's intermediate page lists the device and the selected tenant,
+    confirming assigns it (history entry), the hint disappears; deleting a tenant with devices
+    is refused.
+  - step 1: users of tenants A and B and a superuser behave as on `main`, except for the
+    intended behaviour changes listed in step 1.
+  - step 2: tenants A and B, groups `ops-a` (A), `ops-b` (B), `it` and `audit` (both attached to
+    A and B), a superuser without groups. Log in as each and check: device index counts and
+    tenant column, add form choices and preselection, "save as new" keeps the chosen tenant,
+    crafted POST with a foreign tenant rejected, detail page tenant switch for `it`, relocate
+    action tenant choices and crafted `?ids=`, dashboard tiles and stats, lending borrower
+    filter, licences, inventory room counts and device search, CSV export, admin
+    changelist/add/change, importer form and confirm, navbar badges; the superuser sees nothing.
