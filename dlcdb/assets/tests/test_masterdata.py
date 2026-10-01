@@ -22,6 +22,7 @@ class MasterdataFrontendTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
 
         cls.device_type = DeviceType.objects.create(name="Notebook", prefix="NTB", note="Loan pool devices")
         cls.other_device_type = DeviceType.objects.create(name="Monitor", prefix="MON")

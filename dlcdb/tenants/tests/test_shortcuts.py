@@ -71,14 +71,13 @@ def test_several_matching_tenants_mean_their_union(tenant, member):
     assert set(get_user_tenants(member(tenant, other))) == {tenant, other}
 
 
-def test_superuser_sees_every_tenant(tenant, member):
-    # Flexible tenants, step 1: superusers see every tenant, not only their groups'.
-    other = Tenant.objects.create(name="Other tenant")
-    user = member()
+def test_superuser_sees_only_the_tenants_of_their_groups(tenant, member):
+    Tenant.objects.create(name="Other tenant")
+    user = member(tenant)
     user.is_superuser = True
     user.save()
 
-    assert set(get_user_tenants(user)) == {tenant, other}
+    assert get_user_tenants(user) == (tenant,)
 
 
 def test_middleware_sets_tenants_and_no_tenant(tenant, member):

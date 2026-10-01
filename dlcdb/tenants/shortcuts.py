@@ -12,13 +12,13 @@ from .models import Tenant
 
 
 def get_user_tenants(user):
-    """Tenants whose groups the user belongs to; several tenants mean their union."""
+    """
+    Tenants whose groups the user belongs to; several tenants mean their union.
+    No exception for superusers: to see every tenant, a group is attached to
+    every tenant.
+    """
     if not user.is_authenticated:
         return ()
-    # Flexible tenants, until step 2b (PLANS/flexible-tenants.md): superusers
-    # see every tenant.
-    if user.is_superuser:
-        return tuple(Tenant.objects.all())
     return tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
 
 

@@ -48,10 +48,12 @@ def media_root(settings, tmp_path):
 
 
 @pytest.fixture
-def superuser():
+def superuser(join_tenant):
     # The importer resolves the audit `user` FK from the username via a hard
     # lookup, so the importing user needs a non-empty username.
-    return CustomUser.objects.create_superuser(email="admin@example.com", password="secret", username="pytestadmin")
+    return join_tenant(
+        CustomUser.objects.create_superuser(email="admin@example.com", password="secret", username="pytestadmin")
+    )
 
 
 @pytest.fixture
@@ -256,13 +258,9 @@ def test_confirm_without_history_permission_redirects_to_device_list(client, ten
 
 
 @_PLAIN_STATICFILES
-def test_non_superuser_cannot_confirm_foreign_tenant_row(client, superuser_client, tenant_user):
+def test_non_superuser_cannot_confirm_foreign_tenant_row(client, tenant_user):
     other_tenant = Tenant.objects.create(name="OtherTenant")
-    superuser_client.post(
-        reverse(IMPORT_URL),
-        {"file": _upload_file("devices.correct.csv"), "tenant": other_tenant.pk},
-    )
-    importer_list = ImporterList.objects.get()
+    importer_list = ImporterList.objects.create(file="imported_csv/foreign.csv", tenant=other_tenant)
 
     client.force_login(tenant_user)
     response = client.post(reverse(CONFIRM_URL, args=[importer_list.pk]))

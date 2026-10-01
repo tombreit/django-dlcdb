@@ -120,3 +120,18 @@ def test_tenant_with_devices_cannot_be_deleted(tenant):
 
     with pytest.raises(ProtectedError):
         tenant.delete()
+
+
+def test_superuser_without_groups_sees_no_devices_but_can_assign_orphans(client, tenant):
+    """Superusers see only their groups' tenants, yet the action still reaches every orphan."""
+    Device.objects.create(edv_id="EDV-OWNED", tenant=tenant)
+    orphan = Device.objects.create(edv_id="EDV-ORPHAN")
+    superuser = get_user_model().objects.create_superuser(email="root@example.com", password="secret", username="root")
+    client.force_login(superuser)
+
+    assert "EDV-OWNED" not in client.get(reverse("assets:device_index")).content.decode()
+
+    assert "EDV-ORPHAN" in client.get(reverse(ASSIGN_URL, args=[tenant.pk])).content.decode()
+    client.post(reverse(ASSIGN_URL, args=[tenant.pk]), {"device": [orphan.pk]})
+    orphan.refresh_from_db()
+    assert orphan.tenant == tenant

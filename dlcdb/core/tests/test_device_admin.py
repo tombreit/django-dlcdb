@@ -130,8 +130,12 @@ class DeviceAdminTenantTests(basetest.BaseTest):
         superuser = get_user_model().objects.create_superuser(
             email="admin@example.org", password="secret", username="admin"
         )
+        both = Group.objects.create(name="both-tenants")
+        self.tenant.groups.add(both)
+        self.foreign_tenant.groups.add(both)
+        superuser.groups.add(both)
 
-        # A superuser sees both tenants: the column and filter are added ...
+        # A user of both tenants: the column and filter are added ...
         self.client.force_login(superuser)
         changelist = self.client.get(changelist_url).context["cl"]
         self.assertIn("tenant", changelist.list_display)

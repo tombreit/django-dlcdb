@@ -10,9 +10,9 @@ Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigung
 Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt erscheint nur, wenn Ihre Gruppe die passende Berechtigung besitzt. Welche Berechtigung welchen Menüpunkt freischaltet (und warum manche Berechtigungen unter *Core* gelistet sind), zeigt [Navigation](./guides/berechtigungen.md#navigation). Hinweis: Superuser sehen alle Menüpunkte unabhängig von Berechtigungen.
 `````
 
-`````{dropdown} No tenant set?
+`````{dropdown} None of your groups belongs to a tenant?
 
-Hinweis, dass keine Gruppe des angemeldeten Benutzers einem Tenant zugeordnet ist. Benutzer sehen nur Geräte ihrer Tenants – ohne Tenant sehen sie keine Geräte. Gehören die Gruppen zu mehreren Tenants, sieht der Benutzer die Geräte aller dieser Tenants.
+Keine Gruppe des Benutzers ist einem Tenant zugeordnet, deshalb sieht er keine Geräte – auch als Superuser. Abhilfe: eine seiner Gruppen dem Tenant zuordnen (*Start › Tenants › Tenant › Gruppen*).
 
 Siehe [Tenants](./guides/berechtigungen.md#tenants), [Tenant anlegen](./guides/erste_schritte.md#4-tenant-anlegen), [Tenant Model](./betrieb/model.md#tenant)
 `````

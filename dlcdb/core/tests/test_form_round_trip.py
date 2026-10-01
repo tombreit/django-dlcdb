@@ -26,6 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
@@ -77,6 +78,17 @@ def _person(email="ada.lovelace@example.com", last_name="Lovelace"):
     )
 
 
+# Superusers see only the tenants of their groups: the editor (editor_client)
+# joins this group, and the round-trip tenant is attached to it.
+ROUND_TRIP_GROUP = "round-trip editors"
+
+
+def _round_trip_tenant():
+    tenant = Tenant.objects.create(name="RoundTripTenant")
+    tenant.groups.add(Group.objects.get_or_create(name=ROUND_TRIP_GROUP)[0])
+    return tenant
+
+
 def _populated_device(**overrides):
     """A device with *every* DeviceForm field filled, so a wipe cannot hide."""
     values = dict(
@@ -85,7 +97,7 @@ def _populated_device(**overrides):
         device_type=DeviceType.objects.create(name="Notebook", prefix="NTB"),
         manufacturer=Manufacturer.objects.create(name="Example Inc."),
         supplier=Supplier.objects.create(name="IT Supplies Ltd.", contact="sales@example.com"),
-        tenant=Tenant.objects.create(name="RoundTripTenant"),
+        tenant=_round_trip_tenant(),
         contact_person_internal=_person(),
         series="ExampleBook 14",
         serial_number="SN-2026-0001",
@@ -221,6 +233,7 @@ def editor_client(client, db):
         password="secret",
         username="roundtrip-editor",
     )
+    user.groups.add(Group.objects.get_or_create(name=ROUND_TRIP_GROUP)[0])
     client.force_login(user)
     return client
 

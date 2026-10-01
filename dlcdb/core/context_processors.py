@@ -110,6 +110,18 @@ def hints(request):
                 )
             )
 
+        # Only for users who work with devices at all: they would otherwise
+        # just see empty lists. Superusers are no exception.
+        if not request.tenants and request.user.has_perm("core.view_device"):
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=_("None of your groups belongs to a tenant, so you see no devices."),
+                    cta_link=reverse("admin:tenants_tenant_changelist"),
+                    cta_text=_("Assign groups to tenants?"),
+                )
+            )
+
         room_flags = Room.objects.aggregate(
             room_count=Count("pk"),
             external_room_count=Count("pk", filter=Q(is_external=True)),

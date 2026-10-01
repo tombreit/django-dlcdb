@@ -83,7 +83,7 @@ def test_device_admin_imported_by_link_resolves():
 
 @pytest.mark.django_db
 @_PLAIN_STATICFILES
-def test_device_change_page_renders_with_imported_by(admin_client, test_site, tenant):
+def test_device_change_page_renders_with_imported_by(admin_client, admin_user, test_site, tenant, join_tenant):
     """
     End-to-end smoke test: render the actual Device admin change page for an
     imported device. This catches admin-link regressions (such as a stale
@@ -91,7 +91,8 @@ def test_device_change_page_renders_with_imported_by(admin_client, test_site, te
     is rendered for a device whose ``imported_by`` is set.
     """
     importer = ImporterList.objects.create(file="imported_csv/page.csv")
-    # A tenant, so the (tenant-scoped) admin lists the device.
+    # A tenant the admin belongs to, so the (tenant-scoped) admin lists the device.
+    join_tenant(admin_user)
     device = Device.objects.create(edv_id="PAGE-1", is_imported=True, imported_by=importer, tenant=tenant)
 
     url = reverse("admin:core_device_change", args=(device.pk,))

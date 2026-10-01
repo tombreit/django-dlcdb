@@ -27,6 +27,7 @@ class ContextProcessorQueryTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.superuser = get_user_model().objects.create_superuser(email="admin@example.com", password="secret")
+        cls()._join_default_tenant(cls.superuser)
         cls.plain_user = get_user_model().objects.create_user(
             email="user@example.com", password="secret", username="plain-user"
         )

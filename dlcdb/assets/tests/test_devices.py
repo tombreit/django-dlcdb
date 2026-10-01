@@ -30,6 +30,7 @@ class DeviceFrontendTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.01")
         cls.manufacturer = Manufacturer.objects.create(name="Example Computers")
 
@@ -99,7 +100,7 @@ class DeviceFrontendTests(BaseTest):
         self.assertNotContains(response, "EDV-AVAILABLE")
 
     def test_create_device_redirects_to_its_detail_page(self):
-        tenant = Tenant.objects.create(name="Tenant New")
+        tenant = self._default_tenant()
         response = self.client.post(
             reverse("assets:device_add"),
             {"edv_id": "EDV-NEW", "sap_id": "5-5", "is_lentable": "on", "tenant": tenant.pk},
@@ -137,7 +138,7 @@ class DeviceFrontendTests(BaseTest):
 
     def test_save_as_new_creates_a_copy_and_leaves_the_original(self):
         original = self.inroom_device
-        tenant = Tenant.objects.create(name="Tenant Copy")
+        tenant = self._default_tenant()
         response = self.client.post(
             reverse("assets:device_add"),
             {
@@ -447,8 +448,8 @@ class DeviceFrontendTests(BaseTest):
     def test_tenant_column_is_shown_only_with_several_tenants(self):
         # The Tenant header's sort link is the unambiguous marker for the column
         # (plain "Tenant" text can otherwise appear elsewhere, e.g. the navbar).
-        # A superuser sees every tenant; with a second one the column appears.
-        Tenant.objects.create(name="Tenant Two")
+        # The superuser's group also gets a second tenant: the column appears.
+        Tenant.objects.create(name="Tenant Two").groups.add(*self.user.groups.all())
         superuser_response = self.client.get(self.index_url)
         self.assertContains(superuser_response, "ordering=tenant")
 

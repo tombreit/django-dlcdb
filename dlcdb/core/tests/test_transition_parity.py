@@ -71,6 +71,7 @@ class LendReturnParityTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.23", nickname="Theke")
         cls.auto_return_room = Room.objects.create(number="RETURN", is_auto_return_room=True)
         cls.external_room = Room.objects.create(number="EXTERN", is_external=True)

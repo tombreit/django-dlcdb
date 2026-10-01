@@ -104,11 +104,10 @@ class MainNavPermissionTests(TestCase):
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class TenantBadgeNavbarTests(TestCase):
-    """The user menu names the user's tenant, counts several, or warns about none."""
+    """The user menu names the user's tenant or counts several; no tenant is a sticky hint (see test_hints)."""
 
-    def _login(self, *tenants, superuser=False):
-        create = get_user_model().objects.create_superuser if superuser else get_user_model().objects.create_user
-        user = create(username="badge-user", email="badge@example.com", password="secret")
+    def _login(self, *tenants):
+        user = get_user_model().objects.create_user(username="badge-user", email="badge@example.com", password="secret")
         for tenant in tenants:
             group = Group.objects.create(name=f"group-of-{tenant.name}")
             tenant.groups.add(group)
@@ -121,15 +120,13 @@ class TenantBadgeNavbarTests(TestCase):
         self.assertContains(response, ">Physics</span>")
 
     def test_several_tenants_are_counted(self):
-        # Flexible tenants, step 1: only superusers see several tenants (all of them).
-        Tenant.objects.create(name="Physics")
-        Tenant.objects.create(name="Chemistry")
-        self._login(superuser=True)
+        self._login(Tenant.objects.create(name="Physics"), Tenant.objects.create(name="Chemistry"))
         response = self.client.get(reverse("dashboard:index"))
         self.assertContains(response, "2 tenants")
         self.assertContains(response, "Chemistry, Physics")
 
-    def test_no_tenant_is_a_warning(self):
+    def test_no_tenant_shows_no_badge(self):
         self._login()
         response = self.client.get(reverse("dashboard:index"))
-        self.assertContains(response, "No tenant set!")
+        self.assertNotContains(response, 'class="badge text-bg-secondary ms-1"')
+        self.assertNotContains(response, "No tenant set!")

@@ -20,7 +20,7 @@ Diese Seite erklärt, wie die drei zusammenhängen und wo welche Einstellung vor
 |---|---|---|
 | Benutzer | – | Arbeitet im Frontend. Sieht und darf genau das, was die Berechtigungen seiner Gruppen erlauben. |
 | Staff | *Mitarbeiter-Status* (`is_staff`) | Zusätzlich Zugang zur Django-Admin-Oberfläche (Eintrag *Django Site-Verwaltung* im Benutzermenü). Auch dort gelten die Gruppen-Berechtigungen. Einige Statuswechsel öffnen ein Admin-Formular und sind deshalb nur mit diesem Flag erreichbar (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin)). |
-| Superuser | *Administrator-Status* (`is_superuser`) | Hat implizit **alle** Berechtigungen: sieht alle Menüpunkte, alle Statuswechsel und die Geräte aller Tenants. Nur Superuser dürfen im Admin löschen, Stammdaten aktivieren/deaktivieren und die Admin-Aktion *Restore devices from REMOVED to LOST* ausführen. |
+| Superuser | *Administrator-Status* (`is_superuser`) | Hat implizit **alle** Berechtigungen: sieht alle Menüpunkte und alle Statuswechsel. Geräte sieht auch ein Superuser nur in den Tenants seiner Gruppen (siehe [Tenants](#tenants)). Nur Superuser dürfen im Admin löschen, Stammdaten aktivieren/deaktivieren und die Admin-Aktion *Restore devices from REMOVED to LOST* ausführen. |
 
 - `./manage.py createsuperuser` setzt beide Flags. Ein Superuser ist damit immer auch Staff.
 - Bei LDAP-Anmeldung erhalten Mitglieder der in `AUTH_LDAP_GROUP_SUPERUSERS` (`.env`) genannten LDAP-Gruppe **beide** Flags.
@@ -57,7 +57,7 @@ Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeite
 :::{admonition} **LDAP**
 :class: note
 
-Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` (`.env`) genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Berechtigungen und Tenants werden dann diesen **gespiegelten Gruppen** zugewiesen. Manuell in der DLCDB angelegte Gruppenmitgliedschaften können bei der nächsten Anmeldung durch die LDAP-Spiegelung überschrieben werden.
+Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` (`.env`) genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Berechtigungen und Tenants werden dann diesen **gespiegelten Gruppen** zugewiesen. Die Mitgliedschaften in diesen gespiegelten Gruppen werden bei jeder Anmeldung aus LDAP übernommen; von Hand vergebene Mitgliedschaften in ihnen gehen dabei verloren. Mitgliedschaften in Gruppen, die nicht in `AUTH_LDAP_MIRROR_GROUPS` stehen (z.B. eine in der DLCDB angelegte Gruppe), bleiben unberührt.
 :::
 
 ## Navigation
@@ -166,12 +166,12 @@ Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt un
 
 - Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
 - Mehrere Tenants passen → der Benutzer sieht die Geräte **aller** dieser Tenants. Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*.
-- Kein Tenant passt → die Navigation zeigt *No tenant set!*, und ein Nicht-Superuser sieht **keine Geräte** und kann keine anlegen, bis die Gruppenzuordnung stimmt.
-- Superuser sehen die Geräte aller Tenants (nicht aber [Geräte ohne Tenant](#geräte-ohne-tenant)).
+- Kein Tenant passt → der Benutzer sieht **keine Geräte** und kann keine anlegen; jede Seite zeigt den Hinweis *None of your groups belongs to a tenant, so you see no devices.* (nur für Benutzer mit `core.view_device`).
+- Superuser bilden **keine** Ausnahme: Auch sie sehen nur die Tenants ihrer Gruppen. Ein Superuser ohne passende Gruppe sieht keine Geräte.
 
 Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
 
-**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wer *wen* sieht, steht damit immer vollständig in der Gruppen-Liste des Tenants (Spalte *Groups* in der Tenant-Übersicht).
+**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. Administratoren, IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wird das bei einem neuen Tenant vergessen, sieht die Gruppe ihn schlicht nicht. Wer *wen* sieht, steht damit immer vollständig in der Gruppen-Liste des Tenants (Spalte *Groups* in der Tenant-Übersicht).
 
 Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
 
@@ -192,7 +192,9 @@ Jedes Gerät braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim 
 2. Den Ziel-Tenant auswählen und die Aktion *Assign devices without tenant* ausführen.
 3. Die folgende Seite listet alle Geräte ohne Tenant. Geräte, die zu einem anderen Tenant gehören, abwählen und bestätigen. Für die übrigen Geräte die Schritte mit deren Tenant wiederholen.
 
-Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.change_device`.
+Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.change_device`; sie listet die Geräte unabhängig von den eigenen Tenants.
+
+Reichen die Angaben auf der Bestätigungsseite nicht für die Entscheidung, hilft ein **Zwischen-Tenant**: einen Tenant *Unassigned* anlegen und der IT-Gruppe zuordnen, alle Geräte ohne Tenant per Aktion dorthin verschieben, dann jedes Gerät auf seiner Detailseite (Feld *Tenant*) dem richtigen Tenant zuordnen. Ist *Unassigned* leer, kann er gelöscht werden.
 
 Ein Tenant, dem noch Geräte zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen.
 

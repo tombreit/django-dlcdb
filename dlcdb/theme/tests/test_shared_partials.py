@@ -74,9 +74,7 @@ class SharedFormChromeTests(BaseTest):
         )
         cls.viewer.is_staff = True
         cls.viewer.save()
-        cls.viewer.user_permissions.add(
-            Permission.objects.get(codename="view_room", content_type__app_label="core")
-        )
+        cls.viewer.user_permissions.add(Permission.objects.get(codename="view_room", content_type__app_label="core"))
         cls.room = Room.objects.create(number="A1.01")
 
     def test_action_bar_default_and_custom_submit_label(self):
@@ -113,6 +111,7 @@ class InventoryThemePagerTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="pager@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         room = Room.objects.create(number="B1.01")
         Inventory.objects.create(name="Inv", is_active=True)
         for i in range(cls.TOTAL):
@@ -124,7 +123,7 @@ class InventoryThemePagerTests(BaseTest):
         self.url = reverse("inventory:search-devices")
 
     def _get(self, **params):
-        return self.client.get(self.url, params, HTTP_HX_REQUEST="true").content.decode()
+        return self.client.get(self.url, params, headers={"hx-request": "true"}).content.decode()
 
     def test_pages_and_preserves_active_filter(self):
         first = self._get()

@@ -32,6 +32,10 @@ class GlobalSearchTests(TestCase):
         cls.manufacturer = Manufacturer.objects.create(name="Zebra Computers")
         cls.room = Room.objects.create(number="Z1.42", nickname="Zebra Lab")
         cls.tenant = Tenant.objects.create(name="Zebra tenant")
+        # Superusers see only the tenants of their groups.
+        zebra_group = Group.objects.create(name="Zebra tenant")
+        cls.tenant.groups.add(zebra_group)
+        cls.user.groups.add(zebra_group)
 
         cls.device = Device.objects.create(
             edv_id="ZEBRA-DEVICE-1",

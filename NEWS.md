@@ -8,14 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Users whose groups belong to several tenants see and manage the devices of all these tenants
-* Dashboard counts, the lending person filter and the admin relocate action are now tenant-scoped
-* Licences are tenant-scoped; new licences need a tenant
-* Superusers no longer see devices without tenant (see the "devices without tenant" hint)
-* The navbar shows the user's tenant(s) instead of the red "no tenant" message banner
-* Devices without tenant are reported by a hint and assigned via the new Tenant admin action "Assign devices without tenant"
-* A tenant with devices can no longer be deleted
-* Superusers must choose a tenant when creating or importing devices
+* Tenants: users – superusers included – see the devices of all tenants their groups belong to; every device needs a tenant, devices without one are assigned via the Tenant admin action "Assign devices without tenant" (details: docs › Berechtigungen › Tenants)
 * Devices can be copied in the frontend via "Save as new" on the detail page
 * Import history in the frontend: a read-only list of all device imports with status and log; the device list can be filtered by import file
 * Frontend permissions consolidated onto Django's default `view`/`add`/`change` permissions of the model each view touches. The license module now needs `core.view_licencerecord`; assign this permission to the groups that should keep access (likewise `smallstuff.view_assignedthing` and `smallstuff.add_assignedthing` for Kleinkram)

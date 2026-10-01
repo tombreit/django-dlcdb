@@ -25,6 +25,7 @@ class LicensesIndexViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.23", nickname="Theke")
 
         # Two active licenses with distinct human titles (via ``series``) so

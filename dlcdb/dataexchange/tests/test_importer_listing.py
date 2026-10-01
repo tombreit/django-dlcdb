@@ -29,9 +29,9 @@ def media_root(settings, tmp_path):
 
 
 @pytest.fixture
-def superuser_client(client):
+def superuser_client(client, join_tenant):
     user = CustomUser.objects.create_superuser(email="admin@example.com", password="secret", username="pytestadmin")
-    client.force_login(user)
+    client.force_login(join_tenant(user))
     return client
 
 
@@ -158,7 +158,7 @@ def test_import_pages_and_device_sidebar_link_to_the_frontend(superuser_client, 
 
 
 @_PLAIN_STATICFILES
-def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_client, tenant):
+def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_client, tenant, join_tenant):
     superuser_client.post(
         reverse("dataexchange:device_import"), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk}
     )
@@ -169,7 +169,7 @@ def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_c
     assert importer_list.username == "admin@example.com"
 
     other_admin = CustomUser.objects.create_superuser(email="other@example.com", password="secret", username="other")
-    client.force_login(other_admin)
+    client.force_login(join_tenant(other_admin))
     client.post(reverse("dataexchange:device_import_confirm", args=[importer_list.pk]))
 
     importer_list.refresh_from_db()

@@ -21,20 +21,12 @@ SPDX-License-Identifier: EUPL-1.2
 >
     {% blocktranslate count counter=request.tenants|length %}{{ counter }} tenant{% plural %}{{ counter }} tenants{% endblocktranslate %}
 </span>
-{% else %}
-<a
-    href="{% url 'admin:tenants_tenant_changelist' %}"
-    class="btn btn-warning"
-    title="{% translate 'Your groups belong to no tenant, so you see no devices.' %}"
->
-    {% translate "No tenant set!" %}
-</a>
 {% endif %}
 
 {% if request.user.is_superuser %}
 <button
     class="btn btn-danger"
-    title="Superusers are not tenant aware"
+    title="{% translate 'All permissions, but only the devices of your tenants' %}"
 >
     Superuser
 </button>

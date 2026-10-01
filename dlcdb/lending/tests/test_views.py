@@ -27,6 +27,7 @@ class LendingIndexViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
 
         cls.room = Room.objects.create(number="A1.23", nickname="Theke")
         cls.person = Person.objects.create(first_name="Max", last_name="Mustermann")
@@ -251,6 +252,7 @@ class LendingDetailViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
 
         cls.room = Room.objects.create(number="A1.23", nickname="Theke")
         cls.auto_return_room = Room.objects.create(number="RETURN", is_auto_return_room=True)
@@ -670,6 +672,7 @@ class LendingPrintSheetTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.23")
         cls.person = Person.objects.create(first_name="Max", last_name="Mustermann", email="max@example.com")
 
@@ -735,6 +738,7 @@ class LendingDeviceSearchTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.23")
 
         # Available (InRoom) lentable device -> must be searchable.
@@ -791,6 +795,7 @@ class LendingPickerModeViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
 
         cls.room = Room.objects.create(number="A1.23", nickname="Theke")
         cls.auto_return_room = Room.objects.create(number="RETURN", is_auto_return_room=True)

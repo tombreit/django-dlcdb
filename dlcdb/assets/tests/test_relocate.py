@@ -43,6 +43,7 @@ class RelocateViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room_a = Room.objects.create(number="A1.01", nickname="Office")
         cls.room_b = Room.objects.create(number="B2.02", nickname="Lab")
 

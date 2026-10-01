@@ -8,6 +8,7 @@ apps, not the legacy admin changelists.
 """
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
 
@@ -26,6 +27,7 @@ class StickyHintsTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -62,6 +64,30 @@ class StickyHintsTests(BaseTest):
         self.assertContains(response, "2 devices without tenant!")
         self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
         self.assertContains(response, "Assign a tenant?")
+
+    def test_users_without_tenant_get_a_hint(self):
+        hint = "None of your groups belongs to a tenant, so you see no devices."
+
+        # The class's superuser belongs to the default test tenant: no hint.
+        self.assertNotContains(self.client.get(self.dashboard_url), hint)
+
+        viewer = get_user_model().objects.create_user(username="no-tenant", email="no-tenant@example.com")
+        viewer.user_permissions.add(Permission.objects.get(codename="view_device", content_type__app_label="core"))
+        self.client.force_login(viewer)
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, hint)
+        self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
+
+        # Superusers see only the tenants of their groups, too.
+        superuser = get_user_model().objects.create_superuser(
+            email="root@example.com", password="secret", username="root"
+        )
+        self.client.force_login(superuser)
+        self.assertContains(self.client.get(self.dashboard_url), hint)
+
+    def test_no_tenant_hint_needs_the_view_device_permission(self):
+        self.client.force_login(get_user_model().objects.create_user(username="nobody", email="nobody@example.com"))
+        self.assertNotContains(self.client.get(self.dashboard_url), "so you see no devices")
 
     def test_hints_are_not_shown_to_anonymous_users(self):
         # Every hint condition holds: a device without tenant, no rooms, no

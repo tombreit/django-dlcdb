@@ -5,6 +5,7 @@
 """The dashboard tiles carry the class names their styling and future JS hang on."""
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -17,6 +18,15 @@ _PLAIN_STATIC_STORAGE = {
 }
 
 
+def _tenant_of(user, name):
+    """A tenant the user sees: superusers too see only the tenants of their groups."""
+    tenant = Tenant.objects.create(name=name)
+    group = Group.objects.create(name=name)
+    tenant.groups.add(group)
+    user.groups.add(group)
+    return tenant
+
+
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DashboardTileTests(TestCase):
     @classmethod
@@ -27,7 +37,7 @@ class DashboardTileTests(TestCase):
         cls.device_type = DeviceType.objects.create(name="Notebook", prefix="NTB", note="a note")
         cls.room = Room.objects.create(number="T1.01")
         device = Device.objects.create(
-            edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type, tenant=Tenant.objects.create(name="Tiles")
+            edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type, tenant=_tenant_of(cls.user, "Tiles")
         )
         InRoomRecord.objects.create(device=device, room=cls.room)
 
@@ -86,10 +96,7 @@ class DashboardTileTargetTests(TestCase):
         # A lost record carrying a note, so the Lost tile shows its badge and
         # therefore appends the note filter to its link.
         device = Device.objects.create(
-            edv_id="TILE-LOST",
-            sap_id="7002-1",
-            device_type=cls.device_type,
-            tenant=Tenant.objects.create(name="Targets"),
+            edv_id="TILE-LOST", sap_id="7002-1", device_type=cls.device_type, tenant=_tenant_of(cls.user, "Targets")
         )
         InRoomRecord.objects.create(device=device, room=cls.room)
         LostRecord.objects.create(device=device, note="Not at its desk")

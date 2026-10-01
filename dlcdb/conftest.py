@@ -19,6 +19,7 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 """
 
 import pytest
+from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 
 from dlcdb.accounts.models import CustomUser
@@ -38,6 +39,22 @@ def plain_static(settings):
 @pytest.fixture
 def tenant():
     return Tenant.objects.create(name="PytestTenant")
+
+
+@pytest.fixture
+def join_tenant(tenant):
+    """
+    Let a user see the devices of the ``tenant`` fixture. Superusers need it
+    too: they see only the tenants of their groups.
+    """
+
+    def _join(user):
+        group, _ = Group.objects.get_or_create(name="PytestTenant members")
+        tenant.groups.add(group)
+        user.groups.add(group)
+        return user
+
+    return _join
 
 
 @pytest.fixture

@@ -24,7 +24,7 @@ Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS`
 
 ## 4. Tenant anlegen
 
-Via *Start › Tenants › Tenant hinzufügen*: Name vergeben und die Gruppe(n) aus Schritt 3 zuordnen. Ein Benutzer sieht nur Geräte des Tenants, zu dem seine Gruppen gehören – ohne passende Gruppe sieht er keine Geräte (siehe [Tenants](berechtigungen.md#tenants)).
+Via *Start › Tenants › Tenant hinzufügen*: Name vergeben und die Gruppe(n) aus Schritt 3 zuordnen. Ein Benutzer sieht nur Geräte der Tenants, zu denen seine Gruppen gehören – ohne passende Gruppe sieht er keine Geräte, auch als Superuser (siehe [Tenants](berechtigungen.md#tenants)). Die Gruppe der Administratoren deshalb jedem Tenant zuordnen, auch jedem später angelegten.
 
 ## 5. Benutzer anlegen
 

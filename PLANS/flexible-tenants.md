@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Flexible tenants: users in several tenants, visibility only through groups
 
-**Status:** design document; steps 0, 1 and 2a implemented (2026-10-01), steps 2b and 3 open. Living
+**Status:** design document; steps 0–2 implemented (2026-10-01), step 3 open. Living
 document: update it when decisions or the code change. Last revised 2026-10-01 (review against
 the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
 group attachment).
@@ -202,9 +202,13 @@ and template lookups fail silently, so the grep in *Verification* is a required 
   and the `DeviceAdmin` tenant column and filter (`("tenant", admin.RelatedOnlyFieldListFilter)`,
   built as a new list, no class attribute mutation) only when `request.tenants|length > 1`.
 - Navbar badge (`theme/includes/navbar.html`, `tenants/navbar_current_tenant.html`): one tenant →
-  its name; several → "N tenants" with the names in the `title`; none → warning "No tenant" (the
-  admin navbar keeps its link to the tenant changelist). The red Superuser badge stays; from
-  step 2 on without the title "Superusers are not tenant aware". Strings translatable.
+  its name; several → "N tenants" with the names in the `title`; none → no badge. The red
+  Superuser badge stays; from step 2 on without the title "Superusers are not tenant aware".
+  Strings translatable.
+- No tenant → sticky hint in `core/context_processors.py:hints` (only with `core.view_device`):
+  "None of your groups belongs to a tenant, so you see no devices.", linking to the Tenant admin.
+  Together with the "devices without tenant" hint it tells an operator what to configure after
+  an update.
 
 ### Devices without a tenant: hint and Tenant admin action
 
@@ -258,7 +262,8 @@ view we write (same pattern as `DeviceAdmin.relocate` → `core/views/relocate_v
 - `DeviceForm` and `DeviceImportForm`: delete the superuser branch's `required = False`
   (decision 5).
 - Operators assign the existing orphans (likely mostly licences, see *Current state*) with the
-  action: one run per target tenant, unchecking devices that belong elsewhere.
+  action: one run per target tenant, unchecking devices that belong elsewhere. Any time, before or
+  after the later steps (see the upgrade notes).
 
 ### Step 1: prep, tuple model with today's rules (implemented 2026-10-01)
 
@@ -346,7 +351,7 @@ Intended behaviour changes (docs + NEWS):
 - Licences are tenant-scoped.
 - No more red "no tenant"/"several tenants" message banners; the navbar badge is the hint.
 
-### Step 2: the switch (no migration)
+### Step 2: the switch (implemented 2026-10-01)
 
 Delete the two marked lines in `get_user_tenants`, ideally as two commits:
 - 2a: several matching tenants mean their union;
@@ -360,7 +365,7 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   staff cannot import into arbitrary tenants), `RecordAdmin`, `OrderedRecordAdmin`,
   `InRoomRecordAdmin`, `LostRecordAdmin`, `RemovedRecordAdmin`, `LicenceRecordAdmin`
   (`tenant_lookup = "device__tenant"`; no tenant form field, so only `get_queryset` applies).
-  Behaviour change for staff users: one line in `berechtigungen.md`.
+  Behaviour change for staff users: one line in `berechtigungen.md`. Also check if the related non-admin-views are also tenant-scoped (eg. `importer_index`).
 - Inventory device search: narrow the `tenant` filter choices to `request.tenants`, but only
   when `device_search_tenant_aware` (otherwise the search spans all tenants).
 - Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
@@ -411,7 +416,7 @@ Step 1:
 - `dlcdb/inventory/tests/test_inventory.py`: replace `(tenant=None, is_superuser=True)` with
   `tenants=(...)`; `inventory_relevant_devices` respects the flag.
 - `core/tests/test_context_processor_queries.py`: back to one device query.
-- Navbar badge: tenant name / "N tenants" / "No tenant".
+- Navbar badge: tenant name / "N tenants"; no tenant → sticky hint (only with `core.view_device`).
 - Tests that view tenant-less devices as a superuser give those devices the `tenant` fixture.
 
 Step 2:
@@ -428,11 +433,11 @@ Step 2:
 
 - `docs/guides/berechtigungen.md`: *Tenants* section (union semantics, tenant selector when
   several, "all tenants" = attach a group to every tenant and to each new one, zero tenants →
-  "No tenant" badge and no devices, tenant always required, tenant change between own tenants,
+  sticky hint and no devices, tenant always required, tenant change between own tenants,
   licences scoped, devices without a tenant: the hint and the Tenant admin action, permissions
   apply in every accessible tenant (see *Pitfalls*), the deliberately unscoped areas); superuser
   rows: all permissions, but only the tenants of their groups.
-- `docs/faq.md` ("No tenant?": no error banner any more; several tenants is valid),
+- `docs/faq.md` (the "no tenant" hint and how to fix it),
   `docs/guides/devices.md` (tenant column, tenant field), `docs/guides/lizenzen.md` (tenant
   field), `docs/guides/umziehen.md` (tenant change), `docs/betrieb/model.md` (Tenant paragraph:
   PROTECT), `docs/guides/erste_schritte.md` (step 4: attach the admin group too) and
@@ -442,16 +447,9 @@ Step 2:
   dashboard/lending scoping fix; relocate action scoped; licences tenant-scoped. Step 2: users
   may belong to several tenants (union); superusers see only their groups' tenants.
 
-Upgrade notes (NEWS and `berechtigungen.md`):
-- After step 0: assign the devices without tenant (hint → Tenant admin action), ideally before
-  step 1, while superusers can still open them individually.
-- Before step 2:
-  - attach the admin, IT and audit groups to every tenant they should see, e.g. in
-    `manage.py shell`: `group.tenant_set.add(*Tenant.objects.all())`;
-  - review groups attached to several tenants (`group_names` column): their users silently get
-    the union;
-  - LDAP: `AUTH_LDAP_GROUP_SUPERUSERS` only sets user flags. To attach the admins' LDAP group to
-    tenants it must also be listed in `AUTH_LDAP_MIRROR_GROUPS`, so it exists as a DB group.
+Upgrade notes: steps 0–2 deploy in one go, no prescribed order and no upgrade guide. What
+needs configuring announces itself: the sticky hints for "no tenant" and "devices without
+tenant" (both linking to the Tenant admin). NEWS has one entry.
 
 ## Pitfalls
 
