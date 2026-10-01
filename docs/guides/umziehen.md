@@ -17,12 +17,13 @@ Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", 
 - Menüpunkt *Umziehen* im Hauptmenü aufrufen.
 - Umzuziehende Geräte auswählen (Mehrfachauswahl; die Suche hilft bei der Auswahl).
 - Neuen Raum angeben.
-  - Nur für Superuser: Es kann auch ein neuer Tenant angegeben werden (siehe [Tenants](berechtigungen.md#tenants)).
 - Umzug speichern.
 
 ![Umziehen mehrerer Geräte](/_static/relocate.webp){.sd-card}
 
 :::{note}
 **Fallback Django-Admin:** Der Massen-Umzug ist alternativ auch im
-Device-Admin über die Action *Relocate* möglich.
+Device-Admin über die Action *Relocate* möglich. Dort kann zusätzlich ein neuer
+Tenant angegeben werden – für Benutzer, die mehrere Tenants sehen und
+`core.change_device` besitzen (siehe [Tenants](berechtigungen.md#tenants)).
 :::

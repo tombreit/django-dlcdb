@@ -165,12 +165,19 @@ Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt un
 **Zuordnung zum Benutzer.** Ein Tenant besitzt eine oder mehrere **Gruppen** (*Start › Tenants › Tenant › Gruppen*). Der Tenant eines Benutzers ergibt sich aus dessen Gruppenmitgliedschaften:
 
 - Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
-- Kein oder mehr als ein Tenant passt → der Benutzer hat keinen Tenant. Die Navigation zeigt *No tenant set!*, und ein Nicht-Superuser sieht **keine Geräte** und kann keine anlegen, bis die Gruppenzuordnung stimmt.
-- Superuser sehen die Geräte aller Tenants (nicht aber [Geräte ohne Tenant](#geräte-ohne-tenant)). Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*. Nur Superuser können den Tenant eines Geräts ändern (z.B. beim [Umziehen](umziehen.md)).
+- Mehrere Tenants passen → der Benutzer sieht die Geräte **aller** dieser Tenants. Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*.
+- Kein Tenant passt → die Navigation zeigt *No tenant set!*, und ein Nicht-Superuser sieht **keine Geräte** und kann keine anlegen, bis die Gruppenzuordnung stimmt.
+- Superuser sehen die Geräte aller Tenants (nicht aber [Geräte ohne Tenant](#geräte-ohne-tenant)).
 
-Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt.
+Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
+
+**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wer *wen* sieht, steht damit immer vollständig in der Gruppen-Liste des Tenants (Spalte *Groups* in der Tenant-Übersicht).
 
 Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
+
+:::{warning}
+**Berechtigungen gelten in allen Tenants eines Benutzers.** Wer über die Gruppe *ops-a* Geräte in Tenant A bearbeiten darf und über *audit-b* Tenant B nur ansehen soll, kann trotzdem auch die Geräte von B bearbeiten. Unterschiedliche Rollen je Tenant lassen sich nicht abbilden; dafür getrennte Benutzerkonten verwenden.
+:::
 
 Nicht auf den Tenant eingeschränkt sind:
 

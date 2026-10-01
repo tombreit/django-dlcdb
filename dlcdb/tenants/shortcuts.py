@@ -15,12 +15,11 @@ def get_user_tenants(user):
     """Tenants whose groups the user belongs to; several tenants mean their union."""
     if not user.is_authenticated:
         return ()
-    # Flexible tenants, step 1 only (PLANS/flexible-tenants.md): superusers
-    # see every tenant, several matching tenants stay ambiguous.
+    # Flexible tenants, until step 2b (PLANS/flexible-tenants.md): superusers
+    # see every tenant.
     if user.is_superuser:
         return tuple(Tenant.objects.all())
-    tenants = tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
-    return tenants if len(tenants) == 1 else ()
+    return tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
 
 
 def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):

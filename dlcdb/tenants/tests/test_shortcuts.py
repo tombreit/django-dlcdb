@@ -64,11 +64,11 @@ def test_one_tenant_via_two_groups_still_counts_once(tenant, member):
     assert get_user_tenants(user) == (tenant,)
 
 
-def test_several_matching_tenants_stay_ambiguous(tenant, member):
-    # Flexible tenants, step 1: several tenants still mean none.
+def test_several_matching_tenants_mean_their_union(tenant, member):
     other = Tenant.objects.create(name="Other tenant")
+    Tenant.objects.create(name="Foreign tenant")
 
-    assert get_user_tenants(member(tenant, other)) == ()
+    assert set(get_user_tenants(member(tenant, other))) == {tenant, other}
 
 
 def test_superuser_sees_every_tenant(tenant, member):

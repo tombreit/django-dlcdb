@@ -12,7 +12,7 @@ Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt ersch
 
 `````{dropdown} No tenant set?
 
-Hinweis, dass sich aus den Gruppen des angemeldeten Benutzers kein (oder mehr als ein) Tenant ergibt. Benutzer sehen nur Geräte ihres Tenants – ohne Tenant sehen sie keine Geräte. Superuser sehen die Geräte aller Tenants.
+Hinweis, dass keine Gruppe des angemeldeten Benutzers einem Tenant zugeordnet ist. Benutzer sehen nur Geräte ihrer Tenants – ohne Tenant sehen sie keine Geräte. Gehören die Gruppen zu mehreren Tenants, sieht der Benutzer die Geräte aller dieser Tenants.
 
 Siehe [Tenants](./guides/berechtigungen.md#tenants), [Tenant anlegen](./guides/erste_schritte.md#4-tenant-anlegen), [Tenant Model](./betrieb/model.md#tenant)
 `````

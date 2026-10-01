@@ -119,7 +119,7 @@
               {% elif request.tenants %}
                 <span class="badge text-bg-secondary ms-1" title="{% translate 'Tenants' %}: {{ request.tenants|join:', ' }}">{% blocktranslate count counter=request.tenants|length %}{{ counter }} tenant{% plural %}{{ counter }} tenants{% endblocktranslate %}</span>
               {% elif request.user.is_authenticated %}
-                <span class="badge text-bg-warning ms-1" title="{% translate 'Your groups do not match exactly one tenant, so you see no devices.' %}">{% translate 'No tenant set!' %}</span>
+                <span class="badge text-bg-warning ms-1" title="{% translate 'Your groups belong to no tenant, so you see no devices.' %}">{% translate 'No tenant set!' %}</span>
               {% endif %}
             </a>
             <div class="dropdown-menu dropdown-menu-end">

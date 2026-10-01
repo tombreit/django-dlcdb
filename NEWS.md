@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Users whose groups belong to several tenants see and manage the devices of all these tenants
 * Dashboard counts, the lending person filter and the admin relocate action are now tenant-scoped
 * Licences are tenant-scoped; new licences need a tenant
 * Superusers no longer see devices without tenant (see the "devices without tenant" hint)

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Flexible tenants: users in several tenants, visibility only through groups
 
-**Status:** design document; steps 0 and 1 implemented (2026-10-01), steps 2–3 open. Living
+**Status:** design document; steps 0, 1 and 2a implemented (2026-10-01), steps 2b and 3 open. Living
 document: update it when decisions or the code change. Last revised 2026-10-01 (review against
 the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
 group attachment).

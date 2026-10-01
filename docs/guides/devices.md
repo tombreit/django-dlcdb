@@ -25,9 +25,9 @@ Die Übersicht listet alle Geräte und ist durchsuch-, filter- und sortierbar:
 - Button *Gerät hinzufügen* (rechts oben) legt ein neues Gerät an.
 
 :::{note}
-Nicht-Superuser sehen nur Geräte ihres Mandanten (*Tenant*). Superuser sehen
-die Geräte aller Mandanten und zusätzlich die Spalte *Mandant*. Geräte ohne
-Mandant erscheinen nicht (siehe [Geräte ohne Tenant](berechtigungen.md#geräte-ohne-tenant)).
+Jeder sieht nur die Geräte seiner Mandanten (*Tenants*). Wer mehrere Mandanten
+sieht, bekommt zusätzlich die Spalte *Mandant*. Geräte ohne Mandant erscheinen
+nicht (siehe [Geräte ohne Tenant](berechtigungen.md#geräte-ohne-tenant)).
 :::
 
 ## Geräte-Detailseite
