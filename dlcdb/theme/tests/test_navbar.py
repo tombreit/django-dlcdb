@@ -105,21 +105,21 @@ class MainNavPermissionTests(TestCase):
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class AdminLinkNavbarTests(TestCase):
     """
-    The Django admin link (in the Settings dropdown) follows the staff flag:
-    the admin requires it, being a superuser is not enough.
+    The Django admin link (in the user menu) follows the staff flag: the admin
+    requires it, being a superuser is not enough.
     """
 
     def test_admin_link_follows_the_staff_flag(self):
         admin_link = f'href="{reverse("admin:index")}"'
         user = get_user_model().objects.create_user(username="link-user", email="link@example.com", password="secret")
-        # A Settings entry, so the dropdown holding the admin link renders.
-        user.user_permissions.add(Permission.objects.get(codename="view_branding"))
         self.client.force_login(user)
 
         user.is_superuser = True
         user.save()
         self.assertNotContains(self.client.get(reverse("dashboard:index")), admin_link)
 
+        # Staff without any further permission (formerly the link was hidden in
+        # the Settings dropdown, which needs a settings permission to render).
         user.is_superuser = False
         user.is_staff = True
         user.save()
