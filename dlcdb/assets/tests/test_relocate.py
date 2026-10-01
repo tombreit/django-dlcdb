@@ -256,7 +256,7 @@ class RelocateViewTests(BaseTest):
         self.assertNotContains(response, "1-1")
 
         # Only a serial number -> the SN is shown.
-        sn_device = Device.objects.create(serial_number="SN-XYZ-9")
+        sn_device = Device.objects.create(serial_number="SN-XYZ-9", tenant=self._default_tenant())
         InRoomRecord.objects.create(device=sn_device, room=self.room_a)
         response = self.client.post(
             reverse("theme:device_search"), {"source": "move", "q_device": "SN-XYZ-9"}, headers={"HX-Request": "true"}
@@ -265,7 +265,7 @@ class RelocateViewTests(BaseTest):
 
     def test_device_search_uses_device_type_icon(self):
         laptop_type = DeviceType.objects.create(name="Notebook XYZ", icon="bi-laptop")
-        device = Device.objects.create(edv_id="EDV-LAPTOP", device_type=laptop_type)
+        device = Device.objects.create(edv_id="EDV-LAPTOP", device_type=laptop_type, tenant=self._default_tenant())
         InRoomRecord.objects.create(device=device, room=self.room_a)
         response = self.client.post(
             reverse("theme:device_search"), {"source": "move", "q_device": "EDV-LAPTOP"}, headers={"HX-Request": "true"}

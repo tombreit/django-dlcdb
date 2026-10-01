@@ -26,7 +26,8 @@ Die Übersicht listet alle Geräte und ist durchsuch-, filter- und sortierbar:
 
 :::{note}
 Nicht-Superuser sehen nur Geräte ihres Mandanten (*Tenant*). Superuser sehen
-alle Geräte und zusätzlich die Spalte *Mandant*.
+die Geräte aller Mandanten und zusätzlich die Spalte *Mandant*. Geräte ohne
+Mandant erscheinen nicht (siehe [Geräte ohne Tenant](berechtigungen.md#geräte-ohne-tenant)).
 :::
 
 ## Geräte-Detailseite

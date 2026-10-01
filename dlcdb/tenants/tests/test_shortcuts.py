@@ -2,33 +2,26 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""``get_current_tenant``: the one place that turns group memberships into a tenant."""
-
-from unittest.mock import patch
+"""``dlcdb.tenants.shortcuts``: the one place that turns group memberships into tenants."""
 
 import pytest
+from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
-from django.contrib.messages import get_messages
-from django.contrib.messages.storage.cookie import CookieStorage
 from django.test import RequestFactory
 
+from dlcdb.core.models import Device
+from dlcdb.tenants.middleware import CurrentTenantMiddleware
 from dlcdb.tenants.models import Tenant
-from dlcdb.tenants.shortcuts import get_current_tenant
+from dlcdb.tenants.shortcuts import get_user_tenants, limit_tenant_field, tenant_scoped_queryset
 
 pytestmark = pytest.mark.django_db
 
 
-def _request(user):
-    request = RequestFactory().get("/")
-    request.user = user
-    # Cookie storage needs no session, unlike the default fallback storage.
-    request._messages = CookieStorage(request)
-    return request
-
-
-def _errors(request):
-    return [str(message) for message in get_messages(request)]
+@pytest.fixture(autouse=True)
+def media_root(settings, tmp_path):
+    """Device.save() writes a QR code image; keep it out of the real media directory."""
+    settings.MEDIA_ROOT = tmp_path
 
 
 @pytest.fixture
@@ -44,25 +37,22 @@ def member():
     return _make
 
 
-def test_anonymous_has_no_tenant_and_no_message():
-    request = _request(AnonymousUser())
-    assert get_current_tenant(request) is None
-    assert _errors(request) == []
+def _request(tenants):
+    request = RequestFactory().get("/")
+    request.tenants = tenants
+    return request
 
 
-def test_superuser_has_no_tenant_and_no_message(tenant, member):
-    user = member(tenant)
-    user.is_superuser = True
-    user.save()
-    request = _request(user)
-    assert get_current_tenant(request) is None
-    assert _errors(request) == []
+def test_anonymous_user_has_no_tenants():
+    assert get_user_tenants(AnonymousUser()) == ()
 
 
-def test_exactly_one_matching_tenant_is_returned(tenant, member):
-    request = _request(member(tenant))
-    assert get_current_tenant(request) == tenant
-    assert _errors(request) == []
+def test_user_without_matching_tenant_has_no_tenants(member):
+    assert get_user_tenants(member()) == ()
+
+
+def test_exactly_one_matching_tenant(tenant, member):
+    assert get_user_tenants(member(tenant)) == (tenant,)
 
 
 def test_one_tenant_via_two_groups_still_counts_once(tenant, member):
@@ -70,34 +60,82 @@ def test_one_tenant_via_two_groups_still_counts_once(tenant, member):
     second_group = Group.objects.create(name="second-group")
     tenant.groups.add(second_group)
     user.groups.add(second_group)
-    request = _request(user)
-    assert get_current_tenant(request) == tenant
+
+    assert get_user_tenants(user) == (tenant,)
 
 
-def test_no_matching_tenant_yields_none_with_one_message(member):
-    request = _request(member())
-    assert get_current_tenant(request) is None
-    # Called twice per request (e.g. middleware and a view): the message is not duplicated.
-    assert get_current_tenant(request) is None
-    errors = _errors(request)
-    assert len(errors) == 1
-    assert "Could not find a tenant" in errors[0]
+def test_several_matching_tenants_stay_ambiguous(tenant, member):
+    # Flexible tenants, step 1: several tenants still mean none.
+    other = Tenant.objects.create(name="Other tenant")
+
+    assert get_user_tenants(member(tenant, other)) == ()
 
 
-def test_two_matching_tenants_yield_none_with_a_message(tenant, member):
-    other = Tenant.objects.create(name="OtherTenant")
-    request = _request(member(tenant, other))
-    assert get_current_tenant(request) is None
-    errors = _errors(request)
-    assert len(errors) == 1
-    assert "multiple" in errors[0]
+def test_superuser_sees_every_tenant(tenant, member):
+    # Flexible tenants, step 1: superusers see every tenant, not only their groups'.
+    other = Tenant.objects.create(name="Other tenant")
+    user = member()
+    user.is_superuser = True
+    user.save()
+
+    assert set(get_user_tenants(user)) == {tenant, other}
 
 
-def test_a_lookup_error_is_reported_instead_of_raised(tenant, member):
-    """Regression: the error path used to raise itself (``messages.error`` without a request)."""
-    request = _request(member(tenant))
-    with patch.object(Tenant.objects, "filter", side_effect=RuntimeError("boom")):
-        assert get_current_tenant(request) is None
-    errors = _errors(request)
-    assert len(errors) == 1
-    assert "boom" in errors[0]
+def test_middleware_sets_tenants_and_no_tenant(tenant, member):
+    request = RequestFactory().get("/")
+    request.user = member(tenant)
+
+    CurrentTenantMiddleware(lambda request: None).process_request(request)
+
+    assert request.tenants == (tenant,)
+    assert not hasattr(request, "tenant")
+
+
+def test_scoped_queryset_keeps_only_devices_of_the_given_tenants(tenant):
+    other = Tenant.objects.create(name="Other tenant")
+    own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
+    Device.objects.create(edv_id="EDV-OTHER", tenant=other)
+    Device.objects.create(edv_id="EDV-NO-TENANT")
+
+    assert list(tenant_scoped_queryset(Device.objects.all(), _request((tenant,)))) == [own]
+    # Devices without tenant are never included, not even with every tenant.
+    assert set(tenant_scoped_queryset(Device.objects.all(), _request((tenant, other)))) == set(
+        Device.objects.exclude(tenant=None)
+    )
+
+
+def test_scoped_queryset_is_empty_without_tenants(tenant):
+    Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
+
+    assert not tenant_scoped_queryset(Device.objects.all(), _request(())).exists()
+
+
+def test_limit_tenant_field_with_one_tenant_preselects_the_only_option(tenant):
+    Tenant.objects.create(name="Other tenant")
+    field = forms.ModelChoiceField(queryset=Tenant.objects.all())
+
+    limit_tenant_field(field, (tenant,))
+
+    assert list(field.queryset) == [tenant]
+    assert field.initial == tenant
+    assert field.empty_label is None
+
+
+def test_limit_tenant_field_with_several_tenants_requires_a_choice(tenant):
+    other = Tenant.objects.create(name="Other tenant")
+    Tenant.objects.create(name="Foreign tenant")
+    field = forms.ModelChoiceField(queryset=Tenant.objects.all())
+
+    limit_tenant_field(field, (tenant, other))
+
+    assert set(field.queryset) == {tenant, other}
+    assert field.initial is None
+    assert field.empty_label is not None
+
+
+def test_limit_tenant_field_without_tenants_offers_nothing(tenant):
+    field = forms.ModelChoiceField(queryset=Tenant.objects.all())
+
+    limit_tenant_field(field, ())
+
+    assert not field.queryset.exists()

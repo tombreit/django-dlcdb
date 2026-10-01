@@ -15,8 +15,8 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
 from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.dataexchange.models import ImporterList
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 STATE_NO_RECORD = "no-record"
 STATE_CHOICES = [(STATE_NO_RECORD, _("No active record")), *Record.RECORD_TYPE_CHOICES]

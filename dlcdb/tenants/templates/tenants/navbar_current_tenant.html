@@ -3,29 +3,36 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+{% load i18n %}
 
-{% if request.user.is_superuser %}
-{# is_superuser: tenant unaware #}
-{% elif request.tenant %}
-<span 
+{% if request.tenants|length == 1 %}
+<span
     class="btn btn-secondary"
     style="cursor: default;"
-    title="Tenant: {{ request.tenant }}"
+    title="{% translate 'Tenant' %}: {{ request.tenants.0 }}"
 >
-    {{ request.tenant }}
+    {{ request.tenants.0 }}
+</span>
+{% elif request.tenants %}
+<span
+    class="btn btn-secondary"
+    style="cursor: default;"
+    title="{% translate 'Tenants' %}: {{ request.tenants|join:', ' }}"
+>
+    {% blocktranslate count counter=request.tenants|length %}{{ counter }} tenant{% plural %}{{ counter }} tenants{% endblocktranslate %}
 </span>
 {% else %}
-<a 
+<a
     href="{% url 'admin:tenants_tenant_changelist' %}"
     class="btn btn-warning"
-    title="Tenant: {{ request.tenant }}. Superusers are not tenant aware."
+    title="{% translate 'Your groups do not match exactly one tenant, so you see no devices.' %}"
 >
-    {{ "No tenant set!" }}
+    {% translate "No tenant set!" %}
 </a>
 {% endif %}
 
 {% if request.user.is_superuser %}
-<button 
+<button
     class="btn btn-danger"
     title="Superusers are not tenant aware"
 >

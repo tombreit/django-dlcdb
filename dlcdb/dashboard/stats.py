@@ -10,7 +10,6 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from dlcdb.core.models import (
-    Device,
     DeviceType,
     Record,
 )
@@ -40,14 +39,12 @@ def _to_html(fig):
     return pio.to_html(fig, full_html=False, include_plotlyjs=False, config=PLOTLY_CONFIG)
 
 
-def get_record_fraction_html(tenant=None):
+def get_record_fraction_html(*, tenants):
     """
     Returns a plotly HTML div showing the fraction of active records by type.
     """
     labels = ["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"]
-    base = Record.objects.filter(is_active=True)
-    if tenant:
-        base = base.filter(device__tenant=tenant)
+    base = Record.objects.filter(is_active=True, device__tenant__in=tenants)
 
     # "Verliehen" mirrors LentRecordManager's WHERE (core/models/prx_lentrecord.py):
     # active + lentable device, excluding removed/licence — NOT a pure record_type=LENT count.
@@ -84,11 +81,11 @@ def get_record_fraction_html(tenant=None):
     return _to_html(fig)
 
 
-def get_device_type_html(tenant=None):
+def get_device_type_html(*, tenants):
     """
     Returns a plotly HTML div showing device counts by type (>10 devices).
     """
-    count_filter = Q(device__tenant=tenant) if tenant else Q()
+    count_filter = Q(device__tenant__in=tenants)
     device_types_qs = (
         DeviceType.objects.annotate(count=Count("device", filter=count_filter)).exclude(count__lt=10).order_by("count")
     )
@@ -122,7 +119,7 @@ def get_device_type_html(tenant=None):
     return _to_html(fig)
 
 
-def get_record_timeline_html(tenant=None):
+def get_record_timeline_html(*, tenants):
     """
     Returns a plotly HTML div showing the number of devices with each record
     type (LENT, INROOM, REMOVED) active per month over time.
@@ -137,9 +134,7 @@ def get_record_timeline_html(tenant=None):
 
     # Fetch ALL record types — we need ORDERED/LOST too to know when
     # an INROOM/LENT period ends.
-    qs = Record.objects.all()
-    if tenant:
-        qs = qs.filter(device__tenant=tenant)
+    qs = Record.objects.filter(device__tenant__in=tenants)
     records = qs.order_by("device_id", "created_at").values_list("device_id", "record_type", "created_at")
 
     # Group records by device, derive active periods from consecutive records
@@ -230,37 +225,5 @@ def get_record_timeline_html(tenant=None):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         xaxis=dict(showgrid=False),
         yaxis=dict(gridcolor="rgba(0,0,0,0.06)", zeroline=False),
-    )
-    return _to_html(fig)
-
-
-def get_devices_by_series_data(tenant=None):
-    """
-    Returns a plotly HTML div showing device counts by series.
-    """
-    qs = Device.objects.all()
-    if tenant:
-        qs = qs.filter(tenant=tenant)
-    qs = qs.values("series").annotate(total=Count("series"))
-
-    labels = [elem["series"] for elem in qs]
-    counts = [elem["total"] for elem in qs]
-
-    fig = go.Figure(
-        go.Bar(
-            x=counts,
-            y=labels,
-            orientation="h",
-            marker=dict(
-                color=counts,
-                colorscale=[[0, COLORS["primary_light"]], [1, COLORS["primary"]]],
-                cornerradius=4,
-            ),
-        )
-    )
-    fig.update_layout(
-        **PLOTLY_LAYOUT,
-        height=max(250, len(labels) * 25),
-        margin=dict(l=10, r=10, t=10, b=10),
     )
     return _to_html(fig)

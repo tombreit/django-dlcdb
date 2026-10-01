@@ -19,8 +19,8 @@ from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.dataexchange.csv_export import csv_response
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
@@ -131,8 +131,6 @@ def device_add(request):
     form = DeviceForm(request.POST or None, request=request)
     if request.method == "POST" and form.is_valid():
         device = form.save(commit=False)
-        if not request.user.is_superuser:
-            device.tenant = getattr(request, "tenant", None)
         device.user, device.username = get_denormalized_user(request.user)
         device.save()
         messages.success(request, _("Device “%(device)s” was created.") % {"device": device})
@@ -162,8 +160,6 @@ def device_detail(request, pk):
         form = DeviceForm(request.POST, instance=device, request=request)
         if form.is_valid():
             saved_device = form.save(commit=False)
-            if not request.user.is_superuser:
-                saved_device.tenant = getattr(request, "tenant", None)
             saved_device.user, saved_device.username = get_denormalized_user(request.user)
             saved_device.save()
             messages.success(request, _("Device “%(device)s” was updated.") % {"device": saved_device})

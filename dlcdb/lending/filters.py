@@ -27,12 +27,16 @@ STATE_CHOICES = [
 def current_borrowers(request):
     """
     Persons who currently have an active lent record, scoped to the request's
-    tenant. Used to keep the person filter dropdown compact and relevant.
+    tenants. Used to keep the person filter dropdown compact and relevant.
     """
-    qs = Person.objects.filter(record__record_type=Record.LENT, record__is_active=True)
-    tenant = getattr(request, "tenant", None) if request else None
-    if tenant:
-        qs = qs.filter(record__device__tenant=tenant)
+    if request is None:
+        return Person.objects.none()
+    # One filter() call: all conditions apply to the same record.
+    qs = Person.objects.filter(
+        record__record_type=Record.LENT,
+        record__is_active=True,
+        record__device__tenant__in=request.tenants,
+    )
     return qs.distinct().order_by("last_name", "first_name")
 
 

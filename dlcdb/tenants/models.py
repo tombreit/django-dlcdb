@@ -6,11 +6,6 @@ from django.db import models
 from django.db.models.functions import Lower
 
 
-class TenantManager(models.Manager):
-    def get_current(self, request=None):
-        return self.get_current_tenant(request)
-
-
 class Tenant(models.Model):
     name = models.CharField(
         max_length=150,
@@ -53,8 +48,6 @@ class Tenant(models.Model):
     #         defaults=dict(abbreviation='IT'),
     #     )
     #     return obj.pk
-
-    objects = TenantManager()
 
     def __str__(self):
         return f"{self.name}"

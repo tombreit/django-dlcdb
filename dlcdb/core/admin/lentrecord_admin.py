@@ -39,6 +39,8 @@ session = SessionStore()
 
 @admin.register(LentRecord)
 class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
+    # Records carry no tenant of their own; they are scoped through their device.
+    tenant_lookup = "device__tenant"
     form = LentRecordAdminForm
     change_form_template = "core/lentrecord/change_form.html"
     change_list_template = "core/lentrecord/change_list.html"

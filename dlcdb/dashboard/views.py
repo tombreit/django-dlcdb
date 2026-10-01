@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from dlcdb.core.models import Inventory, LentRecord, Record
 from dlcdb.core.utils.helpers import get_icon_for_class
 from dlcdb.core.utils.htmx import htmx_login_required
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 from . import stats
 from .search import run_search
@@ -39,20 +40,18 @@ TENANT_DISTINCT = {"core.room", "core.devicetype"}
 NO_BADGE_MODELS = {"core.device", "core.lentrecord", "core.licencerecord"}
 
 
-def _get_tenant_queryset(model_name, ModelClass, tenant):
-    if tenant is None:
-        return ModelClass.objects.all()
-
+def _get_tenant_queryset(model_name, ModelClass, request):
     filter_field = TENANT_FILTERS.get(model_name)
     if filter_field is None:
+        # Not tenant-aware (e.g. inventories, smallstuff).
         return ModelClass.objects.all()
 
     # Distinctness is applied in _build_tile via Count(distinct=...), not here,
     # so it is expressed once at the aggregation.
-    return ModelClass.objects.filter(**{filter_field: tenant})
+    return tenant_scoped_queryset(ModelClass.objects.all(), request, tenant_field=filter_field)
 
 
-def _build_tile(*, model_name, url, tenant, base_params=None):
+def _build_tile(*, model_name, url, request, base_params=None):
     """Build the context dict for a single dashboard tile.
 
     ``base_params`` are the GET parameters the tile's target needs to show the
@@ -60,11 +59,11 @@ def _build_tile(*, model_name, url, tenant, base_params=None):
     LOST). The note filter is appended to them when the badge is shown.
     """
     ModelClass = apps.get_model(model_name)
-    qs = _get_tenant_queryset(model_name, ModelClass, tenant)
+    qs = _get_tenant_queryset(model_name, ModelClass, request)
 
     # Collapse the per-tile counts (total, note badge, lent) into a single
     # aggregate query instead of 2-3 separate .count() scans over the same rows.
-    distinct = model_name in TENANT_DISTINCT and tenant is not None
+    distinct = model_name in TENANT_DISTINCT
     agg = {"total": Count("pk", distinct=distinct)}
     if hasattr(ModelClass, "note"):
         agg["with_note"] = Count("pk", filter=~Q(note__exact=""), distinct=distinct)
@@ -106,7 +105,7 @@ def _build_tile(*, model_name, url, tenant, base_params=None):
 def index(request):
     """
     Dashboard on the theme frontend: model tiles (counts + note badges) and
-    Plotly stats, scoped to the current tenant, plus the global search.
+    Plotly stats, scoped to the user's tenants, plus the global search.
 
     Search results are served from this same URL so that ``hx-push-url`` puts
     ``/dashboard/?q=…`` in the address bar: a search is then shareable and
@@ -127,8 +126,6 @@ def index(request):
 
     if request.htmx:
         return TemplateResponse(request, "dashboard/index.html#search-results", search_context)
-
-    tenant = request.tenant
 
     # (model, url name, GET params the target needs to show what the tile counts).
     # Every target is a frontend view: the tiles are the last place that linked
@@ -151,17 +148,16 @@ def index(request):
     # Deliberately not permission-filtered: every tile renders, and a user who
     # may not open its target gets the ordinary 403 on click.
     tiles = [
-        _build_tile(model_name=name, url=url, tenant=tenant, base_params=params) for name, url, params in tile_specs
+        _build_tile(model_name=name, url=url, request=request, base_params=params) for name, url, params in tile_specs
     ]
 
     # Overdue tile: same predicate as the lending list's "state=overdue" filter
     # (lending/filters.py), so the count always matches the linked list.
-    overdue_qs = LentRecord.objects.filter(
-        lent_desired_end_date__lte=date.today(),
-        lent_end_date__isnull=True,
+    overdue_qs = tenant_scoped_queryset(
+        LentRecord.objects.filter(lent_desired_end_date__lte=date.today(), lent_end_date__isnull=True),
+        request,
+        tenant_field="device__tenant",
     )
-    if tenant:
-        overdue_qs = overdue_qs.filter(device__tenant=tenant)
     tiles.insert(
         2,
         {
@@ -177,9 +173,9 @@ def index(request):
 
     context = {
         "tiles": tiles,
-        "record_fraction_html": stats.get_record_fraction_html(tenant=tenant),
-        "device_type_html": stats.get_device_type_html(tenant=tenant),
-        "record_timeline_html": stats.get_record_timeline_html(tenant=tenant),
+        "record_fraction_html": stats.get_record_fraction_html(tenants=request.tenants),
+        "device_type_html": stats.get_device_type_html(tenants=request.tenants),
+        "record_timeline_html": stats.get_record_timeline_html(tenants=request.tenants),
         **search_context,
     }
     return TemplateResponse(request, "dashboard/index.html", context)

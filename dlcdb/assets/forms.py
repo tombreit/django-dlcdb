@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Manufacturer, Record, Room, Supplier
+from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.widgets import DevicePickerMultiField, IconPickerWidget, TomSelectWidget
 
@@ -116,25 +117,11 @@ class DeviceForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.request = request
 
-        tenant_field = self.fields["tenant"]
-        # Superusers choose freely among all tenants. The field stays required
-        # (model blank=False), as in the admin: a device without a tenant is
-        # invisible to every tenant-scoped user.
-        if not request.user.is_superuser:
-            # Non-superusers always SEE their tenant but cannot change it. The
-            # tenant is authoritative from the request and (re)assigned on save
-            # (see the views), so `disabled` is a display guard: Django ignores
-            # any submitted value and keeps the initial, meaning a crafted POST
-            # cannot reassign the tenant. Narrow the queryset to just the
-            # relevant tenant so the disabled <select> shows that one option
-            # rather than the full tenant list.
-            current_tenant = self.instance.tenant if self.instance.pk else getattr(request, "tenant", None)
-            tenant_field.disabled = True
-            tenant_field.required = False
-            tenant_field.initial = current_tenant
-            tenant_field.queryset = (
-                tenant_field.queryset.filter(pk=current_tenant.pk) if current_tenant else tenant_field.queryset.none()
-            )
+        # Only the user's tenants are offered, so a crafted foreign tenant
+        # fails validation; with a single tenant it is the only, preselected
+        # option. The field stays required (model blank=False), as in the
+        # admin: a device without a tenant is invisible to everyone.
+        limit_tenant_field(self.fields["tenant"], request.tenants)
 
         add_bootstrap_classes(self)
 

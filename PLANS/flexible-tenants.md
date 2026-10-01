@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Flexible tenants: users in several tenants, visibility only through groups
 
-**Status:** design document; step 0 implemented (2026-10-01), steps 1–3 open. Living
+**Status:** design document; steps 0 and 1 implemented (2026-10-01), steps 2–3 open. Living
 document: update it when decisions or the code change. Last revised 2026-10-01 (review against
 the code on branch `flexible-tenants`; "all tenants" permission dropped in favour of plain
 group attachment).
@@ -260,7 +260,19 @@ view we write (same pattern as `DeviceAdmin.relocate` → `core/views/relocate_v
 - Operators assign the existing orphans (likely mostly licences, see *Current state*) with the
   action: one run per target tenant, unchecking devices that belong elsewhere.
 
-### Step 1: prep, tuple model with today's rules (no migration, shippable alone)
+### Step 1: prep, tuple model with today's rules (implemented 2026-10-01)
+
+Deviations from the list below, found during implementation:
+- `inventory/partials/device_search_htmx.html` keeps its tenant column for everyone: with
+  `device_search_tenant_aware = False` the search spans all tenants, so even single-tenant users
+  need it.
+- `dashboard/views.py:_get_tenant_queryset` stays (now taking `request`): it separates the
+  tenant-aware tile models from the others.
+- The grep gate below also matches the unrelated `createsuperuser` error message in
+  `accounts/models.py`.
+- Test fixtures: `BaseTest._create_device` and the conftest device fixtures now give devices a
+  tenant (superusers no longer see devices without one); tests about orphans use
+  `Device.objects.create()` directly.
 
 `get_user_tenants` reproduces today's visibility with two marked lines, removed in step 2:
 

@@ -28,6 +28,8 @@ Damit ein Device eine Lizenz ist/wird:
 - Ein Device muss einen Record (z.B. *Lokalisiert im Lizenzraum*) haben
 - Diese Eigenschaften werden beim Eintrag über die Lizenzverwaltung automatisch gesetzt.
 
+Wie Geräte gehören Lizenzen zu einem Tenant: Die Lizenzverwaltung zeigt nur die Lizenzen der eigenen Tenants, und eine neue Lizenz braucht einen Tenant (siehe [Tenants](berechtigungen.md#tenants)).
+
 Eine Lizenz kann:
 
 - Eine Liste von Emailadressen (getrennt durch Komma) haben, die zum aktuellen Stand (Lizenz ist eingetragen, Lizenz läuft bald ab, Lizenz ist abgelaufen) automatisch benachrichtigt werden.

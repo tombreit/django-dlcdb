@@ -21,6 +21,7 @@ from django_htmx.http import HttpResponseClientRedirect
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, LicenceRecord, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
 
@@ -36,8 +37,12 @@ LICENSES_PER_PAGE = 25
 def index(request):
     template = "licenses/index.html#licenses-list" if request.htmx else "licenses/index.html"
 
-    base_qs = LicenceRecord.objects.annotate(
-        device_human_title=Subquery(LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
+    base_qs = tenant_scoped_queryset(
+        LicenceRecord.objects.annotate(
+            device_human_title=Subquery(LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
+        ),
+        request,
+        tenant_field="device__tenant",
     )
 
     # Always supply a default ordering so a bare page load is deterministic;
@@ -80,13 +85,15 @@ def edit(request, license_id):
         template = "licenses/form.html"
 
     # Fetch the concrete Device model directly, as django-simple-history
-    # does not support proxy models for the history.
-    device = get_object_or_404(Device, id=license_id)
+    # does not support proxy models for the history. Only licences of the
+    # user's tenants; anything else is a 404.
+    device = get_object_or_404(tenant_scoped_queryset(Device.objects.filter(is_licence=True), request), id=license_id)
 
     if request.method == "POST":
         form = LicenseForm(
             request.POST,
             instance=device,
+            tenants=request.tenants,
         )
 
         if form.is_valid():
@@ -113,6 +120,7 @@ def edit(request, license_id):
         # GET request
         form = LicenseForm(
             instance=device,
+            tenants=request.tenants,
         )
 
     # Determine if calendar URL should be shown (check for relevant dates)
@@ -145,6 +153,7 @@ def new(request):
     if request.method == "POST":
         form = LicenseForm(
             request.POST,
+            tenants=request.tenants,
         )
 
         if form.is_valid():
@@ -189,7 +198,7 @@ def new(request):
     else:
         # Set default subscribers
         default_subscribers = LicensesConfiguration.load().default_subscribers.all()
-        form = LicenseForm(initial={"subscribers": default_subscribers})
+        form = LicenseForm(initial={"subscribers": default_subscribers}, tenants=request.tenants)
 
     return TemplateResponse(
         request,
@@ -204,7 +213,9 @@ def new(request):
 
 @permission_required("core.view_licencerecord", raise_exception=True)
 def history(request, license_id):
-    device = get_object_or_404(LicenseAsset, id=license_id)
+    device = get_object_or_404(
+        tenant_scoped_queryset(LicenseAsset.objects.filter(is_licence=True), request), id=license_id
+    )
     device_history = device.history.all()
 
     # subscription_model = device.subscription_set.model

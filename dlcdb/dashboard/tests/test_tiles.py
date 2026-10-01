@@ -9,6 +9,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LostRecord, Record, Room
+from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -25,7 +26,9 @@ class DashboardTileTests(TestCase):
         # A device type with a note, so the note badge renders too.
         cls.device_type = DeviceType.objects.create(name="Notebook", prefix="NTB", note="a note")
         cls.room = Room.objects.create(number="T1.01")
-        device = Device.objects.create(edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type)
+        device = Device.objects.create(
+            edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type, tenant=Tenant.objects.create(name="Tiles")
+        )
         InRoomRecord.objects.create(device=device, room=cls.room)
 
     def setUp(self):
@@ -39,6 +42,20 @@ class DashboardTileTests(TestCase):
         self.assertContains(response, "dashboard-tile-count")
         self.assertContains(response, "dashboard-tile-label")
         self.assertContains(response, "dashboard-tile-icon")
+
+    def test_counts_are_scoped_to_the_users_tenants(self):
+        """A user without tenant sees zeros, not the global numbers."""
+
+        def device_tile_count(response):
+            return next(tile["count"] for tile in response.context["tiles"] if tile["url"] == "assets:device_index")
+
+        self.assertEqual(device_tile_count(self.client.get(reverse("dashboard:index"))), 1)
+
+        no_tenant = get_user_model().objects.create_user(
+            username="no-tenant", email="no-tenant@example.com", password="secret"
+        )
+        self.client.force_login(no_tenant)
+        self.assertEqual(device_tile_count(self.client.get(reverse("dashboard:index"))), 0)
 
     def test_the_note_badge_is_targetable(self):
         """Rendered only for a model with notes, hence the device type seeded above."""
@@ -68,7 +85,12 @@ class DashboardTileTargetTests(TestCase):
 
         # A lost record carrying a note, so the Lost tile shows its badge and
         # therefore appends the note filter to its link.
-        device = Device.objects.create(edv_id="TILE-LOST", sap_id="7002-1", device_type=cls.device_type)
+        device = Device.objects.create(
+            edv_id="TILE-LOST",
+            sap_id="7002-1",
+            device_type=cls.device_type,
+            tenant=Tenant.objects.create(name="Targets"),
+        )
         InRoomRecord.objects.create(device=device, room=cls.room)
         LostRecord.objects.create(device=device, note="Not at its desk")
 

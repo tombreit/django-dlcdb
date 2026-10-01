@@ -10,7 +10,7 @@ it is flagged ``is_lentable`` and it is not a licence.
 """
 
 from dlcdb.core import lifecycle
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.pickers import PickerSource, register_picker_source
 
 

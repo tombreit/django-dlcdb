@@ -5,12 +5,13 @@
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import InRoomRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.tenants.models import Tenant
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -166,3 +167,71 @@ class LicensesPermissionTests(BaseTest):
         content = self.client.get(reverse("licenses:index")).content.decode()
 
         self.assertNotIn(reverse("licenses:new"), content)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class LicensesTenantScopingTests(BaseTest):
+    """Licences are scoped to the user's tenants like devices."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.room = Room.objects.create(number="C3.01", nickname="Server")
+        cls.own_tenant = Tenant.objects.create(name="Own tenant")
+        cls.foreign_tenant = Tenant.objects.create(name="Foreign tenant")
+
+        group = Group.objects.create(name="licence-managers")
+        cls.own_tenant.groups.add(group)
+        cls.user = get_user_model().objects.create_user(
+            username="licence-manager", email="licence-manager@example.com", password="secret"
+        )
+        cls.user.groups.add(group)
+        cls.user.user_permissions.add(
+            *Permission.objects.filter(
+                codename__in=["view_licencerecord", "change_licencerecord", "add_licencerecord"],
+                content_type__app_label="core",
+            )
+        )
+
+        cls.own = cls._create_licence(series="Own Suite", sap_id="LIC-OWN", tenant=cls.own_tenant)
+        cls.foreign = cls._create_licence(series="Foreign Suite", sap_id="LIC-FOREIGN", tenant=cls.foreign_tenant)
+
+    @classmethod
+    def _create_licence(cls, *, series, sap_id, tenant):
+        device = cls()._create_device(sap_id=sap_id, tenant=tenant)
+        device.is_licence = True
+        device.series = series
+        device.save()
+        InRoomRecord.objects.create(device=device, room=cls.room)
+        return device
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_list_shows_only_own_licences(self):
+        response = self.client.get(reverse("licenses:index"))
+        self.assertContains(response, "Own Suite")
+        self.assertNotContains(response, "Foreign Suite")
+
+    def test_edit_and_history_of_a_foreign_licence_are_404(self):
+        htmx = {"HX-Request": "true"}
+        self.assertEqual(self.client.get(reverse("licenses:edit", args=[self.own.pk]), headers=htmx).status_code, 200)
+        self.assertEqual(
+            self.client.get(reverse("licenses:edit", args=[self.foreign.pk]), headers=htmx).status_code, 404
+        )
+        self.assertEqual(self.client.get(reverse("licenses:history", args=[self.own.pk])).status_code, 200)
+        self.assertEqual(self.client.get(reverse("licenses:history", args=[self.foreign.pk])).status_code, 404)
+
+    def test_edit_of_a_device_that_is_no_licence_is_404(self):
+        device = self._create_device(sap_id="NO-LICENCE", tenant=self.own_tenant)
+        response = self.client.get(reverse("licenses:edit", args=[device.pk]), headers={"HX-Request": "true"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_new_licence_requires_one_of_the_users_tenants(self):
+        url = reverse("licenses:new")
+        htmx = {"HX-Request": "true"}
+
+        missing = self.client.post(url, {"series": "New Suite"}, headers=htmx)
+        self.assertIn("tenant", missing.context["form"].errors)
+
+        foreign = self.client.post(url, {"series": "New Suite", "tenant": self.foreign_tenant.pk}, headers=htmx)
+        self.assertIn("tenant", foreign.context["form"].errors)

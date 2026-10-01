@@ -14,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, DeviceType, Person
+from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.widgets import TomSelectMultipleWidget
 
 from .subscribers import manage_subscribers
@@ -26,11 +27,14 @@ class LicenseForm(forms.ModelForm):
         help_text=_("Check this box if the contract has been terminated."),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, tenants, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Check if this is an edit form (instance exists)
         self.is_edit = self.instance and self.instance.pk is not None
+
+        # Only the user's tenants; required, so no licence ends up without one.
+        limit_tenant_field(self.fields["tenant"], tenants)
 
         # Limit device-type choices to "License-type" choices
         self.fields["device_type"].queryset = DeviceType.objects.filter(
@@ -63,6 +67,7 @@ class LicenseForm(forms.ModelForm):
             Row(
                 Column("sap_id", css_class="col-md-3"),
                 Column("subscribers", css_class="col-md-5"),
+                Column("tenant", css_class="col-md-4"),
                 # Column("contact_person_internal", css_class="col-md-4"),
             ),
             Div(HTML("<hr>")),
@@ -93,7 +98,9 @@ class LicenseForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if not any(cleaned_data.values()):
+        # The tenant is always set (and preselected for single-tenant users),
+        # so it does not count as content.
+        if not any(value for name, value in cleaned_data.items() if name != "tenant"):
             raise ValidationError(_("At least one field must be filled."))
 
     def save(self, commit=True):
@@ -130,6 +137,7 @@ class LicenseForm(forms.ModelForm):
             "note",
             "device_type",
             "contract_termination",
+            "tenant",
             # "contact_person_internal",  # better: use the existing note fields
         ]
         labels = {

@@ -32,11 +32,11 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.assets.filters import DeviceFilter
 from dlcdb.core.models import Device, LentRecord, Person, Room
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.lending.filters import LentRecordFilter
 from dlcdb.persons.filters import PersonFilter
 from dlcdb.rooms.filters import RoomFilter
 from dlcdb.smallstuff.models import AssignedThing
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.lifecycle_display import active_record_color_case
 
 # Rows shown per group before the "show all" link takes over. The global search

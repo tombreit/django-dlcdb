@@ -7,8 +7,9 @@ import json
 import pytest
 
 from dlcdb.core.lifecycle import IllegalTransition
-from dlcdb.core.models import InRoomRecord, Inventory, Note, Record
+from dlcdb.core.models import Device, InRoomRecord, Inventory, Note, Record
 from dlcdb.inventory.utils import update_inventory_note
+from dlcdb.tenants.models import Tenant
 
 
 @pytest.mark.django_db
@@ -27,39 +28,54 @@ def test_inventory_only_one_active_inventory(inventory_1, inventory_2, inventory
 
 
 @pytest.mark.django_db
-def test_device_in_inventory_devices_for_room(device_1, room_1):
+def test_device_in_inventory_devices_for_room(device_1, room_1, tenant):
     _device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1)
-    devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(
-        room_pk=room_1.pk, tenant=None, is_superuser=True
-    )
+    devices_in_room = Inventory.objects.tenant_aware_device_objects_for_room(room_1.pk, tenants=(tenant,))
     assert device_1 in devices_in_room
+    assert not Inventory.objects.tenant_aware_device_objects_for_room(room_1.pk, tenants=()).exists()
 
 
 @pytest.mark.django_db
-def test_if_device_counts_as_inventorized(device_1, device_2, room_1, room_2, inventory_1):
+def test_if_device_counts_as_inventorized(device_1, device_2, room_1, room_2, inventory_1, tenant):
+    tenants = (tenant,)
     device_record_1 = InRoomRecord.objects.create(device=device_1, room=room_1, inventory=inventory_1)
-    assert device_record_1.device in Inventory.objects.inventory_relevant_devices(is_superuser=True)
+    assert device_record_1.device in Inventory.objects.inventory_relevant_devices(tenants=tenants)
 
     device_record_2 = InRoomRecord.objects.create(device=device_1, room=room_2, inventory=None)
-    assert device_record_2.device in Inventory.objects.inventory_relevant_devices(is_superuser=True)
+    assert device_record_2.device in Inventory.objects.inventory_relevant_devices(tenants=tenants)
 
     test_dict_true = {
         "number": room_2.number,
         "room_devices_count": 1,
     }
-    assert test_dict_true in Inventory.objects.tenant_aware_room_objects().values("number", "room_devices_count")
+    assert test_dict_true in Inventory.objects.tenant_aware_room_objects(tenants=tenants).values(
+        "number", "room_devices_count"
+    )
 
     test_dict_false = {
         "number": room_2.number,
         "room_devices_count": 2,
     }
-    assert test_dict_false not in Inventory.objects.tenant_aware_room_objects().values("number", "room_devices_count")
+    assert test_dict_false not in Inventory.objects.tenant_aware_room_objects(tenants=tenants).values(
+        "number", "room_devices_count"
+    )
+
+
+@pytest.mark.django_db
+def test_inventory_relevant_devices_respects_device_search_tenant_aware(device_1, inventory_1, tenant):
+    foreign = Device.objects.create(sap_id="999", tenant=Tenant.objects.create(name="Foreign tenant"))
+
+    assert set(Inventory.objects.inventory_relevant_devices(tenants=(tenant,))) == {device_1}
+
+    inventory_1.device_search_tenant_aware = False
+    inventory_1.save()
+    assert set(Inventory.objects.inventory_relevant_devices(tenants=(tenant,))) == {device_1, foreign}
 
 
 @pytest.mark.django_db
 def test_inventory_progress_without_relevant_devices_is_zero(inventory_1):
     """Regression: an empty inventory used to divide by zero."""
-    progress = inventory_1.get_inventory_progress(tenant=None, is_superuser=True)
+    progress = inventory_1.get_inventory_progress(tenants=())
     assert (progress.done_percent, progress.all_devices_count, progress.inventorized_devices_count) == (0, 0, 0)
 
 

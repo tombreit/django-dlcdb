@@ -7,7 +7,7 @@ import logging
 import re
 from collections import namedtuple
 from collections.abc import Generator
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from io import BytesIO
 
 from django.conf import settings
@@ -107,18 +107,3 @@ def rollback_atomic() -> Generator[None, None, None]:
             raise DoRollback()
     except DoRollback:
         pass
-
-
-def get_superuser_list(listing: list, list_item: str, is_superuser: bool) -> list:
-    """
-    Adds or removes 'tenant' from a list based on is_superuser.
-    """
-
-    with suppress(ValueError):
-        if is_superuser:
-            if list_item not in listing:
-                listing.append(list_item)
-        else:
-            listing.remove(list_item)
-
-    return listing

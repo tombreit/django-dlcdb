@@ -2,56 +2,39 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.contrib import messages
+"""
+Tenant scoping: the single place that turns a user's groups into the tenants
+they may see, and the helpers that apply this to querysets and form fields.
+The middleware stores the result as ``request.tenants``.
+"""
+
+from .models import Tenant
 
 
-def get_current_tenant(request):
+def get_user_tenants(user):
+    """Tenants whose groups the user belongs to; several tenants mean their union."""
+    if not user.is_authenticated:
+        return ()
+    # Flexible tenants, step 1 only (PLANS/flexible-tenants.md): superusers
+    # see every tenant, several matching tenants stay ambiguous.
+    if user.is_superuser:
+        return tuple(Tenant.objects.all())
+    tenants = tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
+    return tenants if len(tenants) == 1 else ()
+
+
+def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):
     """
-    Get current ``Tenant`` object based on request.user.groups.
+    Restrict ``queryset`` to the request's tenants. ``tenant_field`` is the
+    lookup path to the tenant: ``"tenant"`` for devices, ``"device__tenant"``
+    for records. Objects without a tenant are never included.
     """
+    return queryset.filter(**{f"{tenant_field}__in": request.tenants})
 
-    from .models import Tenant
 
-    tenant = request_user_groups = _tenant = None
-    _tenant_count = 0
-
-    if request.user.is_authenticated and not request.user.is_superuser:
-        try:
-            request_user_groups = request.user.groups.all()
-            _tenant = (
-                Tenant.objects.filter(groups__in=request_user_groups)
-                # Multiple tenent matches ares possible, so we could not use .get()
-                # https://docs.djangoproject.com/en/3.2/ref/models/querysets/#get
-                .distinct()
-            )
-            _tenant_count = _tenant.count()
-        except Exception as e:
-            messages.error(request, f"Something went wrong getting a tenant from a request! Error was: {e}")
-            return None
-
-        if _tenant_count >= 2:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                f"Expected one matched tenant, but got multiple: '{_tenant}'. Tenant-scoped querysets will not return any objects!",
-            )
-        elif _tenant_count == 0:
-            # Check if this message already exists to avoid duplicates
-            error_msg = f"Could not find a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!"
-            existing_messages = [str(msg) for msg in messages.get_messages(request)]
-            if error_msg not in existing_messages:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    error_msg,
-                )
-        elif _tenant_count == 1:
-            tenant = _tenant.get()
-        else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                f"Something went wrong getting a tenant for user '{request.user}' with groups '{request_user_groups}'. Tenant-scoped querysets will not return any objects!",
-            )
-
-    return tenant
+def limit_tenant_field(field, tenants):
+    """Offer only the given tenants; with exactly one, preselect it as the only option."""
+    field.queryset = Tenant.objects.filter(pk__in=[tenant.pk for tenant in tenants])
+    if len(tenants) == 1:
+        field.initial = tenants[0]
+        field.empty_label = None

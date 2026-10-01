@@ -165,8 +165,10 @@ Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt un
 **Zuordnung zum Benutzer.** Ein Tenant besitzt eine oder mehrere **Gruppen** (*Start › Tenants › Tenant › Gruppen*). Der Tenant eines Benutzers ergibt sich aus dessen Gruppenmitgliedschaften:
 
 - Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
-- Kein oder mehr als ein Tenant passt → der Benutzer hat keinen Tenant. Die Navigation zeigt *No tenant set!*, und ein Nicht-Superuser sieht **keine Geräte**, bis die Gruppenzuordnung stimmt.
-- Superuser haben nie einen Tenant: Sie sehen die Geräte aller Tenants, sehen in der Geräteliste die Spalte *Mandant* und dürfen als einzige den Tenant eines Geräts ändern (z.B. beim [Umziehen](umziehen.md)).
+- Kein oder mehr als ein Tenant passt → der Benutzer hat keinen Tenant. Die Navigation zeigt *No tenant set!*, und ein Nicht-Superuser sieht **keine Geräte** und kann keine anlegen, bis die Gruppenzuordnung stimmt.
+- Superuser sehen die Geräte aller Tenants (nicht aber [Geräte ohne Tenant](#geräte-ohne-tenant)). Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*. Nur Superuser können den Tenant eines Geräts ändern (z.B. beim [Umziehen](umziehen.md)).
+
+Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt.
 
 Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
 
@@ -177,7 +179,7 @@ Nicht auf den Tenant eingeschränkt sind:
 
 ### Geräte ohne Tenant
 
-Jedes Gerät braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte ohne Tenant sieht nur ein Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!*. Zum Zuordnen:
+Jedes Gerät braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!*. Zum Zuordnen:
 
 1. Dem Link *Assign a tenant?* folgen (*Start › Tenants › Tenant*).
 2. Den Ziel-Tenant auswählen und die Aktion *Assign devices without tenant* ausführen.

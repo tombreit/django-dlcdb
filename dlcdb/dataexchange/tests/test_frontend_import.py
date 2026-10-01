@@ -235,17 +235,17 @@ def test_non_superuser_cannot_spoof_tenant(client, tenant, tenant_user):
         {"file": _upload_file("devices.correct.csv"), "tenant": other_tenant.pk},
     )
 
+    # Only the user's own tenant is offered: the foreign one fails validation.
     assert response.status_code == 200
-    # The disabled tenant field ignores the submitted value and the view forces
-    # the request tenant on the audit row.
-    assert ImporterList.objects.get().tenant == tenant
+    assert "tenant" in response.context["form"].errors
+    assert not ImporterList.objects.exists()
 
 
 @_PLAIN_STATICFILES
 def test_confirm_without_history_permission_redirects_to_device_list(client, tenant, tenant_user):
     """Importing needs only core.add_device; the import history would be a 403."""
     client.force_login(tenant_user)
-    client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv")})
+    client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk})
     importer_list = ImporterList.objects.get()
 
     response = client.post(reverse(CONFIRM_URL, args=[importer_list.pk]))
@@ -269,6 +269,18 @@ def test_non_superuser_cannot_confirm_foreign_tenant_row(client, superuser_clien
 
     assert response.status_code == 404
     assert Device.objects.count() == 0
+
+
+def test_user_without_tenant_cannot_confirm_an_import_without_tenant(client):
+    # Formerly filtered by tenant=None, which matched exactly these imports.
+    importer_list = ImporterList.objects.create(file="imported_csv/no-tenant.csv")
+    user = CustomUser.objects.create_user(email="lost@example.com", password="secret", username="lost")
+    user.user_permissions.add(Permission.objects.get(codename="add_device", content_type__app_label="core"))
+    client.force_login(user)
+
+    response = client.post(reverse(CONFIRM_URL, args=[importer_list.pk]))
+
+    assert response.status_code == 404
 
 
 @_PLAIN_STATICFILES

@@ -9,9 +9,11 @@ via their navigation.py files.
 """
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.test import TestCase, override_settings
 from django.urls import reverse
+
+from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -98,3 +100,36 @@ class MainNavPermissionTests(TestCase):
         response = self.client.get(reverse("dashboard:index"))
 
         self.assertIn("licenses:index", [item["url"] for item in response.context["nav_items_main"]])
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class TenantBadgeNavbarTests(TestCase):
+    """The user menu names the user's tenant, counts several, or warns about none."""
+
+    def _login(self, *tenants, superuser=False):
+        create = get_user_model().objects.create_superuser if superuser else get_user_model().objects.create_user
+        user = create(username="badge-user", email="badge@example.com", password="secret")
+        for tenant in tenants:
+            group = Group.objects.create(name=f"group-of-{tenant.name}")
+            tenant.groups.add(group)
+            user.groups.add(group)
+        self.client.force_login(user)
+
+    def test_a_single_tenant_is_named(self):
+        self._login(Tenant.objects.create(name="Physics"))
+        response = self.client.get(reverse("dashboard:index"))
+        self.assertContains(response, ">Physics</span>")
+
+    def test_several_tenants_are_counted(self):
+        # Flexible tenants, step 1: only superusers see several tenants (all of them).
+        Tenant.objects.create(name="Physics")
+        Tenant.objects.create(name="Chemistry")
+        self._login(superuser=True)
+        response = self.client.get(reverse("dashboard:index"))
+        self.assertContains(response, "2 tenants")
+        self.assertContains(response, "Chemistry, Physics")
+
+    def test_no_tenant_is_a_warning(self):
+        self._login()
+        response = self.client.get(reverse("dashboard:index"))
+        self.assertContains(response, "No tenant set!")

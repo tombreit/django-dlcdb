@@ -61,7 +61,7 @@ def _viewer_client(client, tenant, *, codenames=("view_importerlist",)):
 
 @_PLAIN_STATICFILES
 def test_index_lists_imports_with_status_and_device_count(superuser_client, confirmed_import):
-    unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv")
+    unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv", tenant=confirmed_import.tenant)
 
     with translation.override("en"):
         response = superuser_client.get(reverse(INDEX_URL))
@@ -86,7 +86,7 @@ def test_index_htmx_response_is_fragment_only(superuser_client, confirmed_import
 
 @_PLAIN_STATICFILES
 def test_status_filter_and_search(superuser_client, confirmed_import):
-    unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv")
+    unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv", tenant=confirmed_import.tenant)
     url = reverse(INDEX_URL)
 
     def listed(params):

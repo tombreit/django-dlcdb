@@ -22,7 +22,6 @@ from dlcdb.tenants.admin import TenantScopedAdmin
 
 from .. import lifecycle
 from ..models import Device, Record
-from ..utils.helpers import get_superuser_list
 from .base_admin import CustomBaseModelAdmin, SoftDeleteModelAdmin, get_has_note_badge
 from .filters.duplicates_filter import DuplicateFilter
 from .filters.recordtype_filter import HasRecordFilter
@@ -201,8 +200,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     )
 
     def get_list_filter(self, request):
-        list_filter = super().get_list_filter(request)
-        return get_superuser_list(list_filter, "tenant", request.user.is_superuser)
+        list_filter = list(super().get_list_filter(request))
+        # The tenant only tells devices apart for users with several tenants.
+        if len(request.tenants) > 1:
+            list_filter.append(("tenant", admin.RelatedOnlyFieldListFilter))
+        return list_filter
 
     def get_list_display(self, request):
         """
@@ -211,14 +213,17 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         """
         self.request = request
 
-        list_display = super().get_list_display(request)
+        # A copy: the class attribute must not change between requests.
+        list_display = list(super().get_list_display(request))
         if settings.DEVICE_HIDE_FIELDS:
-            list_display = list(list_display)
             list_display = [entry for entry in list_display if entry not in settings.DEVICE_HIDE_FIELDS]
             # set() operations do not preserve order
             # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
 
-        return get_superuser_list(list_display, "tenant", request.user.is_superuser)
+        # The tenant only tells devices apart for users with several tenants.
+        if len(request.tenants) > 1:
+            list_display.append("tenant")
+        return list_display
 
     def get_fieldsets(self, request, obj=None):
         orig_fieldsets = super().get_fieldsets(request, obj)

@@ -4,10 +4,9 @@
 
 """
 The context processors run on every frontend page render, so they must not
-issue redundant queries: one aggregate for the room hints, one for the
-record-less device hint, one count for the devices-without-tenant hint, and at
-most one (request-memoized) active-inventory
-lookup shared by nav() and the inventory context processor.
+issue redundant queries: one aggregate for the room hints, one for both device
+hints (record-less, without tenant), and at most one (request-memoized)
+active-inventory lookup shared by nav() and the inventory context processor.
 See https://adamj.eu/tech/2023/03/23/django-context-processors-database-queries/
 """
 
@@ -21,6 +20,7 @@ from dlcdb.core.context_processors import hints, nav
 from dlcdb.core.models import Inventory, Room
 from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.tenants.shortcuts import get_user_tenants
 
 
 class ContextProcessorQueryTests(BaseTest):
@@ -36,6 +36,7 @@ class ContextProcessorQueryTests(BaseTest):
     def _request(self, user):
         request = RequestFactory().get("/")
         request.user = user
+        request.tenants = get_user_tenants(user)
         request.session = self.client.session
         request._messages = FallbackStorage(request)
         return request
@@ -43,7 +44,7 @@ class ContextProcessorQueryTests(BaseTest):
     def _table_queries(self, captured, table):
         return [query["sql"] for query in captured.captured_queries if table in query["sql"]]
 
-    def test_hints_issues_one_room_and_two_device_queries(self):
+    def test_hints_issues_one_room_and_one_device_query(self):
         device = self._create_device(edv_id="EDV-NO-RECORD", sap_id="1-1")
         request = self._request(self.superuser)
 
@@ -51,9 +52,9 @@ class ContextProcessorQueryTests(BaseTest):
             hints(request)
 
         self.assertEqual(len(self._table_queries(captured, "core_room")), 1)
-        # Record-less devices (tenant-scoped) and devices without tenant
-        # (global). Flexible tenants, step 1, folds both into one aggregate.
-        self.assertEqual(len(self._table_queries(captured, "core_device")), 2)
+        # One aggregate counts record-less devices (tenant-scoped) and devices
+        # without tenant (global).
+        self.assertEqual(len(self._table_queries(captured, "core_device")), 1)
 
         # The single record-less device is still linked directly, without the
         # former extra .first() query.
@@ -90,7 +91,8 @@ class ContextProcessorQueryTests(BaseTest):
         self.assertIs(first, second)
 
         # A new request gets a fresh lookup.
+        new_request = self._request(self.superuser)
         with CaptureQueriesContext(connection) as captured:
-            get_active_inventory(self._request(self.superuser))
+            get_active_inventory(new_request)
 
         self.assertEqual(len(captured.captured_queries), 1)

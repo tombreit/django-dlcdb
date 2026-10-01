@@ -40,7 +40,7 @@
               {% include "theme/filterbar/_sort_th.html" with label=_("Type") asc="type" desc="-type" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("State / location") asc="state" desc="-state" th_class="d-none d-lg-table-cell" %}
               {% include "theme/filterbar/_sort_th_dual.html" with column_label=_("Activity") label_a=_("Created") asc_a="created" desc_a="-created" label_b=_("Modified") asc_b="modified" desc_b="-modified" th_class="d-none d-lg-table-cell text-end" %}
-              {% if request.user.is_superuser %}
+              {% if request.tenants|length > 1 %}
                 {% include "theme/filterbar/_sort_th.html" with label=_("Tenant") asc="tenant" desc="-tenant" th_class="d-none d-xl-table-cell" %}
               {% endif %}
             </tr>
@@ -75,13 +75,13 @@
                 <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">
                   {% include "theme/includes/_timestamps.html" with obj=device %}
                 </td>
-                {% if request.user.is_superuser %}
+                {% if request.tenants|length > 1 %}
                   <td class="d-none d-xl-table-cell text-muted">{{ device.tenant|default:"—" }}</td>
                 {% endif %}
               </tr>
             {% empty %}
               <tr>
-                <td colspan="{% if request.user.is_superuser %}5{% else %}4{% endif %}" class="text-center text-muted py-4">
+                <td colspan="{% if request.tenants|length > 1 %}5{% else %}4{% endif %}" class="text-center text-muted py-4">
                   <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                   {% translate "No devices match these filters." %}
                   {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}

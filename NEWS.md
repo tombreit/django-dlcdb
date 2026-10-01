@@ -8,6 +8,10 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Dashboard counts, the lending person filter and the admin relocate action are now tenant-scoped
+* Licences are tenant-scoped; new licences need a tenant
+* Superusers no longer see devices without tenant (see the "devices without tenant" hint)
+* The navbar shows the user's tenant(s) instead of the red "no tenant" message banner
 * Devices without tenant are reported by a hint and assigned via the new Tenant admin action "Assign devices without tenant"
 * A tenant with devices can no longer be deleted
 * Superusers must choose a tenant when creating or importing devices

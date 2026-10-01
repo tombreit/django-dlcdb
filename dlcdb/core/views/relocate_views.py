@@ -9,6 +9,8 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
 
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+
 from .. import lifecycle
 from ..forms.adminactions_forms import RelocateActionForm
 from ..models import Device
@@ -31,9 +33,9 @@ class DevicesRelocateView(FormView):
     form_class = RelocateActionForm
 
     def get_form_kwargs(self):
-        """Added keyword 'is_superuser' for instantiating and validating the form."""
+        """The user's tenants limit the choices for a tenant change."""
         kwargs = super().get_form_kwargs()
-        kwargs["is_superuser"] = self.request.user.is_superuser
+        kwargs["tenants"] = self.request.tenants
         return kwargs
 
     def get_initial(self):
@@ -42,7 +44,8 @@ class DevicesRelocateView(FormView):
         # A bare GET without ?ids= is a 404-shaped mistake, not a 500: treat a
         # missing or blank parameter as "no devices selected".
         device_ids = [pk for pk in (self.request.GET.get("ids") or "").split(",") if pk]
-        devices = Device.objects.filter(pk__in=device_ids)
+        # Scoped, so a crafted ?ids= cannot reach devices of other tenants.
+        devices = tenant_scoped_queryset(Device.objects.filter(pk__in=device_ids), self.request)
 
         initial.update(
             {

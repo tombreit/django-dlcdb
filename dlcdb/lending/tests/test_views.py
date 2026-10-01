@@ -105,6 +105,15 @@ class LendingIndexViewTests(BaseTest):
         self.assertIn(self.person, person_qs)
         self.assertNotIn(self.other_person, person_qs)
 
+    def test_person_filter_hides_borrowers_of_other_tenants(self):
+        # A user without tenant sees no borrowers (formerly: all of them).
+        user = get_user_model().objects.create_user(username="no-tenant", email="no-tenant@example.com")
+        user.user_permissions.add(Permission.objects.get(codename="view_lentrecord", content_type__app_label="core"))
+        self.client.force_login(user)
+
+        person_qs = self.client.get(self.url).context["filter"].form.fields["person"].queryset
+        self.assertNotIn(self.person, person_qs)
+
     def test_ordering_by_device_is_reversible(self):
         asc = self.client.get(self.url, {"ordering": "device"}, headers={"HX-Request": "true"}).content.decode()
         desc = self.client.get(self.url, {"ordering": "-device"}, headers={"HX-Request": "true"}).content.decode()

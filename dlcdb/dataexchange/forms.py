@@ -6,6 +6,8 @@ from django import forms
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
+from dlcdb.tenants.shortcuts import limit_tenant_field
+
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
 from .remover import set_removed_record
@@ -70,22 +72,10 @@ class DeviceImportForm(forms.ModelForm):
         self.fields["file"].help_text = _("CSV file in the internal format (UTF-8).")
         self.fields["note"].label = _("Note")
 
-        tenant_field = self.fields["tenant"]
-        # Superusers choose freely among all tenants. The field stays required
-        # (model blank=False): imported devices without a tenant would be
-        # invisible to every tenant-scoped user.
-        if not request.user.is_superuser:
-            # Non-superusers always SEE their tenant but cannot change it. The
-            # tenant is authoritative from the request and (re)assigned on save
-            # (see the views), so `disabled` is a display guard: Django ignores
-            # any submitted value and keeps the initial.
-            current_tenant = getattr(request, "tenant", None)
-            tenant_field.disabled = True
-            tenant_field.required = False
-            tenant_field.initial = current_tenant
-            tenant_field.queryset = (
-                tenant_field.queryset.filter(pk=current_tenant.pk) if current_tenant else tenant_field.queryset.none()
-            )
+        # Only the user's tenants are offered, so a crafted foreign tenant
+        # fails validation. The field stays required (model blank=False):
+        # imported devices without a tenant would be invisible to everyone.
+        limit_tenant_field(self.fields["tenant"], request.tenants)
 
         # Bootstrap 5 control styling, mirroring the frontend DeviceForm.
         for field in self.fields.values():

@@ -76,45 +76,27 @@ class InventoryQuerySet(models.QuerySet):
     def tenant_unaware_device_objects(self):
         return self._devices_qs().annotate(has_inventory_note=Exists(self._current_inventory_device_note()))
 
-    def tenant_aware_device_objects(self, tenant=None, is_superuser=False):
-        qs = Device.objects.none()
-        devices_qs = self._devices_qs()
+    def tenant_aware_device_objects(self, *, tenants):
+        return self._devices_qs().filter(tenant__in=tenants)
 
-        if tenant:
-            qs = devices_qs.filter(tenant=tenant)
-
-        if is_superuser:
-            qs = devices_qs
-
-        return qs
-
-    def tenant_aware_device_objects_for_room(self, room_pk, tenant=None, is_superuser=False):
-        qs = Device.objects.none()
-
-        devices_qs = (
+    def tenant_aware_device_objects_for_room(self, room_pk, *, tenants):
+        return (
             self._devices_qs()
             .filter(
                 active_record__is_active=True,
                 active_record__room__pk=room_pk,
                 active_record__device__deleted_at__isnull=True,
+                tenant__in=tenants,
             )
             .annotate(has_inventory_note=Exists(self._current_inventory_device_note()))
             .annotate(already_inventorized=Exists(self._current_inventory_records()))
         )
 
-        if tenant:
-            qs = devices_qs.filter(tenant=tenant)
-
-        if is_superuser:
-            qs = devices_qs
-
-        return qs
-
-    def inventory_relevant_devices(self, tenant=None, is_superuser=False):
+    def inventory_relevant_devices(self, *, tenants):
         device_search_tenant_aware = self.active_inventory().device_search_tenant_aware
 
         if device_search_tenant_aware:
-            qs = Inventory.objects.tenant_aware_device_objects(tenant=tenant, is_superuser=is_superuser)
+            qs = Inventory.objects.tenant_aware_device_objects(tenants=tenants)
         else:
             qs = Inventory.objects.tenant_unaware_device_objects()
 
@@ -125,7 +107,7 @@ class InventoryQuerySet(models.QuerySet):
             .annotate(already_inventorized=Exists(self._current_inventory_records()))
         ).distinct()
 
-    def tenant_aware_room_objects(self, tenant=None):
+    def tenant_aware_room_objects(self, *, tenants):
         current_inventory_room_note = Note.objects.filter(
             room=OuterRef("pk"),
             inventory=self.get(is_active=True),
@@ -135,56 +117,38 @@ class InventoryQuerySet(models.QuerySet):
             has_inventory_note=Exists(current_inventory_room_note)
         )
 
-        # Some inventory stats done by the database.
-        if tenant:
-            qs = qs.annotate(
-                room_devices_count=Count(
-                    "record",
-                    filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                        record__device__tenant=tenant,
-                    ),
+        # Some inventory stats done by the database. Rooms are shared by all
+        # tenants, only their device counts are tenant-scoped.
+        qs = qs.annotate(
+            room_devices_count=Count(
+                "record",
+                filter=Q(
+                    record__is_active=True,
+                    record__device__deleted_at__isnull=True,
+                    record__device__tenant__in=tenants,
                 ),
-                room_inventorized_devices_count=Count(
-                    "record",
-                    filter=Q(
-                        Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
-                        record__device__deleted_at__isnull=True,
-                        record__inventory__is_active=True,
-                        record__device__tenant=tenant,
-                    ),
+            ),
+            room_inventorized_devices_count=Count(
+                "record",
+                filter=Q(
+                    Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
+                    record__device__deleted_at__isnull=True,
+                    record__inventory__is_active=True,
+                    record__device__tenant__in=tenants,
                 ),
-                # room_inventorized_devices_count=Sum(
-                #     Case(
-                #         When(
-                #             record__in=inventorized_records_in_room,
-                #             # record__is_active=True,
-                #             then=1
-                #         ),
-                #         default=0,
-                #         output_field=models.IntegerField()
-                #     )
-                # )
-            )
-        else:
-            qs = qs.annotate(
-                room_devices_count=Count(
-                    "record",
-                    filter=Q(
-                        record__is_active=True,
-                        record__device__deleted_at__isnull=True,
-                    ),
-                ),
-                room_inventorized_devices_count=Count(
-                    "record",
-                    filter=Q(
-                        Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
-                        record__device__deleted_at__isnull=True,
-                        record__inventory__is_active=True,
-                    ),
-                ),
-            )
+            ),
+            # room_inventorized_devices_count=Sum(
+            #     Case(
+            #         When(
+            #             record__in=inventorized_records_in_room,
+            #             # record__is_active=True,
+            #             then=1
+            #         ),
+            #         default=0,
+            #         output_field=models.IntegerField()
+            #     )
+            # )
+        )
 
         return qs.order_by("number")
 
@@ -282,7 +246,7 @@ class Inventory(models.Model):
 
         super().save(*args, **kw)
 
-    def get_inventory_progress(self, tenant=None, is_superuser=False):
+    def get_inventory_progress(self, *, tenants):
         """
         Get status for inventory, e.g. "5 from 10 assets already inventorized".
         """
@@ -296,9 +260,7 @@ class Inventory(models.Model):
             ],
         )
 
-        _inventory_relevant_devices = Inventory.objects.inventory_relevant_devices(
-            tenant=tenant, is_superuser=is_superuser
-        )
+        _inventory_relevant_devices = Inventory.objects.inventory_relevant_devices(tenants=tenants)
 
         inventory_relevant_devices_inventorized_count = (
             _inventory_relevant_devices.filter(already_inventorized=True)

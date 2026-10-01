@@ -19,7 +19,7 @@ from django.db.models import Q
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.pickers import PickerSource, register_picker_source
 
 # Any of these opens the Move module; which devices it then offers depends on

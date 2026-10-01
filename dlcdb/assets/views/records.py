@@ -21,7 +21,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, Record
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import index_url as build_index_url

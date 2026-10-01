@@ -4,13 +4,14 @@
 
 from django.utils.deprecation import MiddlewareMixin
 
-from .shortcuts import get_current_tenant
+from .shortcuts import get_user_tenants
 
 
 class CurrentTenantMiddleware(MiddlewareMixin):
     """
-    Middleware that sets `tenant` attribute to request object.
+    Middleware that sets the `tenants` attribute (a tuple of the tenants the
+    user may see) on the request object.
     """
 
     def process_request(self, request):
-        request.tenant = get_current_tenant(request)
+        request.tenants = get_user_tenants(request.user)

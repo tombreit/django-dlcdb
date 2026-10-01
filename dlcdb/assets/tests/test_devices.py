@@ -17,6 +17,7 @@ from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Pe
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
+from dlcdb.tenants.shortcuts import get_user_tenants
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -235,9 +236,10 @@ class DeviceFrontendTests(BaseTest):
         )
         request = RequestFactory().post("/")
         request.user = user
+        request.tenants = (device.tenant,)
 
         form = DeviceForm(
-            {"edv_id": device.edv_id, "sap_id": device.sap_id},
+            {"edv_id": device.edv_id, "sap_id": device.sap_id, "tenant": device.tenant.pk},
             instance=device,
             request=request,
         )
@@ -245,63 +247,76 @@ class DeviceFrontendTests(BaseTest):
         self.assertFalse(form.is_valid())
         self.assertIn("is_lentable", form.errors)
 
-    def test_tenant_field_is_shown_but_disabled_for_non_superuser(self):
-        """Non-superusers always see the tenant field, but it is locked."""
+    def test_single_tenant_user_gets_their_tenant_as_the_only_preselected_option(self):
         tenant = Tenant.objects.create(name="Tenant One")
-        device = self._create_device(edv_id="EDV-TEN", sap_id="7-1")
-        device.tenant = tenant
-        device.save()
-
+        Tenant.objects.create(name="Tenant Foreign")
         operator = get_user_model().objects.create_user(
             username="ten-operator", email="ten-op@example.com", password="secret"
         )
         request = RequestFactory().get("/")
         request.user = operator
+        request.tenants = (tenant,)
 
-        form = DeviceForm(instance=device, request=request)
+        form = DeviceForm(request=request)
         tenant_field = form.fields["tenant"]
-        # Present (not popped) and locked / optional.
-        self.assertTrue(tenant_field.disabled)
-        self.assertFalse(tenant_field.required)
-        # The disabled <select> lists only the device's own tenant, and the
-        # rendered control carries the HTML `disabled` attribute.
+        self.assertFalse(tenant_field.disabled)
+        self.assertTrue(tenant_field.required)
         self.assertEqual(list(tenant_field.queryset), [tenant])
-        html = str(form["tenant"])
-        self.assertIn("disabled", html)
-        self.assertIn(str(tenant), html)
+        self.assertEqual(form["tenant"].value(), tenant.pk)
+        self.assertNotIn("---------", str(form["tenant"]))
 
-    def test_tenant_field_is_editable_and_required_for_superuser(self):
+    def test_superuser_may_pick_any_tenant_but_must_pick_one(self):
         request = RequestFactory().get("/")
         request.user = self.user  # superuser (see setUpTestData)
+        request.tenants = get_user_tenants(self.user)
 
         form = DeviceForm(instance=self.inroom_device, request=request)
         tenant_field = form.fields["tenant"]
         self.assertFalse(tenant_field.disabled)
         self.assertTrue(tenant_field.required)
-        self.assertNotIn("disabled", str(form["tenant"]))
+        self.assertEqual(set(tenant_field.queryset), set(Tenant.objects.all()))
 
-    def test_non_superuser_cannot_reassign_tenant_via_crafted_post(self):
-        """A crafted tenant in POST is ignored; the disabled field keeps the instance value."""
+    def test_crafted_foreign_tenant_fails_validation(self):
         own = Tenant.objects.create(name="Tenant Own")
         other = Tenant.objects.create(name="Tenant Other")
-        device = self._create_device(edv_id="EDV-TEN2", sap_id="7-2")
-        device.tenant = own
-        device.save()
+        device = self._create_device(edv_id="EDV-TEN2", sap_id="7-2", tenant=own)
 
         operator = get_user_model().objects.create_user(
             username="ten-operator2", email="ten-op2@example.com", password="secret"
         )
         request = RequestFactory().post("/")
         request.user = operator
+        request.tenants = (own,)
 
         form = DeviceForm(
             {"edv_id": device.edv_id, "sap_id": device.sap_id, "tenant": other.pk},
             instance=device,
             request=request,
         )
-        self.assertTrue(form.is_valid(), form.errors)
-        # The disabled field ignores the crafted `other` and keeps the instance's tenant.
-        self.assertEqual(form.cleaned_data["tenant"], own)
+        self.assertFalse(form.is_valid())
+        self.assertIn("tenant", form.errors)
+
+    def test_single_tenant_user_creates_a_device_in_their_tenant(self):
+        user, tenant = self._tenant_viewer()
+        user.user_permissions.add(Permission.objects.get(codename="add_device", content_type__app_label="core"))
+        self.client.force_login(user)
+
+        self.client.post(reverse("assets:device_add"), {"edv_id": "EDV-OWN-NEW", "sap_id": "7-3", "tenant": tenant.pk})
+
+        self.assertEqual(Device.objects.get(edv_id="EDV-OWN-NEW").tenant, tenant)
+
+    def test_user_without_tenant_cannot_create_a_device(self):
+        user = get_user_model().objects.create_user(username="no-tenant", email="no-tenant@example.com")
+        user.user_permissions.add(Permission.objects.get(codename="add_device", content_type__app_label="core"))
+        self.client.force_login(user)
+
+        response = self.client.post(
+            reverse("assets:device_add"),
+            {"edv_id": "EDV-NOWHERE", "sap_id": "7-4", "tenant": self._default_tenant().pk},
+        )
+
+        self.assertIn("tenant", response.context["form"].errors)
+        self.assertFalse(Device.objects.filter(edv_id="EDV-NOWHERE").exists())
 
     def test_index_paginates_and_preserves_active_filter(self):
         for i in range(30):
@@ -393,7 +408,7 @@ class DeviceFrontendTests(BaseTest):
 
     def test_device_outside_the_users_tenant_is_404(self):
         user, _tenant = self._tenant_viewer()
-        # Untenanted device: invisible to a tenant-scoped, non-superuser viewer.
+        # A device of another tenant: invisible to a tenant-scoped viewer.
         other = self._create_device(edv_id="EDV-OTHER", sap_id="8-8")
 
         self.client.force_login(user)
@@ -429,9 +444,11 @@ class DeviceFrontendTests(BaseTest):
         self.assertNotContains(response, "Open device")
         self.assertContains(response, f'href="{reverse("assets:device_detail", args=[self.inroom_device.pk])}"')
 
-    def test_tenant_column_is_superuser_only(self):
+    def test_tenant_column_is_shown_only_with_several_tenants(self):
         # The Tenant header's sort link is the unambiguous marker for the column
         # (plain "Tenant" text can otherwise appear elsewhere, e.g. the navbar).
+        # A superuser sees every tenant; with a second one the column appears.
+        Tenant.objects.create(name="Tenant Two")
         superuser_response = self.client.get(self.index_url)
         self.assertContains(superuser_response, "ordering=tenant")
 

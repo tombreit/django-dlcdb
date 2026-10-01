@@ -26,7 +26,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
 from dlcdb.core.utils.helpers import get_denormalized_user
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
 
@@ -87,8 +87,6 @@ def device_import(request):
 
     if request.method == "POST" and form.is_valid():
         importer_list = form.save(commit=False)
-        if not request.user.is_superuser:
-            importer_list.tenant = getattr(request, "tenant", None)
         importer_list.user, importer_list.username = get_denormalized_user(request.user)
         # Archive the file and create the audit row up front: failed attempts
         # are part of the import history (run_device_import marks the row with
@@ -141,10 +139,9 @@ def _after_import_redirect(request):
 @permission_required("core.add_device", raise_exception=True)
 def device_import_confirm(request, pk):
     """Step 2: write the previously uploaded and previewed file for real."""
-    queryset = ImporterList.objects.all()
-    if not request.user.is_superuser:
-        queryset = queryset.filter(tenant=getattr(request, "tenant", None))
-    importer_list = get_object_or_404(queryset, pk=pk)
+    # Scoped like the import history, so imports of other tenants (and
+    # tenant-less ones) cannot be confirmed by pk.
+    importer_list = get_object_or_404(_importer_list_queryset(request), pk=pk)
 
     # persist() sets a success/warning status only on a real write, so it means
     # this file has already been imported (e.g. a re-posted confirm form).

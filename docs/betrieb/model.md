@@ -110,9 +110,9 @@ A tenant is an organizational unit using the DLCDB, only able to manage its
 own assets. `Device` is the only tenant-aware model (`Device.tenant`); records,
 lendings and licences are scoped through their device. A tenant owns a set of
 `auth.Group`s, and a user's tenant is derived from the groups they belong to.
-Superusers are not tenant aware: they see devices from all tenants and may
-change the tenant of a device. Standard users only see devices of their own
-tenant. Tenants grant no permissions. A tenant that still has devices cannot be
+Superusers see devices from all tenants and may change the tenant of a
+device. Standard users only see devices of their own tenant. Devices without
+tenant are listed nowhere, only by the Tenant admin action that assigns them. Tenants grant no permissions. A tenant that still has devices cannot be
 deleted (`on_delete=PROTECT`); `Device.tenant` is nullable for legacy devices
 only, new devices always get one. See
 [Berechtigungen › Tenants](../guides/berechtigungen.md#tenants).

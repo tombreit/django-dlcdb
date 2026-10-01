@@ -31,6 +31,7 @@ class GlobalSearchTests(TestCase):
         cls.device_type = DeviceType.objects.create(name="Notebook", prefix="NTB")
         cls.manufacturer = Manufacturer.objects.create(name="Zebra Computers")
         cls.room = Room.objects.create(number="Z1.42", nickname="Zebra Lab")
+        cls.tenant = Tenant.objects.create(name="Zebra tenant")
 
         cls.device = Device.objects.create(
             edv_id="ZEBRA-DEVICE-1",
@@ -38,6 +39,7 @@ class GlobalSearchTests(TestCase):
             series="Zebra Book",
             device_type=cls.device_type,
             manufacturer=cls.manufacturer,
+            tenant=cls.tenant,
         )
         InRoomRecord.objects.create(device=cls.device, room=cls.room)
 
@@ -47,6 +49,7 @@ class GlobalSearchTests(TestCase):
             series="Zebra Suite",
             manufacturer=cls.manufacturer,
             is_licence=True,
+            tenant=cls.tenant,
         )
 
         cls.person = Person.objects.create(first_name="Zora", last_name="Zebrowski", email="zora.zebrowski@example.org")
@@ -161,8 +164,7 @@ class GlobalSearchTests(TestCase):
     def test_devices_are_scoped_to_the_requesting_users_tenant(self):
         """Tenant scoping applies to devices; the search must honour it like the device list does.
 
-        Deliberately a non-superuser: get_current_tenant() never resolves a
-        tenant for superusers, so they are the one case that is never scoped.
+        Deliberately a non-superuser: superusers see every tenant.
         """
         group = Group.objects.create(name="tenant-a-viewers")
         tenant_a = Tenant.objects.create(name="TenantA")

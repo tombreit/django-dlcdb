@@ -13,7 +13,7 @@ class RoomFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(method="string_search_filter", label="Search rooms")
 
     def string_search_filter(self, queryset, name, value):
-        return Inventory.objects.tenant_aware_room_objects(self.request.tenant).filter(
+        return Inventory.objects.tenant_aware_room_objects(tenants=self.request.tenants).filter(
             Q(number__icontains=value) | Q(nickname__icontains=value) | Q(description__icontains=value)
         )
 

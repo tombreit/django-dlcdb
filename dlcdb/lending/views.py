@@ -23,12 +23,12 @@ from dlcdb.core.models import LentRecord, Person, Record, Room
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.links import linked_message
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
 from dlcdb.dataexchange.csv_export import (
     LENDING_EXPORT_RELATIONS,
     csv_response,
     lending_export_columns,
 )
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import STATE_COLORS
@@ -52,7 +52,7 @@ def _tenant_scoped(queryset, request):
     """
     Scope a record queryset to the current tenant via the related device.
     Records carry no tenant field of their own; the shared policy lives in
-    ``dlcdb.core.utils.tenants``.
+    ``dlcdb.tenants.shortcuts``.
     """
     return tenant_scoped_queryset(queryset, request, tenant_field="device__tenant")
 

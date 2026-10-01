@@ -6,14 +6,20 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from dlcdb.tenants.models import Tenant
+from dlcdb.tenants.shortcuts import limit_tenant_field
 
 from ..models import DeviceType, Room
 
 
 class RelocateActionForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.is_superuser = kwargs.pop("is_superuser", None)
+    def __init__(self, *args, tenants, **kwargs):
         super().__init__(*args, **kwargs)
+        # A tenant change needs at least two tenants to choose from; the
+        # limited queryset rejects any tenant outside the user's tenants.
+        if len(tenants) > 1:
+            limit_tenant_field(self.fields["new_tenant"], tenants)
+        else:
+            del self.fields["new_tenant"]
 
     new_tenant = forms.ModelChoiceField(
         queryset=Tenant.objects.all(),
@@ -27,14 +33,6 @@ class RelocateActionForm(forms.Form):
         queryset=DeviceType.objects.all(),
         required=False,
     )
-
-    def clean_new_tenant(self):
-        new_tenant = self.cleaned_data["new_tenant"]
-
-        if new_tenant and not self.is_superuser:
-            raise ValidationError("You must be logged in with superuser power to change the tenant!")
-
-        return new_tenant
 
     def clean(self):
         cleaned_data = super().clean()

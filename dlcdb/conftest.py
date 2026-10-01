@@ -51,13 +51,13 @@ def user():
 
 
 @pytest.fixture
-def lentable_device() -> Device:
-    return Device.objects.create(is_lentable=True)
+def lentable_device(tenant) -> Device:
+    return Device.objects.create(is_lentable=True, tenant=tenant)
 
 
 @pytest.fixture
-def plain_device() -> Device:
-    return Device.objects.create()
+def plain_device(tenant) -> Device:
+    return Device.objects.create(tenant=tenant)
 
 
 @pytest.fixture
@@ -76,13 +76,13 @@ def inventory_3(db) -> Inventory:
 
 
 @pytest.fixture
-def device_1(db) -> Device:
-    return Device.objects.create(sap_id="123")
+def device_1(db, tenant) -> Device:
+    return Device.objects.create(sap_id="123", tenant=tenant)
 
 
 @pytest.fixture
-def device_2(db) -> Device:
-    return Device.objects.create(sap_id="foo")
+def device_2(db, tenant) -> Device:
+    return Device.objects.create(sap_id="foo", tenant=tenant)
 
 
 @pytest.fixture

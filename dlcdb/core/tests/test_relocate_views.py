@@ -13,9 +13,10 @@ permission, so this closes the asymmetry.
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.urls import reverse
 
+from dlcdb.core.forms.adminactions_forms import RelocateActionForm
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, Record, Room
 from dlcdb.tenants.models import Tenant
 
@@ -41,19 +42,30 @@ def rooms():
     return Room.objects.create(number="A1.01"), Room.objects.create(number="B2.02")
 
 
+@pytest.fixture(autouse=True)
+def media_root(settings, tmp_path):
+    """Device.save() writes a QR code image; keep it out of the real media directory."""
+    settings.MEDIA_ROOT = tmp_path
+
+
 @pytest.fixture
-def device(rooms):
+def device(rooms, tenant):
     room_a, _ = rooms
-    device = Device.objects.create(edv_id="EDV-ADMIN-MOVE", sap_id="8-8")
+    device = Device.objects.create(edv_id="EDV-ADMIN-MOVE", sap_id="8-8", tenant=tenant)
     InRoomRecord.objects.create(device=device, room=room_a)
     device.refresh_from_db()
     return device
 
 
 @pytest.fixture
-def make_user(db):
+def make_user(db, tenant):
+    """A user of `tenant` with the given core permissions."""
+
     def _make(*codenames, email="admin-mover@example.com"):
         user = get_user_model().objects.create_user(email=email, password="secret", username=email.split("@")[0])
+        group = Group.objects.create(name=f"group-of-{user.username}")
+        tenant.groups.add(group)
+        user.groups.add(group)
         for codename in codenames:
             user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
         return get_user_model().objects.get(pk=user.pk)  # reset the perm cache
@@ -127,22 +139,43 @@ def test_device_type_is_left_alone_without_change_device(client, url, device, ro
     assert device.active_record.room == room_b  # the move still happened
 
 
-def test_a_non_superuser_cannot_reassign_the_tenant(client, url, device, rooms, make_user):
-    """Pre-existing rule, pinned: the form refuses a tenant change outright.
-
-    Tenant reassignment moves a device between organisational scopes, so it is
-    superuser-only at form level and never reaches the view's permission check.
-    """
+def test_a_single_tenant_user_gets_no_tenant_choice(client, url, device, rooms, make_user, tenant):
+    """With only one tenant there is nothing to change to: the field is gone,
+    and a crafted ``new_tenant`` is ignored while the move still happens."""
     _, room_b = rooms
-    tenant = Tenant.objects.create(name="OtherTenant")
+    other = Tenant.objects.create(name="OtherTenant")
     client.force_login(make_user("transition_can_relocate_device", "change_device"))
 
-    response = client.post(f"{url}?ids={device.pk}", _payload(device, room_b, new_tenant=tenant.pk))
+    assert "new_tenant" not in client.get(f"{url}?ids={device.pk}").context["form"].fields
 
-    assert not response.context["form"].is_valid()
-    assert "new_tenant" in response.context["form"].errors
+    client.post(f"{url}?ids={device.pk}", _payload(device, room_b, new_tenant=other.pk))
+
     device.refresh_from_db()
-    assert device.tenant is None
+    assert device.tenant == tenant
+    assert device.active_record.room == room_b
+
+
+def test_a_crafted_id_of_a_foreign_device_is_ignored(client, url, device, rooms, make_user):
+    room_a, room_b = rooms
+    foreign = Device.objects.create(edv_id="EDV-FOREIGN", tenant=Tenant.objects.create(name="OtherTenant"))
+    InRoomRecord.objects.create(device=foreign, room=room_a)
+    client.force_login(make_user("transition_can_relocate_device"))
+
+    client.post(f"{url}?ids={foreign.pk}", _payload(foreign, room_b))
+
+    foreign.refresh_from_db()
+    assert foreign.active_record.room == room_a
+
+
+def test_the_tenant_choice_is_limited_to_the_users_tenants(tenant):
+    other = Tenant.objects.create(name="OtherTenant")
+    foreign = Tenant.objects.create(name="ForeignTenant")
+
+    def form(new_tenant):
+        return RelocateActionForm({"new_tenant": new_tenant.pk}, tenants=(tenant, other))
+
+    assert form(other).is_valid()
+    assert "new_tenant" in form(foreign).errors
 
 
 def test_change_device_permits_the_reassignment(client, url, device, rooms, make_user):

@@ -18,7 +18,6 @@ from django.utils.translation import ngettext
 
 from dlcdb.core.models import Device, Room
 from dlcdb.core.models.inventory import get_active_inventory
-from dlcdb.core.utils.tenants import tenant_scoped_queryset
 
 
 def hints(request):
@@ -57,17 +56,23 @@ def hints(request):
     ):
         rooms_index_url = reverse("rooms:index")
 
-        qs = tenant_scoped_queryset(Device.objects.all(), request, tenant_field="tenant")
-        recordless_devices = qs.filter(active_record__isnull=True).aggregate(
-            count=Count("pk"),
-            single_pk=Min("pk"),
+        # One query for both device hints. Record-less devices are scoped to
+        # the user's tenants. Devices without tenant are deliberately counted
+        # globally: they belong to no tenant, so no tenant-scoped list shows
+        # them. The Tenant admin action "Assign devices without tenant" lists
+        # and assigns them.
+        recordless = Q(tenant__in=request.tenants, active_record__isnull=True)
+        device_counts = Device.objects.aggregate(
+            recordless_count=Count("pk", filter=recordless),
+            recordless_single_pk=Min("pk", filter=recordless),
+            without_tenant_count=Count("pk", filter=Q(tenant__isnull=True)),
         )
-        recordless_devices_count = recordless_devices["count"]
+        recordless_devices_count = device_counts["recordless_count"]
 
         if recordless_devices_count:
             if recordless_devices_count == 1:
                 # A single device: jump straight into Move with it preselected.
-                cta_link = f"{reverse('assets:relocate')}?device={recordless_devices['single_pk']}"
+                cta_link = f"{reverse('assets:relocate')}?device={device_counts['recordless_single_pk']}"
             else:
                 # Several devices: the device list filtered to record-less
                 # devices; each detail page offers the Move action from there.
@@ -89,10 +94,7 @@ def hints(request):
                 )
             )
 
-        # Deliberately not tenant-scoped: these devices belong to no tenant, so
-        # no tenant-scoped list shows them. The Tenant admin action
-        # "Assign devices without tenant" lists and assigns them.
-        devices_without_tenant_count = Device.objects.filter(tenant__isnull=True).count()
+        devices_without_tenant_count = device_counts["without_tenant_count"]
         if devices_without_tenant_count:
             sticky_messages.append(
                 StickyMessage(

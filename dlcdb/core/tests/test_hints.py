@@ -11,10 +11,9 @@ from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
 
-from dlcdb.core.models import Room
+from dlcdb.core.models import Device, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.organization.models import Branding
-from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -51,16 +50,13 @@ class StickyHintsTests(BaseTest):
         self.assertContains(response, f"{reverse('assets:device_index')}?state=no-record")
 
     def test_devices_without_tenant_hint_links_to_the_tenant_admin(self):
-        tenant = Tenant.objects.create(name="Tenant One")
-        with_tenant = self._create_device(edv_id="EDV-WITH-TENANT", sap_id="1-1")
-        with_tenant.tenant = tenant
-        with_tenant.save()
+        self._create_device(edv_id="EDV-WITH-TENANT", sap_id="1-1")
 
         response = self.client.get(self.dashboard_url)
         self.assertNotContains(response, "without tenant!")
 
-        self._create_device(edv_id="EDV-NO-TENANT-1", sap_id="2-2")
-        self._create_device(edv_id="EDV-NO-TENANT-2", sap_id="3-3")
+        Device.objects.create(edv_id="EDV-NO-TENANT-1", sap_id="2-2")
+        Device.objects.create(edv_id="EDV-NO-TENANT-2", sap_id="3-3")
 
         response = self.client.get(self.dashboard_url)
         self.assertContains(response, "2 devices without tenant!")
@@ -70,7 +66,7 @@ class StickyHintsTests(BaseTest):
     def test_hints_are_not_shown_to_anonymous_users(self):
         # Every hint condition holds: a device without tenant, no rooms, no
         # Branding IT dept email.
-        self._create_device(edv_id="EDV-NO-TENANT", sap_id="2-2")
+        Device.objects.create(edv_id="EDV-NO-TENANT", sap_id="2-2")
         self.client.logout()
 
         response = self.client.get("/accounts/login/")
