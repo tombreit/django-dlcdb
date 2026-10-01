@@ -4,13 +4,15 @@
 
 from django.contrib import admin
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from ..forms.removedrecord_form import RemovedRecordAdminForm
 from ..models import RemovedRecord
 from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 
 
 @admin.register(RemovedRecord)
-class RemovedRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
+class RemovedRecordAdmin(TenantScopedRecordAdmin, RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = RemovedRecordAdminForm
     change_form_template = "core/record/change_form.html"
     fields = ("device", "disposition_state", "removed_info", "attachments")

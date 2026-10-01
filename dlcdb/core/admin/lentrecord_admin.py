@@ -24,7 +24,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.dataexchange.admin import ExportCsvMixin
 from dlcdb.lending.models import LendingConfiguration
-from dlcdb.tenants.admin import TenantScopedAdmin
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
 
 from .. import lifecycle
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
@@ -38,9 +38,7 @@ session = SessionStore()
 
 
 @admin.register(LentRecord)
-class LentRecordAdmin(TenantScopedAdmin, ExportCsvMixin, CustomBaseModelAdmin):
-    # Records carry no tenant of their own; they are scoped through their device.
-    tenant_lookup = "device__tenant"
+class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     form = LentRecordAdminForm
     change_form_template = "core/lentrecord/change_form.html"
     change_list_template = "core/lentrecord/change_list.html"

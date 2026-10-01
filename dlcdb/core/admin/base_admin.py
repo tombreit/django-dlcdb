@@ -6,10 +6,13 @@ from django.contrib import admin
 from django.contrib.admin.options import ActionLocation
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.http import urlencode
+
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 from ..models import Device, DeviceType, Manufacturer, Room, Supplier
 from ..utils.helpers import get_denormalized_user, get_icon_for_class
@@ -106,7 +109,8 @@ class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
         extra_context = extra_context or {}
 
         if device_id:
-            device = Device.objects.get(id=device_id)
+            # Scoped, so a crafted ?device= cannot reveal a foreign device.
+            device = get_object_or_404(tenant_scoped_queryset(Device.objects.all(), request), id=device_id)
             extra_context["device"] = device
 
         return super().add_view(request, form_url, extra_context=extra_context)

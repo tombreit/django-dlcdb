@@ -10,7 +10,8 @@ from django.contrib.auth.models import Permission
 from django.db.models import ProtectedError
 from django.urls import reverse
 
-from dlcdb.core.models import Device
+from dlcdb.core.models import Device, InRoomRecord, Room
+from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
@@ -135,3 +136,68 @@ def test_superuser_without_groups_sees_no_devices_but_can_assign_orphans(client,
     client.post(reverse(ASSIGN_URL, args=[tenant.pk]), {"device": [orphan.pk]})
     orphan.refresh_from_db()
     assert orphan.tenant == tenant
+
+
+# --- TenantScopedAdmin on the import and record admins ---------------------
+
+
+@pytest.fixture
+def tenant_staff_client(client, staff_user, join_tenant):
+    """Log in a staff user of the `tenant` fixture with the given permissions."""
+
+    def _login(*perms):
+        client.force_login(join_tenant(staff_user(*perms)))
+        return client
+
+    return _login
+
+
+@pytest.fixture
+def foreign():
+    return Tenant.objects.create(name="Foreign tenant")
+
+
+def test_importer_admin_lists_and_offers_only_own_tenants(tenant_staff_client, tenant, foreign):
+    ImporterList.objects.create(file="imported_csv/own.csv", tenant=tenant)
+    ImporterList.objects.create(file="imported_csv/foreign.csv", tenant=foreign)
+    client = tenant_staff_client("dataexchange.view_importerlist", "dataexchange.add_importerlist")
+
+    changelist = client.get(reverse("admin:dataexchange_importerlist_changelist")).content.decode()
+    assert "own.csv" in changelist
+    assert "foreign.csv" not in changelist
+
+    add_form = client.get(reverse("admin:dataexchange_importerlist_add")).context["adminform"].form
+    assert list(add_form.fields["tenant"].queryset) == [tenant]
+
+
+def test_record_admin_lists_only_own_records(tenant_staff_client, tenant, foreign):
+    room = Room.objects.create(number="R1.01")
+    for edv_id, device_tenant in (("EDV-OWN", tenant), ("EDV-FOREIGN", foreign)):
+        InRoomRecord.objects.create(device=Device.objects.create(edv_id=edv_id, tenant=device_tenant), room=room)
+    client = tenant_staff_client("core.view_record")
+
+    content = client.get(reverse("admin:core_record_changelist")).content.decode()
+    assert "EDV-OWN" in content
+    assert "EDV-FOREIGN" not in content
+
+
+def test_record_add_form_offers_only_own_devices(tenant_staff_client, tenant, foreign):
+    own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
+    foreign_device = Device.objects.create(edv_id="EDV-FOREIGN", tenant=foreign)
+    client = tenant_staff_client("core.add_orderedrecord")
+    url = reverse("admin:core_orderedrecord_add")
+
+    assert set(client.get(url).context["adminform"].form.fields["device"].queryset) == {own}
+    # A posted pk of a foreign device fails validation.
+    response = client.post(url, {"device": foreign_device.pk})
+    assert "device" in response.context["adminform"].form.errors
+
+
+def test_record_add_view_does_not_reveal_a_foreign_device(tenant_staff_client, tenant, foreign):
+    own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
+    foreign_device = Device.objects.create(edv_id="EDV-FOREIGN", tenant=foreign)
+    client = tenant_staff_client("core.add_inroomrecord")
+    url = reverse("admin:core_inroomrecord_add")
+
+    assert client.get(url, {"device": own.pk}).status_code == 200
+    assert client.get(url, {"device": foreign_device.pk}).status_code == 404

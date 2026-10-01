@@ -8,6 +8,7 @@ from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, LentRecord
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.tenants.admin import TenantScopedAdmin
 
 from .csv_export import EXPORT_RELATIONS, csv_response
 from .forms import ImporterAdminForm, RemoverListAdminForm
@@ -44,7 +45,9 @@ class ExportCsvMixin:
 
 
 @admin.register(ImporterList)
-class ImporterListAdmin(admin.ModelAdmin):
+class ImporterListAdmin(TenantScopedAdmin, admin.ModelAdmin):
+    # Lists only imports of the user's tenants and offers only these as import
+    # target (TenantScopedAdmin).
     form = ImporterAdminForm
 
     DATE_FIELDS = [

@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.utils.html import format_html_join
 from django.utils.translation import gettext_lazy as _
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from .. import lifecycle
 from ..models import Record
 from ..models.record import SCRAPPED, SOLD
@@ -27,7 +29,7 @@ class CustomRecordModelAdmin(CustomBaseModelAdmin):
 
 
 @admin.register(Record)
-class RecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
+class RecordAdmin(TenantScopedRecordAdmin, NoModificationModelAdminMixin, CustomRecordModelAdmin):
     change_form_template = "core/record/change_form.html"
     change_list_template = "core/record/change_list.html"
 

@@ -20,7 +20,8 @@ from .shortcuts import limit_tenant_field, tenant_scoped_queryset
 class TenantScopedAdmin(admin.ModelAdmin):
     """
     Admin for tenant-scoped models: lists only objects of the user's tenants
-    (``request.tenants``) and offers only these tenants in a ``tenant`` field.
+    (``request.tenants``) and offers only these tenants in a ``tenant`` field
+    and only their devices in any device field.
     """
 
     # Lookup path from the admin's model to the tenant.
@@ -30,10 +31,20 @@ class TenantScopedAdmin(admin.ModelAdmin):
         return tenant_scoped_queryset(super().get_queryset(request), request, tenant_field=self.tenant_lookup)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.related_model is Device:
+            # Autocomplete widgets already search the (scoped) DeviceAdmin; this
+            # also rejects a posted pk of a foreign device.
+            kwargs["queryset"] = tenant_scoped_queryset(Device.objects.all(), request)
         formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == "tenant":
             limit_tenant_field(formfield, request.tenants)
         return formfield
+
+
+class TenantScopedRecordAdmin(TenantScopedAdmin):
+    """For records: they carry no tenant of their own and are scoped through their device."""
+
+    tenant_lookup = "device__tenant"
 
 
 @admin.register(Tenant)

@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.html import format_html
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from ..models import LicenceRecord
 from .base_admin import CustomBaseModelAdmin
 from .filters.licence_filters import IsAssignedFilter, LicenceTypeListFilter
@@ -29,7 +31,7 @@ class LicenceRecordAdminForm(forms.ModelForm):
 
 
 @admin.register(LicenceRecord)
-class LicenceRecordAdmin(CustomBaseModelAdmin):
+class LicenceRecordAdmin(TenantScopedRecordAdmin, CustomBaseModelAdmin):
     form = LicenceRecordAdminForm
 
     search_fields = [

@@ -6,13 +6,15 @@ from django.contrib import admin
 from django.template import Context, Template
 from django.urls import reverse
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from ..models import OrderedRecord
 from .base_admin import NoModificationModelAdminMixin
 from .record_admin import CustomRecordModelAdmin
 
 
 @admin.register(OrderedRecord)
-class OrderedRecordAdmin(NoModificationModelAdminMixin, CustomRecordModelAdmin):
+class OrderedRecordAdmin(TenantScopedRecordAdmin, NoModificationModelAdminMixin, CustomRecordModelAdmin):
     change_form_template = "core/record/change_form.html"
     list_display = ["get_device_link", "date_of_purchase"]
     fields = ["device"]

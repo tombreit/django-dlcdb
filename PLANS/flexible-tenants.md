@@ -195,6 +195,8 @@ and template lookups fail silently, so the grep in *Verification* is a required 
 - `formfield_for_foreignkey`: `limit_tenant_field(formfield, request.tenants)` for
   `db_field.name == "tenant"` (documented hook; replaces mutating `form.base_fields`).
 - Delete `get_readonly_fields` (readonly would block decision 4), `get_form` and `save_model`.
+- `TenantScopedRecordAdmin(TenantScopedAdmin)` with `tenant_lookup = "device__tenant"`: the
+  parent of all record admins (records carry no tenant of their own).
 
 ### Display
 
@@ -338,7 +340,8 @@ Write paths:
   `dlcdb/dataexchange/views.py:device_import`: delete the `obj.tenant = ...` overwrites ("save as
   new" posts to `device_add`, so it is covered).
 
-Display: as designed. `dlcdb/core/admin/lentrecord_admin.py`: `tenant_lookup = "device__tenant"`.
+Display: as designed. `dlcdb/core/admin/lentrecord_admin.py`: scoped through the device
+(now via `TenantScopedRecordAdmin`, see step 3).
 Delete `core/utils/helpers.py:get_superuser_list`.
 `dlcdb/inventory/templates/inventory/includes/inventory_progress.html`: "for your tenants".
 
@@ -361,21 +364,24 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
 
 ### Step 3: optional follow-ups (separate commits)
 
-- Scope the remaining admins: `ImporterListAdmin` (`dlcdb/dataexchange/admin.py`, at minimum, so
+- *(done)* Scope the remaining admins: `ImporterListAdmin` (`dlcdb/dataexchange/admin.py`, at minimum, so
   staff cannot import into arbitrary tenants), `RecordAdmin`, `OrderedRecordAdmin`,
   `InRoomRecordAdmin`, `LostRecordAdmin`, `RemovedRecordAdmin`, `LicenceRecordAdmin`
-  (`tenant_lookup = "device__tenant"`; no tenant form field, so only `get_queryset` applies).
+  (via `TenantScopedRecordAdmin`; no tenant form field, so `get_queryset` and the device choices apply).
   Behaviour change for staff users: one line in `berechtigungen.md`. Also check if the related non-admin-views are also tenant-scoped (eg. `importer_index`).
+  Done: `TenantScopedAdmin` also limits every device FK (forged pks fail) and
+  `CustomBaseProxyModelAdmin.add_view` scopes `?device=`. The non-admin views were already scoped.
+  `NoteAdmin` stays unscoped (decision 2026-10-01; room notes have no tenant), attachments too.
 - Inventory device search: narrow the `tenant` filter choices to `request.tenants`, but only
   when `device_search_tenant_aware` (otherwise the search spans all tenants).
+- *(deferred to a later release)* `Device.tenant` NOT NULL: once production shows no "devices
+  without tenant" message, add the migration, give the ~62 tenant-less test device creations a
+  tenant, and remove the orphan message, the Tenant admin action and their docs in one go. Not
+  on this branch: the migration would fail on instances that still have orphans.
 - Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
   `theme/includes/navbar.html` (staff-or-superuser link), `core/context_processors.py:nav`
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
   (`base_admin.py`, restore action) stay.
-- Convenience: a "Tenants" multi-select on the Group admin (`dlcdb/accounts/admin.py`), so a
-  group can be attached to many tenants at once.
-- `Device.tenant` NOT NULL (touches about 66 test `Device.objects.create(...)` calls without a
-  tenant).
 
 ## Tests (`.venv/bin/pytest`)
 

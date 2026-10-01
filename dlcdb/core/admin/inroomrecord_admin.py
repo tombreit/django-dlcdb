@@ -7,6 +7,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
 from ..models import InRoomRecord, Room
 from ..utils.links import linked_message
@@ -14,7 +16,7 @@ from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
 
 
 @admin.register(InRoomRecord)
-class InRoomRecordAdmin(RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
+class InRoomRecordAdmin(TenantScopedRecordAdmin, RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
     form = ProxyRecordAdminForm
     change_form_template = "core/inroomrecord/change_form.html"
 

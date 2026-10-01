@@ -4,13 +4,17 @@
 
 from django.contrib import admin
 
+from dlcdb.tenants.admin import TenantScopedRecordAdmin
+
 from ..forms.proxyrecord_admin_form import ProxyRecordAdminForm
 from ..models import LostRecord
 from .base_admin import CustomBaseProxyModelAdmin, NoModificationModelAdminMixin, RedirectToDeviceMixin
 
 
 @admin.register(LostRecord)
-class LostRecordAdmin(RedirectToDeviceMixin, NoModificationModelAdminMixin, CustomBaseProxyModelAdmin):
+class LostRecordAdmin(
+    TenantScopedRecordAdmin, RedirectToDeviceMixin, NoModificationModelAdminMixin, CustomBaseProxyModelAdmin
+):
     form = ProxyRecordAdminForm
     change_form_template = "core/lostrecord/change_form.html"
 
