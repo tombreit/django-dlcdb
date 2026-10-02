@@ -7,6 +7,7 @@ TODO: Get rid of our custom delete() and hard_delete() methods.
 """
 
 from django.contrib import admin, messages
+from django.contrib.admin.options import ActionLocation
 from django.contrib.admin.utils import unquote
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin
@@ -15,6 +16,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from .models import CustomUser
 
@@ -24,11 +26,49 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     list_display = UserAdmin.list_display + ("is_active", "last_login")
     change_form_template = "accounts/customuser/change_form.html"
+    actions = ["deactivate"]
 
     # For now we still have to deal with the legacy username field
     # so we keep the default forms for now.
     # add_form = CustomUserCreationForm
     # form = CustomUserChangeForm
+
+    def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
+        actions = super().get_actions(request, action_location)
+        # "Delete selected" would only deactivate (CustomUserQuerySet.delete())
+        # while reporting a deletion; "deactivate" says what happens.
+        actions.pop("delete_selected", None)
+        return actions
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        # Same for the standard "Delete" link: the form offers the "Active"
+        # checkbox to deactivate and "Delete permanently" to delete.
+        extra_context = {**(extra_context or {}), "show_delete": False}
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    @admin.action(description=_("Deactivate selected users"), permissions=["change"])
+    def deactivate(self, request, queryset):
+        """
+        Inactive users can no longer log in, but keep their audit trail. With
+        LDAP, the next login re-activates users who are still in the LDAP group.
+        """
+        if queryset.filter(pk=request.user.pk).exists():
+            # An inactive user loses their session: no locking oneself out.
+            self.message_user(request, _("You cannot deactivate your own account."), messages.WARNING)
+
+        users = list(queryset.filter(is_active=True).exclude(pk=request.user.pk))
+        for user in users:
+            user.is_active = False
+            user.save(update_fields=["is_active"])
+            self.log_change(request, user, _("Deactivated."))
+
+        if users:
+            self.message_user(
+                request,
+                ngettext("%(count)d user deactivated.", "%(count)d users deactivated.", len(users))
+                % {"count": len(users)},
+                messages.SUCCESS,
+            )
 
     def get_urls(self):
         urls = super().get_urls()

@@ -218,7 +218,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug, Inventur, Lizenzen, Import – läuft vollständig im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü, nur mit Staff-Flag) wird noch für Folgendes benötigt:
 
-- Benutzer, Gruppen und Berechtigungen anlegen und zuordnen
+- Benutzer, Gruppen und Berechtigungen anlegen und zuordnen; Benutzer deaktivieren (Aktion *Deactivate selected users* oder Haken *Aktiv*) oder einzeln endgültig löschen (*Delete permanently*; löscht auch ihre Einträge im Admin-Log). Mit LDAP aktiviert der nächste Login einen Benutzer wieder, solange er in der LDAP-Gruppe ist; dauerhaft hilft nur, ihn dort zu entfernen.
 - Geräte und Importe ohne Tenant einem Tenant zuordnen (siehe [Geräte und Importe ohne Tenant](#geräte-und-importe-ohne-tenant))
 - die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
 - Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
