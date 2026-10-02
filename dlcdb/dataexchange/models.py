@@ -108,7 +108,13 @@ class ImporterList(OperationLogBase):
         help_text=f"Specifiy the format of the import file. Currently officially supported is only '{ImportFormatChoices.INTERNALCSV},'.",
     )
     tenant = models.ForeignKey(
-        "tenants.tenant", null=True, on_delete=models.SET_NULL, help_text="Import as given tenant."
+        "tenants.tenant",
+        # Like Device.tenant: a tenant with imports cannot be deleted. SET_NULL
+        # would hide its imports from every tenant-scoped list.
+        on_delete=models.PROTECT,
+        # Nullable for legacy imports only; forms require a tenant.
+        null=True,
+        help_text="Import as given tenant.",
     )
 
     class Meta:

@@ -120,19 +120,22 @@ def detail(request, pk):
     else:
         form = TenantForm(instance=tenant)
 
+    import_count = tenant.importerlist_set.count()
     return TemplateResponse(
         request,
         "tenants/detail.html",
         {
             "tenant": tenant,
+            "import_count": import_count,
             "form": form,
             "can_change": can_change,
             "index_url": index_url,
             "form_action": reverse("tenants:detail", args=[tenant.pk]),
-            # PROTECT refuses a tenant with devices, so only offer Delete without them.
+            # PROTECT refuses a tenant with devices or imports, so only offer
+            # Delete without them.
             "delete_url": (
                 reverse("tenants:delete", args=[tenant.pk])
-                if request.user.has_perm("tenants.delete_tenant") and not tenant.device_count
+                if request.user.has_perm("tenants.delete_tenant") and not tenant.device_count and not import_count
                 else None
             ),
         },
@@ -141,7 +144,7 @@ def detail(request, pk):
 
 @permission_required("tenants.delete_tenant", raise_exception=True)
 def delete(request, pk):
-    """Confirm, then hard delete. PROTECT refuses a tenant that still has devices."""
+    """Confirm, then hard delete. PROTECT refuses a tenant that still has devices or imports."""
     tenant = get_object_or_404(_tenant_queryset(), pk=pk)
 
     if request.method == "POST":
@@ -150,7 +153,7 @@ def delete(request, pk):
         except ProtectedError:
             messages.error(
                 request,
-                _("Tenant “%(tenant)s” still has devices and cannot be deleted.") % {"tenant": tenant},
+                _("Tenant “%(tenant)s” still has devices or imports and cannot be deleted.") % {"tenant": tenant},
             )
             return redirect("tenants:detail", pk=tenant.pk)
         messages.success(request, _("Tenant “%(tenant)s” was deleted.") % {"tenant": tenant})

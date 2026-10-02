@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group, Permission
 from django.urls import reverse
 
 from dlcdb.core.models import Device
+from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
@@ -255,9 +256,25 @@ def test_a_tenant_with_devices_cannot_be_deleted(login, tenant):
 
     content = client.get(detail_url).content.decode()
     assert reverse("tenants:delete", args=[tenant.pk]) not in content
-    assert "A tenant with devices cannot be deleted." in content
+    assert "A tenant with devices or imports cannot be deleted." in content
 
     response = client.post(reverse("tenants:delete", args=[tenant.pk]), follow=True)
     assert response.redirect_chain == [(detail_url, 302)]
-    assert "still has devices and cannot be deleted" in response.content.decode()
+    assert "still has devices or imports and cannot be deleted" in response.content.decode()
+    assert Tenant.objects.filter(pk=tenant.pk).exists()
+
+
+def test_a_tenant_with_imports_cannot_be_deleted(login, tenant):
+    """Imports protect their tenant like devices do."""
+    ImporterList.objects.create(file="imported_csv/old.csv", tenant=tenant)
+    client = login("tenants.view_tenant", "tenants.change_tenant", "tenants.delete_tenant")
+    detail_url = reverse("tenants:detail", args=[tenant.pk])
+
+    content = client.get(detail_url).content.decode()
+    assert reverse("tenants:delete", args=[tenant.pk]) not in content
+    assert "A tenant with devices or imports cannot be deleted." in content
+
+    response = client.post(reverse("tenants:delete", args=[tenant.pk]), follow=True)
+    assert response.redirect_chain == [(detail_url, 302)]
+    assert "still has devices or imports and cannot be deleted" in response.content.decode()
     assert Tenant.objects.filter(pk=tenant.pk).exists()

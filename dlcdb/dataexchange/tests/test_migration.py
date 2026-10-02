@@ -102,3 +102,53 @@ def test_table_move_preserves_data():
 
     # Leave the schema at head so the test DB stays consistent for other tests.
     _migrate(AFTER_RENAME)
+
+
+BEFORE_TENANT_DERIVATION = [("dataexchange", "0007_operationlog_audit_user")]
+AFTER_TENANT_DERIVATION = [("dataexchange", "0008_importerlist_tenant_protect")]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_legacy_imports_get_the_tenant_of_their_devices():
+    """
+    0008 gives a legacy import without tenant the tenant of its devices, but only
+    when all of them share exactly one.
+    """
+    old_apps = _migrate(BEFORE_TENANT_DERIVATION)
+    Tenant = old_apps.get_model("tenants", "Tenant")
+    ImporterList = old_apps.get_model("dataexchange", "ImporterList")
+    Device = old_apps.get_model("core", "Device")
+
+    tenant_a = Tenant.objects.create(name="A")
+    tenant_b = Tenant.objects.create(name="B")
+    imports = {
+        name: ImporterList.objects.create(file=f"imported_csv/{name}.csv", import_format="INTCSV", tenant=tenant)
+        for name, tenant in [
+            ("one-tenant", None),
+            ("two-tenants", None),
+            ("device-without-tenant", None),
+            ("no-devices", None),
+            ("already-assigned", tenant_b),
+        ]
+    }
+    for edv_id, tenant, name in [
+        ("ONE-1", tenant_a, "one-tenant"),
+        ("ONE-2", tenant_a, "one-tenant"),
+        ("TWO-1", tenant_a, "two-tenants"),
+        ("TWO-2", tenant_b, "two-tenants"),
+        ("ORPHAN-1", None, "device-without-tenant"),
+        ("ORPHAN-2", tenant_a, "device-without-tenant"),
+        ("ASSIGNED-1", tenant_a, "already-assigned"),
+    ]:
+        Device.objects.create(edv_id=edv_id, tenant=tenant, username="", imported_by=imports[name])
+
+    new_apps = _migrate(AFTER_TENANT_DERIVATION)
+
+    tenant_names = dict(new_apps.get_model("dataexchange", "ImporterList").objects.values_list("file", "tenant__name"))
+    assert tenant_names == {
+        "imported_csv/one-tenant.csv": "A",
+        "imported_csv/two-tenants.csv": None,
+        "imported_csv/device-without-tenant.csv": None,
+        "imported_csv/no-devices.csv": None,
+        "imported_csv/already-assigned.csv": "B",
+    }

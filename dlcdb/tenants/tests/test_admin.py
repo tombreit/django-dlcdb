@@ -123,6 +123,13 @@ def test_tenant_with_devices_cannot_be_deleted(tenant):
         tenant.delete()
 
 
+def test_tenant_with_imports_cannot_be_deleted(tenant):
+    ImporterList.objects.create(file="imported_csv/old.csv", tenant=tenant)
+
+    with pytest.raises(ProtectedError):
+        tenant.delete()
+
+
 def test_superuser_without_groups_sees_no_devices_but_can_assign_orphans(client, tenant):
     """Superusers see only their groups' tenants, yet the action still reaches every orphan."""
     Device.objects.create(edv_id="EDV-OWNED", tenant=tenant)

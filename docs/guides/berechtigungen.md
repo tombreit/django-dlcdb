@@ -202,7 +202,7 @@ Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.ch
 
 Reichen die Angaben auf der Bestätigungsseite nicht für die Entscheidung, hilft ein **Zwischen-Tenant**: einen Tenant *Unassigned* anlegen und der IT-Gruppe zuordnen, alle Geräte ohne Tenant per Aktion dorthin verschieben, dann jedes Gerät auf seiner Detailseite (Feld *Tenant*) dem richtigen Tenant zuordnen. Ist *Unassigned* leer, kann er gelöscht werden.
 
-Ein Tenant ohne Geräte lässt sich auf seiner Detailseite löschen (Schaltfläche *Delete* neben *Änderungen speichern*; `tenants.change_tenant` und `tenants.delete_tenant`). Ein Tenant, dem noch Geräte zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen.
+Ein Tenant ohne Geräte und Importe lässt sich auf seiner Detailseite löschen (Schaltfläche *Delete* neben *Änderungen speichern*; `tenants.change_tenant` und `tenants.delete_tenant`). Ein Tenant, dem noch Geräte oder Importe zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen; Importe lassen sich im Django-Admin löschen.
 
 ## Rolle des Django-Admins
 

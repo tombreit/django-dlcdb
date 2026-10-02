@@ -617,7 +617,7 @@ Found in the review of step 4 (2026-10-02).
 - *(done, one commit with 5a)* **5b: note on the tenants page** that permissions apply in every tenant (*Pitfalls*,
   "Permissions carry over"). A small `alert-warning` below the intro. The docs already have the
   matching `:::{warning}`.
-- **5c: imports protect their tenant like devices.**
+- *(done)* **5c: imports protect their tenant like devices.**
   - **Why nullable:** `ImporterList.tenant` was nullable and `SET_NULL` from the start
     (`dataexchange/0001`), because superusers imported without a tenant. The forms require one
     since step 0.
@@ -635,6 +635,14 @@ Found in the review of step 4 (2026-10-02).
       tenants or without one, stay NULL (known leftovers, invisible like devices without
       tenant);
     - NOT NULL follows with `Device.tenant` (step 3, deferred).
+  - **Implemented:**
+    - `dataexchange/0008` holds both the `AlterField` and the `RunPython`;
+    - test in `dataexchange/tests/test_migration.py`, which migrates from 0007 to 0008 like the
+      existing table-move test;
+    - the detail page shows *Imports* in *Usage*, and the delete hint reads "A tenant with
+      devices or imports cannot be deleted.".
+  - **Dev DB copy:** 15 of the 26 legacy imports got a tenant. The 11 left have no devices
+    (failed or empty imports).
 
 ### Follow-up: creator in `AuditBaseModel` (proposed 2026-10-01, own commit)
 

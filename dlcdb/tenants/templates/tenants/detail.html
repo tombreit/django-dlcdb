@@ -43,11 +43,15 @@
       <dl class="row mb-0 small">
         <dt class="col-sm-6 text-secondary fw-medium">{% translate "Devices" %}</dt>
         <dd class="col-sm-6">{{ tenant.device_count }}</dd>
+        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Imports" %}</dt>
+        <dd class="col-sm-6">{{ import_count }}</dd>
         <dt class="col-sm-6 text-secondary fw-medium">{% translate "Users who see this tenant" %}</dt>
         <dd class="col-sm-6 mb-0">{{ tenant.user_count }}</dd>
       </dl>
-      {% if perms.tenants.delete_tenant and tenant.device_count %}
-        <p class="small text-secondary mb-0 mt-3">{% translate "A tenant with devices cannot be deleted. Move its devices to another tenant first." %}</p>
+      {% if perms.tenants.delete_tenant %}
+        {% if tenant.device_count or import_count %}
+          <p class="small text-secondary mb-0 mt-3">{% translate "A tenant with devices or imports cannot be deleted." %}</p>
+        {% endif %}
       {% endif %}
     </div>
   </section>
