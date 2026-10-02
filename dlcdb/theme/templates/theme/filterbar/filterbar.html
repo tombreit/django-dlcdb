@@ -82,6 +82,8 @@ behind a "Filters (n)" button; search stays visible.
                 data-bs-toggle="dropdown"
                 data-filterbar-label="{% translate 'Sort' %}"
               >
+                {# Direction-neutral, like the idle marker of the sortable column headers (_sort_link.html); outside the label span, which filterbar.js rewrites. #}
+                <i class="bi bi-arrow-down-up" aria-hidden="true"></i>
                 <span data-filterbar-btn-label>{% translate "Sort" %}{% if bar.current_sort %}: {{ bar.current_sort.label }} <i class="bi {% if bar.current_sort.descending %}bi-sort-down{% else %}bi-sort-up{% endif %}"></i>{% endif %}</span>
               </button>
               <div class="dropdown-menu filterbar-menu p-2">
