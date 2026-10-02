@@ -255,10 +255,9 @@ class Record(AuditBaseModel):
             # Scoping by is_active=True keeps already-closed records' original
             # effective_until intact -- filtering by device alone would rewrite
             # every prior record's close timestamp on each append.
-            # qs.update() does not call the custom save method, does not
-            # emit any signals and did not update the auto_now field so we
-            # need to explictly set the modified_at field.
-            # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#django.db.models.query.QuerySet.update
+            # qs.update() bypasses save() and signals and leaves the auto_now
+            # modified_at alone: closing a record is not an edit of it.
+            # https://docs.djangoproject.com/en/stable/ref/models/querysets/#update
             Record.objects.filter(device=self.device, is_active=True).update(
                 is_active=False,
                 effective_until=timezone.now(),

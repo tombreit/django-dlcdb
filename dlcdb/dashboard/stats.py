@@ -39,6 +39,33 @@ def _to_html(fig):
     return pio.to_html(fig, full_html=False, include_plotlyjs=False, config=PLOTLY_CONFIG)
 
 
+def _month_index(moment):
+    """Months since year 0, so a span of months is a plain range()."""
+    return moment.year * 12 + moment.month - 1
+
+
+def devices_per_month(records, *, now):
+    """
+    {record_type: {"YYYY-MM": device_ids}} from
+    ``(device_id, record_type, created_at, effective_until)`` rows.
+
+    A record owns month M if it is still the active record at the end of M:
+    from the month it was created up to the month before it was superseded, or
+    through the current month while active. A REMOVED record counts once, in the
+    month of the removal.
+    """
+    type_month_devices = defaultdict(lambda: defaultdict(set))
+    for device_id, record_type, created_at, effective_until in records:
+        first = _month_index(created_at)
+        if record_type == Record.REMOVED:
+            last = first
+        else:
+            last = _month_index(effective_until) - 1 if effective_until else _month_index(now)
+        for index in range(first, last + 1):
+            type_month_devices[record_type][f"{index // 12}-{index % 12 + 1:02d}"].add(device_id)
+    return type_month_devices
+
+
 def get_record_fraction_html(*, tenants):
     """
     Returns a plotly HTML div showing the fraction of active records by type.
@@ -122,73 +149,14 @@ def get_device_type_html(*, tenants):
 def get_record_timeline_html(*, tenants):
     """
     Returns a plotly HTML div showing the number of devices with each record
-    type (LENT, INROOM, REMOVED) active per month over time.
-
-    Uses a single query fetching all records ordered by device and time.
-    Each record's active period is derived from the next record's created_at
-    for the same device (not from effective_until, which is unreliable due to
-    Record.save() overwriting it on ALL previous records).
+    type (LENT, INROOM, LOST) active per month over time, and the removals
+    (REMOVED) per month.
     """
-    now = timezone.now()
     chart_types = [Record.LENT, Record.INROOM, Record.LOST, Record.REMOVED]
-
-    # Fetch ALL record types — we need ORDERED/LOST too to know when
-    # an INROOM/LENT period ends.
-    qs = Record.objects.filter(device__tenant__in=tenants)
-    records = qs.order_by("device_id", "created_at").values_list("device_id", "record_type", "created_at")
-
-    # Group records by device, derive active periods from consecutive records
-    # {record_type: {month_key: set(device_ids)}}
-    type_month_devices = defaultdict(lambda: defaultdict(set))
-
-    # Walk through records grouped by device
-    current_device = None
-    device_records = []
-
-    def _process_device_records(device_id, dev_records):
-        for i, (rtype, start) in enumerate(dev_records):
-            if rtype == Record.REMOVED:
-                month_key = f"{start.year}-{start.month:02d}"
-                type_month_devices[rtype][month_key].add(device_id)
-                continue
-
-            if rtype not in (Record.LENT, Record.INROOM, Record.LOST):
-                continue
-
-            # Determine end month (inclusive) for this record's active period.
-            # Use "state at end of month" semantics: a record owns month M if
-            # it is still the active record at the end of that month.
-            year, month = start.year, start.month
-            if i + 1 < len(dev_records):
-                # Exclusive boundary: the month the next record starts is owned
-                # by the next record, so this record covers up to the month before.
-                next_start = dev_records[i + 1][1]
-                end_year, end_month = next_start.year, next_start.month - 1
-                if end_month < 1:
-                    end_month = 12
-                    end_year -= 1
-            else:
-                # Last record: still active through current month
-                end_year, end_month = now.year, now.month
-
-            while (year, month) <= (end_year, end_month):
-                month_key = f"{year}-{month:02d}"
-                type_month_devices[rtype][month_key].add(device_id)
-                month += 1
-                if month > 12:
-                    month = 1
-                    year += 1
-
-    for device_id, record_type, created_at in records:
-        if device_id != current_device:
-            if current_device is not None:
-                _process_device_records(current_device, device_records)
-            current_device = device_id
-            device_records = []
-        device_records.append((record_type, created_at))
-
-    if current_device is not None:
-        _process_device_records(current_device, device_records)
+    records = Record.objects.filter(device__tenant__in=tenants, record_type__in=chart_types).values_list(
+        "device_id", "record_type", "created_at", "effective_until"
+    )
+    type_month_devices = devices_per_month(records, now=timezone.now())
 
     type_labels = {
         Record.LENT: "Verliehen",
