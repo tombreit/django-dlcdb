@@ -52,6 +52,19 @@
   </section>
 {% endblock detail_readonly %}
 
+{% block detail_related %}
+  {# What is or was assigned to the person; each card only for a user who may see that kind. #}
+  {% if perms.core.view_lentrecord %}
+    {% include "persons/includes/_lendings.html" %}
+  {% endif %}
+  {% if perms.core.view_licencerecord %}
+    {% include "persons/includes/_licences.html" %}
+  {% endif %}
+  {% if perms.smallstuff.view_assignedthing %}
+    {% include "persons/includes/_smallstuff.html" %}
+  {% endif %}
+{% endblock detail_related %}
+
 {% block detail_sidebar %}
   {% if is_udb_synced %}
     <section class="card mb-3">

@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Person detail page lists the person's lendings, licences and smallstuff, current and past, with links to device, lending and record
 * Tenants: new page Settings › Tenants to manage tenants and which groups see them, with history
 * Tenants: users see the devices of all tenants their groups belong to, superusers too: give their group access to every tenant
 * Every device and import needs a tenant; a hint leads to assigning the existing ones

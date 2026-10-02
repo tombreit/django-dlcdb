@@ -1,0 +1,85 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+// Timeline: a vertical rail of dated entries, newest first (e.g. the
+// assignment cards on the person detail page).
+//
+//   <ol class="timeline">
+//     <li class="timeline-item timeline-item-current">  current: filled dot
+//       <div class="timeline-date">Since 2026-09-01</div>
+//       ...entry content...
+//     </li>
+//     <li class="timeline-item">                        past: hollow dot
+//
+// Rail and dots are pseudo-elements, so the markup stays classes only. Colours
+// come from Bootstrap's variables and follow the light/dark theme on their own.
+
+.timeline {
+    --timeline-dot: .75rem;
+    // Centre of the dot, which sits centred on the date line (.75rem × 1.5).
+    --timeline-dot-centre: .5625rem;
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding: 0 0 1.25rem 1.75rem;
+
+    // The rail, from this dot down to the next one.
+    &::before {
+        content: "";
+        position: absolute;
+        top: var(--timeline-dot-centre);
+        bottom: calc(-1 * var(--timeline-dot-centre));
+        left: calc(var(--timeline-dot) / 2 - 1px);
+        width: 2px;
+        background: var(--bs-border-color);
+    }
+
+    // The dot, hollow for the past. Its fill covers the rail behind it.
+    &::after {
+        content: "";
+        position: absolute;
+        top: calc(var(--timeline-dot-centre) - var(--timeline-dot) / 2);
+        left: 0;
+        width: var(--timeline-dot);
+        height: var(--timeline-dot);
+        border: 2px solid var(--bs-secondary-color);
+        border-radius: 50%;
+        background: var(--bs-card-bg, var(--bs-body-bg));
+    }
+
+    &:last-child {
+        padding-bottom: 0;
+
+        &::before {
+            display: none;
+        }
+    }
+}
+
+// What the person holds right now: a filled dot with a soft halo.
+.timeline-item-current::after {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary);
+    box-shadow: 0 0 0 .2rem var(--bs-primary-bg-subtle);
+}
+
+.timeline-date {
+    font-size: .75rem;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+
+    .timeline-item-current & {
+        color: var(--bs-primary-text-emphasis);
+    }
+}

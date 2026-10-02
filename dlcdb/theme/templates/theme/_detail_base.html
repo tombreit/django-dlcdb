@@ -29,6 +29,8 @@ Blocks:
   detail_readonly_notice why the page is read-only; defaults to the permission
                          wording, since that is the common case
   detail_readonly        read-only rendering of the object
+  detail_related         cards listing related objects, below the form or the
+                         read-only card; rendered in both modes, outside the <form>
   detail_sidebar         the col-lg-4 column
 
 Read-only pages that are read-only *by design* (assets/records) do not use this
@@ -69,6 +71,7 @@ frame: their header carries a breadcrumb band instead and there is no form.
           {% block detail_readonly %}{% endblock detail_readonly %}
         {% endif %}
       {% endblock detail_main %}
+      {% block detail_related %}{% endblock detail_related %}
     </div>
 
     <div class="col-lg-4">

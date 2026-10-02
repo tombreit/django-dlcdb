@@ -7,16 +7,19 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
 
-from dlcdb.core.models import Person
+from dlcdb.core.models import Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
+from .assignments import group_assignments
 from .filters import PersonFilter
 from .forms import PersonForm
 
@@ -26,6 +29,18 @@ PERSONS_PER_PAGE = 25
 def _person_queryset():
     """Persons visible in the frontend (the default manager excludes soft-deleted)."""
     return Person.objects.select_related("organizational_unit")
+
+
+def _person_records(request, person):
+    """
+    The person's device records in the user's tenants: lendings and licence
+    assignments. Plain ``Record`` rather than the LentRecord/LicenceRecord
+    proxies, whose managers hide inactive records -- and the inactive ones are
+    the person's history. See ``assignments`` for why one assignment can span
+    several records.
+    """
+    queryset = person.record_set.select_related("device", "device__device_type", "device__manufacturer", "room")
+    return tenant_scoped_queryset(queryset, request, tenant_field="device__tenant")
 
 
 @permission_required("core.view_person", raise_exception=True)
@@ -102,6 +117,17 @@ def person_detail(request, pk):
     else:
         form = PersonForm(instance=person)
 
+    # What is or was assigned to the person, current first. The template shows
+    # each card only with the matching view permission.
+    records = _person_records(request, person)
+    lendings = group_assignments(records.filter(record_type=Record.LENT))
+    # A lent licence is listed once, as a lending.
+    licences = group_assignments(records.filter(device__is_licence=True).exclude(record_type=Record.LENT))
+    # Still issued (no return date) first, then by most recent return.
+    assigned_things = person.assignedthing_set.select_related("thing").order_by(
+        F("unassigned_at").desc(nulls_first=True), "-assigned_at"
+    )
+
     return TemplateResponse(
         request,
         "persons/detail.html",
@@ -112,5 +138,8 @@ def person_detail(request, pk):
             "is_udb_synced": is_udb_synced,
             "index_url": index_url,
             "form_action": form_action,
+            "lendings": lendings,
+            "licences": licences,
+            "assigned_things": assigned_things,
         },
     )
