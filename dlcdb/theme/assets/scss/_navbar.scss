@@ -1,0 +1,78 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+/* App header (theme/includes/navbar.html).
+
+   Every color here is a Bootstrap CSS variable that `data-bs-theme` on <html>
+   remaps, so the header and its dropdowns follow light/dark/auto like the
+   rest of the page. Bootstrap's own navbar link colors (rgba of the emphasis
+   color) are already theme-aware and are left alone. The only accent is the
+   bar under the active entry, see --app-nav-active in _tokens.scss. */
+.navbar-main {
+    background-color: var(--bs-body-bg);
+    border-bottom: var(--bs-border-width) solid var(--bs-border-color-translucent);
+
+    .navbar-nav .nav-link {
+        font-weight: 500;
+    }
+
+    // Collapsed (mobile) menu: the entries are stacked rows, so the active one
+    // is a filled row rather than a bar.
+    @include media-breakpoint-down(lg) {
+        .navbar-collapse {
+            padding-bottom: .5rem;
+        }
+
+        .navbar-nav .nav-link {
+            padding-inline: .5rem;
+            border-radius: var(--bs-border-radius);
+
+            &.active {
+                background-color: var(--bs-secondary-bg);
+            }
+        }
+    }
+
+    // Wide screens: the links span the bar's full height, so the active bar
+    // sits right on the header's bottom line. An inset shadow instead of a
+    // border keeps the link from shifting when it becomes active.
+    @include media-breakpoint-up(lg) {
+        --bs-navbar-padding-y: 0;
+
+        .navbar-nav .nav-link {
+            padding-block: 1rem;
+
+            &.active {
+                box-shadow: inset 0 -2px 0 var(--app-nav-active);
+            }
+        }
+
+        .dropdown-menu {
+            box-shadow: var(--app-elevation-2);
+        }
+    }
+
+    // Inset, rounded items; the current page is a quiet fill instead of
+    // Bootstrap's solid primary.
+    .dropdown-menu {
+        --bs-dropdown-padding-x: .375rem;
+        --bs-dropdown-padding-y: .375rem;
+        --bs-dropdown-border-radius: .5rem;
+        --bs-dropdown-item-border-radius: .375rem;
+        --bs-dropdown-item-padding-x: .625rem;
+        --bs-dropdown-header-padding-x: .625rem;
+        --bs-dropdown-link-active-bg: var(--bs-secondary-bg);
+        --bs-dropdown-link-active-color: var(--bs-emphasis-color);
+    }
+}
+
+// The inline logo (theme/includes/_logo.svg) draws in the text color.
+.navbar-logo {
+    display: block;
+    height: 1.75rem;
+    width: auto;
+    color: var(--bs-emphasis-color);
+}

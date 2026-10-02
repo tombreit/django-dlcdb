@@ -13,7 +13,11 @@
   --app-radius-lg: .75rem;
   --app-transition: .15s ease;
 
-  /* App shell navbar */
-  --app-navbar-bg: #0f172a;       /* slate-900 */
-  --app-navbar-accent: #6366f1;   /* indigo-500 — active underline */
+  /* App header: the bar under the active main navigation entry */
+  --app-nav-active: var(--bs-primary);
+}
+
+@include color-mode(dark) {
+  /* The primary indigo is too dark to make out on the dark body background */
+  --app-nav-active: var(--bs-primary-text-emphasis);
 }

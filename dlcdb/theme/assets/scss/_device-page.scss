@@ -13,10 +13,10 @@
 // in the theme bundle rather than in a page-scoped <style> block.
 
 .device-page {
-    --device-tile-bg: var(--app-navbar-bg);
+    --device-tile-bg: #0f172a; // slate-900, the former dark navbar color
 }
 
-// Identity tile — mirrors the slate navbar so the page reads as one system.
+// Identity tile: a slate square with a white icon, in light and dark mode.
 .device-tile {
     width: 3rem;
     height: 3rem;

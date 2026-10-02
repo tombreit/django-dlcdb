@@ -71,6 +71,19 @@ class MasterdataNavbarTests(TestCase):
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class HeaderThemeTests(TestCase):
+    """The header follows the light/dark theme set on <html> instead of forcing its own."""
+
+    def test_the_header_does_not_force_the_dark_theme(self):
+        user = get_user_model().objects.create_user(username="theme-user", email="theme@example.com", password="secret")
+        self.client.force_login(user)
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertContains(response, '<header class="navbar-main')
+        self.assertNotContains(response, 'data-bs-theme="dark"')
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MainNavPermissionTests(TestCase):
     """Every nav entry names a real permission -- there is no login-only entry.
 

@@ -1,14 +1,10 @@
-{% load static i18n %}
+{% load i18n %}
 
-<header class="navbar-main navbar navbar-expand-lg sticky-top" data-bs-theme="dark">
+{# No data-bs-theme here: the header follows the theme set on <html> (see _base.html), like the rest of the page. #}
+<header class="navbar-main navbar navbar-expand-lg sticky-top">
   <nav class="container" aria-label="{% translate 'Main navigation' %}">
     <a class="navbar-brand" href="{% url 'dashboard:index' %}">
-        <img 
-          {# src="{% if branding.organization_logo_white %}{% get_media_prefix %}{{ branding.organization_logo_white }}{% else %}{% static 'theme/branding/dlcdb_logo_white.svg' %}{% endif %}" #}
-          src="{% static 'theme/branding/dlcdb_logo_dark.svg' %}"
-          alt="{{ branding.organization_abbr }}"
-          style="height: 30px;"
-        >
+      {% include "theme/includes/_logo.svg" %}
     </a>
 
     {% if nav_focus.navbar_status_template %}{% include nav_focus.navbar_status_template %}{% endif %}
@@ -58,7 +54,7 @@
           {% endif %}
         </ul>
 
-        <ul  class="navbar-nav">
+        <ul class="navbar-nav align-items-lg-center gap-lg-1">
 
         {% if nav_focus.navbar_secondary %}
             {% for item in nav_focus.navbar_secondary %}
@@ -79,16 +75,16 @@
         {% endif %}
 
           {% if nav_items_settings %}
-          <li class="nav-item d-none d-lg-flex align-items-stretch">
-            <span class="vr mx-2 my-2 opacity-25"></span>
-          </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}">
-              <i class="bi bi-gear"></i>
+            {# Icon only on wide screens, no caret; the collapsed mobile menu shows the label. #}
+            <a class="nav-link{% for item in nav_items_settings %}{% if item.active %} active{% endif %}{% endfor %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}" aria-label="{% translate 'Settings' %}">
+              <i class="bi bi-gear" aria-hidden="true"></i>
+              <span class="d-lg-none">{% translate 'Settings' %}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
+              <h6 class="dropdown-header">{% translate 'Settings' %}</h6>
               {% for item in nav_items_settings %}
-                <a class="dropdown-item" href="{% url item.url %}">
+                <a class="dropdown-item{% if item.active %} active{% endif %}" href="{% url item.url %}"{% if item.active %} aria-current="page"{% endif %}>
                   {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
                   {{ item.label }}
                 </a>
@@ -98,9 +94,6 @@
           {% endif %}
 
           {% if request.user.is_authenticated or nav_focus.userdropdown or nav_focus.userdropdown_template %}
-          <li class="nav-item d-none d-lg-flex align-items-stretch">
-            <span class="vr mx-2 my-2 opacity-25"></span>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user.email }}">
               <i class="bi bi-person"></i>
