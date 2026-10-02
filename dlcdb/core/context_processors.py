@@ -18,6 +18,7 @@ from django.utils.translation import ngettext
 
 from dlcdb.core.models import Device, Room
 from dlcdb.core.models.inventory import get_active_inventory
+from dlcdb.dataexchange.models import ImporterList
 
 
 def hints(request):
@@ -59,8 +60,8 @@ def hints(request):
         # One query for both device hints. Record-less devices are scoped to
         # the user's tenants. Devices without tenant are deliberately counted
         # globally: they belong to no tenant, so no tenant-scoped list shows
-        # them. The Tenant admin action "Assign devices without tenant" lists
-        # and assigns them.
+        # them. The Tenant admin action "Assign devices and imports without
+        # tenant" lists and assigns them.
         recordless = Q(tenant__in=request.tenants, active_record__isnull=True)
         device_counts = Device.objects.aggregate(
             recordless_count=Count("pk", filter=recordless),
@@ -105,6 +106,24 @@ def hints(request):
                         devices_without_tenant_count,
                     )
                     % {"count": devices_without_tenant_count},
+                    cta_link=reverse("admin:tenants_tenant_changelist"),
+                    cta_text=_("Assign a tenant?"),
+                )
+            )
+
+        # Imports without tenant: counted globally like devices without tenant,
+        # assigned by the same Tenant admin action.
+        imports_without_tenant_count = ImporterList.objects.filter(tenant__isnull=True).count()
+        if imports_without_tenant_count:
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=ngettext(
+                        "%(count)d import without tenant!",
+                        "%(count)d imports without tenant!",
+                        imports_without_tenant_count,
+                    )
+                    % {"count": imports_without_tenant_count},
                     cta_link=reverse("admin:tenants_tenant_changelist"),
                     cta_text=_("Assign a tenant?"),
                 )

@@ -5,7 +5,8 @@
 """
 The context processors run on every frontend page render, so they must not
 issue redundant queries: one aggregate for the room hints, one for both device
-hints (record-less, without tenant), and at most one (request-memoized)
+hints (record-less, without tenant), one count for imports without tenant, and
+at most one (request-memoized)
 active-inventory lookup shared by nav() and the inventory context processor.
 See https://adamj.eu/tech/2023/03/23/django-context-processors-database-queries/
 """
@@ -56,6 +57,8 @@ class ContextProcessorQueryTests(BaseTest):
         # One aggregate counts record-less devices (tenant-scoped) and devices
         # without tenant (global).
         self.assertEqual(len(self._table_queries(captured, "core_device")), 1)
+        # Imports without tenant: one count (another table).
+        self.assertEqual(len(self._table_queries(captured, "dataexchange_importerlist")), 1)
 
         # The single record-less device is still linked directly, without the
         # former extra .first() query.

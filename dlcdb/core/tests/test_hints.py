@@ -14,6 +14,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import Device, Room
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.dataexchange.models import ImporterList
 from dlcdb.organization.models import Branding
 
 _PLAIN_STATIC_STORAGE = {
@@ -64,6 +65,19 @@ class StickyHintsTests(BaseTest):
         self.assertContains(response, "2 devices without tenant!")
         self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
         self.assertContains(response, "Assign a tenant?")
+
+    def test_imports_without_tenant_hint_links_to_the_tenant_admin(self):
+        ImporterList.objects.create(file="imported_csv/owned.csv", tenant=self._default_tenant())
+
+        response = self.client.get(self.dashboard_url)
+        self.assertNotContains(response, "without tenant!")
+
+        ImporterList.objects.create(file="imported_csv/orphan-1.csv")
+        ImporterList.objects.create(file="imported_csv/orphan-2.csv")
+
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, "2 imports without tenant!")
+        self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
 
     def test_users_without_tenant_get_a_hint(self):
         hint = "None of your groups belongs to a tenant, so you see no devices."

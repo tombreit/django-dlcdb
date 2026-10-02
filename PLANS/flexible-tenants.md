@@ -215,6 +215,10 @@ and template lookups fail silently, so the grep in *Verification* is a required 
 
 ### Devices without a tenant: hint and Tenant admin action
 
+Since step 5d the action and its page cover imports without tenant too; the names below are
+the original ones (now `assign_without_tenant`, `assign_view`, `tenants_tenant_assign`,
+`tenants/actions/assign.html`).
+
 **Hint** (`dlcdb/core/context_processors.py:hints`, same pattern as "N devices without
 record!", shown to everyone like the room and branding hints):
 - `StickyMessage(level=WARNING, msg=ngettext("%(count)d device without tenant!", ...),
@@ -379,7 +383,8 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
   without tenant" message, add the migration, give the ~62 tenant-less test device creations a
   tenant, and remove the orphan message, the Tenant admin action and their docs in one go. Not
   on this branch: the migration would fail on instances that still have orphans. The same
-  later release makes `ImporterList.tenant` NOT NULL (see step 5c for the legacy imports).
+  later release makes `ImporterList.tenant` NOT NULL (see step 5c for the legacy imports) and
+  removes the import hint and the import part of the action (step 5d).
 - *(done)* Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
   `theme/includes/navbar.html` (staff-or-superuser link), `core/context_processors.py:nav`
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
@@ -643,6 +648,23 @@ Found in the review of step 4 (2026-10-02).
       devices or imports cannot be deleted.".
   - **Dev DB copy:** 15 of the 26 legacy imports got a tenant. The 11 left have no devices
     (failed or empty imports).
+- *(done)* **5d: imports without tenant get the same cleanup as devices.** The imports 5c leaves without
+  a tenant are invisible in every scoped list.
+  - **Reuse:** the device tooling covers them:
+    - a sticky hint "N imports without tenant!" for everyone, like the device hint (one count
+      query per page);
+    - the Tenant admin action, renamed "Assign devices and imports without tenant"
+      (`assign_without_tenant`);
+    - its intermediate page (`tenants/actions/assign.html`) with a second table for imports
+      and one confirm button.
+  - **Permissions:** each table only for users who may change that kind of object; the action
+    needs `tenants.change_tenant` plus `core.change_device` or `dataexchange.change_importerlist`.
+  - **Why a dedicated path:** the admin's import change form is no option, because
+    `ImporterListAdmin.save_model` re-runs the import on every save. The page saves only
+    `tenant` and `modified_at`; the import's `user` stays the uploader.
+  - **Size:** about 60 lines of code plus tests.
+  - **Dev DB copy:** the hint showed "11 imports without tenant!"; the page listed the 11, one
+    confirm assigned them, no devices were created (no re-run), and the hint disappeared.
 
 ### Follow-up: creator in `AuditBaseModel` (proposed 2026-10-01, own commit)
 
@@ -783,7 +805,8 @@ tenant" (both linking to the Tenant admin). NEWS has one entry.
     - tick and untick any group for any tenant (the matrix, and the admin's
       `filter_horizontal`);
     - rename a tenant and set its `contact_email`;
-    - together with `core.change_device`, the admin action "Assign devices without tenant".
+    - together with `core.change_device` or `dataexchange.change_importerlist`, the admin
+      action "Assign devices and imports without tenant".
 
     `tenants.add_tenant` in the admin can also pick groups at creation, but a new tenant has no
     devices yet.

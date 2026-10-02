@@ -190,15 +190,15 @@ Nicht auf den Tenant eingeschränkt sind:
 - die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Tenants,
 - die *Notizen* im Django-Admin (*Datenhaltung › Notizen*).
 
-### Geräte ohne Tenant
+### Geräte und Importe ohne Tenant
 
-Jedes Gerät braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!*. Zum Zuordnen:
+Jedes Gerät und jeder Import braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte und Importe ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!* bzw. *N imports without tenant!*. Zum Zuordnen:
 
 1. Dem Link *Assign a tenant?* folgen (*Start › Tenants › Tenant*).
-2. Den Ziel-Tenant auswählen und die Aktion *Assign devices without tenant* ausführen.
-3. Die folgende Seite listet alle Geräte ohne Tenant. Geräte, die zu einem anderen Tenant gehören, abwählen und bestätigen. Für die übrigen Geräte die Schritte mit deren Tenant wiederholen.
+2. Den Ziel-Tenant auswählen und die Aktion *Assign devices and imports without tenant* ausführen.
+3. Die folgende Seite listet alle Geräte und Importe ohne Tenant. Was zu einem anderen Tenant gehört, abwählen und bestätigen. Für das Übrige die Schritte mit dessen Tenant wiederholen.
 
-Die Aktion benötigt die Berechtigungen `tenants.change_tenant` **und** `core.change_device`; sie listet die Geräte unabhängig von den eigenen Tenants.
+Die Aktion benötigt `tenants.change_tenant` sowie `core.change_device` für Geräte bzw. `dataexchange.change_importerlist` für Importe; die Seite zeigt nur, was der Benutzer ändern darf, unabhängig von den eigenen Tenants. Den Tenant eines Imports nicht im Import-Formular des Django-Admins ändern: Speichern dort führt den Import erneut aus.
 
 Reichen die Angaben auf der Bestätigungsseite nicht für die Entscheidung, hilft ein **Zwischen-Tenant**: einen Tenant *Unassigned* anlegen und der IT-Gruppe zuordnen, alle Geräte ohne Tenant per Aktion dorthin verschieben, dann jedes Gerät auf seiner Detailseite (Feld *Tenant*) dem richtigen Tenant zuordnen. Ist *Unassigned* leer, kann er gelöscht werden.
 
@@ -209,7 +209,7 @@ Ein Tenant ohne Geräte und Importe lässt sich auf seiner Detailseite löschen 
 Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug, Inventur, Lizenzen, Import – läuft vollständig im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü, nur mit Staff-Flag) wird noch für Folgendes benötigt:
 
 - Benutzer, Gruppen und Berechtigungen anlegen und zuordnen
-- Geräte ohne Tenant einem Tenant zuordnen (siehe [Geräte ohne Tenant](#geräte-ohne-tenant))
+- Geräte und Importe ohne Tenant einem Tenant zuordnen (siehe [Geräte und Importe ohne Tenant](#geräte-und-importe-ohne-tenant))
 - die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
 - Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
 - Stammdaten *aktivieren/deaktivieren* (Soft-Delete, nur Superuser) und endgültig löschen (nur Superuser)

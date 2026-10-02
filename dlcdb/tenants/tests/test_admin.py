@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""Tenant admin action "Assign devices without tenant" and its intermediate page."""
+"""Tenant admin action "Assign devices and imports without tenant" and its intermediate page."""
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -17,8 +17,8 @@ from dlcdb.tenants.models import Tenant
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
 
 CHANGELIST_URL = "admin:tenants_tenant_changelist"
-ASSIGN_URL = "admin:tenants_tenant_assign_devices"
-ACTION = "assign_devices_without_tenant"
+ASSIGN_URL = "admin:tenants_tenant_assign"
+ACTION = "assign_without_tenant"
 
 
 @pytest.fixture(autouse=True)
@@ -107,13 +107,72 @@ def test_post_assigns_only_the_confirmed_devices_without_tenant(assigner_client,
     assert confirmed.history.first().tenant_id == tenant.pk
 
 
-@pytest.mark.parametrize("perms", [(), ("tenants.change_tenant",), ("core.change_device",)])
+@pytest.mark.parametrize(
+    "perms", [(), ("tenants.change_tenant",), ("core.change_device",), ("dataexchange.change_importerlist",)]
+)
 def test_action_and_page_need_both_permissions(client, staff_user, tenant, perms):
     client.force_login(staff_user("tenants.view_tenant", *perms))
 
     changelist = client.get(reverse(CHANGELIST_URL))
     assert ACTION not in changelist.content.decode()
     assert client.get(reverse(ASSIGN_URL, args=[tenant.pk])).status_code == 403
+
+
+def test_page_lists_and_assigns_only_the_confirmed_imports_without_tenant(client, staff_user, tenant):
+    client.force_login(staff_user("tenants.change_tenant", "dataexchange.change_importerlist"))
+    uploader = get_user_model().objects.create_user(email="uploader@example.com", username="uploader")
+    confirmed = ImporterList.objects.create(file="imported_csv/confirmed.csv", user=uploader)
+    unchecked = ImporterList.objects.create(file="imported_csv/unchecked.csv")
+    other = Tenant.objects.create(name="Other tenant")
+    owned = ImporterList.objects.create(file="imported_csv/owned.csv", tenant=other)
+    url = reverse(ASSIGN_URL, args=[tenant.pk])
+
+    content = client.get(url).content.decode()
+    assert "confirmed.csv" in content
+    assert "unchecked.csv" in content
+    assert "owned.csv" not in content
+
+    # `owned` is a crafted pk: it already has a tenant and must keep it.
+    response = client.post(url, {"import": [confirmed.pk, owned.pk]}, follow=True)
+
+    assert "1 import assigned to tenant" in response.content.decode()
+    for importer_list in (confirmed, unchecked, owned):
+        importer_list.refresh_from_db()
+    assert confirmed.tenant == tenant
+    assert unchecked.tenant is None
+    assert owned.tenant == other
+    # The import's user stays the uploader, and the import is not re-run.
+    assert confirmed.user == uploader
+    assert not Device.objects.exists()
+
+
+def test_page_shows_only_what_the_user_may_change(client, staff_user, tenant):
+    orphan_device = Device.objects.create(edv_id="EDV-ORPHAN")
+    orphan_import = ImporterList.objects.create(file="imported_csv/orphan.csv")
+    client.force_login(staff_user("tenants.change_tenant", "core.change_device"))
+    url = reverse(ASSIGN_URL, args=[tenant.pk])
+
+    content = client.get(url).content.decode()
+    assert "EDV-ORPHAN" in content
+    assert "orphan.csv" not in content
+
+    # Without dataexchange.change_importerlist a posted import pk is ignored.
+    client.post(url, {"device": [orphan_device.pk], "import": [orphan_import.pk]})
+    orphan_device.refresh_from_db()
+    orphan_import.refresh_from_db()
+    assert orphan_device.tenant == tenant
+    assert orphan_import.tenant is None
+
+
+def test_import_permission_alone_reaches_the_action_without_devices(client, staff_user, tenant):
+    Device.objects.create(edv_id="EDV-ORPHAN")
+    ImporterList.objects.create(file="imported_csv/orphan.csv")
+    client.force_login(staff_user("tenants.view_tenant", "tenants.change_tenant", "dataexchange.change_importerlist"))
+
+    assert ACTION in client.get(reverse(CHANGELIST_URL)).content.decode()
+    content = client.get(reverse(ASSIGN_URL, args=[tenant.pk])).content.decode()
+    assert "orphan.csv" in content
+    assert "EDV-ORPHAN" not in content
 
 
 def test_tenant_with_devices_cannot_be_deleted(tenant):

@@ -27,7 +27,7 @@ Die Übersicht listet alle Geräte und ist durchsuch-, filter- und sortierbar:
 :::{note}
 Jeder sieht nur die Geräte seiner Mandanten (*Tenants*). Wer mehrere Mandanten
 sieht, bekommt zusätzlich die Spalte *Mandant*. Geräte ohne Mandant erscheinen
-nicht (siehe [Geräte ohne Tenant](berechtigungen.md#geräte-ohne-tenant)).
+nicht (siehe [Geräte und Importe ohne Tenant](berechtigungen.md#geräte-und-importe-ohne-tenant)).
 :::
 
 ## Geräte-Detailseite
