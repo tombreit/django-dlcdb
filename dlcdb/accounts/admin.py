@@ -22,7 +22,7 @@ from .models import CustomUser
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = UserAdmin.list_display + ("is_active",)
+    list_display = UserAdmin.list_display + ("is_active", "last_login")
     change_form_template = "accounts/customuser/change_form.html"
 
     # For now we still have to deal with the legacy username field
