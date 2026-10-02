@@ -28,8 +28,12 @@ hiding it would lose history.
     <i class="bi bi-stack"></i>
     <span>{{ record.get_record_type_display }}</span>
     <span>/</span>
-    <a class="fw-semibold text-body link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
-       href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device }}</a>
+    {% if perms.core.view_device %}
+      <a class="fw-semibold text-body link-underline link-underline-opacity-0 link-underline-opacity-100-hover"
+         href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device }}</a>
+    {% else %}
+      <span class="fw-semibold text-body">{{ record.device }}</span>
+    {% endif %}
     {% if record.is_active %}
       <span class="small fw-medium text-primary-emphasis">{% translate "Current" %}</span>
     {% else %}
@@ -52,9 +56,17 @@ hiding it would lose history.
         <div class="card-body">
           <dl class="row mb-0">
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "IT ID" %}</dt>
-            <dd class="col-sm-8 font-monospace">{{ record.device.edv_id|default:"—" }}</dd>
+            <dd class="col-sm-8 font-monospace">
+              {% if record.device.edv_id and perms.core.view_device %}
+                <a href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device.edv_id }}</a>
+              {% else %}{{ record.device.edv_id|default:"—" }}{% endif %}
+            </dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Inventory ID" %}</dt>
-            <dd class="col-sm-8 font-monospace">{{ record.device.sap_id|default:"—" }}</dd>
+            <dd class="col-sm-8 font-monospace">
+              {% if record.device.sap_id and perms.core.view_device %}
+                <a href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device.sap_id }}</a>
+              {% else %}{{ record.device.sap_id|default:"—" }}{% endif %}
+            </dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Device type" %}</dt>
             <dd class="col-sm-8">{{ record.device.device_type|default:"—" }}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Manufacturer" %}</dt>
@@ -65,13 +77,15 @@ hiding it would lose history.
             <dd class="col-sm-8 font-monospace mb-0">{{ record.device.serial_number|default:"—" }}</dd>
           </dl>
         </div>
-        <div class="list-group list-group-flush">
-          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-             href="{% url 'assets:device_detail' record.device.pk %}">
-            <i class="bi bi-pc-display text-primary"></i>
-            <span class="me-auto">{% translate "Open device" %}</span>
-          </a>
-        </div>
+        {% if perms.core.view_device %}
+          <div class="list-group list-group-flush">
+            <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+               href="{% url 'assets:device_detail' record.device.pk %}">
+              <i class="bi bi-pc-display text-primary"></i>
+              <span class="me-auto">{% translate "Open device" %}</span>
+            </a>
+          </div>
+        {% endif %}
       </section>
 
       <section class="card device-card mb-3">
@@ -119,7 +133,9 @@ hiding it would lose history.
             {% if record.assigned_device %}
               <dt class="col-sm-4 text-secondary fw-medium">{% translate "Assigned device" %}</dt>
               <dd class="col-sm-8 mb-0">
-                <a href="{% url 'assets:device_detail' record.assigned_device.pk %}">{{ record.assigned_device }}</a>
+                {% if perms.core.view_device %}
+                  <a href="{% url 'assets:device_detail' record.assigned_device.pk %}">{{ record.assigned_device }}</a>
+                {% else %}{{ record.assigned_device }}{% endif %}
               </dd>
             {% endif %}
           </dl>

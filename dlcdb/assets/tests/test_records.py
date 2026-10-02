@@ -14,12 +14,20 @@ Exercised against the FilterSet rather than the rendered list: a row shows its
 cannot tell "this record has a note" from "this device has another record".
 """
 
-from django.test import TestCase
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
 from dlcdb.core.models import InRoomRecord, LostRecord, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
 
 from ..filters import RecordFilter
+
+_PLAIN_STATIC_STORAGE = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 
 
 class RecordNoteFilterTests(BaseTest, TestCase):
@@ -69,3 +77,39 @@ class RecordNoteFilterTests(BaseTest, TestCase):
             set(self._filtered(record_type=Record.LOST)),
             set(LostRecord.objects.all()),
         )
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class RecordDetailDeviceLinkTests(BaseTest, TestCase):
+    """The record page links its device like its room and lender: only for a user who may open it."""
+
+    @classmethod
+    def setUpTestData(cls):
+        device = cls()._create_device(edv_id="REC-LINK", sap_id="8100")
+        record = InRoomRecord.objects.create(device=device, room=Room.objects.create(number="R2.02"))
+        cls.device_url = reverse("assets:device_detail", args=[device.pk])
+        cls.record_url = reverse("assets:record_detail", args=[record.pk])
+
+    def _login_with(self, *codenames):
+        user = get_user_model().objects.create_user(
+            username="record-viewer", email="viewer@example.com", password="secret"
+        )
+        user.user_permissions.add(*Permission.objects.filter(content_type__app_label="core", codename__in=codenames))
+        self._join_default_tenant(user)
+        self.client.force_login(user)
+
+    def test_the_device_ids_link_to_the_device(self):
+        self._login_with("view_record", "view_device")
+
+        response = self.client.get(self.record_url)
+
+        self.assertContains(response, f'<a href="{self.device_url}">REC-LINK</a>', html=True)
+        self.assertContains(response, f'<a href="{self.device_url}">8100</a>', html=True)
+
+    def test_without_view_device_no_link_leads_to_the_device(self):
+        self._login_with("view_record")
+
+        response = self.client.get(self.record_url)
+
+        self.assertContains(response, "REC-LINK")
+        self.assertNotContains(response, self.device_url)
