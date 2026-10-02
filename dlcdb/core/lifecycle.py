@@ -362,10 +362,23 @@ def transition_locate(device, *, room, user, inventory=None, note=""):
 
 
 def transition_relocate(device, *, room, user, inventory=None, note=""):
-    """INROOM -> INROOM. Move a located device to another room (appends a new record)."""
+    """INROOM -> INROOM. Move a located device to another room (appends a new record).
+
+    A move changes the room, not the assignment: a licence's person and
+    assigned device carry over to the new record.
+    """
     check(device, "relocate")
     InRoomRecord = apps.get_model("core.InRoomRecord")
-    return InRoomRecord.objects.create(device=device, room=room, inventory=inventory, note=note, **_actor(user))
+    moved_from = device.active_record
+    return InRoomRecord.objects.create(
+        device=device,
+        room=room,
+        inventory=inventory,
+        note=note,
+        person=moved_from.person,
+        assigned_device=moved_from.assigned_device,
+        **_actor(user),
+    )
 
 
 def transition_lend(

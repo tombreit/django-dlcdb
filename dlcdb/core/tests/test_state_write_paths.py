@@ -91,6 +91,23 @@ def test_inventory_found_relocates_a_located_device(inventory_1, inventory_rooms
 
 
 @pytest.mark.django_db
+def test_inventory_found_keeps_a_licence_assignment(inventory_1, inventory_rooms, inventory_user):
+    """Stocktaking a licence's room must not end its assignment to a person and a device."""
+    licence = Device.objects.create(edv_id="LIC-INV", is_licence=True)
+    workstation = Device.objects.create(edv_id="PC-INV")
+    person = Person.objects.create(last_name="Licensee", email="licensee@example.com")
+    before = InRoomRecord.objects.create(
+        device=licence, room=inventory_rooms["target"], person=person, assigned_device=workstation
+    )
+
+    record = _inventorize(licence, "dev_state_found", inventory_rooms["target"], inventory_user)
+
+    assert record.pk != before.pk, "stocktaking appends a record"
+    assert record.inventory == inventory_1
+    assert (record.person, record.assigned_device) == (person, workstation)
+
+
+@pytest.mark.django_db
 def test_inventory_found_recovers_a_lost_device(inventory_1, inventory_rooms, inventory_user):
     """Finding a device during stocktaking brings it back from LOST."""
     device = Device.objects.create(edv_id="EDV-INV-LOST")

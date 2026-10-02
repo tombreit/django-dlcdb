@@ -12,6 +12,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.timezone import localtime
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, OrganizationalUnit, Person, Record, Room
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.smallstuff.models import AssignedThing, Thing
@@ -308,6 +309,17 @@ class PersonAssignmentsTests(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "Design Suite", count=1)
         self.assertContains(response, "Since 2021-05-10")
+
+    def test_a_relocated_licence_stays_one_current_assignment(self):
+        licence = Device.objects.create(edv_id="LIC-MOVED", series="CAD Suite", is_licence=True, tenant=self.tenant)
+        first = InRoomRecord.objects.create(device=licence, room=self.room, person=self.person)
+        Record.objects.filter(pk=first.pk).update(created_at=datetime.datetime(2022, 3, 1, 12, tzinfo=datetime.UTC))
+
+        lifecycle.transition_relocate(licence, room=Room.objects.create(number="B2.02"), user=self.user)
+
+        response = self.client.get(self.url)
+        self.assertContains(response, "CAD Suite", count=1)
+        self.assertContains(response, "Since 2022-03-01")
 
     def test_smallstuff_lists_issued_and_returned_items(self):
         response = self.client.get(self.url)

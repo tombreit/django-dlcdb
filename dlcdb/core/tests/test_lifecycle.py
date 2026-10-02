@@ -10,7 +10,7 @@ and the enforcement it drives.
 import pytest
 
 from dlcdb.core import lifecycle
-from dlcdb.core.models import InRoomRecord, LentRecord, Record, Room
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Record, Room
 
 
 @pytest.fixture
@@ -295,6 +295,30 @@ def test_relocate_lending_rejects_a_non_lending_record(lentable_device, room):
 
     with pytest.raises(lifecycle.IllegalTransition):
         lifecycle.relocate_lending(record, room=room, user=None)
+
+
+@pytest.mark.django_db
+def test_relocating_keeps_a_licence_assignment(room):
+    """A move changes the room, not who or what the licence is assigned to."""
+    licence = Device.objects.create(edv_id="LIC-MOVE", is_licence=True)
+    workstation = Device.objects.create(edv_id="PC-MOVE")
+    person = Person.objects.create(last_name="Licensee", email="licensee@example.com")
+    InRoomRecord.objects.create(device=licence, room=room, person=person, assigned_device=workstation)
+    licence.refresh_from_db()
+
+    moved = lifecycle.transition_relocate(licence, room=Room.objects.create(number="LC-MOVE"), user=None)
+
+    assert (moved.person, moved.assigned_device) == (person, workstation)
+
+
+@pytest.mark.django_db
+def test_relocating_an_unassigned_device_assigns_nothing(plain_device, room):
+    InRoomRecord.objects.create(device=plain_device, room=room)
+    plain_device.refresh_from_db()
+
+    moved = lifecycle.transition_relocate(plain_device, room=Room.objects.create(number="LC-MOVE"), user=None)
+
+    assert (moved.person, moved.assigned_device) == (None, None)
 
 
 @pytest.mark.django_db

@@ -41,7 +41,8 @@ def relocate_device(device, new_room, user):
     - LENT     -> ``relocate_lending`` (update the room in place; lending continues)
     - same room -> no-op
     - LOST     -> ``transition_find`` (the device turned up in a room again)
-    - INROOM   -> ``transition_relocate`` (append a new room record)
+    - INROOM   -> ``transition_relocate`` (append a new room record, keeping a
+                  licence's assignment)
     - no record / ORDERED -> ``transition_locate`` (first localisation)
 
     Anything outside ``lifecycle.RELOCATABLE_STATES`` is refused -- in practice a
