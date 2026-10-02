@@ -76,3 +76,86 @@
     width: auto;
     color: var(--bs-emphasis-color);
 }
+
+// The user's initial on the account menu toggle. No taller than a line of
+// text, so the toggle keeps the height of the other links and their active
+// bar stays on the header's bottom line.
+.navbar-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-emphasis-color);
+    font-size: .6875rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+// Wide enough for the theme and language rows; a long name or email is
+// truncated instead of widening the menu.
+.navbar-account-menu {
+    --bs-dropdown-min-width: 16rem;
+    max-width: 20rem;
+}
+
+.navbar-account {
+    padding: .25rem var(--bs-dropdown-item-padding-x) .375rem;
+}
+
+// One preference per row: label left, its control right.
+.navbar-main .navbar-preference {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: .875rem;
+}
+
+// Segmented control: a quiet track with the chosen option raised.
+// Used for the theme and language preferences in the account menu.
+.segmented {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: var(--bs-border-width) solid var(--bs-border-color-translucent);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bs-tertiary-bg);
+}
+
+.segmented-item {
+    padding: .125rem .5rem;
+    border: 0;
+    border-radius: calc(var(--bs-border-radius) - 2px);
+    background-color: transparent;
+    color: var(--bs-secondary-color);
+    font-size: .8125rem;
+    line-height: 1.5;
+    transition: color var(--app-transition), background-color var(--app-transition);
+
+    &:hover {
+        color: var(--bs-emphasis-color);
+    }
+
+    &.active {
+        background-color: var(--bs-body-bg);
+        color: var(--bs-emphasis-color);
+        box-shadow: var(--app-elevation-1);
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+    }
+}
+
+@include color-mode(dark) {
+    // The dark body background is darker than the track, so raise the chosen
+    // option with the lighter secondary background instead.
+    .segmented-item.active {
+        background-color: var(--bs-secondary-bg);
+    }
+}

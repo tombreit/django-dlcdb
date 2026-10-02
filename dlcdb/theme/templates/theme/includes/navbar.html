@@ -76,8 +76,8 @@
 
           {% if nav_items_settings %}
           <li class="nav-item dropdown">
-            {# Icon only on wide screens, no caret; the collapsed mobile menu shows the label. #}
-            <a class="nav-link{% for item in nav_items_settings %}{% if item.active %} active{% endif %}{% endfor %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}" aria-label="{% translate 'Settings' %}">
+            {# Icon only on wide screens; the collapsed mobile menu shows the label. #}
+            <a class="nav-link dropdown-toggle{% for item in nav_items_settings %}{% if item.active %} active{% endif %}{% endfor %}" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}" aria-label="{% translate 'Settings' %}">
               <i class="bi bi-gear" aria-hidden="true"></i>
               <span class="d-lg-none">{% translate 'Settings' %}</span>
             </a>
@@ -93,19 +93,49 @@
           </li>
           {% endif %}
 
-          {% if request.user.is_authenticated or nav_focus.userdropdown or nav_focus.userdropdown_template %}
+          {# The account menu. Logged out, the same menu holds just the preferences, so theme and language can be set on the login page too. #}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user.email }}">
-              <i class="bi bi-person"></i>
-              {{ request.user.email_localpart }}
-              {% if request.user.is_superuser %}<span class="badge text-bg-danger ms-1" title="{% translate 'All permissions, but only the devices of your tenants' %}">{% translate 'Superuser' %}</span>{% endif %}
-              {% include "tenants/includes/_tenant_badge.html" with css_class="badge text-bg-secondary ms-1" %}
+            {% if request.user.is_authenticated %}
+            {# auto-close "outside": a theme click keeps the menu open to show the change #}
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="{{ request.user.email }}" aria-label="{{ request.user.email }}">
+              <span class="navbar-avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.email|first|upper }}</span>
+              <span class="d-lg-none d-xl-inline">{{ request.user.email_localpart }}</span>
+              {% if request.user.is_superuser %}<i class="bi bi-shield-fill text-danger" aria-hidden="true" title="{% translate 'Superuser' %}: {% translate 'All permissions, but only the devices of your tenants' %}"></i>{% endif %}
             </a>
-            <div class="dropdown-menu dropdown-menu-end">
+            {% else %}
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="{% translate 'Preferences' %}" aria-label="{% translate 'Preferences' %}">
+              <i class="bi bi-sliders" aria-hidden="true"></i>
+              <span class="d-lg-none">{% translate 'Preferences' %}</span>
+            </a>
+            {% endif %}
 
-              {% if nav_focus.userdropdown_template %}
-              {% include nav_focus.userdropdown_template %}
+            <div class="dropdown-menu dropdown-menu-end navbar-account-menu">
+
+              {% if request.user.is_authenticated %}
+              <div class="navbar-account">
+                <div class="fw-semibold text-body-emphasis text-truncate">{{ request.user.get_full_name|default:request.user.email_localpart }}</div>
+                <div class="small text-body-secondary text-truncate">{{ request.user.email }}</div>
+                {% if request.user.is_superuser or request.tenants %}
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                  {% if request.user.is_superuser %}
+                  <span class="badge rounded-pill bg-danger-subtle text-danger-emphasis" title="{% translate 'All permissions, but only the devices of your tenants' %}"><i class="bi bi-shield-fill"></i> {% translate 'Superuser' %}</span>
+                  {% endif %}
+                  {% include "tenants/includes/_tenant_badge.html" with css_class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis" %}
+                </div>
+                {% endif %}
+              </div>
               <div class="dropdown-divider"></div>
+              {% endif %}
+
+              {% if nav_focus.userdropdown_template or nav_focus.userdropdown %}
+                {% if nav_focus.userdropdown_template %}{% include nav_focus.userdropdown_template %}{% endif %}
+                {% for item in nav_focus.userdropdown %}
+                  <a class="dropdown-item" href="{% if item.url %}{% url item.url %}{% else %}{{ item.href }}{% endif %}">
+                    {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
+                    {{ item.label }}
+                  </a>
+                {% endfor %}
+                <div class="dropdown-divider"></div>
               {% endif %}
 
               {% if request.user.is_authenticated %}
@@ -122,59 +152,44 @@
                 <div class="dropdown-divider"></div>
               {% endif %}
 
-              {# Bootstrap light/dark/auto theme switcher #}
-              <h6 class="dropdown-header" id="bd-theme">
-                <span id="bd-theme-text">{% translate 'Toggle theme' %}</span>
-                <i class="bi bi-circle-half theme-icon-active"></i>
-              </h6>
-              <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
-                <i class="bi bi-sun me-2 theme-icon"></i>{% translate 'Light' %}
-              </button>
-              <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
-                <i class="bi bi-moon-stars me-2 theme-icon"></i>{% translate 'Dark' %}
-              </button>
-              <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
-                <i class="bi bi-circle-half me-2 theme-icon"></i>{% translate 'Auto' %}
-              </button>
+              {# Theme: light/dark/auto, stored in the browser by theme.js #}
+              <div class="dropdown-item-text navbar-preference">
+                <span id="theme-switch-label">{% translate 'Theme' %}</span>
+                <div class="segmented" role="group" aria-labelledby="theme-switch-label">
+                  <button type="button" class="segmented-item" data-bs-theme-value="light" aria-pressed="false" title="{% translate 'Light' %}">
+                    <i class="bi bi-sun" aria-hidden="true"></i><span class="visually-hidden">{% translate 'Light' %}</span>
+                  </button>
+                  <button type="button" class="segmented-item" data-bs-theme-value="dark" aria-pressed="false" title="{% translate 'Dark' %}">
+                    <i class="bi bi-moon-stars" aria-hidden="true"></i><span class="visually-hidden">{% translate 'Dark' %}</span>
+                  </button>
+                  <button type="button" class="segmented-item" data-bs-theme-value="auto" aria-pressed="false" title="{% translate 'Auto' %}">
+                    <i class="bi bi-circle-half" aria-hidden="true"></i><span class="visually-hidden">{% translate 'Auto' %}</span>
+                  </button>
+                </div>
+              </div>
 
-              <div class="dropdown-divider"></div>
-
-              {# Language switcher: manual override of the browser-detected language #}
+              {# Language: manual override of the browser-detected language. One form; the pressed button carries its code. #}
+              {# Each language is named in itself ("English", not "Englisch"), so it can be found whatever the current one. #}
               {% get_current_language as LANGUAGE_CODE %}
               {% get_available_languages as LANGUAGES %}
-              <h6 class="dropdown-header">
-                <span>{% translate 'Language' %}</span>
-                <i class="bi bi-translate"></i>
-              </h6>
-              {% for code, name in LANGUAGES %}
-                <form action="{% url 'set_language' %}" method="post" class="m-0">
-                  {% csrf_token %}
-                  <input name="next" type="hidden" value="{{ request.get_full_path }}">
-                  <input name="language" type="hidden" value="{{ code }}">
-                  <button type="submit" class="dropdown-item d-flex align-items-center{% if code == LANGUAGE_CODE %} active{% endif %}">
-                    <i class="bi bi-check2 me-2{% if code != LANGUAGE_CODE %} invisible{% endif %}"></i>{{ name }}
-                  </button>
-                </form>
-              {% endfor %}
-
-              <div class="dropdown-divider"></div>
+              <form class="dropdown-item-text navbar-preference" action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                <span id="language-switch-label">{% translate 'Language' %}</span>
+                <div class="segmented" role="group" aria-labelledby="language-switch-label">
+                  {% for code, name in LANGUAGES %}
+                    {% get_language_info for code as language %}
+                    <button type="submit" name="language" value="{{ code }}" lang="{{ code }}" class="segmented-item{% if code == LANGUAGE_CODE %} active{% endif %}" aria-pressed="{% if code == LANGUAGE_CODE %}true{% else %}false{% endif %}">{{ language.name_local }}</button>
+                  {% endfor %}
+                </div>
+              </form>
 
               {% if request.user.is_authenticated %}
+                <div class="dropdown-divider"></div>
                 {% include 'theme/logout_link.html' %}
-              {% endif %}
-
-              {% if nav_focus.userdropdown %}
-              <div class="dropdown-divider"></div>
-                {% for item in nav_focus.userdropdown %}
-                  <a class="dropdown-item" href="{% if item.url %}{% url item.url %}{% else %}{{ item.href }}{% endif %}">
-                    {% if item.icon %}<i class="{{ item.icon }}"></i>{% endif %}
-                    {{ item.label }}
-                  </a>
-                {% endfor %}
               {% endif %}
             </div>
           </li>
-          {% endif %}
 
         </ul>
     </div>

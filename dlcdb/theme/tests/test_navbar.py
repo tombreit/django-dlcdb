@@ -8,6 +8,7 @@ frontend apps (rooms, persons, assets) and core (admin-only leftovers) fill
 via their navigation.py files.
 """
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.test import TestCase, override_settings
@@ -171,5 +172,37 @@ class TenantBadgeNavbarTests(TestCase):
     def test_no_tenant_shows_no_badge(self):
         self._login()
         response = self.client.get(reverse("dashboard:index"))
-        self.assertNotContains(response, 'class="badge text-bg-secondary ms-1"')
+        self.assertNotContains(response, 'class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis"')
         self.assertNotContains(response, "No tenant set!")
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class AccountMenuTests(TestCase):
+    """The account menu names the user and holds the theme and language preferences, logged out too."""
+
+    def test_the_superuser_is_marked_in_the_menu(self):
+        superuser = get_user_model().objects.create_superuser(email="root@example.com", password="secret")
+        self.client.force_login(superuser)
+        self.assertContains(self.client.get(reverse("dashboard:index")), "</i> Superuser</span>")
+
+        user = get_user_model().objects.create_user(username="plain", email="plain@example.com", password="secret")
+        self.client.force_login(user)
+        self.assertNotContains(self.client.get(reverse("dashboard:index")), "</i> Superuser</span>")
+
+    def test_logged_out_visitors_can_set_theme_and_language(self):
+        response = self.client.get(reverse("login"))
+
+        self.assertContains(response, "Preferences")
+        for theme in ["light", "dark", "auto"]:
+            self.assertContains(response, f'data-bs-theme-value="{theme}"')
+        # One form, one submit button per language
+        self.assertContains(response, f'action="{reverse("set_language")}"', count=1)
+        self.assertContains(response, 'type="submit" name="language"', count=len(settings.LANGUAGES))
+        self.assertNotContains(response, reverse("logout"))
+
+    def test_each_language_is_named_in_itself(self):
+        response = self.client.get(reverse("login"), headers={"accept-language": "de"})
+
+        self.assertContains(response, 'lang="de"')  # the German UI is active
+        self.assertContains(response, ">English</button>")
+        self.assertNotContains(response, "Englisch")

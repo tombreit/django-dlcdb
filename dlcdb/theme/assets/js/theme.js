@@ -64,8 +64,8 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
  * Bootstrap 5.3 color mode switcher (Light / Dark / Auto).
  * Adapted from https://getbootstrap.com/docs/5.3/customize/color-modes/#javascript
  * The initial data-bs-theme is set by an inline <head> script (see _base.html) to
- * avoid a flash of the wrong theme; this code only wires up the navbar switcher and
- * follows the OS preference while in "auto" mode.
+ * avoid a flash of the wrong theme; this code only wires up the switcher in the
+ * navbar's account menu and follows the OS preference while in "auto" mode.
  */
 (() => {
     'use strict';
@@ -90,29 +90,11 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
     };
 
     const showActiveTheme = (theme) => {
-        const switcher = document.querySelector('#bd-theme');
-        if (!switcher) return;
-
-        const activeBtn = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-        if (!activeBtn) return;
-
         document.querySelectorAll('[data-bs-theme-value]').forEach((btn) => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
+            const isActive = btn.getAttribute('data-bs-theme-value') === theme;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', String(isActive));
         });
-
-        activeBtn.classList.add('active');
-        activeBtn.setAttribute('aria-pressed', 'true');
-
-        // Reflect the active mode in the toggle icon.
-        const activeIcon = switcher.querySelector('.theme-icon-active');
-        const sourceIcon = activeBtn.querySelector('.theme-icon');
-        if (activeIcon && sourceIcon) {
-            activeIcon.className = `${sourceIcon.className.replace('me-2', '').trim()} theme-icon-active`;
-        }
-
-        const label = `${document.querySelector('#bd-theme-text').textContent} (${theme})`;
-        switcher.setAttribute('aria-label', label);
     };
 
     // Follow the OS preference, but only while the user hasn't pinned light/dark.
@@ -124,7 +106,8 @@ document.body.addEventListener('htmx:afterSwap', function(event) {
     });
 
     const initThemeSwitcher = () => {
-        showActiveTheme(getPreferredTheme());
+        // No stored choice means the page follows the OS, which is "auto".
+        showActiveTheme(getStoredTheme() || 'auto');
 
         document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
             toggle.addEventListener('click', () => {
