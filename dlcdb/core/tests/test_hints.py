@@ -79,6 +79,33 @@ class StickyHintsTests(BaseTest):
         self.assertContains(response, "2 imports without tenant!")
         self.assertContains(response, reverse("admin:tenants_tenant_changelist"))
 
+    def test_without_tenant_hints_only_for_users_of_the_assign_action(self):
+        Device.objects.create(edv_id="EDV-NO-TENANT", sap_id="2-2")
+        ImporterList.objects.create(file="imported_csv/orphan.csv")
+
+        def hints_for(*perms, is_staff=True):
+            number = get_user_model().objects.count()
+            user = get_user_model().objects.create_user(
+                username=f"user-{number}", email=f"user-{number}@example.com", is_staff=is_staff
+            )
+            for perm in perms:
+                app_label, codename = perm.split(".")
+                user.user_permissions.add(Permission.objects.get(content_type__app_label=app_label, codename=codename))
+            self.client.force_login(user)
+            return self.client.get(self.dashboard_url).text
+
+        everything = ("tenants.change_tenant", "core.change_device", "dataexchange.change_importerlist")
+        self.assertNotIn("without tenant!", hints_for(*everything, is_staff=False))
+        self.assertNotIn("without tenant!", hints_for("core.change_device", "dataexchange.change_importerlist"))
+
+        devices_only = hints_for("tenants.change_tenant", "core.change_device")
+        self.assertIn("1 device without tenant!", devices_only)
+        self.assertNotIn("import without tenant!", devices_only)
+
+        imports_only = hints_for("tenants.change_tenant", "dataexchange.change_importerlist")
+        self.assertIn("1 import without tenant!", imports_only)
+        self.assertNotIn("device without tenant!", imports_only)
+
     def test_users_without_tenant_get_a_hint(self):
         hint = "None of your groups belongs to a tenant, so you see no devices."
 
@@ -90,7 +117,13 @@ class StickyHintsTests(BaseTest):
         self.client.force_login(viewer)
         response = self.client.get(self.dashboard_url)
         self.assertContains(response, hint)
-        self.assertContains(response, reverse("tenants:index"))
+        # The link leads to the tenants page, which the viewer may not open.
+        self.assertNotContains(response, "Assign groups to tenants?")
+
+        viewer.user_permissions.add(Permission.objects.get(codename="view_tenant", content_type__app_label="tenants"))
+        self.client.force_login(get_user_model().objects.get(pk=viewer.pk))
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, f"<a href='{reverse('tenants:index')}'>Assign groups to tenants?</a>", html=True)
 
         # Superusers see only the tenants of their groups, too.
         superuser = get_user_model().objects.create_superuser(

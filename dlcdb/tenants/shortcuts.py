@@ -19,7 +19,7 @@ def get_user_tenants(user):
     """
     if not user.is_authenticated:
         return ()
-    return tuple(Tenant.objects.filter(groups__in=user.groups.all()).distinct())
+    return tuple(Tenant.objects.filter(groups__user=user).distinct())
 
 
 def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):
@@ -32,7 +32,11 @@ def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):
 
 
 def limit_tenant_field(field, tenants):
-    """Offer only the given tenants; with exactly one, preselect it as the only option."""
+    """
+    Offer only the given tenants; with exactly one, preselect it as the only
+    option. The field stays required: a foreign tenant fails validation, and
+    without tenants the form cannot be valid.
+    """
     field.queryset = Tenant.objects.filter(pk__in=[tenant.pk for tenant in tenants])
     if len(tenants) == 1:
         field.initial = tenants[0]

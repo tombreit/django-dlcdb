@@ -7,10 +7,8 @@
 
 {% block extra_css %}
   <style>
-    /* The clicked cell lights up while its change is saved (htmx sets
-       .htmx-request on the hx-indicator, the cell), then fades out. A
-       background colour shows through Bootstrap's translucent stripe and
-       hover shadows and leaves them alone. */
+    /* The clicked cell (hx-indicator) lights up while saving, then fades out.
+       A background colour leaves Bootstrap's stripe and hover shadows alone. */
     .tenant-matrix td { transition: background-color 1s ease-out; }
     .tenant-matrix td.htmx-request { background-color: var(--bs-success-bg-subtle); transition: none; }
   </style>
@@ -29,7 +27,7 @@
   </div>
 
   <p class="text-secondary">
-    {% translate "Users get access to a tenant's devices through their groups: tick a group in a tenant's column to give all its members access. Every device belongs to exactly one tenant; what users may do with the devices is set by their groups' permissions. A group that should access all tenants needs a tick in every column, including the column of each new tenant." %}
+    {% translate "Users get access to a tenant's devices through their groups: tick a group in a tenant's column to give all its members access. A group that should access all tenants needs a tick in every column, including the column of each new tenant." %}
     {% if can_change %}{% translate "Each tick is saved immediately." %}{% endif %}
   </p>
 
@@ -63,10 +61,8 @@
           </tr>
         </thead>
         {% comment %}
-        Each click is saved by views.toggle: the checkbox posts "sees" only when
-        ticked, and the response replaces the tenant's "users with access" line
-        in the header (partial "user-count"). hx-sync applies quick clicks in order;
-        hx-indicator lets the cell light up while saving (see extra_css).
+        Each click is saved by views.toggle, which returns the tenant's "users
+        with access" line (partial "user-count"); hx-sync keeps quick clicks in order.
         {% endcomment %}
         <tbody>
           {% for group, cells in rows %}

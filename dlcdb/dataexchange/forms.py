@@ -72,9 +72,6 @@ class DeviceImportForm(forms.ModelForm):
         self.fields["file"].help_text = _("CSV file in the internal format (UTF-8).")
         self.fields["note"].label = _("Note")
 
-        # Only the user's tenants are offered, so a crafted foreign tenant
-        # fails validation. The field stays required (model blank=False):
-        # imported devices without a tenant would be invisible to everyone.
         limit_tenant_field(self.fields["tenant"], request.tenants)
 
         # Bootstrap 5 control styling, mirroring the frontend DeviceForm.
@@ -102,5 +99,5 @@ class RemoverListAdminForm(forms.ModelForm):
         username = self.request.user.username
 
         # Fail loudly: any error raised by set_removed_record propagates.
-        report_dryrun = set_removed_record(file, username=username, write=False)
+        report_dryrun = set_removed_record(file, tenants=self.request.tenants, username=username, write=False)
         _show_report(self.request, report_dryrun)

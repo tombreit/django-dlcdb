@@ -27,7 +27,7 @@ IMPORT_URL = "dataexchange:device_import"
 CONFIRM_URL = "dataexchange:device_import_confirm"
 TEMPLATE_URL = "dataexchange:device_import_template"
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 # The production-like settings use a hashed/manifest static files storage, which
 # requires a built manifest (collectstatic). For rendering tests we swap in the
@@ -38,13 +38,6 @@ _PLAIN_STATICFILES = override_settings(
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
 )
-
-
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    """Keep uploaded import files out of the real media directory."""
-    settings.MEDIA_ROOT = tmp_path
-    return tmp_path
 
 
 @pytest.fixture

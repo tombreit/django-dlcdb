@@ -37,11 +37,13 @@ def hints(request):
 
         level: str
         msg: str
-        cta_link: str
-        cta_text: str
+        cta_link: str = ""
+        cta_text: str = ""
 
         def get_formatted_msg(self) -> str:
-            """Build a html safe message with a call-to-action link."""
+            """Build a html safe message, with a call-to-action link if given."""
+            if not self.cta_link:
+                return format_html("{}", self.msg)
             return format_html(
                 "{} <a href='{}'>{}</a>",
                 self.msg,
@@ -56,12 +58,10 @@ def hints(request):
         ]
     ):
         rooms_index_url = reverse("rooms:index")
+        user = request.user
 
-        # One query for both device hints. Record-less devices are scoped to
-        # the user's tenants. Devices without tenant are deliberately counted
-        # globally: they belong to no tenant, so no tenant-scoped list shows
-        # them. The Tenant admin action "Assign devices and imports without
-        # tenant" lists and assigns them.
+        # One query for both device hints: record-less devices of the user's
+        # tenants, and devices without tenant (global: they belong to no tenant).
         recordless = Q(tenant__in=request.tenants, active_record__isnull=True)
         device_counts = Device.objects.aggregate(
             recordless_count=Count("pk", filter=recordless),
@@ -95,51 +95,54 @@ def hints(request):
                 )
             )
 
-        devices_without_tenant_count = device_counts["without_tenant_count"]
-        if devices_without_tenant_count:
-            sticky_messages.append(
-                StickyMessage(
-                    level=messages.WARNING,
-                    msg=ngettext(
+        # Devices and imports without tenant: only for users of the Tenant
+        # admin action that assigns them (TenantAdmin.has_assign_permission).
+        if user.is_staff and user.has_perm("tenants.change_tenant"):
+            devices_without_tenant = device_counts["without_tenant_count"] if user.has_perm("core.change_device") else 0
+            imports_without_tenant = (
+                ImporterList.objects.filter(tenant__isnull=True).count()
+                if user.has_perm("dataexchange.change_importerlist")
+                else 0
+            )
+            for count, msg in [
+                (
+                    devices_without_tenant,
+                    ngettext(
                         "%(count)d device without tenant!",
                         "%(count)d devices without tenant!",
-                        devices_without_tenant_count,
-                    )
-                    % {"count": devices_without_tenant_count},
-                    cta_link=reverse("admin:tenants_tenant_changelist"),
-                    cta_text=_("Assign a tenant?"),
-                )
-            )
-
-        # Imports without tenant: counted globally like devices without tenant,
-        # assigned by the same Tenant admin action.
-        imports_without_tenant_count = ImporterList.objects.filter(tenant__isnull=True).count()
-        if imports_without_tenant_count:
-            sticky_messages.append(
-                StickyMessage(
-                    level=messages.WARNING,
-                    msg=ngettext(
+                        devices_without_tenant,
+                    ),
+                ),
+                (
+                    imports_without_tenant,
+                    ngettext(
                         "%(count)d import without tenant!",
                         "%(count)d imports without tenant!",
-                        imports_without_tenant_count,
+                        imports_without_tenant,
+                    ),
+                ),
+            ]:
+                if count:
+                    sticky_messages.append(
+                        StickyMessage(
+                            level=messages.WARNING,
+                            msg=msg % {"count": count},
+                            cta_link=reverse("admin:tenants_tenant_changelist"),
+                            cta_text=_("Assign a tenant?"),
+                        )
                     )
-                    % {"count": imports_without_tenant_count},
-                    cta_link=reverse("admin:tenants_tenant_changelist"),
-                    cta_text=_("Assign a tenant?"),
-                )
-            )
 
         # Only for users who work with devices at all: they would otherwise
-        # just see empty lists. Superusers are no exception.
-        if not request.tenants and request.user.has_perm("core.view_device"):
-            sticky_messages.append(
-                StickyMessage(
-                    level=messages.WARNING,
-                    msg=_("None of your groups belongs to a tenant, so you see no devices."),
-                    cta_link=reverse("tenants:index"),
-                    cta_text=_("Assign groups to tenants?"),
-                )
+        # just see empty lists. The link only for those who may open its page.
+        if not request.tenants and user.has_perm("core.view_device"):
+            no_tenant_hint = StickyMessage(
+                level=messages.WARNING,
+                msg=_("None of your groups belongs to a tenant, so you see no devices."),
             )
+            if user.has_perm("tenants.view_tenant"):
+                no_tenant_hint.cta_link = reverse("tenants:index")
+                no_tenant_hint.cta_text = _("Assign groups to tenants?")
+            sticky_messages.append(no_tenant_hint)
 
         room_flags = Room.objects.aggregate(
             room_count=Count("pk"),

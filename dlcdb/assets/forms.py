@@ -116,10 +116,6 @@ class DeviceForm(forms.ModelForm):
     def __init__(self, *args, request, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only the user's tenants are offered, so a crafted foreign tenant
-        # fails validation; with a single tenant it is the only, preselected
-        # option. The field stays required (model blank=False), as in the
-        # admin: a device without a tenant is invisible to everyone.
         limit_tenant_field(self.fields["tenant"], request.tenants)
 
         add_bootstrap_classes(self)

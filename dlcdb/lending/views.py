@@ -50,7 +50,7 @@ DEFAULT_ORDERING = "-modified"
 
 def _tenant_scoped(queryset, request):
     """
-    Scope a record queryset to the current tenant via the related device.
+    Scope a record queryset to the user's tenants via the related device.
     Records carry no tenant field of their own; the shared policy lives in
     ``dlcdb.tenants.shortcuts``.
     """
@@ -186,7 +186,7 @@ def lending_export_csv(request):
 
 def _get_scoped_record(request, pk):
     """
-    Fetch the lending record for ``pk``, scoped to the request's tenant so a
+    Fetch the lending record for ``pk``, scoped to the user's tenants so a
     user can only open rows they can also see on the index. Returns a 404 for
     out-of-tenant or non-lentable (e.g. REMOVED) records.
     """

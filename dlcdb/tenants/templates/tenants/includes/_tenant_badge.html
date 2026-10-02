@@ -1,0 +1,12 @@
+{% comment %}
+The user's tenants: the name of a single tenant, or "N tenants" with the names
+in the title. Nothing without tenants (core.context_processors.hints shows a
+hint instead).
+
+Params:
+  css_class — the badge's classes
+{% endcomment %}
+{% load i18n %}
+{% if request.tenants %}
+  <span class="{{ css_class }}" title="{% translate 'Tenants' %}: {{ request.tenants|join:', ' }}">{% if request.tenants|length == 1 %}{{ request.tenants.0 }}{% else %}{% blocktranslate count counter=request.tenants|length %}{{ counter }} tenant{% plural %}{{ counter }} tenants{% endblocktranslate %}{% endif %}</span>
+{% endif %}

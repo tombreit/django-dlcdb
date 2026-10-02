@@ -45,7 +45,7 @@ class ExportCsvMixin:
 
 
 @admin.register(ImporterList)
-class ImporterListAdmin(TenantScopedAdmin, admin.ModelAdmin):
+class ImporterListAdmin(TenantScopedAdmin):
     # Lists only imports of the user's tenants and offers only these as import
     # target (TenantScopedAdmin).
     form = ImporterAdminForm
@@ -236,6 +236,7 @@ class RemoverListAdmin(admin.ModelAdmin):
         # We only have a primary key for this object after saving
         report = set_removed_record(
             obj.file,
+            tenants=request.tenants,
             username=request.user.username,
             write=True,
         )

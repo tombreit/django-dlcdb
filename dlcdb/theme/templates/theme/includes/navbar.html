@@ -106,11 +106,7 @@
               <i class="bi bi-person"></i>
               {{ request.user.email_localpart }}
               {% if request.user.is_superuser %}<span class="badge text-bg-danger ms-1" title="{% translate 'All permissions, but only the devices of your tenants' %}">{% translate 'Superuser' %}</span>{% endif %}
-              {% if request.tenants|length == 1 %}
-                <span class="badge text-bg-secondary ms-1" title="{% translate 'Tenant' %}: {{ request.tenants.0 }}">{{ request.tenants.0 }}</span>
-              {% elif request.tenants %}
-                <span class="badge text-bg-secondary ms-1" title="{% translate 'Tenants' %}: {{ request.tenants|join:', ' }}">{% blocktranslate count counter=request.tenants|length %}{{ counter }} tenant{% plural %}{{ counter }} tenants{% endblocktranslate %}</span>
-              {% endif %}
+              {% include "tenants/includes/_tenant_badge.html" with css_class="badge text-bg-secondary ms-1" %}
             </a>
             <div class="dropdown-menu dropdown-menu-end">
 

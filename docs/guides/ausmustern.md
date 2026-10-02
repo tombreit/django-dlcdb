@@ -24,6 +24,7 @@ Sollen viele Devices auf einmal entfernt/ausgemustert werden:
 * Die auszumusternden Devices werden in einer CSV-Datei mit eventuell weiteren Attributen erfasst.
   * *Hinweis:* Eine existierende CSV-Removal-Datei nutzen und mit neuen Daten füllen.
 * Die CSV-Datei wird unter *Prozesse › Bulk Ausmusterung* (Django-Admin) hochgeladen. Die DLCDB liest die Datei ein und führt die entsprechende Aktion (Record auf "ENTFERNT" setzen) für alle Devices aus.
+  * Gefunden werden nur Devices der eigenen Tenants (siehe [Tenants](berechtigungen.md#tenants)); jedes andere Device gilt als nicht vorhanden.
 * Die DLCDB gibt eine Zusammenfassung der Vorgänge aus.
 
 :::{note}

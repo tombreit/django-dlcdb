@@ -16,6 +16,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name='tenant',
+            name='name',
+            field=models.CharField(max_length=150, unique=True, verbose_name='Name'),
+        ),
+        migrations.AlterField(
+            model_name='tenant',
+            name='groups',
+            field=models.ManyToManyField(blank=True, help_text="Members of these groups see this tenant's devices.", to='auth.group'),
+        ),
+        migrations.AlterField(
+            model_name='tenant',
+            name='contact_email',
+            field=models.EmailField(blank=True, help_text="Receives the overdue-lending reminders for this tenant's devices, as a copy or instead of the borrower (see the lending configuration), and is shown in email footers. Falls back to the IT department email in Branding.", max_length=254, verbose_name='Contact email'),
+        ),
         migrations.AddField(
             model_name='tenant',
             name='created_at',
@@ -44,8 +59,8 @@ class Migration(migrations.Migration):
                 ('username', models.CharField(blank=True, max_length=255, verbose_name='Username (denormalized)')),
                 ('created_at', models.DateTimeField(blank=True, editable=False, verbose_name='Created')),
                 ('modified_at', models.DateTimeField(blank=True, editable=False, verbose_name='Modified')),
-                ('name', models.CharField(db_index=True, max_length=150)),
-                ('contact_email', models.EmailField(blank=True, help_text="Responsible contact/IT address for this tenant. Receives the overdue-lending copies (CC or reroute) for this tenant's devices and is shown in email footers. Falls back to the Branding IT dept email, then DEFAULT_FROM_EMAIL.", max_length=254)),
+                ('name', models.CharField(db_index=True, max_length=150, verbose_name='Name')),
+                ('contact_email', models.EmailField(blank=True, help_text="Receives the overdue-lending reminders for this tenant's devices, as a copy or instead of the borrower (see the lending configuration), and is shown in email footers. Falls back to the IT department email in Branding.", max_length=254, verbose_name='Contact email')),
                 ('history_id', models.AutoField(primary_key=True, serialize=False)),
                 ('history_date', models.DateTimeField(db_index=True)),
                 ('history_change_reason', models.CharField(max_length=100, null=True)),

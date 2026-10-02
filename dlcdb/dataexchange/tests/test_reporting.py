@@ -150,23 +150,23 @@ def _remover_csv(*, edv_id):
 
 
 @pytest.mark.django_db
-def test_remover_reports_removed_then_fails_loudly():
+def test_remover_reports_removed_then_fails_loudly(tenant):
     CustomUser.objects.create(username="pytestuser")
-    Device.objects.create(edv_id="REM-1")
+    Device.objects.create(edv_id="REM-1", tenant=tenant)
 
-    report = set_removed_record(_remover_csv(edv_id="REM-1"), username="pytestuser", write=True)
+    report = set_removed_record(_remover_csv(edv_id="REM-1"), tenants=(tenant,), username="pytestuser", write=True)
     assert report.counts[Outcome.REMOVED] == 1
     assert report.level == "success"
 
     # Already removed -> fail loudly (unchanged behavior).
     with pytest.raises(ValidationError):
-        set_removed_record(_remover_csv(edv_id="REM-1"), username="pytestuser", write=True)
+        set_removed_record(_remover_csv(edv_id="REM-1"), tenants=(tenant,), username="pytestuser", write=True)
 
 
 @pytest.mark.django_db
-def test_remover_missing_column_raises_friendly_error():
+def test_remover_missing_column_raises_friendly_error(tenant):
     CustomUser.objects.create(username="pytestuser")
-    Device.objects.create(edv_id="REM-2")
+    Device.objects.create(edv_id="REM-2", tenant=tenant)
 
     # CSV is missing the required NOTE/DISPOSITION_STATE/... columns: previously a
     # raw KeyError, now the same friendly ValidationError as the importer.
@@ -174,7 +174,7 @@ def test_remover_missing_column_raises_friendly_error():
     # Read the (lazy) message inside the override so it resolves under "en".
     with translation.override("en"):
         with pytest.raises(ValidationError) as excinfo:
-            set_removed_record(bad_csv, username="pytestuser", write=True)
+            set_removed_record(bad_csv, tenants=(tenant,), username="pytestuser", write=True)
         message = excinfo.value.messages[0]
     assert "Missing column(s):" in message
 

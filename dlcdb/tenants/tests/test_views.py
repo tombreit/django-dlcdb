@@ -6,32 +6,22 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from dlcdb.core.models import Device
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
-
-
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    """Device.save() writes a QR code image; keep it out of the real media directory."""
-    settings.MEDIA_ROOT = tmp_path
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static", "media_root")]
 
 
 @pytest.fixture
-def login(client):
+def login(client, make_user):
     """Log in a non-staff user with the given permissions: the frontend needs no admin access."""
 
     def _login(*perms):
-        user = get_user_model().objects.create_user(email="ops@example.com", password="secret", username="ops")
-        for perm in perms:
-            app_label, codename = perm.split(".")
-            user.user_permissions.add(Permission.objects.get(content_type__app_label=app_label, codename=codename))
-        client.force_login(user)
+        client.force_login(make_user(*perms, email="ops@example.com"))
         return client
 
     return _login

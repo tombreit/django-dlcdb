@@ -12,15 +12,13 @@ permission, so this closes the asymmetry.
 """
 
 import pytest
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group, Permission
 from django.urls import reverse
 
 from dlcdb.core.forms.adminactions_forms import RelocateActionForm
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, Record, Room
 from dlcdb.tenants.models import Tenant
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 
 @pytest.fixture(autouse=True)
@@ -42,12 +40,6 @@ def rooms():
     return Room.objects.create(number="A1.01"), Room.objects.create(number="B2.02")
 
 
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    """Device.save() writes a QR code image; keep it out of the real media directory."""
-    settings.MEDIA_ROOT = tmp_path
-
-
 @pytest.fixture
 def device(rooms, tenant):
     room_a, _ = rooms
@@ -58,17 +50,11 @@ def device(rooms, tenant):
 
 
 @pytest.fixture
-def make_user(db, tenant):
+def relocator(make_user, tenant):
     """A user of `tenant` with the given core permissions."""
 
-    def _make(*codenames, email="admin-mover@example.com"):
-        user = get_user_model().objects.create_user(email=email, password="secret", username=email.split("@")[0])
-        group = Group.objects.create(name=f"group-of-{user.username}")
-        tenant.groups.add(group)
-        user.groups.add(group)
-        for codename in codenames:
-            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
-        return get_user_model().objects.get(pk=user.pk)  # reset the perm cache
+    def _make(*codenames):
+        return make_user(*(f"core.{codename}" for codename in codenames), tenants=(tenant,))
 
     return _make
 
@@ -86,28 +72,28 @@ def test_anonymous_is_refused(client, url):
     assert client.get(url).status_code == 403
 
 
-def test_a_logged_in_user_without_the_move_permission_is_refused(client, url, make_user):
-    client.force_login(make_user())
+def test_a_logged_in_user_without_the_move_permission_is_refused(client, url, relocator):
+    client.force_login(relocator())
     assert client.get(url).status_code == 403
 
 
-def test_the_relocate_permission_opens_the_view(client, url, device, make_user):
-    client.force_login(make_user("transition_can_relocate_device"))
+def test_the_relocate_permission_opens_the_view(client, url, device, relocator):
+    client.force_login(relocator("transition_can_relocate_device"))
     assert client.get(f"{url}?ids={device.pk}").status_code == 200
 
 
-def test_a_bare_get_without_ids_does_not_error(client, url, make_user):
+def test_a_bare_get_without_ids_does_not_error(client, url, relocator):
     """The admin action always sends ?ids=, but a hand-typed URL must not 500."""
-    client.force_login(make_user("transition_can_relocate_device"))
+    client.force_login(relocator("transition_can_relocate_device"))
     assert client.get(url).status_code == 200
 
 
 # --- the move itself -----------------------------------------------------
 
 
-def test_a_permitted_user_can_move_a_device(client, url, device, rooms, make_user):
+def test_a_permitted_user_can_move_a_device(client, url, device, rooms, relocator):
     _, room_b = rooms
-    client.force_login(make_user("transition_can_relocate_device"))
+    client.force_login(relocator("transition_can_relocate_device"))
 
     client.post(f"{url}?ids={device.pk}", _payload(device, room_b))
 
@@ -119,7 +105,7 @@ def test_a_permitted_user_can_move_a_device(client, url, device, rooms, make_use
 # --- tenant and device-type reassignment are a separate competence -------
 
 
-def test_device_type_is_left_alone_without_change_device(client, url, device, rooms, make_user):
+def test_device_type_is_left_alone_without_change_device(client, url, device, rooms, relocator):
     """Moving a device is not licence to re-file it.
 
     Changing the device type is a plain device edit, so it needs
@@ -130,7 +116,7 @@ def test_device_type_is_left_alone_without_change_device(client, url, device, ro
     _, room_b = rooms
     device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
     original_type = device.device_type
-    client.force_login(make_user("transition_can_relocate_device"))
+    client.force_login(relocator("transition_can_relocate_device"))
 
     client.post(f"{url}?ids={device.pk}", _payload(device, room_b, new_device_type=device_type.pk))
 
@@ -139,12 +125,12 @@ def test_device_type_is_left_alone_without_change_device(client, url, device, ro
     assert device.active_record.room == room_b  # the move still happened
 
 
-def test_a_single_tenant_user_gets_no_tenant_choice(client, url, device, rooms, make_user, tenant):
+def test_a_single_tenant_user_gets_no_tenant_choice(client, url, device, rooms, relocator, tenant):
     """With only one tenant there is nothing to change to: the field is gone,
     and a crafted ``new_tenant`` is ignored while the move still happens."""
     _, room_b = rooms
     other = Tenant.objects.create(name="OtherTenant")
-    client.force_login(make_user("transition_can_relocate_device", "change_device"))
+    client.force_login(relocator("transition_can_relocate_device", "change_device"))
 
     assert "new_tenant" not in client.get(f"{url}?ids={device.pk}").context["form"].fields
 
@@ -155,11 +141,11 @@ def test_a_single_tenant_user_gets_no_tenant_choice(client, url, device, rooms, 
     assert device.active_record.room == room_b
 
 
-def test_a_crafted_id_of_a_foreign_device_is_ignored(client, url, device, rooms, make_user):
+def test_a_crafted_id_of_a_foreign_device_is_ignored(client, url, device, rooms, relocator):
     room_a, room_b = rooms
     foreign = Device.objects.create(edv_id="EDV-FOREIGN", tenant=Tenant.objects.create(name="OtherTenant"))
     InRoomRecord.objects.create(device=foreign, room=room_a)
-    client.force_login(make_user("transition_can_relocate_device"))
+    client.force_login(relocator("transition_can_relocate_device"))
 
     client.post(f"{url}?ids={foreign.pk}", _payload(foreign, room_b))
 
@@ -178,10 +164,10 @@ def test_the_tenant_choice_is_limited_to_the_users_tenants(tenant):
     assert "new_tenant" in form(foreign).errors
 
 
-def test_change_device_permits_the_reassignment(client, url, device, rooms, make_user):
+def test_change_device_permits_the_reassignment(client, url, device, rooms, relocator):
     _, room_b = rooms
     device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
-    client.force_login(make_user("transition_can_relocate_device", "change_device"))
+    client.force_login(relocator("transition_can_relocate_device", "change_device"))
 
     client.post(
         f"{url}?ids={device.pk}",

@@ -17,4 +17,9 @@ class Migration(migrations.Migration):
             name='tenant',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='tenants.tenant'),
         ),
+        migrations.AlterField(
+            model_name='inventory',
+            name='device_search_tenant_aware',
+            field=models.BooleanField(default=True, help_text="If set, the device search will only return devices of the user's tenants.", verbose_name='Device search tenant aware'),
+        ),
     ]

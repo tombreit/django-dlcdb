@@ -86,7 +86,10 @@ SPDX-License-Identifier: EUPL-1.2
           </div>
           {% endif %}
 
-          {% include 'tenants/navbar_current_tenant.html' %}
+          {% include "tenants/includes/_tenant_badge.html" with css_class="btn btn-secondary" %}
+          {% if request.user.is_superuser %}
+            <button class="btn btn-danger" title="{% translate 'All permissions, but only the devices of your tenants' %}">{% translate 'Superuser' %}</button>
+          {% endif %}
 
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="{{ request.user.email }}">

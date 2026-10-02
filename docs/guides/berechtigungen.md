@@ -163,16 +163,16 @@ Eine Berechtigung schaltet nicht nur den Eintrag auf der Geräteseite frei, sond
 
 Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt und nur ihre eigenen Geräte verwaltet. Der Tenant hängt am **Gerät** (*Datenhaltung › Geräte › Mandant*); Records, Ausleihen und Lizenzen erben ihn über ihr Gerät.
 
-**Zuordnung zum Benutzer.** Ein Tenant besitzt eine oder mehrere **Gruppen**. Welche Gruppe welchen Tenant sieht, zeigt und ändert *Einstellungen › Tenants*: eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder, unter jedem Tenant die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins). Die Seite zeigt alle Tenants und Gruppen (`tenants.view_tenant`); Haken setzen und Tenants umbenennen erfordern `tenants.change_tenant`, Tenants anlegen `tenants.add_tenant`. Jede Änderung, auch an den Haken, steht in der *History* des Tenants im Django-Admin. Der Tenant eines Benutzers ergibt sich aus dessen Gruppenmitgliedschaften:
+**Zuordnung zum Benutzer.** Ein Tenant gibt den Mitgliedern seiner **Gruppen** Zugriff auf seine Geräte (zugeordnet unter [Einstellungen › Tenants](#einstellungen-tenants)). Die Tenants eines Benutzers ergeben sich aus dessen Gruppenmitgliedschaften:
 
 - Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
 - Mehrere Tenants passen → der Benutzer sieht die Geräte **aller** dieser Tenants. Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*.
 - Kein Tenant passt → der Benutzer sieht **keine Geräte** und kann keine anlegen; jede Seite zeigt den Hinweis *None of your groups belongs to a tenant, so you see no devices.* (nur für Benutzer mit `core.view_device`).
-- Superuser bilden **keine** Ausnahme: Auch sie sehen nur die Tenants ihrer Gruppen. Ein Superuser ohne passende Gruppe sieht keine Geräte.
+- Das gilt auch für Superuser: Ohne passende Gruppe sehen sie keine Geräte.
 
-Beim Anlegen eines Geräts, einer Lizenz oder eines Imports bietet das Feld *Tenant* nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
+Beim Anlegen und Importieren ist ein Tenant Pflicht. Das Feld *Tenant* eines Geräts, einer Lizenz oder eines Imports bietet nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
 
-**Alle Tenants sehen.** Eine eigene „Alle Tenants“-Stufe gibt es nicht: Eine Gruppe, die alle Tenants sehen soll (z.B. Administratoren, IT, Einkauf, Revision), wird **jedem** Tenant zugeordnet – auch jedem neu angelegten. Wird das bei einem neuen Tenant vergessen, sieht die Gruppe ihn schlicht nicht. In der Tenant-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke in einer sonst vollen Zeile ist ein vergessener Tenant.
+**Alle Tenants sehen.** Soll eine Gruppe alle Tenants sehen (z.B. Administratoren, IT, Einkauf, Revision), wird sie **jedem** Tenant zugeordnet, auch jedem neu angelegten. In der Tenant-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke in einer sonst vollen Zeile ist ein vergessener Tenant, den die Gruppe nicht sieht.
 
 Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
 
@@ -188,21 +188,31 @@ Nicht auf den Tenant eingeschränkt sind:
 
 - die *Devices*-Übersicht der Inventur-App, wenn bei der Inventur *Device search tenant aware* ausgeschaltet ist (siehe [Inventur](inventur.md)),
 - die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Tenants,
-- die *Notizen* im Django-Admin (*Datenhaltung › Notizen*).
+- die *Notizen* im Django-Admin (*Datenhaltung › Notizen*),
+- der *SAP-Abgleich* der Inventur: Er vergleicht den gesamten Bestand.
+
+### Einstellungen › Tenants
+
+Die Seite zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder, unter jedem Tenant die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
+
+- `tenants.view_tenant`: die Seite mit allen Tenants und Gruppen ansehen
+- `tenants.change_tenant`: Haken setzen, Tenants umbenennen, Kontakt-E-Mail setzen
+- `tenants.add_tenant`: Tenants anlegen
+- `tenants.delete_tenant`: Tenants ohne Geräte und Importe löschen (zusammen mit `tenants.change_tenant`: Schaltfläche *Delete* auf der Detailseite, neben *Änderungen speichern*)
+
+Jede Änderung, auch an den Haken, steht in der *History* des Tenants im Django-Admin. Ein Tenant, dem noch Geräte oder Importe zugeordnet sind, lässt sich nicht löschen: seine Geräte zuerst einem anderen Tenant zuordnen; Importe lassen sich im Django-Admin löschen.
 
 ### Geräte und Importe ohne Tenant
 
-Jedes Gerät und jeder Import braucht einen Tenant: Auch Superuser müssen beim Anlegen und beim Import einen auswählen. Ältere Geräte und Importe ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser; solange es sie gibt, zeigt die DLCDB auf jeder Seite den Hinweis *N devices without tenant!* bzw. *N imports without tenant!*. Zum Zuordnen:
+Ältere Geräte und Importe ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser. Solange es sie gibt, zeigt die DLCDB allen, die sie zuordnen dürfen (siehe unten), auf jeder Seite den Hinweis *N devices without tenant!* bzw. *N imports without tenant!*. Zum Zuordnen:
 
 1. Dem Link *Assign a tenant?* folgen (*Start › Tenants › Tenant*).
 2. Den Ziel-Tenant auswählen und die Aktion *Assign devices and imports without tenant* ausführen.
 3. Die folgende Seite listet alle Geräte und Importe ohne Tenant. Was zu einem anderen Tenant gehört, abwählen und bestätigen. Für das Übrige die Schritte mit dessen Tenant wiederholen.
 
-Die Aktion benötigt `tenants.change_tenant` sowie `core.change_device` für Geräte bzw. `dataexchange.change_importerlist` für Importe; die Seite zeigt nur, was der Benutzer ändern darf, unabhängig von den eigenen Tenants. Den Tenant eines Imports nicht im Import-Formular des Django-Admins ändern: Speichern dort führt den Import erneut aus.
+Die Aktion benötigt das Staff-Flag, `tenants.change_tenant` sowie `core.change_device` für Geräte bzw. `dataexchange.change_importerlist` für Importe; die Seite zeigt nur, was der Benutzer ändern darf, unabhängig von den eigenen Tenants. Den Tenant eines Imports nicht im Import-Formular des Django-Admins ändern: Speichern dort führt den Import erneut aus.
 
-Reichen die Angaben auf der Bestätigungsseite nicht für die Entscheidung, hilft ein **Zwischen-Tenant**: einen Tenant *Unassigned* anlegen und der IT-Gruppe zuordnen, alle Geräte ohne Tenant per Aktion dorthin verschieben, dann jedes Gerät auf seiner Detailseite (Feld *Tenant*) dem richtigen Tenant zuordnen. Ist *Unassigned* leer, kann er gelöscht werden.
-
-Ein Tenant ohne Geräte und Importe lässt sich auf seiner Detailseite löschen (Schaltfläche *Delete* neben *Änderungen speichern*; `tenants.change_tenant` und `tenants.delete_tenant`). Ein Tenant, dem noch Geräte oder Importe zugeordnet sind, lässt sich nicht löschen. Seine Geräte zuerst einem anderen Tenant zuordnen; Importe lassen sich im Django-Admin löschen.
+Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwischen-Tenant** *Unassigned* (der IT-Gruppe zugeordnet) zuweisen und dann auf ihren Detailseiten dem richtigen Tenant zuordnen. Den leeren Zwischen-Tenant danach löschen.
 
 ## Rolle des Django-Admins
 

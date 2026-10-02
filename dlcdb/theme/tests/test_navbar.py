@@ -149,6 +149,12 @@ class TenantBadgeNavbarTests(TestCase):
         self.assertContains(response, "2 tenants")
         self.assertContains(response, "Chemistry, Physics")
 
+    def test_the_admin_navbar_shows_the_same_badge(self):
+        self._login(Tenant.objects.create(name="Physics"))
+        get_user_model().objects.filter(username="badge-user").update(is_staff=True)
+        response = self.client.get(reverse("admin:index"))
+        self.assertContains(response, 'class="btn btn-secondary" title="Tenants: Physics">Physics</span>')
+
     def test_no_tenant_shows_no_badge(self):
         self._login()
         response = self.client.get(reverse("dashboard:index"))

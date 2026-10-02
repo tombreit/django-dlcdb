@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
 from dlcdb.core.models.abstracts import AuditBaseModel
@@ -13,44 +14,24 @@ class Tenant(AuditBaseModel):
     name = models.CharField(
         max_length=150,
         unique=True,
+        verbose_name=_("Name"),
     )
 
     groups = models.ManyToManyField(
         "auth.Group",
         blank=True,
-        help_text="The groups which define this tenant.",
+        help_text=_("Members of these groups see this tenant's devices."),
     )
 
     contact_email = models.EmailField(
         blank=True,
-        help_text=(
-            "Responsible contact/IT address for this tenant. Receives the overdue-"
-            "lending copies (CC or reroute) for this tenant's devices and is shown in "
-            "email footers. Falls back to the Branding IT dept email, then "
-            "DEFAULT_FROM_EMAIL."
+        verbose_name=_("Contact email"),
+        help_text=_(
+            "Receives the overdue-lending reminders for this tenant's devices, as a copy or instead of "
+            "the borrower (see the lending configuration), and is shown in email footers. Falls back "
+            "to the IT department email in Branding."
         ),
     )
-
-    # is_super_tenant = models.BooleanField(
-    #     default=False,
-    #     help_text="If set to True, users of this tenant could view and edit all assets.",
-    # )
-
-    # abbreviation = models.CharField(
-    #     max_length=3,
-    #     blank=False,
-    #     unique=True,
-    #     verbose_name='Abkürzung',
-    #     help_text='Like "IT" or "VRL" etc.'
-    # )
-
-    # @classmethod
-    # def get_default_pk(cls):
-    #     obj, created = cls.objects.get_or_create(
-    #         title='IT Department',
-    #         defaults=dict(abbreviation='IT'),
-    #     )
-    #     return obj.pk
 
     # Records every create, rename, group change and delete: the groups decide
     # who sees this tenant's devices.

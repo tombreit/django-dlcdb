@@ -6,7 +6,6 @@
 
 import pytest
 from django import forms
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Group
 from django.test import RequestFactory
 
@@ -15,24 +14,13 @@ from dlcdb.tenants.middleware import CurrentTenantMiddleware
 from dlcdb.tenants.models import Tenant
 from dlcdb.tenants.shortcuts import get_user_tenants, limit_tenant_field, tenant_scoped_queryset
 
-pytestmark = pytest.mark.django_db
-
-
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    """Device.save() writes a QR code image; keep it out of the real media directory."""
-    settings.MEDIA_ROOT = tmp_path
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 
 @pytest.fixture
-def member():
-    def _make(*tenants, email="member@example.com"):
-        user = get_user_model().objects.create_user(email=email, password="secret", username=email.split("@")[0])
-        for tenant in tenants:
-            group = Group.objects.create(name=f"group-of-{tenant.name}")
-            tenant.groups.add(group)
-            user.groups.add(group)
-        return user
+def member(make_user):
+    def _make(*tenants):
+        return make_user(tenants=tenants)
 
     return _make
 

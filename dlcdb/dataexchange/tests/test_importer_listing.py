@@ -19,13 +19,7 @@ from .test_frontend_import import _PLAIN_STATICFILES, _upload_file
 INDEX_URL = "dataexchange:importer_index"
 DETAIL_URL = "dataexchange:importer_detail"
 
-pytestmark = pytest.mark.django_db
-
-
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    settings.MEDIA_ROOT = tmp_path
-    return tmp_path
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 
 @pytest.fixture

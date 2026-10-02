@@ -137,17 +137,6 @@ class InventoryQuerySet(models.QuerySet):
                     record__device__tenant__in=tenants,
                 ),
             ),
-            # room_inventorized_devices_count=Sum(
-            #     Case(
-            #         When(
-            #             record__in=inventorized_records_in_room,
-            #             # record__is_active=True,
-            #             then=1
-            #         ),
-            #         default=0,
-            #         output_field=models.IntegerField()
-            #     )
-            # )
         )
 
         return qs.order_by("number")
@@ -209,7 +198,7 @@ class Inventory(models.Model):
     device_search_tenant_aware = models.BooleanField(
         default=True,
         verbose_name=_("Device search tenant aware"),
-        help_text=_("If set, the device search will only return devices for the current tenant."),
+        help_text=_("If set, the device search will only return devices of the user's tenants."),
     )
 
     # started_on = models.DateField(

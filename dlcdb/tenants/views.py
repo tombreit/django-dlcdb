@@ -62,7 +62,7 @@ def toggle(request, pk, group_pk):
     """
     One checkbox of the matrix (htmx). The checkbox posts the desired state
     ("sees" only when ticked), so a repeated request cannot invert it. Returns
-    the tenant's footer cell with the updated count of users who see it.
+    the tenant's "users with access" line from the column header.
     """
     tenant = get_object_or_404(Tenant, pk=pk)
     group = get_object_or_404(Group, pk=group_pk)
@@ -145,7 +145,7 @@ def detail(request, pk):
 @permission_required("tenants.delete_tenant", raise_exception=True)
 def delete(request, pk):
     """Confirm, then hard delete. PROTECT refuses a tenant that still has devices or imports."""
-    tenant = get_object_or_404(_tenant_queryset(), pk=pk)
+    tenant = get_object_or_404(Tenant, pk=pk)
 
     if request.method == "POST":
         try:

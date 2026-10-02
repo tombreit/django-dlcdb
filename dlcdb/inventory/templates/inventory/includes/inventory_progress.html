@@ -3,7 +3,7 @@
     {% cache 60 inventory_progress request.user.username %}
     {% endcache %}
 {% endcomment %}
-
+{% load i18n %}
 
 <div class="progress bg-primary" style="height: 2rem;">
     <div 
@@ -13,7 +13,7 @@
         aria-valuenow="{{ inventory_progress.done_percent }}" 
         aria-valuemin="0" 
         aria-valuemax="100"
-        title="Inventory progress for your tenants, counting only devices with an inventory id"
+        title="{% translate 'Inventory progress for your tenants, counting only devices with an inventory id' %}"
     >
         {{ inventory_progress.done_percent }}% 
         ({{ inventory_progress.inventorized_devices_count }} / {{ inventory_progress.all_devices_count }} Devices)

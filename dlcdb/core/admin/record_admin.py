@@ -9,9 +9,10 @@ from django.utils.html import format_html_join
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.tenants.admin import TenantScopedRecordAdmin
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 from .. import lifecycle
-from ..models import Record
+from ..models import Device, Record
 from ..models.record import SCRAPPED, SOLD
 from .base_admin import CustomBaseModelAdmin, NoModificationModelAdminMixin, get_has_note_badge
 
@@ -195,15 +196,14 @@ class RecordAdmin(TenantScopedRecordAdmin, NoModificationModelAdminMixin, Custom
         Customized record listing admin view when only records for one device are shown.
         TODO: Get action_form object from super() write a nicer method body.
         """
-        from dlcdb.core.models import Device
-
-        try:
-            device_id = int(request.GET.get("device__id__exact"))
-            extra_context = extra_context or {
-                "device_obj": Device.objects.get(id=device_id),
-                "action_form": False,
-            }
-        except:  # NOQA
-            pass
+        device_id = request.GET.get("device__id__exact", "")
+        # Scoped, so a crafted id cannot reveal a foreign device in the header.
+        device = (
+            tenant_scoped_queryset(Device.objects.all(), request).filter(pk=device_id).first()
+            if device_id.isdigit()
+            else None
+        )
+        if device:
+            extra_context = extra_context or {"device_obj": device, "action_form": False}
 
         return super().changelist_view(request, extra_context=extra_context)

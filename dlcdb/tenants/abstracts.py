@@ -19,7 +19,6 @@ class TenantAwareModel(models.Model):
         on_delete=models.PROTECT,
         # Nullable for legacy devices only; forms require a tenant.
         null=True,
-        # blank=True,
     )
 
     class Meta:

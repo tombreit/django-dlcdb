@@ -72,10 +72,7 @@ class TenantAdmin(SimpleHistoryAdmin):
         return ", ".join(group.name for group in obj.groups.all())
 
     def has_assign_permission(self, request):
-        """
-        Assigning a tenant changes the tenant's scope and the devices or imports
-        alike; the intermediate page lists only what the user may change.
-        """
+        """Changes the tenant and the assigned objects; the page lists only what the user may change."""
         user = request.user
         return user.has_perm("tenants.change_tenant") and (
             user.has_perm("core.change_device") or user.has_perm("dataexchange.change_importerlist")

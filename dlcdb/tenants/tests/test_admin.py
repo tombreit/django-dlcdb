@@ -6,7 +6,6 @@
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from django.db.models import ProtectedError
 from django.urls import reverse
 
@@ -14,29 +13,17 @@ from dlcdb.core.models import Device, InRoomRecord, Room
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static", "media_root")]
 
 CHANGELIST_URL = "admin:tenants_tenant_changelist"
 ASSIGN_URL = "admin:tenants_tenant_assign"
 ACTION = "assign_without_tenant"
 
 
-@pytest.fixture(autouse=True)
-def media_root(settings, tmp_path):
-    """Device.save() writes a QR code image; keep it out of the real media directory."""
-    settings.MEDIA_ROOT = tmp_path
-
-
 @pytest.fixture
-def staff_user():
+def staff_user(make_user):
     def _make(*perms):
-        user = get_user_model().objects.create_user(
-            email="staff@example.com", password="secret", username="staff", is_staff=True
-        )
-        for perm in perms:
-            app_label, codename = perm.split(".")
-            user.user_permissions.add(Permission.objects.get(content_type__app_label=app_label, codename=codename))
-        return user
+        return make_user(*perms, is_staff=True, email="staff@example.com")
 
     return _make
 
@@ -267,3 +254,13 @@ def test_record_add_view_does_not_reveal_a_foreign_device(tenant_staff_client, t
 
     assert client.get(url, {"device": own.pk}).status_code == 200
     assert client.get(url, {"device": foreign_device.pk}).status_code == 404
+
+
+def test_record_changelist_does_not_reveal_a_foreign_device(tenant_staff_client, tenant, foreign):
+    own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
+    foreign_device = Device.objects.create(edv_id="EDV-FOREIGN", tenant=foreign)
+    client = tenant_staff_client("core.view_record")
+    url = reverse("admin:core_record_changelist")
+
+    assert "Device EDV-OWN" in client.get(url, {"device__id__exact": own.pk}).text
+    assert "EDV-FOREIGN" not in client.get(url, {"device__id__exact": foreign_device.pk}).text

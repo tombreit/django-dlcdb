@@ -26,10 +26,11 @@ from .validators import validate_column_headers
 logger = logging.getLogger(__name__)
 
 
-def set_removed_record(csvfile, *, username=None, write=False):
+def set_removed_record(csvfile, *, tenants, username=None, write=False):
     """
     Mark a device as "removed".
-    * Identify device given in CSV, via EDV_ID or SAP_ID or both
+    * Identify device given in CSV, via EDV_ID or SAP_ID or both, among the
+      devices of ``tenants``: devices of other tenants count as missing
     * Search active record for given device
     * Create a new removed-record with attributes given in CSV
 
@@ -63,6 +64,8 @@ def set_removed_record(csvfile, *, username=None, write=False):
     else:
         atomic_context = rollback_atomic()
 
+    devices = Device.objects.filter(tenant__in=tenants)
+
     with atomic_context:
         for idx, row in enumerate(rows, start=1):
             try:
@@ -82,11 +85,11 @@ def set_removed_record(csvfile, *, username=None, write=False):
 
             try:
                 if SAP_ID and EDV_ID:
-                    device = Device.objects.get(edv_id=EDV_ID, sap_id=SAP_ID)
+                    device = devices.get(edv_id=EDV_ID, sap_id=SAP_ID)
                 elif EDV_ID:
-                    device = Device.objects.get(edv_id=EDV_ID)
+                    device = devices.get(edv_id=EDV_ID)
                 elif SAP_ID:
-                    device = Device.objects.get(sap_id=SAP_ID)
+                    device = devices.get(sap_id=SAP_ID)
             except Device.DoesNotExist as does_not_exist_error:
                 raise Device.DoesNotExist(f"Device {SAP_ID=} or {EDV_ID=} does not exist. {does_not_exist_error}")
 

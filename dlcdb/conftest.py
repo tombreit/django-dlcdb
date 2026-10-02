@@ -19,7 +19,7 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 """
 
 import pytest
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.contrib.sites.models import Site
 
 from dlcdb.accounts.models import CustomUser
@@ -39,6 +39,37 @@ def plain_static(settings):
 @pytest.fixture
 def tenant():
     return Tenant.objects.create(name="PytestTenant")
+
+
+@pytest.fixture
+def media_root(settings, tmp_path):
+    """Keep files written by tests (QR codes, uploads) out of the real media directory."""
+    settings.MEDIA_ROOT = tmp_path
+    return tmp_path
+
+
+@pytest.fixture
+def make_user(db):
+    """
+    Build a user with the given permissions ("app_label.codename") who sees the
+    given tenants, through one group per tenant.
+    """
+
+    def _make(*perms, tenants=(), is_staff=False, email="user@example.com"):
+        user = CustomUser.objects.create_user(
+            email=email, password="secret", username=email.split("@")[0], is_staff=is_staff
+        )
+        for perm in perms:
+            app_label, codename = perm.split(".")
+            user.user_permissions.add(Permission.objects.get(content_type__app_label=app_label, codename=codename))
+        for tenant in tenants:
+            group, _ = Group.objects.get_or_create(name=f"{tenant.name} members")
+            tenant.groups.add(group)
+            user.groups.add(group)
+        # Fetched anew: has_perm caches the permissions per user object.
+        return CustomUser.objects.get(pk=user.pk)
+
+    return _make
 
 
 @pytest.fixture

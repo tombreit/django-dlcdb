@@ -8,8 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Tenants: new page Settings › Tenants shows and edits which groups see which tenant; tenants can be added, edited and deleted there too; tenant changes are kept in a history
-* Tenants: users – superusers included – see the devices of all tenants their groups belong to; every device needs a tenant, devices and imports without one are assigned via the Tenant admin action "Assign devices and imports without tenant"; the Django admin lists records and imports per tenant too (details: docs › Berechtigungen › Tenants)
+* Tenants: new page Settings › Tenants to manage tenants and which groups see them, with history
+* Tenants: users see the devices of all tenants their groups belong to, superusers too: give their group access to every tenant
+* Every device and import needs a tenant; a hint leads to assigning the existing ones
 * Devices can be copied in the frontend via "Save as new" on the detail page
 * Import history in the frontend: a read-only list of all device imports with status and log; the device list can be filtered by import file
 * Frontend permissions consolidated onto Django's default `view`/`add`/`change` permissions of the model each view touches. The license module now needs `core.view_licencerecord`; assign this permission to the groups that should keep access (likewise `smallstuff.view_assignedthing` and `smallstuff.add_assignedthing` for Kleinkram)

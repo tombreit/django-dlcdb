@@ -5,8 +5,8 @@
 """
 The context processors run on every frontend page render, so they must not
 issue redundant queries: one aggregate for the room hints, one for both device
-hints (record-less, without tenant), one count for imports without tenant, and
-at most one (request-memoized)
+hints (record-less, without tenant), one count for imports without tenant (only
+for users who may assign them), and at most one (request-memoized)
 active-inventory lookup shared by nav() and the inventory context processor.
 See https://adamj.eu/tech/2023/03/23/django-context-processors-database-queries/
 """
@@ -57,13 +57,22 @@ class ContextProcessorQueryTests(BaseTest):
         # One aggregate counts record-less devices (tenant-scoped) and devices
         # without tenant (global).
         self.assertEqual(len(self._table_queries(captured, "core_device")), 1)
-        # Imports without tenant: one count (another table).
+        # Imports without tenant: one count (another table), for users who may
+        # assign them.
         self.assertEqual(len(self._table_queries(captured, "dataexchange_importerlist")), 1)
 
         # The single record-less device is still linked directly, without the
         # former extra .first() query.
         stored_messages = [str(message) for message in request._messages]
         self.assertTrue(any(f"?device={device.pk}" in message for message in stored_messages))
+
+    def test_hints_skip_the_import_count_for_users_who_cannot_assign(self):
+        request = self._request(self.plain_user)
+
+        with CaptureQueriesContext(connection) as captured:
+            hints(request)
+
+        self.assertEqual(len(self._table_queries(captured, "dataexchange_importerlist")), 0)
 
     def test_nav_memoizes_active_inventory_query(self):
         # Three nav entries carry show_condition "active_inventory_exists"

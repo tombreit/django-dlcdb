@@ -33,7 +33,6 @@ class LicenseForm(forms.ModelForm):
         # Check if this is an edit form (instance exists)
         self.is_edit = self.instance and self.instance.pk is not None
 
-        # Only the user's tenants; required, so no licence ends up without one.
         limit_tenant_field(self.fields["tenant"], tenants)
 
         # Limit device-type choices to "License-type" choices

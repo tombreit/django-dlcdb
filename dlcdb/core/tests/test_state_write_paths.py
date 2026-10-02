@@ -47,6 +47,7 @@ from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dataexchange.records import create_record
 from dlcdb.dataexchange.remover import set_removed_record
+from dlcdb.tenants.models import Tenant
 
 
 @pytest.fixture
@@ -238,13 +239,14 @@ def _remover_csv(rows):
 
 
 @pytest.mark.django_db
-def test_remover_marks_a_device_as_removed(room):
+def test_remover_marks_a_device_as_removed(room, tenant):
     user = get_user_model().objects.create_user(username="remover", email="remover@example.com", password="secret")
-    device = Device.objects.create(edv_id="EDV-REMOVE", sap_id="900-1")
+    device = Device.objects.create(edv_id="EDV-REMOVE", sap_id="900-1", tenant=tenant)
     InRoomRecord.objects.create(device=device, room=room)
 
     set_removed_record(
         _remover_csv([f"900-1,EDV-REMOVE,bulk decommission,{SCRAPPED},recycled,,remover"]),
+        tenants=(tenant,),
         username=user.username,
         write=True,
     )
@@ -255,30 +257,51 @@ def test_remover_marks_a_device_as_removed(room):
 
 
 @pytest.mark.django_db
-def test_remover_refuses_to_remove_an_already_removed_device():
+def test_remover_refuses_to_remove_an_already_removed_device(tenant):
     user = get_user_model().objects.create_user(username="remover", email="remover@example.com", password="secret")
-    device = Device.objects.create(edv_id="EDV-REMOVE-2", sap_id="900-2")
+    device = Device.objects.create(edv_id="EDV-REMOVE-2", sap_id="900-2", tenant=tenant)
     RemovedRecord.objects.create(device=device)
 
     with pytest.raises(ValidationError):
         set_removed_record(
             _remover_csv([f"900-2,EDV-REMOVE-2,again,{SCRAPPED},,,remover"]),
+            tenants=(tenant,),
             username=user.username,
             write=True,
         )
 
 
 @pytest.mark.django_db
-def test_remover_dry_run_changes_nothing(room):
+def test_remover_dry_run_changes_nothing(room, tenant):
     user = get_user_model().objects.create_user(username="remover", email="remover@example.com", password="secret")
-    device = Device.objects.create(edv_id="EDV-REMOVE-3", sap_id="900-3")
+    device = Device.objects.create(edv_id="EDV-REMOVE-3", sap_id="900-3", tenant=tenant)
     InRoomRecord.objects.create(device=device, room=room)
 
     set_removed_record(
         _remover_csv([f"900-3,EDV-REMOVE-3,dry run,{SCRAPPED},,,remover"]),
+        tenants=(tenant,),
         username=user.username,
         write=False,
     )
+
+    device.refresh_from_db()
+    assert device.active_record.record_type == Record.INROOM
+
+
+@pytest.mark.django_db
+def test_remover_does_not_find_devices_of_other_tenants(room, tenant):
+    user = get_user_model().objects.create_user(username="remover", email="remover@example.com", password="secret")
+    foreign = Tenant.objects.create(name="Foreign")
+    device = Device.objects.create(edv_id="EDV-FOREIGN", sap_id="900-4", tenant=foreign)
+    InRoomRecord.objects.create(device=device, room=room)
+
+    with pytest.raises(Device.DoesNotExist):
+        set_removed_record(
+            _remover_csv([f"900-4,EDV-FOREIGN,not ours,{SCRAPPED},,,remover"]),
+            tenants=(tenant,),
+            username=user.username,
+            write=True,
+        )
 
     device.refresh_from_db()
     assert device.active_record.record_type == Record.INROOM
