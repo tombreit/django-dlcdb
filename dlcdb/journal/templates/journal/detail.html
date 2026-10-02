@@ -1,0 +1,72 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% comment %}
+Read-only by design (entries are never changed), so like the import detail
+this page does not use theme/_detail_base.html, which is built around a form.
+{% endcomment %}
+
+{% block title %}{{ entry.summary|default:entry.event }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    <div class="me-auto">
+      <h1 class="h3 mb-1">{{ entry.summary|default:entry.event }}</h1>
+      <div class="text-muted d-flex flex-wrap gap-2 align-items-center">
+        {% include "journal/includes/_level_badge.html" %}
+        <code>{{ entry.source }}</code>
+        <span>{{ entry.event }}</span>
+      </div>
+    </div>
+    {% include "theme/includes/_back_link.html" with url=index_url %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-journal-text text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Details" %}</h2>
+        </div>
+        <div class="card-body">
+          {% if entry.body %}
+            <pre class="small mb-0">{{ entry.body }}</pre>
+          {% else %}
+            <span class="text-muted">{% translate "No details recorded." %}</span>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      <section class="card mb-3">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-info-circle text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Entry" %}</h2>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Time" %}</dt>
+            <dd class="col-sm-8">{{ entry.timestamp|date:"Y-m-d H:i:s" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Source" %}</dt>
+            <dd class="col-sm-8"><code>{{ entry.source }}</code></dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Event" %}</dt>
+            <dd class="col-sm-8">{{ entry.event }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "User" %}</dt>
+            <dd class="col-sm-8">{{ entry.username|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Tenant" %}</dt>
+            <dd class="col-sm-8">{{ entry.tenant|default:"—" }}</dd>
+            <dt class="col-sm-4 text-secondary fw-medium">{% translate "Subject" %}</dt>
+            <dd class="col-sm-8 mb-0">
+              {% if subject_url %}
+                <a href="{{ subject_url }}">{{ entry.object_repr }}</a>
+              {% else %}
+                {{ entry.object_repr|default:"—" }}
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock body %}

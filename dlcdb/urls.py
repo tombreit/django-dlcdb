@@ -31,6 +31,7 @@ urlpatterns = [
     path("tenants/", include("dlcdb.tenants.urls")),
     path("persons/", include("dlcdb.persons.urls")),
     path("dataexchange/", include("dlcdb.dataexchange.urls")),
+    path("journal/", include("dlcdb.journal.urls")),
     path("theme/", include("dlcdb.theme.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("select2/", include("django_select2.urls")),

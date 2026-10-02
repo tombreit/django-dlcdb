@@ -7,9 +7,10 @@ SPDX-License-Identifier: CC0-1.0
 # Journal: one log for all in-app logs
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
-journald fields and of existing Django packages (2026-10-03). Nothing implemented yet. Open
-questions are settled (see batches 6 and 7, *Working agreement*). This is a living document:
-each batch ticks its checkbox under *Progress* and updates this line.
+journald fields and of existing Django packages (2026-10-03). Batch 1 (journal app) is
+implemented; nothing writes entries yet. Open questions are settled (see batches 6 and 7,
+*Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
+and updates this line.
 
 ## Why
 
@@ -257,7 +258,7 @@ class JournalHandler(logging.Handler):
 ## Progress
 
 - [x] **0. This document**
-- [ ] **1. Journal app**
+- [x] **1. Journal app**
   - model, manager, `journal/0001_initial`, views, filter, templates;
   - `navigation.py` (`nav_settings`, `bi bi-journal-text`);
   - `LOCAL_APPS`, `dlcdb/urls.py`;
@@ -382,7 +383,21 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
 
 ## Decided during implementation
 
-Nothing yet.
+- **Batch 1, detail page on `theme/_base.html`,** like `dataexchange/importer_detail.html`, not
+  on `theme/_detail_base.html`. That frame is built around a form, and its docstring says pages
+  that are read-only by design don't use it.
+- **Batch 1, source and event choices are set in `JournalEntryFilter.__init__`,** not as
+  callable `choices`: django-filter's `ChoiceIterator.__len__` calls `len()` on them, which a
+  callable doesn't support.
+- **Batch 1, `_subject_url()` checks `content_type.model_class()`** before touching
+  `content_object`. Once a legacy log model is retired (`UdbSyncRun`, see *Phase-out*), its
+  content type has no model class and the GFK would raise. It also treats a `None` from
+  `get_absolute_url()` as "no page" (a `Device` has one only as a licence).
+- **Pre-existing test failures on `7ccc178`,** unrelated and left alone; they fail on a clean
+  checkout too:
+  - `assets/tests/test_devices.py::DeviceFrontendTests::test_modified_column_uses_naturaltime_for_recent_edits_only`
+    (date-dependent);
+  - `core/tests/test_form_round_trip.py::test_edit_page_renders_and_round_trips_every_field[lending_return]`.
 
 ## Lessons from existing packages
 

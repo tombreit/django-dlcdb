@@ -1,0 +1,63 @@
+{% extends "theme/_index_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Journal" %}{% endblock title %}
+{% block index_title %}{% translate "Journal" %}{% endblock index_title %}
+
+{% block index_list %}
+  {% partialdef journal-list inline %}
+    <div id="journal-list" class="position-relative" hx-target="#journal-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} entry{% plural %}{{ counter }} of {{ total }} entries{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Time") asc="timestamp" desc="-timestamp" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Level") asc="level" desc="-level" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Source") asc="source" desc="-source" th_class="d-none d-md-table-cell" %}
+              <th scope="col">{% translate "Summary" %}</th>
+              <th scope="col" class="d-none d-lg-table-cell">{% translate "User" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in page_obj %}
+              <tr>
+                <td class="text-nowrap text-muted small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                <td>{% include "journal/includes/_level_badge.html" %}</td>
+                <td class="d-none d-md-table-cell small">
+                  <code>{{ entry.source }}</code>
+                  <div class="text-muted">{{ entry.event }}</div>
+                </td>
+                <td class="position-relative">
+                  <a href="{% url 'journal:detail' entry.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                     class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover">
+                    {{ entry.summary|default:entry.event }}
+                  </a>
+                  {% if entry.object_repr %}<div class="small text-muted text-truncate">{{ entry.object_repr }}</div>{% endif %}
+                </td>
+                <td class="d-none d-lg-table-cell text-muted small">{{ entry.username|default:"—" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% if total_count == 0 %}
+                    {% translate "No journal entries yet." %}
+                  {% else %}
+                    {% translate "No journal entries match these filters." %}
+                    {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock index_list %}

@@ -1,0 +1,14 @@
+{% comment %}
+Level badge of one journal entry, colored by severity.
+Caller passes:
+  entry - a JournalEntry
+{% endcomment %}
+{% if entry.level <= entry.Level.ERROR %}
+  <span class="badge text-bg-danger">{{ entry.get_level_display }}</span>
+{% elif entry.level == entry.Level.WARNING %}
+  <span class="badge text-bg-warning">{{ entry.get_level_display }}</span>
+{% elif entry.level == entry.Level.SUCCESS %}
+  <span class="badge text-bg-success">{{ entry.get_level_display }}</span>
+{% else %}
+  <span class="badge text-bg-light border">{{ entry.get_level_display }}</span>
+{% endif %}

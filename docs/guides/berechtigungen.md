@@ -97,6 +97,7 @@ Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt ersc
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
 | Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
+| Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 
 [^kleinkram]: `smallstuff.view_assignedthing` öffnet die Ansicht. Zum Ausgeben eines Gegenstands wird zusätzlich `smallstuff.add_assignedthing` benötigt, zum Zurücknehmen `smallstuff.change_assignedthing`.
 
@@ -105,7 +106,7 @@ Steht bei einem Menüpunkt mehr als eine Berechtigung, genügt **eine** davon. S
 :::{admonition} **Menüpunkte, die in den Django-Admin führen**
 :class: note
 
-Die Einträge *Entfernt-Records*, *Inventuren*, *Notizen*, *Bulk Ausmusterung*, *SAP-Abgleich* und alle Einträge unter *Einstellungen* außer *Tenants* öffnen eine Django-Admin-Ansicht. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das **Staff-Flag**, sonst landet er auf der Admin-Anmeldeseite. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
+Die Einträge *Entfernt-Records*, *Inventuren*, *Notizen*, *Bulk Ausmusterung*, *SAP-Abgleich* und alle Einträge unter *Einstellungen* außer *Tenants* und *Journal* öffnen eine Django-Admin-Ansicht. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das **Staff-Flag**, sonst landet er auf der Admin-Anmeldeseite. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
 :::
 
 ## Statuswechsel
