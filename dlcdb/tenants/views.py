@@ -5,10 +5,11 @@
 """The tenant frontend: which groups see which tenant, plus the tenant pages."""
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, ProtectedError, Q
+from django.db.models import Count, Prefetch, ProtectedError, Q
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -43,7 +44,12 @@ def index(request):
     tenants they are not in.
     """
     tenants = list(_tenant_queryset())
-    groups = Group.objects.annotate(member_count=Count("user", filter=Q(user__is_active=True))).order_by("name")
+    # Active members only, like the "users with access" counts; the template
+    # shows their number and lists them.
+    active_members = get_user_model().objects.filter(is_active=True).order_by("email")
+    groups = Group.objects.prefetch_related(
+        Prefetch("user_set", queryset=active_members, to_attr="active_members")
+    ).order_by("name")
     pairs = set(Tenant.groups.through.objects.values_list("tenant_id", "group_id"))
     # One row per group with one (tenant, checked) cell per tenant, so the
     # template only loops.

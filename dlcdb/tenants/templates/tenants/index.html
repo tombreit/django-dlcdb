@@ -69,9 +69,23 @@
             <tr>
               <th scope="row">
                 {{ group.name }}
-                <span class="small text-secondary fw-normal" title="{% translate "Active user accounts; with LDAP as of each user's last login" %}">
-                  · {% blocktranslate count counter=group.member_count %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktranslate %}
-                </span>
+                {% if group.active_members %}
+                  {# Native disclosure: the member count expands to the members' list. #}
+                  <details class="d-inline-block align-top small text-secondary fw-normal">
+                    <summary title="{% translate "Active user accounts; with LDAP as of each user's last login" %}">
+                      {% blocktranslate count counter=group.active_members|length %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktranslate %}
+                    </summary>
+                    <ul class="list-unstyled mb-0">
+                      {% for member in group.active_members %}
+                        <li>{{ member }}</li>
+                      {% endfor %}
+                    </ul>
+                  </details>
+                {% else %}
+                  <span class="small text-secondary fw-normal" title="{% translate "Active user accounts; with LDAP as of each user's last login" %}">
+                    · {% blocktranslate count counter=0 %}{{ counter }} member{% plural %}{{ counter }} members{% endblocktranslate %}
+                  </span>
+                {% endif %}
               </th>
               {% for tenant, checked in cells %}
                 <td class="text-center">

@@ -193,9 +193,9 @@ Nicht auf den Tenant eingeschränkt sind:
 
 ### Einstellungen › Tenants
 
-Die Seite zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder, unter jedem Tenant die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
+Die Seite zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder; ein Klick darauf listet ihre E-Mail-Adressen. Unter jedem Tenant steht die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
 
-- `tenants.view_tenant`: die Seite mit allen Tenants und Gruppen ansehen
+- `tenants.view_tenant`: die Seite mit allen Tenants, Gruppen und deren Mitgliedern ansehen
 - `tenants.change_tenant`: Haken setzen, Tenants umbenennen, Kontakt-E-Mail setzen
 - `tenants.add_tenant`: Tenants anlegen
 - `tenants.delete_tenant`: Tenants ohne Geräte und Importe löschen (zusammen mit `tenants.change_tenant`: Schaltfläche *Delete* auf der Detailseite, neben *Änderungen speichern*)

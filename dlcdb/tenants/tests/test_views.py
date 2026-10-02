@@ -67,13 +67,29 @@ def test_matrix_shows_which_groups_see_which_tenant(login, setup):
     # Users who see the tenant: the active user counts once although two of
     # their groups see A; the inactive user not at all.
     assert [tenant.user_count for tenant in tenants] == [1, 1]
-    member_counts = {group.name: group.member_count for group, _cells in response.context["rows"]}
-    assert member_counts == {"helpdesk": 0, "it": 1, "ops-a": 1}
+    members = {group.name: group.active_members for group, _cells in response.context["rows"]}
+    assert members == {"helpdesk": [], "it": [active], "ops-a": [active]}
 
     # Viewing only: all six checkboxes disabled and none of them saves.
     content = response.content.decode()
     assert content.count('name="sees"') == 6
     assert "hx-post" not in content
+
+
+def test_matrix_lists_the_active_members_of_each_group(login, setup):
+    _tenant_a, _tenant_b, it, _ops_a, _helpdesk = setup
+    it.user_set.add(
+        get_user_model().objects.create_user(email="zoe@example.com", username="zoe"),
+        get_user_model().objects.create_user(email="adam@example.com", username="adam"),
+        get_user_model().objects.create_user(email="gone@example.com", username="gone", is_active=False),
+    )
+
+    content = login("tenants.view_tenant").get(reverse("tenants:index")).content.decode()
+
+    # Only "it" has members, so only its row expands; the list is sorted.
+    assert content.count("<details") == 1
+    assert content.index("<li>adam@example.com</li>") < content.index("<li>zoe@example.com</li>")
+    assert "gone@example.com" not in content
 
 
 def test_matrix_notes_that_permissions_apply_in_every_tenant(login):
