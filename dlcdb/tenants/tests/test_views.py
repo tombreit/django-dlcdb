@@ -85,6 +85,12 @@ def test_matrix_shows_which_groups_see_which_tenant(login, setup):
     assert "hx-post" not in content
 
 
+def test_matrix_notes_that_permissions_apply_in_every_tenant(login):
+    content = login("tenants.view_tenant").get(reverse("tenants:index")).content.decode()
+
+    assert "Permissions are not per tenant" in content
+
+
 def test_matrix_columns_are_ordered_by_name(login):
     """The counts make it a GROUP BY query, which ignores Meta.ordering."""
     for name in ("zeta", "Alpha", "beta"):

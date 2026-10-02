@@ -378,7 +378,8 @@ Plus the Superuser badge title, docs, NEWS and the upgrade notes.
 - *(deferred to a later release)* `Device.tenant` NOT NULL: once production shows no "devices
   without tenant" message, add the migration, give the ~62 tenant-less test device creations a
   tenant, and remove the orphan message, the Tenant admin action and their docs in one go. Not
-  on this branch: the migration would fail on instances that still have orphans.
+  on this branch: the migration would fail on instances that still have orphans. The same
+  later release makes `ImporterList.tenant` NOT NULL (see step 5c for the legacy imports).
 - *(done)* Phase out the remaining non-admin `is_superuser` checks: `DeviceForm.clean_is_lentable`,
   `theme/includes/navbar.html` (staff-or-superuser link), `core/context_processors.py:nav`
   (redundant `or is_superuser`, `has_perm` already covers it). Admin-only checks
@@ -606,6 +607,35 @@ task (give user XY access to a tenant through XY's group):
   - a tenant with devices cannot be deleted.
 - **Hint:** links to `tenants:index`.
 
+### Step 5: follow-ups after step 4 (separate commits)
+
+Found in the review of step 4 (2026-10-02).
+
+- *(done)* **5a: `tenants.change_tenant` explained** (this plan, *Pitfalls*). The new finding there is the
+  mail channel: a tenant's `contact_email` receives the overdue-lending mails for its devices.
+  `berechtigungen.md` gets one sentence on it in the `change_tenant` warning.
+- *(done, one commit with 5a)* **5b: note on the tenants page** that permissions apply in every tenant (*Pitfalls*,
+  "Permissions carry over"). A small `alert-warning` below the intro. The docs already have the
+  matching `:::{warning}`.
+- **5c: imports protect their tenant like devices.**
+  - **Why nullable:** `ImporterList.tenant` was nullable and `SET_NULL` from the start
+    (`dataexchange/0001`), because superusers imported without a tenant. The forms require one
+    since step 0.
+  - **What it cost:**
+    - deleting a tenant silently hid its imports (scoped lists use `tenant__in`, which never
+      matches NULL);
+    - legacy imports without a tenant are invisible to everyone since steps 1–3: in the dev DB
+      copy, 26 of 43 imports.
+  - **Change:**
+    - `on_delete=PROTECT` (state-only `AlterField`), still nullable for legacy rows;
+    - a tenant is deletable only without devices **and** imports; the detail page's *Usage*
+      card shows the import count;
+    - data migration `dataexchange/0008`: an import without a tenant gets its devices' tenant
+      when all of them share exactly one. Imports without devices, or with devices in several
+      tenants or without one, stay NULL (known leftovers, invisible like devices without
+      tenant);
+    - NOT NULL follows with `Device.tenant` (step 3, deferred).
+
 ### Follow-up: creator in `AuditBaseModel` (proposed 2026-10-01, own commit)
 
 Found during step 4: *Created* in the audit card shows only a date. `AuditBaseModel` keeps
@@ -717,7 +747,8 @@ tenant" (both linking to the Tenant admin). NEWS has one entry.
 
 - **Permissions carry over between tenants** (consequence of decision 1): a user in "ops-a"
   (edit permissions, tenant A) and "audit-b" (view permissions, tenant B) can edit B devices
-  too. Per-tenant roles are not expressible; use separate accounts where it matters.
+  too. Per-tenant roles are not expressible; use separate accounts where it matters. Stated in
+  `berechtigungen.md` as a `:::{warning}`, and as a note on the tenants page (step 5b).
 - **New tenants are private until groups are attached.** Attach the IT/audit groups in the
   Tenant add form. Forgetting fails closed: IT simply does not see the new tenant.
 - Groups attached to several tenants currently produce empty lists; after step 2 those users
@@ -737,18 +768,45 @@ tenant" (both linking to the Tenant admin). NEWS has one entry.
 - Scoping stays opt-in per view. A django-scopes-style enforced default is the natural hardening
   if more apps are added.
 - Overdue-lending notifications group by device tenant and use `Tenant.contact_email`; unchanged.
-- **`tenants.change_tenant` decides visibility for everyone, the holder included** (step 4):
-  attaching one's own group to a tenant reveals its devices. True in the admin today, but a
-  frontend makes the permission easier to hand out. Treat it like group administration, not as
-  an operator permission.
+- **`tenants.change_tenant` decides visibility for everyone, the holder included** (step 4,
+  explained in step 5a). True in the admin too, but a frontend makes the permission easier to
+  hand out.
+  - **What it allows:**
+    - tick and untick any group for any tenant (the matrix, and the admin's
+      `filter_horizontal`);
+    - rename a tenant and set its `contact_email`;
+    - together with `core.change_device`, the admin action "Assign devices without tenant".
+
+    `tenants.add_tenant` in the admin can also pick groups at creation, but a new tenant has no
+    devices yet.
+  - **Consequences:**
+    1. **Self-escalation:** the holder ticks their own group for any tenant and sees its
+       devices. Because permissions carry over, they can then do with these devices whatever
+       their groups allow elsewhere (edit, lend, move).
+    2. **Withdrawal:** unticking takes access away from everyone else in that group.
+    3. **Mail channel:** a tenant's `contact_email` receives the overdue-lending mails for its
+       devices (`notifications/overdue_lenders.py`, `get_contact_email`): as CC in "lender and
+       IT" mode, as the only recipient in "IT" mode. They contain borrower names and devices.
+       Setting it to one's own address leaks them, even for tenants the holder does not see.
+  - **What it does not allow:** changing group membership or a group's permissions, or creating
+    users. That stays with the admin's `auth`/`accounts` permissions (or LDAP).
+  - **Not scoped, on purpose:** restricting edits to the editor's own tenants would block
+    onboarding, because nobody sees a new tenant.
+  - **Controls:**
+    - every change is in the tenant history with its user (simple-history, admin);
+    - recommendation: give `change_tenant` only to a group that is attached to every tenant
+      anyway (e.g. the IT admins), so self-escalation gains nothing; treat it like
+      `auth.change_group`, not as an operator permission.
 - **Mirrored LDAP groups appear only at the first login of a member** (django-auth-ldap
   `_mirror_groups` creates them with `get_or_create`). Until then they cannot be attached to a
   tenant, in the admin or the frontend (and do not appear as a row in the matrix). Workaround: create the group in the admin with the exact
   LDAP name. Possible follow-up: create the `AUTH_LDAP_MIRROR_GROUPS` groups in `post_migrate`.
 - **User counts on the tenant page follow LDAP only at login:** group membership is synced when
   a user logs in, so the *Users* counts reflect each user's last login.
-- **Deleting a tenant nulls its imports' tenant** (`ImporterList.tenant` is `SET_NULL`): those
-  imports then appear in no scoped import list.
+- **Imports and their tenant** (step 5c): `ImporterList.tenant` is `PROTECT` like
+  `Device.tenant`, so a tenant with imports cannot be deleted. Legacy imports without a tenant
+  get one from their devices where unambiguous. The rest (no devices, or devices in several
+  tenants) stays NULL and, like devices without tenant, appears in no scoped list.
 
 ## Verification
 

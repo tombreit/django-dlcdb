@@ -33,6 +33,11 @@
     {% if can_change %}{% translate "Each tick is saved immediately." %}{% endif %}
   </p>
 
+  <div class="alert alert-warning small py-2" role="note">
+    <i class="bi bi-exclamation-triangle"></i>
+    {% translate "Permissions are not per tenant: what users may do through any of their groups applies in every tenant they can access." %}
+  </div>
+
   {% if tenants and rows %}
     <div class="table-responsive">
       <table class="table table-striped table-hover align-middle tenant-matrix">

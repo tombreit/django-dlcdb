@@ -181,7 +181,7 @@ Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen 
 :::
 
 :::{warning}
-**`tenants.change_tenant` entscheidet über die Sichtbarkeit – auch über die eigene.** Wer diese Berechtigung besitzt, kann die eigene Gruppe jedem Tenant zuordnen und so dessen Geräte sehen. Sie gehört deshalb wie die Gruppenverwaltung zu den Administrations-Berechtigungen, nicht in Bediener-Gruppen.
+**`tenants.change_tenant` entscheidet über die Sichtbarkeit – auch über die eigene.** Wer diese Berechtigung besitzt, kann die eigene Gruppe jedem Tenant zuordnen und so dessen Geräte sehen. Außerdem lässt sich damit die Kontakt-E-Mail eines Tenants setzen; an sie gehen – je nach Ausleihe-Konfiguration als Kopie oder ausschließlich – die Mahnungen überfälliger Ausleihen zu dessen Geräten, mit Namen der Ausleihenden. Die Berechtigung gehört deshalb wie die Gruppenverwaltung zu den Administrations-Berechtigungen, nicht in Bediener-Gruppen.
 :::
 
 Nicht auf den Tenant eingeschränkt sind:
