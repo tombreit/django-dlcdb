@@ -171,6 +171,11 @@ below.
 Besides notifications and the HR sync, it writes the nightly database snapshot
 for backups (see *Backup*).
 
+Its queue lives in `data/db/huey_task_queue.sqlite3`. The file holds only
+transient data: tasks waiting to run and locks. Task results are not stored
+(`results=False`, nobody reads them), so the file stays at a few MB and needs no
+backup.
+
 Add a systemd user service unit for huey (modify paths etc.):
 
 ```ini
@@ -235,6 +240,29 @@ podman run --name dlcdb ... dlcdb serve
 podman run --name dlcdb-huey ... dlcdb huey
 ```
 
+### Huey queue file grown large (one-time)
+
+Before October 2026 huey stored every task result, and the SQLite backend never
+expires them: the queue file grew by gigabytes (7 GB in production). Since then
+no results are stored, but the existing file keeps its size. It holds nothing of
+value, so reset it once during the deployment, while the task runner is stopped:
+
+```bash
+systemctl --user stop dlcdb_huey.service
+# Both counts must be 0: no task is still waiting to run.
+sqlite3 data/db/huey_task_queue.sqlite3 "select count(*) from task; select count(*) from schedule;"
+rm data/db/huey_task_queue.sqlite3 data/db/huey_task_queue.sqlite3-wal data/db/huey_task_queue.sqlite3-shm
+python manage.py migrate --noinput
+systemctl --user start dlcdb_huey.service  # creates a new, empty queue file
+touch dlcdb/wsgi.py                        # the web workers reconnect to the new file
+```
+
+If a count is not 0, start the task runner again until it has worked off the
+waiting tasks, then stop it and check once more.
+
+For a containerized deployment: remove both containers, delete the three files
+on the data volume, then start `dlcdb serve` and `dlcdb huey` again.
+
 ### Apache and mod_wsgi
 
 ```
@@ -276,7 +304,7 @@ Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. d
 
 Die Datenbank läuft im WAL-Modus: Zuletzt gespeicherte Änderungen stehen zunächst in `db.sqlite3-wal`. Eine einfache Kopie von `db.sqlite3` im laufenden Betrieb kann sie verpassen oder inkonsistent sein.
 
-Deshalb schreibt der Task Runner jede Nacht um 00:30 UTC einen Snapshot der Datenbank: `data/db/db.sqlite3.snapshot`. Er ist vollständig, konsistent und kompakt (`VACUUM INTO`, ohne die freien Seiten der laufenden Datenbank), eine einzelne Datei, und kann jederzeit kopiert werden, denn er wird erst fertig geschrieben und dann ausgetauscht. Ein Backup-Skript sichert also diese Datei und lässt die laufende Datenbank (`db.sqlite3`, `db.sqlite3-wal`, `db.sqlite3-shm`) aus. Ohne laufenden Task Runner entsteht kein neuer Snapshot; das Backup-Skript sollte deshalb das Alter der Datei prüfen. Der Snapshot entsteht nur, wenn die DLCDB mit einer SQLite-Datei läuft. Komprimieren übernimmt das Backup-Skript: Mit `zstd` oder `gzip` schrumpft der Snapshot auf etwa ein Zehntel. Backup-Werkzeuge mit Deduplizierung (z. B. borg, restic) komprimieren selbst und sollten den unkomprimierten Snapshot bekommen.
+Deshalb schreibt der Task Runner jede Nacht um 00:30 UTC einen Snapshot der Datenbank: `data/db/db.sqlite3.snapshot`. Er ist vollständig, konsistent und kompakt (`VACUUM INTO`, ohne die freien Seiten der laufenden Datenbank), eine einzelne Datei, und kann jederzeit kopiert werden, denn er wird erst fertig geschrieben und dann ausgetauscht. Ein Backup-Skript sichert also diese Datei und lässt die laufende Datenbank (`db.sqlite3`, `db.sqlite3-wal`, `db.sqlite3-shm`) aus, ebenso die Warteschlange des Task Runners (`huey_task_queue.sqlite3` samt `-wal`/`-shm`), die nur kurzlebige Daten enthält. Ohne laufenden Task Runner entsteht kein neuer Snapshot; das Backup-Skript sollte deshalb das Alter der Datei prüfen. Der Snapshot entsteht nur, wenn die DLCDB mit einer SQLite-Datei läuft. Komprimieren übernimmt das Backup-Skript: Mit `zstd` oder `gzip` schrumpft der Snapshot auf etwa ein Zehntel. Backup-Werkzeuge mit Deduplizierung (z. B. borg, restic) komprimieren selbst und sollten den unkomprimierten Snapshot bekommen.
 
 Für einen aktuelleren Stand als den nächtlichen Snapshot sichert `sqlite3` die Datenbank auch im laufenden Betrieb in eine einzelne Datei:
 

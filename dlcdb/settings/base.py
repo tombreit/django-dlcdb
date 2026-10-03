@@ -465,9 +465,13 @@ SIMPLE_HISTORY_REVERT_DISABLED = True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 
+# results=False: nothing reads task results, and the SQLite backend keeps them
+# forever (no expiry). Storing them grew the queue file to 7 GB in production.
+# Failures still reach the log and the journal (dlcdb/journal/signals.py).
 HUEY = SqliteHuey(
     name="dlcdb_huey",
     filename=str(DB_DIR / "huey_task_queue.sqlite3"),
+    results=False,
 )
 
 if DEBUG:

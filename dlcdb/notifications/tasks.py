@@ -228,7 +228,11 @@ def send_message(message_id):
 
 @db_task()
 def queue_messages_for_interval(interval):
-    """Create messages for all active subscriptions with the given interval."""
+    """
+    Create report messages for the due report subscriptions of the given
+    interval, and queue a message check for every other active subscription.
+    Returns the number of report messages created.
+    """
 
     subscription_count = 0
     message_count = 0
@@ -259,16 +263,18 @@ def queue_messages_for_interval(interval):
             subscription.schedule_next_message()
             subscription.save_schedule("next_scheduled")
 
+    # Each check runs as a task of its own; whether it creates a message is not
+    # known here (huey stores no results, see HUEY in settings).
+    queued_count = 0
     for subscription in Subscription.objects.filter(interval=interval.value, is_active=True).exclude(
         event__in=Subscription.REPORT_EVENTS
     ):
-        result = queue_message(subscription.id)
-        subscription_count += 1
-        if result:  # If a message ID was returned
-            message_count += 1
+        queue_message(subscription.id)
+        queued_count += 1
 
     logger.info(
-        f"Processed {subscription_count} subscriptions, created {message_count} new messages for {interval.value} interval"
+        f"{interval.value} interval: {message_count} report messages for {subscription_count} report "
+        f"subscriptions, queued {queued_count} subscriptions for a message check"
     )
     return message_count
 
