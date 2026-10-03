@@ -26,7 +26,10 @@ class Subscription(models.Model):
       spreadsheet attachment.
     """
 
-    history = HistoricalRecords()
+    # The scheduler's bookkeeping changes on every run and says nothing about
+    # who changed the subscription; tracking it produced 1.25 million identical
+    # history rows by 2026-08. Scheduler code saves it with save_schedule().
+    history = HistoricalRecords(excluded_fields=["last_sent", "last_run", "next_scheduled", "modified_at"])
     objects = models.Manager()
 
     class NotificationEventChoices(models.TextChoices):
@@ -123,6 +126,17 @@ class Subscription(models.Model):
         if not self.next_scheduled:
             self.schedule_next_message()
         super().save(*args, **kwargs)
+
+    def save_schedule(self, *fields):
+        """
+        Save scheduler bookkeeping (``last_sent``, ``last_run``,
+        ``next_scheduled``) without a history row.
+
+        Only the given fields are written, so a scheduler run cannot overwrite a
+        concurrent edit of the subscription. Changes made by people go through
+        ``save()`` and keep their history row.
+        """
+        self.save_without_historical_record(update_fields=[*fields, "modified_at"])
 
     def clean(self):
         errors = []

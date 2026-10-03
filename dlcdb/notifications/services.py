@@ -38,15 +38,16 @@ def create_license_subscriptions(
             event=license_event, subscriber=subscriber, device=device, defaults={"interval": sub_interval}
         )
 
-        # Set scheduled time
+        # Set scheduled time: bookkeeping, so no history row (save_schedule).
+        # Creating the subscription above already wrote one.
         if license_event in scheduled_times:
             # For point-in-time, directly set next_scheduled without calling schedule_next_message
             subscription.next_scheduled = scheduled_times[license_event]
-            subscription.save()
+            subscription.save_schedule("next_scheduled")
         elif created:
             # For regular intervals, use schedule_next_message
             subscription.schedule_next_message()
-            subscription.save()
+            subscription.save_schedule("next_scheduled")
 
         result.append(
             {

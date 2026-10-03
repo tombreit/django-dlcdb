@@ -169,7 +169,7 @@ def create_report_messages(subscriptions, *, now=None, update_window=True) -> li
 
         if update_window:
             subscription.last_run = now
-            subscription.save(update_fields=["last_run", "modified_at"])
+            subscription.save_schedule("last_run")
 
     return messages
 

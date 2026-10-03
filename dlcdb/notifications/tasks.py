@@ -47,7 +47,7 @@ def _ensure_aware_dt(dt):
 def _update_subscription_after_send(subscription):
     """Record a successful send. Rescheduling happens at message creation."""
     subscription.last_sent = timezone.now()
-    subscription.save()
+    subscription.save_schedule("last_sent")
 
 
 def _process_messages_for_interval(interval):
@@ -155,7 +155,7 @@ def _update_license_subscriptions():
 
         # Update each subscription based on its event type
         for subscription in subscriptions:
-            updated = False
+            previous = subscription.next_scheduled
 
             # For CONTRACT_EXPIRES_SOON, set to 30 days before expiration
             if (
@@ -166,7 +166,6 @@ def _update_license_subscriptions():
                 if expiration_date:  # Only proceed if not None
                     notify_date = expiration_date - timedelta(days=30)
                     subscription.schedule_next_message(datetime_obj=notify_date)
-                    updated = True
 
             # For CONTRACT_EXPIRED, set to expiration date
             elif (
@@ -176,22 +175,23 @@ def _update_license_subscriptions():
                 expiration_date = _ensure_aware_dt(device.contract_expiration_date)
                 if expiration_date:  # Only proceed if not None
                     subscription.schedule_next_message(datetime_obj=expiration_date)
-                    updated = True
 
-            # Save if updated
-            if updated:
-                subscription.save()
-                update_count += 1
-                logger.info(
-                    f"Updated subscription {subscription.id} for device {device.id}, "
-                    f"event {subscription.event}, next_scheduled={subscription.next_scheduled}"
-                )
+            # This runs every minute for 48 hours after a device edit: save and
+            # regenerate only when the date really changed.
+            if subscription.next_scheduled == previous:
+                continue
+            subscription.save_schedule("next_scheduled")
+            update_count += 1
+            logger.info(
+                f"Updated subscription {subscription.id} for device {device.id}, "
+                f"event {subscription.event}, next_scheduled={subscription.next_scheduled}"
+            )
 
-                # Update any existing pending messages
-                messages = Message.objects.filter(subscription=subscription, status=Message.STATUS_PENDING)
-                for message in messages:
-                    message.generate_content(force=True)
-                    logger.info(f"Updated content for message {message.id}")
+            # Update any existing pending messages
+            messages = Message.objects.filter(subscription=subscription, status=Message.STATUS_PENDING)
+            for message in messages:
+                message.generate_content(force=True)
+                logger.info(f"Updated content for message {message.id}")
 
     logger.info(f"Updated {update_count} subscriptions based on device changes")
     return update_count
@@ -257,7 +257,7 @@ def queue_messages_for_interval(interval):
         message_count += len(messages)
         for subscription in group:
             subscription.schedule_next_message()
-            subscription.save()
+            subscription.save_schedule("next_scheduled")
 
     for subscription in Subscription.objects.filter(interval=interval.value, is_active=True).exclude(
         event__in=Subscription.REPORT_EVENTS
@@ -318,7 +318,7 @@ def queue_message(subscription_id):
     else:
         # For point-in-time, just clear the next_scheduled since it's a one-time event
         subscription.next_scheduled = None
-    subscription.save()
+    subscription.save_schedule("next_scheduled")
 
     if message:
         logger.info(f"Created message {message.id} for subscription {subscription.id}")
