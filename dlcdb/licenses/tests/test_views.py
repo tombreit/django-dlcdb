@@ -3,14 +3,17 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.contrib.messages import get_messages
 from django.test import override_settings
 from django.urls import reverse
 
-from dlcdb.core.models import InRoomRecord, Room
+from dlcdb.core.models import Device, InRoomRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
@@ -236,3 +239,23 @@ class LicensesTenantScopingTests(BaseTest):
 
         foreign = self.client.post(url, {"series": "New Suite", "tenant": self.foreign_tenant.pk}, headers=htmx)
         self.assertIn("tenant", foreign.context["form"].errors)
+
+    def test_an_unexpected_save_error_is_journaled_not_shown(self):
+        Room.objects.create(number="LIC.01", is_default_license_room=True)
+        with mock.patch("dlcdb.licenses.views.lifecycle.transition_locate", side_effect=RuntimeError("boom")):
+            response = self.client.post(
+                reverse("licenses:new"),
+                {"series": "Broken Suite", "tenant": self.own_tenant.pk},
+                headers={"HX-Request": "true"},
+            )
+
+        shown = " ".join(str(message) for message in get_messages(response.wsgi_request))
+        self.assertNotIn("Traceback", shown)
+        entry = JournalEntry.objects.get(source="licenses.views")
+        self.assertEqual(entry.level, JournalEntry.Level.ERROR)
+        self.assertEqual(entry.event, "exception")
+        self.assertIn("boom", entry.body)
+        self.assertIn("Traceback", entry.body)
+        self.assertEqual(entry.user, self.user)
+        # The atomic block rolled the half-created licence back.
+        self.assertFalse(Device.objects.filter(series="Broken Suite").exists())

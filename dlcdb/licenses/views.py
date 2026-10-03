@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import traceback
+import logging
 from itertools import chain
 from operator import attrgetter
 
@@ -28,6 +28,8 @@ from dlcdb.theme.pagination import paginate
 from .filters import LicenceRecordFilter
 from .forms import LicenseForm
 from .models import LicenseAsset, LicensesConfiguration
+
+logger = logging.getLogger(__name__)
 
 # Rows per page for the licenses list. Mirrors dlcdb.assets.views.devices.
 LICENSES_PER_PAGE = 25
@@ -174,15 +176,23 @@ def new(request):
                     room = Room.objects.get(is_default_license_room=True)
                     lifecycle.transition_locate(device, room=room, user=request.user)
 
+            # Unexpected errors are logged, which puts them into the journal with
+            # their traceback; the user only learns that saving failed. The
+            # request names the user in the journal entry, as for django.request.
             except Room.DoesNotExist:
-                errors.append("No license room/location defined. Define a license room first.")
+                errors.append(_("No license room/location defined. Define a license room first."))
             except ValidationError as e:
                 errors.append(str(e))
             except IntegrityError as e:
-                errors.append(f"Database error: Could not save the license. Please try again. Error: {e}")
-            except Exception as e:
-                stacktrace = traceback.format_exc()
-                errors.append(f"An error occurred while saving: {e}\n{stacktrace}")
+                logger.exception("Saving a new licence failed", extra={"request": request})
+                errors.append(
+                    _("Database error: Could not save the license. Please try again. Error: %(error)s") % {"error": e}
+                )
+            except Exception:
+                logger.exception("Saving a new licence failed", extra={"request": request})
+                errors.append(
+                    _("The license could not be saved because of an unexpected error. The error has been logged.")
+                )
 
             if errors:
                 for error in errors:
