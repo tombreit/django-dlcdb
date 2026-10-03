@@ -32,6 +32,7 @@ Device Lifecycle Database
 - You may suggest commit messages, but do not commit on your own
 - If adding SPDX license headers: omit the year
 - Do not run `manage.py makemessages` and do not modify the po translation files. I will take care of the translation stuff. Just ensure that the user facing strings in the codebase are marked as "translateable".
+- Add a `NEWS.md` entry for every significant change, not for every commit or fix
 
 ## Quirks
 
