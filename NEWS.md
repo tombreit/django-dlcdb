@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Journal: every sent notification mail and every newly failed one gets a journal entry; existing sent and failed mails are copied over
 * Journal: every bulk decommissioning run gets a journal entry naming who ran it; existing decommissioning logs are copied over
 * Journal: every stored import outcome (written, failed, dry run with bad rows) gets a journal entry naming who ran it; existing import logs are copied over
 * Journal: logged warnings and errors, unhandled exceptions in views and failed background tasks show up in the journal; a repeat at most once per hour

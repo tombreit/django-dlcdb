@@ -9,6 +9,8 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.utils import timezone
 
+from dlcdb.journal.models import JournalEntry
+
 from .models import Message
 
 XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -16,12 +18,38 @@ XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml
 logger = logging.getLogger(__name__)
 
 
+def _journal(message, *, event, level, outcome, body):
+    """
+    One journal entry about a mail. Mails are sent by tasks, so there is no
+    user. The tenant is the subscribed device's; other mails (reports, overdue
+    lenders) have none, and every journal viewer sees them.
+    """
+    device = message.subscription.device if message.subscription else None
+    JournalEntry.objects.log(
+        source="notifications.mail",
+        event=event,
+        level=level,
+        summary=f"{outcome}: {message.subject}" if message.subject else outcome,
+        body=body,
+        subject=message,
+        tenant=device.tenant if device else None,
+    )
+
+
 # Move this to module level
 def mark_message_failed(message, error_message):
-    """Mark a message as failed with an error"""
+    """
+    Mark a message as failed with an error.
+
+    Journaled only on the way into "failed": a failed message is retried every
+    minute, and a retry that fails again adds nothing new.
+    """
+    newly_failed = message.status != Message.STATUS_FAILED
     message.status = Message.STATUS_FAILED
     message.error_message = error_message
     message.save()
+    if newly_failed:
+        _journal(message, event="failed", level=JournalEntry.Level.ERROR, outcome="Mail failed", body=error_message)
 
 
 class NotificationChannel:
@@ -55,7 +83,8 @@ class EmailChannel(NotificationChannel):
             # silently sends nothing and the message would be marked SENT.
             if not to:
                 mark_message_failed(message, "No recipient email address")
-                logger.warning(f"No recipient email address for message {message.id}")
+                # Not journaled: mark_message_failed journals the failure.
+                logger.warning(f"No recipient email address for message {message.id}", extra={"journal": False})
                 return False
 
             email = EmailMessage(
@@ -81,12 +110,17 @@ class EmailChannel(NotificationChannel):
             message.sent_at = timezone.now()
             message.save()
             logger.info(f"Email sent for message {message.id} to {to}")
-            return True
 
         except Exception as e:
             mark_message_failed(message, str(e))  # Use the module-level function
-            logger.exception(f"Failed to send email for message {message.id}: {e!s}")
+            # Not journaled: mark_message_failed journals the failure.
+            logger.exception(f"Failed to send email for message {message.id}: {e!s}", extra={"journal": False})
             return False
+
+        # Outside the try: a journal error must not mark a sent mail as failed.
+        recipients = f"To: {', '.join(to)}" + (f"\nCc: {message.cc_email}" if message.cc_email else "")
+        _journal(message, event="sent", level=JournalEntry.Level.SUCCESS, outcome="Mail sent", body=recipients)
+        return True
 
 
 # Registry of available channels

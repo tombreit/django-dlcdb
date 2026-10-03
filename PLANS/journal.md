@@ -8,7 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
 journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app), 2
-(anomalies from Python logging), 3 (import log) and 4 (decommissioning log) are implemented. Open questions are settled (see batches 6 and 7,
+(anomalies from Python logging), 3 (import log), 4 (decommissioning log) and 6 (notification
+mails) are implemented; batch 5 (HR sync log) waits for an answer (*Open questions*). Open questions are settled (see batches 6 and 7,
 *Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
 and updates this line.
 
@@ -326,7 +327,8 @@ class JournalHandler(logging.Handler):
     - skips unchanged-only runs (success and summary `"N unchanged"` / `"no rows"`);
     - a `<sync>` row in the log → `sync_failed`, otherwise `synced`.
   - Tests: changes → one entry; all unchanged → none; failed run → one `sync_failed`.
-- [ ] **6. Notification mails** (`notifications.mail`)
+  - **Moved to the end: open question,** see *Open questions* below.
+- [x] **6. Notification mails** (`notifications.mail`)
   - `sent` entry in `EmailChannel.send` (body To/Cc). `failed` entry in `mark_message_failed`
     (body = `error_message`).
   - Journal a mail only when its status changes (pending → sent or failed, failed → sent). A
@@ -381,6 +383,24 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
 - **Otherwise,** record the open question there, move the affected batch to the end, and continue
   with a batch that doesn't depend on it.
 
+## Open questions
+
+- **Batch 5, HR sync runs with persistent per-contract errors** (found 2026-10-03, batch 5 moved
+  to the end).
+  - **Problem:** in production every HR sync run carries the same 3 per-contract errors. That
+    holds for all 50 stored runs (2026-08-18): "257 unchanged, 3 error", the same three
+    contracts. Decision 6 ("journal a run if any row is not `UNCHANGED`") would journal every run,
+    144 a day: the flood decision 6 was meant to prevent.
+  - **Options:**
+    - **A (recommended):** a run with created, updated or skipped rows, or a run-level failure,
+      is always journaled. A run whose only notable rows are per-contract errors is journaled
+      only when those error rows differ from the last journaled run's: same contracts, same
+      details → skipped. Persistent bad contracts then show up once, and again when they change.
+    - **B:** like A, but an error-only run repeats at most once per hour, like anomalies
+      (decision 16): 24 a day while the errors persist.
+    - **C:** journal every run with errors (144 a day while they persist).
+  - The copy migration `dataexchange/0011` follows the same rule.
+
 ## Decided during implementation
 
 - **Batch 1, detail page on `theme/_base.html`,** like `dataexchange/importer_detail.html`, not
@@ -408,6 +428,15 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
   `view_removerlist` sees every run), and one file may cover devices of several of the
   uploader's tenants. This keeps today's visibility rather than inventing a tenant. A failed run
   still raises before anything is stored (unchanged); then there is no entry either.
+- **Batch 6, every successful send is journaled,** including a manual resend of an already
+  sent message (admin "send now"): each one is a mail that went out. Only failures are limited
+  to the transition into "failed", which is what stops the retry flood.
+- **Batch 6, the `sent` entry is written after the `try` block** in `EmailChannel.send`, so a
+  journal error cannot flip a sent message to "failed" through the channel's catch-all.
+- **Batch 6, copied mails** (production: 296 sent, none failed, 2 pending skipped) get the
+  recipient the way `Person.get_email` picks it. Their subject text is
+  `"<id> - <status> - <recipient or subscription id>"`, because a historical model lacks
+  `Subscription.__str__`.
 - **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
   Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
   (`dlcdb/settings/base.py`). Left alone.
