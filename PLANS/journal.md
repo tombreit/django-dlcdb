@@ -7,8 +7,8 @@ SPDX-License-Identifier: CC0-1.0
 # Journal: one log for all in-app logs
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
-journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app) and 2
-(anomalies from Python logging) are implemented; the legacy logs are not moved yet. Open questions are settled (see batches 6 and 7,
+journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app), 2
+(anomalies from Python logging) and 3 (import log) are implemented. Open questions are settled (see batches 6 and 7,
 *Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
 and updates this line.
 
@@ -285,7 +285,7 @@ class JournalHandler(logging.Handler):
     - a 500 response adds a `django.request` entry with the user;
     - the huey receiver logs the task name;
     - the outside-atomic path is tested with `transaction=True` (see *Pitfalls*).
-- [ ] **3. Import log** (`dataexchange.import`)
+- [x] **3. Import log** (`dataexchange.import`)
   - `OperationLogBase.write_journal()` and `JOURNAL_LEVELS`; `ImporterList.journal_source`.
   - `run_device_import` (`importer.py`) takes the acting `user` instead of `username` and
     passes `user.username` down. All four callers have `request.user`: the two frontend views,
@@ -393,11 +393,16 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
   `content_object`. Once a legacy log model is retired (`UdbSyncRun`, see *Phase-out*), its
   content type has no model class and the GFK would raise. It also treats a `None` from
   `get_absolute_url()` as "no page" (a `Device` has one only as a licence).
-- **Pre-existing test failures on `7ccc178`,** unrelated and left alone; they fail on a clean
-  checkout too:
-  - `assets/tests/test_devices.py::DeviceFrontendTests::test_modified_column_uses_naturaltime_for_recent_edits_only`
-    (date-dependent);
+- **Time-dependent test failures,** unrelated and left alone. Both failed on a clean checkout of
+  `7ccc178` around 01:00 on 2026-10-03 and passed in later runs:
+  - `assets/tests/test_devices.py::DeviceFrontendTests::test_modified_column_uses_naturaltime_for_recent_edits_only`;
   - `core/tests/test_form_round_trip.py::test_edit_page_renders_and_round_trips_every_field[lending_return]`.
+- **Batch 3, old import logs without status** (production, 29 rows: "Imported devices: N",
+  written before `status` existed) are copied as `imported` at level INFO: the status is
+  unknown, and the copy stays verbatim. The import report's row details mix German and English
+  (some importer strings are translated at write time); the journal copies that verbatim too.
+- **Batch 3, the frontend tests that drive an import** pass the acting user as `user=`; the
+  importer still resolves the audit `user` FK from `user.username` (unchanged hard lookup).
 - **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
   Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
   (`dlcdb/settings/base.py`). Left alone.

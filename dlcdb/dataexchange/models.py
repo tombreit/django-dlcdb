@@ -4,7 +4,10 @@
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from dlcdb.journal.models import JournalEntry
 
 from ..core.models.abstracts import AuditBaseModel, SingletonBaseModel
 
@@ -48,8 +51,36 @@ class OperationLogBase(AuditBaseModel):
         abstract = True
         ordering = ["-created_at"]
 
+    def write_journal(self, *, event, user):
+        """
+        Copy the stored outcome into the journal, verbatim, as one entry.
+
+        The row keeps only the latest attempt; the journal gets every one.
+        ``user`` is whoever caused this event, not necessarily the row's user
+        (the uploader): confirming an import is an event of its own.
+        """
+        return JournalEntry.objects.log(
+            source=self.journal_source,
+            event=event,
+            level=JOURNAL_LEVELS.get(self.status, JournalEntry.Level.INFO),
+            summary=self.summary,
+            body=self.messages,
+            user=user,
+            subject=self,
+        )
+
+
+# OperationLogBase.Status -> JournalEntry.Level; an empty status (never confirmed) is INFO.
+JOURNAL_LEVELS = {
+    OperationLogBase.Status.SUCCESS: JournalEntry.Level.SUCCESS,
+    OperationLogBase.Status.WARNING: JournalEntry.Level.WARNING,
+    OperationLogBase.Status.ERROR: JournalEntry.Level.ERROR,
+}
+
 
 class ImporterList(OperationLogBase):
+    journal_source = "dataexchange.import"
+
     VALID_COL_HEADERS = [
         "SAP_ID",
         "ROOM",
@@ -124,6 +155,9 @@ class ImporterList(OperationLogBase):
 
     def __str__(self):
         return f"{self.file}"
+
+    def get_absolute_url(self):
+        return reverse("dataexchange:importer_detail", args=[self.pk])
 
 
 class RemoverList(OperationLogBase):

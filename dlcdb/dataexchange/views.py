@@ -97,7 +97,7 @@ def device_import(request):
                 file=form.cleaned_data["file"],
                 tenant=importer_list.tenant,
                 import_format=importer_list.import_format,
-                username=request.user.username,
+                user=request.user,
                 importer_list=importer_list,
                 write=False,
             )
@@ -156,7 +156,7 @@ def device_import_confirm(request, pk):
             file=importer_list.file,
             tenant=importer_list.tenant,
             import_format=importer_list.import_format,
-            username=request.user.username,
+            user=request.user,
             importer_list=importer_list,
             write=True,
         )

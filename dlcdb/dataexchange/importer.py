@@ -174,7 +174,10 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                         )
             except Exception as error:
                 detail = _row_error_detail(error)
-                logger.warning("Row %s (%s) failed: %s", import_obj.row, import_obj.identifier, detail)
+                # Not journaled: the import's own journal entry lists the row.
+                logger.warning(
+                    "Row %s (%s) failed: %s", import_obj.row, import_obj.identifier, detail, extra={"journal": False}
+                )
                 report.add(
                     row=import_obj.row,
                     identifier=import_obj.identifier,
@@ -200,7 +203,10 @@ def _import_transaction(*, import_objs, import_format, report, device_objs, tena
                         record_obj.save(check_transition=False)
             except Exception as error:
                 detail = _row_error_detail(error)
-                logger.warning("Row %s (%s) failed: %s", import_obj.row, import_obj.identifier, detail)
+                # Not journaled: the import's own journal entry lists the row.
+                logger.warning(
+                    "Row %s (%s) failed: %s", import_obj.row, import_obj.identifier, detail, extra={"journal": False}
+                )
                 report.add(
                     row=import_obj.row,
                     identifier=import_obj.identifier,
@@ -336,7 +342,8 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
             # number and identifier and carry on, so the dry run surfaces every
             # problem at once instead of one per re-upload.
             detail = _row_error_detail(error)
-            logger.warning("Row %s (%s) failed: %s", idx, identifier, detail)
+            # Not journaled: the import's own journal entry lists the row.
+            logger.warning("Row %s (%s) failed: %s", idx, identifier, detail, extra={"journal": False})
             report.add(row=idx, identifier=identifier, outcome=Outcome.ERROR, detail=detail)
             continue
 
@@ -356,7 +363,7 @@ def create_devices(*, rows, report, importer_inst_pk=None, import_format=None, t
     return device_objs
 
 
-def run_device_import(*, file, tenant, import_format, username, importer_list=None, write=False):
+def run_device_import(*, file, tenant, import_format, user, importer_list=None, write=False):
     """
     Single entry point for device imports, shared by the admin and the frontend.
 
@@ -365,6 +372,9 @@ def run_device_import(*, file, tenant, import_format, username, importer_list=No
     the report is persisted on it. A failed attempt is part of the import
     history too: it is recorded on the given ImporterList row (status "error"
     plus the error text in the log) before the exception is re-raised.
+
+    Every outcome stored on the row also becomes a journal entry naming
+    ``user``, whoever runs this import.
     """
     try:
         report = import_data(
@@ -373,16 +383,19 @@ def run_device_import(*, file, tenant, import_format, username, importer_list=No
             valid_col_headers=ImporterList.VALID_COL_HEADERS,
             import_format=import_format,
             tenant=tenant,
-            username=username,
+            username=user.username,
             write=write,
         )
     except Exception as error:
         if importer_list is not None and importer_list.pk:
+            # Written after the import's transaction has rolled back, so the
+            # row and its journal entry survive the failure.
             error_text = import_error_message(error)
             importer_list.status = ImporterList.Status.ERROR
             importer_list.summary = error_text[:255]
             importer_list.messages = f"{'Import' if write else 'Import check (dry run)'} failed: {error_text}"
             importer_list.save()
+            importer_list.write_journal(event="failed" if write else "dry_run_failed", user=user)
         raise
 
     if importer_list is not None and (write or report.counts[Outcome.ERROR]):
@@ -390,6 +403,7 @@ def run_device_import(*, file, tenant, import_format, username, importer_list=No
         # import history with its per-row reasons -- otherwise the audit row keeps
         # an empty status and the user loses the detail on the next upload.
         report.persist(importer_list)
+        importer_list.write_journal(event="imported" if write else "dry_run_failed", user=user)
     return report
 
 

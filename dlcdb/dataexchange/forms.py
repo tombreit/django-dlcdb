@@ -30,14 +30,13 @@ class ImporterAdminForm(forms.ModelForm):
         file = cleaned_data.get("file")
         tenant = cleaned_data.get("tenant")
         import_format = cleaned_data.get("import_format")
-        username = self.request.user.username
 
         try:
             report_dryrun = run_device_import(
                 file=file,
                 tenant=tenant,
                 import_format=import_format,
-                username=username,
+                user=self.request.user,
                 write=False,
             )
         except IMPORT_ERRORS as error:

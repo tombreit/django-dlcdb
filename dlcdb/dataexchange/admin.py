@@ -128,7 +128,7 @@ class ImporterListAdmin(TenantScopedAdmin):
                 file=obj.file,
                 tenant=obj.tenant,
                 import_format=obj.import_format,
-                username=request.user.username,
+                user=request.user,
                 importer_list=obj,
                 write=True,
             )

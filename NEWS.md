@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Journal: every stored import outcome (written, failed, dry run with bad rows) gets a journal entry naming who ran it; existing import logs are copied over
 * Journal: logged warnings and errors, unhandled exceptions in views and failed background tasks show up in the journal; a repeat at most once per hour
 * Journal: new page Settings › Journal, one read-only list of logged events, filterable by source, event, minimum level and text; needs `journal.view_journalentry`
 * Person detail page lists the person's lendings, licences and smallstuff, current and past, with links to device, lending and record

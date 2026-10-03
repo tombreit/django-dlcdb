@@ -373,7 +373,7 @@ def test_sap_import_skips_an_existing_device_without_tenant(tenant):
 
 
 @pytest.mark.django_db
-def test_run_device_import_dry_run_does_not_persist(tenant):
+def test_run_device_import_dry_run_does_not_persist(tenant, import_user):
     csv_path = TEST_DATA_DIR / "devices.correct.csv"
 
     with open(csv_path, "rb") as csv_file:
@@ -381,7 +381,7 @@ def test_run_device_import_dry_run_does_not_persist(tenant):
             file=csv_file,
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
@@ -391,7 +391,7 @@ def test_run_device_import_dry_run_does_not_persist(tenant):
 
 
 @pytest.mark.django_db
-def test_run_device_import_write_persists_report_and_links_devices(tenant):
+def test_run_device_import_write_persists_report_and_links_devices(tenant, import_user):
     csv_path = TEST_DATA_DIR / "devices.correct.csv"
     importer_list = ImporterList.objects.create(file="imported_csv/pytest.csv", tenant=tenant)
 
@@ -400,7 +400,7 @@ def test_run_device_import_write_persists_report_and_links_devices(tenant):
             file=csv_file,
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             importer_list=importer_list,
             write=True,
         )
@@ -425,7 +425,7 @@ def test_build_import_template_csv_contains_all_columns():
 
 
 @pytest.mark.django_db
-def test_import_template_example_rows_import_cleanly(tenant):
+def test_import_template_example_rows_import_cleanly(tenant, import_user):
     """The template's example rows must stay valid import data."""
     from io import BytesIO
 
@@ -433,7 +433,7 @@ def test_import_template_example_rows_import_cleanly(tenant):
         file=BytesIO(build_import_template_csv().encode("utf-8")),
         tenant=tenant,
         import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-        username="pytestuser",
+        user=import_user,
         write=True,
     )
 
@@ -450,7 +450,7 @@ def test_import_template_example_rows_import_cleanly(tenant):
 
 
 @pytest.mark.django_db
-def test_room_without_record_type_defaults_to_inroom(tenant):
+def test_room_without_record_type_defaults_to_inroom(tenant, import_user):
     """A row with a ROOM but no RECORD_TYPE gets an INROOM record."""
     import csv
     from io import BytesIO, StringIO
@@ -464,7 +464,7 @@ def test_room_without_record_type_defaults_to_inroom(tenant):
         file=BytesIO(buffer.getvalue().encode("utf-8")),
         tenant=tenant,
         import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-        username="pytestuser",
+        user=import_user,
         write=True,
     )
 
@@ -474,7 +474,7 @@ def test_room_without_record_type_defaults_to_inroom(tenant):
 
 
 @pytest.mark.django_db
-def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
+def test_run_device_import_marks_failed_attempt_on_log_row(tenant, import_user):
     """A raising import records status "error" on the given ImporterList row."""
     csv_path = TEST_DATA_DIR / "devices.incompleterowheader.csv"
     importer_list = ImporterList.objects.create(file="imported_csv/pytest-failed.csv", tenant=tenant)
@@ -484,7 +484,7 @@ def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
             file=csv_file,
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             importer_list=importer_list,
             write=False,
         )
@@ -496,7 +496,7 @@ def test_run_device_import_marks_failed_attempt_on_log_row(tenant):
 
 
 @pytest.mark.django_db
-def test_import_report_details_describe_the_records(tenant):
+def test_import_report_details_describe_the_records(tenant, import_user):
     """Each preview row says which record it writes, not just "created"."""
     import csv
     from io import BytesIO, StringIO
@@ -535,7 +535,7 @@ def test_import_report_details_describe_the_records(tenant):
             file=BytesIO(buffer.getvalue().encode("utf-8")),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
@@ -662,7 +662,7 @@ def _csv_bytes(rows):
 
 
 @pytest.mark.django_db
-def test_lender_name_collision_is_reported_with_the_email(tenant):
+def test_lender_name_collision_is_reported_with_the_email(tenant, import_user):
     """The original bug report, reproduced: a raw "UNIQUE constraint failed".
 
     Lenders are resolved by email, but Person also carries a UniqueConstraint on
@@ -688,7 +688,7 @@ def test_lender_name_collision_is_reported_with_the_email(tenant):
             file=_csv_bytes([lent_row]),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
@@ -699,7 +699,7 @@ def test_lender_name_collision_is_reported_with_the_email(tenant):
 
 
 @pytest.mark.django_db
-def test_blank_lender_names_collide_and_are_reported(tenant):
+def test_blank_lender_names_collide_and_are_reported(tenant, import_user):
     """Two lenders with emails but no names both insert ("", "") -> collision."""
     rows = [
         {
@@ -717,7 +717,7 @@ def test_blank_lender_names_collide_and_are_reported(tenant):
             file=_csv_bytes(rows),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
@@ -729,7 +729,7 @@ def test_blank_lender_names_collide_and_are_reported(tenant):
 
 
 @pytest.mark.django_db
-def test_duplicate_edv_id_is_reported_against_its_row(tenant):
+def test_duplicate_edv_id_is_reported_against_its_row(tenant, import_user):
     """The other route to the reported error: a repeated device id.
 
     The internal-CSV branch had no duplicate check, so this surfaced as a bare
@@ -745,7 +745,7 @@ def test_duplicate_edv_id_is_reported_against_its_row(tenant):
             file=_csv_bytes(rows),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
@@ -757,7 +757,7 @@ def test_duplicate_edv_id_is_reported_against_its_row(tenant):
 
 
 @pytest.mark.django_db
-def test_soft_deleted_lender_still_imports(tenant):
+def test_soft_deleted_lender_still_imports(tenant, import_user):
     """Pins the variant of the report that was already fixed.
 
     A soft-deleted Person holding the email must be reused and undeleted rather
@@ -781,7 +781,7 @@ def test_soft_deleted_lender_still_imports(tenant):
             file=_csv_bytes([row]),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=True,
         )
 
@@ -790,7 +790,7 @@ def test_soft_deleted_lender_still_imports(tenant):
 
 
 @pytest.mark.django_db
-def test_ragged_row_is_an_error_row_not_a_crash(tenant):
+def test_ragged_row_is_an_error_row_not_a_crash(tenant, import_user):
     """A short data row used to raise AttributeError that nothing caught.
 
     DictReader fills the missing cells with None, so row["IS_LENTABLE"].lower()
@@ -807,7 +807,7 @@ def test_ragged_row_is_an_error_row_not_a_crash(tenant):
             file=BytesIO(payload),
             tenant=tenant,
             import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
-            username="pytestuser",
+            user=import_user,
             write=False,
         )
 
