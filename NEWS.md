@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* SQLite runs in WAL mode with an immediate write lock, a 20 s busy timeout and larger caches; deployments stop the task runner during `migrate`, and the huey container waits until `serve` has applied all migrations; the task runner writes a compacted, copyable `data/db/db.sqlite3.snapshot` every night at 00:30 UTC for file-based backups
 * Journal: a cleanup page (Settings › Journal › Clean up) removes repeated HR sync and error entries, keeping the first and the latest, and entries older than a chosen age
 * Journal: every HR sync run that created, changed or failed something gets a journal entry; unchanged runs do not; the stored runs are copied over
 * Journal: deactivating and activating persons, devices, rooms and device types, device note changes on licences and deactivated users are journaled; earlier ones are copied from the admin history

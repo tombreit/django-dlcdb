@@ -189,12 +189,50 @@ WSGI_APPLICATION = "dlcdb.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': str(DB_DIR / 'db.sqlite3'),
-    # },
     "default": env.db_url(default=f"sqlite:////{DB_DIR / 'db.sqlite3'}"),
 }
+
+# SQLite tuned for several writers on one file: the web server (Apache mod_wsgi,
+# by default one process with 15 threads; or the gunicorn workers of the
+# container) and the huey consumer, and during a deploy also `migrate` while the
+# old processes still run. Requires Django >= 5.1 for init_command and
+# transaction_mode.
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    DATABASES["default"]["OPTIONS"] = {
+        # WAL lets readers run while a writer holds the lock, instead of reads
+        # and writes blocking each other. The mode is stored in the file
+        # header, so this only actually flips it on the first connect. Backups
+        # copy the nightly snapshot instead of the live file (core/tasks.py,
+        # docs/betrieb/setup.md).
+        #
+        # synchronous=NORMAL is the safe pairing for WAL: a process crash loses
+        # nothing; only an OS crash or power loss can lose the most recently
+        # committed transactions.
+        #
+        # cache_size is negative, which means KiB rather than pages: up to 20 MB
+        # per connection (one per thread), filled only as pages are read.
+        # mmap_size maps up to 128 MB of the file, shared through the OS page
+        # cache.
+        "init_command": (
+            "PRAGMA journal_mode=WAL;"
+            "PRAGMA synchronous=NORMAL;"
+            "PRAGMA temp_store=MEMORY;"
+            "PRAGMA mmap_size=134217728;"  # 128 MB
+            "PRAGMA journal_size_limit=27103364;"  # ~26 MB, caps WAL growth
+            "PRAGMA cache_size=-20000;"  # 20 MB
+        ),
+        # Take the write lock at BEGIN rather than upgrading to it mid
+        # transaction. A lock upgrade cannot wait for `timeout` -- it fails
+        # immediately with "database is locked", as a data migration did while
+        # huey was writing -- so IMMEDIATE turns those errors into a wait.
+        # Django's docs warn against combining this with ATOMIC_REQUESTS; this
+        # project does not set it.
+        "transaction_mode": "IMMEDIATE",
+        # Busy timeout in seconds (Python's default is 5). Deploys run `migrate`
+        # while the old web workers (and huey, unless stopped) still run, so
+        # leave more room than the default.
+        "timeout": 20,
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 

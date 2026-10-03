@@ -43,7 +43,7 @@ The same image serves production (see `container/Containerfile` and
 |---|---|
 | `dev` | `migrate`, `collectstatic`, then Django's development server |
 | `serve` | `migrate`, `collectstatic`, then gunicorn (the default `CMD`) |
-| `huey` | the background task runner, nothing else |
+| `huey` | the background task runner, nothing else; waits until `serve` has applied all migrations |
 
 Anything else is executed verbatim, e.g. `podman run --rm dlcdb python3 manage.py createsuperuser`.
 
@@ -145,10 +145,19 @@ Be sure to use one of the production requirement files:
 * `requirements/prod-ldap.txt`
 :::
 
-:::{tip}
-Speed up your sqlite, enable [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html) (one off command):
+:::{note}
+The settings tune SQLite for several writers on one file (web server, task
+runner, `migrate` during a deploy), see `DATABASES` in `dlcdb/settings/base.py`:
 
-`sqlite3 data/db/db.sqlite3 'PRAGMA journal_mode=WAL;'`
+* [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html), switched on at the
+  first connect: readers keep working while a writer holds the lock.
+* `transaction_mode=IMMEDIATE` and a 20 s busy timeout: a writer waits for the
+  lock instead of failing with "database is locked".
+* Larger caches, memory-mapped reads and a capped WAL file.
+
+WAL adds the files `db.sqlite3-wal` and `db.sqlite3-shm` next to the database.
+All processes must run on the same host, with the database on a local disk (no
+network filesystem). Back up the nightly snapshot, see *Backup* below.
 :::
 
 ### Task runner
@@ -158,6 +167,9 @@ As a task runner/task schedular this projects uses [huey](https://github.com/col
 For a containerized deployment run the task runner as a second container
 (`dlcdb huey`, see *Install with podman* above) instead of the systemd unit
 below.
+
+Besides notifications and the HR sync, it writes the nightly database snapshot
+for backups (see *Backup*).
 
 Add a systemd user service unit for huey (modify paths etc.):
 
@@ -203,10 +215,24 @@ source /path/to/dlcdb/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install -r requirements/prod-ldap.txt  # requirements/prod.txt
 python manage.py collectstatic --noinput
+# The task runner writes to the database every minute; stop it while the
+# migrations run, so they don't compete for the write lock.
+systemctl --user stop dlcdb_huey.service
 python manage.py migrate --noinput
-systemctl --user restart dlcdb_huey.service
+systemctl --user start dlcdb_huey.service
 touch dlcdb/wsgi.py
 make docs
+```
+
+For a containerized deployment, stop and remove the old task runner container
+(`dlcdb huey`) before starting the new `dlcdb serve` container, which runs the
+migrations. The new task runner container can be started right away: it waits
+until all migrations are applied.
+
+```bash
+podman rm --force dlcdb-huey dlcdb
+podman run --name dlcdb ... dlcdb serve
+podman run --name dlcdb-huey ... dlcdb huey
 ```
 
 ### Apache and mod_wsgi
@@ -247,6 +273,18 @@ Get rid of the default DLCDB branding: Set your organization via *Start › Orga
 ### Backup
 
 Die DLCDB nutzt als Datenbank SQLite. Sämtliche Betriebsdaten der DLCDB inkl. der Datenbankdatei sind im Verzeichnis `data/` gespeichert. Für ein vollständiges Backup sind das Verzeichnis `data/` sowie - falls vorhanden - die Datei `.env` zu sichern.
+
+Die Datenbank läuft im WAL-Modus: Zuletzt gespeicherte Änderungen stehen zunächst in `db.sqlite3-wal`. Eine einfache Kopie von `db.sqlite3` im laufenden Betrieb kann sie verpassen oder inkonsistent sein.
+
+Deshalb schreibt der Task Runner jede Nacht um 00:30 UTC einen Snapshot der Datenbank: `data/db/db.sqlite3.snapshot`. Er ist vollständig, konsistent und kompakt (`VACUUM INTO`, ohne die freien Seiten der laufenden Datenbank), eine einzelne Datei, und kann jederzeit kopiert werden, denn er wird erst fertig geschrieben und dann ausgetauscht. Ein Backup-Skript sichert also diese Datei und lässt die laufende Datenbank (`db.sqlite3`, `db.sqlite3-wal`, `db.sqlite3-shm`) aus. Ohne laufenden Task Runner entsteht kein neuer Snapshot; das Backup-Skript sollte deshalb das Alter der Datei prüfen. Der Snapshot entsteht nur, wenn die DLCDB mit einer SQLite-Datei läuft. Komprimieren übernimmt das Backup-Skript: Mit `zstd` oder `gzip` schrumpft der Snapshot auf etwa ein Zehntel. Backup-Werkzeuge mit Deduplizierung (z. B. borg, restic) komprimieren selbst und sollten den unkomprimierten Snapshot bekommen.
+
+Für einen aktuelleren Stand als den nächtlichen Snapshot sichert `sqlite3` die Datenbank auch im laufenden Betrieb in eine einzelne Datei:
+
+```bash
+sqlite3 data/db/db.sqlite3 ".backup 'data/db/db.sqlite3.backup-$(date +%Y%m%d-%H%M%S)'"
+```
+
+Wiederherstellen: DLCDB stoppen (Webserver und Task Runner), den Snapshot nach `data/db/db.sqlite3` kopieren, `db.sqlite3-wal` und `db.sqlite3-shm` löschen, DLCDB starten.
 
 ### Documentation
 

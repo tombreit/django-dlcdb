@@ -37,7 +37,16 @@ production_server() {
 
 # Background tasks (huey). Run as a second container from the same image; it
 # shares the database, so it must not migrate or collect static itself.
+#
+# It waits until the serve container has applied all migrations: huey must not
+# run new code against the old schema, nor compete with `migrate` for the write
+# lock. A container cannot stop the *old* huey container; stop that one before
+# starting the new serve container (docs/betrieb/setup.md).
 task_runner() {
+    until python3 manage.py migrate --check; do
+        echo "Waiting for the serve container to apply pending migrations..."
+        sleep 10
+    done
     echo "Start huey task runner..."
     exec python3 manage.py run_huey
 }
