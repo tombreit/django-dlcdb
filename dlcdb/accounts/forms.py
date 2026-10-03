@@ -7,7 +7,10 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 class EmailAuthenticationForm(AuthenticationForm):
-    username = forms.EmailField(widget=forms.EmailInput(attrs={"autofocus": True}))
+    username = forms.EmailField(widget=forms.EmailInput(attrs={"autofocus": True, "autocomplete": "username"}))
+
+    class Media:
+        js = ["accounts/js/password-toggle.js"]
 
 
 # from django.contrib.auth.forms import UserCreationForm, UserChangeForm

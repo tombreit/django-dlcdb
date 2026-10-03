@@ -1,0 +1,18 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{# Rendered by Django's page_not_found (DEBUG off), with the request, so the navbar works. #}
+
+{% block title %}404 · {% translate "Page not found" %}{% endblock title %}
+
+{% block body %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6 text-center">
+    <h1 class="h3">{% translate "Page not found" %}</h1>
+    <p>{% translate "This address does not lead to a page. It may be mistyped, or the page has moved." %}</p>
+    <a class="btn btn-primary" href="{% url 'dashboard:index' %}">{% translate "Go to the dashboard" %}</a>
+  </div>
+</div>
+{% endblock body %}

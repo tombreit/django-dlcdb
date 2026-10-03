@@ -1,12 +1,16 @@
 {% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
 {% load i18n %}
 
+{% block title %}{% translate "You are logged out" %}{% endblock title %}
+
 {% block body %}
-
-<p>{% translate "Thanks for spending some quality time with the DLCDB today." %}</p>
-
-<p>
-    <a class="btn btn-primary" href="{% url 'dashboard' %}">{% translate 'Log in again' %}</a>
-</p>
-
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6 text-center">
+    <h1 class="h3">{% translate "You are logged out" %}</h1>
+    <p>{% translate "Thanks for spending some quality time with the DLCDB today." %}</p>
+    <a class="btn btn-primary" href="{% url 'login' %}">{% translate 'Log in again' %}</a>
+  </div>
+</div>
 {% endblock body %}

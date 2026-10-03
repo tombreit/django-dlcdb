@@ -5,6 +5,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.views import LoginView
 from django.urls import include, path, reverse_lazy
 from django.views.generic.base import RedirectView
 
@@ -40,6 +41,8 @@ urlpatterns = [
     path("favicon.ico", organization_views.favicon),
     path("admin/login/", RedirectView.as_view(url=reverse_lazy("login")), name="login"),
     path("admin/logout/", RedirectView.as_view(url=reverse_lazy("logout")), name="logout"),
+    # Ahead of the auth URLs: their login view, but with the email login form.
+    path("accounts/login/", LoginView.as_view(authentication_form=EmailAuthenticationForm)),
     path("accounts/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("", RedirectView.as_view(url=reverse_lazy("dashboard:index")), name="dashboard"),

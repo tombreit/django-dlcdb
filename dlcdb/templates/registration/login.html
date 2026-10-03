@@ -1,42 +1,77 @@
 {% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n crispy_forms_field %}
 
-{% load crispy_forms_tags %}
+{% comment %}
+The inputs are placed by hand, the password one inside an input group with its
+"show password" button (the form's media); crispy_field gives them the same
+classes crispy uses on every other form.
+{% endcomment %}
 
-{% block title %}
-DLCDB Login
-{% endblock title %}
-
+{% block title %}{% translate "Log in" %}{% endblock title %}
 
 {% block body %}
-
-<h1 class="display-4 text-center mb-4">
-    DLCDB Login
-</h1>
-
-{% if form.errors %}
-    <div class="alert alert-danger" role="alert">
-        Your username and password didn't match. Please try again.
-    </div>
-{% endif %}
-
-{% if next %}
-    {% if user.is_authenticated %}
-    <div class="alert alert-warning" role="alert">
-        Your account doesn't have access to this page. To proceed,
-        please login with an account that has access.
-    </div>
-    {% endif %}
-{% endif %}
-
+{% get_current_language as LANGUAGE_CODE %}
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
-            {{ form|crispy }}
-            <input type="hidden" name="next" value="{{ next }}">
-            <button type="submit" class="btn btn-primary w-100 mt-3">Login</button>
-        </form>
-    </div>
-</div>
+  <div class="col-sm-10 col-md-7 col-lg-5 col-xl-4">
 
+    <h1 class="h3 text-center">{% translate "Device Life Cycle Database" %}</h1>
+    <p class="text-body-secondary text-center mb-4">
+      {% if LANGUAGE_CODE == "de" %}{{ branding.organization_name_de }}{% else %}{{ branding.organization_name_en }}{% endif %}
+    </p>
+
+    <form method="post" action="{% url 'login' %}" class="card shadow-sm">
+      <div class="card-body p-4">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        {# Django's own message for a wrong email address or password. #}
+        {% for error in form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endfor %}
+
+        {% if next and user.is_authenticated %}
+          <div class="alert alert-warning" role="alert">
+            {% translate "Your account doesn't have access to this page. To proceed, please log in with an account that has access." %}
+          </div>
+        {% endif %}
+
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          {% crispy_field form.username "class" "form-control" %}
+          {% for error in form.username.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+          <div class="input-group">
+            {% crispy_field form.password "class" "form-control" %}
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-password-toggle
+              aria-controls="{{ form.password.id_for_label }}"
+              aria-pressed="false"
+              aria-label="{% translate 'Show password' %}"
+              title="{% translate 'Show password' %}"
+            >
+              <i class="bi bi-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+          {% for error in form.password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
+      </div>
+    </form>
+
+    <p class="text-body-secondary small text-center mt-3">
+      {% blocktranslate with email=branding.organization_it_dept_email|default:django_settings.DEFAULT_FROM_EMAIL %}Trouble logging in? Contact <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktranslate %}
+    </p>
+
+  </div>
+</div>
 {% endblock body %}
+
+{% block extra_js %}{{ form.media }}{% endblock extra_js %}

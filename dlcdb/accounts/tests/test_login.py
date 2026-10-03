@@ -65,10 +65,34 @@ def test_staff_login_to_admin_with_username(client, create_user, test_password, 
 
     response = client.post(login_url, {"username": user.username, "password": test_password}, follow=False)
 
-    # Login should fail - we stay on the login page (status 200) with the error alert rendered
+    # Login should fail - we stay on the login page (status 200). The login form
+    # takes an email address, so a username is rejected at the field.
+    assert response.status_code == 200
+    assert "username" in response.context["form"].errors
+    assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+def test_wrong_password_shows_the_login_error(client, create_user, login_url):
+    user = create_user()
+
+    response = client.post(login_url, {"username": user.email, "password": "not-the-password"})
+
     assert response.status_code == 200
     assert b"alert-danger" in response.content
     assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
+def test_login_page_offers_a_show_password_button(client, create_user, login_url):
+    # create_user swaps in plain static storage, so the page renders.
+    create_user()
+
+    content = client.get(login_url).content.decode()
+
+    assert "data-password-toggle" in content
+    assert 'aria-controls="id_password"' in content
+    assert "accounts/js/password-toggle.js" in content
 
 
 @pytest.mark.django_db
