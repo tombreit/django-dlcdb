@@ -153,25 +153,36 @@ def import_udb_persons():
                     )
                 report.add(row=index, identifier=identifier, outcome=outcome, detail=detail)
             except Exception as exc:
-                # One bad contract must not abort the whole run.
-                logger.error(f"Failed to import UDB contract {identifier}: {exc}")
+                # One bad contract must not abort the whole run. Not journaled:
+                # the run's journal entry lists the contract.
+                logger.error(f"Failed to import UDB contract {identifier}: {exc}", extra={"journal": False})
                 report.add(row=index, identifier=identifier, outcome=Outcome.ERROR, detail=str(exc))
     except Exception as exc:
         # A run-level failure (no url, unreachable server, bad JSON). Record it as
         # a failed run so the reason survives, then re-raise for the caller.
-        logger.error(f"[UDB] sync failed: {exc}")
+        # Not journaled: the run's journal entry ("sync_failed") carries the reason.
+        logger.error(f"[UDB] sync failed: {exc}", extra={"journal": False})
         report.add(row=0, identifier="<sync>", outcome=Outcome.ERROR, detail=str(exc))
-        _store_run(report)
+        _store_run(report, event="sync_failed")
         raise
 
     logger.info(f"[UDB] {report.counts_summary()}")
-    _store_run(report)
+    _store_run(report, event="synced")
     return report
 
 
-def _store_run(report):
-    """Persist the report as a UdbSyncRun and prune to the most recent runs."""
-    report.persist(UdbSyncRun())
+def _store_run(report, *, event):
+    """
+    Persist the report as a UdbSyncRun, journal it, and prune to the most
+    recent runs.
+
+    Only runs where something happened are journaled: a run that left every
+    person unchanged (most of the 144 runs a day) is not. Errors count, so a
+    contract that keeps failing is journaled with every run.
+    """
+    run = report.persist(UdbSyncRun())
+    if any(row.outcome is not Outcome.UNCHANGED for row in report.rows):
+        run.write_journal(event=event, user=None)
     stale_run_ids = list(UdbSyncRun.objects.values_list("pk", flat=True)[MAX_STORED_SYNC_RUNS:])
     UdbSyncRun.objects.filter(pk__in=stale_run_ids).delete()
 

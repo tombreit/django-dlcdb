@@ -6,13 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Journal: one log for all in-app logs
 
-**Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
-journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app), 2
-(anomalies from Python logging), 3 (import log), 4 (decommissioning log), 6 (notification
-mails) and 7 (custom admin actions) are implemented; batch 5 (HR sync log) waits for an answer
-(*Open questions*). Open questions are settled (see batches 6 and 7,
-*Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
-and updates this line.
+**Status:** implemented on branch `unified-logging` (batches 0–7, 2026-10-03), after reviews of
+the journald fields and of existing Django packages. The legacy logs are still written in
+parallel (decision 2); see *Phase-out of the legacy logs* and *Open follow-ups* for what is
+left. This is a living document.
 
 ## Why
 
@@ -46,7 +43,8 @@ Emitters move over one at a time.
    anomalies, not orphans. That is why the journal does not use `tenant_scoped_queryset`. Import
    entries carry the import's tenant.
 6. **HR sync: only runs with changes.** A run is journaled if any row is not `UNCHANGED`. A failed
-   run counts, through its `<sync>` error row.
+   run counts, through its `<sync>` error row, and so does a run with per-contract errors, every
+   time (confirmed with the user, see *Open questions*).
 7. **`source` is free text** of the form `<app_label>.<topic>` (`dataexchange.import`,
    `dataexchange.decommission`, `dataexchange.hr_sync`, `notifications.mail`, `core.admin`,
    `accounts.admin`). No choices: a new emitter needs no migration. The filter offers the distinct
@@ -316,7 +314,7 @@ class JournalHandler(logging.Handler):
   - `RemoverList.journal_source`; `write_journal(event="decommissioned", user=request.user)`
     after `report.persist(obj)` in `RemoverListAdmin.save_model`.
   - Migration `dataexchange/0010`. Tests.
-- [ ] **5. HR sync log** (`dataexchange.hr_sync`)
+- [x] **5. HR sync log** (`dataexchange.hr_sync`)
   - `UdbSyncRun.journal_source`.
   - `udb_sync._store_run` gets the event: `sync_failed` from the run-level `except`, `synced`
     otherwise. It calls `write_journal(event=…, user=None)` per decision 6.
@@ -328,7 +326,7 @@ class JournalHandler(logging.Handler):
     - skips unchanged-only runs (success and summary `"N unchanged"` / `"no rows"`);
     - a `<sync>` row in the log → `sync_failed`, otherwise `synced`.
   - Tests: changes → one entry; all unchanged → none; failed run → one `sync_failed`.
-  - **Moved to the end: open question,** see *Open questions* below.
+  - Implemented last: it waited for the answer under *Open questions*.
 - [x] **6. Notification mails** (`notifications.mail`)
   - `sent` entry in `EmailChannel.send` (body To/Cc). `failed` entry in `mark_message_failed`
     (body = `error_message`).
@@ -386,21 +384,13 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
 
 ## Open questions
 
-- **Batch 5, HR sync runs with persistent per-contract errors** (found 2026-10-03, batch 5 moved
-  to the end).
-  - **Problem:** in production every HR sync run carries the same 3 per-contract errors. That
-    holds for all 50 stored runs (2026-08-18): "257 unchanged, 3 error", the same three
-    contracts. Decision 6 ("journal a run if any row is not `UNCHANGED`") would journal every run,
-    144 a day: the flood decision 6 was meant to prevent.
-  - **Options:**
-    - **A (recommended):** a run with created, updated or skipped rows, or a run-level failure,
-      is always journaled. A run whose only notable rows are per-contract errors is journaled
-      only when those error rows differ from the last journaled run's: same contracts, same
-      details → skipped. Persistent bad contracts then show up once, and again when they change.
-    - **B:** like A, but an error-only run repeats at most once per hour, like anomalies
-      (decision 16): 24 a day while the errors persist.
-    - **C:** journal every run with errors (144 a day while they persist).
-  - The copy migration `dataexchange/0011` follows the same rule.
+None. Answered:
+- **Batch 5, HR sync runs with persistent per-contract errors** (found 2026-10-03). In
+  production every run carries the same 3 failing contracts ("257 unchanged, 3 error", all 50
+  stored runs, 2026-08-18). The options were to journal error-only runs once until the errors
+  change, once per hour, or every time. **The user chose every time:** decision 6 stands as
+  written, and a contract that keeps failing is journaled with every run, 144 entries a day
+  while it fails.
 
 ## Decided during implementation
 
@@ -446,6 +436,11 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
 - **Batch 7, the copy matches `Deactivated.` in English only:** the msgid has no translation in
   `dlcdb/locale`, so gettext always stored it as is. Production: 17 rows (14 deactivations,
   3 device note changes); the copied `username` is the actor's email, `CustomUser.__str__`.
+- **Batch 5, the copy keeps all 50 production runs:** each has per-contract errors, so none is
+  unchanged-only. Two runs that failed during the batch 2 check on the scratch DB show that an
+  anomaly journaled before batch 5 ("[UDB] sync failed") and the copied `sync_failed` run entry
+  describe the same failure. That only affects history from before this batch; from now on the
+  log line opts out (decision 15).
 - **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
   Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
   (`dlcdb/settings/base.py`). Left alone.

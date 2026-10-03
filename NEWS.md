@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Journal: every HR sync run that created, changed or failed something gets a journal entry; unchanged runs do not; the stored runs are copied over
 * Journal: deactivating and activating persons, devices, rooms and device types, device note changes on licences and deactivated users are journaled; earlier ones are copied from the admin history
 * Journal: every sent notification mail and every newly failed one gets a journal entry; existing sent and failed mails are copied over
 * Journal: every bulk decommissioning run gets a journal entry naming who ran it; existing decommissioning logs are copied over

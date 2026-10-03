@@ -249,6 +249,8 @@ class UdbSyncRun(OperationLogBase):
     history so a transient failure is not lost on the next run.
     """
 
+    journal_source = "dataexchange.hr_sync"
+
     class Meta:
         verbose_name = "HR API Sync Run"
         verbose_name_plural = "HR API Sync Runs"
