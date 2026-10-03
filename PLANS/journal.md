@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
 journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app), 2
-(anomalies from Python logging) and 3 (import log) are implemented. Open questions are settled (see batches 6 and 7,
+(anomalies from Python logging), 3 (import log) and 4 (decommissioning log) are implemented. Open questions are settled (see batches 6 and 7,
 *Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
 and updates this line.
 
@@ -310,7 +310,7 @@ class JournalHandler(logging.Handler):
       tenant and acting user;
     - a clean dry run adds none;
     - migration test.
-- [ ] **4. Decommissioning log** (`dataexchange.decommission`)
+- [x] **4. Decommissioning log** (`dataexchange.decommission`)
   - `RemoverList.journal_source`; `write_journal(event="decommissioned", user=request.user)`
     after `report.persist(obj)` in `RemoverListAdmin.save_model`.
   - Migration `dataexchange/0010`. Tests.
@@ -403,6 +403,11 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
   (some importer strings are translated at write time); the journal copies that verbatim too.
 - **Batch 3, the frontend tests that drive an import** pass the acting user as `user=`; the
   importer still resolves the audit `user` FK from `user.username` (unchanged hard lookup).
+- **Batch 4, decommissioning entries have no tenant,** so every journal viewer sees them.
+  `RemoverList` has no tenant and its admin is not tenant-scoped (everyone with
+  `view_removerlist` sees every run), and one file may cover devices of several of the
+  uploader's tenants. This keeps today's visibility rather than inventing a tenant. A failed run
+  still raises before anything is stored (unchanged); then there is no entry either.
 - **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
   Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
   (`dlcdb/settings/base.py`). Left alone.

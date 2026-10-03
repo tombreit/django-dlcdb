@@ -161,6 +161,8 @@ class ImporterList(OperationLogBase):
 
 
 class RemoverList(OperationLogBase):
+    journal_source = "dataexchange.decommission"
+
     VALID_COL_HEADERS = [
         "SAP_ID",
         "EDV_ID",

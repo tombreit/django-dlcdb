@@ -241,4 +241,7 @@ class RemoverListAdmin(admin.ModelAdmin):
             write=True,
         )
         report.persist(obj)
+        # Without a tenant, like the decommissioning list itself: one file may
+        # cover devices of several of the uploader's tenants.
+        obj.write_journal(event="decommissioned", user=request.user)
         getattr(messages, report.level)(request, report.short_html())
