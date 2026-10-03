@@ -6,7 +6,6 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -28,17 +27,6 @@ from .models import JournalEntry
 ENTRIES_PER_PAGE = 50
 
 
-def _journal_queryset(request):
-    """
-    Entries of the request's tenants plus the tenant-less ones.
-
-    Unlike ``tenant_scoped_queryset``, which never includes objects without a
-    tenant: a tenant-less entry is not an orphan but a system event (an HR sync
-    run, a logged error), and every journal viewer may see it.
-    """
-    return JournalEntry.objects.filter(Q(tenant__in=request.tenants) | Q(tenant__isnull=True))
-
-
 def _subject_url(entry):
     """Link to the entry's subject, if it still exists and has a page of its own."""
     # A subject whose model is gone (a retired log table) has no model class.
@@ -53,7 +41,7 @@ def _subject_url(entry):
 def journal_index(request):
     """Read-only journal list, with progressive HTMX filtering."""
     template = "journal/index.html#journal-list" if request.htmx else "journal/index.html"
-    base_queryset = _journal_queryset(request)
+    base_queryset = JournalEntry.objects.visible_to(request.tenants)
 
     data = request.GET.copy()
     data.setdefault("ordering", "-timestamp")
@@ -81,7 +69,8 @@ def journal_index(request):
 @permission_required("journal.view_journalentry", raise_exception=True)
 def journal_detail(request, pk):
     """One entry with its details. Entries are never changed, so nothing is editable."""
-    entry = get_object_or_404(_journal_queryset(request).select_related("tenant", "content_type"), pk=pk)
+    visible = JournalEntry.objects.visible_to(request.tenants)
+    entry = get_object_or_404(visible.select_related("tenant", "content_type"), pk=pk)
     context = {
         "entry": entry,
         "subject_url": _subject_url(entry),
@@ -97,7 +86,7 @@ def journal_cleanup(request):
     and the latest of each group), or the entries older than a number of months.
     Only entries the user can see are removed by age.
     """
-    visible = _journal_queryset(request)
+    visible = JournalEntry.objects.visible_to(request.tenants)
     now = timezone.now()
     form = RemoveOldEntriesForm(request.POST or None)
 

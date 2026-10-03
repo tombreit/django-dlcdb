@@ -10,10 +10,13 @@ Emitters (imports, syncs, mails, ...) add entries through
 ``JournalEntry.objects.log()``. An entry is never changed afterwards.
 """
 
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Count, Q
 from django.utils import timezone, translation
 from django.utils.translation import gettext_lazy as _
 
@@ -72,6 +75,32 @@ class JournalEntryManager(models.Manager):
             content_object=subject,
             object_repr=object_repr[:200],
         )
+
+    def visible_to(self, tenants):
+        """
+        Entries of ``tenants`` plus the tenant-less ones.
+
+        Unlike ``tenant_scoped_queryset``, which never includes objects without a
+        tenant: a tenant-less entry is not an orphan but a system event (an HR sync
+        run, a logged error), and every journal viewer may see it.
+        """
+        return self.filter(Q(tenant__in=tenants) | Q(tenant__isnull=True))
+
+    def problem_counts(self, *, tenants, days):
+        """
+        How many critical, error and warning entries ``tenants`` see from the
+        last ``days`` days, most severe first:
+        ``[(Level.CRITICAL, 0), (Level.ERROR, 2), (Level.WARNING, 5)]``.
+        """
+        Level = self.model.Level
+        levels = [Level.CRITICAL, Level.ERROR, Level.WARNING]
+        since = timezone.now() - timedelta(days=days)
+        counts = (
+            self.visible_to(tenants)
+            .filter(timestamp__gte=since)
+            .aggregate(**{level.name: Count("pk", filter=Q(level=level)) for level in levels})
+        )
+        return [(level, counts[level.name]) for level in levels]
 
 
 class JournalEntry(models.Model):

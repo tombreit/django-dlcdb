@@ -9,10 +9,12 @@ from django.db.models import Count, Q
 from django.template.response import TemplateResponse
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 
 from dlcdb.core.models import Inventory, LentRecord, Record
 from dlcdb.core.utils.helpers import get_icon_for_class
 from dlcdb.core.utils.htmx import htmx_login_required
+from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 from . import stats
@@ -20,6 +22,9 @@ from .search import run_search
 
 # GET parameter carrying the global search term.
 GLOBAL_SEARCH_PARAM = "q"
+
+# How far back the journal tile counts problems.
+JOURNAL_TILE_DAYS = 30
 
 
 # Map each dashboard model to the field path used to scope its queryset to a
@@ -169,6 +174,21 @@ def index(request):
             "url": "lending:index",
             "query_params": "state=overdue",
         },
+    )
+
+    # Journal tile: one count per problem level instead of a single count. It
+    # links to the whole journal; the period only applies to the counts.
+    tiles.append(
+        {
+            "label": ngettext("Journal, last %(days)d day", "Journal, last %(days)d days", JOURNAL_TILE_DAYS)
+            % {"days": JOURNAL_TILE_DAYS},
+            "level_counts": JournalEntry.objects.problem_counts(tenants=request.tenants, days=JOURNAL_TILE_DAYS),
+            "note_count": 0,
+            "show_badge": False,
+            "icon": "bi bi-journal-text",
+            "url": "journal:index",
+            "query_params": "",
+        }
     )
 
     context = {

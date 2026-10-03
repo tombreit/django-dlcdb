@@ -10,7 +10,20 @@ SPDX-License-Identifier: EUPL-1.2
     class="dashboard-tile card h-100 text-decoration-none text-reset text-center"
   >
     <div class="card-body d-flex flex-column align-items-center justify-content-center">
-      <div class="dashboard-tile-count display-6 fw-semibold lh-1">{{ tile.count }}</div>
+      {% if tile.level_counts %}
+        {# One count per journal level, colored like the journal's level badges once non-zero. #}
+        {# Wraps in the half-width tiles on phones, where three counts do not fit side by side. #}
+        <div class="dashboard-tile-levels d-flex flex-wrap justify-content-center column-gap-3 row-gap-2">
+          {% for level, count in tile.level_counts %}
+            <div class="dashboard-tile-level">
+              <div class="dashboard-tile-count fs-3 fw-semibold lh-1 {% if not count %}text-body-secondary{% elif level.name == "WARNING" %}text-warning-emphasis{% else %}text-danger-emphasis{% endif %}">{{ count }}</div>
+              <div class="small text-body-secondary">{{ level.label }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="dashboard-tile-count display-6 fw-semibold lh-1">{{ tile.count }}</div>
+      {% endif %}
       <div class="dashboard-tile-label mt-2">
         <i class="dashboard-tile-icon {{ tile.icon }} me-1"></i>{{ tile.label }}
       </div>

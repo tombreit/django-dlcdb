@@ -10,6 +10,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, LostRecord, Record, Room
+from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
@@ -36,9 +37,8 @@ class DashboardTileTests(TestCase):
         # A device type with a note, so the note badge renders too.
         cls.device_type = DeviceType.objects.create(name="Notebook", prefix="NTB", note="a note")
         cls.room = Room.objects.create(number="T1.01")
-        device = Device.objects.create(
-            edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type, tenant=_tenant_of(cls.user, "Tiles")
-        )
+        cls.tenant = _tenant_of(cls.user, "Tiles")
+        device = Device.objects.create(edv_id="TILE-1", sap_id="7001-1", device_type=cls.device_type, tenant=cls.tenant)
         InRoomRecord.objects.create(device=device, room=cls.room)
 
     def setUp(self):
@@ -70,6 +70,18 @@ class DashboardTileTests(TestCase):
     def test_the_note_badge_is_targetable(self):
         """Rendered only for a model with notes, hence the device type seeded above."""
         self.assertContains(self.client.get(reverse("dashboard:index")), "dashboard-tile-badge")
+
+    def test_the_journal_tile_counts_problems_and_links_to_the_journal(self):
+        JournalEntry.objects.log(
+            source="pytest.topic", event="failed", summary="Broke", level=JournalEntry.Level.ERROR, tenant=self.tenant
+        )
+
+        response = self.client.get(reverse("dashboard:index"))
+        journal = next(tile for tile in response.context["tiles"] if tile["url"] == "journal:index")
+
+        self.assertIn((JournalEntry.Level.ERROR, 1), journal["level_counts"])
+        self.assertEqual(journal["query_params"], "")
+        self.assertContains(response, "dashboard-tile-levels")
 
     def test_a_tile_is_still_a_link_wearing_the_card_utilities(self):
         """The new names are additive: the Bootstrap classes and the href must survive."""
