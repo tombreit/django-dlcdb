@@ -37,6 +37,18 @@ Für diese use cases müssen die folgenden Informationen aus dem HR-System in de
 - Vertragsende
 - Vertragstyp und Position (z.B. zur Einschätzung welche Geräteklassen verliehen werden)
 
+## Zuordnung
+
+Jeder HR-Vertrag wird einer DLCDB-Person zugeordnet, in dieser Reihenfolge:
+
+1. über die HR-UUID der Person (bereits verknüpfte Personen);
+2. über die Institutsemailadresse oder die persönliche Emailadresse, aber nur bei Personen ohne HR-Verknüpfung;
+3. über Vor- und Nachname (Groß-/Kleinschreibung egal), ebenfalls nur bei Personen ohne HR-Verknüpfung.
+
+Hat die DLCDB-Person noch keine Emailadresse, übernimmt der Sync die Institutsemailadresse aus dem HR-System. Gehört diese Adresse bereits einer anderen DLCDB-Person ohne HR-Verknüpfung, ist das dieselbe Person, nur doppelt angelegt (etwa einmal als Ausleiher, einmal durch den Sync). Der Sync führt beide zusammen: Ausleihen, Gerätekontakte, Benachrichtigungen, Kleinkram und Lizenz-Standardabonnenten des Duplikats gehen an die verknüpfte Person, das Duplikat wird gelöscht. Die Zusammenführung steht in der Admin-Historie der Person und im Protokoll des Sync-Laufs.
+
+Ist die andere Person selbst mit einem anderen HR-Datensatz verknüpft, führt das HR-System zwei Personen mit derselben Adresse. Dann führt der Sync nichts zusammen, sondern meldet den Konflikt mit beiden Personen und ihren HR-Verknüpfungen; die Adresse ist im HR-System zu korrigieren.
+
 ## Konfiguration
 
 Die HR-Integration wird im Django-Admin konfiguriert: *Data exchange › HR API Sync Configuration* (Singleton).

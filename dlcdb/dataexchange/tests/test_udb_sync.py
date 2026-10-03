@@ -28,6 +28,8 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dataexchange import udb_sync
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.dataexchange.reporting import Outcome
+from dlcdb.licenses.models import LicensesConfiguration
+from dlcdb.notifications.models import Subscription
 
 
 def _enable_sync():
@@ -545,3 +547,116 @@ def test_synced_lending_writes_change_history():
     assert entry.action_flag == CHANGE
     assert entry.object_id == str(lending.pk)
     assert entry.user.username == "udb-sync"
+
+
+# --- e-mail conflicts: duplicates are merged, other clashes are explained ------
+
+
+def _hr_person(uuid, first, last):
+    """A person the sync created earlier, linked to HR but without a local e-mail."""
+    return Person.objects.create(
+        first_name=first,
+        last_name=last,
+        email=None,
+        udb_person_uuid=uuid,
+        udb_person_first_name=first,
+        udb_person_last_name=last,
+    )
+
+
+@pytest.mark.django_db
+def test_local_duplicate_with_the_hr_email_is_merged_into_the_hr_person():
+    _enable_sync()
+    hr_person = _hr_person("uuid-lang", "Gabriele", "Lang")
+    duplicate = Person.objects.create(first_name="Gabi", last_name="Lang", email="g.lang@example.org")
+    lending = _make_lending(duplicate, sync=False, desired_end=datetime.date(2024, 6, 30))
+    subscription = Subscription.objects.create(
+        event=Subscription.NotificationEventChoices.CONTRACT_EXPIRED, subscriber=duplicate, device=lending.device
+    )
+    LicensesConfiguration.load().default_subscribers.add(duplicate)
+    payload = {"results": {"contracts": [_contract("uuid-lang", "Gabriele", "Lang", email="g.lang@example.org")]}}
+
+    report = _run_with_payload(payload)
+
+    assert not Person.with_softdeleted_objects.filter(pk=duplicate.pk).exists()
+    hr_person.refresh_from_db()
+    assert hr_person.email == "g.lang@example.org"
+    assert hr_person.first_name == "Gabriele"
+    lending.refresh_from_db()
+    subscription.refresh_from_db()
+    assert lending.person == hr_person
+    assert subscription.subscriber == hr_person
+    assert list(LicensesConfiguration.load().default_subscribers.all()) == [hr_person]
+
+    [row] = report.rows
+    assert row.outcome is Outcome.UPDATED
+    assert f'merged duplicate person #{duplicate.pk} "Lang, Gabi" (no HR link, active' in row.detail
+    assert "1 core.Record" in row.detail
+    assert "1 notifications.Subscription" in row.detail
+    assert LogEntry.objects.filter(
+        object_id=str(hr_person.pk), change_message__startswith="UDB sync merged duplicate person"
+    ).exists()
+
+    # Idempotent: nothing left to merge.
+    assert _run_with_payload(payload).counts[Outcome.UNCHANGED] == 1
+
+
+@pytest.mark.django_db
+def test_deactivated_duplicate_with_swapped_names_is_merged_too():
+    _enable_sync()
+    hr_person = _hr_person("uuid-frey", "Antonia", "Frey")
+    duplicate = Person.with_softdeleted_objects.create(
+        first_name="Frey",
+        last_name="Antonia",
+        email="a.frey@example.org",
+        deleted_at=datetime.datetime.now(datetime.UTC),
+    )
+
+    report = _run_with_payload(
+        {"results": {"contracts": [_contract("uuid-frey", "Antonia", "Frey", email="a.frey@example.org")]}}
+    )
+
+    assert report.counts[Outcome.UPDATED] == 1
+    assert not Person.with_softdeleted_objects.filter(pk=duplicate.pk).exists()
+    hr_person.refresh_from_db()
+    assert hr_person.email == "a.frey@example.org"
+    assert "deactivated" in report.rows[0].detail
+
+
+@pytest.mark.django_db
+def test_email_of_another_hr_person_is_an_explained_error():
+    _enable_sync()
+    hr_person = _hr_person("uuid-p", "Pat", "Doe")
+    other = Person.objects.create(
+        first_name="Other", last_name="Person", email="shared@example.org", udb_person_uuid="uuid-other"
+    )
+
+    report = _run_with_payload(
+        {"results": {"contracts": [_contract("uuid-p", "Pat", "Doe", email="shared@example.org")]}}
+    )
+
+    [row] = report.rows
+    assert row.outcome is Outcome.ERROR
+    assert f"E-mail shared@example.org from HR is already used by #{other.pk}" in row.detail
+    assert "HR uuid uuid-other" in row.detail
+    assert f'this person is #{hr_person.pk} "Doe, Pat" (HR uuid uuid-p' in row.detail
+    assert "e-mail (empty)" in row.detail
+    # Nothing merged, nothing changed.
+    assert Person.objects.filter(pk=other.pk, email="shared@example.org").exists()
+    hr_person.refresh_from_db()
+    assert hr_person.email is None
+
+
+@pytest.mark.django_db
+def test_name_clash_names_the_person_holding_the_name():
+    _enable_sync()
+    _hr_person("uuid-x", "Old", "Name")
+    holder = Person.objects.create(first_name="Ada", last_name="Lovelace", email="ada.local@example.org")
+
+    # HR renames the person to the name another local person already has.
+    report = _run_with_payload({"results": {"contracts": [_contract("uuid-x", "Ada", "Lovelace")]}})
+
+    [row] = report.rows
+    assert row.outcome is Outcome.ERROR
+    assert "UNIQUE constraint failed" in row.detail
+    assert f'name "Lovelace, Ada" is used by #{holder.pk} "Lovelace, Ada" (no HR link, active' in row.detail

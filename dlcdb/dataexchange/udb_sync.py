@@ -266,6 +266,91 @@ def _match_person(udb_person_uuid, first_name, last_name, claim_emails):
     return unsynced.filter(first_name__iexact=first_name, last_name__iexact=last_name).first()
 
 
+def _describe(person):
+    """One person, the way a human needs it to resolve a conflict."""
+    link = f"HR uuid {person.udb_person_uuid}" if person.udb_person_uuid else "no HR link"
+    state = "deactivated" if person.deleted_at else "active"
+    return f'#{person.pk} "{person}" ({link}, {state}, created {person.created_at:%Y-%m-%d})'
+
+
+def _email_holder(email, *, exclude):
+    """The other person, deactivated ones included, whose e-mail is ``email``."""
+    if not email:
+        return None
+    holders = Person.with_softdeleted_objects.filter(email=email)
+    if exclude is not None:
+        holders = holders.exclude(pk=exclude.pk)
+    return holders.first()
+
+
+def _merge_duplicate(duplicate, *, into, log_user_id):
+    """
+    Move everything that refers to ``duplicate`` over to ``into``, then delete it.
+
+    The same e-mail address means the same person: ``duplicate`` holds the HR
+    e-mail of ``into`` but has no HR link, so the person was created twice --
+    before the sync claimed people by e-mail, the name claim missed variants
+    like "Gabi"/"Gabriele". Every relation to Person is moved, so nothing points
+    at the deleted row. Returns the note for the run report.
+    """
+    moved = []
+    for relation in Person._meta.related_objects:
+        field = relation.field.name
+        related = relation.related_model._base_manager.filter(**{field: duplicate})
+        count = related.count()
+        if not count:
+            continue
+        if relation.many_to_many:
+            for obj in related:
+                getattr(obj, field).remove(duplicate)
+                getattr(obj, field).add(into)
+        else:
+            related.update(**{field: into})
+        moved.append(f"{count} {relation.related_model._meta.label}")
+
+    note = f"merged duplicate person {_describe(duplicate)} with the same e-mail {duplicate.email}"
+    if moved:
+        note += f"; moved {', '.join(moved)}"
+    _log_admin_history(into, log_user_id=log_user_id, action_flag=CHANGE, message=f"UDB sync {note}.")
+    # Person.delete() only deactivates; the duplicate must go, or it keeps the e-mail.
+    duplicate.hard_delete()
+    return note
+
+
+def _unique_value_holders(values, *, exclude):
+    """
+    Who already holds one of the unique values the sync writes, as text for the
+    report: the database error alone names the constraint, not the person.
+    """
+    checks = [
+        (f"e-mail {values.get('email')!r}", {"email": values.get("email")}),
+        (
+            f"HR e-mail {values['udb_person_email_internal_business']!r}",
+            {"udb_person_email_internal_business": values["udb_person_email_internal_business"]},
+        ),
+        (
+            f'name "{values["last_name"]}, {values["first_name"]}"',
+            {"first_name__iexact": values["first_name"], "last_name__iexact": values["last_name"]},
+        ),
+        (
+            f'HR name "{values["udb_person_last_name"]}, {values["udb_person_first_name"]}"',
+            {
+                "udb_person_first_name__iexact": values["udb_person_first_name"],
+                "udb_person_last_name__iexact": values["udb_person_last_name"],
+            },
+        ),
+    ]
+    found = []
+    for label, lookup in checks:
+        if not all(lookup.values()):
+            continue
+        holders = Person.with_softdeleted_objects.filter(**lookup)
+        if exclude is not None:
+            holders = holders.exclude(pk=exclude.pk)
+        found += [f"{label} is used by {_describe(holder)}" for holder in holders]
+    return "; ".join(found)
+
+
 def _log_admin_history(person, *, log_user_id, action_flag, message):
     """Record a row in the admin History (LogEntry) for a sync-driven change.
 
@@ -433,21 +518,45 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
     if udb_person_email_internal_business and (existing is None or not existing.email):
         defaults["email"] = udb_person_email_internal_business
 
+    # Another person already holds that e-mail. Without an HR link of its own it
+    # is this person, created twice: merge it in. With an HR link, HR itself
+    # lists two people with this address (an unlinked holder would have been
+    # claimed by e-mail above); merging would only move the clash to the other
+    # contract.
+    merge_note = ""
+    holder = _email_holder(defaults.get("email"), exclude=existing)
+    if holder is not None:
+        if existing is None or holder.udb_person_uuid:
+            this = (
+                "this person is new in DLCDB"
+                if existing is None
+                else f"this person is {_describe(existing)}, e-mail {existing.email or '(empty)'}"
+            )
+            raise ValueError(
+                f"E-mail {defaults['email']} from HR is already used by {_describe(holder)}; {this}. "
+                "HR lists both with this address: correct it in HR."
+            )
+        merge_note = _merge_duplicate(holder, into=existing, log_user_id=log_user_id)
+
     try:
-        if existing is None:
-            existing = Person.with_softdeleted_objects.create(**defaults)
-            created = True
-        else:
-            for field, value in defaults.items():
-                setattr(existing, field, value)
-            existing.save()
-            created = False
+        # A savepoint of its own: after a clash the holders can still be queried.
+        with transaction.atomic():
+            if existing is None:
+                existing = Person.with_softdeleted_objects.create(**defaults)
+                created = True
+            else:
+                for field, value in defaults.items():
+                    setattr(existing, field, value)
+                existing.save()
+                created = False
     except IntegrityError as integrity_error:
-        # Surface the original error verbatim — it already names the violated
-        # constraint (e.g. core_person.email) — prefixed with the person so the
+        # Keep the database's text (it names the violated constraint) and add
+        # who already holds the clashing value, prefixed with the person so the
         # reported row identifies who clashed.
+        holders = _unique_value_holders(defaults, exclude=existing)
         raise IntegrityError(
             f"Integrity error for {udb_person_last_name}/{udb_person_first_name}: {integrity_error}"
+            + (f". {holders}" if holders else "")
         ) from integrity_error
 
     if created:
@@ -481,6 +590,7 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
         message=f"Changed by UDB sync: {change_summary}",
     )
 
-    # The detailed diff is only useful for debugging, so keep it out of routine logs.
-    detail = change_summary if settings.DEBUG else ""
+    # The detailed diff is only useful for debugging, so keep it out of routine
+    # logs; a merge is always worth reading.
+    detail = "; ".join(part for part in (merge_note, change_summary if settings.DEBUG else "") if part)
     return Outcome.UPDATED, detail
