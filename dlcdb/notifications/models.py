@@ -10,6 +10,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
+from dlcdb.core.models import Device
+
 from .email_footer import email_footer_context
 from .intervals import INTERVAL_DETAILS, NotificationInterval
 
@@ -319,7 +321,9 @@ class Message(models.Model):
         context = {
             "subscription": subscription,
             "subscriber": subscription.subscriber,
-            "device": subscription.device,
+            # Through Device.objects, which annotates human_title; the FK
+            # accessor uses the plain base manager and would lack it.
+            "device": Device.objects.get(pk=subscription.device_id),
             **email_footer_context(),
         }
 

@@ -1,1 +1,1 @@
-License: {{ device.device_human_title }} → Event: {{ subscription.event}}
+License: {{ device.human_title }} → Event: {{ subscription.get_event_display }}

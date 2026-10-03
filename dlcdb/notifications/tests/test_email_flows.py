@@ -103,6 +103,19 @@ class MessageDeliveryTests(TestCase):
         # POINT_IN_TIME subscriptions fire once and are not rescheduled.
         self.assertIsNone(subscription.next_scheduled)
 
+    def test_contract_mail_names_the_license_and_the_event(self):
+        self.device.series = "Office Suite"
+        self.device.sap_id = "LIC-42"
+        self.device.save()
+        subscription = self.create_due_subscription(Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON)
+
+        send_message.call_local(queue_message.call_local(subscription.id))
+
+        email = mail.outbox[0]
+        self.assertIn("License: Office Suite (LIC-42) → Event: Contract Expires Soon", email.subject)
+        self.assertIn("Event:      Contract Expires Soon", email.body)
+        self.assertIn("License:    Office Suite (LIC-42)", email.body)
+
     def test_moved_subscription_sends_device_moved_mail(self):
         subscription = self.create_due_subscription(Subscription.NotificationEventChoices.MOVED)
 

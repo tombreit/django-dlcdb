@@ -1,6 +1,6 @@
-Event:      {{ subscription.event}}
+Event:      {{ subscription.get_event_display }}
 
-License:    {{ device.manufacturer|default:"" }}{% if device.manufacturer and device.series %} / {% endif %}{{ device.series|default:"" }}
+License:    {{ device.human_title }}
 License ID: {{ device }}
 URL:        {{ device.get_fqdn_url }}
 
