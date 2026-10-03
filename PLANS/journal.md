@@ -8,8 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
 journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app), 2
-(anomalies from Python logging), 3 (import log), 4 (decommissioning log) and 6 (notification
-mails) are implemented; batch 5 (HR sync log) waits for an answer (*Open questions*). Open questions are settled (see batches 6 and 7,
+(anomalies from Python logging), 3 (import log), 4 (decommissioning log), 6 (notification
+mails) and 7 (custom admin actions) are implemented; batch 5 (HR sync log) waits for an answer
+(*Open questions*). Open questions are settled (see batches 6 and 7,
 *Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
 and updates this line.
 
@@ -342,7 +343,7 @@ class JournalHandler(logging.Handler):
     (`modified_at`).
   - Mails without a tenant (overdue lenders, reports) are journaled without one and are visible
     to every journal viewer, like anomalies (decided with the user, 2026-10-03).
-- [ ] **7. Custom admin actions** (`core.admin`, `accounts.admin`; the LogEntry rows stay, the
+- [x] **7. Custom admin actions** (`core.admin`, `accounts.admin`; the LogEntry rows stay, the
   journal gets a copy)
   - `SoftDeleteModelAdmin.activate_view/deactivate_view` (events `activated`, `deactivated`) and
     the device note in `LicenceRecordAdmin.save_model` (`device_note_changed`) → `core.admin`.
@@ -437,6 +438,14 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
   recipient the way `Person.get_email` picks it. Their subject text is
   `"<id> - <status> - <recipient or subscription id>"`, because a historical model lacks
   `Subscription.__str__`.
+- **Batch 7, summaries** are `"Activated <model>: <object>"` / `"Deactivated <model>: <object>"`
+  with the untranslated model name (`room`, `device`, …), `"Device note changed"` (the admin
+  history text goes into the body) and `"Deactivated user: <email>"`. A device subject brings
+  its tenant through `log()`'s subject default; persons, rooms, device types and users have
+  none.
+- **Batch 7, the copy matches `Deactivated.` in English only:** the msgid has no translation in
+  `dlcdb/locale`, so gettext always stored it as is. Production: 17 rows (14 deactivations,
+  3 device note changes); the copied `username` is the actor's email, `CustomUser.__str__`.
 - **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
   Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
   (`dlcdb/settings/base.py`). Left alone.

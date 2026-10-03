@@ -18,6 +18,8 @@ from django.urls import path, reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
+from dlcdb.journal.models import JournalEntry
+
 from .models import CustomUser
 
 
@@ -61,6 +63,13 @@ class CustomUserAdmin(UserAdmin):
             user.is_active = False
             user.save(update_fields=["is_active"])
             self.log_change(request, user, _("Deactivated."))
+            JournalEntry.objects.log(
+                source="accounts.admin",
+                event="deactivated",
+                summary=f"Deactivated user: {user}",
+                user=request.user,
+                subject=user,
+            )
 
         if users:
             self.message_user(

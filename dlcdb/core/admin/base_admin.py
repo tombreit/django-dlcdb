@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.http import urlencode
 
+from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
 from ..models import Device, DeviceType, Manufacturer, Room, Supplier
@@ -197,12 +198,23 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         opts = self.model._meta
         return HttpResponseRedirect(reverse(f"admin:{opts.app_label}_{opts.model_name}_change", args=[object_id]))
 
+    def _log_activation(self, request, obj, action):
+        """The admin history line ("Activated" / "Deactivated") and its journal copy."""
+        self.log_change(request, obj, action)
+        JournalEntry.objects.log(
+            source="core.admin",
+            event=action.lower(),
+            summary=f"{action} {obj._meta.model_name}: {obj}",
+            user=request.user,
+            subject=obj,
+        )
+
     def deactivate_view(self, request, object_id, *args, **kwargs):
         obj = self.get_object(request, object_id)
         obj.deleted_at = timezone.now()
         obj.deleted_by = request.user
         obj.save()
-        self.log_change(request, obj, "Deactivated")
+        self._log_activation(request, obj, "Deactivated")
         self.message_user(request, f"{obj._meta.verbose_name} {obj} has been deactivated.")
         return self._redirect_to_change_view(object_id)
 
@@ -211,7 +223,7 @@ class SoftDeleteModelAdmin(admin.ModelAdmin):
         obj.deleted_at = None
         obj.deleted_by = None
         obj.save()
-        self.log_change(request, obj, "Activated")
+        self._log_activation(request, obj, "Activated")
         self.message_user(request, f"{obj._meta.verbose_name} {obj} has been activated.")
         return self._redirect_to_change_view(object_id)
 

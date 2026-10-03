@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils.formats import date_format
 from django.utils.html import format_html
 
+from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.admin import TenantScopedRecordAdmin
 
 from ..models import LicenceRecord
@@ -125,10 +126,15 @@ class LicenceRecordAdmin(TenantScopedRecordAdmin, CustomBaseModelAdmin):
         if old_device_note != new_device_note:
             device.note = new_device_note
             device.save()
-            self.log_change(
-                request,
-                device,
-                message=f"Device note changed. Old value: `{old_device_note}` New value: `{new_device_note}`",
+            message = f"Device note changed. Old value: `{old_device_note}` New value: `{new_device_note}`"
+            self.log_change(request, device, message=message)
+            JournalEntry.objects.log(
+                source="core.admin",
+                event="device_note_changed",
+                summary="Device note changed",
+                body=message,
+                user=request.user,
+                subject=device,
             )
 
         super().save_model(request, obj, form, change)
