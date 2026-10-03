@@ -4,18 +4,25 @@
 
 """The journal in the frontend: a read-only list and detail of its entries."""
 
+from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.views.decorators.http import require_GET
 
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.navigation import index_url
 from dlcdb.theme.pagination import paginate
 
+from . import cleanup
 from .filters import JournalEntryFilter
+from .forms import AGE_CHOICES, RemoveOldEntriesForm
 from .models import JournalEntry
 
 ENTRIES_PER_PAGE = 50
@@ -81,3 +88,53 @@ def journal_detail(request, pk):
         "index_url": index_url(request, "journal:index"),
     }
     return TemplateResponse(request, "journal/detail.html", context)
+
+
+@permission_required("journal.delete_journalentry", raise_exception=True)
+def journal_cleanup(request):
+    """
+    Confirm, then remove: repeated HR sync runs and anomalies (keeping the first
+    and the latest of each group), or the entries older than a number of months.
+    Only entries the user can see are removed by age.
+    """
+    visible = _journal_queryset(request)
+    now = timezone.now()
+    form = RemoveOldEntriesForm(request.POST or None)
+
+    if request.method == "POST":
+        if request.POST.get("action") == "repeats":
+            count = cleanup.remove_repeats(user=request.user)
+            messages.success(
+                request,
+                ngettext("Removed %(count)d repeated entry.", "Removed %(count)d repeated entries.", count)
+                % {"count": count},
+            )
+            return redirect("journal:index")
+        if form.is_valid():
+            cutoff = cleanup.months_before(now, form.cleaned_data["months"])
+            count = cleanup.remove_older_than(visible, cutoff, user=request.user)
+            messages.success(
+                request,
+                ngettext(
+                    "Removed %(count)d entry older than %(date)s.",
+                    "Removed %(count)d entries older than %(date)s.",
+                    count,
+                )
+                % {"count": count, "date": date_format(cutoff, "SHORT_DATE_FORMAT")},
+            )
+            return redirect("journal:index")
+
+    groups = cleanup.repeat_groups()
+    age_options = []
+    for months in AGE_CHOICES:
+        cutoff = cleanup.months_before(now, months)
+        age_options.append({"months": months, "cutoff": cutoff, "count": visible.filter(timestamp__lt=cutoff).count()})
+
+    context = {
+        "groups": groups,
+        "repeat_count": sum(len(group.removable) for group in groups),
+        "age_options": age_options,
+        "form": form,
+        "index_url": reverse("journal:index"),
+    }
+    return TemplateResponse(request, "journal/cleanup.html", context)

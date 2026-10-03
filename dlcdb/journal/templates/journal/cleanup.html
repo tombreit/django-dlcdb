@@ -1,0 +1,97 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% comment %}
+Confirmation page of the journal cleanup, like tenants/delete.html: nothing is
+removed until one of the two forms is submitted.
+{% endcomment %}
+
+{% block title %}{% translate "Clean up journal" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Clean up journal" %}</h1>
+    {% include "theme/includes/_back_link.html" with url=index_url %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-10 col-xl-9">
+      <section class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-files text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Repeated entries" %}</h2>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">
+            {% translate "HR sync runs and logged warnings or errors repeat while a problem persists. Of each group of identical entries, the first and the most recent stay. Imports, mails and admin actions are never removed here." %}
+          </p>
+          {% if groups %}
+            <div class="table-responsive mb-3">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">{% translate "Source" %}</th>
+                    <th scope="col">{% translate "Summary" %}</th>
+                    <th scope="col" class="text-nowrap">{% translate "First" %}</th>
+                    <th scope="col" class="text-nowrap">{% translate "Latest" %}</th>
+                    <th scope="col" class="text-end">{% translate "To remove" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for group in groups %}
+                    <tr>
+                      <td class="small"><code>{{ group.source }}</code><div class="text-muted">{{ group.event }}</div></td>
+                      <td>{{ group.summary|default:"—" }}</td>
+                      <td class="text-nowrap small text-muted">{{ group.first|date:"Y-m-d H:i" }}</td>
+                      <td class="text-nowrap small text-muted">{{ group.latest|date:"Y-m-d H:i" }}</td>
+                      <td class="text-end"><span class="badge text-bg-light border">{{ group.removable|length }}</span></td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="repeats">
+              <button class="btn btn-danger" type="submit">
+                <i class="bi bi-trash"></i>
+                {% blocktranslate count counter=repeat_count %}Remove {{ counter }} repeated entry{% plural %}Remove {{ counter }} repeated entries{% endblocktranslate %}
+              </button>
+            </form>
+          {% else %}
+            <p class="mb-0"><i class="bi bi-check-circle text-success"></i> {% translate "No repeated entries." %}</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-calendar-x text-primary"></i>
+          <h2 class="h6 mb-0">{% translate "Old entries" %}</h2>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">
+            {% translate "Remove every journal entry you can see that is older than the chosen age. Entries of tenants you cannot see stay." %}
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="older">
+            {% for error in form.months.errors %}<div class="alert alert-danger py-2">{{ error }}</div>{% endfor %}
+            {% for option in age_options %}
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{ form.months.html_name }}" id="months-{{ option.months }}" value="{{ option.months }}"{% if not option.count %} disabled{% endif %}>
+                <label class="form-check-label" for="months-{{ option.months }}">
+                  {% blocktranslate with months=option.months cutoff=option.cutoff|date:"Y-m-d" count counter=option.count %}Older than {{ months }} months (before {{ cutoff }}): {{ counter }} entry{% plural %}Older than {{ months }} months (before {{ cutoff }}): {{ counter }} entries{% endblocktranslate %}
+                </label>
+              </div>
+            {% endfor %}
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> {% translate "Remove old entries" %}</button>
+              <a class="btn btn-outline-secondary" href="{{ index_url }}">{% translate "Cancel" %}</a>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock body %}

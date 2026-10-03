@@ -10,5 +10,6 @@ app_name = "journal"
 
 urlpatterns = [
     path("", views.journal_index, name="index"),
+    path("cleanup/", views.journal_cleanup, name="cleanup"),
     path("<int:pk>/", views.journal_detail, name="detail"),
 ]

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Journal: one log for all in-app logs
 
-**Status:** implemented on branch `unified-logging` (batches 0–7, 2026-10-03), after reviews of
+**Status:** implemented on branch `unified-logging` (batches 0–8, 2026-10-03), after reviews of
 the journald fields and of existing Django packages. The legacy logs are still written in
 parallel (decision 2); see *Phase-out of the legacy logs* and *Open follow-ups* for what is
 left. This is a living document.
@@ -94,6 +94,18 @@ Emitters move over one at a time.
     An anomaly logged inside a transaction that later rolls back is lost from the journal, not
     from the console. Explicit `log()` calls are not guarded: a missing audit entry must fail
     loudly.
+18. **Cleanup from the journal page** (`journal.delete_journalentry`, batch 8; no management
+    command, as the user is moving such functions to the frontend):
+    - **Repeats:** HR sync runs and anomalies (tenant-less, status-like) are grouped by content.
+      Of each group the first and the most recent entry stay, regardless of what came between
+      ("first seen", "still seen"). HR sync runs compare by their notable rows, without the
+      header, the counts line and the row numbers. Events that each happened (imports,
+      decommissioning, mails, admin actions) are never collapsed.
+    - **Old entries:** everything older than 6, 12, 24 or 36 months, but only among the entries
+      the user can see (own tenants plus tenant-less).
+    - **Every cleanup journals itself** (`source="journal"`, events `repeats_removed` /
+      `old_entries_removed`, with the user and what went). That is the one exception to
+      decision 4.
 
 ## Schema
 
@@ -357,6 +369,15 @@ class JournalHandler(logging.Handler):
     per created, updated, skipped or failed person; unchanged rows and the field diff only with
     DEBUG. The per-person diff stays in the admin History tab (`LogEntry` "Changed by UDB sync:
     field: old -> new"); Person has no simple-history.
+- [x] **8. Cleanup page** (decision 18)
+  - `journal/cleanup.py`: `repeat_groups()`, `months_before()`, `remove_repeats()`,
+    `remove_older_than()`; `journal/forms.py`: `RemoveOldEntriesForm`.
+  - `journal_cleanup` at `/journal/cleanup/`: GET shows the confirmation page with both
+    previews, POST removes (pattern of `tenants:delete`). The "Clean up" button on the journal
+    list needs the permission.
+  - Production copy: the 50 copied HR sync runs shrink to 3 (first and latest of the 49 conflict
+    runs, plus the run with an update); other sources untouched.
+  - Tests in `journal/tests/test_cleanup.py`.
 
 Every batch:
 - `.venv/bin/pytest .` green;
@@ -482,6 +503,7 @@ Reviewed 2026-10-03 as sources of ideas only; none of them will be used.
 | `transaction.on_commit` for anomalies | Drops exactly the anomalies that came with a rollback. |
 | Attaching the handler to the `huey` logger | Huey's line names only the task id, which also defeats decision 16. |
 | Swallowing errors in explicit `log()` calls | Would hide missing audit entries; an insert into the same DB fails only when the DB itself fails. |
+| A management command for the cleanup (`journal_flush --before`) | The user is moving such functions to the frontend; the journal page offers the cleanup with a preview (decision 18). |
 | A separate permission for anomaly entries | Decided against: journal viewers are admins; one more permission and queryset branch for little gain. |
 | Other journald fields | `CODE_FILE`/`LINE`/`FUNC` as fields break on every refactor; anomaly entries carry the code location in their body. `ERRNO`, process, kernel and host fields have nothing to map to in one Django app with one DB. `DOCUMENTATION=` would belong to an event type rather than an entry. `_TRANSPORT`/`_COMM` (web, task, command) would need a parameter through every entry point. |
 
@@ -505,8 +527,7 @@ Reviewed 2026-10-03 as sources of ideas only; none of them will be used.
   since huey doesn't propagate contextvars. Not needed while the HR sync writes only run entries.
 - **Per-object journal** on the device, person or import detail page: needs an index on
   `(content_type, object_id)`. It is a prerequisite for phasing out `ImporterList.messages`.
-- **Retention/purging,** if volume grows (decisions 6 and 16 keep it small): a command
-  `journal_flush --before <date>` deleting in batches by `timestamp__lt`.
+- ~~**Retention/purging**~~: done in batch 8 as a page, not a command (decision 18).
 - **`recorded_at`** (`auto_now_add`, journald `__REALTIME_TIMESTAMP=` vs
   `_SOURCE_REALTIME_TIMESTAMP=`): would show copied entries, whose `timestamp` is only
   approximate, as copies. Low value.

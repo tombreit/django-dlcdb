@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2024 Thomas Breitner
+SPDX-FileCopyrightText: Thomas Breitner
 
 SPDX-License-Identifier: CC0-1.0
 -->
@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Journal: a cleanup page (Settings › Journal › Clean up) removes repeated HR sync and error entries, keeping the first and the latest, and entries older than a chosen age
 * Journal: every HR sync run that created, changed or failed something gets a journal entry; unchanged runs do not; the stored runs are copied over
 * Journal: deactivating and activating persons, devices, rooms and device types, device note changes on licences and deactivated users are journaled; earlier ones are copied from the admin history
 * Journal: every sent notification mail and every newly failed one gets a journal entry; existing sent and failed mails are copied over

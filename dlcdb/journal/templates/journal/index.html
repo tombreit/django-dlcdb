@@ -4,6 +4,16 @@
 {% block title %}{% translate "Journal" %}{% endblock title %}
 {% block index_title %}{% translate "Journal" %}{% endblock index_title %}
 
+{% block object_tools %}
+  {% if perms.journal.delete_journalentry %}
+    <div class="ms-auto">
+      <a href="{% url 'journal:cleanup' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-trash"></i> {% translate "Clean up" %}
+      </a>
+    </div>
+  {% endif %}
+{% endblock object_tools %}
+
 {% block index_list %}
   {% partialdef journal-list inline %}
     <div id="journal-list" class="position-relative" hx-target="#journal-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
