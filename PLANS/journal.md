@@ -7,8 +7,8 @@ SPDX-License-Identifier: CC0-1.0
 # Journal: one log for all in-app logs
 
 **Status:** planned on branch `unified-logging` (2026-10-02), revised after reviews of the
-journald fields and of existing Django packages (2026-10-03). Batch 1 (journal app) is
-implemented; nothing writes entries yet. Open questions are settled (see batches 6 and 7,
+journald fields and of existing Django packages (2026-10-03). Batches 1 (journal app) and 2
+(anomalies from Python logging) are implemented; the legacy logs are not moved yet. Open questions are settled (see batches 6 and 7,
 *Working agreement*). This is a living document: each batch ticks its checkbox under *Progress*
 and updates this line.
 
@@ -271,7 +271,7 @@ class JournalHandler(logging.Handler):
     - sorting by level orders by severity;
     - another tenant's entry hidden, tenant-less entry visible;
     - detail scoped the same way.
-- [ ] **2. Anomalies from Python logging** (decisions 14–17)
+- [x] **2. Anomalies from Python logging** (decisions 14–17)
   - `journal/handlers.py`, `journal/signals.py`, `JournalConfig.ready()`;
   - `LOGGING` in `dlcdb/settings/base.py`;
   - NEWS.
@@ -398,6 +398,9 @@ Agreed with the user on 2026-10-03, for implementation while they are away:
   - `assets/tests/test_devices.py::DeviceFrontendTests::test_modified_column_uses_naturaltime_for_recent_edits_only`
     (date-dependent);
   - `core/tests/test_form_round_trip.py::test_edit_page_renders_and_round_trips_every_field[lending_return]`.
+- **Unrelated finding (batch 2):** a 500 now runs `mail_admins` in the handler test, which shows
+  Django's `RemovedInDjango70Warning`: `ADMINS` holds `(name, address)` pairs
+  (`dlcdb/settings/base.py`). Left alone.
 
 ## Lessons from existing packages
 

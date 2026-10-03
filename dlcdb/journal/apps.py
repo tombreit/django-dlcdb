@@ -10,3 +10,6 @@ class JournalConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.journal"
     verbose_name = _("Journal")
+
+    def ready(self):
+        from . import signals  # noqa: F401  # connects the huey task error receiver

@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Journal: logged warnings and errors, unhandled exceptions in views and failed background tasks show up in the journal; a repeat at most once per hour
 * Journal: new page Settings › Journal, one read-only list of logged events, filterable by source, event, minimum level and text; needs `journal.view_journalentry`
 * Person detail page lists the person's lendings, licences and smallstuff, current and past, with links to device, lending and record
 * Tenants: new page Settings › Tenants to manage tenants and which groups see them, with history

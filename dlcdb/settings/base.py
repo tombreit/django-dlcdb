@@ -331,6 +331,16 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "django.server",
         },
+        # Copy anomalies into the journal (dlcdb.journal.handlers). Never attach
+        # these to django.db.backends: every query would recurse into an insert.
+        "journal": {
+            "level": "WARNING",
+            "class": "dlcdb.journal.handlers.JournalHandler",
+        },
+        "journal_errors": {
+            "level": "ERROR",
+            "class": "dlcdb.journal.handlers.JournalHandler",
+        },
     },
     "root": {
         "handlers": ["console"],
@@ -352,8 +362,15 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        # Unhandled exceptions in views (500s) into the journal. No level of its
+        # own and propagating, so "django" still prints 404/403 warnings and
+        # mails 500s as before.
+        "django.request": {
+            "handlers": ["journal_errors"],
+            "propagate": True,
+        },
         "dlcdb": {
-            "handlers": ["console"],
+            "handlers": ["console", "journal"],
             "level": "DEBUG" if DEBUG else "WARNING",
             "propagate": False,
         },
