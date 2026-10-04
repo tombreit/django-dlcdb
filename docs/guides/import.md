@@ -8,8 +8,7 @@ angezeigt — erst nach Bestätigung wird importiert.
 
 1. CSV-Import-Datei erstellen
 
-   - CSV-Vorlage nutzen: Download-Link auf der Import-Seite (alternativ:
-     {download}`CSV-Vorlage-Datei </_static/dlcdb_csv_import_template.csv>`)
+   - CSV-Vorlage nutzen: Download-Link auf der Import-Seite
    - CSV-Datei mit den zu importierenden Daten vorbereiten
    - CSV-Datei muss festgelegte Spaltenköpfe enthalten
    - CSV-Datei muss UTF-8 kodiert sein und "plain text"
