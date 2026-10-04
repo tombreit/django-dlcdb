@@ -1,103 +1,39 @@
 # Notifications
 
-Die DLCDB kann über Bestandsveränderungen Email-Benachrichtigungen
-verschicken. Alle Benachrichtigungslogik lebt in der App
-`dlcdb.notifications`. Die App `dlcdb.reporting` erzeugt dabei nur die
-Report-Artefakte: tabellarische Übersichten über Records als xlsx-Spreadsheet
-und Text-Repräsentation, gespeichert als `Report` (Titel, Body,
-Spreadsheet-Datei unter `media/reporting/spreadsheets/`). Welche Felder in
-Reports auftauchen, steuert `EXPOSED_FIELDS` in `dlcdb/reporting/settings.py`
-(pro Record-Typ). Erzeugte Reports sind im Django-Admin einsehbar
-(read-only, kein Add).
+Die DLCDB verschickt drei Arten von Email-Benachrichtigungen:
 
-## Subscriptions
+| Art | Empfänger | Auslöser |
+|---|---|---|
+| [Berichte](#berichte-abonnieren) über Records eines Typs | wer sie abonniert hat | Intervall des Abonnements |
+| [Lizenz-Ereignisse](#lizenz-ereignisse) | die Abonnenten der Lizenz | Lizenz eingetragen, läuft bald ab, abgelaufen |
+| [Erinnerungen an überfällige Ausleihen](#erinnerungen-an-überfällige-ausleihen) | Ausleihende und/oder IT | wöchentlich |
 
-Eine Person (*Subscriber*) abonniert ein Ereignis (*Event*) in einem
-Intervall. Es gibt zwei Arten von Subscriptions, unterschieden über das
-Event:
+Jede Mail, ob versendet oder fehlgeschlagen, steht im Journal (*Einstellungen › Journal*).
 
-- **Geräte-Events**: beziehen sich auf ein konkretes Gerät, z.B.
-  "Lizenz XY läuft bald ab" oder "Gerät wurde umgezogen". Die
-  Lizenz-Subscriptions werden derzeit automatisch über das Lizenz-Modul
-  verwaltet (`dlcdb.notifications.services`, signalgetrieben beim
-  Speichern/Löschen einer Lizenz, siehe `dlcdb/licenses/subscribers.py`) —
-  Nutzer können diese nicht selbst anlegen oder abbestellen.
-- **Report-Events**: ein periodischer Bericht über Records eines Typs
-  (z.B. lokalisiert, verliehen), optional eingeschränkt über eine
-  *Condition* (z.B. "hat SAP-Nummer", "Rückgabe überfällig"). Die Mail
-  enthält eine Übersicht und ein xlsx-Spreadsheet als Anhang
-  (erzeugt über `dlcdb.reporting.services.create_report()`).
+## Berichte abonnieren
 
-Empfänger ist immer die Email-Adresse des Subscribers (`Person`). Mehrere
-Empfänger = mehrere Subscriptions.
+Über *Abonnements* im Benutzermenü verwaltet jeder Benutzer seine eigenen Bericht-Abonnements:
 
-Daneben gibt es die **Overdue-Lender-Mails**: Personen mit überfälligen
-Ausleihen werden wöchentlich automatisch erinnert (eine Mail pro Person mit
-allen überfälligen Geräten). Der Empfänger wird über die *Lending
-Configuration* im Admin gesteuert (`overdue_notifications_recipient`):
+- **Abonnieren:** ein Ereignis (z.B. *Report: Lent devices*), optional eine *Bedingung* (z.B. *Überfällige Rückgabe*, *Hat SAP-Nummer*), ein *Intervall* und ob auch dann gemailt wird, wenn keine Records passen. Die Mail enthält eine Übersicht und die Records als xlsx-Anhang.
+- **Verwalten:** *Deaktivieren*/*Aktivieren*, *Löschen* oder sofort eine *Ad-hoc Meldung* versenden, ohne den regulären Termin zu verschieben. Ändern lässt sich ein Abonnement nicht; dafür löschen und neu anlegen.
 
-- *Nobody* — keine Mails
-- *Lender* — Mail an die ausleihende Person
-- *Lender, IT in CC* — eine Mail, Person im To, IT (`DEFAULT_FROM_EMAIL`) im CC
-- *IT only* — Mail nur an IT (Testdrive: identischer Inhalt, umgeleitet)
+Abonnieren kann nur, wessen Email-Adresse zu einer [Person](erste_schritte.md#7-personen-anlegen) gehört; sonst zeigt die Seite nur einen Hinweis.
 
-Für eine mailfreie Übersicht zeigt das Dashboard eine Kachel mit der Anzahl
-überfälliger Ausleihen, verlinkt auf die vorgefilterte Lending-Liste.
+## Lizenz-Ereignisse
 
-## Self-Service: eigene Report-Subscriptions verwalten
+Die {ref}`Abonnenten einer Lizenz <subscribers>` erhalten automatisch eine Mail, wenn die Lizenz eingetragen wird, 30 Tage vor ihrem Ablauf und am Ablaufdatum. Diese Abonnements entstehen und verschwinden mit der Lizenz. Auf der Seite *Abonnements* erscheinen sie nur zur Ansicht, mit einem Link zur Lizenz.
 
-Eingeloggte Nutzer erreichen über den User-Dropdown ("Subscriptions",
-`dlcdb/theme/templates/theme/includes/navbar.html`) die Seite
-`notifications:index` (`dlcdb/notifications/views.py`,
-`dlcdb/notifications/templates/notifications/index.html`). Dort können sie:
+## Erinnerungen an überfällige Ausleihen
 
-- eine neue Report-Subscription anlegen (Event, Condition, Intervall,
-  `notify_no_updates`; `ReportSubscriptionForm` in
-  `dlcdb/notifications/forms.py`),
-- ihre bestehenden Report-Subscriptions in einer Tabelle einsehen,
-- eine Subscription deaktivieren/reaktivieren (`toggle`) oder löschen,
-- über "Trigger ad hoc report" sofort einen Report auslösen und versenden,
-  ohne das reguläre Berichtsfenster zu verschieben — analog zur
-  gleichnamigen Aktion im Admin.
+Jeden Montag erhält jede Person mit überfälligen Ausleihen eine Mail, die ihre überfälligen Geräte auflistet (eine Mail je Mandant). Wer sie bekommt, legt *Einstellungen › Ausleihe Konfiguration* fest:
 
-Es gibt keine Edit-Ansicht; eine Änderung an Event/Condition/Intervall
-erfolgt über Löschen und Neuanlegen.
+- *Nobody*: keine Mails
+- *Lender*: an die ausleihende Person
+- *Lender, IT in CC*: an die Person, die IT in Kopie
+- *IT only*: nur an die IT (zum Testen: dieselbe Mail, umgeleitet)
 
-Die Zuordnung Nutzer → `Person` (Subscriber) erfolgt über die Email-Adresse
-(`Person.objects.filter(email=request.user.email)`), nicht über eine
-Fremdschlüssel-Relation. Existiert keine passende `Person`, zeigt die Seite
-nur einen Hinweis ohne Formular. Die Ansicht ist strikt auf die eigenen
-Subscriptions beschränkt — Nutzer sehen und verwalten nie fremde
-Subscriptions.
+Die IT-Adresse ist die Kontakt-Email des [Mandanten](berechtigungen.md#mandanten) der Geräte, ersatzweise die IT-Adresse aus dem Branding, zuletzt `DEFAULT_FROM_EMAIL`. Unabhängig davon zeigt das Dashboard die Zahl der überfälligen Ausleihen.
 
-Geräte-Events (Lizenz-Ablauf, Umzug etc.) werden in derselben Tabelle
-read-only mitangezeigt, mit einem Link zur jeweiligen Lizenz- bzw.
-Geräte-Ansicht statt der Delete/Toggle/Trigger-Aktionen — sie werden weiterhin
-ausschließlich automatisch verwaltet (siehe oben).
+## Betrieb
 
-## Implementation
-
-Jede Benachrichtigung wird als `Message` erzeugt (pending) und über die
-konfigurierten Channels (`channels.py`, derzeit Email) versendet. Status
-und Vorschau (inkl. "Send Now") pro Message im Admin.
-
-Ein periodischer huey-Task (`process_notification_system`, minütlich)
-verarbeitet fällige Subscriptions (`next_scheduled`):
-
-```{eval-rst}
-.. mermaid::
-
-   graph TD
-      A(huey: process_notification_system, minütlich) --> B{Subscription fällig?}
-      B --> |Geräte-Event|C[Message aus Template]
-      B --> |Report-Event|D[reporting.create_report: xlsx]
-      D --> E[Message mit Report-Anhang]
-      C --> F(Email-Versand via Channels)
-      E --> F
-      F --> G[Message: sent/failed]
-```
-
-Im Admin einer Report-Subscription kann über "Trigger ad hoc report"
-jederzeit ein Report erzeugt und versendet werden, ohne das reguläre
-Berichtsfenster zu verschieben — dieselbe Funktion steht Nutzern auch
-selbst über die oben beschriebene Self-Service-Seite zur Verfügung.
+Ein Task des Task Runners prüft jede Minute, welche Abonnements fällig sind, und versendet deren Mails; ohne laufenden Task Runner geht keine Mail hinaus (siehe [Setup](../betrieb/setup.md)). Im Django-Admin lassen sich alle Nachrichten (Status, Vorschau, *Send Now*) und die erzeugten Berichte einsehen. Welche Felder ein Bericht enthält, legt `EXPOSED_FIELDS` in `dlcdb/reporting/settings.py` fest.
