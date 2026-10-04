@@ -91,7 +91,7 @@ def hints(request):
                     )
                     % {"count": recordless_devices_count},
                     cta_link=cta_link,
-                    cta_text=_("Add proper record?"),
+                    cta_text=_("Add record?"),
                 )
             )
 

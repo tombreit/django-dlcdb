@@ -41,7 +41,7 @@ class StickyHintsTests(BaseTest):
 
         self.assertContains(response, "device without record!")
         self.assertContains(response, f"{reverse('assets:relocate')}?device={device.pk}")
-        self.assertContains(response, "Add proper record?")
+        self.assertContains(response, "Add record?")
 
     def test_multiple_recordless_devices_link_to_the_filtered_device_index(self):
         self._create_device(edv_id="EDV-NR-1", sap_id="1-1")
