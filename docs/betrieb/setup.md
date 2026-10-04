@@ -240,32 +240,9 @@ podman run --name dlcdb ... dlcdb serve
 podman run --name dlcdb-huey ... dlcdb huey
 ```
 
-### Huey queue file grown large (one-time)
-
-Before October 2026 huey stored every task result, and the SQLite backend never
-expires them: the queue file grew by gigabytes (7 GB in production). Since then
-no results are stored, but the existing file keeps its size. It holds nothing of
-value, so reset it once during the deployment, while the task runner is stopped:
-
-```bash
-systemctl --user stop dlcdb_huey.service
-# Both counts must be 0: no task is still waiting to run.
-sqlite3 data/db/huey_task_queue.sqlite3 "select count(*) from task; select count(*) from schedule;"
-rm data/db/huey_task_queue.sqlite3 data/db/huey_task_queue.sqlite3-wal data/db/huey_task_queue.sqlite3-shm
-python manage.py migrate --noinput
-systemctl --user start dlcdb_huey.service  # creates a new, empty queue file
-touch dlcdb/wsgi.py                        # the web workers reconnect to the new file
-```
-
-If a count is not 0, start the task runner again until it has worked off the
-waiting tasks, then stop it and check once more.
-
-For a containerized deployment: remove both containers, delete the three files
-on the data volume, then start `dlcdb serve` and `dlcdb huey` again.
-
 ### Apache and mod_wsgi
 
-```
+```apacheconf
 <VirtualHost *:443>
     ServerName dlcdb.fqdn
 
