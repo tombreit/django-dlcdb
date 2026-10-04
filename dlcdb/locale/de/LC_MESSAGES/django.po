@@ -18,38 +18,33 @@ msgstr ""
 "X-Generator: Poedit 3.9\n"
 
 #: dlcdb/accounts/admin.py:51
-#, fuzzy
-#| msgid "Relocate selected devices"
 msgid "Deactivate selected users"
-msgstr "Ausgewählte Geräte umziehen"
+msgstr "Ausgewählte Benutzer deaktivieren"
 
 #: dlcdb/accounts/admin.py:59
 msgid "You cannot deactivate your own account."
-msgstr ""
+msgstr "Sie können Ihr eigenes Konto nicht deaktivieren."
 
 #: dlcdb/accounts/admin.py:65
-#, fuzzy
-#| msgid "Deactivate"
 msgid "Deactivated."
-msgstr "Deaktivieren"
+msgstr "Deaktiviert."
 
 #: dlcdb/accounts/admin.py:77
-#, fuzzy, python-format
-#| msgid "%(count)d selected"
+#, python-format
 msgid "%(count)d user deactivated."
 msgid_plural "%(count)d users deactivated."
-msgstr[0] "%(count)d ausgewählt"
-msgstr[1] "%(count)d ausgewählt"
+msgstr[0] "%(count)d Benutzer deaktiviert."
+msgstr[1] "%(count)d Benutzer deaktiviert."
 
 #: dlcdb/accounts/admin.py:110
 #, python-format
 msgid "The %(name)s \"%(obj)s\" was permanently deleted."
-msgstr ""
+msgstr "%(name)s \"%(obj)s\" wurde endgültig gelöscht."
 
 #: dlcdb/accounts/admin.py:123
 #, python-format
 msgid "Permanently delete %s"
-msgstr ""
+msgstr "%s endgültig löschen"
 
 #: dlcdb/accounts/admin.py:145
 msgid "group"
@@ -69,11 +64,11 @@ msgstr "Email muss angegeben sein"
 
 #: dlcdb/accounts/models.py:60
 msgid "Superuser must have is_staff=True."
-msgstr ""
+msgstr "Superuser muss is_staff=True haben."
 
 #: dlcdb/accounts/models.py:62
 msgid "Superuser must have is_superuser=True."
-msgstr ""
+msgstr "Superuser muss is_superuser=True haben."
 
 #: dlcdb/accounts/models.py:68
 msgid "email address"
@@ -81,7 +76,7 @@ msgstr "Email-Adresse"
 
 #: dlcdb/accounts/templates/accounts/customuser/change_form.html:11
 msgid "Delete permanently"
-msgstr ""
+msgstr "Endgültig löschen"
 
 #: dlcdb/accounts/templates/accounts/logout.html:29
 msgid "Thanks for spending some quality time with the web site today."
@@ -329,16 +324,16 @@ msgstr "Aktueller Status"
 #: dlcdb/assets/templates/assets/records/detail.html:41
 #: dlcdb/assets/templates/assets/records/detail.html:104
 msgid "Superseded"
-msgstr ""
+msgstr "Abgelöst"
 
 #: dlcdb/assets/filters.py:209
 #: dlcdb/assets/templates/assets/records/detail.html:102
 msgid "Validity"
-msgstr ""
+msgstr "Gültigkeit"
 
 #: dlcdb/assets/filters.py:210
 msgid "Current and superseded..."
-msgstr ""
+msgstr "Aktuell und abgelöst..."
 
 #: dlcdb/assets/filters.py:214
 #: dlcdb/assets/templates/assets/devices/detail.html:58
@@ -527,10 +522,8 @@ msgid "Field history"
 msgstr "Felder Historie"
 
 #: dlcdb/assets/templates/assets/devices/history.html:25
-#, fuzzy
-#| msgid "Back to devices"
 msgid "Back to device"
-msgstr "Zurück zur Übersicht"
+msgstr "Zurück zum Gerät"
 
 #: dlcdb/assets/templates/assets/devices/history.html:34
 #, python-format
@@ -538,6 +531,8 @@ msgid ""
 "State changes such as moves and lendings are listed in the <a href=\"%(url)s?"
 "device=%(pk)s\">records history</a>."
 msgstr ""
+"Statusänderungen wie Umzüge und Ausleihen stehen in der <a href=\"%(url)s?"
+"device=%(pk)s\">Records Historie</a>."
 
 #: dlcdb/assets/templates/assets/devices/includes/_device_teaser.html:15
 msgid "View device details"
@@ -817,7 +812,7 @@ msgstr "Verleihende"
 
 #: dlcdb/assets/templates/assets/records/detail.html:169
 msgid "Follows contract end"
-msgstr ""
+msgstr "Folgt Vertragsende"
 
 #: dlcdb/assets/templates/assets/records/detail.html:172
 #: dlcdb/core/models/record.py:143
@@ -1060,7 +1055,7 @@ msgstr "Verliehen"
 #: dlcdb/core/admin/lentrecord_admin.py:252 dlcdb/lending/views.py:232
 #, python-format
 msgid "Warning: No HR contract end date found for %(person)s!"
-msgstr ""
+msgstr "Warnung: Kein HR-Vertragsende für %(person)s gefunden!"
 
 #: dlcdb/core/admin/lentrecord_admin.py:257 dlcdb/lending/views.py:234
 msgid "Warning: Contract ends before the desired return date!"
@@ -1088,7 +1083,7 @@ msgstr "%(count)s Records auf 'Entfernt' gesetzt / %(label)s."
 
 #: dlcdb/core/admin/record_admin.py:186
 msgid "Set selected records to 'Removed' / 'Sold'"
-msgstr ""
+msgstr "Ausgewählte Records auf 'Entfernt' / 'Verkauft' setzen"
 
 #: dlcdb/core/admin/record_admin.py:188 dlcdb/core/models/record.py:25
 msgid "Sold"
@@ -1096,7 +1091,7 @@ msgstr "Verkauft"
 
 #: dlcdb/core/admin/record_admin.py:190
 msgid "Set selected records to 'Removed' / 'Scrapped'"
-msgstr ""
+msgstr "Ausgewählte Records auf 'Entfernt' / 'Verschrottet' setzen"
 
 #: dlcdb/core/admin/record_admin.py:192 dlcdb/core/models/record.py:26
 msgid "Scrapped"
@@ -1118,34 +1113,31 @@ msgid "Add record?"
 msgstr "Einen Record hinzufügen?"
 
 #: dlcdb/core/context_processors.py:111
-#, fuzzy, python-format
-#| msgid "%(count)d device without record!"
-#| msgid_plural "%(count)d devices without record!"
+#, python-format
 msgid "%(count)d device without tenant!"
 msgid_plural "%(count)d devices without tenant!"
-msgstr[0] "%(count)d Geräte ohne aktuellen Record!"
-msgstr[1] "%(count)d Geräte ohne aktuellen Record!"
+msgstr[0] "%(count)d Gerät ohne Mandant!"
+msgstr[1] "%(count)d Geräte ohne Mandant!"
 
 #: dlcdb/core/context_processors.py:119
-#, fuzzy, python-format
-#| msgid "%(count)d device without record!"
-#| msgid_plural "%(count)d devices without record!"
+#, python-format
 msgid "%(count)d import without tenant!"
 msgid_plural "%(count)d imports without tenant!"
-msgstr[0] "%(count)d Geräte ohne aktuellen Record!"
-msgstr[1] "%(count)d Geräte ohne aktuellen Record!"
+msgstr[0] "%(count)d Import ohne Mandant!"
+msgstr[1] "%(count)d Importe ohne Mandant!"
 
 #: dlcdb/core/context_processors.py:131
 msgid "Assign a tenant?"
-msgstr ""
+msgstr "Mandant zuordnen?"
 
 #: dlcdb/core/context_processors.py:140
 msgid "None of your groups belongs to a tenant, so you see no devices."
 msgstr ""
+"Keine Ihrer Gruppen gehört zu einem Mandanten, daher sehen Sie keine Geräte."
 
 #: dlcdb/core/context_processors.py:144
 msgid "Assign groups to tenants?"
-msgstr ""
+msgstr "Gruppen Mandanten zuordnen?"
 
 #: dlcdb/core/context_processors.py:158
 msgid "No room configured as 'is_external'!"
@@ -1169,7 +1161,7 @@ msgstr "Räume hinzufügen?"
 
 #: dlcdb/core/context_processors.py:191
 msgid "No IT department contact email configured in Branding!"
-msgstr ""
+msgstr "Keine Kontakt-Email der IT-Abteilung im Branding konfiguriert!"
 
 #: dlcdb/core/context_processors.py:193
 msgid "Configure it?"
@@ -1178,6 +1170,7 @@ msgstr "Konfigurieren?"
 #: dlcdb/core/forms/removedrecord_form.py:26
 msgid "Record already of type \"REMOVED\" - can not be removed again!"
 msgstr ""
+"Record ist bereits vom Typ \"REMOVED\" und kann nicht erneut entfernt werden!"
 
 #: dlcdb/core/forms/removedrecord_form.py:31
 msgid "This device has no record yet and cannot be removed. Localize it first."
@@ -1186,7 +1179,7 @@ msgstr ""
 
 #: dlcdb/core/forms/removedrecord_form.py:33
 msgid "This device cannot be removed in its current state."
-msgstr ""
+msgstr "Dieses Gerät kann im aktuellen Status nicht entfernt werden."
 
 #: dlcdb/core/lifecycle.py:77 dlcdb/core/models/prx_licencerecord.py:118
 msgid "Ordered"
@@ -1231,7 +1224,7 @@ msgstr "Wiedereingliedern"
 #: dlcdb/core/lifecycle.py:315
 #, python-format
 msgid "“%(action)s” is not allowed for a device in state “%(state)s”."
-msgstr ""
+msgstr "“%(action)s” ist für ein Gerät im Status “%(state)s” nicht erlaubt."
 
 #: dlcdb/core/lifecycle.py:316
 msgid "not yet recorded"
@@ -1243,11 +1236,14 @@ msgid ""
 "“%(action)s” is not allowed for device “%(device)s” in its current "
 "configuration."
 msgstr ""
+"“%(action)s” ist für Gerät “%(device)s” in der aktuellen Konfiguration nicht "
+"erlaubt."
 
 #: dlcdb/core/lifecycle.py:336
 #, python-format
 msgid "Illegal state change for device %(device)s: %(current)s -> %(target)s."
 msgstr ""
+"Unzulässiger Statuswechsel für Gerät %(device)s: %(current)s -> %(target)s."
 
 #: dlcdb/core/lifecycle.py:337
 msgid "no record"
@@ -1255,11 +1251,13 @@ msgstr "kein Record"
 
 #: dlcdb/core/lifecycle.py:422
 msgid "Only the active lending record of a device can be returned."
-msgstr ""
+msgstr "Nur der aktive Verleih-Record eines Geräts kann zurückgegeben werden."
 
 #: dlcdb/core/lifecycle.py:516
 msgid "Only the active lending record of a device can be moved in place."
 msgstr ""
+"Nur beim aktiven Verleih-Record eines Geräts kann der Raum direkt geändert "
+"werden."
 
 #: dlcdb/core/models/abstracts.py:31 dlcdb/journal/models.py:157
 msgid "Username (denormalized)"
@@ -1385,7 +1383,7 @@ msgstr "Icon"
 #: dlcdb/core/models/device_type.py:29
 #, python-format
 msgid "Bootstrap Icons class, e.g. “bi-laptop”. See %(url)s."
-msgstr ""
+msgstr "Bootstrap-Icons-Klasse, z.B. “bi-laptop”. Siehe %(url)s."
 
 #: dlcdb/core/models/device_type.py:38
 msgid "Device Type"
@@ -1400,14 +1398,11 @@ msgid "Device search tenant aware"
 msgstr "Geräte-Suche ist Tenant-spezifisch"
 
 #: dlcdb/core/models/inventory.py:201
-#, fuzzy
-#| msgid ""
-#| "If set, the device search will only return devices for the current tenant."
 msgid ""
 "If set, the device search will only return devices of the user's tenants."
 msgstr ""
-"Wenn aktiviert, werden bei der Gerätesuche nur Geräte des aktuellen "
-"Mandanten angezeigt."
+"Wenn aktiviert, werden bei der Gerätesuche nur Geräte der eigenen Mandanten "
+"angezeigt."
 
 #: dlcdb/core/models/inventory.py:219 dlcdb/core/navigation.py:23
 msgid "Inventories"
@@ -1563,7 +1558,7 @@ msgstr ""
 
 #: dlcdb/core/models/record.py:86
 msgid "Replaced by the next record at this timestamp."
-msgstr ""
+msgstr "Zu diesem Zeitpunkt durch den nächsten Record abgelöst."
 
 #: dlcdb/core/models/record.py:134
 msgid "Sync return date with contract end"
@@ -1721,6 +1716,8 @@ msgid ""
 "Tenant and device type were left unchanged: you may move devices but not "
 "edit them."
 msgstr ""
+"Mandant und Geräteklasse blieben unverändert: Sie dürfen Geräte umziehen, "
+"aber nicht bearbeiten."
 
 #: dlcdb/dashboard/apps.py:12 dlcdb/dashboard/templates/dashboard/index.html:8
 msgid "Dashboard"
@@ -1755,7 +1752,7 @@ msgstr[1] "%(counter)s mit Notizen"
 #: dlcdb/dashboard/templates/dashboard/index.html:16
 #: dlcdb/templates/registration/login.html:19
 msgid "Device Life Cycle Database"
-msgstr ""
+msgstr "Device Life Cycle Database"
 
 #: dlcdb/dashboard/templates/dashboard/index.html:45
 #, python-format
@@ -1819,8 +1816,8 @@ msgstr "Überfällige Ausleihen"
 #, python-format
 msgid "Journal, last %(days)d day"
 msgid_plural "Journal, last %(days)d days"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Journal, letzter %(days)d Tag"
+msgstr[1] "Journal, letzte %(days)d Tage"
 
 #: dlcdb/dataexchange/admin.py:140 dlcdb/dataexchange/views.py:165
 #, python-format
@@ -1834,23 +1831,26 @@ msgstr "Datenaustausch"
 #: dlcdb/dataexchange/fields.py:36
 #, python-format
 msgid "%(prefix)sincorrect date format, should be YYYY-MM-DD: '%(value)s'"
-msgstr ""
+msgstr "%(prefix)sfalsches Datumsformat, erwartet wird YYYY-MM-DD: '%(value)s'"
 
 #: dlcdb/dataexchange/fields.py:66
 #, python-format
 msgid "%(column)s: no %(model)s named '%(value)s' exists."
-msgstr ""
+msgstr "%(column)s: %(model)s '%(value)s' existiert nicht."
 
 #: dlcdb/dataexchange/fields.py:71
 #, python-format
 msgid ""
 "%(column)s: '%(value)s' is ambiguous, several %(model)s entries match it."
 msgstr ""
+"%(column)s: '%(value)s' ist mehrdeutig, mehrere %(model)s-Einträge passen."
 
 #: dlcdb/dataexchange/fields.py:137
 msgid ""
 "LENDER_EMAIL: a lender email address is required to import a LENT record."
 msgstr ""
+"LENDER_EMAIL: Für den Import eines LENT-Records ist die Email-Adresse des "
+"Ausleihers erforderlich."
 
 #: dlcdb/dataexchange/fields.py:161
 #, python-format
@@ -1859,6 +1859,9 @@ msgid ""
 "under the name '%(first_name)s %(last_name)s' (names must be unique). "
 "Original error: %(error)s"
 msgstr ""
+"Ausleiher '%(email)s' konnte nicht importiert werden: Unter dem Namen "
+"'%(first_name)s %(last_name)s' ist bereits eine andere Person gespeichert "
+"(Namen müssen eindeutig sein). Ursprünglicher Fehler: %(error)s"
 
 #: dlcdb/dataexchange/filters.py:21
 #: dlcdb/dataexchange/templates/dataexchange/includes/_status_badge.html:15
@@ -1880,7 +1883,7 @@ msgstr "Jeder Status..."
 #: dlcdb/dataexchange/templates/dataexchange/importer_detail.html:36
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:36
 msgid "Format"
-msgstr ""
+msgstr "Format"
 
 #: dlcdb/dataexchange/filters.py:28
 msgid "Any format..."
@@ -1895,6 +1898,8 @@ msgstr "CSV-Datei im internen Format (UTF-8)."
 msgid ""
 "a device with this EDV_ID or SAP_ID already exists. Original error: %(error)s"
 msgstr ""
+"ein Gerät mit dieser EDV_ID oder SAP_ID existiert bereits. Ursprünglicher "
+"Fehler: %(error)s"
 
 #: dlcdb/dataexchange/importer.py:80
 msgid "new device, no record"
@@ -1913,7 +1918,7 @@ msgstr "Neues Gerät, verliehen an %(lender)s (Raum %(room)s), zurückgegeben"
 #: dlcdb/dataexchange/importer.py:93
 #, python-format
 msgid "new device, lent to %(lender)s (room %(room)s)"
-msgstr ""
+msgstr "Neues Gerät, verliehen an %(lender)s (Raum %(room)s)"
 
 #: dlcdb/dataexchange/importer.py:98
 msgid "new device, not locatable"
@@ -1922,37 +1927,39 @@ msgstr "Neues Gerät, nicht auffindbar"
 #: dlcdb/dataexchange/importer.py:103
 #, python-format
 msgid "new device, removed on %(date)s"
-msgstr ""
+msgstr "Neues Gerät, entfernt am %(date)s"
 
 #: dlcdb/dataexchange/importer.py:105
 #, python-format
 msgid "new device, record %(record_type)s"
-msgstr ""
+msgstr "Neues Gerät, Record %(record_type)s"
 
 #: dlcdb/dataexchange/importer.py:138
 #, python-format
 msgid "record only; device exists in tenant '%(tenant)s'"
-msgstr ""
+msgstr "Nur Record; Gerät existiert in Mandant '%(tenant)s'"
 
 #: dlcdb/dataexchange/importer.py:148
 #, python-format
 msgid "edv_id collision -> %(new_edv_id)s"
-msgstr ""
+msgstr "edv_id-Kollision -> %(new_edv_id)s"
 
 #: dlcdb/dataexchange/importer.py:165
 #, python-format
 msgid "exists in other tenant '%(tenant)s'"
-msgstr ""
+msgstr "Existiert in anderem Mandanten '%(tenant)s'"
 
 #: dlcdb/dataexchange/importer.py:167
 msgid "already exists; no record to update"
-msgstr ""
+msgstr "Existiert bereits; kein Record zu aktualisieren"
 
 #: dlcdb/dataexchange/importer.py:480
 #, python-format
 msgid ""
 "Import aborted: %(count)s row(s) could not be imported. Nothing was written."
 msgstr ""
+"Import abgebrochen: %(count)s Zeile(n) konnten nicht importiert werden. Es "
+"wurde nichts geschrieben."
 
 #: dlcdb/dataexchange/models.py:122
 msgid "Internal (CSV)"
@@ -1977,10 +1984,12 @@ msgstr "HR-API-Sync-Konfiguration"
 #: dlcdb/dataexchange/records.py:66
 msgid "ROOM: a room number is required to import an INROOM record."
 msgstr ""
+"ROOM: Für den Import eines INROOM-Records ist eine Raumnummer erforderlich."
 
 #: dlcdb/dataexchange/records.py:79
 msgid "ROOM: a room number is required to import a LENT record."
 msgstr ""
+"ROOM: Für den Import eines LENT-Records ist eine Raumnummer erforderlich."
 
 #: dlcdb/dataexchange/records.py:120
 #, python-format
@@ -1988,6 +1997,8 @@ msgid ""
 "RECORD_TYPE: unknown value '%(value)s'. Expected one of: %(expected)s (or "
 "empty with a ROOM set)."
 msgstr ""
+"RECORD_TYPE: Unbekannter Wert '%(value)s'. Erwartet wird einer von: "
+"%(expected)s (oder leer bei gesetztem ROOM)."
 
 #: dlcdb/dataexchange/templates/dataexchange/import.html:12
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:12
@@ -2039,6 +2050,8 @@ msgid ""
 "Fix the lines listed below in your CSV file and upload it again. The line "
 "numbers match your spreadsheet."
 msgstr ""
+"Die unten aufgeführten Zeilen in der CSV-Datei korrigieren und die Datei "
+"erneut hochladen. Die Zeilennummern entsprechen denen Ihrer Tabelle."
 
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:51
 msgid "Outcome"
@@ -2063,6 +2076,8 @@ msgstr "Import bestätigen"
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:83
 msgid "Confirming is disabled until every row above imports cleanly."
 msgstr ""
+"Bestätigen ist erst möglich, wenn sich alle Zeilen oben fehlerfrei "
+"importieren lassen."
 
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:85
 msgid "Confirming will write the rows shown above."
@@ -2077,13 +2092,13 @@ msgstr "Zurück zur Übersicht"
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:34
 #: dlcdb/tenants/templates/tenants/actions/assign.html:70
 msgid "File"
-msgstr ""
+msgstr "Datei"
 
 #: dlcdb/dataexchange/templates/dataexchange/importer_detail.html:34
 #: dlcdb/journal/models.py:140 dlcdb/journal/templates/journal/cleanup.html:34
 #: dlcdb/journal/templates/journal/index.html:31
 msgid "Summary"
-msgstr ""
+msgstr "Zusammenfassung"
 
 #: dlcdb/dataexchange/templates/dataexchange/importer_detail.html:49
 msgid "Import log"
@@ -2145,18 +2160,18 @@ msgstr "SAP-Abgleich"
 
 #: dlcdb/inventory/navigation.py:52
 msgid "VG bei MAs"
-msgstr ""
+msgstr "VG bei MAs"
 
 #: dlcdb/inventory/navigation.py:57 dlcdb/lending/navigation.py:37
 #: dlcdb/licenses/navigation.py:29 dlcdb/smallstuff/navigation.py:21
 msgid "Docs"
-msgstr ""
+msgstr "Doku"
 
 #: dlcdb/inventory/templates/inventory/includes/inventory_progress.html:16
 msgid ""
 "Inventory progress for your tenants, counting only devices with an inventory "
 "id"
-msgstr ""
+msgstr "Inventurfortschritt Ihrer Mandanten, nur Geräte mit Inventarnummer"
 
 #: dlcdb/inventory/templates/inventory/includes/no_active_inventory_alert.html:3
 msgid "No active inventory found"
@@ -2170,20 +2185,18 @@ msgstr "Bitte erstelle eine Inventur."
 #: dlcdb/journal/templates/journal/index.html:4
 #: dlcdb/journal/templates/journal/index.html:5
 msgid "Journal"
-msgstr ""
+msgstr "Journal"
 
 #: dlcdb/journal/filters.py:25 dlcdb/journal/models.py:125
 #: dlcdb/journal/templates/journal/cleanup.html:33
 #: dlcdb/journal/templates/journal/detail.html:51
 #: dlcdb/journal/templates/journal/index.html:30
 msgid "Source"
-msgstr ""
+msgstr "Quelle"
 
 #: dlcdb/journal/filters.py:26
-#, fuzzy
-#| msgid "Any state..."
 msgid "Any source..."
-msgstr "Status..."
+msgstr "Jede Quelle..."
 
 #: dlcdb/journal/filters.py:29 dlcdb/journal/models.py:130
 #: dlcdb/journal/templates/journal/detail.html:53
@@ -2192,54 +2205,50 @@ msgid "Event"
 msgstr "Event"
 
 #: dlcdb/journal/filters.py:30
-#, fuzzy
-#| msgid "Any inventory..."
 msgid "Any event..."
-msgstr "Jede Inventur..."
+msgstr "Jedes Event..."
 
 #: dlcdb/journal/filters.py:35
 msgid "Minimum level"
-msgstr ""
+msgstr "Mindest-Level"
 
 #: dlcdb/journal/filters.py:36
-#, fuzzy
-#| msgid "Any device type..."
 msgid "Any level..."
-msgstr "Alle Geräteklassen..."
+msgstr "Jedes Level..."
 
 #: dlcdb/journal/filters.py:45 dlcdb/journal/models.py:120
 #: dlcdb/journal/templates/journal/detail.html:49
 #: dlcdb/journal/templates/journal/index.html:28
 msgid "Time"
-msgstr ""
+msgstr "Zeit"
 
 #: dlcdb/journal/forms.py:16
 msgid "Older than (months)"
-msgstr ""
+msgstr "Älter als (Monate)"
 
 #: dlcdb/journal/models.py:110
 msgid "Critical"
-msgstr ""
+msgstr "Kritisch"
 
 #: dlcdb/journal/models.py:111
 msgid "Error"
-msgstr ""
+msgstr "Fehler"
 
 #: dlcdb/journal/models.py:112
 msgid "Warning"
-msgstr ""
+msgstr "Warnung"
 
 #: dlcdb/journal/models.py:113
 msgid "Success"
-msgstr ""
+msgstr "Erfolg"
 
 #: dlcdb/journal/models.py:114
 msgid "Info"
-msgstr ""
+msgstr "Info"
 
 #: dlcdb/journal/models.py:135 dlcdb/journal/templates/journal/index.html:29
 msgid "Level"
-msgstr ""
+msgstr "Level"
 
 #: dlcdb/journal/models.py:144 dlcdb/journal/templates/journal/detail.html:29
 #: dlcdb/notifications/templates/notifications/index.html:44
@@ -2249,42 +2258,36 @@ msgstr "Details"
 #: dlcdb/journal/models.py:152 dlcdb/journal/templates/journal/detail.html:55
 #: dlcdb/journal/templates/journal/index.html:32
 msgid "User"
-msgstr ""
+msgstr "Benutzer"
 
 #: dlcdb/journal/models.py:176
-#, fuzzy
-#| msgid "Record type"
 msgid "Subject type"
-msgstr "Record Typ"
+msgstr "Objekttyp"
 
 #: dlcdb/journal/models.py:181
 msgid "Subject ID"
-msgstr ""
+msgstr "Objekt-ID"
 
 #: dlcdb/journal/models.py:187 dlcdb/journal/templates/journal/detail.html:59
 msgid "Subject"
-msgstr ""
+msgstr "Objekt"
 
 #: dlcdb/journal/models.py:194
-#, fuzzy
-#| msgid "Manual entry"
 msgid "Journal entry"
-msgstr "Manueller Eintrag"
+msgstr "Journal-Eintrag"
 
 #: dlcdb/journal/models.py:195
-#, fuzzy
-#| msgid "Inventories"
 msgid "Journal entries"
-msgstr "Inventuren"
+msgstr "Journal-Einträge"
 
 #: dlcdb/journal/templates/journal/cleanup.html:9
 #: dlcdb/journal/templates/journal/cleanup.html:13
 msgid "Clean up journal"
-msgstr ""
+msgstr "Journal aufräumen"
 
 #: dlcdb/journal/templates/journal/cleanup.html:22
 msgid "Repeated entries"
-msgstr ""
+msgstr "Wiederholte Einträge"
 
 #: dlcdb/journal/templates/journal/cleanup.html:26
 msgid ""
@@ -2292,116 +2295,103 @@ msgid ""
 "Of each group of identical entries, the first and the most recent stay. "
 "Imports, mails and admin actions are never removed here."
 msgstr ""
+"HR-Sync-Läufe sowie protokollierte Warnungen und Fehler wiederholen sich, "
+"solange ein Problem besteht. Von jeder Gruppe identischer Einträge bleiben "
+"der erste und der jüngste erhalten. Importe, Mails und Admin-Aktionen werden "
+"hier nie entfernt."
 
 #: dlcdb/journal/templates/journal/cleanup.html:35
-#, fuzzy
-#| msgid "First name"
 msgid "First"
-msgstr "Vorname"
+msgstr "Erstmals"
 
 #: dlcdb/journal/templates/journal/cleanup.html:36
 msgid "Latest"
-msgstr ""
+msgstr "Zuletzt"
 
 #: dlcdb/journal/templates/journal/cleanup.html:37
-#, fuzzy
-#| msgid "Remove"
 msgid "To remove"
-msgstr "Entfernen"
+msgstr "Zu entfernen"
 
 #: dlcdb/journal/templates/journal/cleanup.html:58
 #, python-format
 msgid "Remove %(counter)s repeated entry"
 msgid_plural "Remove %(counter)s repeated entries"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(counter)s wiederholten Eintrag entfernen"
+msgstr[1] "%(counter)s wiederholte Einträge entfernen"
 
 #: dlcdb/journal/templates/journal/cleanup.html:62
-#, fuzzy
-#| msgid "No report sent."
 msgid "No repeated entries."
-msgstr "Kein Bericht versendet."
+msgstr "Keine wiederholten Einträge."
 
 #: dlcdb/journal/templates/journal/cleanup.html:70
-#, fuzzy
-#| msgid "Inventories"
 msgid "Old entries"
-msgstr "Inventuren"
+msgstr "Alte Einträge"
 
 #: dlcdb/journal/templates/journal/cleanup.html:74
 msgid ""
 "Remove every journal entry you can see that is older than the chosen age. "
 "Entries of tenants you cannot see stay."
 msgstr ""
+"Entfernt alle für Sie sichtbaren Journal-Einträge, die älter als das "
+"gewählte Alter sind. Einträge von Mandanten, die Sie nicht sehen, bleiben "
+"erhalten."
 
 #: dlcdb/journal/templates/journal/cleanup.html:84
 #, python-format
 msgid "Older than %(months)s months (before %(cutoff)s): %(counter)s entry"
 msgid_plural ""
 "Older than %(months)s months (before %(cutoff)s): %(counter)s entries"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Älter als %(months)s Monate (vor %(cutoff)s): %(counter)s Eintrag"
+msgstr[1] "Älter als %(months)s Monate (vor %(cutoff)s): %(counter)s Einträge"
 
 #: dlcdb/journal/templates/journal/cleanup.html:89
-#, fuzzy
-#| msgid "Removed records"
 msgid "Remove old entries"
-msgstr "Entfernt-Records"
+msgstr "Alte Einträge entfernen"
 
 #: dlcdb/journal/templates/journal/detail.html:35
-#, fuzzy
-#| msgid "No log recorded."
 msgid "No details recorded."
-msgstr "Keine Log-Meldung aufgezeichnet."
+msgstr "Keine Details aufgezeichnet."
 
 #: dlcdb/journal/templates/journal/detail.html:45
 msgid "Entry"
-msgstr ""
+msgstr "Eintrag"
 
 #: dlcdb/journal/templates/journal/index.html:11
 msgid "Clean up"
-msgstr ""
+msgstr "Aufräumen"
 
 #: dlcdb/journal/templates/journal/index.html:21
-#, fuzzy, python-format
-#| msgid "%(counter)s of %(total)s record"
-#| msgid_plural "%(counter)s of %(total)s records"
+#, python-format
 msgid "%(counter)s of %(total)s entry"
 msgid_plural "%(counter)s of %(total)s entries"
-msgstr[0] "%(counter)s von %(total)s Record"
-msgstr[1] "%(counter)s von %(total)s Records"
+msgstr[0] "%(counter)s von %(total)s Eintrag"
+msgstr[1] "%(counter)s von %(total)s Einträgen"
 
 #: dlcdb/journal/templates/journal/index.html:58
-#, fuzzy
-#| msgid "No imports yet."
 msgid "No journal entries yet."
-msgstr "Noch keine Imports."
+msgstr "Noch keine Journal-Einträge."
 
 #: dlcdb/journal/templates/journal/index.html:60
-#, fuzzy
-#| msgid "No suppliers match these filters."
 msgid "No journal entries match these filters."
-msgstr "Keine Distributoren gefunden, die diesen Filtern entsprechen."
+msgstr "Keine Journal-Einträge gefunden, die diesen Filtern entsprechen."
 
 #: dlcdb/journal/views.py:59
-#, fuzzy
-#| msgid "Search name or e-mail..."
 msgid "Search summary, details, user..."
-msgstr "Suche Name oder Email..."
+msgstr "Suche Zusammenfassung, Details, Benutzer..."
 
 #: dlcdb/journal/views.py:98
 #, python-format
 msgid "Removed %(count)d repeated entry."
 msgid_plural "Removed %(count)d repeated entries."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d wiederholter Eintrag entfernt."
+msgstr[1] "%(count)d wiederholte Einträge entfernt."
 
 #: dlcdb/journal/views.py:108
 #, python-format
 msgid "Removed %(count)d entry older than %(date)s."
 msgid_plural "Removed %(count)d entries older than %(date)s."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d Eintrag älter als %(date)s entfernt."
+msgstr[1] "%(count)d Einträge älter als %(date)s entfernt."
 
 #: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:70
 msgid "Overdue"
@@ -2520,10 +2510,12 @@ msgid ""
 "To change these, cancel and open the lending via <a "
 "href=\"%(edit_url)s\">“Edit”</a>."
 msgstr ""
+"Zum Ändern abbrechen und den Verleih über <a "
+"href=\"%(edit_url)s\">“Bearbeiten”</a> öffnen."
 
 #: dlcdb/lending/templates/lending/lend.html:162
 msgid "Dates"
-msgstr ""
+msgstr "Zeitraum"
 
 #: dlcdb/lending/templates/lending/lend.html:182
 msgid "Defaults to the person's contract end date."
@@ -2578,7 +2570,7 @@ msgstr "Verleihstatus unbekannt - bitte diesen Fall melden!"
 #: dlcdb/lending/views.py:290
 #, python-format
 msgid "Configuration error: %(err)s"
-msgstr ""
+msgstr "Konfigurationsfehler: %(err)s"
 
 #: dlcdb/lending/views.py:347
 msgid "Device is currently \"not locatable\" and must be located first."
@@ -2635,6 +2627,7 @@ msgstr "Ablaufdatum"
 #: dlcdb/licenses/models.py:27
 msgid "These subscribers will be added to all new licenses by default."
 msgstr ""
+"Diese Abonnenten werden standardmäßig allen neuen Lizenzen hinzugefügt."
 
 #: dlcdb/licenses/models.py:34 dlcdb/licenses/models.py:35
 #: dlcdb/licenses/navigation.py:19
@@ -2647,8 +2640,6 @@ msgid "Show history"
 msgstr "Zeige Historie"
 
 #: dlcdb/licenses/templates/licenses/history.html:25
-#, fuzzy
-#| msgid "Back to list"
 msgid "Back to licenses"
 msgstr "Zurück zur Übersicht"
 
@@ -2685,7 +2676,7 @@ msgstr "Lizenz bearbeiten"
 
 #: dlcdb/licenses/views.py:182
 msgid "No license room/location defined. Define a license room first."
-msgstr ""
+msgstr "Kein Lizenz-Raum definiert. Bitte zuerst einen Lizenz-Raum festlegen."
 
 #: dlcdb/licenses/views.py:188
 #, python-format
@@ -2693,12 +2684,16 @@ msgid ""
 "Database error: Could not save the license. Please try again. Error: "
 "%(error)s"
 msgstr ""
+"Datenbankfehler: Die Lizenz konnte nicht gespeichert werden. Bitte erneut "
+"versuchen. Fehler: %(error)s"
 
 #: dlcdb/licenses/views.py:193
 msgid ""
 "The license could not be saved because of an unexpected error. The error has "
 "been logged."
 msgstr ""
+"Die Lizenz konnte wegen eines unerwarteten Fehlers nicht gespeichert werden. "
+"Der Fehler wurde protokolliert."
 
 #: dlcdb/licenses/views.py:218
 msgid "New license"
@@ -2774,7 +2769,7 @@ msgstr "Bedingung"
 
 #: dlcdb/notifications/models.py:86
 msgid "Only for report events: restrict which records are reported."
-msgstr ""
+msgstr "Nur für Berichte: schränkt ein, welche Records gemeldet werden."
 
 #: dlcdb/notifications/models.py:92
 #: dlcdb/notifications/templates/notifications/index.html:45
@@ -2790,44 +2785,50 @@ msgid ""
 "Also send an email when no records match. Useful for testing the email "
 "functionality."
 msgstr ""
+"Auch dann eine Email senden, wenn keine Records zutreffen. Nützlich, um den "
+"Email-Versand zu testen."
 
 #: dlcdb/notifications/models.py:114
 msgid ""
 "When the next message should be sent. Based on the interval setting. "
 "Subscriptions with a date/time in the past are due for processing."
 msgstr ""
+"Wann die nächste Nachricht gesendet wird, basierend auf dem Intervall. "
+"Abonnements mit Datum/Zeit in der Vergangenheit werden als Nächstes "
+"verarbeitet."
 
 #: dlcdb/notifications/models.py:148
 msgid "Report subscriptions are not device-specific."
-msgstr ""
+msgstr "Bericht-Abonnements sind nicht gerätespezifisch."
 
 #: dlcdb/notifications/models.py:150
 msgid "Report subscriptions need a recurring interval."
-msgstr ""
+msgstr "Bericht-Abonnements benötigen ein wiederkehrendes Intervall."
 
 #: dlcdb/notifications/models.py:157
 msgid "Immediately/hourly intervals are only allowed in development mode."
-msgstr ""
+msgstr "Sofortige/stündliche Intervalle sind nur im Entwicklungsmodus erlaubt."
 
 #: dlcdb/notifications/models.py:165
 msgid "Overdue notifications can only be created for \"lent\" records."
 msgstr ""
+"Überfällig-Benachrichtigungen sind nur für \"Verliehen\"-Records möglich."
 
 #: dlcdb/notifications/models.py:173
 msgid "You already have a subscription for this report."
-msgstr ""
+msgstr "Sie haben diesen Bericht bereits abonniert."
 
 #: dlcdb/notifications/models.py:177
 msgid "Conditions are only available for report subscriptions."
-msgstr ""
+msgstr "Bedingungen gibt es nur für Bericht-Abonnements."
 
 #: dlcdb/notifications/models.py:180
 msgid "Device subscriptions need a device."
-msgstr ""
+msgstr "Geräte-Abonnements benötigen ein Gerät."
 
 #: dlcdb/notifications/models.py:188
 msgid "You already have a subscription for this event and device."
-msgstr ""
+msgstr "Sie haben dieses Event für dieses Gerät bereits abonniert."
 
 #: dlcdb/notifications/templates/notifications/index.html:5
 #: dlcdb/notifications/templates/notifications/index.html:12
@@ -2839,6 +2840,9 @@ msgid ""
 "No person record matches your email address, so subscriptions cannot be "
 "managed for your account. Please contact your IT department."
 msgstr ""
+"Zu Ihrer Email-Adresse gibt es keine Person, daher können für Ihr Konto "
+"keine Abonnements verwaltet werden. Bitte wenden Sie sich an Ihre IT-"
+"Abteilung."
 
 #: dlcdb/notifications/templates/notifications/index.html:25
 msgid "Add a report subscription"
@@ -2880,7 +2884,7 @@ msgstr "Nein"
 
 #: dlcdb/notifications/templates/notifications/index.html:76
 msgid "Not available for device-based subscriptions."
-msgstr ""
+msgstr "Für gerätebezogene Abonnements nicht verfügbar."
 
 #: dlcdb/notifications/templates/notifications/index.html:84
 msgid "Ad hoc report"
@@ -2946,31 +2950,35 @@ msgstr "Organisation"
 
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
-msgstr ""
+msgstr "Eine Firma, die alles herstellt"
 
 #: dlcdb/organization/models.py:29
 msgid "Company, institute, site name (english version)."
-msgstr ""
+msgstr "Name der Firma, des Instituts oder Standorts (englische Version)."
 
 #: dlcdb/organization/models.py:36
 msgid "Company, institute, site name (german version)."
-msgstr ""
+msgstr "Name der Firma, des Instituts oder Standorts (deutsche Version)."
 
 #: dlcdb/organization/models.py:43
 msgid "Company, institute, site abbreviation."
-msgstr ""
+msgstr "Abkürzung der Firma, des Instituts oder Standorts."
 
 #: dlcdb/organization/models.py:60
 msgid ""
 "Logo file. SVG, white foreground, transparent background. Used in the main "
 "navigation bar/site header."
 msgstr ""
+"Logo-Datei. SVG, weißer Vordergrund, transparenter Hintergrund. Wird in der "
+"Hauptnavigation/Kopfzeile verwendet."
 
 #: dlcdb/organization/models.py:69
 msgid ""
 "Logo file. SVG, black foreground, transparent background. Used in PDF "
 "printouts."
 msgstr ""
+"Logo-Datei. SVG, schwarzer Vordergrund, transparenter Hintergrund. Wird in "
+"PDF-Ausdrucken verwendet."
 
 #: dlcdb/organization/navigation.py:11
 msgid "Branding"
@@ -2993,11 +3001,13 @@ msgstr "Personen"
 #: dlcdb/persons/templates/persons/detail.html:17
 #: dlcdb/persons/templates/persons/index.html:50
 msgid "Managed by HR API sync"
-msgstr ""
+msgstr "Verwaltet per HR-API-Sync"
 
 #: dlcdb/persons/templates/persons/detail.html:28
 msgid "This person is managed by the HR API sync and cannot be edited here."
 msgstr ""
+"Diese Person wird per HR-API-Sync verwaltet und kann hier nicht bearbeitet "
+"werden."
 
 #: dlcdb/persons/templates/persons/detail.html:30
 msgid "You may view this person but do not have permission to edit them."
@@ -3007,7 +3017,7 @@ msgstr ""
 
 #: dlcdb/persons/templates/persons/detail.html:73
 msgid "HR API data"
-msgstr ""
+msgstr "HR-API-Daten"
 
 #: dlcdb/persons/templates/persons/detail.html:79
 msgid "Business e-mail"
@@ -3039,47 +3049,37 @@ msgstr "Voraussichtlicher Check-Out"
 
 #: dlcdb/persons/templates/persons/detail.html:93
 msgid "Last HR API update"
-msgstr ""
+msgstr "Letztes HR-API-Update"
 
 #: dlcdb/persons/templates/persons/includes/_lendings.html:29
 #: dlcdb/persons/templates/persons/includes/_licences.html:29
 #: dlcdb/persons/templates/persons/includes/_smallstuff.html:28
 msgid "Since"
-msgstr ""
+msgstr "Seit"
 
 #: dlcdb/persons/templates/persons/includes/_lendings.html:69
-#, fuzzy
-#| msgid "Lendings"
 msgid "No lendings."
-msgstr "Ausleihen"
+msgstr "Keine Ausleihen."
 
 #: dlcdb/persons/templates/persons/includes/_licences.html:19
-#, fuzzy
-#| msgid "licences"
 msgid "Licences"
 msgstr "Lizenzen"
 
 #: dlcdb/persons/templates/persons/includes/_licences.html:43
-#, fuzzy
-#| msgid "Assigned device"
 msgid "Assigned"
-msgstr "Zugeordnetes Gerät"
+msgstr "Zugeordnet"
 
 #: dlcdb/persons/templates/persons/includes/_licences.html:61
-#, fuzzy
-#| msgid "licences"
 msgid "No licences."
-msgstr "Lizenzen"
+msgstr "Keine Lizenzen."
 
 #: dlcdb/persons/templates/persons/includes/_smallstuff.html:17
 msgid "Manage"
-msgstr ""
+msgstr "Verwalten"
 
 #: dlcdb/persons/templates/persons/includes/_smallstuff.html:41
-#, fuzzy
-#| msgid "Smallstuff"
 msgid "No smallstuff."
-msgstr "Kleinkram"
+msgstr "Kein Kleinkram."
 
 #: dlcdb/persons/templates/persons/index.html:11 dlcdb/persons/views.py:88
 msgid "Add person"
@@ -3172,11 +3172,11 @@ msgstr[1] "%(counter)s Geräte in diesem Raum"
 #: dlcdb/rooms/templates/rooms/detail.html:89
 #, python-format
 msgid "QR code for room %(room)s"
-msgstr ""
+msgstr "QR-Code für Raum %(room)s"
 
 #: dlcdb/rooms/templates/rooms/includes/_form_fields.html:23
 msgid "Special roles"
-msgstr ""
+msgstr "Sonderfunktionen"
 
 #: dlcdb/rooms/templates/rooms/index.html:16
 msgid "Room reconcile"
@@ -3221,11 +3221,11 @@ msgstr "Raum “%(room)s” wurde geändert."
 
 #: dlcdb/smallstuff/models.py:93
 msgid "Can not be unassigned without being assigned first!"
-msgstr ""
+msgstr "Ohne vorherige Ausgabe ist keine Rückgabe möglich!"
 
 #: dlcdb/smallstuff/models.py:97
 msgid "Unassignment timestamp could not be before assignment timestamp!"
-msgstr ""
+msgstr "Der Rückgabezeitpunkt kann nicht vor dem Ausgabezeitpunkt liegen!"
 
 #: dlcdb/smallstuff/models.py:100 dlcdb/smallstuff/models.py:101
 msgid "Stuff"
@@ -3241,10 +3241,8 @@ msgid "Loading..."
 msgstr "Lädt..."
 
 #: dlcdb/templates/403.html:6 dlcdb/templates/403.html:11
-#, fuzzy
-#| msgid "Accessories"
 msgid "Access denied"
-msgstr "Zubehör"
+msgstr "Zugriff verweigert"
 
 #: dlcdb/templates/403.html:18
 msgid "You do not have permission to access this page or perform this action."
@@ -3272,17 +3270,19 @@ msgstr "Anmelden"
 
 #: dlcdb/templates/404.html:8 dlcdb/templates/404.html:13
 msgid "Page not found"
-msgstr ""
+msgstr "Seite nicht gefunden"
 
 #: dlcdb/templates/404.html:14
 msgid ""
 "This address does not lead to a page. It may be mistyped, or the page has "
 "moved."
 msgstr ""
+"Unter dieser Adresse gibt es keine Seite. Vielleicht ist sie falsch "
+"geschrieben oder die Seite wurde verschoben."
 
 #: dlcdb/templates/404.html:15
 msgid "Go to the dashboard"
-msgstr ""
+msgstr "Zum Dashboard"
 
 #: dlcdb/templates/admin/base_site.html:28
 msgid "Django site admin"
@@ -3320,7 +3320,7 @@ msgstr "Einstellungen"
 #: dlcdb/theme/templates/theme/includes/navbar.html:103
 #: dlcdb/theme/templates/theme/includes/navbar.html:121
 msgid "All permissions, but only the devices of your tenants"
-msgstr ""
+msgstr "Alle Berechtigungen, aber nur die Geräte Ihrer Mandanten"
 
 #: dlcdb/templates/admin/navbar.html:91
 #: dlcdb/theme/templates/theme/includes/navbar.html:103
@@ -3336,7 +3336,7 @@ msgstr "Sprache"
 #: dlcdb/templates/registration/logged_out.html:6
 #: dlcdb/templates/registration/logged_out.html:11
 msgid "You are logged out"
-msgstr ""
+msgstr "Sie sind abgemeldet"
 
 #: dlcdb/templates/registration/logged_out.html:12
 msgid "Thanks for spending some quality time with the DLCDB today."
@@ -3347,23 +3347,20 @@ msgid ""
 "Your account doesn't have access to this page. To proceed, please log in "
 "with an account that has access."
 msgstr ""
+"Ihr Konto hat keinen Zugriff auf diese Seite. Bitte melden Sie sich mit "
+"einem berechtigten Konto an."
 
 #: dlcdb/templates/registration/login.html:56
 #: dlcdb/templates/registration/login.html:57
-#, fuzzy
-#| msgid "Show history"
 msgid "Show password"
-msgstr "Zeige Historie"
+msgstr "Passwort anzeigen"
 
 #: dlcdb/templates/registration/login.html:70
-#, fuzzy, python-format
-#| msgid ""
-#| "If you believe this is an error, please contact <a href=\"mailto:"
-#| "%(email)s\">%(email)s</a>."
+#, python-format
 msgid "Trouble logging in? Contact <a href=\"mailto:%(email)s\">%(email)s</a>."
 msgstr ""
-"Falls Sie dies für einen Fehler halten, kontaktieren Sie bitte <a "
-"href=\"mailto:%(email)s\">%(email)s</a>."
+"Probleme bei der Anmeldung? Wenden Sie sich an <a href=\"mailto:"
+"%(email)s\">%(email)s</a>."
 
 #: dlcdb/templates/simple_history/_object_history_list.html:19
 msgid "Date/time"
@@ -3382,38 +3379,34 @@ msgid "None"
 msgstr "None"
 
 #: dlcdb/tenants/admin.py:69
-#, fuzzy
-#| msgid "groups"
 msgid "Groups"
 msgstr "Gruppen"
 
 #: dlcdb/tenants/admin.py:81 dlcdb/tenants/admin.py:166
 msgid "Assign devices and imports without tenant"
-msgstr ""
+msgstr "Geräte und Importe ohne Mandant zuordnen"
 
 #: dlcdb/tenants/admin.py:89
-#, fuzzy
-#| msgid "Please select a device to lend."
 msgid "Please select exactly one tenant."
-msgstr "Bitte ein Gerät zum verleihen auswählen."
+msgstr "Bitte genau einen Mandanten auswählen."
 
 #: dlcdb/tenants/admin.py:141
 #, python-format
 msgid "%(count)d device assigned to tenant “%(tenant)s”."
 msgid_plural "%(count)d devices assigned to tenant “%(tenant)s”."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d Gerät dem Mandanten “%(tenant)s” zugeordnet."
+msgstr[1] "%(count)d Geräte dem Mandanten “%(tenant)s” zugeordnet."
 
 #: dlcdb/tenants/admin.py:152
 #, python-format
 msgid "%(count)d import assigned to tenant “%(tenant)s”."
 msgid_plural "%(count)d imports assigned to tenant “%(tenant)s”."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(count)d Import dem Mandanten “%(tenant)s” zugeordnet."
+msgstr[1] "%(count)d Importe dem Mandanten “%(tenant)s” zugeordnet."
 
 #: dlcdb/tenants/admin.py:160
 msgid "Nothing was assigned."
-msgstr ""
+msgstr "Nichts zugeordnet."
 
 #: dlcdb/tenants/apps.py:12 dlcdb/tenants/navigation.py:11
 #: dlcdb/tenants/templates/tenants/includes/_tenant_badge.html:11
@@ -3424,13 +3417,11 @@ msgstr "Mandanten"
 
 #: dlcdb/tenants/models.py:23
 msgid "Members of these groups see this tenant's devices."
-msgstr ""
+msgstr "Mitglieder dieser Gruppen sehen die Geräte dieses Mandanten."
 
 #: dlcdb/tenants/models.py:28
-#, fuzzy
-#| msgid "Contract until"
 msgid "Contact email"
-msgstr "Vertrag bis"
+msgstr "Kontakt-Email"
 
 #: dlcdb/tenants/models.py:30
 msgid ""
@@ -3438,71 +3429,62 @@ msgid ""
 "or instead of the borrower (see the lending configuration), and is shown in "
 "email footers. Falls back to the IT department email in Branding."
 msgstr ""
+"Erhält die Erinnerungen zu überfälligen Ausleihen von Geräten dieses "
+"Mandanten, als Kopie oder anstelle des Ausleihers (siehe Ausleihe "
+"Konfiguration), und erscheint in der Email-Fußzeile. Ohne Angabe gilt die "
+"Email der IT-Abteilung aus dem Branding."
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:22
 #, python-format
 msgid "Assign the following to tenant “%(tenant)s”?"
-msgstr ""
+msgstr "Folgendes dem Mandanten “%(tenant)s” zuordnen?"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:24
 msgid "No devices or imports without tenant."
-msgstr ""
+msgstr "Keine Geräte oder Importe ohne Mandant."
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:37
-#, fuzzy
-#| msgid "Device search tenant aware"
 msgid "Devices without tenant"
-msgstr "Geräte-Suche ist Tenant-spezifisch"
+msgstr "Geräte ohne Mandant"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:41
 #: dlcdb/tenants/templates/tenants/actions/assign.html:69
 msgid "Assign"
-msgstr ""
+msgstr "Zuordnen"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:44
-#, fuzzy
-#| msgid "License"
 msgid "Licence"
 msgstr "Lizenz"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:45
-#, fuzzy
-#| msgid "Create room"
 msgid "Current room"
-msgstr "Raum hinzufügen"
+msgstr "Aktueller Raum"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:46
-#, fuzzy
-#| msgid "no record"
 msgid "Current record"
-msgstr "kein Record"
+msgstr "Aktueller Record"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:65
 msgid "Imports without tenant"
-msgstr ""
+msgstr "Importe ohne Mandant"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:72
 msgid "Uploaded by"
 msgstr "Hochgeladen von"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:93
-#, fuzzy, python-format
-#| msgid "Nothing found for “%(term)s”."
+#, python-format
 msgid "Assign to “%(tenant)s”"
-msgstr "Keine Treffer für “%(term)s”."
+msgstr "Zu “%(tenant)s” zuordnen"
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:100
-#, fuzzy
-#| msgid "Backend"
 msgid "Back"
-msgstr "Backend"
+msgstr "Zurück"
 
 #: dlcdb/tenants/templates/tenants/delete.html:6
 #: dlcdb/tenants/templates/tenants/delete.html:10
-#, fuzzy
-#| msgid "Delete"
 msgid "Delete tenant"
-msgstr "Löschen"
+msgstr "Mandant löschen"
 
 #: dlcdb/tenants/templates/tenants/delete.html:16
 #, python-format
@@ -3510,51 +3492,47 @@ msgid ""
 "Delete tenant “%(tenant)s”? Its group assignments are removed; the deletion "
 "is kept in the tenant history."
 msgstr ""
+"Mandant “%(tenant)s” löschen? Seine Gruppenzuordnungen werden entfernt; die "
+"Löschung bleibt in der Mandanten-Historie erhalten."
 
 #: dlcdb/tenants/templates/tenants/delete.html:21
 msgid "Yes, delete"
-msgstr ""
+msgstr "Ja, löschen"
 
 #: dlcdb/tenants/templates/tenants/detail.html:16
-#, fuzzy
-#| msgid "You may view this entry but do not have permission to edit it."
 msgid "You may view this tenant but do not have permission to edit it."
 msgstr ""
-"Sie können diesen Eintrag anzeigen, haben jedoch keine Berechtigung ihn zu "
-"bearbeiten."
+"Sie können diesen Mandanten anzeigen, haben jedoch keine Berechtigung, ihn "
+"zu bearbeiten."
 
 #: dlcdb/tenants/templates/tenants/detail.html:48
 msgid "Users who see this tenant"
-msgstr ""
+msgstr "Benutzer mit Zugriff auf diesen Mandanten"
 
 #: dlcdb/tenants/templates/tenants/detail.html:52
 msgid "A tenant with devices or imports cannot be deleted."
-msgstr ""
+msgstr "Ein Mandant mit Geräten oder Importen kann nicht gelöscht werden."
 
 #: dlcdb/tenants/templates/tenants/detail.html:57
-#, fuzzy
-#| msgid "Change"
 msgid "Changes"
-msgstr "Ändern"
+msgstr "Änderungen"
 
 #: dlcdb/tenants/templates/tenants/includes/_form_fields.html:14
 msgid "Which groups see this tenant is set in the tenant overview."
 msgstr ""
+"Welche Gruppen diesen Mandanten sehen, wird in der Mandanten-Übersicht "
+"festgelegt."
 
 #: dlcdb/tenants/templates/tenants/includes/_tenant_badge.html:11
-#, fuzzy, python-format
-#| msgid "%(counter)s with note"
-#| msgid_plural "%(counter)s with notes"
+#, python-format
 msgid "%(counter)s tenant"
 msgid_plural "%(counter)s tenants"
-msgstr[0] "%(counter)s mit Notiz"
-msgstr[1] "%(counter)s mit Notizen"
+msgstr[0] "%(counter)s Mandant"
+msgstr[1] "%(counter)s Mandanten"
 
 #: dlcdb/tenants/templates/tenants/index.html:23 dlcdb/tenants/views.py:105
-#, fuzzy
-#| msgid "Tenant"
 msgid "Add tenant"
-msgstr "Mandant"
+msgstr "Mandant hinzufügen"
 
 #: dlcdb/tenants/templates/tenants/index.html:30
 msgid ""
@@ -3563,87 +3541,89 @@ msgid ""
 "all tenants needs a tick in every column, including the column of each new "
 "tenant."
 msgstr ""
+"Benutzer erhalten über ihre Gruppen Zugriff auf die Geräte eines Mandanten: "
+"Eine Gruppe in der Spalte eines Mandanten anhaken, um allen Mitgliedern "
+"Zugriff zu geben. Eine Gruppe mit Zugriff auf alle Mandanten braucht einen "
+"Haken in jeder Spalte, auch in der jedes neuen Mandanten."
 
 #: dlcdb/tenants/templates/tenants/index.html:31
 msgid "Each tick is saved immediately."
-msgstr ""
+msgstr "Jeder Haken wird sofort gespeichert."
 
 #: dlcdb/tenants/templates/tenants/index.html:36
 msgid ""
 "Permissions are not per tenant: what users may do through any of their "
 "groups applies in every tenant they can access."
 msgstr ""
+"Berechtigungen gelten nicht pro Mandant: Was Benutzer über eine ihrer "
+"Gruppen dürfen, gilt in jedem Mandanten, auf den sie Zugriff haben."
 
 #: dlcdb/tenants/templates/tenants/index.html:44
-#, fuzzy
-#| msgid "group"
 msgid "Group"
 msgstr "Gruppe"
 
 #: dlcdb/tenants/templates/tenants/index.html:45
 msgid "Access to tenant"
-msgstr ""
+msgstr "Zugriff auf Mandant"
 
 #: dlcdb/tenants/templates/tenants/index.html:56
-#, fuzzy, python-format
-#| msgid "%(counter)s with note"
-#| msgid_plural "%(counter)s with notes"
+#, python-format
 msgid "%(counter)s user with access"
 msgid_plural "%(counter)s users with access"
-msgstr[0] "%(counter)s mit Notiz"
-msgstr[1] "%(counter)s mit Notizen"
+msgstr[0] "%(counter)s Benutzer mit Zugriff"
+msgstr[1] "%(counter)s Benutzer mit Zugriff"
 
 #: dlcdb/tenants/templates/tenants/index.html:76
 #: dlcdb/tenants/templates/tenants/index.html:86
 msgid "Active user accounts; with LDAP as of each user's last login"
 msgstr ""
+"Aktive Benutzerkonten; bei LDAP mit Stand der jeweils letzten Anmeldung"
 
 #: dlcdb/tenants/templates/tenants/index.html:77
 #: dlcdb/tenants/templates/tenants/index.html:87
-#, fuzzy, python-format
-#| msgid "%(counter)s device"
-#| msgid_plural "%(counter)s devices"
+#, python-format
 msgid "%(counter)s member"
 msgid_plural "%(counter)s members"
-msgstr[0] "%(counter)s Gerät"
-msgstr[1] "%(counter)s Geräten"
+msgstr[0] "%(counter)s Mitglied"
+msgstr[1] "%(counter)s Mitglieder"
 
 #: dlcdb/tenants/templates/tenants/index.html:94
 #, python-format
 msgid "Members of %(group)s have access to %(tenant)s"
-msgstr ""
+msgstr "Mitglieder von %(group)s haben Zugriff auf %(tenant)s"
 
 #: dlcdb/tenants/templates/tenants/index.html:113
 msgid "Tenants and groups are needed to decide who sees which devices."
 msgstr ""
+"Mandanten und Gruppen sind nötig, um festzulegen, wer welche Geräte sieht."
 
 #: dlcdb/tenants/views.py:98
 #, python-format
 msgid "Tenant “%(tenant)s” was created. Tick the groups that should see it."
 msgstr ""
+"Mandant “%(tenant)s” wurde hinzugefügt. Gruppen anhaken, die ihn sehen "
+"sollen."
 
 #: dlcdb/tenants/views.py:105
-#, fuzzy
-#| msgid "Create person"
 msgid "Create tenant"
-msgstr "Person hinzufügen"
+msgstr "Mandant hinzufügen"
 
 #: dlcdb/tenants/views.py:124
-#, fuzzy, python-format
-#| msgid "Person “%(person)s” was updated."
+#, python-format
 msgid "Tenant “%(tenant)s” was updated."
-msgstr "Person “%(person)s” geändert."
+msgstr "Mandant “%(tenant)s” wurde geändert."
 
 #: dlcdb/tenants/views.py:162
 #, python-format
 msgid "Tenant “%(tenant)s” still has devices or imports and cannot be deleted."
 msgstr ""
+"Mandant “%(tenant)s” hat noch Geräte oder Importe und kann nicht gelöscht "
+"werden."
 
 #: dlcdb/tenants/views.py:165
-#, fuzzy, python-format
-#| msgid "Person “%(person)s” was created."
+#, python-format
 msgid "Tenant “%(tenant)s” was deleted."
-msgstr "Person “%(person)s” hinzugefügt."
+msgstr "Mandant “%(tenant)s” wurde gelöscht."
 
 #: dlcdb/theme/apps.py:11 dlcdb/theme/templates/theme/includes/navbar.html:157
 msgid "Theme"
@@ -3695,28 +3675,24 @@ msgid "Record data"
 msgstr "Record Informationen"
 
 #: dlcdb/theme/templates/theme/includes/_field_history.html:18
-#, fuzzy
-#| msgid "Unknown"
 msgid "Unknown user"
-msgstr "Unbekannt"
+msgstr "Unbekannter Benutzer"
 
 #: dlcdb/theme/templates/theme/includes/_field_history.html:33
 msgid "Field"
-msgstr ""
+msgstr "Feld"
 
 #: dlcdb/theme/templates/theme/includes/_field_history.html:34
 msgid "Before"
-msgstr ""
+msgstr "Vorher"
 
 #: dlcdb/theme/templates/theme/includes/_field_history.html:35
 msgid "After"
-msgstr ""
+msgstr "Nachher"
 
 #: dlcdb/theme/templates/theme/includes/_field_history.html:50
-#, fuzzy
-#| msgid "No log recorded."
 msgid "No changes recorded yet."
-msgstr "Keine Log-Meldung aufgezeichnet."
+msgstr "Noch keine Änderungen aufgezeichnet."
 
 #: dlcdb/theme/templates/theme/includes/_form_action_bar.html:32
 msgid "Save changes"
@@ -3795,7 +3771,7 @@ msgstr "Datenhaltung"
 #: dlcdb/theme/templates/theme/includes/navbar.html:106
 #: dlcdb/theme/templates/theme/includes/navbar.html:108
 msgid "Preferences"
-msgstr ""
+msgstr "Einstellungen"
 
 #: dlcdb/theme/templates/theme/includes/navbar.html:144
 msgid "Subscriptions"
@@ -3823,7 +3799,7 @@ msgstr "Auto"
 #: dlcdb/theme/templates/theme/logout_link.html:9
 #, python-format
 msgid "Logout %(username)s"
-msgstr ""
+msgstr "%(username)s abmelden"
 
 #: dlcdb/theme/templates/theme/widgets/device_picker/_detail_link.html:25
 msgid "Open device detail"
