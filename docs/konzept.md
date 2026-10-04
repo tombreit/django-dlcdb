@@ -109,8 +109,8 @@ Zusatzmodul:
 - Die Detailseite eines Devices zeigt den aktiven Record; über *Verlauf
   › Alle Zustände* ist die vollständige, chronologische Kette erreichbar.
 - Zusätzlich werden Änderungen an den Stammdaten eines Devices
-  feldgenau versioniert (django-simple-history), einsehbar über die
-  *History* im Django-Admin.
+  feldgenau versioniert (django-simple-history), einsehbar über
+  *Verlauf › Felder Historie* auf der Detailseite: wann, wer, welches Feld.
 
 Für Nachweispflichten (z.B. gegenüber Verwaltung oder Revision) ist
 damit kein zusätzlicher Prozess nötig: Der Audit-Trail ist das

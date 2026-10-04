@@ -642,3 +642,58 @@ class DeviceDetailLendingLinkTests(BaseTest):
 
         self.assertContains(response, str(self.person))
         self.assertNotContains(response, reverse("lending:detail", args=[self.record.pk]))
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class DeviceHistoryTests(BaseTest):
+    """The field history page: open to every viewer of the device, tenant-scoped like the detail page."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.editor = get_user_model().objects.create_user(
+            username="editor", email="editor@example.com", password="secret"
+        )
+        cls.device = cls()._create_device(edv_id="EDV-HISTORY", sap_id="6-1")
+        cls.device.series = "Notebook One"
+        cls.device._history_user = cls.editor
+        cls.device.save()
+        cls.foreign_device = cls()._create_device(
+            edv_id="EDV-FOREIGN", sap_id="6-2", tenant=Tenant.objects.create(name="Foreign tenant")
+        )
+
+    def _login(self, *codenames):
+        """A non-staff user of the default tenant with just these core permissions."""
+        user = get_user_model().objects.create_user(username="viewer", email="viewer@example.com", password="secret")
+        self._join_default_tenant(user)
+        for codename in codenames:
+            user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        self.client.force_login(user)
+
+    def _history(self, device):
+        return self.client.get(reverse("assets:device_history", args=[device.pk]))
+
+    def test_a_viewer_sees_who_changed_which_field(self):
+        self._login("view_device")
+
+        response = self._history(self.device)
+
+        self.assertContains(response, "editor@example.com")
+        self.assertContains(response, "Model name")
+        self.assertContains(response, "Notebook One")
+
+    def test_without_view_device_the_page_is_forbidden(self):
+        self._login()
+
+        self.assertEqual(self._history(self.device).status_code, 403)
+
+    def test_a_device_of_another_tenant_is_not_found(self):
+        self._login("view_device")
+
+        self.assertEqual(self._history(self.foreign_device).status_code, 404)
+
+    def test_the_detail_page_links_to_it_for_non_staff_viewers(self):
+        self._login("view_device")
+
+        response = self.client.get(reverse("assets:device_detail", args=[self.device.pk]))
+
+        self.assertContains(response, f'href="{reverse("assets:device_history", args=[self.device.pk])}"')

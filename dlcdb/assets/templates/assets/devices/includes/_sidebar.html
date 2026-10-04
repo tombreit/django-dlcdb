@@ -9,9 +9,8 @@ and mirror the admin's read-only status.
 
 <div class="device-sidebar">
   {% comment %}
-  Record trail + field history. The record trail is a frontend view scoped to
-  this device; the field history is still simple-history's admin diff, so it
-  stays behind is_staff.
+  Record trail + field history, both frontend views scoped to this device. The
+  field history needs only view_device, which this page already requires.
   {% endcomment %}
 
   <section class="card device-card mb-3">
@@ -26,31 +25,26 @@ and mirror the admin's read-only status.
     </div>
   </section>
 
-  {% if perms.core.view_record or request.user.is_staff %}
-    <section class="card device-card mb-3">
-      <div class="card-header">
-        <i class="bi bi-clock-history"></i>
-        <h2 class="device-card-title">{% translate "Trail" %}</h2>
-      </div>
-      <div class="list-group list-group-flush">
-        {% if perms.core.view_record %}
-          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-             href="{% url 'assets:record_index' %}?device={{ device.pk }}">
-            <i class="bi bi-list-ul text-primary"></i>
-            <span class="me-auto">{% translate "Records history" %}</span>
-          </a>
-        {% endif %}
-        {% if request.user.is_staff %}
-          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-             href="{% url 'admin:core_device_history' device.pk %}">
-            <i class="bi bi-arrow-counterclockwise text-primary"></i>
-            <span class="me-auto">{% translate "Field history" %}</span>
-            <i class="bi bi-box-arrow-up-right small text-muted"></i>
-          </a>
-        {% endif %}
-      </div>
-    </section>
-  {% endif %}
+  <section class="card device-card mb-3">
+    <div class="card-header">
+      <i class="bi bi-clock-history"></i>
+      <h2 class="device-card-title">{% translate "Trail" %}</h2>
+    </div>
+    <div class="list-group list-group-flush">
+      {% if perms.core.view_record %}
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+           href="{% url 'assets:record_index' %}?device={{ device.pk }}">
+          <i class="bi bi-list-ul text-primary"></i>
+          <span class="me-auto">{% translate "Records history" %}</span>
+        </a>
+      {% endif %}
+      <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+         href="{% url 'assets:device_history' device.pk %}">
+        <i class="bi bi-arrow-counterclockwise text-primary"></i>
+        <span class="me-auto">{% translate "Field history" %}</span>
+      </a>
+    </div>
+  </section>
 
   <section class="card device-card mb-3">
     <div class="card-header">

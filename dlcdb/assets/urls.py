@@ -13,6 +13,7 @@ urlpatterns = [
     path("devices/export.csv", views.device_export_csv, name="device_export_csv"),
     path("devices/add/", views.device_add, name="device_add"),
     path("devices/<int:pk>/", views.device_detail, name="device_detail"),
+    path("devices/<int:pk>/history/", views.device_history, name="device_history"),
     path("devices/<int:pk>/order/", views.device_order, name="device_order"),
     path("device-types/", views.device_type_index, name="device_type_index"),
     path("device-types/add/", views.device_type_add, name="device_type_add"),

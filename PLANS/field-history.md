@@ -6,7 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Field history: a frontend timeline of simple-history changes
 
-**Status:** planned (2026-10-04). This is a living document.
+**Status:** batch 1 done (2026-10-04): devices have the frontend field history; licences
+follow in batch 2. This is a living document.
 
 ## Why
 
@@ -26,7 +27,8 @@ component in `dlcdb/theme/` should answer *when, who, what* for any model with
    `diff_against(..., foreign_keys_are_objs=True)`. No `prev_record` (one query per row).
 3. **What is shown:** a *Changed* entry with no visible change and no change reason is skipped;
    *Created* and *Deleted* are always shown. Fields come in model order, by verbose name. Empty
-   values render as "—", choices by label, booleans as Yes/No, dates localized.
+   values render as "—", choices by label, booleans as Yes/No, dates as `Y-m-d` like the rest
+   of the frontend.
 4. **Device:** `Device.FIELD_HISTORY_EXCLUDE = ("active_record", "user", "username",
    "deleted_by")`. The audit stamps repeat the history user, and state changes belong to the
    record trail. The encryption keys (`Device.FIELD_HISTORY_SECRET`) are **masked** for every
@@ -35,8 +37,9 @@ component in `dlcdb/theme/` should answer *when, who, what* for any model with
    detail page (the admin's history also only needs the model's view permission). The licence
    page keeps `core.view_licencerecord`.
 6. **Layout:** one timeline item per entry: date, user ("Unknown user" if none), action badge,
-   change reason, then a `Field | Before | After` table. The newest item gets the filled
-   "current" dot.
+   change reason, then a `Field | Before | After` table. It is built from the Bootstrap grid, not
+   `<table>`: the columns line up across entries, and on phones the field name takes its own line
+   above Before | After. The newest item gets the filled "current" dot.
 
 ## Alternatives considered and rejected
 
@@ -52,7 +55,7 @@ component in `dlcdb/theme/` should answer *when, who, what* for any model with
 ## Progress
 
 - [x] Batch 0: this document
-- [ ] Batch 1: theme component, device field history page, sidebar link, docs
+- [x] Batch 1: theme component, device field history page, sidebar link, docs
 - [ ] Batch 2: licence history on the component, NEWS
 
 ## Open follow-ups

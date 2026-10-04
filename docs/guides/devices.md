@@ -55,8 +55,9 @@ Die Info-Spalte rechts zeigt:
   *Neuer Zustand*. Dieser bietet nur die laut [Konzept](../konzept.md) erlaubten
   Übergänge — u.a. *Verschieben* → [Umziehen](umziehen.md) und *Verleihen* →
   [Ausleihe](ausleihe.md).
-- **Verlauf** — *Alle Zustände* (vollständige Record-Kette) und *History*
-  (feldgenaue Änderungshistorie).
+- **Verlauf** — *Alle Zustände* (vollständige Record-Kette) und *Felder Historie*
+  (feldgenaue Änderungen als Zeitleiste: wann, wer, was; die
+  Verschlüsselungs-Passwörter nur maskiert).
 - **Geräte-Details** — Admin-Ansicht, Erstellt/Zuletzt geändert, Ursprung, UUID.
 - **QR-Code** — der automatisch erzeugte QR-Code des Geräts (für die
   [Inventur](inventur.md)).

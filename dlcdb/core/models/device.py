@@ -224,6 +224,11 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     )
 
     history = HistoricalRecords()
+    # The frontend field history (dlcdb.theme.field_history) leaves out the audit
+    # stamps, which repeat the history user, and active_record, which the record
+    # trail shows. The keys show only that they changed, never their value.
+    FIELD_HISTORY_EXCLUDE = ("active_record", "user", "username", "deleted_by")
+    FIELD_HISTORY_SECRET = ("machine_encryption_key", "backup_encryption_key")
 
     class Meta:
         verbose_name = "Device"

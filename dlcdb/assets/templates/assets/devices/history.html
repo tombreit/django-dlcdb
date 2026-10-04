@@ -1,0 +1,45 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The device's field history: when who changed which master-data field. State
+changes (moves, lendings, …) are records, not fields, so they live in the
+records history this page points to.
+{% endcomment %}
+
+{% block title %}{% translate "Field history" %} · {{ device }}{% endblock title %}
+
+{% block body %}
+{% url "assets:device_detail" device.pk as device_url %}
+<div class="device-page">
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+    <div class="device-tile">
+      <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }}"></i>
+    </div>
+    <div class="me-auto">
+      <h1 class="h3 mb-1">{% translate "Field history" %}</h1>
+      <div class="text-muted font-monospace">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</div>
+    </div>
+    {% include "theme/includes/_back_link.html" with url=device_url label=_("Back to device") %}
+  </div>
+
+  <div class="row">
+    <div class="col-xl-9">
+      {% if perms.core.view_record %}
+        {% url "assets:record_index" as record_index_url %}
+        <p class="text-muted small">
+          <i class="bi bi-info-circle"></i>
+          {% blocktranslate with url=record_index_url pk=device.pk %}State changes such as moves and lendings are listed in the <a href="{{ url }}?device={{ pk }}">records history</a>.{% endblocktranslate %}
+        </p>
+      {% endif %}
+      <section class="card device-card">
+        <div class="card-body">
+          {% include "theme/includes/_field_history.html" with entries=entries %}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock body %}

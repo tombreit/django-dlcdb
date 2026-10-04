@@ -22,6 +22,7 @@ from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
+from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls
@@ -184,6 +185,14 @@ def device_detail(request, pk):
             "lending_url": _lending_url(request.user, device),
         },
     )
+
+
+@permission_required("core.view_device", raise_exception=True)
+def device_history(request, pk):
+    """When who changed which field of one device (django-simple-history)."""
+    device = _get_device(request, pk)
+    entries = build_field_history(device, exclude=Device.FIELD_HISTORY_EXCLUDE, secret=Device.FIELD_HISTORY_SECRET)
+    return TemplateResponse(request, "assets/devices/history.html", {"device": device, "entries": entries})
 
 
 @require_POST

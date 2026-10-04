@@ -224,7 +224,7 @@ Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug,
 - die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
 - Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
 - Stammdaten *aktivieren/deaktivieren* (Soft-Delete, nur Superuser) und endgültig löschen (nur Superuser)
-- die feldgenaue Änderungs-*History* eines Geräts oder Tenants
+- die feldgenaue Änderungs-*History* eines Tenants
 - Bulk Ausmusterung, Entfernt-Records, Inventuren, Notizen, SAP-Abgleich, erzeugte Reports
 - alle Einträge unter *Einstellungen* (Ausleihe-Konfiguration, Ausleih-Profile, Lizenzmodul-Konfiguration, Branding, HR-API-Sync-Konfiguration)
 
