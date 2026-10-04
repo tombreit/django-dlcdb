@@ -1,4 +1,2 @@
-# Announcements
-
 ```{include} ../../NEWS.md
 ```

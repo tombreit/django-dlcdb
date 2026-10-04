@@ -1,3 +1,7 @@
+---
+html_theme.sidebar_secondary.remove: true
+---
+
 # DLCDB-Dokumentation
 
 Die DLCDB verwaltet den Lebenszyklus von IT-Assets, von der Bestellung
@@ -48,22 +52,43 @@ Die DLCDB ist ein Django-Projekt und ist schnell und einfach aufgesetzt.
 
 ::::
 
-`````{dropdown} Inhaltsverzeichnis
-:icon: book
-:color: light
+## Konzept
+
+Devices, Records und Audit-Trail: wie die DLCDB den Lebenszyklus eines Geräts abbildet.
 
 ```{toctree}
-:maxdepth: 3
+:maxdepth: 2
 
 konzept
+```
+
+## Guides
+
+Einrichtung und tägliche Arbeit mit der DLCDB.
+
+```{toctree}
+:maxdepth: 2
+
 guides/index
+```
+
+## Betrieb
+
+Installation, Datenmodell und Schnittstellen.
+
+```{toctree}
+:maxdepth: 2
+
 betrieb/index
+```
+
+## FAQ
+
+```{toctree}
+:maxdepth: 2
+
 faq
 ```
 
-`````
-
 Verbesserungsvorschläge, Fehler gefunden, Kommentare?
 [📧 Thomas Breitner](mailto:t.breitner@csl.mpg.de)
-
-![Dashboard](/_static/dashboard.webp){.sd-card}

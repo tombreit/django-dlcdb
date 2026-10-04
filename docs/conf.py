@@ -101,20 +101,31 @@ html_js_files = [
     "vendor/mermaid/mermaid.min.js",
 ]
 
-html_theme = "sphinx_book_theme"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 
 
+# Upstream defaults on purpose: top navigation from the root toctree, section
+# sidebar on the left, page TOC on the right.
+html_title = "DLCDB"
+
 html_theme_options = {
-    "repository_url": "https://gitlab.gwdg.de/dlcdb/django-dlcdb",
-    "use_repository_button": True,
-    "show_toc_level": 3,
-    "navigation_with_keys": True,
-    "extra_footer": '<p>Questions?<br><a href="mailto:t.breitner@csl.mpg.de">📧 Thomas Breitner</a></p>',
+    "gitlab_url": "https://gitlab.gwdg.de/dlcdb/django-dlcdb",
+    # The app's figurative mark, one file per color mode; the theme copies them
+    # to _static. With an image, the title text shows only when set here.
+    "logo": {
+        "image_light": "../dlcdb/theme/static/theme/branding/dlcdb_mark_light.svg",
+        "image_dark": "../dlcdb/theme/static/theme/branding/dlcdb_mark_dark.svg",
+        "text": html_title,
+    },
 }
 
-html_title = "♻ DLCDB Docs"
-# html_logo = "path/to/logo.png"
+# Top-level pages without subpages would show an empty section sidebar.
+html_sidebars = {
+    "konzept": [],
+    "faq": [],
+}
+
 # html_favicon = "path/to/favicon.ico"
 
 base_url = settings.DLCDB_BASE_URL

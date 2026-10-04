@@ -40,7 +40,7 @@ dependencies = [
     "icalendar",
     "plotly",
     "Sphinx",
-    "sphinx-book-theme",
+    "pydata-sphinx-theme",
     "sphinxcontrib-mermaid",
     "sphinxcontrib-openapi",
     "myst_parser",  # currently not working: myst_parser[linkify]
