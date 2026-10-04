@@ -1,10 +1,10 @@
 # Setup
 
-## Development setup
+The DLCDB runs either as a [container image](#container-podman) or [from a
+source checkout](#from-source). Either way it keeps all data in `data/` and
+needs a second process next to the web server, the [task runner](#task-runner).
 
-### Install with podman
-
-Want to try it containerized via `podman`?
+## Container (podman)
 
 ```sh
          .--"--.
@@ -17,6 +17,8 @@ Want to try it containerized via `podman`?
    ~~~~~~~  ~| =(Y_)=-  |
   ~~~~    ~~~|   U      |~~
 ```
+
+### Try it
 
 ```bash
 podman build \
@@ -47,8 +49,10 @@ The same image serves production (see `container/Containerfile` and
 
 Anything else is executed verbatim, e.g. `podman run --rm dlcdb python3 manage.py createsuperuser`.
 
-For production, mount an `.env` and the data directory, and run the task
-runner as a second container against the same volume:
+### Production
+
+Mount an `.env` and the data directory, and run the task runner as a second
+container against the same volume:
 
 ```bash
 podman run \
@@ -67,22 +71,37 @@ podman run \
     dlcdb huey
 ```
 
-Without the second container, background tasks (notifications, report
-generation) silently never run. `INTERNAL_SERVER_PORT` (default 8000) and
-`GUNICORN_WORKERS` (default 3) are honoured as environment variables.
+Without the second container, background tasks silently never run.
+`INTERNAL_SERVER_PORT` (default 8000) and `GUNICORN_WORKERS` (default 3) are
+honoured as environment variables.
 
 Put a TLS-terminating reverse proxy in front of gunicorn; it is not meant to
 face the internet directly.
 
-### Install from source
+### Update
 
-**Prerequisites**
+Build the new image, then stop and remove the old task runner container before
+starting the new `dlcdb serve` container, which runs the migrations. The new
+task runner container can be started right away: it waits until all migrations
+are applied.
+
+```bash
+podman rm --force dlcdb-huey dlcdb
+podman run --name dlcdb ... dlcdb serve
+podman run --name dlcdb-huey ... dlcdb huey
+```
+
+## From source
+
+### Prerequisites
 
 - (assuming) Debian 13
 - Python >= 3.13 (see `pyproject.toml`)
 - Django 6.x (installed via the requirements files)
-- npm — for development and for building the container image, not for running a built image
+- npm
 - for LDAP: libldap2-dev libsasl2-dev
+
+### Development setup
 
 **Python**
 
@@ -105,14 +124,13 @@ cp env.template .env
 ```
 
 :::{note}
-**Permissions** should be assigned to Django groups. Only LDAP groups listed in `AUTH_LDAP_MIRROR_GROUPS` in the `.env`-file are mirrored as Django groups. Members of `AUTH_LDAP_GROUP_SUPERUSERS` become staff and superuser. See [Berechtigungen](../guides/berechtigungen.md).
-:::
-
-:::{note}
-**LDAP variant.** Set `LDAP_VARIANT` in `.env` to match your directory:
-`msad` (default) for Microsoft Active Directory, or `openldap` for
-OpenLDAP-based directories (e.g. Univention Corporate Server). This selects
-the appropriate group type (`ActiveDirectoryGroupType` vs. `PosixGroupType`).
+**LDAP.** Set `AUTH_LDAP=true` and the `AUTH_LDAP_*` variables in `.env` (see
+`env.template`); what the LDAP groups do is described in
+[Berechtigungen › LDAP](../guides/berechtigungen.md#ldap). Set `LDAP_VARIANT`
+to match your directory: `msad` (default) for Microsoft Active Directory, or
+`openldap` for OpenLDAP-based directories (e.g. Univention Corporate Server).
+This selects the appropriate group type (`ActiveDirectoryGroupType` vs.
+`PosixGroupType`).
 :::
 
 **Build frontend assets**
@@ -133,10 +151,9 @@ npm run build
 ```
 
 The superuser is the only account after a fresh install. Continue with
-[Erste Schritte](../guides/erste_schritte.md) to set up branding, groups,
-tenant, users and rooms.
+[Erste Schritte](../guides/erste_schritte.md).
 
-## Production deployment
+### Production
 
 :::{warning}
 Be sure to use one of the production requirement files:
@@ -145,38 +162,9 @@ Be sure to use one of the production requirement files:
 * `requirements/prod-ldap.txt`
 :::
 
-:::{note}
-The settings tune SQLite for several writers on one file (web server, task
-runner, `migrate` during a deploy), see `DATABASES` in `dlcdb/settings/base.py`:
+#### Task runner unit
 
-* [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html), switched on at the
-  first connect: readers keep working while a writer holds the lock.
-* `transaction_mode=IMMEDIATE` and a 20 s busy timeout: a writer waits for the
-  lock instead of failing with "database is locked".
-* Larger caches, memory-mapped reads and a capped WAL file.
-
-WAL adds the files `db.sqlite3-wal` and `db.sqlite3-shm` next to the database.
-All processes must run on the same host, with the database on a local disk (no
-network filesystem). Back up the nightly snapshot, see *Backup* below.
-:::
-
-### Task runner
-
-As a task runner/task schedular this projects uses [huey](https://github.com/coleifer/huey).
-
-For a containerized deployment run the task runner as a second container
-(`dlcdb huey`, see *Install with podman* above) instead of the systemd unit
-below.
-
-Besides notifications and the HR sync, it writes the nightly database snapshot
-for backups (see *Backup*).
-
-Its queue lives in `data/db/huey_task_queue.sqlite3`. The file holds only
-transient data: tasks waiting to run and locks. Task results are not stored
-(`results=False`, nobody reads them), so the file stays at a few MB and needs no
-backup.
-
-Add a systemd user service unit for huey (modify paths etc.):
+Add a systemd user service unit for the [task runner](#task-runner) (modify paths etc.):
 
 ```ini
 # /etc/systemd/user/dlcdb_huey.service
@@ -207,11 +195,7 @@ systemctl --user restart dlcdb_huey.service
 systemctl --user status dlcdb_huey.service
 ```
 
-### Deployment steps
-
-These are the steps for a **source checkout** deployment, which builds
-everything on the target machine. For a containerized deployment build the
-image instead and run `dlcdb serve` — see *Install with podman* above.
+#### Deployment steps
 
 ```bash
 npm install
@@ -229,18 +213,7 @@ touch dlcdb/wsgi.py
 make docs
 ```
 
-For a containerized deployment, stop and remove the old task runner container
-(`dlcdb huey`) before starting the new `dlcdb serve` container, which runs the
-migrations. The new task runner container can be started right away: it waits
-until all migrations are applied.
-
-```bash
-podman rm --force dlcdb-huey dlcdb
-podman run --name dlcdb ... dlcdb serve
-podman run --name dlcdb-huey ... dlcdb huey
-```
-
-### Apache and mod_wsgi
+#### Apache and mod_wsgi
 
 ```apacheconf
 <VirtualHost *:443>
@@ -269,11 +242,31 @@ podman run --name dlcdb-huey ... dlcdb huey
 </VirtualHost>
 ```
 
-## Misc
+## Operations
 
-### Branding
+### Task runner
 
-Get rid of the default DLCDB branding: Set your organization via *Start › Organization › Branding*
+Background work runs in [huey](https://github.com/coleifer/huey): notifications,
+the HR sync and the nightly database snapshot for [backups](#backup). In a
+container it is the `dlcdb huey` container, from source the systemd unit above.
+Its queue lives in `data/db/huey_task_queue.sqlite3` and holds only transient
+data (tasks waiting to run and locks; results are not stored), so the file stays
+at a few MB.
+
+### SQLite
+
+The settings tune SQLite for several writers on one file (web server, task
+runner, `migrate` during a deploy), see `DATABASES` in `dlcdb/settings/base.py`:
+
+* [Write Ahead Logging (WAL)](https://www.sqlite.org/wal.html), switched on at the
+  first connect: readers keep working while a writer holds the lock.
+* `transaction_mode=IMMEDIATE` and a 20 s busy timeout: a writer waits for the
+  lock instead of failing with "database is locked".
+* Larger caches, memory-mapped reads and a capped WAL file.
+
+WAL adds the files `db.sqlite3-wal` and `db.sqlite3-shm` next to the database.
+All processes must run on the same host, with the database on a local disk (no
+network filesystem).
 
 ### Backup
 

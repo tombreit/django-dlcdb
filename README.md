@@ -6,11 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # ♻ DLCDB
 
-*Device Live Cycle Database*
+*Device Life Cycle Database*
 
 The DLCDB manages the life cycle of IT assets: a device collects append-only records (*inroom*, *lent*, *lost*, *removed*, …), which gives you the current state and a complete audit trail for free. Built with [Django](https://www.djangoproject.com/), served as a plain server-rendered web app.
-
-⚡Not yet fully translated.⚡
 
 ## 🔥 Features
 
