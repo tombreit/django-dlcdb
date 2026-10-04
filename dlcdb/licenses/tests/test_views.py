@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.messages import get_messages
 from django.test import override_settings
 from django.urls import reverse
+from simple_history.utils import update_change_reason
 
 from dlcdb.core.models import Device, InRoomRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
@@ -224,6 +225,19 @@ class LicensesTenantScopingTests(BaseTest):
         )
         self.assertEqual(self.client.get(reverse("licenses:history", args=[self.own.pk])).status_code, 200)
         self.assertEqual(self.client.get(reverse("licenses:history", args=[self.foreign.pk])).status_code, 404)
+
+    def test_history_lists_a_creation_with_subscribers_once(self):
+        """A new licence's subscribers become the creation entry's change reason.
+
+        The old history view listed an oldest entry with a change reason twice.
+        """
+        licence = Device.objects.create(is_licence=True, series="New Suite", tenant=self.own_tenant)
+        update_change_reason(licence, "Added subscribers: someone@example.com")
+
+        response = self.client.get(reverse("licenses:history", args=[licence.pk]))
+
+        self.assertContains(response, "Added subscribers: someone@example.com", count=1)
+        self.assertContains(response, "Created</span>", count=1)
 
     def test_edit_of_a_device_that_is_no_licence_is_404(self):
         device = self._create_device(sap_id="NO-LICENCE", tenant=self.own_tenant)

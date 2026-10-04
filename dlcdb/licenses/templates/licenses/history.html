@@ -1,101 +1,37 @@
 {% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
 
-{% block title %}
-    History for {{ license }}
-{% endblock %}
+{% comment %}
+The licence's field history: when who changed which field. Subscriber changes
+appear as the entry's change reason (see licenses/subscribers.py).
+{% endcomment %}
 
+{% block title %}{% translate "Field history" %} · {{ license.human_title }}{% endblock title %}
 
 {% block body %}
-
-<div class="d-flex align-items-center mb-4">
-  <div>
-      <h2 class="mb-0 me-4">
-        History for {{ license }}
-      </h2>
+{% url "licenses:index" as index_url %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+  <div class="me-auto">
+    <h1 class="h3 mb-1">{% translate "Field history" %}</h1>
+    <div class="text-muted">{{ license.human_title }}</div>
   </div>
-  <div>
-    <a
-        href="{% url 'licenses:edit' license.id %}"
-        class="btn text-bg-warning btn-sm"
-    >
-        <i class="bi bi-pencil-square"></i>
-        Edit
+  {% if perms.core.change_licencerecord %}
+    <a href="{% url 'licenses:edit' license.id %}" class="btn btn-outline-secondary">
+      <i class="bi bi-pencil-square"></i> {% translate "Edit" %}
     </a>
-  </div>
+  {% endif %}
+  {% include "theme/includes/_back_link.html" with url=index_url label=_("Back to licenses") %}
 </div>
 
-
-
-<ul>
-    {% for entry, delta in history %}
-        <li class="rounded border p-3 mb-3">
-            <div class="row">
-                <div class="col-4">
-
-                    <strong>
-                        <span class="me-2">
-                          {{ entry.history_date }}
-                        </span>
-                        <br>
-                        <span class="badge text-bg-secondary">
-                          <i class="bi bi-person-fill"></i> 
-                          {{ entry.history_user }} 
-                        </span>
-                        <i class="fw-normal ms-4">
-                          {% if entry.history_type == '+' %}
-                          <i class="bi bi-plus-circle-fill text-success"></i>
-                          {% elif entry.history_type == '~' %}
-                          <i class="bi bi-pencil-fill text-warning"></i>
-                          {% elif entry.history_type == '-' %}
-                          <i class="bi bi-dash-circle-fill text-danger"></i>
-                          {% else %}
-                          <i class="bi bi-circle-fill text-secondary"></i>
-                          {% endif %}
-                          {{ entry.get_history_type_display }}
-                        </i>
-
-                    </strong>
-                    <p class="small">
-                        <!-- {{ entry.history_id }}:  -->
-                        <!-- {{ entry.history_object }} -->
-                    </p>
-                </div>
-                <div class="col-8">
-
-                  {% if entry.history_change_reason %}
-                    <p>
-                      {{ entry.history_change_reason }}
-                    </p>
-                  {% endif %} 
-                    {% if delta.changes %}
-                    <small>
-                        <table class="table table-sm">
-                          <thead class="table-light">
-                            <tr>
-                              <th>Field</th>
-                              <th>From</th>
-                              <th>To</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-          
-                        {% for change in delta.changes %}
-                        <tr>
-                          <td>{{ change.field }}</td>
-                          <td>{{ change.old }}</td>
-                          <td>{{ change.new }}</td>
-                        </tr>
-                        {% empty %}
-                            <p>No history for this item has been logged yet.</p>
-                        {% endfor %}
-                        </tbody>
-                        </table>
-                      </small>
-                    {% endif %}
-
-                </div>
-            </div>
-        </li>
-    {% endfor %}
-</ul>
-{% endblock %}
+<div class="row">
+  <div class="col-xl-9">
+    <section class="card">
+      <div class="card-body">
+        {% include "theme/includes/_field_history.html" with entries=entries %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock body %}

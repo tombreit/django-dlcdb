@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import logging
-from itertools import chain
-from operator import attrgetter
 
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
@@ -22,6 +20,7 @@ from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, LicenceRecord, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import build_filterbar
 from dlcdb.theme.pagination import paginate
 
@@ -223,55 +222,13 @@ def new(request):
 
 @permission_required("core.view_licencerecord", raise_exception=True)
 def history(request, license_id):
+    """When who changed which field of one licence (django-simple-history).
+
+    Subscriber changes have no field of their own: manage_subscribers() writes
+    them as the change reason of the licence's latest history entry.
+    """
     device = get_object_or_404(
         tenant_scoped_queryset(LicenseAsset.objects.filter(is_licence=True), request), id=license_id
     )
-    device_history = device.history.all()
-
-    # subscription_model = device.subscription_set.model
-    # deleted_subscription_history = subscription_model.history.filter(device_id=device.id)
-    # Currently we do not need the combined history of multiple models
-    # as the subscribers changes are tracked manually with the
-    # update_change_reason function.
-    combined_history = sorted(chain(device_history), key=attrgetter("history_date"), reverse=True)
-
-    # Use a generator function to yield history entries with diffs
-    def get_history_with_diffs():
-        history_list = list(combined_history)
-        for i in range(len(history_list) - 1):
-            record = history_list[i]
-            next_record = history_list[i + 1]
-
-            # Check if both records are from the same model
-            if isinstance(record.instance, type(next_record.instance)):
-                # They are the same model; compute the diff
-                delta = record.diff_against(
-                    next_record, foreign_keys_are_objs=True, excluded_fields=["id", "active_record", "subscriber"]
-                )
-                # Skip if no changes detected
-                if not delta.changes and not record.history_change_reason:
-                    continue
-            else:
-                # Different models; cannot compute diff
-                # delta = None
-                if not record.history_change_reason:
-                    continue
-
-            yield (record, delta)
-
-        # Handle the last record
-        if history_list and history_list[-1].history_change_reason:
-            yield (history_list[-1], None)
-        # Handle the last record
-        if history_list:
-            yield (history_list[-1], None)
-
-    return TemplateResponse(
-        request,
-        "licenses/history.html",
-        {
-            "history": get_history_with_diffs(),
-            "license": device,
-            "title": _("License History"),
-        },
-    )
+    entries = build_field_history(device, exclude=Device.FIELD_HISTORY_EXCLUDE, secret=Device.FIELD_HISTORY_SECRET)
+    return TemplateResponse(request, "licenses/history.html", {"license": device, "entries": entries})

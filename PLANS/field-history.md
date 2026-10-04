@@ -6,8 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Field history: a frontend timeline of simple-history changes
 
-**Status:** batch 1 done (2026-10-04): devices have the frontend field history; licences
-follow in batch 2. This is a living document.
+**Status:** implemented (2026-10-04): devices and licences show their field history as a
+frontend timeline. This document keeps the decisions and what is still open.
 
 ## Why
 
@@ -56,7 +56,7 @@ component in `dlcdb/theme/` should answer *when, who, what* for any model with
 
 - [x] Batch 0: this document
 - [x] Batch 1: theme component, device field history page, sidebar link, docs
-- [ ] Batch 2: licence history on the component, NEWS
+- [x] Batch 2: licence history on the component, NEWS
 
 ## Open follow-ups
 
