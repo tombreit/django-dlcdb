@@ -2,15 +2,15 @@
 
 Wer in der DLCDB was sehen und tun darf, ergibt sich aus drei Dingen:
 
-1. den **Stufen** des Benutzerkontos (normaler Benutzer, *Staff*, *Superuser*),
+1. der **Stufe** des Benutzerkontos (Benutzer, *Staff*, *Superuser*),
 2. den **Berechtigungen** der Gruppen, in denen das Konto Mitglied ist,
-3. dem **Tenant**, der sich aus diesen Gruppen ergibt.
+3. den **Mandanten**, die sich aus diesen Gruppen ergeben.
 
-Diese Seite erklärt, wie die drei zusammenhängen und wo welche Einstellung vorgenommen wird. Die Einrichtung selbst ist Schritt für Schritt unter [Erste Schritte](erste_schritte.md) beschrieben.
+Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.md).
 
 ## Benutzer und Personen
 
-*Benutzer* (oder *User*) sind Menschen, die sich an der DLCDB anmelden und mit ihr arbeiten. Sie werden unter *Start › Accounts › Benutzer* verwaltet; bei LDAP-Anmeldung entstehen sie automatisch beim ersten Login.
+*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr. Sie werden im Django-Admin unter *Start › Konten › Benutzer* verwaltet; mit [LDAP](#ldap) entstehen sie beim ersten Login.
 
 *Personen* sind „Kunden“ der DLCDB, z.B. Menschen, denen ein Gerät ausgeliehen wird. Sie werden unter *Datenhaltung › Personen* gepflegt und haben nichts mit Benutzerkonten oder Berechtigungen zu tun.
 
@@ -18,54 +18,58 @@ Diese Seite erklärt, wie die drei zusammenhängen und wo welche Einstellung vor
 
 | Stufe | Flag am Benutzer | Bedeutung |
 |---|---|---|
-| Benutzer | – | Arbeitet im Frontend. Sieht und darf genau das, was die Berechtigungen seiner Gruppen erlauben. |
-| Staff | *Mitarbeiter-Status* (`is_staff`) | Zusätzlich Zugang zur Django-Admin-Oberfläche (Eintrag *Django Site-Verwaltung* im Benutzermenü). Auch dort gelten die Gruppen-Berechtigungen. Einige Statuswechsel öffnen ein Admin-Formular und sind deshalb nur mit diesem Flag erreichbar (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin)). |
-| Superuser | *Administrator-Status* (`is_superuser`) | Hat implizit **alle** Berechtigungen: sieht alle Menüpunkte und alle Statuswechsel. Geräte sieht auch ein Superuser nur in den Tenants seiner Gruppen (siehe [Tenants](#tenants)). Nur Superuser dürfen im Admin löschen, Stammdaten aktivieren/deaktivieren und die Admin-Aktion *Restore devices from REMOVED to LOST* ausführen. |
+| Benutzer | – | Arbeitet im Frontend und darf genau das, was die Berechtigungen seiner Gruppen erlauben. |
+| Staff | *Mitarbeiter-Status* (`is_staff`) | Zusätzlich Zugang zum [Django-Admin](#django-admin). Auch dort gelten die Gruppen-Berechtigungen. |
+| Superuser | *Administrator-Status* (`is_superuser`) | Hat implizit **alle** Berechtigungen, sieht also jeden Menüpunkt und jeden Statuswechsel. Geräte sieht auch ein Superuser nur in seinen [Mandanten](#mandanten). |
 
-- `./manage.py createsuperuser` setzt beide Flags. Ein Superuser ist damit immer auch Staff.
-- Bei LDAP-Anmeldung erhalten Mitglieder der in `AUTH_LDAP_GROUP_SUPERUSERS` (`.env`) genannten LDAP-Gruppe **beide** Flags.
-- Für die tägliche Arbeit sind weder Staff noch Superuser nötig: Alle Alltagsansichten laufen im Frontend und werden allein über Gruppen-Berechtigungen freigeschaltet.
+`./manage.py createsuperuser` setzt beide Flags, ein Superuser ist also immer auch Staff. Für die tägliche Arbeit ist keines der beiden Flags nötig.
 
 :::{warning}
-**Berechtigungen nie als Superuser testen.** Ein Superuser sieht jeden Menüpunkt und jeden Statuswechsel – auch ohne die zugehörige Berechtigung. Ob eine Gruppe wirklich das Richtige freischaltet, zeigt nur ein Testkonto **ohne** Superuser-Flag.
+**Berechtigungen nie als Superuser testen.** Ob eine Gruppe das Richtige freischaltet, zeigt nur ein Testkonto **ohne** Superuser-Flag.
 :::
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Start › Authentifizierung und Autorisierung › Gruppen*. Benutzer werden dann unter *Start › Accounts › Benutzer* den Gruppen zugeordnet.
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Start › Konten › Gruppen*. Benutzer werden unter *Start › Konten › Benutzer* den Gruppen zugeordnet.
 
 Es gibt drei Familien von Berechtigungen:
 
 | Familie | Beispiel | Wofür |
 |---|---|---|
-| Standard-Berechtigungen pro Model | `core.view_device`, `core.change_room` | Django legt für jedes Model *Can add* / *Can change* / *Can delete* / *Can view* an. Sie schalten Ansichten, Formulare und Menüpunkte im Frontend frei – und dieselben Module im Django-Admin. |
-| Statuswechsel | `core.transition_can_lend_device` | Neun eigene Berechtigungen, eine je Übergang im Gerätelebenszyklus. In der Gruppen-Auswahl unter **Core \| record \| Transition: …** gelistet. Siehe [Statuswechsel](#statuswechsel). |
+| Standard-Berechtigungen pro Model | `core.view_device`, `core.change_room` | Django legt für jedes Model *Can add* / *Can change* / *Can delete* / *Can view* an. Sie schalten Ansichten, Formulare und Menüpunkte frei, im Frontend wie im Django-Admin. |
+| Statuswechsel | `core.transition_can_lend_device` | Eine Berechtigung je Übergang im Gerätelebenszyklus, siehe [Statuswechsel](#statuswechsel). |
 | Spezielle Berechtigungen | `core.can_inventorize` | Einzelne Prozesse, hier: Inventur durchführen. |
 
 :::{admonition} **Berechtigung unter *Core* finden**
 :class: note
 
-Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt die Berechtigung **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
+Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
 :::
 
 :::{admonition} **Lesen und Bearbeiten sind getrennte Berechtigungen**
 :class: note
 
-Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeiten berechtigt, sollte ihr deshalb immer auch die passende *Can view*-Berechtigung geben. Beispiel Lizenzen: Mit `core.change_licencerecord` lässt sich eine Lizenz bearbeiten, aber die Schaltflächen *Verlauf* und *iCal* auf dem Bearbeitungsformular benötigen `core.view_licencerecord`.
+Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeiten berechtigt, gibt ihr deshalb auch die passende *Can view*-Berechtigung. Beispiel Lizenzen: Mit `core.change_licencerecord` lässt sich eine Lizenz bearbeiten, die Schaltflächen *Verlauf* und *iCal* benötigen aber `core.view_licencerecord`.
 :::
 
-:::{admonition} **LDAP**
-:class: note
+### LDAP
 
-Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` (`.env`) genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Berechtigungen und Tenants werden dann diesen **gespiegelten Gruppen** zugewiesen. Die Mitgliedschaften in diesen gespiegelten Gruppen werden bei jeder Anmeldung aus LDAP übernommen; von Hand vergebene Mitgliedschaften in ihnen gehen dabei verloren. Mitgliedschaften in Gruppen, die nicht in `AUTH_LDAP_MIRROR_GROUPS` stehen (z.B. eine in der DLCDB angelegte Gruppe), bleiben unberührt. Eine gespiegelte Gruppe entsteht in der DLCDB erst beim ersten Login eines ihrer Mitglieder; vorher fehlt sie in der Tenant-Übersicht. Soll sie schon vorher einem Tenant zugeordnet werden, im Django-Admin eine Gruppe mit exakt dem LDAP-Namen anlegen.
-:::
+Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setup](../betrieb/setup.md)), steuern LDAP-Gruppen Anmeldung, Flags und Gruppen:
+
+- **Anmelden** darf, wer Mitglied von `AUTH_LDAP_REQUIRE_GROUP`, `AUTH_LDAP_GROUP_STAFF` oder `AUTH_LDAP_GROUP_SUPERUSERS` ist. Das Benutzerkonto entsteht beim ersten Login.
+- **Flags:** Mitglieder von `AUTH_LDAP_GROUP_STAFF` erhalten das Staff-Flag, Mitglieder von `AUTH_LDAP_GROUP_SUPERUSERS` Staff- und Superuser-Flag. Alle Flags, auch *Aktiv*, werden bei jedem Login neu aus LDAP gesetzt: Ein im Django-Admin deaktivierter Benutzer ist nach dem nächsten Login wieder aktiv, solange er in der LDAP-Gruppe ist. Dauerhaft hilft nur, ihn dort zu entfernen.
+- **Gruppen:** Die in `AUTH_LDAP_MIRROR_GROUPS` genannten LDAP-Gruppen werden als DLCDB-Gruppen gespiegelt; ihnen werden Berechtigungen und Mandanten zugewiesen. Die Mitgliedschaften in diesen Gruppen werden bei jedem Login aus LDAP übernommen, von Hand vergebene gehen dabei verloren. Andere Gruppen, z.B. in der DLCDB angelegte, bleiben unberührt.
+- Eine gespiegelte Gruppe entsteht erst beim ersten Login eines ihrer Mitglieder und fehlt bis dahin in der Mandanten-Übersicht. Soll sie vorher einem Mandanten zugeordnet werden, im Django-Admin eine Gruppe mit exakt dem LDAP-Namen anlegen.
 
 ## Navigation
 
-Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt erscheint für einen Benutzer nur dann, wenn eine seiner Gruppen die in der Tabelle genannte Berechtigung besitzt – in der Regel die *view*-Berechtigung des zugrundeliegenden Models. Ein sichtbarer Menüpunkt kann so nie in einer Fehlermeldung enden.
+Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt erscheint nur, wenn eine Gruppe des Benutzers die genannte Berechtigung besitzt – in der Regel die *view*-Berechtigung der verlinkten Ansicht. Steht mehr als eine Berechtigung in der Zeile, genügt **eine** davon.
+
+Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das Staff-Flag. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
 
 <!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
-     dlcdb/*/navigation.py-Dateien wider. Bei Änderungen an den Menüs
+     dlcdb/*/navigation.py-Dateien wider; *(Admin)* markiert Einträge,
+     deren "url" auf "admin:..." zeigt. Bei Änderungen an den Menüs
      (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen.
      Invariante: Die "required_permission" eines Menüeintrags ist immer
      die Lese-Berechtigung der verlinkten Ansicht -- ein sichtbarer
@@ -77,43 +81,32 @@ Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt ersc
 | Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
 | Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.transition_can_locate_device`, `core.transition_can_relocate_device` oder `core.transition_can_find_device` |
 | Inventarisieren (Hauptmenü, nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
-| Kleinkram (Hauptmenü) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` [^kleinkram] |
+| Kleinkram (Hauptmenü), weitere Berechtigungen siehe [Kleinkram](kleinkram.md) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
 | Lizenzen (Hauptmenü) | Core \| licence record \| Can view licence record | `core.view_licencerecord` |
 | Datenhaltung › Räume | Core \| room \| Can view room | `core.view_room` |
 | Datenhaltung › Hersteller | Core \| manufacturer \| Can view manufacturer | `core.view_manufacturer` |
 | Datenhaltung › Zulieferer | Core \| supplier \| Can view supplier | `core.view_supplier` |
 | Datenhaltung › Geräteklassen | Core \| device type \| Can view device type | `core.view_devicetype` |
 | Datenhaltung › Personen | Core \| person \| Can view person | `core.view_person` |
-| Datenhaltung › Records / Entfernt-Records | Core \| record \| Can view record | `core.view_record` |
-| Datenhaltung › Inventuren | Core \| inventory \| Can change inventory | `core.change_inventory` |
-| Datenhaltung › Notizen | Core \| note \| Can view note | `core.view_note` |
+| Datenhaltung › Records | Core \| record \| Can view record | `core.view_record` |
+| Datenhaltung › Entfernt-Records *(Admin)* | Core \| record \| Can view record | `core.view_record` |
+| Datenhaltung › Inventuren *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Datenhaltung › Notizen *(Admin)* | Core \| note \| Can view note | `core.view_note` |
 | Prozesse › Bulk Import | Data Exchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
-| Prozesse › Bulk Ausmusterung | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
+| Prozesse › Bulk Ausmusterung *(Admin)* | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
 | Prozesse › Inventarisieren (nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
-| Prozesse › SAP-Abgleich (nur bei aktiver Inventur) | Core \| inventory \| Can change inventory | `core.change_inventory` |
-| Einstellungen › Tenants | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
-| Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
-| Einstellungen › Ausleih-Profile | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
-| Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
-| Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
-| Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
+| Prozesse › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
+| Einstellungen › Ausleihe Konfiguration *(Admin)* | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
+| Einstellungen › Ausleih-Profile *(Admin)* | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
+| Einstellungen › Lizenzmodul Konfiguration *(Admin)* | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
+| Einstellungen › Branding *(Admin)* | Organization \| branding \| Can view branding | `organization.view_branding` |
+| Einstellungen › HR-API-Sync-Konfiguration *(Admin)* | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
-
-[^kleinkram]: `smallstuff.view_assignedthing` öffnet die Ansicht. Zum Ausgeben eines Gegenstands wird zusätzlich `smallstuff.add_assignedthing` benötigt, zum Zurücknehmen `smallstuff.change_assignedthing`.
-
-Steht bei einem Menüpunkt mehr als eine Berechtigung, genügt **eine** davon. Superuser sehen alle Menüpunkte.
-
-:::{admonition} **Menüpunkte, die in den Django-Admin führen**
-:class: note
-
-Die Einträge *Entfernt-Records*, *Inventuren*, *Notizen*, *Bulk Ausmusterung*, *SAP-Abgleich* und alle Einträge unter *Einstellungen* außer *Tenants* und *Journal* öffnen eine Django-Admin-Ansicht. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das **Staff-Flag**, sonst landet er auf der Admin-Anmeldeseite. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
-:::
 
 ## Statuswechsel
 
-Welche Statuswechsel (*Records*) einem Benutzer für ein Gerät angeboten werden, ist an Berechtigungen gebunden. Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine eigene Berechtigung; angeboten wird ein Übergang genau dann, wenn er vom aktuellen Status aus überhaupt zulässig ist **und** der Benutzer die zugehörige Berechtigung besitzt.
-
-Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktionen eine Gruppe im Alltag sieht. Alle neun Berechtigungen sind in der Gruppen-Auswahl unter **Core | record** gelistet.
+Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine eigene Berechtigung. Das Menü *Neuer Zustand* auf der [Geräte-Detailseite](devices.md) bietet einen Übergang genau dann an, wenn er vom aktuellen Status aus zulässig ist **und** der Benutzer die Berechtigung besitzt. Alle neun sind in der Gruppen-Auswahl unter **Core | record** gelistet.
 
 | Aktion | Übergang | Berechtigung (Django-Admin-Anzeige) | codename |
 |---|---|---|---|
@@ -127,31 +120,21 @@ Damit entscheidet die Rechtevergabe – nicht der Programmcode –, welche Aktio
 | Wiederherstellen | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to not-locatable | `core.transition_can_restore_device` |
 | Wiedereingliedern | Entfernt → Lokalisiert | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
 
-Die Aktion erscheint auf der Geräte-Detailseite im Menü *Neuer Zustand* (siehe [Geräte](devices.md)).
-
 ### Frontend oder Django-Admin?
 
-Die Berechtigung entscheidet, **ob** ein Statuswechsel angeboten wird. **Wo** er ausgeführt wird, hängt vom Übergang ab: Ein Teil läuft vollständig im Frontend, der Rest öffnet noch ein Formular des Django-Admins.
+Die Berechtigung entscheidet, **ob** ein Statuswechsel angeboten wird. **Wo** er ausgeführt wird, hängt vom Übergang ab:
 
 | Übergang | Ausführung | benötigt zusätzlich |
 |---|---|---|
-| Bestellung, Lokalisieren, Umziehen, Gefunden, Ausleihen, Zurückgeben | Frontend | nichts – die Transition-Berechtigung genügt |
+| Bestellung, Lokalisieren, Umziehen, Gefunden, Ausleihen, Zurückgeben | Frontend | nichts |
 | Nicht auffindbar, Entfernen, Wiederherstellen, Wiedereingliedern | Django-Admin-Formular (Menüeintrag mit ↗-Symbol) | *Staff*-Flag **und** die *Can add*-Berechtigung des geschriebenen Records: `core.add_lostrecord`, `core.add_removedrecord` bzw. `core.add_inroomrecord` (Wiedereingliedern) |
 
-Ohne Staff-Flag werden die Admin-gestützten Einträge im Menü *Neuer Zustand* gar nicht erst angezeigt. Auch die CSV-Bulk-Ausmusterung (*Prozesse › Bulk Ausmusterung*, siehe [Ausmustern](ausmustern.md)) läuft im Django-Admin.
-
-:::{admonition} **Die alten *Can add*-Berechtigungen der Records**
-:class: note
-
-Die Standard-Berechtigungen der Record-Typen (`core.add_inroomrecord`, `core.add_lentrecord`, `core.change_lentrecord`, …) steuern **keine** Statuswechsel mehr. Sie werden nur noch von Django selbst für die oben genannten Admin-Formulare geprüft. Für alle Frontend-Abläufe sind ausschließlich die `transition_*`-Berechtigungen maßgeblich.
-:::
+Ohne Staff-Flag erscheinen die Admin-gestützten Einträge gar nicht erst. Die übrigen Standard-Berechtigungen der Record-Typen (`core.add_lentrecord`, `core.change_lentrecord`, …) steuern keine Statuswechsel; im Frontend zählen allein die `transition_*`-Berechtigungen.
 
 :::{admonition} **Ausmusterung rückgängig machen**
 :class: note
 
-`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**. Ein ausgemustertes Gerät ist damit standardmäßig ein Endpunkt. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst zu – üblicherweise nur einer eng gefassten Gruppe, die zudem das Staff-Flag hat (siehe oben).
-
-Unabhängig davon steht Superusern im Device-Admin die Massen-Aktion *Restore devices from REMOVED to LOST* zur Verfügung. Sie ist an das Superuser-Flag gebunden, nicht an eine Berechtigung.
+`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**; *Entfernt* ist damit standardmäßig ein Endzustand. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst einer eng gefassten Gruppe mit Staff-Flag zu.
 :::
 
 :::{admonition} **Die Berechtigung gilt für die ganze Aktion**
@@ -160,84 +143,81 @@ Unabhängig davon steht Superusern im Device-Admin die Massen-Aktion *Restore de
 Eine Berechtigung schaltet nicht nur den Eintrag auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur `core.transition_can_find_device` besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen.
 :::
 
-## Tenants
+## Mandanten
 
-Ein *Tenant* (Mandant) ist eine organisatorische Einheit, die die DLCDB nutzt und nur ihre eigenen Geräte verwaltet. Der Tenant hängt am **Gerät** (*Datenhaltung › Geräte › Mandant*); Records, Ausleihen und Lizenzen erben ihn über ihr Gerät.
+Ein *Mandant* (im Code *Tenant*) ist eine organisatorische Einheit, die nur ihre eigenen Geräte verwaltet. Der Mandant hängt am **Gerät** (Feld *Mandant*); Records, Ausleihen und Lizenzen erben ihn über ihr Gerät.
 
-**Zuordnung zum Benutzer.** Ein Tenant gibt den Mitgliedern seiner **Gruppen** Zugriff auf seine Geräte (zugeordnet unter [Einstellungen › Tenants](#einstellungen-tenants)). Die Tenants eines Benutzers ergeben sich aus dessen Gruppenmitgliedschaften:
+Welche Mandanten ein Benutzer sieht, ergibt sich aus seinen **Gruppen**: Ein Mandant gibt den Mitgliedern der ihm zugeordneten Gruppen Zugriff auf seine Geräte (siehe [Mandanten-Übersicht](#mandanten-übersicht)).
 
-- Genau ein Tenant passt zu den Gruppen des Benutzers → der Benutzer arbeitet in diesem Tenant und sieht nur dessen Geräte.
-- Mehrere Tenants passen → der Benutzer sieht die Geräte **aller** dieser Tenants. Die Navigation zeigt die Zahl der Tenants, die Geräteliste die Spalte *Mandant*.
-- Kein Tenant passt → der Benutzer sieht **keine Geräte** und kann keine anlegen; jede Seite zeigt den Hinweis *None of your groups belongs to a tenant, so you see no devices.* (nur für Benutzer mit `core.view_device`).
-- Das gilt auch für Superuser: Ohne passende Gruppe sehen sie keine Geräte.
+- Ein Mandant → der Benutzer sieht nur dessen Geräte.
+- Mehrere Mandanten → er sieht die Geräte **aller** dieser Mandanten. Das Benutzermenü zeigt die Zahl der Mandanten, die Geräteliste die Spalte *Mandant*.
+- Kein Mandant → er sieht **keine Geräte** und kann keine anlegen. Jede Seite zeigt dann den Hinweis *Keine Ihrer Gruppen gehört zu einem Mandanten, daher sehen Sie keine Geräte.* (nur für Benutzer mit `core.view_device`).
+- Das gilt auch für Superuser.
 
-Beim Anlegen und Importieren ist ein Tenant Pflicht. Das Feld *Tenant* eines Geräts, einer Lizenz oder eines Imports bietet nur die eigenen Tenants an; mit genau einem Tenant ist er vorausgewählt, mit mehreren muss einer gewählt werden. Wer mehrere Tenants sieht und `core.change_device` besitzt, kann ein Gerät zwischen diesen Tenants verschieben: auf der Geräte-Detailseite (Feld *Tenant*) oder für mehrere Geräte über die Admin-Aktion *Relocate* (siehe [Umziehen](umziehen.md)).
+Beim Anlegen und Importieren ist ein Mandant Pflicht. Das Feld *Mandant* eines Geräts, einer Lizenz oder eines Imports bietet nur die eigenen Mandanten an; bei genau einem ist er vorausgewählt. Wer mehrere Mandanten sieht und `core.change_device` besitzt, kann ein Gerät zwischen ihnen verschieben: auf der Geräte-Detailseite oder, für mehrere Geräte, mit der Aktion *Ausgewählte Geräte umziehen* im Geräte-Admin.
 
-**Alle Tenants sehen.** Soll eine Gruppe alle Tenants sehen (z.B. Administratoren, IT, Einkauf, Revision), wird sie **jedem** Tenant zugeordnet, auch jedem neu angelegten. In der Tenant-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke in einer sonst vollen Zeile ist ein vergessener Tenant, den die Gruppe nicht sieht.
+**Alle Mandanten sehen.** Eine Gruppe, die alle Mandanten sehen soll (z.B. Administratoren, IT, Revision), wird **jedem** Mandanten zugeordnet, auch jedem neu angelegten. In der Mandanten-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke darin ist ein vergessener Mandant.
 
-Tenants vergeben **keine** Berechtigungen. Was ein Benutzer tun darf, bestimmen ausschließlich seine Gruppen; der Tenant bestimmt nur, welche Geräte er dabei sieht. Üblicherweise verwendet man dieselben Gruppen für beides: eine Gruppe pro Tenant und Rolle, mit den passenden Berechtigungen, dem Tenant zugeordnet.
+Mandanten vergeben **keine** Berechtigungen: Was ein Benutzer tun darf, bestimmen allein seine Gruppen, der Mandant nur, welche Geräte er dabei sieht. Üblich ist eine Gruppe pro Mandant und Rolle.
 
 :::{warning}
-**Berechtigungen gelten in allen Tenants eines Benutzers.** Wer über die Gruppe *ops-a* Geräte in Tenant A bearbeiten darf und über *audit-b* Tenant B nur ansehen soll, kann trotzdem auch die Geräte von B bearbeiten. Unterschiedliche Rollen je Tenant lassen sich nicht abbilden; dafür getrennte Benutzerkonten verwenden.
+**Berechtigungen gelten in allen Mandanten eines Benutzers.** Wer über die Gruppe *ops-a* Geräte in Mandant A bearbeiten darf und über *audit-b* Mandant B nur ansehen soll, kann trotzdem auch die Geräte von B bearbeiten. Unterschiedliche Rollen je Mandant lassen sich nicht abbilden; dafür getrennte Benutzerkonten verwenden.
 :::
 
 :::{warning}
-**`tenants.change_tenant` entscheidet über die Sichtbarkeit – auch über die eigene.** Wer diese Berechtigung besitzt, kann die eigene Gruppe jedem Tenant zuordnen und so dessen Geräte sehen. Außerdem lässt sich damit die Kontakt-E-Mail eines Tenants setzen; an sie gehen – je nach Ausleihe-Konfiguration als Kopie oder ausschließlich – die Mahnungen überfälliger Ausleihen zu dessen Geräten, mit Namen der Ausleihenden. Die Berechtigung gehört deshalb wie die Gruppenverwaltung zu den Administrations-Berechtigungen, nicht in Bediener-Gruppen.
+**`tenants.change_tenant` entscheidet über die Sichtbarkeit – auch über die eigene.** Wer diese Berechtigung besitzt, kann die eigene Gruppe jedem Mandanten zuordnen und so dessen Geräte sehen. Außerdem setzt er die Kontakt-Email eines Mandanten, an die die [Erinnerungen an überfällige Ausleihen](notifications.md) gehen, mit den Namen der Ausleihenden. Die Berechtigung gehört deshalb wie die Gruppenverwaltung zu den Administrations-Berechtigungen.
 :::
 
-Nicht auf den Tenant eingeschränkt sind:
+Nicht auf die eigenen Mandanten eingeschränkt sind:
 
-- die *Devices*-Übersicht der Inventur-App, wenn bei der Inventur *Device search tenant aware* ausgeschaltet ist (siehe [Inventur](inventur.md)),
-- die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Tenants,
+- die *Devices*-Übersicht der Inventur-App, wenn bei der Inventur *Geräte-Suche ist Tenant-spezifisch* ausgeschaltet ist (siehe [Inventur](inventur.md)),
+- die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Mandanten,
 - die *Notizen* im Django-Admin (*Datenhaltung › Notizen*),
 - der *SAP-Abgleich* der Inventur: Er vergleicht den gesamten Bestand.
 
-### Einstellungen › Tenants
+### Mandanten-Übersicht
 
-Die Seite zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Tenant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Tenants und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder; ein Klick darauf listet ihre E-Mail-Adressen. Unter jedem Tenant steht die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
+*Einstellungen › Mandanten* zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Mandant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Mandanten und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder (ein Klick listet sie auf), unter jedem Mandanten die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
 
-- `tenants.view_tenant`: die Seite mit allen Tenants, Gruppen und deren Mitgliedern ansehen
-- `tenants.change_tenant`: Haken setzen, Tenants umbenennen, Kontakt-E-Mail setzen
-- `tenants.add_tenant`: Tenants anlegen
-- `tenants.delete_tenant`: Tenants ohne Geräte und Importe löschen (zusammen mit `tenants.change_tenant`: Schaltfläche *Delete* auf der Detailseite, neben *Änderungen speichern*)
+- `tenants.view_tenant`: die Übersicht ansehen
+- `tenants.change_tenant`: Haken setzen, Mandanten umbenennen, Kontakt-Email setzen
+- `tenants.add_tenant`: Mandanten anlegen
+- `tenants.delete_tenant`: Mandanten ohne Geräte und Importe löschen (zusammen mit `tenants.change_tenant`, Schaltfläche auf der Detailseite)
 
-Jede Änderung, auch an den Haken, steht in der *History* des Tenants im Django-Admin. Ein Tenant, dem noch Geräte oder Importe zugeordnet sind, lässt sich nicht löschen: seine Geräte zuerst einem anderen Tenant zuordnen; Importe lassen sich im Django-Admin löschen.
+Jede Änderung, auch an den Haken, steht in der Änderungshistorie des Mandanten im Django-Admin. Einen Mandanten mit Geräten oder Importen kann man nicht löschen: Die Geräte zuerst einem anderen Mandanten zuordnen; Importe lassen sich im Django-Admin löschen.
 
-### Geräte und Importe ohne Tenant
+### Geräte und Importe ohne Mandant
 
-Ältere Geräte und Importe ohne Tenant erscheinen in keiner Liste, auch nicht für Superuser. Solange es sie gibt, zeigt die DLCDB allen, die sie zuordnen dürfen (siehe unten), auf jeder Seite den Hinweis *N devices without tenant!* bzw. *N imports without tenant!*. Zum Zuordnen:
+Ältere Geräte und Importe ohne Mandant erscheinen in keiner Liste, auch nicht für Superuser. Solange es sie gibt, zeigt die DLCDB allen, die sie zuordnen dürfen, auf jeder Seite den Hinweis *N Geräte ohne Mandant!* bzw. *N Importe ohne Mandant!*. Zum Zuordnen:
 
-1. Dem Link *Assign a tenant?* folgen (*Start › Tenants › Tenant*).
-2. Den Ziel-Tenant auswählen und die Aktion *Assign devices and imports without tenant* ausführen.
-3. Die folgende Seite listet alle Geräte und Importe ohne Tenant. Was zu einem anderen Tenant gehört, abwählen und bestätigen. Für das Übrige die Schritte mit dessen Tenant wiederholen.
+1. Dem Link *Mandant zuordnen?* folgen (Django-Admin, *Start › Mandanten › Tenants*).
+2. Den Ziel-Mandanten auswählen und die Aktion *Geräte und Importe ohne Mandant zuordnen* ausführen.
+3. Die folgende Seite listet alle Geräte und Importe ohne Mandant. Was zu einem anderen Mandanten gehört, abwählen und bestätigen; für das Übrige die Schritte mit dessen Mandant wiederholen.
 
-Die Aktion benötigt das Staff-Flag, `tenants.change_tenant` sowie `core.change_device` für Geräte bzw. `dataexchange.change_importerlist` für Importe; die Seite zeigt nur, was der Benutzer ändern darf, unabhängig von den eigenen Tenants. Den Tenant eines Imports nicht im Import-Formular des Django-Admins ändern: Speichern dort führt den Import erneut aus.
+Die Aktion benötigt das Staff-Flag, `tenants.change_tenant` sowie `core.change_device` für Geräte bzw. `dataexchange.change_importerlist` für Importe; die Seite zeigt alles, was der Benutzer ändern darf, unabhängig von den eigenen Mandanten. Den Mandanten eines Imports nicht im Import-Formular des Django-Admins ändern: Speichern dort führt den Import erneut aus.
 
-Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwischen-Tenant** *Unassigned* (der IT-Gruppe zugeordnet) zuweisen und dann auf ihren Detailseiten dem richtigen Tenant zuordnen. Den leeren Zwischen-Tenant danach löschen.
+Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwischen-Mandanten** *Unassigned* (der IT-Gruppe zugeordnet) zuweisen und dann auf ihren Detailseiten dem richtigen Mandanten zuordnen. Den leeren Zwischen-Mandanten danach löschen.
 
-## Rolle des Django-Admins
+## Django-Admin
 
-Die tägliche Arbeit – Geräte, Räume, Personen, Stammdaten, Ausleihe, Umzug, Inventur, Lizenzen, Import – läuft vollständig im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü, nur mit Staff-Flag) wird noch für Folgendes benötigt:
+Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
-- Benutzer, Gruppen und Berechtigungen anlegen und zuordnen; Benutzer deaktivieren (Aktion *Deactivate selected users* oder Haken *Aktiv*) oder einzeln endgültig löschen (*Delete permanently*; löscht auch ihre Einträge im Admin-Log). Mit LDAP aktiviert der nächste Login einen Benutzer wieder, solange er in der LDAP-Gruppe ist; dauerhaft hilft nur, ihn dort zu entfernen.
-- Geräte und Importe ohne Tenant einem Tenant zuordnen (siehe [Geräte und Importe ohne Tenant](#geräte-und-importe-ohne-tenant))
-- die vier Admin-gestützten Statuswechsel (siehe [Frontend oder Django-Admin?](#frontend-oder-django-admin))
-- Massen-Aktion *Restore devices from REMOVED to LOST* (nur Superuser)
-- Stammdaten *aktivieren/deaktivieren* (Soft-Delete, nur Superuser) und endgültig löschen (nur Superuser)
-- die feldgenaue Änderungs-*History* eines Tenants
-- Bulk Ausmusterung, Entfernt-Records, Inventuren, Notizen, SAP-Abgleich, erzeugte Reports
-- alle Einträge unter *Einstellungen* (Ausleihe-Konfiguration, Ausleih-Profile, Lizenzmodul-Konfiguration, Branding, HR-API-Sync-Konfiguration)
+- Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
+- die mit *(Admin)* markierten [Menüpunkte](#navigation) und die vier [Admin-gestützten Statuswechsel](#frontend-oder-django-admin),
+- [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
+- die Änderungshistorie eines Mandanten, erzeugte Reports und den SAP-Import.
 
-Die *Fallback Django-Admin*-Hinweise in den Guides beschreiben jeweils den Admin-Weg für einen Vorgang, der auch im Frontend möglich ist.
+Nur Superuser dürfen, unabhängig von Berechtigungen:
+
+- Stammdaten im Admin endgültig löschen und *aktivieren/deaktivieren* (Soft-Delete, siehe [Model](../betrieb/model.md#softdelete)),
+- im Geräte-Admin die Aktion *Wiederherstellung von REMOVED auf LOST* ausführen.
 
 ## Beispiel-Gruppen
 
-Drei Gruppen als Ausgangspunkt; die Berechtigungen werden im Admin unter *Gruppen* zusammengestellt. Immer mit einem Nicht-Superuser-Testkonto prüfen.
+Drei Gruppen als Ausgangspunkt; jede wird zusätzlich dem passenden Mandanten zugeordnet, damit ihre Mitglieder Geräte sehen.
 
 | Gruppe | Berechtigungen | Ergebnis |
 |---|---|---|
 | Helpdesk / Ausleihe | `core.view_device`, `core.view_person`, `core.view_lentrecord`, `core.transition_can_lend_device`, `core.transition_can_relocate_device` | Sieht Geräte, Personen und Ausleihen; kann Geräte ausleihen, zurücknehmen und umziehen. |
-| Inventur | `core.view_device`, `core.can_inventorize`, `core.change_inventory` | Sieht Geräte, führt die aktive Inventur durch, erreicht Inventuren und SAP-Abgleich. |
+| Inventur | `core.view_device`, `core.can_inventorize`, `core.change_inventory` | Sieht Geräte, führt die aktive Inventur durch, erreicht Inventuren und SAP-Abgleich (beides *(Admin)*, also mit Staff-Flag). |
 | Stammdaten / IT-Beschaffung | `core.view_device`, `core.add_device`, `core.change_device`, `core.view_room`, `core.add_room`, `core.change_room`, `core.view_devicetype`, `core.view_manufacturer`, `core.view_supplier`, `core.transition_can_order_device`, `core.transition_can_locate_device`, `core.transition_can_relocate_device` | Legt Geräte und Räume an, pflegt sie, setzt Geräte auf *Bestellt* bzw. *Lokalisiert* und zieht sie um. |
-
-Jede dieser Gruppen wird zusätzlich dem passenden Tenant zugeordnet, damit ihre Mitglieder Geräte sehen.

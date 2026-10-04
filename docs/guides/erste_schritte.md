@@ -1,38 +1,26 @@
 # Erste Schritte
 
-Die DLCDB ist [installiert](../betrieb/setup.md) und ein Superuser ist mit `./manage.py createsuperuser` angelegt. Die folgenden Schritte richten eine frisch installierte DLCDB für den Alltag ein. Wie Benutzer, Gruppen, Berechtigungen und Tenants zusammenhängen, erklärt die Seite [Berechtigungen](berechtigungen.md).
+Die DLCDB ist [installiert](../betrieb/setup.md) und ein Superuser ist mit `./manage.py createsuperuser` angelegt. Die folgenden Schritte richten eine frisch installierte DLCDB für den Alltag ein. Wie Benutzer, Gruppen, Berechtigungen und Mandanten zusammenhängen, erklärt [Berechtigungen](berechtigungen.md).
 
 ## 1. Als Superuser anmelden
 
-Der Superuser dient der Einrichtung und Administration. Für die tägliche Arbeit werden anschließend Gruppen mit eingeschränkten Rechten und normale Benutzerkonten verwendet.
+Der Superuser dient der Einrichtung. Für die tägliche Arbeit werden Benutzerkonten ohne Sonderrechte verwendet (siehe [Drei Stufen](berechtigungen.md#drei-stufen-benutzer-staff-superuser)).
 
 ## 2. Branding
 
-Logo und Organisationsname werden unter *Start › Organization › Branding* eingetragen. Ohne diese Einstellungen firmiert die DLCDB als „DLCDB Corporation“.
+Logo und Organisationsname unter *Einstellungen › Branding* eintragen.
 
 ## 3. Gruppen anlegen und Berechtigungen vergeben
 
-Via *Start › Authentifizierung und Autorisierung › Gruppen*. Eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten) – Vorschläge stehen unter [Beispiel-Gruppen](berechtigungen.md#beispiel-gruppen).
+Via *Start › Konten › Gruppen*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), Vorschläge unter [Beispiel-Gruppen](berechtigungen.md#beispiel-gruppen). Welche Berechtigung was freischaltet, zeigen die Tabellen [Navigation](berechtigungen.md#navigation) und [Statuswechsel](berechtigungen.md#statuswechsel). Mit LDAP werden die Gruppen gespiegelt, siehe [LDAP](berechtigungen.md#ldap).
 
-Welche Berechtigung welchen Menüpunkt freischaltet, zeigt die Tabelle [Navigation](berechtigungen.md#navigation); welche Berechtigung welchen Statuswechsel erlaubt, die Tabelle [Statuswechsel](berechtigungen.md#statuswechsel).
+## 4. Mandant anlegen
 
-:::{admonition} **LDAP**
-:class: note
-
-Ist die Anmeldung via LDAP konfiguriert, werden die in `AUTH_LDAP_MIRROR_GROUPS` genannten LDAP-Gruppen als DLCDB-Gruppen gespiegelt. Die Berechtigungen werden dann diesen gespiegelten Gruppen zugewiesen; Benutzer entstehen automatisch beim ersten Login.
-:::
-
-## 4. Tenant anlegen
-
-Via *Einstellungen › Tenants › Tenant hinzufügen*: Name vergeben und speichern, dann in der Tenant-Übersicht in der Spalte des neuen Tenants die Gruppe(n) aus Schritt 3 anhaken. Ein Benutzer sieht nur Geräte der Tenants, zu denen seine Gruppen gehören – ohne passende Gruppe sieht er keine Geräte, auch als Superuser (siehe [Tenants](berechtigungen.md#tenants)). Die Gruppe der Administratoren deshalb jedem Tenant zuordnen, auch jedem später angelegten.
+Via *Einstellungen › Mandanten › Mandant hinzufügen*: Name vergeben und speichern, dann in der Mandanten-Übersicht in der Spalte des neuen Mandanten die Gruppe(n) aus Schritt 3 anhaken. Die Gruppe der Administratoren jedem Mandanten zuordnen, auch jedem später angelegten – ohne passende Gruppe sieht niemand Geräte (siehe [Mandanten](berechtigungen.md#mandanten)).
 
 ## 5. Benutzer anlegen
 
-Via *Start › Accounts › Benutzer*: Konto anlegen und den Gruppen aus Schritt 3 zuordnen. Das Staff-Flag ist nur für Zugang zum Django-Admin nötig, das Superuser-Flag für die Administration (siehe [Drei Stufen](berechtigungen.md#drei-stufen-benutzer-staff-superuser)).
-
-:::{tip}
-Zum Prüfen der Rechtevergabe ein **Nicht-Superuser**-Konto verwenden – Superuser sehen alles, unabhängig von Berechtigungen.
-:::
+Via *Start › Konten › Benutzer*: Konto anlegen und den Gruppen aus Schritt 3 zuordnen. Mit LDAP entstehen die Konten beim ersten Login.
 
 ## 6. Räume anlegen
 
@@ -64,14 +52,4 @@ Via Menü *Geräte* (Hauptmenü), Button *Gerät hinzufügen* rechts oben. Viele
 
 ## 9. Devices einen Status geben
 
-Die DLCDB verwaltet im Grunde nicht nur Devices, sondern vor allem die unterschiedlichen Status (in der DLCDB genannt *Records*), die ein Device in seinem Lebenszyklus durchläuft — siehe [Konzept](../konzept.md).
-
-Als Status oder *Record* stehen zur Verfügung:
-
-1. Bestellt → Device ist bestellt, aber noch nicht eingetroffen
-1. Lokalisiert → Device ist einem Raum zugeordnet
-1. Verliehen → Device ist an eine Person verliehen
-1. Nicht auffindbar → Verbleib des Devices ist aktuell nicht klar
-1. Entfernt → Device ist z.B. ausgemustert und verschrottet
-
-Jedes Device hat zu einem Zeitpunkt genau einen aktiven *Record*. Die DLCDB kann Devices nur sinnvoll verwalten, wenn sie einen Status haben: Nach dem Anlegen eines Devices sollte demnach direkt über *Neuer Zustand* auf der Detailseite ein Record vergeben werden (*Lokalisieren* oder *Bestellung*).
+Ein Device braucht einen Status (*Record*), damit die DLCDB es verwalten kann – siehe [Konzept](../konzept.md). Nach dem Anlegen deshalb auf der Detailseite über *Neuer Zustand* *Lokalisieren* oder *Bestellung* wählen.

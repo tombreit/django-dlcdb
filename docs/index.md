@@ -1,10 +1,7 @@
-# Welcome to DLCDB's documentation.
+# DLCDB-Dokumentation
 
-Die DLCDB verwaltet den Lebenszyklus von IT-Assets: Jedes Gerät sammelt
-eine Kette von Zustandseinträgen (*Records*) — von der Lokalisierung
-über Verleih und Inventur bis zur Ausmusterung. Daraus ergibt sich eine
-lückenlose Historie ganz von selbst. Betrieben wird das Ganze mit einem
-bewusst einfachen Stack: Django, SQLite, server-gerendertes UI.
+Die DLCDB verwaltet den Lebenszyklus von IT-Assets, von der Bestellung
+über Verleih und Inventur bis zur Ausmusterung.
 
 ::::{grid} 1 2 2 3
 :gutter: 1 1 1 2

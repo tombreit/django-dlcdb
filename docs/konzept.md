@@ -24,17 +24,14 @@ eines Devices wird aber nicht am Device selbst gespeichert, sondern als
 - Ein Device hat zu jedem Zeitpunkt **genau einen aktiven Record**.
 - Eine Zustandsänderung (Umzug, Verleih, Ausmusterung, …) **legt immer
   einen neuen Record an**. Der bisherige Record wird dabei nicht
-  verändert oder gelöscht, sondern nur geschlossen (er erhält einen
-  `effective_until`-Zeitstempel).
+  verändert oder gelöscht, sondern nur geschlossen.
 - Records sind damit **append-only**: Es kommt immer nur etwas dazu,
   nichts wird überschrieben.
 
-Die möglichen Record-Typen und ihre erlaubten Übergänge sind zentral in
-`dlcdb/core/lifecycle.py` definiert — dort liegen die Zustände, die
-Übergangstabelle und die Funktionen, die einen Übergang ausführen. Jeder neue
-Record läuft über diese eine Stelle; `Record.save()` weist unerlaubte Übergänge
-zurück. Das folgende Diagramm gibt die Übergangstabelle wieder — wird
-`TRANSITIONS` geändert, gehört es mitgepflegt:
+Welche Übergänge zwischen den Zuständen erlaubt sind, zeigt das Diagramm:
+
+<!-- Das Diagramm gibt TRANSITIONS in dlcdb/core/lifecycle.py wieder;
+     wird die Übergangstabelle geändert, hier mitpflegen. -->
 
 ```{eval-rst}
 .. mermaid::
@@ -73,17 +70,11 @@ zurück. Das folgende Diagramm gibt die Übergangstabelle wieder — wird
       class REMOVED terminal
 ```
 
-Ob ein zulässiger Übergang einem Benutzer auch angeboten wird, entscheidet
-seine Berechtigung: Jeder Übergang hat eine eigene, und die beiden Wege aus
-`ENTFERNT` heraus sind nach der Installation niemandem zugewiesen. Einige
-Übergänge (nicht auffindbar, entfernen, wiederherstellen, wiedereingliedern)
-öffnen zudem noch ein Formular des Django-Admins — siehe
-[Berechtigungen](guides/berechtigungen.md#statuswechsel).
+Welche dieser Übergänge ein Benutzer angeboten bekommt, bestimmen seine
+Berechtigungen, siehe [Statuswechsel](guides/berechtigungen.md#statuswechsel).
 
-Maßgeblich ist jeweils der **Schlüssel** (`INROOM`, `LENT`, …): er steht so in
-der Datenbank, wird von der `CheckConstraint` geprüft und von der API
-unverändert ausgeliefert. Die Beschriftungen daneben sind übersetzbar
-(`gettext`) und können sich je nach Sprache ändern.
+Die **Schlüssel** (`INROOM`, `LENT`, …) stehen so in der Datenbank, in der API
+und im CSV-Import; die Beschriftungen sind übersetzt.
 
 | Schlüssel | Beschriftung (de) | Bedeutung |
 |---|---|---|
@@ -93,28 +84,23 @@ unverändert ausgeliefert. Die Beschriftungen daneben sind übersetzbar
 | `REMOVED` | Entfernt | Das Device wurde ausgemustert (verkauft, verschrottet, …). Endzustand. |
 | `ORDERED` | Bestellt | Bestelltes, noch nicht eingetroffenes Gerät. Optionaler Startzustand vor `INROOM`. |
 
-Daneben existiert der Typ *Lizenz-Record* für Software-Lizenzen und
-Verträge — siehe [Lizenzen](guides/lizenzen.md).
+Software-Lizenzen und Verträge sind Devices mit dem Schalter *Ist Lizenz?*
+und durchlaufen dieselben Zustände — siehe [Lizenzen](guides/lizenzen.md).
 
-## Historie und Audit-Trail gratis
+## Historie und Audit-Trail
 
-Weil Records nie verändert, sondern nur angehängt werden, ist die
-komplette Gerätehistorie einfach *da* — ohne separates Logging, ohne
-Zusatzmodul:
+Weil Records nur angehängt werden, ist die Gerätehistorie ohne separates
+Logging vollständig:
 
-- Die Record-Kette eines Devices beantwortet Fragen wie „Wo war dieses
-  Notebook im März?", „Wer hatte es ausgeliehen?" oder „Wann und mit
-  welchem Verbleib wurde es ausgemustert?" — inklusive Zeitstempel und
-  Bearbeiter.
-- Die Detailseite eines Devices zeigt den aktiven Record; über *Verlauf
-  › Alle Zustände* ist die vollständige, chronologische Kette erreichbar.
-- Zusätzlich werden Änderungen an den Stammdaten eines Devices
-  feldgenau versioniert (django-simple-history), einsehbar über
-  *Verlauf › Felder Historie* auf der Detailseite: wann, wer, welches Feld.
+- Die Record-Kette beantwortet Fragen wie „Wo war dieses Notebook im
+  März?", „Wer hatte es ausgeliehen?" oder „Wann und mit welchem Verbleib
+  wurde es ausgemustert?" — mit Zeitstempel und Bearbeiter. Auf der
+  Detailseite eines Devices: *Verlauf › Alle Zustände*.
+- Änderungen an den Stammdaten eines Devices werden feldgenau
+  versioniert: *Verlauf › Felder Historie* (wann, wer, welches Feld).
 
 Für Nachweispflichten (z.B. gegenüber Verwaltung oder Revision) ist
-damit kein zusätzlicher Prozess nötig: Der Audit-Trail ist das
-Datenmodell.
+damit kein zusätzlicher Prozess nötig.
 
 ## Einfacher Betrieb
 
@@ -122,15 +108,12 @@ Die DLCDB setzt konsequent auf einen "schmalen" Technik-Stack:
 
 - **SQLite als Datenbank.** Die gesamte Datenbank ist eine einzelne
   Datei. Lesezugriffe sind sehr schnell, ein Datenbankserver muss weder
-  installiert, noch abgesichert, noch aktualisiert werden. Backup heißt:
-  das `data/`-Verzeichnis kopieren. Dank WAL-Modus blockieren sich
-  Lese- und Schreibzugriffe im Alltagsbetrieb nicht.
+  installiert, noch abgesichert, noch aktualisiert werden; gesichert wird
+  ein nächtlicher Snapshot (siehe [Backup](betrieb/setup.md#backup)). Dank
+  WAL-Modus blockieren sich Lese- und Schreibzugriffe im Alltagsbetrieb nicht.
 - **Server-gerendertes UI.** Django-Templates mit Bootstrap 5 und htmx
   für partielle Updates — keine Single-Page-App, kein separates
   Frontend-Deployment, keine API-Synchronisationsprobleme.
-- **Rechtegesteuerte Navigation.** Menüpunkte erscheinen nur, wenn die
-  angemeldete Person die nötige Berechtigung hat. Die Oberfläche bleibt
-  für jede Rolle übersichtlich.
 - **Ein Prozess plus ein Worker.** Neben dem Webprozess läuft genau ein
   huey-Worker für Hintergrundaufgaben (Benachrichtigungen,
   HR-Sync) — ebenfalls SQLite-basiert, ohne Redis oder Message-Broker.

@@ -1,10 +1,10 @@
 # Import
 
 Devices können per CSV-Datei in die DLCDB importiert werden. Der Import
-erfolgt über die Geräte-Übersicht (*Hauptmenü › Geräte*, Button
-*Import*) und läuft in zwei Schritten: Nach dem Hochladen wird die Datei
-zunächst nur validiert und eine Vorschau angezeigt — erst nach
-Bestätigung wird tatsächlich importiert.
+startet in der Geräte-Übersicht (*Hauptmenü › Geräte*, Dropdown neben
+*Gerät hinzufügen* › *Geräte importieren*) und läuft in zwei Schritten:
+Nach dem Hochladen wird die Datei nur validiert und eine Vorschau
+angezeigt — erst nach Bestätigung wird importiert.
 
 1. CSV-Import-Datei erstellen
 
@@ -21,8 +21,7 @@ Bestätigung wird tatsächlich importiert.
 
 2. CSV-Datei hochladen und prüfen
 
-   - *Hauptmenü › Geräte › Import*
-   - Datei mit eventuellen Anmerkungen (`note`) hochladen
+   - Datei hochladen, [Mandant](berechtigungen.md#mandanten) wählen, optional eine Notiz
    - Die Vorschau zeigt Validierungsfehler an — dabei wird noch nichts
      in die Datenbank geschrieben
    - Falls vorhanden: Validierungsfehler in der CSV-Datei beheben und
@@ -41,9 +40,8 @@ Bestätigung wird tatsächlich importiert.
 ![Import: Vorschau und Bestätigung](/_static/import-preview.webp){.sd-card}
 
 :::{note}
-**Import-Historie und SAP-Format.** Vergangene Importe (Audit-Trail)
-sind unter *Prozesse › Bulk Import* (Django-Admin, ImporterList)
-einsehbar. Dort steht auch ein experimenteller Import für
-SAP-CSV-Exporte zur Verfügung — offiziell unterstützt ist nur das
-DLCDB-interne CSV-Format der Vorlage.
+**Import-Historie und SAP-Format.** Vergangene Importe listet
+*Prozesse › Bulk Import*. Ein experimenteller Import für SAP-CSV-Exporte
+steht nur im Django-Admin zur Verfügung — offiziell unterstützt ist nur
+das DLCDB-interne CSV-Format der Vorlage.
 :::

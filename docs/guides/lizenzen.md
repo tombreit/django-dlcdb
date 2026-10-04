@@ -18,7 +18,7 @@
 (subscribers)=
 ### Subscribers / Abonnenten
 
-Als "Subscriber" oder Abonnenten können beliebige Emailadressen (kommagetrennt) eingegeben werden. Diese Abonnenten werden über bestimmte Zustände der entsprechenden Lizenz - z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* - via Email benachrichtigt.
+Abonnenten sind [Personen](erste_schritte.md#7-personen-anlegen) mit Email-Adresse. Sie werden über Zustände der Lizenz – z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* – per Email benachrichtigt (siehe [Notifications](notifications.md)). Standard-Abonnenten für alle neuen Lizenzen stehen in der *Lizenzmodul Konfiguration*.
 
 ## Definitionen
 
@@ -28,11 +28,7 @@ Damit ein Device eine Lizenz ist/wird:
 - Ein Device muss einen Record (z.B. *Lokalisiert im Lizenzraum*) haben
 - Diese Eigenschaften werden beim Eintrag über die Lizenzverwaltung automatisch gesetzt.
 
-Wie Geräte gehören Lizenzen zu einem Tenant: Die Lizenzverwaltung zeigt nur die Lizenzen der eigenen Tenants, und eine neue Lizenz braucht einen Tenant (siehe [Tenants](berechtigungen.md#tenants)).
-
-Eine Lizenz kann:
-
-- Eine Liste von Emailadressen (getrennt durch Komma) haben, die zum aktuellen Stand (Lizenz ist eingetragen, Lizenz läuft bald ab, Lizenz ist abgelaufen) automatisch benachrichtigt werden.
+Wie Geräte gehören Lizenzen zu einem [Mandanten](berechtigungen.md#mandanten).
 
 Eine Lizenz sollte:
 
@@ -57,8 +53,3 @@ Die Lizenzverwaltung ({{ licenses_fe_link }}) gibt Auskunft über:
 Auf der Detailseite einer Lizenz steht ein ICS-Kalender-Link zur
 Verfügung. Damit lassen sich Ablaufdaten einer Lizenz direkt in den
 eigenen Kalender (Outlook, Thunderbird, etc.) übernehmen.
-
-:::{note}
-**Fallback Django-Admin:** Lizenz-Records sind zusätzlich unter
-`/admin/core/licencerecord/` einsehbar.
-:::

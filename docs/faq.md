@@ -2,40 +2,32 @@
 
 `````{dropdown} Warum kann ich keinen Hersteller oder Zulieferer bearbeiten oder zuordnen?
 
-Ihr Benutzeraccount bzw. ihre Gruppenzugehörigkeiten bestimmen die Berechtigungen in der DLCDB. In den meisten Fällen fehlt eine entsprechende Berechtigung (hier: *Can change manufacturer* bzw. *Can change supplier*). Siehe [Gruppen und Berechtigungen](./guides/berechtigungen.md#gruppen-und-berechtigungen)
+Meist fehlt Ihren Gruppen die Berechtigung, hier *Can change manufacturer* bzw. *Can change supplier*. Siehe [Gruppen und Berechtigungen](./guides/berechtigungen.md#gruppen-und-berechtigungen).
 `````
 
 `````{dropdown} Warum sehe ich einen Menüpunkt nicht?
 
-Menüpunkte im Frontend sind an Berechtigungen gebunden – ein Menüpunkt erscheint nur, wenn Ihre Gruppe die passende Berechtigung besitzt. Welche Berechtigung welchen Menüpunkt freischaltet (und warum manche Berechtigungen unter *Core* gelistet sind), zeigt [Navigation](./guides/berechtigungen.md#navigation). Hinweis: Superuser sehen alle Menüpunkte unabhängig von Berechtigungen.
+Ein Menüpunkt erscheint nur, wenn eine Ihrer Gruppen die passende Berechtigung besitzt. Welche das ist, zeigt [Navigation](./guides/berechtigungen.md#navigation).
 `````
 
-`````{dropdown} None of your groups belongs to a tenant?
+`````{dropdown} „Keine Ihrer Gruppen gehört zu einem Mandanten“?
 
-Keine Gruppe des Benutzers ist einem Tenant zugeordnet, deshalb sieht er keine Geräte – auch als Superuser. Abhilfe: unter *Einstellungen › Tenants* in der Zeile einer seiner Gruppen den Tenant anhaken.
-
-Siehe [Tenants](./guides/berechtigungen.md#tenants), [Tenant anlegen](./guides/erste_schritte.md#4-tenant-anlegen), [Tenant Model](./betrieb/model.md#tenant)
+Keine Gruppe des Benutzers ist einem Mandanten zugeordnet, deshalb sieht er keine Geräte. Abhilfe: unter *Einstellungen › Mandanten* in der Zeile einer seiner Gruppen den Mandanten anhaken. Siehe [Mandanten](./guides/berechtigungen.md#mandanten).
 `````
 
 `````{dropdown} Wo finde ich weitere Django-Admin Module?
 
-Die Django-Admin Auflistung der verfügbaren Module ist unter {{ base_url }}/admin/ abrufbar (Eintrag *Django Site-Verwaltung* im Benutzermenü; erfordert das Staff-Flag, siehe [Rolle des Django-Admins](./guides/berechtigungen.md#rolle-des-django-admins)).
+Unter {{ base_url }}/admin/ (Eintrag *Django Site-Verwaltung* im Benutzermenü), siehe [Django-Admin](./guides/berechtigungen.md#django-admin).
 `````
 
 `````{dropdown} Wo ist die Historie eines Devices?
 
-Die Detailseite eines Devices (*Hauptmenü › Geräte* › Gerät öffnen) zeigt den aktiven Record. Über *Verlauf › Alle Zustände* in der Seitenleiste ist die vollständige, chronologische Record-Kette des Devices erreichbar — wo war das Gerät wann, an wen war es verliehen, wann wurde es ausgemustert.
-
-Zusätzlich werden Änderungen an den Stammdaten eines Devices feldgenau versioniert und sind über die *History* im Django-Admin einsehbar.
-
-Siehe [Historie und Audit-Trail](./konzept.md#historie-und-audit-trail-gratis).
+Auf der Detailseite des Devices unter *Verlauf*: *Alle Zustände* zeigt die Record-Kette, *Felder Historie* die Änderungen an den Stammdaten. Siehe [Historie und Audit-Trail](./konzept.md#historie-und-audit-trail).
 `````
 
 `````{dropdown} Was ist ein "Record"?
 
-Ein *Record* ist ein Statuszustand eines Devices, z.B. *Lokalisiert*, *Verliehen* oder *Entfernt*. Ein Device hat zu jedem Zeitpunkt genau einen aktiven Record; jede Statusänderung legt einen neuen Record an, ohne die bisherigen zu verändern. So entsteht automatisch die lückenlose Historie eines Devices.
-
-Siehe [Konzept](./konzept.md).
+Ein Statuseintrag eines Devices, z.B. *Lokalisiert* oder *Verliehen*. Siehe [Konzept](./konzept.md).
 `````
 
 `````{dropdown} Was ist ein "Auto-Return-Raum"?
@@ -50,5 +42,5 @@ Siehe [Räume anlegen](./guides/erste_schritte.md#6-räume-anlegen)
 
 `````{dropdown} Was ist "Kleinkram"?
 
-Siehe [Kleinkram](guides/kleinkram.md) 
+Siehe [Kleinkram](guides/kleinkram.md)
 `````

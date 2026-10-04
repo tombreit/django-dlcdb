@@ -24,11 +24,7 @@ Die Übersicht listet alle Geräte und ist durchsuch-, filter- und sortierbar:
   Filtern, Sortieren und Blättern aktualisieren die Liste ohne Neuladen.
 - Button *Gerät hinzufügen* (rechts oben) legt ein neues Gerät an.
 
-:::{note}
-Jeder sieht nur die Geräte seiner Mandanten (*Tenants*). Wer mehrere Mandanten
-sieht, bekommt zusätzlich die Spalte *Mandant*. Geräte ohne Mandant erscheinen
-nicht (siehe [Geräte und Importe ohne Tenant](berechtigungen.md#geräte-und-importe-ohne-tenant)).
-:::
+Die Liste zeigt nur die Geräte der eigenen [Mandanten](berechtigungen.md#mandanten).
 
 ## Geräte-Detailseite
 
@@ -52,9 +48,9 @@ Das Formular ist in Sektionen gegliedert:
 Die Info-Spalte rechts zeigt:
 
 - **Aktueller Status** — der aktive Record (Zustand, Raum/Person) und der Button
-  *Neuer Zustand*. Dieser bietet nur die laut [Konzept](../konzept.md) erlaubten
-  Übergänge — u.a. *Verschieben* → [Umziehen](umziehen.md) und *Verleihen* →
-  [Ausleihe](ausleihe.md).
+  *Neuer Zustand* mit den erlaubten Übergängen (siehe
+  [Statuswechsel](berechtigungen.md#statuswechsel)), u.a. *Umziehen* →
+  [Umziehen](umziehen.md) und *Ausleihen* → [Ausleihe](ausleihe.md).
 - **Verlauf** — *Alle Zustände* (vollständige Record-Kette) und *Felder Historie*
   (feldgenaue Änderungen als Zeitleiste: wann, wer, was; die
   Verschlüsselungs-Passwörter nur maskiert).
@@ -62,19 +58,8 @@ Die Info-Spalte rechts zeigt:
 - **QR-Code** — der automatisch erzeugte QR-Code des Geräts (für die
   [Inventur](inventur.md)).
 
-:::{tip}
-Nur Geräte mit gesetztem Schalter *Ist verleihbar?* erscheinen in der
-[Verleihansicht](ausleihe.md).
-:::
-
 :::{note}
 Ist *Ist Lizenz?* gesetzt, wird das Gerät als Software-Lizenz behandelt und über
-die [Lizenzen](lizenzen.md)-Verwaltung geführt.
+die [Lizenzen](lizenzen.md)-Verwaltung geführt. *Ist verleihbar?* entscheidet,
+ob es in der [Verleihansicht](ausleihe.md) erscheint.
 :::
-
-## Verwandte Themen
-
-- [Konzept](../konzept.md) — Devices, Records und Audit-Trail
-- [Erste Schritte](erste_schritte.md) — Geräte anlegen und Records zuordnen
-- [Import](import.md) — Geräte per CSV importieren
-- [Umziehen](umziehen.md) · [Ausleihe](ausleihe.md) · [Inventur](inventur.md) · [Lizenzen](lizenzen.md)

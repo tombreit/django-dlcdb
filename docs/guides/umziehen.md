@@ -3,14 +3,9 @@
 ## Umzug eines einzelnen Gerätes
 
 - Umzuziehendes Gerät in der Geräte-Übersicht (*Hauptmenü › Geräte*) aufrufen. Such-, Filter- und Sortierfunktionen können bei der Auswahl hilfreich sein.
-- Auf der Detailseite *Neuer Zustand › Umziehen* wählen (benötigt `core.transition_can_relocate_device`, siehe [Berechtigungen](berechtigungen.md#statuswechsel)).
+- Auf der Detailseite *Neuer Zustand › Umziehen* wählen (siehe [Statuswechsel](berechtigungen.md#statuswechsel)).
 - Neuen Raum angeben.
 - Neue Raumzuordnung speichern.
-
-:::{warning}
-Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", wird der aktuelle Verleih damit beendet und ein "InRoomRecord" für dieses Gerät erstellt. Ist eine Raumänderung eines verliehenen Geräts gewünscht, so ist diese in der Verleihansicht des Devices vorzunehmen.
-:::
-
 
 ## Umzug mehrerer Geräte
 
@@ -21,9 +16,9 @@ Ist ein Device aktuell "verliehen" und wird wie oben beschrieben "lokalisiert", 
 
 ![Umziehen mehrerer Geräte](/_static/relocate.webp){.sd-card}
 
-:::{note}
-**Fallback Django-Admin:** Der Massen-Umzug ist alternativ auch im
-Device-Admin über die Action *Relocate* möglich. Dort kann zusätzlich ein neuer
-Tenant angegeben werden – für Benutzer, die mehrere Tenants sehen und
-`core.change_device` besitzen (siehe [Tenants](berechtigungen.md#tenants)).
-:::
+## Verliehene Geräte
+
+Über den Menüpunkt *Umziehen* lassen sich auch verliehene Geräte umziehen:
+Dabei ändert sich nur der Raum der Ausleihe, der Verleih läuft weiter. Auf der
+Detailseite bietet *Neuer Zustand* für verliehene Geräte kein *Umziehen* an;
+dort ändert man den Raum über die [Ausleihe](ausleihe.md).

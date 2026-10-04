@@ -24,7 +24,7 @@ Token.objects.create(user=apiuser)
 
 The API user needs neither the staff nor the superuser flag. Note that the API
 is **not** tenant-filtered: a token returns the devices of all tenants (see
-[Berechtigungen › Tenants](../guides/berechtigungen.md#tenants)).
+[Berechtigungen › Mandanten](../guides/berechtigungen.md#mandanten)).
 
 :::{note}
 In your queries the token must be present via HTTP header, e.g.:

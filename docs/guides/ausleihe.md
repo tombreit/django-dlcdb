@@ -14,12 +14,12 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 
 - Druckbarer, gebrandeter Ausleihvertrag, inklusive Version für die Ausleihenden
 - Editierbare Checkliste als Anhang zum Ausleihvertrag
-- Automatische Notifications (Emails) an Ausleiher bei überfälliger Rückgabe
+- Automatische [Erinnerungen](notifications.md) an Ausleiher bei überfälliger Rückgabe
 
 ## Gerät wird ausgeliehen
 
 :::{note}
-Auch einem verliehenen Gerät kann ein Raum zugeordnet werden. Wenn beim Verleih davon auszugehen ist, dass das Device mit hoher Wahrscheinlichkeit in Raum X wiederzufinden, so ist hier auch Raum X einzutragen. Wenn mit hoher Wahrscheinlichkeit unklar ist, wo sich das Device befinden wird (z.B. Homeoffice-Ausleihen), kann der Raum “Extern” angegeben werden.
+Auch ein verliehenes Gerät hat einen Raum: den, in dem es voraussichtlich zu finden ist. Ist das unklar (z.B. Homeoffice), den [Extern-Raum](erste_schritte.md#6-räume-anlegen) angeben.
 :::
 
 - Gerät-Ausleihe wird in DLCDB geöffnet
@@ -33,9 +33,7 @@ Auch einem verliehenen Gerät kann ein Raum zugeordnet werden. Wenn beim Verleih
 - Gerät wird übergeben
 - Unterschriebener Ausleihzettel wird abgeheftet
 
-### Gerät wird während der Ausleihe editiert
-
-- Raumänderungen eines verliehenen Gerätes werden in der Verleihansicht des Gerätes vorgenommen
+Den Raum eines verliehenen Geräts ändert man in der Ausleihe oder über [Umziehen](umziehen.md#verliehene-geräte); der Verleih läuft dabei weiter.
 
 ## Gerät wird zurückgegeben
 
@@ -44,7 +42,7 @@ Auch einem verliehenen Gerät kann ein Raum zugeordnet werden. Wenn beim Verleih
 - Datensatz wird gespeichert
 
 :::{tip}
-Für zurückgegebene Devices wird automatisch ein `INROOM`-Record mit dem definierten Auto-Return-Raum erstellt. Der Auto-Return-Raum wird (einmalig) in der Raumverwaltung definiert.
+Ein zurückgegebenes Gerät kommt automatisch in den [„Auto return“-Raum](erste_schritte.md#6-räume-anlegen).
 :::
 
 :::{note}

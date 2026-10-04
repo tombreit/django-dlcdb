@@ -1,6 +1,6 @@
 # Inventur
 
-Inventur-Ansicht: *Inventarisieren* (Hauptmenü bzw. *Prozesse › Inventarisieren*; der Menüpunkt erscheint nur bei aktiver Inventur und mit der Berechtigung *Can inventorize*, siehe [Berechtigungen](berechtigungen.md#navigation))
+Inventur-Ansicht: *Inventarisieren* (Hauptmenü bzw. *Prozesse › Inventarisieren*, nur bei aktiver Inventur)
 
 ## Screenshots
 
@@ -20,7 +20,7 @@ Inventur-Ansicht: *Inventarisieren* (Hauptmenü bzw. *Prozesse › Inventarisier
 
 ### Voraussetzungen
 
-- Zugriff auf die DLCDB, Berechtigung zum Inventarisieren
+- Berechtigung *Can inventorize* (siehe [Navigation](berechtigungen.md#navigation))
 - Endgerät (Smartphone, Tablet, Notebook) mit aktuellem Mozilla Firefox oder Google Chrome Browser
 - Aktuelle Inventur (*Datenhaltung > Inventuren*, *Aktiv*) angelegt
 
@@ -70,7 +70,7 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ## Geräte-Übersicht
 
-Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht zeigt die Devices der eigenen Tenants; ist bei der Inventur *Device search tenant aware* ausgeschaltet, zeigt sie alle Devices (siehe [Tenants](berechtigungen.md#tenants)).
+Zu Recherchezwecken und zur manuellen Raumzuordnung - ohne Inventur-Record - existiert eine *Devices*-Übersicht in der Navigation der Inventur-App (*Devices*; nicht zu verwechseln mit der allgemeinen Geräte-Übersicht *Hauptmenü › Geräte*). Diese Übersicht zeigt die Devices der eigenen [Mandanten](berechtigungen.md#mandanten); ist bei der Inventur *Geräte-Suche ist Tenant-spezifisch* ausgeschaltet, zeigt sie alle Devices.
 
 Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurstatus ausstehend etc.).
 
@@ -78,8 +78,8 @@ Die Übersicht ist durchsuch- und filterbar (z.B. nach Geräteklasse, Inventurst
 
 ## Hinweise
 
-- Geräteänderungen im Inventurmodus werden erst übertragen, wenn der Button "Save inventory for room..." angeklickt wird. Es ist daher problemlos möglich, Inventurstatusänderungen an Geräten vorzunehmen und auch wiederholt zu ändern, ohne eine Inventarisierungsaktion auszulösen. Der Status einer Rauminventur wird erst und ausschließlich beim oben genannten Speichern des Raums übertragen.
-- Die Person, die an der DLCDB angemeldet ist, wird in diversen Auswertungen vermerkt. Daher sollten personalisierte Accounts für die Inventarisierung genutzt werden (und z.B. nicht der Benutzername 'admin').
+- Änderungen im Inventurmodus werden erst mit dem Button "Save inventory for room..." übertragen; bis dahin lässt sich der Status beliebig ändern.
+- Die angemeldete Person wird in Auswertungen vermerkt. Deshalb personalisierte Accounts nutzen (z.B. nicht 'admin').
 - Ein Raum gilt als fertig inventarisiert, wenn alle Devices die aktuell diesem Raum zugeordnet sind irgendeinen Record vom Typ INROOM oder LENT haben, der einen aktuellen Inventurstempel hat.
 
 ## SAP-Abgleich
@@ -130,10 +130,10 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
 - Jedes Device hat automatisch eine eindeutige UUID
 - Für jedes Gerät wird ein QR-Code generiert, der sich aus einem Prefix, einem (optionalen) Infix und einem Suffix zusammensetzt:
 
-    - Prefix: String, wird in via `settings` definiert, dient der Unterscheidung von eigenen und fremden QR-Codes. Zum Beispiel: `DLCDB` oder `example.com`
+    - Prefix: `QRCODE_PREFIX` in den Settings (z.B. `DLCDB`), unterscheidet eigene von fremden QR-Codes.
     - Suffix: UUID eines Items, in der Regel eines Devices
     - Infix: Optionaler Identifier (String), der zwischen Prefix und Suffix steht und spezielle Items kennzeichnet, z.B. Räume.
 
-:::{WARNING}
-Do not change this prefix mid-project as it will break the scanner recognizing already printed qr codes!
+:::{warning}
+Den Prefix im laufenden Betrieb nicht ändern: Bereits gedruckte QR-Codes erkennt der Scanner sonst nicht mehr.
 :::
