@@ -10,6 +10,8 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
+import dlcdb.accounts.auth_backends
+
 
 @pytest.fixture
 def test_password():
@@ -137,6 +139,8 @@ def test_auth_backends_import_without_django_auth_ldap(monkeypatch):
     """Without the `ldap` extra, the always active EmailModelBackend must still import."""
     monkeypatch.setitem(sys.modules, "django_auth_ldap", None)
     monkeypatch.setitem(sys.modules, "django_auth_ldap.backend", None)
-    monkeypatch.delitem(sys.modules, "dlcdb.accounts.auth_backends", raising=False)
+    monkeypatch.delitem(sys.modules, "dlcdb.accounts.auth_backends")
+    # The re-import also rebinds the package attribute; restore that as well
+    monkeypatch.setattr(dlcdb.accounts, "auth_backends", dlcdb.accounts.auth_backends)
 
     importlib.import_module("dlcdb.accounts.auth_backends")

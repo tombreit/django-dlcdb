@@ -23,9 +23,9 @@ ref=${1:-HEAD}
 release_dir=$PWD/run/release
 src=$release_dir/src
 
-# Guards
-version=$(python3 -c "import dlcdb; print(dlcdb.__version__)")
-npm_version=$(node -p "require('./package.json').version")
+# Guards, against the state that gets built ($ref), not the working tree
+version=$(git show "$ref:dlcdb/__init__.py" | sed -n 's/^__version__ = "\(.*\)"/\1/p')
+npm_version=$(git show "$ref:package.json" | python3 -c "import json, sys; print(json.load(sys.stdin)['version'])")
 if [ "$version" != "$npm_version" ]; then
     echo "dlcdb/__init__.py says $version, package.json $npm_version" >&2
     exit 1

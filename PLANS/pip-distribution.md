@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–12 done (2026-10-06); the first tag is your call. A release starts with
+**Status:** batches 0–13 done (2026-10-06); the first tag is your call. A release starts with
 `make release VERSION=X.Y.Z`. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
@@ -356,6 +356,35 @@ This is the common pattern; Django itself keeps `do_django_release.py` and `veri
 - Python instead of shell: you chose shell, as it stays closest to the commands you'd type by
   hand.
 
+### Batch 13: second branch review before the tag
+- **`git push production` still deploys.** The post-receive hook on `apps.mpicc.de` was replayed
+  in the scratchpad: verbatim, apart from paths, stubbed `systemctl` and the ref. First `main`,
+  then the branch on the same work tree, venv and database (with LDAP):
+  - every step passes, the upgrade finds no migrations, `createcachetable` has nothing to do;
+  - through `dlcdb/wsgi.py`, the login page, `/docs/` and the theme CSS return 200, and
+    `run_huey` starts;
+  - local users' sessions survive. LDAP users are logged out once, because the backend path
+    stored in their session no longer exists (a re-export in `auth_backends.py` would not help:
+    Django checks the stored path against `AUTHENTICATION_BACKENDS`).
+
+  The hook only checks out `main`: merge the branch, then `git push production main`.
+- **Fixed from the review:**
+  - `dlcdb_init` renders before it creates a file, and removes a half-written file. A failing
+    template used to leave an empty `.env` behind, which later runs skipped, so the instance ran
+    with the publicly known fallback `SECRET_KEY`.
+  - `build_wheel.sh` reads the version guards from the built `REF` (`git show`), not from the
+    working tree.
+  - `prepare_release.sh` restores the three version files when the build or smoke test fails
+    (`trap … ERR`), so a retry works.
+  - The import test in `accounts/tests/test_login.py` also restores the package attribute it
+    rebinds.
+  - `DOCS_DIR` uses `RUN_DIR`, like `STATICFILES_DIR`.
+- **Left as is:**
+  - the API schema version (your consolidation to 0.9.4);
+  - the duplicated project URLs;
+  - the wheel size (batch 9);
+  - a wheel built without `make wheel` lacks its static files (no extra startup check).
+
 ## Pitfalls
 
 - Build wheels only with `make wheel` (or `make release`). It takes care of three traps:
@@ -391,3 +420,4 @@ This is the common pattern; Django itself keeps `do_django_release.py` and `veri
 - [x] Batch 10: Makefile targets for releases
 - [x] Batch 11: admin error mails found by the container test
 - [x] Batch 12: release logic in `scripts/`
+- [x] Batch 13: second branch review before the tag

@@ -8,7 +8,9 @@ import re
 import stat
 import sys
 
+import pytest
 from django.core.management import call_command
+from django.template import TemplateDoesNotExist
 
 
 def test_dlcdb_init_creates_the_files_of_a_pip_installation_once(settings, tmp_path):
@@ -41,3 +43,18 @@ def test_dlcdb_init_in_a_source_checkout_creates_only_env(settings, tmp_path):
     call_command("dlcdb_init", stdout=io.StringIO())
 
     assert [path.name for path in tmp_path.iterdir()] == [".env"]
+
+
+def test_dlcdb_init_leaves_no_empty_file_when_rendering_fails(settings, tmp_path, monkeypatch):
+    """Otherwise a later run would skip the empty .env, leaving the instance without SECRET_KEY."""
+    settings.INSTANCE_DIR = tmp_path
+
+    def broken_render(template, context):
+        raise TemplateDoesNotExist(template)
+
+    monkeypatch.setattr("dlcdb.core.management.commands.dlcdb_init.render_to_string", broken_render)
+
+    with pytest.raises(TemplateDoesNotExist):
+        call_command("dlcdb_init", stdout=io.StringIO())
+
+    assert list(tmp_path.iterdir()) == []

@@ -497,7 +497,7 @@ WHITENOISE_INDEX_FILE = True
 
 # Built docs, served at /docs/: `make docs` writes them to run/docs/html in a source
 # checkout; a wheel carries them inside the package (copied there by the release build).
-DOCS_DIR = BASE_DIR / "run" / "docs" / "html" if SOURCE_CHECKOUT else BASE_DIR / "dlcdb" / "docs_html"
+DOCS_DIR = RUN_DIR / "docs" / "html" if SOURCE_CHECKOUT else BASE_DIR / "dlcdb" / "docs_html"
 
 # Add extra output directories that WhiteNoise can serve as static files
 # *outside* of `staticfiles`.

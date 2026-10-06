@@ -53,11 +53,18 @@ class Command(BaseCommand):
         files = FILES if settings.SOURCE_CHECKOUT else FILES + PIP_INSTALLATION_FILES
         for template, name, mode, note in files:
             path = settings.INSTANCE_DIR / name
+            # Rendered first: a failing template must not leave an empty file
+            # behind, which every later run would skip as existing.
+            content = render_to_string(template, context)
             try:
                 # Created empty with its final mode, never over an existing file
                 path.touch(mode=mode, exist_ok=False)
             except FileExistsError:
                 self.stdout.write(f"Skipped {path} (exists)")
                 continue
-            path.write_text(render_to_string(template, context))
+            try:
+                path.write_text(content)
+            except OSError:
+                path.unlink()  # same reason: no half-written file
+                raise
             self.stdout.write(self.style.SUCCESS(f"Created {path}{note}"))

@@ -28,7 +28,10 @@ if git rev-parse --quiet --verify "refs/tags/v$version" > /dev/null; then
     exit 1
 fi
 
-# The version, in all three places
+# The version, in all three places. If anything below fails, the three files
+# are restored, so a retry starts from a clean working tree again.
+version_files=(dlcdb/__init__.py package.json package-lock.json)
+trap 'git checkout -- "${version_files[@]}"; echo "Restored ${version_files[*]}" >&2' ERR
 sed -i "s/^__version__ = \".*\"/__version__ = \"$version\"/" dlcdb/__init__.py
 npm version "$version" --no-git-tag-version --allow-same-version --loglevel=error > /dev/null
 
@@ -42,6 +45,7 @@ else
     ref=$(git stash create)
 fi
 scripts/build_wheel.sh "$ref"
+trap - ERR
 
 if ! git diff --quiet; then
     echo "Next: git commit --all --message \"Version $version\""
