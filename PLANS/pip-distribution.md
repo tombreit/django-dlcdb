@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–13 done (2026-10-06); the first tag is your call. A release starts with
+**Status:** batches 0–14 done (2026-10-06); the first tag is your call. A release starts with
 `make release VERSION=X.Y.Z`. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
@@ -83,7 +83,8 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 8. **The version lives in code: `dlcdb.__version__`.** It is the single source.
    `pyproject.toml` takes it via `dynamic = ["version"]`, and the footer imports it. Checkouts,
    the container and wheels see the same value without reading any file at runtime. The API
-   schema (`SPECTACULAR_SETTINGS["VERSION"]`) uses it too. `package.json` and
+   schema keeps its own version (`SPECTACULAR_SETTINGS["VERSION"]`, 2.0.0): it versions the API
+   contract, not the app (since batch 14). `package.json` and
    `package-lock.json` cannot import it, so they carry the same number by hand. They were
    consolidated to 0.9.4 in batch 2; before that, 0.9.3, 2.0.1 and 2.0.0 were in use. You bump
    it by hand before tagging; the release workflow checks that the tag matches. The footer's
@@ -169,7 +170,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - `dlcdb/__init__.py`: `__version__`. `pyproject.toml`: `dynamic = ["version"]` from
   `dlcdb.__version__`. `theme/context_processors.py` imports it, and the URLs become constants.
 - Versions consolidated to 0.9.4: `dlcdb.__version__`, `package.json` and `package-lock.json`.
-  The API schema version comes from `dlcdb.__version__`.
+  The API schema version comes from `dlcdb.__version__` (it went back to 2.0.0 in batch 14).
 
 ### Batch 3: release workflow and docs
 - Add `.github/workflows/release.yml`, triggered on a `v*` tag push. It uses only the
@@ -380,10 +381,18 @@ This is the common pattern; Django itself keeps `do_django_release.py` and `veri
     rebinds.
   - `DOCS_DIR` uses `RUN_DIR`, like `STATICFILES_DIR`.
 - **Left as is:**
-  - the API schema version (your consolidation to 0.9.4);
   - the duplicated project URLs;
   - the wheel size (batch 9);
   - a wheel built without `make wheel` lacks its static files (no extra startup check).
+
+### Batch 14: the API schema keeps its own version
+Review finding 4 was right, and batch 13 had wrongly filed it under "your decision". Batch 2 set
+`SPECTACULAR_SETTINGS["VERSION"]` to `dlcdb.__version__` (0.9.4). But `info.version` in an OpenAPI
+schema versions the API contract, which the OpenAPI specification explicitly distinguishes from
+the implementation's version. The API hasn't changed (`/api/v2/`), so consumers would have seen
+a downgrade from 2.0.0 to 0.9.4, and the API version would have moved with every app release.
+It is the literal `"2.0.0"` again, with a comment: bump it when the API changes. The
+`import dlcdb` in the settings, used only for this, is gone.
 
 ## Pitfalls
 
@@ -421,3 +430,4 @@ This is the common pattern; Django itself keeps `do_django_release.py` and `veri
 - [x] Batch 11: admin error mails found by the container test
 - [x] Batch 12: release logic in `scripts/`
 - [x] Batch 13: second branch review before the tag
+- [x] Batch 14: the API schema keeps its own version

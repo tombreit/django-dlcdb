@@ -11,8 +11,6 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from huey import SqliteHuey
 
-import dlcdb
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # A source checkout has pyproject.toml next to the dlcdb package; a pip installation has not.
@@ -469,7 +467,9 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "DLCDB API",
     "DESCRIPTION": "Device Life Cycle Database API",
-    "VERSION": dlcdb.__version__,
+    # The version of the API contract (/api/v2/), not of the app: bump it
+    # when the API changes, independently of dlcdb.__version__.
+    "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
