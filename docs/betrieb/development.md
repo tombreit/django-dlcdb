@@ -67,3 +67,35 @@ The pushed tag starts `.github/workflows/release.yml` on GitHub. It runs
 `make wheel` on the tag, with the smoke test on Python 3.12, and attaches the
 wheel to a new GitHub release. A tag that does not match both version numbers
 fails the workflow.
+
+## Trying a wheel in a container
+
+To try a wheel before it is released, install it into a fresh container, the
+way an operator installs a release:
+
+```bash
+make wheel  # builds run/release/dist/dlcdb-X.Y.Z-py3-none-any.whl from HEAD
+podman run --rm -it --publish 8000:8000 \
+    --volume ./run/release/dist:/wheels:ro,Z \
+    docker.io/library/debian:trixie-slim bash
+```
+
+In the container, follow [Setup › Pip installation](setup.md#pip-installation),
+with the wheel file instead of the release URL:
+
+```bash
+apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
+useradd --create-home --home-dir /srv/dlcdb dlcdb && su - dlcdb
+python3 -m venv /srv/dlcdb/venv
+/srv/dlcdb/venv/bin/pip install /wheels/dlcdb-*.whl
+DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init
+cd /srv/dlcdb
+./manage.py migrate
+./manage.py createsuperuser
+./manage.py runserver 0.0.0.0:8000
+```
+
+Then open <http://127.0.0.1:8000>. The generated `.env` allows `127.0.0.1`,
+not `localhost`. For Python 3.12, the lowest supported version, use
+`docker.io/library/python:3.12-slim` instead and skip the `apt-get` line.
+`--rm` discards the container on exit.

@@ -311,6 +311,9 @@ tags or pushes.
   - It prints the commit, tag and push commands; you run them yourself.
 - `release.yml` now only runs `make wheel TAG=… SMOKE_PYTHON=python3.12` and `gh release create`
   on `run/release/dist/*.whl`. The `release` recipe in `development.md` uses the targets.
+- `development.md` also shows how to try a wheel in a fresh podman container before releasing
+  it: Debian 13, or `python:3.12-slim` for the minimum version, following *Setup › Pip
+  installation* with the wheel file instead of the release URL.
 - **Pitfall found while testing:** `python -m dlcdb`, started inside a source checkout, imports
   `dlcdb` from the checkout rather than from the installed wheel, because Python puts the current
   directory first on its search path. The smoke test therefore starts from the empty instance
