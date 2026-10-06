@@ -167,7 +167,7 @@ touch wsgi.py
 *Assuming local development environment in a virtual python environment*
 
 ```bash
-git clone git@gitlab.gwdg.de:dlcdb/django-dlcdb.git
+git clone https://github.com/tombreit/django-dlcdb.git
 cd django-dlcdb
 python3 -m venv .venv  # Create a virtual environment
 source .venv/bin/activate  # Activate the virtual environment
@@ -356,6 +356,8 @@ The built documentation lands in `run/docs` and is served by the
 application itself at `/docs/` (via WhiteNoise, see
 `MoreWhiteNoiseMiddleware`) — that is why `make docs` is part of the
 deployment steps above. A pip installation gets them with the wheel.
+Every push to `main` on GitHub also publishes them at
+<https://tombreit.github.io/django-dlcdb/> (`.github/workflows/docs.yml`).
 
 ### Localization
 

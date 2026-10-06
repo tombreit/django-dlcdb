@@ -17,6 +17,6 @@ First start, after editing `.env`:
 After installing a new release, `./manage.py dlcdb_init` adds files that are new, and
 `./manage.py migrate` updates the database.
 
-Documentation: https://dlcdb.pages.gwdg.de/django-dlcdb/ and, for the installed
+Documentation: https://tombreit.github.io/django-dlcdb/ and, for the installed
 version, `/docs/` of the running DLCDB. Production setup, task runner and
-updates: https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html#pip-installation
+updates: https://tombreit.github.io/django-dlcdb/betrieb/setup.html#pip-installation

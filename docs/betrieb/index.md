@@ -1,6 +1,6 @@
 # Betrieb
 
-Installation, Datenmodell und Schnittstellen der DLCDB. Repository: [https://gitlab.gwdg.de/dlcdb/django-dlcdb](https://gitlab.gwdg.de/dlcdb/django-dlcdb)
+Installation, Datenmodell und Schnittstellen der DLCDB. Repository: [https://github.com/tombreit/django-dlcdb](https://github.com/tombreit/django-dlcdb)
 
 ```{toctree}
 :maxdepth: 2

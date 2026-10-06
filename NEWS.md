@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Docs moved to GitHub Pages: https://tombreit.github.io/django-dlcdb/; existing instances update the documentation URL under Branding
 * Pip installation: each GitHub release carries a wheel with frontend assets, docs and collected static files; `python -m dlcdb dlcdb_init` creates the instance directory's `.env` (with a fresh secret key), `manage.py`, `wsgi.py` and a README, so the instance runs with `./manage.py` like any Django project
 * Dashboard: a Journal tile counts the critical, error and warning entries of the last 30 days
 * SQLite runs in WAL mode with an immediate write lock, a 20 s busy timeout and larger caches; deployments stop the task runner during `migrate`, and the huey container waits until `serve` has applied all migrations; the task runner writes a compacted, copyable `data/db/db.sqlite3.snapshot` every night at 00:30 UTC for file-based backups

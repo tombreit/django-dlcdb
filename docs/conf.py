@@ -10,8 +10,8 @@ sys.path.insert(0, os.path.abspath(".."))
 # node_bin_path = os.path.abspath('../node_modules/.bin')
 # sys.path.append(node_bin_path)
 
-# A minimal .env with production settings is created for gitlab pages
-# see .gitlab.ci.yml
+# Without a .env (GitHub Pages, the wheel build), base falls back to its
+# production defaults.
 os.environ["DJANGO_SETTINGS_MODULE"] = "dlcdb.settings.base"
 django.setup()
 
@@ -19,7 +19,7 @@ django.setup()
 # Generate the OpenAPI schema from drf-spectacular at build time, so the API
 # reference in docs/betrieb/api.md can never drift from the code. The file is
 # gitignored (see .gitignore) and regenerated on every sphinx-build, both
-# locally and in GitLab CI.
+# locally and on GitHub (.github/workflows/docs.yml).
 from django.core.management import call_command
 
 _schema_path = os.path.join(os.path.dirname(__file__), "_generated", "openapi.yaml")
@@ -110,7 +110,7 @@ html_static_path = ["_static"]
 html_title = "DLCDB"
 
 html_theme_options = {
-    "gitlab_url": "https://gitlab.gwdg.de/dlcdb/django-dlcdb",
+    "github_url": "https://github.com/tombreit/django-dlcdb",
     # The app's figurative mark, one file per color mode; the theme copies them
     # to _static. With an image, the title text shows only when set here.
     "logo": {

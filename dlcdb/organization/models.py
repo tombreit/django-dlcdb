@@ -109,7 +109,7 @@ class Branding(SingletonBaseModel):
 
     documentation_url = models.URLField(
         blank=True,
-        default="https://dlcdb.pages.gwdg.de/django-dlcdb/",
+        default="https://tombreit.github.io/django-dlcdb/",
         help_text="If you host the documentation on your own, provide the URL here.",
     )
 

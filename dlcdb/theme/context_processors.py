@@ -5,8 +5,8 @@
 from dlcdb import __version__
 
 # Kept in step with [project.urls] in pyproject.toml.
-REPOSITORY_URL = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
-ISSUES_URL = f"{REPOSITORY_URL}/-/issues"
+REPOSITORY_URL = "https://github.com/tombreit/django-dlcdb"
+ISSUES_URL = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
 
 
 def project_meta(request):

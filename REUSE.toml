@@ -1,7 +1,7 @@
 version = 1
 SPDX-PackageName = "django-dlcdb"
 SPDX-PackageSupplier = "Thomas Breitner <t.breitner@csl.mpg.de>"
-SPDX-PackageDownloadLocation = "https://gitlab.gwdg.de/dlcdb/django-dlcdb"
+SPDX-PackageDownloadLocation = "https://github.com/tombreit/django-dlcdb"
 
 [[annotations]]
 path = "**/templates/**/*.html"

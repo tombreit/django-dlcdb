@@ -39,19 +39,19 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Then log in as that superuser and follow [Erste Schritte](https://dlcdb.pages.gwdg.de/django-dlcdb/guides/erste_schritte.html) to set up groups, permissions, a tenant and rooms.
+Then log in as that superuser and follow [Erste Schritte](https://tombreit.github.io/django-dlcdb/guides/erste_schritte.html) to set up groups, permissions, a tenant and rooms.
 
-[Detailed setup and installation docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/setup.html)
+[Detailed setup and installation docs](https://tombreit.github.io/django-dlcdb/betrieb/setup.html)
 
 ## 📖 Documentation
 
-`docs/` or [https://dlcdb.pages.gwdg.de/django-dlcdb/](https://dlcdb.pages.gwdg.de/django-dlcdb/)
+`docs/` or [https://tombreit.github.io/django-dlcdb/](https://tombreit.github.io/django-dlcdb/)
 
 ## 📡 REST-API
 
 The DLCDB exposes some data via its REST-API:
 
-* [API docs](https://dlcdb.pages.gwdg.de/django-dlcdb/betrieb/api.html)
+* [API docs](https://tombreit.github.io/django-dlcdb/betrieb/api.html)
 * Endpoint: `https://fqdn/api/v2/`
 
 ## ✅ Tests
@@ -70,4 +70,4 @@ DLCDB supports:
 
 ## ⚖️ License
 
-[EUPL-1.2](https://gitlab.gwdg.de/dlcdb/django-dlcdb/-/blob/main/LICENSE) - The EUPL is a reciprocal (or copyleft) licence, meaning that distributed contributions and improvements (called "derivatives") will be provided back or shared with the licensor and all other users. At the same time (and unlike other copyleft licences like the GPL or AGPL), the EUPL is compatible with most other open reciprocal licences and is interoperable. [Source](https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence)
+[EUPL-1.2](https://github.com/tombreit/django-dlcdb/blob/main/LICENSE) - The EUPL is a reciprocal (or copyleft) licence, meaning that distributed contributions and improvements (called "derivatives") will be provided back or shared with the licensor and all other users. At the same time (and unlike other copyleft licences like the GPL or AGPL), the EUPL is compatible with most other open reciprocal licences and is interoperable. [Source](https://joinup.ec.europa.eu/collection/eupl/introduction-eupl-licence)

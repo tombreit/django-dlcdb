@@ -62,7 +62,7 @@
   },
   "repository": {
     "type": "https",
-    "url": "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+    "url": "https://github.com/tombreit/django-dlcdb"
   },
   "author": "Thomas Breitner",
   "license": "ISC",

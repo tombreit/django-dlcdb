@@ -8,7 +8,6 @@
 .gitignore
 .pytest_cache
 .vscode
-.gitlab-ci.yml
 .ruff_cache
 
 Containerfile

@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Thomas Breitner
+#
+# SPDX-License-Identifier: CC0-1.0
+
+# Every push to main publishes the handbook (docs/) on GitHub Pages:
+# https://tombreit.github.io/django-dlcdb/
+
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; a running one is not cancelled halfway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      # The same target builds the docs locally and for the wheel (Makefile, `make docs`)
+      - name: Docs
+        run: |
+          pip install -r requirements/prod.txt
+          npm ci --ignore-scripts --loglevel=error
+          make docs
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: run/docs/html
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

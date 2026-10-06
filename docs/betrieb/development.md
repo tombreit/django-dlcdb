@@ -16,7 +16,7 @@ every package, including the indirect ones, for one combination of extras:
 
 | File | Extras | Used by |
 |---|---|---|
-| `prod.txt` | `docs` | source installations without LDAP, GitLab Pages, the release workflow |
+| `prod.txt` | `docs` | source installations without LDAP, GitHub Pages, the release workflow |
 | `prod-ldap.txt` | `docs`, `ldap` | source installations with LDAP (`requirements.txt` links here) |
 | `dev.txt` | `docs`, `dev` | development |
 | `container.txt` | `docs`, `ldap`, `container` | the container image |

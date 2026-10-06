@@ -81,9 +81,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
-Documentation = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/tree/main/docs"
-Repository = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
+Homepage = "https://github.com/tombreit/django-dlcdb"
+Documentation = "https://tombreit.github.io/django-dlcdb/"
+Repository = "https://github.com/tombreit/django-dlcdb"
 Issues = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
 
 [build-system]
