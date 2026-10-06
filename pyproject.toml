@@ -25,7 +25,6 @@ dependencies = [
     "django-simple-history",
     "django-htmx",
     "whitenoise",
-    "python-magic",
     "huey",
     "openpyxl",
     "markdown",

@@ -145,7 +145,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   4. `python -m build --wheel`
   5. smoke test in a fresh venv: `dlcdb check`, `dlcdb migrate`, `dlcdb collectstatic`
   6. `gh release create … --generate-notes` with the wheel
-  No system packages: nothing imports `python-magic`, so libmagic is not needed.
+  No system packages: libmagic is not needed (`python-magic` was unused and has been removed).
 - `docs/betrieb/setup.md`: a new section *Pip installation*, plus *Operations › Release*. The
   section covers:
   - install, including the wheel URL with extras and optional constraints from the
@@ -165,8 +165,9 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - **`createcachetable`: resolved by removing django-select2.** No widget had used it since
   2023, so its DatabaseCache table `dlcdb_select2` is not needed. Old installations may keep the
   empty table; it is harmless.
-- **`python-magic` looks unused.** It is in `dependencies` and the container installs libmagic,
-  but nothing under `dlcdb/` imports `magic`. Remove it, or find out who needs it.
+- **`python-magic`: removed.** Its only use, a CSV MIME check in the bulk decommissioning
+  import, went away in March 2025 (`a84fba15`). The container and GitLab CI no longer install
+  libmagic.
 - **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow run and the
   release page, then try the documented install from the release URL.
 

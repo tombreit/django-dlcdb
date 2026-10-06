@@ -143,8 +143,6 @@ python-dateutil==2.9.0.post0
     # via icalendar
 python-ldap==3.4.8
     # via django-auth-ldap
-python-magic==0.4.27
-    # via dlcdb (pyproject.toml)
 pyyaml==6.0.3
     # via
     #   drf-spectacular

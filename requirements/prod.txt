@@ -130,8 +130,6 @@ pygments==2.21.0
     #   sphinx-mdinclude
 python-dateutil==2.9.0.post0
     # via icalendar
-python-magic==0.4.27
-    # via dlcdb (pyproject.toml)
 pyyaml==6.0.3
     # via
     #   drf-spectacular

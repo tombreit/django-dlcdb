@@ -200,8 +200,6 @@ python-discovery==1.6.1
     # via virtualenv
 python-ldap==3.4.8
     # via django-auth-ldap
-python-magic==0.4.27
-    # via dlcdb (pyproject.toml)
 pyyaml==6.0.3
     # via
     #   drf-spectacular
