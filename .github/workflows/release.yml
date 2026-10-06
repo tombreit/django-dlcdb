@@ -45,8 +45,10 @@ jobs:
         run: |
           pip install -r requirements/prod.txt build
           make docs
+          python manage.py collectstatic --noinput --clear
+          # Replace, never copy into: `cp -r` into an existing directory nests the copy
+          rm -rf dlcdb/docs_html dlcdb/staticfiles
           cp -r run/docs/html dlcdb/docs_html
-          python manage.py collectstatic --noinput
           cp -r run/staticfiles dlcdb/staticfiles
 
       - name: Wheel

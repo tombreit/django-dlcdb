@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–8 done (2026-10-06); next is the first tag. A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–9 done (2026-10-06); the first tag is your call. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
 fresh secret key), `manage.py`, `wsgi.py` and a README, so the instance runs with
@@ -114,6 +114,14 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
     wheel lacks. (Batch 4 tried `WHITENOISE_MANIFEST_STRICT = False` instead. It does not help:
     Django still raises for a file missing from `STATIC_ROOT`. Removed in batch 7.) The cost is
     a larger wheel.
+
+    The wheel also keeps each app's raw `static/**`. Batch 9 measured 1.8 MB of 16.6 MB; the
+    review's estimate of 6 MB was wrong. The bulk is the collected files (9.8 MB, mostly
+    WhiteNoise's `.gz`/`.br` copies, which zip cannot compress further) and the docs (4.4 MB).
+    The raw files are read at runtime by the favicon view and the icon picker. They also keep a
+    habitual `./manage.py collectstatic` in a pip installation harmless: it rebuilds the same
+    set. Without them, it would overwrite the baked manifest with a fraction of the files and
+    break every page.
 
 ## Alternatives considered and rejected
 
@@ -265,6 +273,15 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   flow: `python -m dlcdb dlcdb_init`, then `./manage.py check`, `migrate`, and a request with
   `HTTP_HOST=127.0.0.1`, because the generated `.env` restricts `ALLOWED_HOSTS`.
 
+### Batch 9: two items left open from the branch review
+- `cp -r` into an existing directory nests the copy (`dlcdb/staticfiles/staticfiles/`), which
+  hit repeated local builds in the same scratch copy. `release.yml` now removes
+  `dlcdb/docs_html` and `dlcdb/staticfiles` before copying, and runs
+  `collectstatic --clear`, so a reused build directory carries no stale files into the wheel.
+  The `pyproject.toml` comment points to the workflow instead of repeating its steps.
+- The raw app static files stay in the wheel (decision 11): 1.8 MB, and `collectstatic` stays
+  harmless.
+
 ## Open follow-ups
 
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
@@ -278,12 +295,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   run and the release page, then try the documented install from the release URL. Neither
   Python 3.12 nor the upload has been tried locally.
 - **Left open from the branch review:**
-  - The wheel ships each app's raw `static/**` as well as the collected copies, about 6 MB
-    extra. The raw ones are only needed by the favicon view and the icon picker
-    (`theme/bootstrap_icons.py`).
   - The project URLs (footer, wheel metadata) point to GitLab, while releases are on GitHub.
-  - `cp -r` into an existing target nests the copy. Fresh CI runners are unaffected; repeated
-    local builds in the same scratch copy are not.
   - `npm ci` reports `npm audit` advisories in the frontend dependencies.
 
 ## Pitfalls
@@ -293,9 +305,9 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   Otherwise it silently lacks bundles, docs or static files.
 - Collect the static files with the production requirements and without a `.env` that turns
   on `DEBUG`. Otherwise dev-only apps (debug toolbar, django-extensions) end up in the wheel.
-- Build wheels only on CI or in a scratch copy (`git ls-files` plus the three `dist/` bundles
-  plus `dlcdb/docs_html` and `dlcdb/staticfiles`). In the working tree, setuptools leaves
-  `build/` and `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
+- Build wheels only on CI or in a scratch copy (`git ls-files` plus the three `dist/` bundles,
+  then the steps of `release.yml`). In the working tree, setuptools leaves `build/` and
+  `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
 - mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why the `wsgi.py` that
   `init` writes sets `DLCDB_HOME` itself, from its own location.
@@ -311,3 +323,4 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 6: developer page
 - [x] Batch 7: fixes from the review of the branch
 - [x] Batch 8: `init` writes `manage.py` and `wsgi.py`
+- [x] Batch 9: two items left open from the branch review

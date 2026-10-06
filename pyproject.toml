@@ -102,10 +102,10 @@ exclude = ["*.tests", "*.tests.*"]
 namespaces = false
 
 # Listed explicitly, because the frontend bundles (static/**/dist/), the docs
-# and the collected static files are gitignored build output. Before building
-# the wheel, run `npm run build`, `make docs` and `collectstatic`, then copy
-# run/docs/html to dlcdb/docs_html and run/staticfiles to dlcdb/staticfiles
-# (on CI or in a scratch copy, not in the working tree).
+# (docs_html/) and the collected static files (staticfiles/) are gitignored
+# build output. .github/workflows/release.yml builds and copies them before the
+# wheel; for a local build, follow its steps in a scratch copy, not in the
+# working tree.
 [tool.setuptools.package-data]
 "*" = ["templates/**/*", "static/**/*", "locale/**/*.mo"]
 "dlcdb" = ["docs_html/**/*", "staticfiles/**/*"]
