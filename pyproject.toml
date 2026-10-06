@@ -17,20 +17,23 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
+# Exact pins for the packages whose static files the wheel ships pre-collected
+# (Django's admin, DRF, django-htmx): a newer version could reference static
+# files the wheel lacks. Bump them deliberately, then run `make requirements`.
 dependencies = [
     "Django==6.1.1",
     "django-environ",
     "django-crispy-forms",
     "crispy-bootstrap5",
     "django-simple-history",
-    "django-htmx",
+    "django-htmx==1.29.0",
     "whitenoise",
     "huey",
     "openpyxl",
     "markdown",
     "Pillow",
     "segno",
-    "djangorestframework",
+    "djangorestframework==3.18.1",
     "drf-spectacular",
     "django-filter",
     "icalendar",

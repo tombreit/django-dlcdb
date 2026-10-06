@@ -41,9 +41,11 @@ class Command(BaseCommand):
         }
         for template, name, mode, note in FILES:
             path = settings.INSTANCE_DIR / name
-            if path.exists():
+            try:
+                # Created empty with its final mode, never over an existing file
+                path.touch(mode=mode, exist_ok=False)
+            except FileExistsError:
                 self.stdout.write(f"Skipped {path} (exists)")
                 continue
             path.write_text(render_to_string(template, context))
-            path.chmod(mode)
             self.stdout.write(self.style.SUCCESS(f"Created {path}{note}"))

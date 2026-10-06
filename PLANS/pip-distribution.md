@@ -6,7 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–6 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–7 done (2026-10-06); batch 8 (`init` writes `manage.py` and
+`wsgi.py`) comes before the first tag. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `dlcdb init` writes the instance's `.env` (with a
 fresh secret key) and a README. `docs/betrieb/setup.md` describes installation, production use
@@ -74,9 +75,10 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    So wheels are never built in the working tree. `settings.DOCS_DIR` picks the docs location
    via `SOURCE_CHECKOUT`.
 7. **Instance directory `DLCDB_HOME`.** It holds `.env` and `data/`. A source checkout
-   (recognised by `pyproject.toml` next to the package) defaults to the repository root as
-   before. A pip installation must set `DLCDB_HOME`, otherwise the settings raise
-   `ImproperlyConfigured` with a hint.
+   (recognised by `pyproject.toml` next to the package) always uses the repository root and
+   ignores `DLCDB_HOME`, so an exported `DLCDB_HOME` cannot redirect a dev checkout to a
+   production instance (since batch 7). A pip installation must set `DLCDB_HOME`, otherwise
+   the settings raise `ImproperlyConfigured` with a hint.
 8. **The version lives in code: `dlcdb.__version__`.** It is the single source.
    `pyproject.toml` takes it via `dynamic = ["version"]`, and the footer imports it. Checkouts,
    the container and wheels see the same value without reading any file at runtime. The API
@@ -95,11 +97,13 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
     (branding uploads are media), so the release build runs `collectstatic` once and copies
     `run/staticfiles` into the package (`dlcdb/staticfiles`). In a wheel, `STATIC_ROOT` points
     there (`settings.STATICFILES_DIR` via `SOURCE_CHECKOUT`). Install and update need no
-    `collectstatic`, and the static files always match the installed release. Since the
-    collected files reflect the dependency versions of the release build,
-    `WHITENOISE_MANIFEST_STRICT` is off in a wheel. A newer dependency that refers to a static
-    file missing there then gets the unhashed name instead of failing the page. Checkouts stay
-    strict. The cost is a larger wheel.
+    `collectstatic`, and the static files always match the installed release. The collected
+    files reflect the dependency versions of the release build. So the three third-party
+    packages that contribute to them, Django (admin), `djangorestframework` and `django-htmx`,
+    are pinned exactly in `pyproject.toml`; a newer version could reference static files the
+    wheel lacks. (Batch 4 tried `WHITENOISE_MANIFEST_STRICT = False` instead. It does not help:
+    Django still raises for a file missing from `STATIC_ROOT`. Removed in batch 7.) The cost is
+    a larger wheel.
 
 ## Alternatives considered and rejected
 
@@ -216,6 +220,29 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   batch 5, `init` writes `false`. Without `DEBUG` and without `collectstatic`, the strict
   manifest would fail the dev server's pages.
 
+### Batch 7: fixes from the review of the branch
+- Pin `djangorestframework==3.18.1` and `django-htmx==1.29.0` exactly, like Django (decision 11).
+  Remove the ineffective `WHITENOISE_MANIFEST_STRICT` line.
+- `init` creates each file empty with its final mode via `Path.touch(mode=…, exist_ok=False)`
+  (internally `os.open` with `O_CREAT | O_EXCL`), then writes the content. Before,
+  `.env` was readable by other users for a moment (written with the umask, then `chmod 0600`),
+  and two concurrent runs could overwrite each other.
+- The `env.template` banner no longer claims that a missing `.env` means development mode. It
+  means the publicly known fallback `SECRET_KEY`.
+- Python 3.12 stays the minimum (`67f37831`). `setup.md`, `README.md` and `AGENTS.md` now say
+  3.12+, and the release workflow smoke-tests the wheel on 3.12 while building on 3.13.
+- `DLCDB_HOME` only applies to pip installations (decision 7).
+- The README quickstart runs `manage.py init` and says to set `DJANGO_DEBUG=true`. Without a
+  `.env`, `DEBUG` is off and the dev server fails without `collectstatic`.
+
+### Batch 8: `init` writes `manage.py` and `wsgi.py`
+- Django users feel at home in a pip installation: `dlcdb init` additionally writes into
+  `DLCDB_HOME` a `manage.py` and the Apache `wsgi.py`. `manage.py` gets a shebang to the venv's
+  Python, and both set `DLCDB_HOME` to their own directory. Operators then run
+  `cd /srv/dlcdb && ./manage.py migrate` without exporting `DLCDB_HOME`, and nobody writes the
+  wsgi stub by hand. `dlcdb` is left for `init` and DLCDB-specific commands. The docs
+  (pip *Install*, *Production*, *Update*, the instance README) switch to `./manage.py`.
+
 ## Open follow-ups
 
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
@@ -225,8 +252,17 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - **`python-magic`: removed.** Its only use, a CSV MIME check in the bulk decommissioning
   import, went away in March 2025 (`a84fba15`). The container and GitLab CI no longer install
   libmagic.
-- **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow run and the
-  release page, then try the documented install from the release URL.
+- **First release.** After batch 8: tag `v0.9.4` and push the tag to GitHub. Check the workflow
+  run and the release page, then try the documented install from the release URL. Neither
+  Python 3.12 nor the upload has been tried locally.
+- **Left open from the branch review:**
+  - The wheel ships each app's raw `static/**` as well as the collected copies, about 6 MB
+    extra. The raw ones are only needed by the favicon view and the icon picker
+    (`theme/bootstrap_icons.py`).
+  - The project URLs (footer, wheel metadata) point to GitLab, while releases are on GitHub.
+  - `cp -r` into an existing target nests the copy. Fresh CI runners are unaffected; repeated
+    local builds in the same scratch copy are not.
+  - `npm ci` reports `npm audit` advisories in the frontend dependencies.
 
 ## Pitfalls
 
@@ -251,3 +287,5 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 4: collected static files ship in the wheel
 - [x] Batch 5: `dlcdb init`
 - [x] Batch 6: developer page
+- [x] Batch 7: fixes from the review of the branch
+- [ ] Batch 8: `init` writes `manage.py` and `wsgi.py`

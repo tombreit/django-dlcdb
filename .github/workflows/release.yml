@@ -25,7 +25,11 @@ jobs:
           node-version: 24
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.13"
+          # The last one is the default and builds; the smoke test uses the
+          # lowest version pyproject.toml allows.
+          python-version: |
+            3.12
+            3.13
 
       - name: Tag matches the version
         run: |
@@ -48,10 +52,10 @@ jobs:
       - name: Wheel
         run: python -m build --wheel
 
-      - name: Smoke test in a fresh venv
+      - name: Smoke test in a fresh venv, on Python 3.12
         working-directory: ${{ runner.temp }}
         run: |
-          python -m venv smoke
+          python3.12 -m venv smoke
           smoke/bin/pip install "$GITHUB_WORKSPACE"/dist/*.whl
           export DLCDB_HOME="$RUNNER_TEMP/home"
           smoke/bin/dlcdb check

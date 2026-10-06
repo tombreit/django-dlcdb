@@ -166,7 +166,7 @@ touch $DLCDB_HOME/wsgi.py
 ### Prerequisites
 
 - (assuming) Debian 13
-- Python >= 3.13 (see `pyproject.toml`)
+- Python >= 3.12 (see `pyproject.toml`)
 - Django 6.x (installed via the requirements files)
 - npm
 - for LDAP: libldap2-dev libsasl2-dev

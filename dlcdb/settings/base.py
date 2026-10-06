@@ -19,12 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SOURCE_CHECKOUT = (BASE_DIR / "pyproject.toml").exists()
 
 # The instance directory holds .env and data/ (a source checkout also run/). A source
-# checkout uses the repository root; a pip installation names it via the DLCDB_HOME
-# environment variable.
-if os.environ.get("DLCDB_HOME"):
-    INSTANCE_DIR = Path(os.environ["DLCDB_HOME"]).resolve()
-elif SOURCE_CHECKOUT:
+# checkout always uses the repository root, so an exported DLCDB_HOME cannot redirect it
+# to another instance; a pip installation names it via the DLCDB_HOME environment variable.
+if SOURCE_CHECKOUT:
     INSTANCE_DIR = BASE_DIR
+elif os.environ.get("DLCDB_HOME"):
+    INSTANCE_DIR = Path(os.environ["DLCDB_HOME"]).resolve()
 else:
     raise ImproperlyConfigured(
         "DLCDB is not running from a source checkout: set the DLCDB_HOME environment variable "
@@ -493,10 +493,6 @@ if DEBUG:
 
 # WhiteNoise
 WHITENOISE_INDEX_FILE = True
-# A wheel's collected static files match the dependency versions of its release build. If a
-# newer dependency refers to a static file missing there, fall back to the unhashed name
-# instead of failing the whole page.
-WHITENOISE_MANIFEST_STRICT = SOURCE_CHECKOUT
 
 # Built docs, served at /docs/: `make docs` writes them to run/docs/html in a source
 # checkout; a wheel carries them inside the package (copied there by the release build).

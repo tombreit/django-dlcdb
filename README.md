@@ -25,7 +25,7 @@ The DLCDB manages the life cycle of IT assets: a device collects append-only rec
 
 ## 👉 Getting started
 
-The DLCDB is a Django project, works with [Python 3.13+](https://www.python.org/downloads/) and [nodejs](https://nodejs.org/en/download/) on Debian Linux.
+The DLCDB is a Django project, works with [Python 3.12+](https://www.python.org/downloads/) and [nodejs](https://nodejs.org/en/download/) on Debian Linux.
 
 To get started using the DLCDB, run the following in a virtual python environment (development setup, not to be used in production):
 
@@ -33,6 +33,7 @@ To get started using the DLCDB, run the following in a virtual python environmen
 npm install
 npm run build
 pip install -r requirements/dev.txt
+python manage.py init  # writes .env; set DJANGO_DEBUG=true there for development
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
@@ -64,7 +65,7 @@ make tests
 
 DLCDB supports:
 
-- Python 3.13+
+- Python 3.12+
 - any Django supported database backends, runs fine with SQLite in production
 
 ## ⚖️ License

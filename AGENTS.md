@@ -11,7 +11,7 @@ Device Lifecycle Database
 ## Tech Stack
 
 - Target OS: Debian 13 Trixie or newer
-- Python 3.13+
+- Python 3.12+
 - Django 6+
 
 ## Entrypoints
