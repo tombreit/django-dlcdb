@@ -31,42 +31,13 @@ jobs:
             3.12
             3.13
 
-      - name: Tag matches the version
-        run: |
-          test "$GITHUB_REF_NAME" = "v$(python -c 'import dlcdb; print(dlcdb.__version__)')"
-          test "$GITHUB_REF_NAME" = "v$(node -p 'require("./package.json").version')"
-
-      - name: Frontend bundles
-        run: |
-          npm ci
-          npm run build
-
-      - name: Docs and static files, copied into the package
+      # The same target builds and tries a release locally (Makefile, `make wheel`)
+      - name: Wheel, built from the tag and tried on Python 3.12
         run: |
           pip install -r requirements/prod.txt build
-          make docs
-          python manage.py collectstatic --noinput --clear
-          # Replace, never copy into: `cp -r` into an existing directory nests the copy
-          rm -rf dlcdb/docs_html dlcdb/staticfiles
-          cp -r run/docs/html dlcdb/docs_html
-          cp -r run/staticfiles dlcdb/staticfiles
-
-      - name: Wheel
-        run: python -m build --wheel
-
-      - name: Smoke test in a fresh venv, on Python 3.12
-        working-directory: ${{ runner.temp }}
-        run: |
-          python3.12 -m venv smoke
-          smoke/bin/pip install "$GITHUB_WORKSPACE"/dist/*.whl
-          test -f smoke/lib/python*/site-packages/dlcdb/staticfiles/staticfiles.json
-          DLCDB_HOME="$RUNNER_TEMP/home" smoke/bin/python -m dlcdb dlcdb_init
-          cd home
-          ./manage.py check
-          ./manage.py migrate --noinput
-          ./manage.py shell --verbosity 0 --command "from django.test import Client; assert Client().get('/accounts/login/', HTTP_HOST='127.0.0.1').status_code == 200"
+          make wheel TAG="$GITHUB_REF_NAME" SMOKE_PYTHON=python3.12
 
       - name: GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/*.whl --title "DLCDB $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" run/release/dist/*.whl --title "DLCDB $GITHUB_REF_NAME" --generate-notes

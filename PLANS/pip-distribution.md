@@ -6,7 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–9 done (2026-10-06); the first tag is your call. A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–10 done (2026-10-06); the first tag is your call. A release starts with
+`make release VERSION=X.Y.Z`. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
 fresh secret key), `manage.py`, `wsgi.py` and a README, so the instance runs with
@@ -70,10 +71,10 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    on the server.
 6. **Generated files stay in `run/`, the working tree stays clean.** `make docs` keeps writing
    to `run/docs`. Only the wheel build copies `run/docs/html` into the package
-   (`dlcdb/docs_html`), and it does so on CI or in a scratch copy. setuptools always writes
-   `build/` and `*.egg-info/` into the project root, and pyproject offers no option to move them.
-   So wheels are never built in the working tree. `settings.DOCS_DIR` picks the docs location
-   via `SOURCE_CHECKOUT`.
+   (`dlcdb/docs_html`). setuptools always writes `build/` and `*.egg-info/` into the project
+   root, and pyproject offers no option to move them. So wheels are never built in the working
+   tree: since batch 10, `make wheel` builds from `git archive` in a fresh `run/release/`.
+   `settings.DOCS_DIR` picks the docs location via `SOURCE_CHECKOUT`.
 7. **Instance directory `DLCDB_HOME`.** It holds `.env` and `data/`. A source checkout
    (recognised by `pyproject.toml` next to the package) always uses the repository root and
    ignores `DLCDB_HOME`, so an exported `DLCDB_HOME` cannot redirect a dev checkout to a
@@ -282,32 +283,45 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - The raw app static files stay in the wheel (decision 11): 1.8 MB, and `collectstatic` stays
   harmless.
 
-## Open follow-ups
+### Batch 10: Makefile targets for releases
+The build steps moved from the workflow into the `Makefile`, so CI and local builds share one
+recipe, and the targets guard against the common pitfalls. Neither target calls `gh`, commits,
+tags or pushes.
 
-- **PyPI.** Add a publish job with trusted publishing to the release workflow.
-- **`createcachetable`: resolved by removing django-select2.** No widget had used it since
-  2023, so its DatabaseCache table `dlcdb_select2` is not needed. Old installations may keep the
-  empty table; it is harmless.
-- **`python-magic`: removed.** Its only use, a CSV MIME check in the bulk decommissioning
-  import, went away in March 2025 (`a84fba15`). The container and GitLab CI no longer install
-  libmagic.
-- **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow
-  run and the release page, then try the documented install from the release URL. Neither
-  Python 3.12 nor the upload has been tried locally.
-- **Left open from the branch review:**
-  - The project URLs (footer, wheel metadata) point to GitLab, while releases are on GitHub.
-  - `npm ci` reports `npm audit` advisories in the frontend dependencies.
+- **`make wheel`** (the release workflow; locally a release candidate):
+  - `git archive $(REF)` (default `HEAD`) into a fresh `run/release/src`, then `npm ci` and the
+    build, `make docs`, `collectstatic`, the copies into the package, and
+    `python -m build --wheel` into `run/release/dist`.
+  - Smoke test in a fresh venv (`SMOKE_PYTHON`, CI: `python3.12`): `dlcdb_init`, `check`,
+    `migrate`, login page.
+  - **Guards:** `check-version` (`dlcdb.__version__` equals `package.json`; with `TAG=vX.Y.Z`
+    the tag must match too), a note when uncommitted changes are left out, and a fresh build
+    directory every time (no nesting, no stale files, no `.env` that could turn on `DEBUG`).
+- **`make release VERSION=X.Y.Z`** (local):
+  - **Guards:** `X.Y.Z` form, a clean working tree, and the tag must not exist yet.
+  - It writes the version to `dlcdb/__init__.py` (`sed`) and to `package.json` and
+    `package-lock.json` (`npm version --allow-same-version`).
+  - Then `make wheel REF=$(git stash create)`: the wheel comes from exactly the state you are
+    about to commit (the committed tree plus the version change) without touching the branch.
+  - It prints the commit, tag and push commands; you run them yourself.
+- `release.yml` now only runs `make wheel TAG=… SMOKE_PYTHON=python3.12` and `gh release create`
+  on `run/release/dist/*.whl`. The `release` recipe in `development.md` uses the targets.
+- **Pitfall found while testing:** `python -m dlcdb`, started inside a source checkout, imports
+  `dlcdb` from the checkout rather than from the installed wheel, because Python puts the current
+  directory first on its search path. The smoke test therefore starts from the empty instance
+  directory.
 
 ## Pitfalls
 
-- Package data globs match whatever is on disk. Build the wheel only after `npm run build`,
-  `make docs`, `collectstatic` and the copies to `dlcdb/docs_html` and `dlcdb/staticfiles`.
-  Otherwise it silently lacks bundles, docs or static files.
-- Collect the static files with the production requirements and without a `.env` that turns
-  on `DEBUG`. Otherwise dev-only apps (debug toolbar, django-extensions) end up in the wheel.
-- Build wheels only on CI or in a scratch copy (`git ls-files` plus the three `dist/` bundles,
-  then the steps of `release.yml`). In the working tree, setuptools leaves `build/` and
-  `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
+- Build wheels only with `make wheel` (or `make release`). It takes care of three traps:
+  - Package data globs match whatever is on disk. Without the npm build, `make docs`,
+    `collectstatic` and the copies into the package, the wheel silently lacks bundles, docs or
+    static files.
+  - Static files collected with a `.env` that turns on `DEBUG` include the dev-only apps
+    (debug toolbar, django-extensions).
+  - In the working tree, setuptools leaves `build/` and `dlcdb.egg-info/` behind and reuses a
+    stale `build/lib/` on the next build.
+- `python -m dlcdb` inside a source checkout uses the checkout, not an installed wheel.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
 - mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why the `wsgi.py` that
   `init` writes sets `DLCDB_HOME` itself, from its own location.
@@ -324,3 +338,4 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 7: fixes from the review of the branch
 - [x] Batch 8: `init` writes `manage.py` and `wsgi.py`
 - [x] Batch 9: two items left open from the branch review
+- [x] Batch 10: Makefile targets for releases

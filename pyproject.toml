@@ -103,9 +103,8 @@ namespaces = false
 
 # Listed explicitly, because the frontend bundles (static/**/dist/), the docs
 # (docs_html/) and the collected static files (staticfiles/) are gitignored
-# build output. .github/workflows/release.yml builds and copies them before the
-# wheel; for a local build, follow its steps in a scratch copy, not in the
-# working tree.
+# build output. `make wheel` builds and copies them before building the wheel,
+# in run/release/, never in the working tree.
 [tool.setuptools.package-data]
 "*" = ["templates/**/*", "static/**/*", "locale/**/*.mo"]
 "dlcdb" = ["docs_html/**/*", "staticfiles/**/*"]

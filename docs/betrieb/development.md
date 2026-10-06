@@ -44,15 +44,26 @@ that changes, the project stays with pip-compile.
 
 ## Release
 
+In the activated dev venv:
+
 ```bash
-# set __version__ in dlcdb/__init__.py, then:
-npm version X.Y.Z --no-git-tag-version  # package.json and package-lock.json
+make release VERSION=X.Y.Z
 git commit --all --message "Version X.Y.Z"
 git tag vX.Y.Z
 git push <github-remote> main vX.Y.Z
 ```
 
-The tag starts `.github/workflows/release.yml` on GitHub: it builds the
-frontend assets and the docs, collects the static files, builds the wheel,
-tries it in a fresh virtual environment and attaches it to a new GitHub
-release. A tag that does not match both version numbers fails the workflow.
+`make release` refuses to run with uncommitted changes, with a version not of
+the form `X.Y.Z`, or when the tag exists already. It writes the version to
+`dlcdb/__init__.py`, `package.json` and `package-lock.json`, then builds the
+wheel from exactly the state you are about to commit and tries it in a fresh
+virtual environment (`make wheel`). Everything it builds stays in
+`run/release/`, outside the working tree.
+
+`make wheel` alone builds and tries a release candidate from `HEAD`; the wheel
+lands in `run/release/dist/`.
+
+The pushed tag starts `.github/workflows/release.yml` on GitHub. It runs
+`make wheel` on the tag, with the smoke test on Python 3.12, and attaches the
+wheel to a new GitHub release. A tag that does not match both version numbers
+fails the workflow.
