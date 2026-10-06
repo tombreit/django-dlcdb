@@ -74,7 +74,6 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
     "crispy_forms",
     "crispy_bootstrap5",
-    "django_select2",
     "django_htmx",
     "huey.contrib.djhuey",
     "simple_history",
@@ -262,16 +261,8 @@ CACHES = {
     #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
     #     'LOCATION': '127.0.0.1:11211',  # Docker notation: 'memcached:11211', see docker-compose
     # },
-    # 'select2': {
-    #     'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-    #     'LOCATION': '127.0.0.1:11211',
-    # },
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "select2": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "dlcdb_select2",
     },
 }
 
@@ -451,8 +442,6 @@ MESSAGE_TAGS = {
 }
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000  # default is: 1000
-
-SELECT2_CACHE_BACKEND = "select2"
 
 CRISPY_FAIL_SILENTLY = not DEBUG
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

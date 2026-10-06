@@ -35,7 +35,6 @@ urlpatterns = [
     path("journal/", include("dlcdb.journal.urls")),
     path("theme/", include("dlcdb.theme.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
-    path("select2/", include("django_select2.urls")),
     path("api/v2/", include("dlcdb.api.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
     path("favicon.ico", organization_views.favicon),

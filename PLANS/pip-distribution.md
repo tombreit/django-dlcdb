@@ -161,11 +161,10 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 
 ## Open follow-ups
 
-- **`Django==6.1.1` exact pin.** Pip users only get Django security releases with a new DLCDB
-  release. Consider `Django>=6.1.1,<6.2`.
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
-- **`createcachetable`.** The `select2` DatabaseCache table `dlcdb_select2` is never created
-  (not documented, not in `container/entrypoint.sh`). This is independent of this plan.
+- **`createcachetable`: resolved by removing django-select2.** No widget had used it since
+  2023, so its DatabaseCache table `dlcdb_select2` is not needed. Old installations may keep the
+  empty table; it is harmless.
 - **`python-magic` looks unused.** It is in `dependencies` and the container installs libmagic,
   but nothing under `dlcdb/` imports `magic`. Remove it, or find out who needs it.
 - **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow run and the
