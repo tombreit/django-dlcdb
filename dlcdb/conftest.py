@@ -21,10 +21,21 @@ https://docs.pytest.org/en/latest/reference/fixtures.html#conftest-py-sharing-fi
 import pytest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.sites.models import Site
+from django.test import override_settings
 
 from dlcdb.accounts.models import CustomUser
 from dlcdb.core.models import Device, Inventory, Room
 from dlcdb.tenants.models import Tenant
+
+
+@pytest.fixture(autouse=True, scope="session")
+def isolated_media_root(tmp_path_factory):
+    """
+    Saving a device or room writes its QR code to MEDIA_ROOT. Keep those files,
+    also the ones of objects from setUpTestData, out of the instance's data/media.
+    """
+    with override_settings(MEDIA_ROOT=tmp_path_factory.mktemp("media")):
+        yield
 
 
 @pytest.fixture
@@ -43,7 +54,7 @@ def tenant():
 
 @pytest.fixture
 def media_root(settings, tmp_path):
-    """Keep files written by tests (QR codes, uploads) out of the real media directory."""
+    """A fresh, empty MEDIA_ROOT for tests that inspect the files they write."""
     settings.MEDIA_ROOT = tmp_path
     return tmp_path
 
