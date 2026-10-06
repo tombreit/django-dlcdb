@@ -119,10 +119,7 @@ $DLCDB_HOME/venv/bin/dlcdb migrate
 $DLCDB_HOME/venv/bin/dlcdb createsuperuser
 ```
 
-Without LDAP, leave out `[ldap]`. To get the same dependency versions as a
-source installation of that release, add
-`--constraint https://raw.githubusercontent.com/tombreit/django-dlcdb/v0.9.4/requirements/prod-ldap.txt`
-(or `prod.txt` without LDAP) to `pip install`.
+Without LDAP, leave out `[ldap]`.
 
 ### Production
 
@@ -193,7 +190,7 @@ pip install -r requirements/dev.txt  # Install development requirements
 
 ```bash
 ./manage.py init  # writes .env with a fresh secret key
-# edit .env
+# edit .env, for development set DJANGO_DEBUG=true
 ```
 
 :::{note}
@@ -224,7 +221,8 @@ npm run build
 ```
 
 The superuser is the only account after a fresh install. Continue with
-[Erste Schritte](../guides/erste_schritte.md).
+[Erste Schritte](../guides/erste_schritte.md). Dependencies, lock files and
+releases are described in [Development](development.md).
 
 ### Production
 
@@ -389,24 +387,3 @@ The compiled catalog `dlcdb/locale/de/LC_MESSAGES/django.mo` is **committed**.
 gettext reads only the `.mo`, never the `.po`, so shipping it means a
 deployment needs neither `compilemessages` nor gettext on the target machine —
 which is why that step is absent from the deployment steps above.
-
-### Requirements
-
-(Re-)Build requirements via `make requirements` (uses pip-tools to
-compile `requirements/{prod,prod-ldap,dev}.txt` from `pyproject.toml`).
-
-### Release
-
-```bash
-# set __version__ in dlcdb/__init__.py, then:
-npm version X.Y.Z --no-git-tag-version  # package.json and package-lock.json
-git commit --all --message "Version X.Y.Z"
-git tag vX.Y.Z
-git push <github-remote> main vX.Y.Z
-```
-
-The tag starts `.github/workflows/release.yml` on GitHub: it builds the
-frontend assets and the docs, collects the static files, builds the wheel, tries
-it in a fresh virtual
-environment and attaches it to a new GitHub release. A tag that does not match
-both version numbers fails the workflow.

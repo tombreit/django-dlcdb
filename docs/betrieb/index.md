@@ -6,6 +6,7 @@ Installation, Datenmodell und Schnittstellen der DLCDB. Repository: [https://git
 :maxdepth: 2
 
 setup
+development
 model
 news
 management_commands

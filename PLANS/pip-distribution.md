@@ -6,14 +6,14 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–5 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–6 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `dlcdb init` writes the instance's `.env` (with a
-fresh secret key) and a README. `docs/betrieb/setup.md` describes installation, production
-use, updates and releasing. Installations without the `ldap` extra work since the LDAP backend
-moved into its own module (`accounts/ldap_backends.py`). Batch 6 moves maintainer topics to a
-developer page. No release has been tagged yet (see *Open follow-ups*). This is a living
-document; each batch ticks its box in *Progress*.
+fresh secret key) and a README. `docs/betrieb/setup.md` describes installation, production use
+and updates. `docs/betrieb/development.md` covers dependencies, lock files and releasing.
+Installations without the `ldap` extra work since the LDAP backend moved into its own module
+(`accounts/ldap_backends.py`). No release has been tagged yet (see *Open follow-ups*). This is
+a living document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -209,7 +209,12 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   - the `--constraint` hint for pip installations
   - `pylock.toml` as the future option
 
-  It also gets *Release*, moved from `setup.md`. `setup.md` keeps only what operators need.
+  It also gets *Release*, moved from `setup.md`. `setup.md` keeps only what operators need: the
+  constraints paragraph and *Operations › Requirements* are gone, and *Development setup* links
+  to the new page.
+- `setup.md` *Development setup*: "edit .env, for development set `DJANGO_DEBUG=true`". Since
+  batch 5, `init` writes `false`. Without `DEBUG` and without `collectstatic`, the strict
+  manifest would fail the dev server's pages.
 
 ## Open follow-ups
 
@@ -245,4 +250,4 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 3: release workflow and docs
 - [x] Batch 4: collected static files ship in the wheel
 - [x] Batch 5: `dlcdb init`
-- [ ] Batch 6: developer page
+- [x] Batch 6: developer page
