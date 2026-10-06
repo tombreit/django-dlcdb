@@ -6,9 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batch 1 done (2026-10-06). The wheel has the correct contents and a `dlcdb` command,
-but an installed copy still puts `.env`, `data/` and `run/` into site-packages (batch 2). This is
-a living document; each batch ticks its box in *Progress*.
+**Status:** batch 2 done (2026-10-06). An installed wheel runs from its `DLCDB_HOME` with
+bundled docs and the footer version. A wheel built locally works; publishing it is batch 3.
+Without the `ldap` extra every login page fails (see *Open follow-ups*). This is a living
+document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -62,15 +63,25 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    installed version. Sphinx and its extensions move from `dependencies` to a `docs` extra. The
    requirements files include `--extra docs`, because source-checkout deployments build the docs
    on the server.
-6. **The docs build goes into the package directory** (`dlcdb/docs_build/html`, gitignored)
-   instead of `run/docs/html`. One path works in both modes.
+6. **Generated files stay in `run/`, the working tree stays clean.** `make docs` keeps writing
+   to `run/docs`. Only the wheel build copies `run/docs/html` into the package
+   (`dlcdb/docs_html`), and it does so on CI or in a scratch copy. setuptools always writes
+   `build/` and `*.egg-info/` into the project root, and pyproject offers no option to move them.
+   So wheels are never built in the working tree. `settings.DOCS_DIR` picks the docs location
+   via `SOURCE_CHECKOUT`.
 7. **Instance directory `DLCDB_HOME`.** It holds `.env`, `data/` and `run/`. A source checkout
    (recognised by `pyproject.toml` next to the package) defaults to the repository root as
    before. A pip installation must set `DLCDB_HOME`, otherwise the settings raise
    `ImproperlyConfigured` with a hint.
-8. **`pyproject.toml` stays the single source of the version and project URLs.** A checkout
-   reads it as before. An installation reads the same values from the wheel metadata
-   (`importlib.metadata`).
+8. **The version lives in code: `dlcdb.__version__`.** It is the single source.
+   `pyproject.toml` takes it via `dynamic = ["version"]`, and the footer imports it. Checkouts,
+   the container and wheels see the same value without reading any file at runtime. The API
+   schema (`SPECTACULAR_SETTINGS["VERSION"]`) uses it too. `package.json` and
+   `package-lock.json` cannot import it, so they carry the same number by hand. They were
+   consolidated to 0.9.4 in batch 2; before that, 0.9.3, 2.0.1 and 2.0.0 were in use. You bump
+   it by hand before tagging; the release workflow checks that the tag matches. The footer's
+   repository and issues URLs are constants in `theme/context_processors.py`, kept in step with
+   `[project.urls]`, which can't be dynamic.
 9. **CLI `dlcdb`** (`[project.scripts]`, `dlcdb/__main__.py`) behaves like `manage.py`:
    `dlcdb migrate`, `dlcdb run_huey`, …. `manage.py` stays for checkouts.
 10. **License metadata:** SPDX expression `EUPL-1.2` (the license of the code) plus all texts from
@@ -87,8 +98,14 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   the installed one, and needs network access.
 - **Current working directory as instance directory:** the settings create `data/` and `run/`
   on import, so any `dlcdb` call in the wrong directory would scatter them there.
-- **`importlib.metadata` only:** source checkouts are not pip-installed, so the footer would lose
-  its version there.
+- **Reading the version at runtime** (`pyproject.toml` in a checkout, `importlib.metadata` in a
+  wheel): two code paths, file IO and error handling for three footer strings. It was tried in
+  batch 2 and replaced by `dlcdb.__version__`.
+- **Version from the git tag (setuptools-scm `version_file`):** that file only exists after a
+  build. Source checkouts, including the Apache deployments, would lose the footer version.
+- **Building the docs straight into the package directory** (one path for both modes): this
+  puts build output and the Sphinx doctrees cache into `dlcdb/`. It was tried in batch 2 and
+  reverted.
 
 ## Plan
 
@@ -96,7 +113,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - `name = "dlcdb"`. In `packages.find`, use `include = ["dlcdb*"]`,
   `exclude = ["*.tests", "*.tests.*"]` and `namespaces = false`.
 - Add `[tool.setuptools.package-data]`: `"*" = ["templates/**/*", "static/**/*",
-  "locale/**/*.mo"]` and `"dlcdb" = ["docs_build/html/**/*"]`.
+  "locale/**/*.mo"]` and the docs entry (`"dlcdb" = ["docs_html/**/*"]` since batch 2).
 - Drop setuptools-scm from `[build-system]` and drop `[tool.setuptools_scm]`.
 - Add a `docs` extra with Sphinx, pydata-sphinx-theme, sphinxcontrib-*, myst_parser,
   sphinx-design and sphinx-togglebutton.
@@ -106,19 +123,23 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - Add `[project.scripts] dlcdb = "dlcdb.__main__:main"` and `dlcdb/__main__.py`.
 
 ### Batch 2: run outside a checkout
-- `settings/base.py`: add `INSTANCE_DIR` from `DLCDB_HOME`, falling back to `BASE_DIR` for a
-  checkout and raising `ImproperlyConfigured` otherwise. Derive `RUN_DIR`, `DATA_DIR` and `.env`
-  from it.
-- Docs build to `dlcdb/docs_build`. This touches `docs/Makefile` `BUILDDIR`, `MORE_WHITENOISE`,
-  `.gitignore` and the docs copy line in `container/Containerfile`.
-- `theme/context_processors.py`: if `pyproject.toml` is missing, fall back to
-  `importlib.metadata.metadata("dlcdb")`.
+- `settings/base.py`: add `SOURCE_CHECKOUT` (`pyproject.toml` next to the package). Add
+  `INSTANCE_DIR` from `DLCDB_HOME`, falling back to `BASE_DIR` for a checkout and raising
+  `ImproperlyConfigured` otherwise. Derive `RUN_DIR`, `DATA_DIR` and `.env` from it.
+- `settings/base.py`: `DOCS_DIR` is `run/docs/html` in a checkout and `dlcdb/docs_html` in a
+  wheel. `MORE_WHITENOISE` serves it.
+- `pyproject.toml`: the package-data entry and its comment point to `dlcdb/docs_html`.
+- `dlcdb/__init__.py`: `__version__`. `pyproject.toml`: `dynamic = ["version"]` from
+  `dlcdb.__version__`. `theme/context_processors.py` imports it, and the URLs become constants.
+- Versions consolidated to 0.9.4: `dlcdb.__version__`, `package.json` and `package-lock.json`.
+  The API schema version comes from `dlcdb.__version__`.
 
 ### Batch 3: release workflow and docs
 - Add `.github/workflows/release.yml`, triggered on a `v*` tag push:
   1. `npm ci` and `npm run build`
-  2. `pip install -r requirements/prod.txt build` and `make docs`
-  3. check that the tag matches the `pyproject.toml` version
+  2. `pip install -r requirements/prod.txt build`, `make docs`, then
+     `cp -r run/docs/html dlcdb/docs_html`
+  3. check that the tag matches `dlcdb.__version__` and the `package.json` version
   4. `python -m build --wheel`
   5. smoke test in a fresh venv: `dlcdb check`, `dlcdb migrate`
   6. `gh release create`
@@ -132,8 +153,13 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 
 ## Open follow-ups
 
-- **Release version.** `pyproject.toml` says 0.9.3, `package.json` 2.0.1 and
-  `SPECTACULAR_SETTINGS["VERSION"]` 2.0.0. Pick one before the first tag.
+- **Installations without LDAP fail on every page.** This predates the pip work.
+  `dlcdb/accounts/auth_backends.py` imports `django_auth_ldap` at module level, and the always
+  active `EmailModelBackend` lives in that same module. So every request that touches
+  authentication raises `ModuleNotFoundError`. That covers `pip install dlcdb` without `[ldap]`
+  and source checkouts installed from `requirements/prod.txt`. Fix: move `EmailLDAPBackend` into
+  its own module and point `settings/ldap.py` at it. LDAP users with an open session must log in
+  once more, because the session stores the old backend path.
 - **`Django==6.1.1` exact pin.** Pip users only get Django security releases with a new DLCDB
   release. Consider `Django>=6.1.1,<6.2`.
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
@@ -142,10 +168,11 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 
 ## Pitfalls
 
-- Package data globs match whatever is on disk. Build the wheel only after `npm run build` and
-  `make docs`, otherwise it silently lacks bundles or docs.
-- setuptools reuses `build/lib/`. Delete `build/` (it holds the old top-level layout) and
-  `dlcdb/*.egg-info` before building locally, or stale packages end up in the wheel.
+- Package data globs match whatever is on disk. Build the wheel only after `npm run build`,
+  `make docs` and the copy to `dlcdb/docs_html`, otherwise it silently lacks bundles or docs.
+- Build wheels only on CI or in a scratch copy (`git ls-files` plus the three `dist/` bundles
+  plus `dlcdb/docs_html`). In the working tree, setuptools leaves `build/` and
+  `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
 - mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why a pip installation behind
   Apache needs the `wsgi.py` stub that sets `DLCDB_HOME`.
@@ -154,5 +181,5 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 
 - [x] Batch 0: this document
 - [x] Batch 1: correct wheel contents
-- [ ] Batch 2: run outside a checkout
+- [x] Batch 2: run outside a checkout
 - [ ] Batch 3: release workflow and docs

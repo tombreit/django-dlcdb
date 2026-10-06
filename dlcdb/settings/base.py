@@ -2,16 +2,36 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import os
 from email.utils import getaddresses
 from pathlib import Path
 
 import environ
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
 from huey import SqliteHuey
 
+import dlcdb
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-RUN_DIR = BASE_DIR / "run"
-DATA_DIR = BASE_DIR / "data"
+
+# A source checkout has pyproject.toml next to the dlcdb package; a pip installation has not.
+SOURCE_CHECKOUT = (BASE_DIR / "pyproject.toml").exists()
+
+# The instance directory holds .env, data/ and run/. A source checkout uses the
+# repository root; a pip installation names it via the DLCDB_HOME environment variable.
+if os.environ.get("DLCDB_HOME"):
+    INSTANCE_DIR = Path(os.environ["DLCDB_HOME"]).resolve()
+elif SOURCE_CHECKOUT:
+    INSTANCE_DIR = BASE_DIR
+else:
+    raise ImproperlyConfigured(
+        "DLCDB is not running from a source checkout: set the DLCDB_HOME environment variable "
+        "to the instance directory, which holds .env, data/ and run/."
+    )
+
+RUN_DIR = INSTANCE_DIR / "run"
+DATA_DIR = INSTANCE_DIR / "data"
 DB_DIR = DATA_DIR / "db"
 MEDIA_DIR = DATA_DIR / "media"
 STATICFILES_DIR = RUN_DIR / "staticfiles"
@@ -28,7 +48,7 @@ env = environ.Env(
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!"),
     ADMINS=(str, ""),
 )
-environ.Env.read_env(BASE_DIR / ".env")
+environ.Env.read_env(INSTANCE_DIR / ".env")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DJANGO_DEBUG")
@@ -456,7 +476,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "DLCDB API",
     "DESCRIPTION": "Device Life Cycle Database API",
-    "VERSION": "2.0.0",
+    "VERSION": dlcdb.__version__,
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
@@ -482,10 +502,14 @@ if DEBUG:
 # WhiteNoise
 WHITENOISE_INDEX_FILE = True
 
+# Built docs, served at /docs/: `make docs` writes them to run/docs/html in a source
+# checkout; a wheel carries them inside the package (copied there by the release build).
+DOCS_DIR = BASE_DIR / "run" / "docs" / "html" if SOURCE_CHECKOUT else BASE_DIR / "dlcdb" / "docs_html"
+
 # Add extra output directories that WhiteNoise can serve as static files
 # *outside* of `staticfiles`.
 MORE_WHITENOISE = [
-    {"directory": BASE_DIR / "run" / "docs" / "html", "prefix": "docs/"},
+    {"directory": DOCS_DIR, "prefix": "docs/"},
 ]
 
 DLCDB_BASE_URL = env("DLCDB_BASE_URL", default="http://127.0.0.1:8000")
