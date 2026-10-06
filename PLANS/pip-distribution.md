@@ -303,6 +303,10 @@ tags or pushes.
     `package-lock.json` (`npm version --allow-same-version`).
   - Then `make wheel REF=$(git stash create)`: the wheel comes from exactly the state you are
     about to commit (the committed tree plus the version change) without touching the branch.
+    If the version was already set (`git diff --quiet`), it uses `REF=HEAD`. Found in the first
+    real run with `VERSION=0.9.4`: `npm version` rewrites `package.json` and
+    `package-lock.json` with identical content, and right after that `git stash create` exits
+    with 1 without output. The recipe aborted silently.
   - It prints the commit, tag and push commands; you run them yourself.
 - `release.yml` now only runs `make wheel TAG=… SMOKE_PYTHON=python3.12` and `gh release create`
   on `run/release/dist/*.whl`. The `release` recipe in `development.md` uses the targets.

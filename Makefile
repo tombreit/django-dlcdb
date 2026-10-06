@@ -88,13 +88,17 @@ wheel: check-version
 	@echo "Wheel: $$(ls $(release_dir)/dist/*.whl)"
 
 # Prepares release VERSION=X.Y.Z: writes the version to all three places, then
-# builds and tries the wheel from exactly that state (the committed tree plus
-# the version change, via `git stash create`). Commit, tag and push stay yours.
+# builds and tries the wheel from exactly that state: the committed tree plus
+# the version change, as a commit object from `git stash create` that touches
+# neither branch nor stash list; HEAD itself if the version was already set
+# (`git diff`, unlike `git stash create`, ignores the mere rewrite by npm).
+# Commit, tag and push stay yours.
 release:
 	@echo "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || (echo "Usage: make release VERSION=X.Y.Z" && exit 1)
 	@test -z "$$(git status --porcelain)" || (echo "Commit or stash your changes first: a release is the committed state" && exit 1)
 	@! git rev-parse --quiet --verify refs/tags/v$(VERSION) >/dev/null || (echo "Tag v$(VERSION) exists already" && exit 1)
 	sed -i 's/^__version__ = ".*"/__version__ = "$(VERSION)"/' dlcdb/__init__.py
 	npm version $(VERSION) --no-git-tag-version --allow-same-version --loglevel=error
-	ref=$$(git stash create) && $(MAKE) --no-print-directory wheel REF=$${ref:-HEAD}
-	@echo "Next: git commit --all --message \"Version $(VERSION)\" && git tag v$(VERSION) && git push <github-remote> HEAD v$(VERSION)"
+	if git diff --quiet; then ref=HEAD; else ref=$$(git stash create); fi && $(MAKE) --no-print-directory wheel REF=$$ref
+	@git diff --quiet || echo "Next: git commit --all --message \"Version $(VERSION)\""
+	@echo "Then: git tag v$(VERSION) && git push <github-remote> HEAD v$(VERSION)"
