@@ -2,4 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from .base import *
+"""
+The settings modules: ``dlcdb.settings.base`` (manage.py, wsgi.py, python -m dlcdb)
+and ``dlcdb.settings.test`` (pytest). This package imports neither, so that the test
+settings can adjust the environment before ``base`` reads the ``.env``.
+"""

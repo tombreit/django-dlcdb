@@ -152,12 +152,10 @@ if env.str("EMAIL_HOST", default=""):
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # WhiteNoiseMiddleware, extended to serve the built docs at /docs/ as well
+    "dlcdb.core.middleware.MoreWhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # Using our customized WhiteNoiseMiddleware to serve additional static files (here: /docs/)
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
-    "dlcdb.core.middleware.MoreWhiteNoiseMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -184,9 +182,18 @@ TEMPLATES = [
         "DIRS": [str(BASE_DIR / "dlcdb/templates")],
         "OPTIONS": {
             "loaders": [
+                # Lent sheet templates are edited in the database, so they bypass the cache.
                 "dlcdb.lending.loader.DatabaseLoader",
-                "django.template.loaders.filesystem.Loader",
-                "django.template.loaders.app_directories.Loader",
+                # Parse each template file once per process instead of on every
+                # request. runserver still picks up edits: its autoreloader resets
+                # the cache when a template changes.
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ],
+                ),
             ],
             "context_processors": [
                 "django.template.context_processors.debug",

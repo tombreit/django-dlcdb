@@ -2,12 +2,22 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import os
+
 from huey import MemoryHuey
+
+# Test the production settings, even if the developer's .env sets
+# DJANGO_DEBUG=true (debug toolbar, dev apps): base reads the .env without
+# overriding variables that are already set.
+os.environ["DJANGO_DEBUG"] = "false"
 
 from .base import *
 
 # Tests assert English UI strings; keep rendering language-independent.
 LANGUAGE_CODE = "en"
+
+# Unlike production, a broken form layout should fail the test.
+CRISPY_FAIL_SILENTLY = False
 
 # PBKDF2 costs ~0.2 s per password by design; tests need no strong hashes.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

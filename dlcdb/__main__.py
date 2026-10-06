@@ -13,7 +13,7 @@ import sys
 
 
 def main(argv=None):
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dlcdb.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dlcdb.settings.base")
 
     from django.core.management import execute_from_command_line
 

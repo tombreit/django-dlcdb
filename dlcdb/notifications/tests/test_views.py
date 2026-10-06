@@ -178,8 +178,7 @@ class MySubscriptionsViewTests(BaseTest):
         self.assertNotIn(NotificationInterval.IMMEDIATELY.value, interval_values)
         self.assertNotIn(NotificationInterval.HOURLY.value, interval_values)
 
-        # DEBUG=True breaks the test client (debug toolbar URLs are not
-        # registered in the test URLconf), so check the form directly.
+        # The debug-only intervals, checked on the form directly.
         with override_settings(DEBUG=True):
             form = ReportSubscriptionForm(instance=Subscription(subscriber=self.person))
             interval_values = {value for value, _ in form.fields["interval"].choices}
