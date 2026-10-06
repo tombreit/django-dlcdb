@@ -57,11 +57,12 @@ jobs:
         run: |
           python3.12 -m venv smoke
           smoke/bin/pip install "$GITHUB_WORKSPACE"/dist/*.whl
-          export DLCDB_HOME="$RUNNER_TEMP/home"
-          smoke/bin/dlcdb check
-          smoke/bin/dlcdb migrate --noinput
           test -f smoke/lib/python*/site-packages/dlcdb/staticfiles/staticfiles.json
-          smoke/bin/dlcdb shell --verbosity 0 --command "from django.test import Client; assert Client().get('/accounts/login/').status_code == 200"
+          DLCDB_HOME="$RUNNER_TEMP/home" smoke/bin/python -m dlcdb dlcdb_init
+          cd home
+          ./manage.py check
+          ./manage.py migrate --noinput
+          ./manage.py shell --verbosity 0 --command "from django.test import Client; assert Client().get('/accounts/login/', HTTP_HOST='127.0.0.1').status_code == 200"
 
       - name: GitHub release
         env:

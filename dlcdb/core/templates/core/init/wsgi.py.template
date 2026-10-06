@@ -1,0 +1,9 @@
+"""WSGI entry point of this DLCDB instance (written by `dlcdb_init`), e.g. for Apache's WSGIScriptAlias."""
+
+import os
+from pathlib import Path
+
+# The instance is the directory this file is in
+os.environ["DLCDB_HOME"] = str(Path(__file__).resolve().parent)
+
+from dlcdb.wsgi import application

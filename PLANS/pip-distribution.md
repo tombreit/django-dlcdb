@@ -6,11 +6,11 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–7 done (2026-10-06); batch 8 (`init` writes `manage.py` and
-`wsgi.py`) comes before the first tag. A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–8 done (2026-10-06); next is the first tag. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
-installation needs no `collectstatic`, and `dlcdb init` writes the instance's `.env` (with a
-fresh secret key) and a README. `docs/betrieb/setup.md` describes installation, production use
+installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
+fresh secret key), `manage.py`, `wsgi.py` and a README, so the instance runs with
+`./manage.py` like any Django project. `docs/betrieb/setup.md` describes installation, production use
 and updates. `docs/betrieb/development.md` covers dependencies, lock files and releasing.
 Installations without the `ldap` extra work since the LDAP backend moved into its own module
 (`accounts/ldap_backends.py`). No release has been tagged yet (see *Open follow-ups*). This is
@@ -88,8 +88,18 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    it by hand before tagging; the release workflow checks that the tag matches. The footer's
    repository and issues URLs are constants in `theme/context_processors.py`, kept in step with
    `[project.urls]`, which can't be dynamic.
-9. **CLI `dlcdb`** (`[project.scripts]`, `dlcdb/__main__.py`) behaves like `manage.py`:
-   `dlcdb migrate`, `dlcdb run_huey`, …. `manage.py` stays for checkouts.
+9. **No console script; `python -m dlcdb` and `./manage.py` instead.** `dlcdb/__main__.py`
+   behaves like `manage.py` (`python -m dlcdb <command>`). It passes "python -m dlcdb" as the
+   program name, because Django would otherwise call itself "python -m django" in its help.
+   The `dlcdb` console script from batch 1 was dropped in batch 8, together with the rename of
+   `init` to `dlcdb_init`, as decided in a side conversation. The docs use `python -m dlcdb` only
+   for the first `DLCDB_HOME=… /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init`.
+
+   `dlcdb_init` writes a `manage.py` (shebang to the venv's Python) and a `wsgi.py` into the
+   instance directory. Both set `DLCDB_HOME` to their own directory and run
+   `dlcdb.__main__.main` or `dlcdb.wsgi`. So an instance works with `./manage.py` like any Django
+   project, and Apache needs no hand-written stub. `manage.py` in the repository stays the plain
+   Django one for checkouts.
 10. **License metadata:** SPDX expression `EUPL-1.2` (the license of the code) plus all texts from
     `LICENSES/` as license files. The table form and the license classifier are deprecated in
     setuptools ≥ 77, which is now the build requirement.
@@ -242,6 +252,18 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   `cd /srv/dlcdb && ./manage.py migrate` without exporting `DLCDB_HOME`, and nobody writes the
   wsgi stub by hand. `dlcdb` is left for `init` and DLCDB-specific commands. The docs
   (pip *Install*, *Production*, *Update*, the instance README) switch to `./manage.py`.
+- In a source checkout, `init` writes only `.env`. The checkout has its own README,
+  `manage.py` and `dlcdb/wsgi.py`, and a `wsgi.py` at the repository's top level would be
+  clutter.
+- The templates are named `manage.py.template` and `wsgi.py.template`, so neither ruff nor
+  pip's byte-compilation parses them as Python.
+- The docs say to run `init` as the user that runs DLCDB, because `.env` is readable only by
+  its owner (mode 0600 since batch 7).
+- Also in batch 8, as decided in a side conversation: the `[project.scripts] dlcdb` console
+  script is gone. The command is renamed `init` → `dlcdb_init`, and the first run is
+  `python -m dlcdb dlcdb_init` (decision 9). The release smoke test now follows the documented
+  flow: `python -m dlcdb dlcdb_init`, then `./manage.py check`, `migrate`, and a request with
+  `HTTP_HOST=127.0.0.1`, because the generated `.env` restricts `ALLOWED_HOSTS`.
 
 ## Open follow-ups
 
@@ -252,7 +274,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - **`python-magic`: removed.** Its only use, a CSV MIME check in the bulk decommissioning
   import, went away in March 2025 (`a84fba15`). The container and GitLab CI no longer install
   libmagic.
-- **First release.** After batch 8: tag `v0.9.4` and push the tag to GitHub. Check the workflow
+- **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow
   run and the release page, then try the documented install from the release URL. Neither
   Python 3.12 nor the upload has been tried locally.
 - **Left open from the branch review:**
@@ -275,8 +297,8 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   plus `dlcdb/docs_html` and `dlcdb/staticfiles`). In the working tree, setuptools leaves
   `build/` and `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
-- mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why a pip installation behind
-  Apache needs the `wsgi.py` stub that sets `DLCDB_HOME`.
+- mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why the `wsgi.py` that
+  `init` writes sets `DLCDB_HOME` itself, from its own location.
 
 ## Progress
 
@@ -288,4 +310,4 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 5: `dlcdb init`
 - [x] Batch 6: developer page
 - [x] Batch 7: fixes from the review of the branch
-- [ ] Batch 8: `init` writes `manage.py` and `wsgi.py`
+- [x] Batch 8: `init` writes `manage.py` and `wsgi.py`

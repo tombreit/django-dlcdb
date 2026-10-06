@@ -1,0 +1,14 @@
+{% autoescape off %}#!{{ python }}
+"""Django's command-line utility for this DLCDB instance (written by `dlcdb_init`)."""
+
+import os
+from pathlib import Path
+
+if __name__ == "__main__":
+    # The instance is the directory this file is in
+    os.environ["DLCDB_HOME"] = str(Path(__file__).resolve().parent)
+
+    from dlcdb.__main__ import main
+
+    main()
+{% endautoescape %}

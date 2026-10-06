@@ -33,7 +33,7 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "Thomas Breitner <t.breitner@csl.mpg.de>"
 SPDX-License-Identifier = "EUPL-1.2"
 
-# The files `dlcdb init` writes into an instance directory, without license headers
+# The files `dlcdb_init` writes into an instance directory, without license headers
 [[annotations]]
 path = "dlcdb/core/templates/core/init/**"
 precedence = "aggregate"

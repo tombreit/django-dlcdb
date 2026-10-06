@@ -2,8 +2,8 @@
 
 The DLCDB runs as a [container image](#container-podman), as a [pip
 installation](#pip-installation) or [from a source checkout](#from-source).
-Each way keeps all data in `data/` (of a pip installation: inside its
-`DLCDB_HOME`) and needs a second process next to the web server, the [task
+Each way keeps all data in `data/` (of a pip installation: inside its instance
+directory) and needs a second process next to the web server, the [task
 runner](#task-runner).
 
 ## Container (podman)
@@ -103,20 +103,24 @@ collected, so there is no `collectstatic` step either. For LDAP, pip builds
 `python-ldap`, which needs `libldap2-dev libsasl2-dev python3-dev gcc`.
 
 A pip installation keeps its `.env` and `data/` (database, media files) in one
-directory, named by the environment variable `DLCDB_HOME`. It has to be set in the environment, not in `.env`; without it,
-every `dlcdb` command stops with a hint. The `dlcdb` command takes the same
-commands as `manage.py`.
+directory, the instance directory. The management command `dlcdb_init` writes a
+`manage.py` and a `wsgi.py` there, which run DLCDB for that directory: from then
+on you work with `./manage.py` as in any Django project. Only the first
+`dlcdb_init` needs the directory in the environment variable `DLCDB_HOME`.
 
 ### Install
 
+Run the commands as the user that runs DLCDB (the web server's daemon process,
+the task runner): `.env` is readable only by its owner.
+
 ```bash
-export DLCDB_HOME=/srv/dlcdb
-python3 -m venv $DLCDB_HOME/venv
-$DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/v0.9.4/dlcdb-0.9.4-py3-none-any.whl"
-$DLCDB_HOME/venv/bin/dlcdb init  # writes .env (with a fresh secret key) and README.md
-# edit $DLCDB_HOME/.env
-$DLCDB_HOME/venv/bin/dlcdb migrate
-$DLCDB_HOME/venv/bin/dlcdb createsuperuser
+python3 -m venv /srv/dlcdb/venv
+/srv/dlcdb/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/v0.9.4/dlcdb-0.9.4-py3-none-any.whl"
+DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init  # writes .env (with a fresh secret key), manage.py, wsgi.py, README.md
+# edit /srv/dlcdb/.env
+cd /srv/dlcdb
+./manage.py migrate
+./manage.py createsuperuser
 ```
 
 Without LDAP, leave out `[ldap]`.
@@ -124,41 +128,26 @@ Without LDAP, leave out `[ldap]`.
 ### Production
 
 **Task runner:** the [task runner unit](#task-runner-unit) of the source
-installation, with this `[Service]` section:
+installation, with `ExecStart=/srv/dlcdb/manage.py run_huey`.
 
-```ini
-[Service]
-Environment=DLCDB_HOME=/srv/dlcdb
-ExecStart=/srv/dlcdb/venv/bin/dlcdb run_huey
-```
-
-**Apache and mod_wsgi:** Apache's `SetEnv` does not reach the Python process,
-so a small `wsgi.py` in `DLCDB_HOME` sets it:
-
-```python
-# /srv/dlcdb/wsgi.py
-import os
-
-os.environ.setdefault("DLCDB_HOME", "/srv/dlcdb")
-
-from dlcdb.wsgi import application  # noqa: E402
-```
-
-Then use the [Apache configuration](#apache-and-mod_wsgi) of the source
-installation with `/srv/dlcdb/data/media` for `/media`, `/srv/dlcdb/wsgi.py` as
-`WSGIScriptAlias` (and in `<Directory /srv/dlcdb>`), and
-`python-home=/srv/dlcdb/venv` without `python-path`.
+**Apache and mod_wsgi:** the [Apache configuration](#apache-and-mod_wsgi) of the
+source installation, with `/srv/dlcdb/data/media` for `/media`,
+`/srv/dlcdb/wsgi.py` (written by `dlcdb_init`) as `WSGIScriptAlias` and in
+`<Directory /srv/dlcdb>`, and `python-home=/srv/dlcdb/venv` without
+`python-path`.
 
 ### Update
 
 ```bash
-$DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+/srv/dlcdb/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+cd /srv/dlcdb
+./manage.py dlcdb_init  # adds files that are new in this release
 # The task runner writes to the database every minute; stop it while the
 # migrations run, so they don't compete for the write lock.
 systemctl --user stop dlcdb_huey.service
-$DLCDB_HOME/venv/bin/dlcdb migrate --noinput
+./manage.py migrate --noinput
 systemctl --user start dlcdb_huey.service
-touch $DLCDB_HOME/wsgi.py
+touch wsgi.py
 ```
 
 ## From source
@@ -189,7 +178,7 @@ pip install -r requirements/dev.txt  # Install development requirements
 **Set environment for project**
 
 ```bash
-./manage.py init  # writes .env with a fresh secret key
+./manage.py dlcdb_init  # writes .env with a fresh secret key
 # edit .env, for development set DJANGO_DEBUG=true
 ```
 

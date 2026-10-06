@@ -40,9 +40,6 @@ dependencies = [
     "plotly",
 ]
 
-[project.scripts]
-dlcdb = "dlcdb.__main__:main"
-
 [project.optional-dependencies]
 # Builds the in-app docs (`make docs`). A wheel already contains them, so only
 # source checkouts and the release build need this extra.

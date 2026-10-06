@@ -33,7 +33,7 @@ To get started using the DLCDB, run the following in a virtual python environmen
 npm install
 npm run build
 pip install -r requirements/dev.txt
-python manage.py init  # writes .env; set DJANGO_DEBUG=true there for development
+python manage.py dlcdb_init  # writes .env; set DJANGO_DEBUG=true there for development
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
