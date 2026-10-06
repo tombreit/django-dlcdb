@@ -113,8 +113,8 @@ commands as `manage.py`.
 export DLCDB_HOME=/srv/dlcdb
 python3 -m venv $DLCDB_HOME/venv
 $DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/v0.9.4/dlcdb-0.9.4-py3-none-any.whl"
-curl --output $DLCDB_HOME/.env https://raw.githubusercontent.com/tombreit/django-dlcdb/v0.9.4/env.template
-# edit .env
+$DLCDB_HOME/venv/bin/dlcdb init  # writes .env (with a fresh secret key) and README.md
+# edit $DLCDB_HOME/.env
 $DLCDB_HOME/venv/bin/dlcdb migrate
 $DLCDB_HOME/venv/bin/dlcdb createsuperuser
 ```
@@ -192,13 +192,13 @@ pip install -r requirements/dev.txt  # Install development requirements
 **Set environment for project**
 
 ```bash
-cp env.template .env
+./manage.py init  # writes .env with a fresh secret key
 # edit .env
 ```
 
 :::{note}
 **LDAP.** Set `AUTH_LDAP=true` and the `AUTH_LDAP_*` variables in `.env` (see
-`env.template`); what the LDAP groups do is described in
+the comments there); what the LDAP groups do is described in
 [Berechtigungen › LDAP](../guides/berechtigungen.md#ldap). Set `LDAP_VARIANT`
 to match your directory: `msad` (default) for Microsoft Active Directory, or
 `openldap` for OpenLDAP-based directories (e.g. Univention Corporate Server).

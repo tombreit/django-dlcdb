@@ -6,14 +6,14 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–4 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
+**Status:** batches 0–5 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
-installation needs no `collectstatic`. `docs/betrieb/setup.md` describes installation,
-production use, updates and releasing. Installations without the `ldap` extra work since the
-LDAP backend moved into its own module (`accounts/ldap_backends.py`). Batches 5–6 make the
-install simpler (`dlcdb init`) and move maintainer topics to a developer page. No release has
-been tagged yet (see *Open follow-ups*). This is a living document; each batch ticks its box
-in *Progress*.
+installation needs no `collectstatic`, and `dlcdb init` writes the instance's `.env` (with a
+fresh secret key) and a README. `docs/betrieb/setup.md` describes installation, production
+use, updates and releasing. Installations without the `ldap` extra work since the LDAP backend
+moved into its own module (`accounts/ldap_backends.py`). Batch 6 moves maintainer topics to a
+developer page. No release has been tagged yet (see *Open follow-ups*). This is a living
+document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -186,8 +186,16 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   templates shipped in the package. It never overwrites anything, so it is safe to run again,
   and after an update it only adds what is new:
   - `.env`, from `env.template` (moved into `core/templates/core/init/`), with a fresh
-    `SECRET_KEY`
+    `SECRET_KEY`. The key comes from `secrets.token_urlsafe`, because `$` and `#` mean something
+    in django-environ files, and the file gets mode 0600.
   - a short `README.md` with links to the docs
+
+  The templates get their license from a `REUSE.toml` annotation, so the generated files carry
+  no SPDX headers.
+- The template now defaults to `DJANGO_DEBUG=false`, with a hint that `true` needs the dev
+  requirements. With `true`, the settings load the debug toolbar and django-extensions. A pip
+  installation doesn't have them, so every `dlcdb` command after `init` crashed until the line
+  was edited.
 - The name follows `git init` / `cargo init` / `sentry init`. `doctor` was rejected because it
   diagnoses instead of creating (that belongs in Django's system checks). `bootstrap` was
   rejected as vague, and because it collides with the Bootstrap CSS framework.
@@ -236,5 +244,5 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 2: run outside a checkout
 - [x] Batch 3: release workflow and docs
 - [x] Batch 4: collected static files ship in the wheel
-- [ ] Batch 5: `dlcdb init`
+- [x] Batch 5: `dlcdb init`
 - [ ] Batch 6: developer page

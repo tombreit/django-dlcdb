@@ -18,6 +18,7 @@ Get help for a specific command:
 
 | Command | Does |
 |---|---|
+| `init` | Create `.env` (with a fresh secret key) and `README.md` in the instance directory; existing files stay untouched (see [Setup](setup.md#pip-installation)) |
 | `anonymize_data` | Replace person and device data with random values (for demo/dev copies) |
 | `audit_field_losses` | Report device field values that were silently lost on save, optionally restore them |
 | `audit_transitions` | Report device record chains that violate the lifecycle transition table |
