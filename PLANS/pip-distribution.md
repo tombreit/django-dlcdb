@@ -6,10 +6,11 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batch 2 done (2026-10-06). An installed wheel runs from its `DLCDB_HOME` with
-bundled docs and the footer version. A wheel built locally works; publishing it is batch 3.
-Without the `ldap` extra every login page fails (see *Open follow-ups*). This is a living
-document; each batch ticks its box in *Progress*.
+**Status:** batches 0–3 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
+and attaches it to a release. `docs/betrieb/setup.md` describes installation, production
+use, updates and releasing. No release has been tagged yet: the first one waits for the LDAP fix
+(see *Open follow-ups*), because without the `ldap` extra every login page fails. This is a
+living document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -135,20 +136,27 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   The API schema version comes from `dlcdb.__version__`.
 
 ### Batch 3: release workflow and docs
-- Add `.github/workflows/release.yml`, triggered on a `v*` tag push:
-  1. `npm ci` and `npm run build`
-  2. `pip install -r requirements/prod.txt build`, `make docs`, then
+- Add `.github/workflows/release.yml`, triggered on a `v*` tag push. It uses only the
+  checkout/setup-node/setup-python actions (v7), Node 24 and Python 3.13:
+  1. check that the tag matches `dlcdb.__version__` and the `package.json` version
+  2. `npm ci` and `npm run build`
+  3. `pip install -r requirements/prod.txt build`, `make docs`, then
      `cp -r run/docs/html dlcdb/docs_html`
-  3. check that the tag matches `dlcdb.__version__` and the `package.json` version
   4. `python -m build --wheel`
-  5. smoke test in a fresh venv: `dlcdb check`, `dlcdb migrate`
-  6. `gh release create`
-- `docs/betrieb/setup.md`: add a section "Installation via pip". It covers:
-  - the wheel URL with extras
-  - optional constraints from `requirements/prod.txt` of the same tag
+  5. smoke test in a fresh venv: `dlcdb check`, `dlcdb migrate`, `dlcdb collectstatic`
+  6. `gh release create … --generate-notes` with the wheel
+  No system packages: nothing imports `python-magic`, so libmagic is not needed.
+- `docs/betrieb/setup.md`: a new section *Pip installation*, plus *Operations › Release*. The
+  section covers:
+  - install, including the wheel URL with extras and optional constraints from the
+    `requirements/` of the same tag
   - `DLCDB_HOME`
-  - systemd for huey
-  - a `wsgi.py` stub for Apache/mod_wsgi
+  - the systemd `[Service]` section for the task runner
+  - the `wsgi.py` stub for Apache/mod_wsgi
+  - updates
+
+  *Operations › Release* covers the version bump with `npm version X.Y.Z --no-git-tag-version`
+  for the npm files, and the tag push. The introduction names all three ways to run DLCDB.
 - `NEWS.md`: one line.
 
 ## Open follow-ups
@@ -165,6 +173,10 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
 - **`createcachetable`.** The `select2` DatabaseCache table `dlcdb_select2` is never created
   (not documented, not in `container/entrypoint.sh`). This is independent of this plan.
+- **`python-magic` looks unused.** It is in `dependencies` and the container installs libmagic,
+  but nothing under `dlcdb/` imports `magic`. Remove it, or find out who needs it.
+- **First release.** After the LDAP fix: tag `v0.9.4` and push the tag to GitHub. Check the
+  workflow run and the release page, then try the documented install from the release URL.
 
 ## Pitfalls
 
@@ -182,4 +194,4 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 0: this document
 - [x] Batch 1: correct wheel contents
 - [x] Batch 2: run outside a checkout
-- [ ] Batch 3: release workflow and docs
+- [x] Batch 3: release workflow and docs

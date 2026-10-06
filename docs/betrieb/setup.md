@@ -1,8 +1,10 @@
 # Setup
 
-The DLCDB runs either as a [container image](#container-podman) or [from a
-source checkout](#from-source). Either way it keeps all data in `data/` and
-needs a second process next to the web server, the [task runner](#task-runner).
+The DLCDB runs as a [container image](#container-podman), as a [pip
+installation](#pip-installation) or [from a source checkout](#from-source).
+Each way keeps all data in `data/` (of a pip installation: inside its
+`DLCDB_HOME`) and needs a second process next to the web server, the [task
+runner](#task-runner).
 
 ## Container (podman)
 
@@ -89,6 +91,79 @@ are applied.
 podman rm --force dlcdb-huey dlcdb
 podman run --name dlcdb ... dlcdb serve
 podman run --name dlcdb-huey ... dlcdb huey
+```
+
+## Pip installation
+
+Each [GitHub release](https://github.com/tombreit/django-dlcdb/releases)
+carries a wheel. Like the container image it contains the frontend assets, the
+compiled message catalog and the rendered handbook, so **installing it needs
+neither npm nor gettext nor Sphinx**, only Python. For LDAP, pip builds
+`python-ldap`, which needs `libldap2-dev libsasl2-dev python3-dev gcc`.
+
+A pip installation keeps its `.env`, `data/` (database, media files) and `run/`
+(collected static files) in one directory, named by the environment variable
+`DLCDB_HOME`. It has to be set in the environment, not in `.env`; without it,
+every `dlcdb` command stops with a hint. The `dlcdb` command takes the same
+commands as `manage.py`.
+
+### Install
+
+```bash
+export DLCDB_HOME=/srv/dlcdb
+python3 -m venv $DLCDB_HOME/venv
+$DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/v0.9.4/dlcdb-0.9.4-py3-none-any.whl"
+curl --output $DLCDB_HOME/.env https://raw.githubusercontent.com/tombreit/django-dlcdb/v0.9.4/env.template
+# edit .env
+$DLCDB_HOME/venv/bin/dlcdb migrate
+$DLCDB_HOME/venv/bin/dlcdb collectstatic --noinput
+$DLCDB_HOME/venv/bin/dlcdb createsuperuser
+```
+
+Without LDAP, leave out `[ldap]`. To get the same dependency versions as a
+source installation of that release, add
+`--constraint https://raw.githubusercontent.com/tombreit/django-dlcdb/v0.9.4/requirements/prod-ldap.txt`
+(or `prod.txt` without LDAP) to `pip install`.
+
+### Production
+
+**Task runner:** the [task runner unit](#task-runner-unit) of the source
+installation, with this `[Service]` section:
+
+```ini
+[Service]
+Environment=DLCDB_HOME=/srv/dlcdb
+ExecStart=/srv/dlcdb/venv/bin/dlcdb run_huey
+```
+
+**Apache and mod_wsgi:** Apache's `SetEnv` does not reach the Python process,
+so a small `wsgi.py` in `DLCDB_HOME` sets it:
+
+```python
+# /srv/dlcdb/wsgi.py
+import os
+
+os.environ.setdefault("DLCDB_HOME", "/srv/dlcdb")
+
+from dlcdb.wsgi import application  # noqa: E402
+```
+
+Then use the [Apache configuration](#apache-and-mod_wsgi) of the source
+installation with `/srv/dlcdb/data/media` for `/media`, `/srv/dlcdb/wsgi.py` as
+`WSGIScriptAlias` (and in `<Directory /srv/dlcdb>`), and
+`python-home=/srv/dlcdb/venv` without `python-path`.
+
+### Update
+
+```bash
+$DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+$DLCDB_HOME/venv/bin/dlcdb collectstatic --noinput
+# The task runner writes to the database every minute; stop it while the
+# migrations run, so they don't compete for the write lock.
+systemctl --user stop dlcdb_huey.service
+$DLCDB_HOME/venv/bin/dlcdb migrate --noinput
+systemctl --user start dlcdb_huey.service
+touch $DLCDB_HOME/wsgi.py
 ```
 
 ## From source
@@ -295,7 +370,7 @@ make docs
 The built documentation lands in `run/docs` and is served by the
 application itself at `/docs/` (via WhiteNoise, see
 `MoreWhiteNoiseMiddleware`) — that is why `make docs` is part of the
-deployment steps above.
+deployment steps above. A pip installation gets them with the wheel.
 
 ### Localization
 
@@ -321,3 +396,18 @@ which is why that step is absent from the deployment steps above.
 
 (Re-)Build requirements via `make requirements` (uses pip-tools to
 compile `requirements/{prod,prod-ldap,dev}.txt` from `pyproject.toml`).
+
+### Release
+
+```bash
+# set __version__ in dlcdb/__init__.py, then:
+npm version X.Y.Z --no-git-tag-version  # package.json and package-lock.json
+git commit --all --message "Version X.Y.Z"
+git tag vX.Y.Z
+git push <github-remote> main vX.Y.Z
+```
+
+The tag starts `.github/workflows/release.yml` on GitHub: it builds the
+frontend assets, the docs and the wheel, tries the wheel in a fresh virtual
+environment and attaches it to a new GitHub release. A tag that does not match
+both version numbers fails the workflow.

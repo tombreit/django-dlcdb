@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Pip installation: each GitHub release carries a wheel with frontend assets and docs; the `dlcdb` command works like `manage.py`, `DLCDB_HOME` names the directory for `.env`, `data/` and `run/`
 * Dashboard: a Journal tile counts the critical, error and warning entries of the last 30 days
 * SQLite runs in WAL mode with an immediate write lock, a 20 s busy timeout and larger caches; deployments stop the task runner during `migrate`, and the huey container waits until `serve` has applied all migrations; the task runner writes a compacted, copyable `data/db/db.sqlite3.snapshot` every night at 00:30 UTC for file-based backups
 * Journal: a cleanup page (Settings › Journal › Clean up) removes repeated HR sync and error entries, keeping the first and the latest, and entries older than a chosen age
