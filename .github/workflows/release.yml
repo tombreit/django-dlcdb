@@ -37,11 +37,13 @@ jobs:
           npm ci
           npm run build
 
-      - name: Docs, copied into the package
+      - name: Docs and static files, copied into the package
         run: |
           pip install -r requirements/prod.txt build
           make docs
           cp -r run/docs/html dlcdb/docs_html
+          python manage.py collectstatic --noinput
+          cp -r run/staticfiles dlcdb/staticfiles
 
       - name: Wheel
         run: python -m build --wheel
@@ -54,7 +56,8 @@ jobs:
           export DLCDB_HOME="$RUNNER_TEMP/home"
           smoke/bin/dlcdb check
           smoke/bin/dlcdb migrate --noinput
-          smoke/bin/dlcdb collectstatic --noinput
+          test -f smoke/lib/python*/site-packages/dlcdb/staticfiles/staticfiles.json
+          smoke/bin/dlcdb shell --verbosity 0 --command "from django.test import Client; assert Client().get('/accounts/login/').status_code == 200"
 
       - name: GitHub release
         env:

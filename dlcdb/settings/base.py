@@ -18,8 +18,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # A source checkout has pyproject.toml next to the dlcdb package; a pip installation has not.
 SOURCE_CHECKOUT = (BASE_DIR / "pyproject.toml").exists()
 
-# The instance directory holds .env, data/ and run/. A source checkout uses the
-# repository root; a pip installation names it via the DLCDB_HOME environment variable.
+# The instance directory holds .env and data/ (a source checkout also run/). A source
+# checkout uses the repository root; a pip installation names it via the DLCDB_HOME
+# environment variable.
 if os.environ.get("DLCDB_HOME"):
     INSTANCE_DIR = Path(os.environ["DLCDB_HOME"]).resolve()
 elif SOURCE_CHECKOUT:
@@ -27,14 +28,16 @@ elif SOURCE_CHECKOUT:
 else:
     raise ImproperlyConfigured(
         "DLCDB is not running from a source checkout: set the DLCDB_HOME environment variable "
-        "to the instance directory, which holds .env, data/ and run/."
+        "to the instance directory, which holds .env and data/."
     )
 
 RUN_DIR = INSTANCE_DIR / "run"
 DATA_DIR = INSTANCE_DIR / "data"
 DB_DIR = DATA_DIR / "db"
 MEDIA_DIR = DATA_DIR / "media"
-STATICFILES_DIR = RUN_DIR / "staticfiles"
+# Collected static files: `collectstatic` writes them to run/staticfiles in a source
+# checkout; a wheel carries them inside the package (collected by the release build).
+STATICFILES_DIR = RUN_DIR / "staticfiles" if SOURCE_CHECKOUT else BASE_DIR / "dlcdb" / "staticfiles"
 
 # Make sure directory structure exists
 Path(DB_DIR).mkdir(parents=True, exist_ok=True)
@@ -490,6 +493,10 @@ if DEBUG:
 
 # WhiteNoise
 WHITENOISE_INDEX_FILE = True
+# A wheel's collected static files match the dependency versions of its release build. If a
+# newer dependency refers to a static file missing there, fall back to the unhashed name
+# instead of failing the whole page.
+WHITENOISE_MANIFEST_STRICT = SOURCE_CHECKOUT
 
 # Built docs, served at /docs/: `make docs` writes them to run/docs/html in a source
 # checkout; a wheel carries them inside the package (copied there by the release build).

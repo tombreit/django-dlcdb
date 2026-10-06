@@ -6,11 +6,14 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–3 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
-and attaches it to a release. `docs/betrieb/setup.md` describes installation, production
-use, updates and releasing. Installations without the `ldap` extra work since the LDAP
-backend moved into its own module (`accounts/ldap_backends.py`). No release has been tagged
-yet (see *Open follow-ups*). This is a living document; each batch ticks its box in *Progress*.
+**Status:** batches 0–4 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
+and attaches it to a release. The wheel ships the collected static files, so a pip
+installation needs no `collectstatic`. `docs/betrieb/setup.md` describes installation,
+production use, updates and releasing. Installations without the `ldap` extra work since the
+LDAP backend moved into its own module (`accounts/ldap_backends.py`). Batches 5–6 make the
+install simpler (`dlcdb init`) and move maintainer topics to a developer page. No release has
+been tagged yet (see *Open follow-ups*). This is a living document; each batch ticks its box
+in *Progress*.
 
 ## Why
 
@@ -70,7 +73,7 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    `build/` and `*.egg-info/` into the project root, and pyproject offers no option to move them.
    So wheels are never built in the working tree. `settings.DOCS_DIR` picks the docs location
    via `SOURCE_CHECKOUT`.
-7. **Instance directory `DLCDB_HOME`.** It holds `.env`, `data/` and `run/`. A source checkout
+7. **Instance directory `DLCDB_HOME`.** It holds `.env` and `data/`. A source checkout
    (recognised by `pyproject.toml` next to the package) defaults to the repository root as
    before. A pip installation must set `DLCDB_HOME`, otherwise the settings raise
    `ImproperlyConfigured` with a hint.
@@ -88,6 +91,15 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 10. **License metadata:** SPDX expression `EUPL-1.2` (the license of the code) plus all texts from
     `LICENSES/` as license files. The table form and the license classifier are deprecated in
     setuptools ≥ 77, which is now the build requirement.
+11. **The wheel ships the collected static files.** DLCDB has no instance-specific static files
+    (branding uploads are media), so the release build runs `collectstatic` once and copies
+    `run/staticfiles` into the package (`dlcdb/staticfiles`). In a wheel, `STATIC_ROOT` points
+    there (`settings.STATICFILES_DIR` via `SOURCE_CHECKOUT`). Install and update need no
+    `collectstatic`, and the static files always match the installed release. Since the
+    collected files reflect the dependency versions of the release build,
+    `WHITENOISE_MANIFEST_STRICT` is off in a wheel. A newer dependency that refers to a static
+    file missing there then gets the unhashed name instead of failing the page. Checkouts stay
+    strict. The cost is a larger wheel.
 
 ## Alternatives considered and rejected
 
@@ -159,6 +171,38 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   for the npm files, and the tag push. The introduction names all three ways to run DLCDB.
 - `NEWS.md`: one line.
 
+### Batch 4: collected static files ship in the wheel
+- `settings/base.py`: `STATICFILES_DIR` (= `STATIC_ROOT`) is `run/staticfiles` in a checkout
+  and `dlcdb/staticfiles` in a wheel. `WHITENOISE_MANIFEST_STRICT = SOURCE_CHECKOUT`.
+- `pyproject.toml` package-data: `staticfiles/**/*` for `dlcdb`.
+- `release.yml`: `collectstatic` and `cp -r run/staticfiles dlcdb/staticfiles` before the wheel
+  build. The smoke test checks for `staticfiles.json` in the installed package and requests the
+  login page, instead of running `collectstatic`.
+- `setup.md` *Pip installation*: no `collectstatic` in *Install* and *Update*; the instance
+  directory holds `.env` and `data/`.
+
+### Batch 5: `dlcdb init`
+- A management command `init` creates the starting files of an instance directory from
+  templates shipped in the package. It never overwrites anything, so it is safe to run again,
+  and after an update it only adds what is new:
+  - `.env`, from `env.template` (moved into `core/templates/core/init/`), with a fresh
+    `SECRET_KEY`
+  - a short `README.md` with links to the docs
+- The name follows `git init` / `cargo init` / `sentry init`. `doctor` was rejected because it
+  diagnoses instead of creating (that belongs in Django's system checks). `bootstrap` was
+  rejected as vague, and because it collides with the Bootstrap CSS framework.
+- Docs: `dlcdb init` replaces the curl line, and `./manage.py init` replaces
+  `cp env.template .env`. `management_commands.md` gets an entry, and `NEWS.md` a line.
+
+### Batch 6: developer page
+- New `docs/betrieb/development.md` with *Dependencies and lock files*:
+  - the roles of `pyproject.toml` and `requirements/*.txt`
+  - `make requirements` versus pip-compile without `--upgrade`
+  - the `--constraint` hint for pip installations
+  - `pylock.toml` as the future option
+
+  It also gets *Release*, moved from `setup.md`. `setup.md` keeps only what operators need.
+
 ## Open follow-ups
 
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
@@ -174,10 +218,13 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 ## Pitfalls
 
 - Package data globs match whatever is on disk. Build the wheel only after `npm run build`,
-  `make docs` and the copy to `dlcdb/docs_html`, otherwise it silently lacks bundles or docs.
+  `make docs`, `collectstatic` and the copies to `dlcdb/docs_html` and `dlcdb/staticfiles`.
+  Otherwise it silently lacks bundles, docs or static files.
+- Collect the static files with the production requirements and without a `.env` that turns
+  on `DEBUG`. Otherwise dev-only apps (debug toolbar, django-extensions) end up in the wheel.
 - Build wheels only on CI or in a scratch copy (`git ls-files` plus the three `dist/` bundles
-  plus `dlcdb/docs_html`). In the working tree, setuptools leaves `build/` and
-  `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
+  plus `dlcdb/docs_html` and `dlcdb/staticfiles`). In the working tree, setuptools leaves
+  `build/` and `dlcdb.egg-info/` behind and reuses a stale `build/lib/` on the next build.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
 - mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why a pip installation behind
   Apache needs the `wsgi.py` stub that sets `DLCDB_HOME`.
@@ -188,3 +235,6 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 - [x] Batch 1: correct wheel contents
 - [x] Batch 2: run outside a checkout
 - [x] Batch 3: release workflow and docs
+- [x] Batch 4: collected static files ship in the wheel
+- [ ] Batch 5: `dlcdb init`
+- [ ] Batch 6: developer page

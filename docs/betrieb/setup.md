@@ -98,12 +98,12 @@ podman run --name dlcdb-huey ... dlcdb huey
 Each [GitHub release](https://github.com/tombreit/django-dlcdb/releases)
 carries a wheel. Like the container image it contains the frontend assets, the
 compiled message catalog and the rendered handbook, so **installing it needs
-neither npm nor gettext nor Sphinx**, only Python. For LDAP, pip builds
+neither npm nor gettext nor Sphinx**, only Python. The static files come
+collected, so there is no `collectstatic` step either. For LDAP, pip builds
 `python-ldap`, which needs `libldap2-dev libsasl2-dev python3-dev gcc`.
 
-A pip installation keeps its `.env`, `data/` (database, media files) and `run/`
-(collected static files) in one directory, named by the environment variable
-`DLCDB_HOME`. It has to be set in the environment, not in `.env`; without it,
+A pip installation keeps its `.env` and `data/` (database, media files) in one
+directory, named by the environment variable `DLCDB_HOME`. It has to be set in the environment, not in `.env`; without it,
 every `dlcdb` command stops with a hint. The `dlcdb` command takes the same
 commands as `manage.py`.
 
@@ -116,7 +116,6 @@ $DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/djan
 curl --output $DLCDB_HOME/.env https://raw.githubusercontent.com/tombreit/django-dlcdb/v0.9.4/env.template
 # edit .env
 $DLCDB_HOME/venv/bin/dlcdb migrate
-$DLCDB_HOME/venv/bin/dlcdb collectstatic --noinput
 $DLCDB_HOME/venv/bin/dlcdb createsuperuser
 ```
 
@@ -157,7 +156,6 @@ installation with `/srv/dlcdb/data/media` for `/media`, `/srv/dlcdb/wsgi.py` as
 
 ```bash
 $DLCDB_HOME/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
-$DLCDB_HOME/venv/bin/dlcdb collectstatic --noinput
 # The task runner writes to the database every minute; stop it while the
 # migrations run, so they don't compete for the write lock.
 systemctl --user stop dlcdb_huey.service
@@ -408,6 +406,7 @@ git push <github-remote> main vX.Y.Z
 ```
 
 The tag starts `.github/workflows/release.yml` on GitHub: it builds the
-frontend assets, the docs and the wheel, tries the wheel in a fresh virtual
+frontend assets and the docs, collects the static files, builds the wheel, tries
+it in a fresh virtual
 environment and attaches it to a new GitHub release. A tag that does not match
 both version numbers fails the workflow.
