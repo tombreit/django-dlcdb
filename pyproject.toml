@@ -61,7 +61,7 @@ container = [
 dev = [
     "pre-commit",
     "ruff",
-    "pytest",
+    "pytest>=9",
     "pytest-django",
     "pytest-cov",
     "pip-tools",
@@ -117,14 +117,7 @@ ignore = [
     "C400",
 ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 DJANGO_SETTINGS_MODULE = "dlcdb.settings.test"
-# norecursedirs = [
-#     "*/node_modules/",
-#     "/.venv/",
-#     "/docs/",
-#     "/container/",
-#     "/frontend/",
-#     "/run/",
-#     "/temp/",
-# ]
+testpaths = ["dlcdb"]
+required_plugins = ["pytest-django"]
