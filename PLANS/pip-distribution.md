@@ -6,8 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** planned (2026-10-06). Nothing is implemented yet. This is a living document; each
-batch ticks its box in *Progress*.
+**Status:** batch 1 done (2026-10-06). The wheel has the correct contents and a `dlcdb` command,
+but an installed copy still puts `.env`, `data/` and `run/` into site-packages (batch 2). This is
+a living document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -53,7 +54,10 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 4. **Explicit package data.** Package data is listed explicitly
    (`templates/**`, `static/**`, `locale/**/*.mo`, the built docs) instead of taken from the git
    file finder. setuptools-scm is dropped; its only effect was that file finder (the version is
-   static). Tests are not packaged.
+   static). `include-package-data` is off, so the list in `pyproject.toml` is the only source.
+   Tests, frontend sources (`*/assets/`) and the `.po` file are not packaged.
+   `dlcdb/conftest.py` is a module, not a package, so it is still included.
+   That is harmless: only pytest imports it.
 5. **Built Sphinx docs are bundled in the wheel.** `/docs/` keeps working offline and matches the
    installed version. Sphinx and its extensions move from `dependencies` to a `docs` extra. The
    requirements files include `--extra docs`, because source-checkout deployments build the docs
@@ -69,6 +73,9 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    (`importlib.metadata`).
 9. **CLI `dlcdb`** (`[project.scripts]`, `dlcdb/__main__.py`) behaves like `manage.py`:
    `dlcdb migrate`, `dlcdb run_huey`, …. `manage.py` stays for checkouts.
+10. **License metadata:** SPDX expression `EUPL-1.2` (the license of the code) plus all texts from
+    `LICENSES/` as license files. The table form and the license classifier are deprecated in
+    setuptools ≥ 77, which is now the build requirement.
 
 ## Alternatives considered and rejected
 
@@ -146,6 +153,6 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 ## Progress
 
 - [x] Batch 0: this document
-- [ ] Batch 1: correct wheel contents
+- [x] Batch 1: correct wheel contents
 - [ ] Batch 2: run outside a checkout
 - [ ] Batch 3: release workflow and docs

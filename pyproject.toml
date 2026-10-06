@@ -3,18 +3,17 @@
 # SPDX-License-Identifier: CC0-1.0
 
 [project]
-name = "django-dlcdb"
-# dynamic = ["version"]
+name = "dlcdb"
 version = "0.9.3"
 description = "Device Live Cycle Database"
 authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
-license = {file = "LICENSE"}
+license = "EUPL-1.2"
+license-files = ["LICENSE", "LICENSES/*.txt"]
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
     "Framework :: Django",
     "Topic :: Documentation",
-    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
     "Programming Language :: Python :: 3",
 ]
 
@@ -39,6 +38,15 @@ dependencies = [
     "django-filter",
     "icalendar",
     "plotly",
+]
+
+[project.scripts]
+dlcdb = "dlcdb.__main__:main"
+
+[project.optional-dependencies]
+# Builds the in-app docs (`make docs`). A wheel already contains them, so only
+# source checkouts and the release build need this extra.
+docs = [
     "Sphinx",
     "pydata-sphinx-theme",
     "sphinxcontrib-mermaid",
@@ -48,8 +56,6 @@ dependencies = [
     "sphinx-togglebutton",
     # "roman-numerals-py",
 ]
-
-[project.optional-dependencies]
 ldap = [
     "django-auth-ldap",
 ]
@@ -84,17 +90,23 @@ Repository = "https://gitlab.gwdg.de/t.breitner/django-dlcdb"
 Issues = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
 
 [build-system]
-requires = [
-    "setuptools>=61.0.0",
-    "setuptools-scm>=8.0",
-    "wheel"
-]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools_scm]
+[tool.setuptools]
+include-package-data = false
 
 [tool.setuptools.packages.find]
-where = ["dlcdb"]
+include = ["dlcdb*"]
+exclude = ["*.tests", "*.tests.*"]
+namespaces = false
+
+# Listed explicitly, because the frontend bundles (static/**/dist/) and the
+# built docs are gitignored build output: run `npm run build` and `make docs`
+# before building the wheel.
+[tool.setuptools.package-data]
+"*" = ["templates/**/*", "static/**/*", "locale/**/*.mo"]
+"dlcdb" = ["docs_build/html/**/*"]
 
 [tool.ruff]
 line-length = 120
