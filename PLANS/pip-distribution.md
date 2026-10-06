@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–11 done (2026-10-06); the first tag is your call. A release starts with
+**Status:** batches 0–12 done (2026-10-06); the first tag is your call. A release starts with
 `make release VERSION=X.Y.Z`. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
@@ -335,6 +335,27 @@ request. In production the same happened whenever the mail server was unreachabl
 - **Test:** `core/tests/test_log.py`. A mailer that always fails plus a disallowed host still
   gives a 400; with Django's own handler the test fails with the `OSError`.
 
+### Batch 12: release logic in `scripts/`
+The `Makefile` targets from batch 10 were hard to follow and review. The causes: guards as
+`@test … || (echo … && exit 1)` chains, `$$` escaping, and `cd … &&` on every line. The logic
+now lives in two shell scripts with `set -euo pipefail`, one step per line and a comment per
+section:
+- `scripts/build_wheel.sh [REF]` (env `TAG`, `SMOKE_PYTHON`)
+- `scripts/prepare_release.sh X.Y.Z`
+
+The `Makefile` keeps `make wheel` and `make release VERSION=X.Y.Z` as thin, commented entry
+points, so a developer gets the how-to without reading the docs. Behaviour, guards and the
+workflow call (`make wheel TAG=… SMOKE_PYTHON=python3.12`) are unchanged.
+
+This is the common pattern; Django itself keeps `do_django_release.py` and `verify_release.sh` in
+`scripts/`. Rejected:
+- a task runner (nox, invoke): a new dependency for two scripts;
+- a version-bump tool (`bump-my-version`, `tbump`): `npm version` already writes `package.json`
+  and `package-lock.json` correctly, which a generic tool does not reliably do, because the lock
+  file has several `"version"` fields;
+- Python instead of shell: you chose shell, as it stays closest to the commands you'd type by
+  hand.
+
 ## Pitfalls
 
 - Build wheels only with `make wheel` (or `make release`). It takes care of three traps:
@@ -369,3 +390,4 @@ request. In production the same happened whenever the mail server was unreachabl
 - [x] Batch 9: two items left open from the branch review
 - [x] Batch 10: Makefile targets for releases
 - [x] Batch 11: admin error mails found by the container test
+- [x] Batch 12: release logic in `scripts/`

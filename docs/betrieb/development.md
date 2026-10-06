@@ -58,7 +58,9 @@ the form `X.Y.Z`, or when the tag exists already. It writes the version to
 `dlcdb/__init__.py`, `package.json` and `package-lock.json`, then builds the
 wheel from exactly the state you are about to commit and tries it in a fresh
 virtual environment (`make wheel`). Everything it builds stays in
-`run/release/`, outside the working tree.
+`run/release/`, outside the working tree. The logic lives in
+`scripts/prepare_release.sh` and `scripts/build_wheel.sh`; the `Makefile` only
+calls them.
 
 `make wheel` alone builds and tries a release candidate from `HEAD`; the wheel
 lands in `run/release/dist/`.
