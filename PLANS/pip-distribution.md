@@ -99,8 +99,9 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
    `dlcdb_init` writes a `manage.py` (shebang to the venv's Python) and a `wsgi.py` into the
    instance directory. Both set `DLCDB_HOME` to their own directory and run
    `dlcdb.__main__.main` or `dlcdb.wsgi`. So an instance works with `./manage.py` like any Django
-   project, and Apache needs no hand-written stub. `manage.py` in the repository stays the plain
-   Django one for checkouts.
+   project, and Apache needs no hand-written stub (mod_wsgi's `SetEnv` does not reach
+   `os.environ`, and the package's own `wsgi.py` sits at a Python-version-specific path).
+   `manage.py` in the repository stays the plain Django one for checkouts.
 10. **License metadata:** SPDX expression `EUPL-1.2` (the license of the code) plus all texts from
     `LICENSES/` as license files. The table form and the license classifier are deprecated in
     setuptools ≥ 77, which is now the build requirement.
@@ -327,8 +328,13 @@ tags or pushes.
     stale `build/lib/` on the next build.
 - `python -m dlcdb` inside a source checkout uses the checkout, not an installed wheel.
 - `DLCDB_HOME` cannot be set in `.env`, because it is what locates `.env`.
-- mod_wsgi does not pass Apache `SetEnv` into `os.environ`. That is why the `wsgi.py` that
-  `init` writes sets `DLCDB_HOME` itself, from its own location.
+- With Apache/mod_wsgi, `dlcdb/wsgi.py` alone is not enough for a pip installation. The
+  settings need `DLCDB_HOME` in `os.environ`, but `SetEnv` only reaches the per-request WSGI
+  environ. `WSGIScriptAlias` would also need the file path inside site-packages, which contains
+  the Python version. So `dlcdb_init` copies `core/init/wsgi.py.template` into the instance
+  directory. There it sets `DLCDB_HOME` from its own location and imports
+  `dlcdb.wsgi.application`. With gunicorn, `dlcdb.wsgi:application` plus
+  `Environment=DLCDB_HOME=…` is enough.
 
 ## Progress
 
