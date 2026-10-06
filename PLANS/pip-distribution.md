@@ -8,9 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** batches 0–3 done (2026-10-06). A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. `docs/betrieb/setup.md` describes installation, production
-use, updates and releasing. No release has been tagged yet: the first one waits for the LDAP fix
-(see *Open follow-ups*), because without the `ldap` extra every login page fails. This is a
-living document; each batch ticks its box in *Progress*.
+use, updates and releasing. Installations without the `ldap` extra work since the LDAP
+backend moved into its own module (`accounts/ldap_backends.py`). No release has been tagged
+yet (see *Open follow-ups*). This is a living document; each batch ticks its box in *Progress*.
 
 ## Why
 
@@ -161,13 +161,6 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
 
 ## Open follow-ups
 
-- **Installations without LDAP fail on every page.** This predates the pip work.
-  `dlcdb/accounts/auth_backends.py` imports `django_auth_ldap` at module level, and the always
-  active `EmailModelBackend` lives in that same module. So every request that touches
-  authentication raises `ModuleNotFoundError`. That covers `pip install dlcdb` without `[ldap]`
-  and source checkouts installed from `requirements/prod.txt`. Fix: move `EmailLDAPBackend` into
-  its own module and point `settings/ldap.py` at it. LDAP users with an open session must log in
-  once more, because the session stores the old backend path.
 - **`Django==6.1.1` exact pin.** Pip users only get Django security releases with a new DLCDB
   release. Consider `Django>=6.1.1,<6.2`.
 - **PyPI.** Add a publish job with trusted publishing to the release workflow.
@@ -175,8 +168,8 @@ What blocks this today (seen in the leftovers of a `pip install .` in `build/lib
   (not documented, not in `container/entrypoint.sh`). This is independent of this plan.
 - **`python-magic` looks unused.** It is in `dependencies` and the container installs libmagic,
   but nothing under `dlcdb/` imports `magic`. Remove it, or find out who needs it.
-- **First release.** After the LDAP fix: tag `v0.9.4` and push the tag to GitHub. Check the
-  workflow run and the release page, then try the documented install from the release URL.
+- **First release.** Tag `v0.9.4` and push the tag to GitHub. Check the workflow run and the
+  release page, then try the documented install from the release URL.
 
 ## Pitfalls
 

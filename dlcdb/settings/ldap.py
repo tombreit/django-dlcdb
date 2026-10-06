@@ -34,7 +34,7 @@ AUTH_LDAP_BIND_PASSWORD = env.str("AUTH_LDAP_BIND_PASSWORD")
 AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 
 # First check ModelBackend than LDAPBackend
-AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ["dlcdb.accounts.auth_backends.EmailLDAPBackend"]
+AUTHENTICATION_BACKENDS = AUTHENTICATION_BACKENDS + ["dlcdb.accounts.ldap_backends.EmailLDAPBackend"]
 
 
 LDAP_VARIANT = env.str("LDAP_VARIANT", default="msad").lower()

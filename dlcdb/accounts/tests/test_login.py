@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import importlib
+import sys
 import uuid
 
 import pytest
@@ -129,3 +131,12 @@ def test_legacy_user_login_with_email_and_username_migration(client, test_passwo
     client.logout()
     response = client.post(login_url, {"username": user.username, "password": test_password})
     assert response.status_code == 302
+
+
+def test_auth_backends_import_without_django_auth_ldap(monkeypatch):
+    """Without the `ldap` extra, the always active EmailModelBackend must still import."""
+    monkeypatch.setitem(sys.modules, "django_auth_ldap", None)
+    monkeypatch.setitem(sys.modules, "django_auth_ldap.backend", None)
+    monkeypatch.delitem(sys.modules, "dlcdb.accounts.auth_backends", raising=False)
+
+    importlib.import_module("dlcdb.accounts.auth_backends")
