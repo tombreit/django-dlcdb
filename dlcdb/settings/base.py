@@ -369,13 +369,14 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
-        # Copied from Django's DEFAULT_LOGGING. Its own "level" is what gates
+        # Copied from Django's DEFAULT_LOGGING, with a handler that survives an
+        # unreachable mail server (dlcdb.core.log). Its own "level" is what gates
         # email — only ERROR and above are sent, regardless of the level on the
         # loggers that feed it.
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
+            "class": "dlcdb.core.log.AdminEmailHandler",
         },
         # Copied from Django's DEFAULT_LOGGING.
         "django.server": {

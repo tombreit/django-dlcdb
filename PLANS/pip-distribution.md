@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Pip distribution: install DLCDB from a wheel
 
-**Status:** batches 0–10 done (2026-10-06); the first tag is your call. A release starts with
+**Status:** batches 0–11 done (2026-10-06); the first tag is your call. A release starts with
 `make release VERSION=X.Y.Z`. A pushed `vX.Y.Z` tag builds the wheel on GitHub
 and attaches it to a release. The wheel ships the collected static files, so a pip
 installation needs no `collectstatic`, and `python -m dlcdb dlcdb_init` writes the instance's `.env` (with a
@@ -319,6 +319,22 @@ tags or pushes.
   directory first on its search path. The smoke test therefore starts from the empty instance
   directory.
 
+### Batch 11: admin error mails found by the container test
+A request with a disallowed host (`localhost`) got a 500 instead of a 400 in the container. A
+disallowed host is logged as an error, and Django mails the admins. The fresh `.env` had the
+template's example values active (`ADMINS`, SMTP host `smtp.fqdn`). Since Django 6.1's
+`MAILERS`, `AdminEmailHandler` sends without `fail_silently`, so the failed mail broke the
+request. In production the same happened whenever the mail server was unreachable.
+- **`env.template`:** `ADMINS` and the `EMAIL_*`/`DEFAULT_FROM_EMAIL` examples are commented
+  out. A fresh `.env` sends no admin mails and prints mails to the console until they are set
+  up.
+- **`dlcdb/core/log.py`:** `AdminEmailHandler`, Django's handler with an `emit()` that hands its
+  own errors to `handleError()` (stderr), like `JournalHandler`. `LOGGING` uses it.
+  `fail_silently` in the mailer's `OPTIONS` was rejected: only the SMTP backend accepts it (the
+  console backend raises "Unknown options"), and Django 7 deprecates it.
+- **Test:** `core/tests/test_log.py`. A mailer that always fails plus a disallowed host still
+  gives a 400; with Django's own handler the test fails with the `OSError`.
+
 ## Pitfalls
 
 - Build wheels only with `make wheel` (or `make release`). It takes care of three traps:
@@ -352,3 +368,4 @@ tags or pushes.
 - [x] Batch 8: `init` writes `manage.py` and `wsgi.py`
 - [x] Batch 9: two items left open from the branch review
 - [x] Batch 10: Makefile targets for releases
+- [x] Batch 11: admin error mails found by the container test
