@@ -335,6 +335,9 @@ request. In production the same happened whenever the mail server was unreachabl
   console backend raises "Unknown options"), and Django 7 deprecates it.
 - **Test:** `core/tests/test_log.py`. A mailer that always fails plus a disallowed host still
   gives a 400; with Django's own handler the test fails with the `OSError`.
+- **Superseded:** `dlcdb/core/log.py` and its test are removed; `LOGGING` uses Django's plain
+  `AdminEmailHandler` again. While the mail server is unreachable, a request that logs an error
+  gets a 500: Django 6.1's default, accepted for a simpler setup.
 
 ### Batch 12: release logic in `scripts/`
 The `Makefile` targets from batch 10 were hard to follow and review. The causes: guards as

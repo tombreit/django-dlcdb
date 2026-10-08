@@ -319,14 +319,15 @@ With `DJANGO_DEBUG=false`, Django mails unhandled errors to the `ADMINS` in
 `.env`: comma-separated, each an address or `Name <address>`, no commas in
 names. Without email settings, mails are only printed to the console. Sending
 needs `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` together with
-`EMAIL_HOST` (and `EMAIL_PORT`); the other backends reject a host.
+`EMAIL_HOST` (and `EMAIL_PORT`); the other backends reject a host. These `.env`
+variables fill `MAILERS["default"]`.
 
 * `./manage.py sendtestemail --admins` checks the mail server and the addresses.
 * `/_500/`, opened as a superuser, raises a test error and checks the whole way
   from the error to the mail.
 
-A failed mail never breaks the request: it shows up as `--- Logging error ---`
-on stderr (`dlcdb/core/log.py`).
+While the mail server is unreachable, the error mail fails, and with it the
+request that logged the error (500): Django's default since 6.1.
 
 ### SQLite
 

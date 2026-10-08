@@ -104,7 +104,7 @@ class EmailChannel(NotificationChannel):
                     XLSX_CONTENT_TYPE,
                 )
 
-            email.send(fail_silently=False)
+            email.send()
 
             message.status = Message.STATUS_SENT
             message.sent_at = timezone.now()

@@ -37,7 +37,7 @@ def _message(device, *, email="max@example.org", **kwargs):
 
 @pytest.fixture
 def smtp_down(monkeypatch):
-    def fail(self, fail_silently=False):
+    def fail(self):
         raise SMTPException("SMTP down")
 
     monkeypatch.setattr(EmailMessage, "send", fail)
