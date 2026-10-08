@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import os
-from email.utils import getaddresses
 from pathlib import Path
 
 import environ
@@ -47,7 +46,6 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     AUTH_LDAP=(bool, False),
     SECRET_KEY=(str, "!set-your-secretkey-via-dot-env-file!"),
-    ADMINS=(str, ""),
 )
 environ.Env.read_env(INSTANCE_DIR / ".env")
 
@@ -134,9 +132,9 @@ AUTHENTICATION_BACKENDS = [
 SITE_ID = 1
 
 # Email these people full exception information
-# https://docs.djangoproject.com/en/1.9/ref/settings/#admins
-# https://django-environ.readthedocs.io/en/latest/tips.html#nested-lists
-ADMINS = getaddresses([env("ADMINS")])
+# https://docs.djangoproject.com/en/dev/ref/settings/#admins
+# Comma-separated addresses, optionally with a name: "Name <addr>", no commas in names
+ADMINS = env.list("ADMINS", default=[])
 MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = env.str("EMAIL_SUBJECT_PREFIX", default="[DLCDB] ")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="mail@example.org")
