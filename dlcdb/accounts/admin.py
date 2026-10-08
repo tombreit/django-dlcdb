@@ -20,6 +20,7 @@ from django.utils.translation import ngettext
 
 from dlcdb.journal.models import JournalEntry
 
+from .forms import CustomUserCreationForm
 from .models import CustomUser
 
 
@@ -30,9 +31,11 @@ class CustomUserAdmin(UserAdmin):
     change_form_template = "accounts/customuser/change_form.html"
     actions = ["deactivate"]
 
+    add_form = CustomUserCreationForm
+    add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email", "usable_password", "password1", "password2")}),)
+
     # For now we still have to deal with the legacy username field
-    # so we keep the default forms for now.
-    # add_form = CustomUserCreationForm
+    # so we keep the default change form for now.
     # form = CustomUserChangeForm
 
     def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):

@@ -72,6 +72,7 @@ def full_admin_client(client, make_user):
     client.force_login(
         make_user(
             "accounts.view_customuser",
+            "accounts.add_customuser",
             "accounts.change_customuser",
             "accounts.delete_customuser",
             is_staff=True,
@@ -103,3 +104,30 @@ def test_delete_permanently_removes_the_user(full_admin_client, others):
     full_admin_client.post(reverse("admin:accounts_customuser_hard_delete", args=[anna.pk]))
 
     assert not CustomUser.objects.filter(pk=anna.pk).exists()
+
+
+def _add(client, email):
+    return client.post(
+        reverse("admin:accounts_customuser_add"),
+        {"email": email, "usable_password": "true", "password1": "a-Long-secret-42", "password2": "a-Long-secret-42"},
+        follow=True,
+    )
+
+
+def test_adding_users_asks_for_the_email(full_admin_client):
+    assert 'name="username"' not in full_admin_client.get(reverse("admin:accounts_customuser_add")).text
+
+    # The second user once failed on the unique email, saved empty.
+    for email in ("dora@example.com", "emil@example.com"):
+        _add(full_admin_client, email)
+
+        user = CustomUser.objects.get(email=email)
+        assert user.username == email
+        assert user.check_password("a-Long-secret-42")
+
+
+def test_adding_a_user_rejects_an_email_differing_only_in_case(full_admin_client, others):
+    response = _add(full_admin_client, "Anna@Example.com")
+
+    assert "with this Email address already exists" in response.text
+    assert CustomUser.objects.filter(email__iexact="anna@example.com").count() == 1
