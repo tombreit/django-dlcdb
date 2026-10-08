@@ -10,6 +10,7 @@ from django.urls import include, path, reverse_lazy
 from django.views.generic.base import RedirectView
 
 from dlcdb.accounts.forms import EmailAuthenticationForm
+from dlcdb.core.views import error_views
 from dlcdb.organization import views as organization_views
 
 admin.site.site_header = "DLCDB Admin"
@@ -21,6 +22,7 @@ admin.site.logout_template = "accounts/logout.html"
 
 
 urlpatterns = [
+    path("_500/", error_views.raise_test_error),  # Superusers: check that ADMINS get error mails
     path("core/", include("dlcdb.core.urls")),
     path("dashboard/", include("dlcdb.dashboard.urls")),
     path("inventory/", include("dlcdb.inventory.urls")),

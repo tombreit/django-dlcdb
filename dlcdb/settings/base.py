@@ -131,9 +131,7 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-# Email these people full exception information
-# https://docs.djangoproject.com/en/dev/ref/settings/#admins
-# Comma-separated addresses, optionally with a name: "Name <addr>", no commas in names
+# Error mails, ADMINS and the email variables in .env: see docs/betrieb/setup.md (Error mails)
 ADMINS = env.list("ADMINS", default=[])
 MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = env.str("EMAIL_SUBJECT_PREFIX", default="[DLCDB] ")
@@ -144,7 +142,6 @@ MAILERS = {
         "BACKEND": env.str("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"),
     },
 }
-# Only SMTP-like backends accept host/port; the console backend rejects unknown OPTIONS.
 if env.str("EMAIL_HOST", default=""):
     MAILERS["default"]["OPTIONS"] = {"host": env.str("EMAIL_HOST"), "port": env.int("EMAIL_PORT", default=25)}
 

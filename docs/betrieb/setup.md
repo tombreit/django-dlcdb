@@ -313,6 +313,21 @@ Its queue lives in `data/db/huey_task_queue.sqlite3` and holds only transient
 data (tasks waiting to run and locks; results are not stored), so the file stays
 at a few MB.
 
+### Error mails
+
+With `DJANGO_DEBUG=false`, Django mails unhandled errors to the `ADMINS` in
+`.env`: comma-separated, each an address or `Name <address>`, no commas in
+names. Without email settings, mails are only printed to the console. Sending
+needs `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` together with
+`EMAIL_HOST` (and `EMAIL_PORT`); the other backends reject a host.
+
+* `./manage.py sendtestemail --admins` checks the mail server and the addresses.
+* `/_500/`, opened as a superuser, raises a test error and checks the whole way
+  from the error to the mail.
+
+A failed mail never breaks the request: it shows up as `--- Logging error ---`
+on stderr (`dlcdb/core/log.py`).
+
 ### SQLite
 
 The settings tune SQLite for several writers on one file (web server, task
