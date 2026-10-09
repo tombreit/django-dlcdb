@@ -95,10 +95,12 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
    row is a second `btn-group btn-group-sm` in the collapse, left-aligned under the group
    with `mt-2`.
 6. **Sort is the last segment.** Label and icon as today.
-7. **One status line.** `includes/_list_status.html` is the only status line. It gets an
-   optional `export_label` (rendered in the page, like `count_label`) so lending's export
-   text no longer says "device". Lending's "(N available, M lent)" goes into its
-   `count_label`. `importer_index.html` extends `_index_base.html` like every other list.
+7. **One status line.** `includes/_list_status.html` is the only status line. Lending's
+   "(N available, M lent)" goes into its `count_label`; its export link keeps the shared
+   "Export N devices as CSV", which is the right noun there (the count counts devices,
+   and the old template said so in a comment). The `export_label` parameter planned here
+   was therefore not needed (batch 2). `importer_index.html` extends `_index_base.html`
+   like every other list.
 8. **Mobile:** inside the offcanvas the group stacks: `flex-direction: column`, each
    button full width, left-aligned text, normal radius (about ten lines of SCSS replacing
    the current mobile block).
@@ -131,10 +133,10 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
   in one tone`
 
 ### 2 — One status line
-- `_list_status.html`: optional `export_label`.
 - `lending/index.html:23-46` and `dataexchange/importer_index.html:7-28` use the include;
-  importer index extends `_index_base.html`.
-- Tests: `lending/tests/test_views.py` export-link assertion follows the new label.
+  importer index extends `_index_base.html`. No change to `_list_status.html`.
+- Tests: none assert on the export label; the existing lending and importer tests cover
+  the count line and the chips.
 - No NEWS.
 - Commit: `Filterbar redesign, step 2: lending and import history use the shared status
   line`
@@ -155,6 +157,11 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
   `input-group-sm` + flat icon look.
 - The sort dropdown offers fields that have no column (e.g. Tenant for single-tenant
   users); a follow-up in `PLANS/filterbar.md`.
+- **Tenant column and sort** exist only on the device list. The record, lending, licence and
+  import lists have none.
+- **The device sort dropdown offers "Tenant" to single-tenant users**, while the column is hidden.
+- **Lending runs a second COUNT:** the paginator counts on top of the state aggregate
+  (`lending/views.py:138`).
 
 ## Alternatives considered and rejected
 
@@ -181,7 +188,7 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
 
 - [x] 0 — This document, baseline screenshots
 - [x] 1 — One rail
-- [ ] 2 — One status line
+- [x] 2 — One status line
 - [ ] 3 — Small screens
 
 ## Verification (each batch)
