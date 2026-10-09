@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_GET
 
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import index_url
 from dlcdb.theme.pagination import paginate
 
@@ -43,9 +43,7 @@ def journal_index(request):
     template = "journal/index.html#journal-list" if request.htmx else "journal/index.html"
     base_queryset = JournalEntry.objects.visible_to(request.tenants)
 
-    data = request.GET.copy()
-    data.setdefault("ordering", "-timestamp")
-    journal_filter = JournalEntryFilter(data, queryset=base_queryset, request=request)
+    journal_filter = bind_filterset(JournalEntryFilter, request, base_queryset, default_ordering="-timestamp")
 
     page_obj = paginate(request, journal_filter.qs, ENTRIES_PER_PAGE)
 
@@ -58,7 +56,7 @@ def journal_index(request):
             target="#journal-list",
             search_placeholder=_("Search summary, details, user..."),
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": journal_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
     }

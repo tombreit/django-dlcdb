@@ -5,12 +5,14 @@
 """
 Reusable search/filter/sort bar ("filterbar") for django-filter list views.
 
-Usage: a list view builds the bar from its FilterSet and puts it into the
-template context ...
+Usage: a list view binds its FilterSet with the view's default ordering,
+builds the bar from it and puts both into the template context ...
 
+    my_filterset = bind_filterset(MyFilter, request, queryset, default_ordering="-modified")
     context["filterbar"] = build_filterbar(
         my_filterset, request, target="#my-list", search_placeholder=_("Search...")
     )
+    context["current_ordering"] = my_filterset.data["ordering"]
 
 ... and the templates render it with plain includes:
 
@@ -30,8 +32,9 @@ dataclasses of strings) — no state, no template tags, no mixins.
 A sort counts as a user modification of the viewset, exactly like a filter: it
 gets its own removable chip and "Clear all" undoes it. What separates "the page
 is sorted" from "the user sorted it" is whether ``?ordering=`` is in the
-request — the bar reads the selection from ``request.GET``, not from the
-FilterSet's data, which every view has already seeded with its own default.
+request — so the bar reads every selection, filters and sort alike, from
+``request.GET``, not from the FilterSet's data, which ``bind_filterset`` has
+seeded with the view's default ordering.
 
 Conventions the consuming view/page must follow:
 - the list page is served at its own endpoint (the form submits to
@@ -39,11 +42,11 @@ Conventions the consuming view/page must follow:
 - exactly one filterbar per page,
 - the HTMX-swapped fragment root carries hx-target/hx-swap/hx-push-url so the
   sortable column headers (``_sort_th.html``) can inherit them,
-- the view injects its default ordering onto a copy of ``request.GET``
-  (``data.setdefault("ordering", ...)``). This is load-bearing, not advisory:
-  "Clear all" drops ``?ordering=`` and django-filter leaves the queryset
-  untouched for an empty ordering, so a view without that default would
-  paginate an unordered queryset.
+- the FilterSet is bound through ``bind_filterset``, which seeds the view's
+  default ordering. This is load-bearing, not advisory: "Clear all" drops
+  ``?ordering=`` and django-filter leaves the queryset untouched for an empty
+  ordering, so a view without that default would paginate an unordered
+  queryset.
 """
 
 from dataclasses import dataclass
@@ -108,6 +111,18 @@ class FilterBar:
     hidden_params: dict  # scope params carried through the bar's form, not rendered as filters
 
 
+def bind_filterset(filterset_class, request, queryset, *, default_ordering):
+    """
+    Bind ``filterset_class`` to the request's GET parameters, with the view's
+    ``default_ordering`` seeded in: an explicit ``?ordering=`` wins, a request
+    without one is ordered by the default instead of not at all. The bound
+    FilterSet's ``.data["ordering"]`` is the ordering in force.
+    """
+    data = request.GET.copy()
+    data.setdefault("ordering", default_ordering)
+    return filterset_class(data, queryset=queryset, request=request)
+
+
 def build_filterbar(
     filterset,
     request,
@@ -154,13 +169,13 @@ def build_filterbar(
 
         if isinstance(flt, django_filters.OrderingFilter):
             ordering_param = bound_field.html_name
-            # From request.GET, not from the bound field: the view seeds its own
-            # default into the FilterSet's data, and that default is not a sort
-            # the user picked.
+            # From request.GET, not from the bound field: bind_filterset seeds
+            # the view's default into the FilterSet's data, and that default is
+            # not a sort the user picked.
             sort_options = _sort_options(bound_field, request.GET.get(ordering_param, ""))
             continue
 
-        spec = _filter_spec(flt, bound_field)
+        spec = _filter_spec(flt, bound_field, request.GET.getlist(bound_field.html_name))
         if spec is not None:
             (secondary_specs if name in secondary_fields else specs).append(spec)
 
@@ -206,8 +221,11 @@ def build_filterbar(
     )
 
 
-def _filter_spec(flt, bound_field):
-    """Classify one filter into a FilterSpec, or None if it has no bar widget."""
+def _filter_spec(flt, bound_field, raw_values):
+    """Classify one filter into a FilterSpec, or None if it has no bar widget.
+
+    ``raw_values`` are the parameter's values from the request, as strings.
+    """
     # Explicit tuples instead of the base classes alone: they document intent
     # without requiring the reader to know django-filter's class hierarchy.
     if isinstance(flt, (django_filters.MultipleChoiceFilter, django_filters.ModelMultipleChoiceFilter)):
@@ -222,7 +240,7 @@ def _filter_spec(flt, bound_field):
     if not any(value for value, _label in pairs):
         return None
     label_by_value = dict(pairs)
-    selected_values = [value for value in _raw_values(bound_field) if value in label_by_value and value != ""]
+    selected_values = [value for value in raw_values if value in label_by_value and value != ""]
     choices = [(value, label, _is_checked(value, selected_values, multiple)) for value, label in pairs]
 
     if len(selected_values) == 1:
@@ -248,16 +266,6 @@ def _is_checked(value, selected_values, multiple):
         return True
     # The empty radio choice is the dropdown's own reset: checked when nothing is.
     return not multiple and value == "" and not selected_values
-
-
-def _raw_values(bound_field):
-    """The bound field's raw GET value(s), normalized to a list of strings."""
-    raw = bound_field.value()
-    if raw is None:
-        return []
-    if isinstance(raw, (list, tuple)):
-        return [str(value) for value in raw if value not in (None, "")]
-    return [str(raw)] if str(raw) else []
 
 
 def _chip(request, param, value, label, value_label, *, icon="", in_panel=True):
@@ -286,13 +294,12 @@ def _sort_options(bound_field, current):
     the template can render an icon instead of the "(descending)" suffix.
 
     ``current`` is the raw ``?ordering=`` value from the request — the sort the
-    user picked, which is not the same as the ordering in force: views seed a
-    default into the FilterSet's data. Nothing is selected on a default page, so
-    the bar shows a plain "Sort" button and no chip until the user sorts.
+    user picked, which is not the same as the ordering in force: bind_filterset
+    seeds a default into the FilterSet's data. Nothing is selected on a default
+    page, so the bar shows a plain "Sort" button and no chip until the user
+    sorts.
     """
-    if isinstance(current, str):
-        current = current.split(",")
-    current = current[0].strip() if current else ""
+    current = current.split(",")[0].strip()
 
     ascending_labels = {}
     for value, label in bound_field.field.choices:
@@ -315,8 +322,7 @@ def _remove_value_href(request, param, value):
         query.setlist(param, remaining)
     else:
         query.pop(param, None)
-    encoded = query.urlencode()
-    return f"{request.path}?{encoded}" if encoded else request.path
+    return _href(request, query)
 
 
 def _clear_all_href(request, keep_params):
@@ -330,5 +336,10 @@ def _clear_all_href(request, keep_params):
     for key in list(query.keys()):
         if key not in keep_params:
             del query[key]
+    return _href(request, query)
+
+
+def _href(request, query):
+    """The current path with ``query``, or the bare path for an empty query."""
     encoded = query.urlencode()
     return f"{request.path}?{encoded}" if encoded else request.path

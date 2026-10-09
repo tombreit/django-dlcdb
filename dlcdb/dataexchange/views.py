@@ -27,7 +27,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
 
 from .csv_template import build_import_template_csv
@@ -192,9 +192,7 @@ def importer_index(request):
     template = "dataexchange/importer_index.html#importer-list" if request.htmx else "dataexchange/importer_index.html"
     base_queryset = _importer_list_queryset(request)
 
-    data = request.GET.copy()
-    data.setdefault("ordering", "-created")
-    importer_filter = ImporterListFilter(data, queryset=base_queryset, request=request)
+    importer_filter = bind_filterset(ImporterListFilter, request, base_queryset, default_ordering="-created")
 
     page_obj = paginate(request, importer_filter.qs, IMPORTS_PER_PAGE)
 
@@ -207,7 +205,7 @@ def importer_index(request):
             target="#importer-list",
             search_placeholder=_("Search file name, note..."),
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": importer_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
         # Mirrors assets.views.devices.device_index, for theme/includes/_timestamps.html.

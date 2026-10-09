@@ -22,7 +22,7 @@ from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, Record
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import index_url as build_index_url
 from dlcdb.theme.pagination import paginate
@@ -79,9 +79,7 @@ def record_index(request):
     if device:
         queryset = queryset.filter(device=device)
 
-    data = request.GET.copy()
-    data.setdefault("ordering", DEFAULT_ORDERING)
-    record_filter = RecordFilter(data, queryset=queryset, request=request)
+    record_filter = bind_filterset(RecordFilter, request, queryset, default_ordering=DEFAULT_ORDERING)
 
     page_obj = paginate(request, record_filter.qs, RECORDS_PER_PAGE)
 

@@ -21,7 +21,7 @@ from dlcdb.core.models import Device, LicenceRecord, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.field_history import build_field_history
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
 
 from .filters import LicenceRecordFilter
@@ -46,11 +46,7 @@ def index(request):
         tenant_field="device__tenant",
     )
 
-    # Always supply a default ordering so a bare page load is deterministic;
-    # an explicit header/dropdown click still wins. Mirrors device_index.
-    data = request.GET.copy()
-    data.setdefault("ordering", "-modified")
-    license_record_filter = LicenceRecordFilter(data, queryset=base_qs, request=request)
+    license_record_filter = bind_filterset(LicenceRecordFilter, request, base_qs, default_ordering="-modified")
 
     page_obj = paginate(request, license_record_filter.qs, LICENSES_PER_PAGE)
 
@@ -63,7 +59,7 @@ def index(request):
             target="#licenses-list",
             search_placeholder=_("Search title, manufacturer, supplier, inventory ID..."),
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": license_record_filter.data["ordering"],
         # paginator.count runs the filtered COUNT once; reuse it here.
         "filtered_count": page_obj.paginator.count,
         "total_count": base_qs.count(),

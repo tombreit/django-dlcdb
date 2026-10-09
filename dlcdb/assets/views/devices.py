@@ -23,7 +23,7 @@ from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
 from dlcdb.theme.field_history import build_field_history
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
@@ -70,9 +70,7 @@ def _device_filter(request):
     filters, same ordering. ``.qs`` is the filtered queryset, ``.queryset`` the
     unfiltered one.
     """
-    data = request.GET.copy()
-    data.setdefault("ordering", DEFAULT_ORDERING)
-    return DeviceFilter(data, queryset=_device_queryset(request), request=request)
+    return bind_filterset(DeviceFilter, request, _device_queryset(request), default_ordering=DEFAULT_ORDERING)
 
 
 @permission_required("core.view_device", raise_exception=True)

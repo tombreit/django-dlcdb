@@ -30,7 +30,7 @@ from dlcdb.dataexchange.csv_export import (
 )
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.theme.pagination import paginate
 
@@ -114,14 +114,7 @@ def _lending_filter(request):
             request,
         )
     )
-
-    # Default the list to newest-modified first. Copying request.GET (immutable)
-    # and using setdefault means the OrderingFilter always applies an ordering,
-    # so the default view is modified-desc while explicit clicks still win.
-    data = request.GET.copy()
-    data.setdefault("ordering", DEFAULT_ORDERING)
-
-    return LentRecordFilter(data, queryset=base_qs, request=request)
+    return bind_filterset(LentRecordFilter, request, base_qs, default_ordering=DEFAULT_ORDERING)
 
 
 @permission_required("core.view_lentrecord", raise_exception=True)
@@ -150,7 +143,7 @@ def index(request):
             target="#lent-list",
             search_placeholder=_("Search device, person, note..."),
         ),
-        "current_ordering": lent_record_filter.data.get("ordering"),
+        "current_ordering": lent_record_filter.data["ordering"],
         # The Modified column shows relative time ("2 hours ago") only for recent
         # edits; anything older than this cutoff falls back to an absolute date.
         "recent_cutoff": timezone.now() - datetime.timedelta(weeks=3),

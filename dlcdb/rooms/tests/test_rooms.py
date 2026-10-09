@@ -73,6 +73,17 @@ class RoomFrontendTests(BaseTest):
         self.assertContains(response, "F2.02")
         self.assertNotContains(response, "F1.01")
 
+    def test_true_false_filter(self):
+        Room.objects.create(number="EXT", is_external=True)
+
+        response = self.client.get(self.index_url, {"is_external": "true"}, headers={"HX-Request": "true"})
+        self.assertContains(response, "EXT")
+        self.assertNotContains(response, "F1.01")
+
+        response = self.client.get(self.index_url, {"is_external": "false"}, headers={"HX-Request": "true"})
+        self.assertContains(response, "F1.01")
+        self.assertNotContains(response, "EXT")
+
     def test_index_shows_active_record_count(self):
         device = self._create_device(edv_id="EDV-ROOMED", sap_id="1-1")
         InRoomRecord.objects.create(device=device, room=self.server_room)

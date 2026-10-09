@@ -21,7 +21,7 @@ from dlcdb.core.models import Record, Room
 from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
@@ -89,9 +89,7 @@ def room_index(request):
     template = "rooms/index.html#room-list" if request.htmx else "rooms/index.html"
     base_queryset = _room_queryset()
 
-    data = request.GET.copy()
-    data.setdefault("ordering", "number")
-    room_filter = RoomFilter(data, queryset=base_queryset, request=request)
+    room_filter = bind_filterset(RoomFilter, request, base_queryset, default_ordering="number")
 
     page_obj = paginate(request, room_filter.qs, ROOMS_PER_PAGE)
 
@@ -104,7 +102,7 @@ def room_index(request):
             target="#room-list",
             search_placeholder=_("Search number, nickname, description..."),
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": room_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
     }

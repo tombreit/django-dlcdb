@@ -184,7 +184,7 @@ iteration (see *Open follow-ups*).
 
 - [x] 0 — This document
 - [x] 1 — Tenant filter
-- [ ] 2 — Backend cleanup
+- [x] 2 — Backend cleanup
 - [ ] 3 — "Clear filters" button
 
 ## Verification (each batch)

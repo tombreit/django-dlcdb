@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 from dlcdb.core.models import Person, Record
 from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
@@ -49,9 +49,7 @@ def person_index(request):
     template = "persons/index.html#person-list" if request.htmx else "persons/index.html"
     base_queryset = _person_queryset()
 
-    data = request.GET.copy()
-    data.setdefault("ordering", "name")
-    person_filter = PersonFilter(data, queryset=base_queryset, request=request)
+    person_filter = bind_filterset(PersonFilter, request, base_queryset, default_ordering="name")
 
     page_obj = paginate(request, person_filter.qs, PERSONS_PER_PAGE)
 
@@ -64,7 +62,7 @@ def person_index(request):
             target="#person-list",
             search_placeholder=_("Search name or e-mail..."),
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": person_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
     }

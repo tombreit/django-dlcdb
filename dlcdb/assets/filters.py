@@ -17,6 +17,7 @@ from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Recor
 from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.shortcuts import filterable_tenants, tenant_scoped_queryset
+from dlcdb.theme.filters import HAS_NOTE_CHOICES, filter_boolean_choice, filter_has_note
 
 STATE_NO_RECORD = "no-record"
 STATE_CHOICES = [(STATE_NO_RECORD, _("No active record")), *Record.RECORD_TYPE_CHOICES]
@@ -55,7 +56,7 @@ class DeviceFilter(django_filters.FilterSet):
     )
     is_lentable = django_filters.ChoiceFilter(
         choices=[("true", _("Loanable")), ("false", _("Not loanable"))],
-        method="lentable_filter",
+        method=filter_boolean_choice,
         label=_("Loanable"),
         empty_label=_("Any loanability..."),
     )
@@ -87,7 +88,7 @@ class DeviceFilter(django_filters.FilterSet):
     )
     is_imported = django_filters.ChoiceFilter(
         choices=[("true", _("Imported")), ("false", _("Not imported"))],
-        method="imported_filter",
+        method=filter_boolean_choice,
         label=_("Import"),
         empty_label=_("Any import status..."),
     )
@@ -161,17 +162,11 @@ class DeviceFilter(django_filters.FilterSet):
     def state_filter(self, queryset, name, value):
         if value == STATE_NO_RECORD:
             return queryset.filter(active_record__isnull=True)
-        if value:
-            return queryset.filter(active_record__record_type=value)
-        return queryset
-
-    def lentable_filter(self, queryset, name, value):
-        return queryset.filter(is_lentable=value == "true") if value else queryset
-
-    def imported_filter(self, queryset, name, value):
-        return queryset.filter(is_imported=value == "true") if value else queryset
+        return queryset.filter(active_record__record_type=value)
 
     def duplicate_filter(self, queryset, name, value):
+        # Guards the field-name kwargs below, not an empty value (django-filter
+        # never calls a method with one).
         if value not in {DUPLICATE_SERIAL, DUPLICATE_NICKNAME}:
             return queryset
 
@@ -203,16 +198,14 @@ class RecordFilter(django_filters.FilterSet):
         empty_label=_("Any record type..."),
     )
     has_note = django_filters.ChoiceFilter(
-        choices=[("has_note", _("Has note")), ("has_no_note", _("No note"))],
-        method="note_filter",
+        choices=HAS_NOTE_CHOICES,
+        method=filter_has_note,
         label=_("Note"),
         empty_label=_("Any note status..."),
     )
-    # An explicit ChoiceFilter, not a BooleanFilter: the filterbar renders only
-    # choice-ish filters, so a BooleanFilter would show up as no dropdown at all.
     is_active = django_filters.ChoiceFilter(
         choices=[("true", _("Current")), ("false", _("Superseded"))],
-        method="active_filter",
+        method=filter_boolean_choice,
         label=_("Validity"),
         empty_label=_("Current and superseded..."),
     )
@@ -298,18 +291,6 @@ class RecordFilter(django_filters.FilterSet):
             | Q(removed_info__icontains=value)
         )
 
-    def active_filter(self, queryset, name, value):
-        return queryset.filter(is_active=value == "true") if value else queryset
-
-    def note_filter(self, queryset, name, value):
-        # Same semantics as the admin's HasNoteFilter, and as the room and
-        # device-type list views.
-        if value == "has_note":
-            return queryset.exclude(note__exact="")
-        if value == "has_no_note":
-            return queryset.filter(note__exact="")
-        return queryset
-
 
 class DeviceTypeFilter(django_filters.FilterSet):
     """Search and the has-note filter from the previous DeviceType changelist."""
@@ -317,8 +298,8 @@ class DeviceTypeFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="search_filter", label=_("Search"))
 
     has_note = django_filters.ChoiceFilter(
-        choices=[("has_note", _("Has note")), ("has_no_note", _("No note"))],
-        method="note_filter",
+        choices=HAS_NOTE_CHOICES,
+        method=filter_has_note,
         label=_("Note"),
         empty_label=_("Any note status..."),
     )
@@ -338,14 +319,6 @@ class DeviceTypeFilter(django_filters.FilterSet):
 
     def search_filter(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value) | Q(prefix__icontains=value))
-
-    def note_filter(self, queryset, name, value):
-        # Same semantics as the admin's HasNoteFilter.
-        if value == "has_note":
-            return queryset.exclude(note__exact="")
-        if value == "has_no_note":
-            return queryset.filter(note__exact="")
-        return queryset
 
 
 class ManufacturerFilter(django_filters.FilterSet):

@@ -6,7 +6,7 @@ import django_filters
 from django.test import RequestFactory, TestCase
 
 from dlcdb.core.models import Person
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 
 
 class SampleFilter(django_filters.FilterSet):
@@ -171,13 +171,13 @@ class BuildFilterbarTests(TestCase):
         self.assertEqual(bar.active_count, 2)
 
     def test_the_views_default_ordering_is_not_a_sort_chip(self):
-        # The real view shape: every list view seeds its default onto a copy of
-        # request.GET, so the FilterSet is ordered while the request names no
-        # ordering. That default is not something the user chose.
+        # The real view shape: every list view binds through bind_filterset,
+        # which seeds the default ordering, so the FilterSet is ordered while
+        # the request names no ordering. That default is not something the
+        # user chose.
         request = RequestFactory().get("/items/?state=open")
-        data = request.GET.copy()
-        data.setdefault("ordering", "-modified")
-        filterset = SampleFilter(data, queryset=Person.objects.all(), request=request)
+        filterset = bind_filterset(SampleFilter, request, Person.objects.all(), default_ordering="-modified")
+        self.assertEqual(filterset.data["ordering"], "-modified")
         bar = build_filterbar(filterset, request, target="#item-list")
 
         self.assertIsNone(self._chip(bar, "ordering"))
@@ -197,6 +197,13 @@ class BuildFilterbarTests(TestCase):
 
         self.assertNotIn("nobody", [spec.param for spec in bar.specs])
         self.assertEqual(len(bar.specs), 3)
+
+    def test_an_explicit_ordering_wins_over_the_default(self):
+        request = RequestFactory().get("/items/?ordering=name")
+        filterset = bind_filterset(SampleFilter, request, Person.objects.all(), default_ordering="-modified")
+
+        self.assertEqual(filterset.data["ordering"], "name")
+        self.assertEqual(build_filterbar(filterset, request, target="#item-list").current_sort.value, "name")
 
     def test_default_secondary_fields_is_empty_and_unchanged_behavior(self):
         bar = self._bar()

@@ -23,7 +23,7 @@ from django.utils.translation import gettext_lazy
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.utils.helpers import get_denormalized_user
-from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
@@ -126,9 +126,7 @@ def _masterdata_index(request, spec):
     template = f"{spec.index_template}#{spec.list_id}" if request.htmx else spec.index_template
     base_queryset = _masterdata_queryset(spec)
 
-    data = request.GET.copy()
-    data.setdefault("ordering", "name")
-    filterset = spec.filter_class(data, queryset=base_queryset, request=request)
+    filterset = bind_filterset(spec.filter_class, request, base_queryset, default_ordering="name")
 
     page_obj = paginate(request, filterset.qs, MASTERDATA_PER_PAGE)
 
@@ -141,7 +139,7 @@ def _masterdata_index(request, spec):
             target=f"#{spec.list_id}",
             search_placeholder=spec.search_placeholder,
         ),
-        "current_ordering": data["ordering"],
+        "current_ordering": filterset.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
     }
