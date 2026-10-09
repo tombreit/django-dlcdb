@@ -78,6 +78,7 @@
     // each with its own corners again, no joining overlap.
     @include media-breakpoint-down(md) {
         .offcanvas-body .filterbar-group {
+            display: flex; // block-level: a btn-group is inline-flex, which would shrink-wrap the secondary group
             flex-direction: column;
             align-items: stretch;
             gap: .5rem;

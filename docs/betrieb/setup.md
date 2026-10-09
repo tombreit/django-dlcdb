@@ -385,10 +385,15 @@ are the English source.
 Extract and compile with:
 
 ```bash
-./manage.py makemessages --locale de --ignore=.venv/*
+make messages
 poedit dlcdb/locale/de/LC_MESSAGES/django.po
-./manage.py compilemessages --ignore=.venv/*
+make compilemessages
 ```
+
+Both targets skip `.venv/`, `run/` and `node_modules/`. Running the bare
+`manage.py` commands from the repository root would scan them too, and a build
+left in `run/release/` by `make wheel` carries a second copy of the package and a
+whole site-packages: hundreds of Django's own strings would land in the catalog.
 
 The compiled catalog `dlcdb/locale/de/LC_MESSAGES/django.mo` is **committed**.
 gettext reads only the `.mo`, never the `.po`, so shipping it means a

@@ -133,4 +133,6 @@ ignore = [
 [tool.pytest]
 DJANGO_SETTINGS_MODULE = "dlcdb.settings.test"
 testpaths = ["dlcdb"]
+# `pytest .` must not collect the package copy a `make wheel` leaves in run/release/.
+norecursedirs = ["run", ".venv", "node_modules"]
 required_plugins = ["pytest-django"]

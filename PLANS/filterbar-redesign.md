@@ -6,9 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Filterbar redesign: one rail
 
-**Status:** planned (2026-10-09). Follows `PLANS/filterbar.md` (tenant filter, backend
-cleanup, "Clear filters" button), whose batches 1–3 land first. This document covers only
-the look and feel of the bar and the status line.
+**Status:** implemented (batches 0–3, 2026-10-09), after `PLANS/filterbar.md` (tenant
+filter, backend cleanup, "Clear filters" button). This document covers only the look and
+feel of the bar and the status line; what is left is under *Ideas, not now*.
 
 ## Context
 
@@ -143,6 +143,11 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
 
 ### 3 — Small screens
 - Offcanvas body: stacked group, `Filters` header as today; screenshots at 375 px.
+- Found in batch 3: the stacking rule from batch 1 stretched only the primary group, since
+  a `btn-group` is `inline-flex` and the secondary group sits inside the collapse. One
+  `display: flex` on the stacked groups fixes it. Checked at 375 px (panel closed, open,
+  secondary row expanded, a menu open, a value picked) and at 820 px (rail wraps under
+  the search).
 - No NEWS.
 - Commit: `Filterbar redesign, step 3: the filter panel on small screens stacks the same
   rail`
@@ -189,7 +194,7 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
 - [x] 0 — This document, baseline screenshots
 - [x] 1 — One rail
 - [x] 2 — One status line
-- [ ] 3 — Small screens
+- [x] 3 — Small screens
 
 ## Verification (each batch)
 
