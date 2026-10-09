@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-.PHONY: requirements tests format lint docs assets messages wheel release
+.PHONY: requirements tests format lint docs assets messages compilemessages wheel release
 
 # include .env
 
@@ -14,7 +14,8 @@ help:
 	@echo "test - run test suite"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "assets - build static assets with npm"
-	@echo "messages - extract translatable strings and compile the message catalogs"
+	@echo "messages - extract translatable strings into dlcdb/locale/de (then edit the .po)"
+	@echo "compilemessages - compile the edited .po into the committed .mo"
 	@echo "wheel - build the wheel from HEAD in run/release/ and try it in a fresh venv"
 	@echo "release VERSION=X.Y.Z - set the version everywhere, then build and try the wheel"
 
@@ -29,6 +30,15 @@ requirements:
 
 tests:
 	pytest
+
+# From the repository root, so the .po keeps its dlcdb/... locations. The ignores
+# keep the virtualenv, node_modules and a build left in run/release/ (a second
+# copy of the package plus a site-packages) out of the catalog.
+messages:
+	python3 manage.py makemessages --locale de --ignore=.venv/* --ignore=run/* --ignore=node_modules/*
+
+compilemessages:
+	python3 manage.py compilemessages --ignore=.venv/* --ignore=run/* --ignore=node_modules/*
 
 # The mermaid assets are gitignored and only exist once npm has copied them out
 # of node_modules. Without them the diagrams render blank, so 'make docs' pulls
