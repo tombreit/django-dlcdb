@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
 from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
 from dlcdb.dataexchange.models import ImporterList
-from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+from dlcdb.tenants.shortcuts import filterable_tenants, tenant_scoped_queryset
 
 STATE_NO_RECORD = "no-record"
 STATE_CHOICES = [(STATE_NO_RECORD, _("No active record")), *Record.RECORD_TYPE_CHOICES]
@@ -68,6 +68,12 @@ class DeviceFilter(django_filters.FilterSet):
         queryset=Manufacturer.objects.all(),
         label=_("Manufacturer"),
         empty_label=_("Any manufacturer..."),
+    )
+    # Offered only to users who see several tenants (see filterable_tenants).
+    tenant = django_filters.ModelChoiceFilter(
+        queryset=filterable_tenants,
+        label=_("Tenant"),
+        empty_label=_("Any tenant..."),
     )
     supplier = django_filters.ModelChoiceFilter(
         queryset=Supplier.objects.all(),
@@ -127,6 +133,7 @@ class DeviceFilter(django_filters.FilterSet):
             "is_lentable",
             "active_record__room",
             "manufacturer",
+            "tenant",
             "supplier",
             "active_record__inventory",
             "is_imported",
@@ -219,6 +226,11 @@ class RecordFilter(django_filters.FilterSet):
         label=_("Room"),
         empty_label=_("Any room..."),
     )
+    device__tenant = django_filters.ModelChoiceFilter(
+        queryset=filterable_tenants,
+        label=_("Tenant"),
+        empty_label=_("Any tenant..."),
+    )
     inventory = django_filters.ModelChoiceFilter(
         queryset=Inventory.objects.all(),
         label=_("Inventory"),
@@ -264,6 +276,7 @@ class RecordFilter(django_filters.FilterSet):
             "has_note",
             "device__device_type",
             "room",
+            "device__tenant",
             "inventory",
             "device__manufacturer",
             "disposition_state",

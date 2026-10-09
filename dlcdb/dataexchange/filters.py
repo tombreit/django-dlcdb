@@ -6,6 +6,8 @@ import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from dlcdb.tenants.shortcuts import filterable_tenants
+
 from .models import ImporterList
 
 # An empty status marks a dry run that was previewed but never confirmed; a
@@ -27,6 +29,11 @@ class ImporterListFilter(django_filters.FilterSet):
         label=_("Format"),
         empty_label=_("Any format..."),
     )
+    tenant = django_filters.ModelChoiceFilter(
+        queryset=filterable_tenants,
+        label=_("Tenant"),
+        empty_label=_("Any tenant..."),
+    )
     ordering = django_filters.OrderingFilter(
         fields=(
             ("file", "file"),
@@ -39,7 +46,7 @@ class ImporterListFilter(django_filters.FilterSet):
 
     class Meta:
         model = ImporterList
-        fields = ["search", "status", "import_format", "ordering"]
+        fields = ["search", "status", "import_format", "tenant", "ordering"]
 
     def search_filter(self, queryset, name, value):
         return queryset.filter(Q(file__icontains=value) | Q(note__icontains=value))

@@ -367,6 +367,13 @@ class DeviceFrontendTests(BaseTest):
         user.user_permissions.add(Permission.objects.get(codename="view_device", content_type__app_label="core"))
         return user, tenant
 
+    def test_single_tenant_user_gets_no_tenant_filter(self):
+        user, _tenant = self._tenant_viewer()
+        self.client.force_login(user)
+
+        bar = self.client.get(reverse("assets:device_index")).context["filterbar"]
+        self.assertNotIn("tenant", [spec.param for spec in bar.specs + bar.secondary_specs])
+
     def test_view_only_user_gets_readonly_detail_and_cannot_post(self):
         user, tenant = self._tenant_viewer()
         device = self._create_device(edv_id="EDV-TENANT", sap_id="7-7")

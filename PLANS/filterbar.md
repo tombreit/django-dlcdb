@@ -183,7 +183,7 @@ iteration (see *Open follow-ups*).
 ## Progress
 
 - [x] 0 — This document
-- [ ] 1 — Tenant filter
+- [x] 1 — Tenant filter
 - [ ] 2 — Backend cleanup
 - [ ] 3 — "Clear filters" button
 

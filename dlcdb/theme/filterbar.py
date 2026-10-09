@@ -20,8 +20,12 @@ template context ...
 
 The bar is derived by introspecting the FilterSet: the filter named
 ``search_field`` becomes the search input, an OrderingFilter becomes the sort
-dropdown, choice-ish filters become one dropdown each. Everything is plain
-data (frozen dataclasses of strings) — no state, no template tags, no mixins.
+dropdown, choice-ish filters become one dropdown each. A choice filter with
+nothing to choose — only its empty reset choice, e.g. a ModelChoiceFilter over
+an empty queryset — gets no dropdown at all, so a FilterSet can declare a
+filter whose choices depend on the request (the tenant filter) without an
+``__init__`` that removes it again. Everything is plain data (frozen
+dataclasses of strings) — no state, no template tags, no mixins.
 
 A sort counts as a user modification of the viewset, exactly like a filter: it
 gets its own removable chip and "Clear all" undoes it. What separates "the page
@@ -214,6 +218,9 @@ def _filter_spec(flt, bound_field):
         return None
 
     pairs = [(str(value), str(label)) for value, label in bound_field.field.choices]
+    # Nothing to choose besides the empty reset choice: no dropdown.
+    if not any(value for value, _label in pairs):
+        return None
     label_by_value = dict(pairs)
     selected_values = [value for value in _raw_values(bound_field) if value in label_by_value and value != ""]
     choices = [(value, label, _is_checked(value, selected_values, multiple)) for value, label in pairs]

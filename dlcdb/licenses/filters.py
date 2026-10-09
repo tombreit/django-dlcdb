@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import DeviceType, LicenceRecord, Supplier
+from dlcdb.tenants.shortcuts import filterable_tenants
 
 
 class LicenceRecordFilter(django_filters.FilterSet):
@@ -55,6 +56,12 @@ class LicenceRecordFilter(django_filters.FilterSet):
         empty_label=_("License state..."),
     )
 
+    device__tenant = django_filters.ModelChoiceFilter(
+        queryset=filterable_tenants,
+        label=_("Tenant"),
+        empty_label=_("Any tenant..."),
+    )
+
     ordering = django_filters.OrderingFilter(
         fields=(
             ("device_human_title", "license"),  # annotation supplied by the view's base_qs
@@ -70,4 +77,4 @@ class LicenceRecordFilter(django_filters.FilterSet):
 
     class Meta:
         model = LicenceRecord
-        fields = ["search", "device__device_type", "device__supplier", "license_state", "ordering"]
+        fields = ["search", "device__device_type", "device__supplier", "license_state", "device__tenant", "ordering"]

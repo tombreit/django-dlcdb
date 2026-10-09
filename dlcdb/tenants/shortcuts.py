@@ -31,6 +31,20 @@ def tenant_scoped_queryset(queryset, request, *, tenant_field="tenant"):
     return queryset.filter(**{f"{tenant_field}__in": request.tenants})
 
 
+def filterable_tenants(request):
+    """
+    The tenants a list can be narrowed to: the request's tenants, but only when
+    there are two or more. With a single tenant the scoping already narrows the
+    list to it, so a filter would have nothing to offer; it returns ``none()``
+    and the filterbar renders no dropdown for an empty choice list. A
+    ``ModelChoiceFilter`` calls it with the request (or ``None`` when unbound).
+    """
+    tenants = getattr(request, "tenants", ())
+    if len(tenants) < 2:
+        return Tenant.objects.none()
+    return Tenant.objects.filter(pk__in=[tenant.pk for tenant in tenants])
+
+
 def limit_tenant_field(field, tenants):
     """
     Offer only the given tenants; with exactly one, preselect it as the only

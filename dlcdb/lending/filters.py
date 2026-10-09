@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import DeviceType, LentRecord, Person, Record
+from dlcdb.tenants.shortcuts import filterable_tenants
 
 # Lending state keys. This filter is the single source of truth for lending
 # state in the standalone lending app; it intentionally does not import from
@@ -62,6 +63,12 @@ class LentRecordFilter(django_filters.FilterSet):
         empty_label=_("Person..."),
     )
 
+    device__tenant = django_filters.ModelChoiceFilter(
+        queryset=filterable_tenants,
+        label=_("Tenant"),
+        empty_label=_("Any tenant..."),
+    )
+
     ordering = django_filters.OrderingFilter(
         fields=(
             ("device__edv_id", "device"),
@@ -77,7 +84,7 @@ class LentRecordFilter(django_filters.FilterSet):
 
     class Meta:
         model = LentRecord
-        fields = ["search", "state", "device__device_type", "person", "ordering"]
+        fields = ["search", "state", "device__device_type", "person", "device__tenant", "ordering"]
 
     def search_filter_method(self, queryset, name, value):
         return queryset.filter(

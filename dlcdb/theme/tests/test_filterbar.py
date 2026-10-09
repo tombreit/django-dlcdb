@@ -187,6 +187,17 @@ class BuildFilterbarTests(TestCase):
         self.assertEqual(len(bar.sort_options), 4)
         self.assertFalse(any(opt.selected for opt in bar.sort_options))
 
+    def test_filter_with_nothing_to_choose_gets_no_spec(self):
+        class EmptyChoiceFilter(SampleFilter):
+            nobody = django_filters.ModelChoiceFilter(queryset=Person.objects.none(), label="Nobody")
+
+        request = RequestFactory().get("/items/")
+        filterset = EmptyChoiceFilter(request.GET, queryset=Person.objects.all(), request=request)
+        bar = build_filterbar(filterset, request, target="#item-list")
+
+        self.assertNotIn("nobody", [spec.param for spec in bar.specs])
+        self.assertEqual(len(bar.specs), 3)
+
     def test_default_secondary_fields_is_empty_and_unchanged_behavior(self):
         bar = self._bar()
         self.assertEqual(bar.secondary_specs, [])

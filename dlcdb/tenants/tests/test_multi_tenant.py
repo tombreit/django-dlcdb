@@ -47,9 +47,13 @@ class MultiTenantUserTests(BaseTest):
                     "change_device",
                     "view_licencerecord",
                     "view_lentrecord",
+                    "view_record",
                     "transition_can_relocate_device",
                 ],
             )
+        )
+        cls.user.user_permissions.add(
+            Permission.objects.get(content_type__app_label="dataexchange", codename="view_importerlist")
         )
 
         cls.room = Room.objects.create(number="M1.01")
@@ -121,6 +125,48 @@ class MultiTenantUserTests(BaseTest):
         self.client.post(url, {**payload, "new_tenant": self.tenant_b.pk})
         self.device_a.refresh_from_db()
         self.assertEqual(self.device_a.tenant, self.tenant_b)
+
+    # The tenant-owned lists and the name of their tenant filter parameter:
+    # ``tenant`` on devices and imports, ``device__tenant`` on records.
+    TENANT_FILTERED_LISTS = [
+        ("assets:device_index", "tenant"),
+        ("dataexchange:importer_index", "tenant"),
+        ("assets:record_index", "device__tenant"),
+        ("lending:index", "device__tenant"),
+        ("licenses:index", "device__tenant"),
+    ]
+
+    def _tenant_spec(self, response, param):
+        bar = response.context["filterbar"]
+        return next(spec for spec in bar.specs + bar.secondary_specs if spec.param == param)
+
+    def test_lists_offer_the_own_tenants_as_filter(self):
+        for url_name, param in self.TENANT_FILTERED_LISTS:
+            with self.subTest(url_name):
+                response = self.client.get(reverse(url_name))
+                self.assertEqual(response.status_code, 200)
+                spec = self._tenant_spec(response, param)
+                self.assertEqual(
+                    [label for _value, label, _checked in spec.choices], ["Any tenant...", "Tenant A", "Tenant B"]
+                )
+                self.assertNotContains(response, "Foreign tenant")
+
+    def test_tenant_filter_narrows_the_device_list(self):
+        response = self.client.get(reverse("assets:device_index"), {"tenant": self.tenant_a.pk})
+
+        self.assertContains(response, "EDV-A")
+        self.assertNotContains(response, "EDV-B")
+        self.assertEqual(self._tenant_spec(response, "tenant").selected_label, "Tenant A")
+        self.assertContains(response, "Tenant: Tenant A")
+
+    def test_foreign_tenant_in_the_filter_is_ignored(self):
+        response = self.client.get(reverse("assets:device_index"), {"tenant": self.foreign.pk})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "EDV-A")
+        self.assertContains(response, "EDV-B")
+        self.assertNotContains(response, "EDV-FOREIGN")
+        self.assertEqual(self._tenant_spec(response, "tenant").selected_label, "")
 
     def test_dashboard_licences_and_lending_show_the_union(self):
         own_borrower = self._lend(self.device_b, "Own")
