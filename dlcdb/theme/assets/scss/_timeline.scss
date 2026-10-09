@@ -4,82 +4,221 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
-// Timeline: a vertical rail of dated entries, newest first (e.g. the
-// assignment cards on the person detail page).
+// Timeline: when and who on the left, a rail with one marker per entry, what
+// happened on the right. Newest first. Used by the room's stock changes, the
+// person's lendings, licences and smallstuff, and the field history.
 //
 //   <ol class="timeline">
-//     <li class="timeline-item timeline-item-current">  current: filled dot
-//       <div class="timeline-date">Since 2026-09-01</div>
-//       ...entry content...
+//     <li class="timeline-item">
+//       <div class="timeline-aside">                       when and who
+//         <div class="timeline-day">2026-08-19</div>        optional: once per day
+//         <a class="timeline-time" href="…record…">12:49</a>
+//         <div class="timeline-who"><i class="bi bi-person"></i> t.breitner</div>
+//       </div>
+//       <span class="timeline-marker bg-success-subtle text-success-emphasis">
+//         <i class="bi bi-plus-lg"></i>             optional: what happened
+//       </span>
+//       <div class="timeline-body">
+//         <div class="timeline-title">…device…</div>
+//         <div class="timeline-text">Arrived from 248</div>
+//       </div>
 //     </li>
-//     <li class="timeline-item">                        past: hollow dot
+//     <li class="timeline-item timeline-item-current">       a current period
+//       <div class="timeline-aside">
+//         <a class="timeline-time" href="…"><span>Since</span> <span>2026-07-20</span></a>
+//       …
 //
-// Rail and dots are pseudo-elements, so the markup stays classes only. Colours
-// come from Bootstrap's variables and follow the light/dark theme on their own.
+// Without a .timeline-marker an entry gets a dot: hollow for the past, filled
+// for a .timeline-item-current, whose rail segment down to the next entry is
+// tinted as well. The spans of a period stack in the aside and run on one line
+// on phones, where the aside moves above the body.
+//
+// Rail and dots are pseudo-elements and the marker tone comes from Bootstrap's
+// subtle colour utilities, so the markup stays classes only and follows the
+// light/dark theme on its own.
 
 .timeline {
+    --timeline-aside: 7.5rem;
+    --timeline-gutter: 2.5rem;
+    --timeline-rail-x: calc(var(--timeline-aside) + var(--timeline-gutter) / 2);
+    // Vertical centre of the first line, where dot and marker sit.
+    --timeline-anchor: .75rem;
     --timeline-dot: .75rem;
-    // Centre of the dot, which sits centred on the date line (.75rem × 1.5).
-    --timeline-dot-centre: .5625rem;
+    --timeline-marker: 1.75rem;
+    // The card around the timeline: marker rings and dot fills cut the rail with it.
+    --timeline-bg: var(--bs-card-bg, var(--bs-body-bg));
 
+    position: relative;
     list-style: none;
     margin: 0;
     padding: 0;
+
+    // The rail, one line from the first entry down. It fades out at the end:
+    // the history goes on, on the next page or before the first record.
+    &::before {
+        content: "";
+        position: absolute;
+        top: var(--timeline-anchor);
+        bottom: 0;
+        left: calc(var(--timeline-rail-x) - 1px);
+        width: 2px;
+        background: linear-gradient(to bottom, var(--bs-border-color) calc(100% - 2.5rem), transparent);
+    }
 }
 
 .timeline-item {
     position: relative;
-    padding: 0 0 1.25rem 1.75rem;
+    display: grid;
+    grid-template-columns: var(--timeline-aside) var(--timeline-gutter) minmax(0, 1fr);
+    grid-template-areas: "aside . body";
+    padding-bottom: 1.25rem;
 
-    // The rail, from this dot down to the next one.
-    &::before {
-        content: "";
-        position: absolute;
-        top: var(--timeline-dot-centre);
-        bottom: calc(-1 * var(--timeline-dot-centre));
-        left: calc(var(--timeline-dot) / 2 - 1px);
-        width: 2px;
-        background: var(--bs-border-color);
+    &:last-child {
+        padding-bottom: .5rem;
+    }
+
+    // A new day gets a little air above it.
+    &:has(.timeline-day):not(:first-child) {
+        margin-top: .5rem;
     }
 
     // The dot, hollow for the past. Its fill covers the rail behind it.
     &::after {
         content: "";
         position: absolute;
-        top: calc(var(--timeline-dot-centre) - var(--timeline-dot) / 2);
-        left: 0;
+        top: calc(var(--timeline-anchor) - var(--timeline-dot) / 2);
+        left: calc(var(--timeline-rail-x) - var(--timeline-dot) / 2);
         width: var(--timeline-dot);
         height: var(--timeline-dot);
         border: 2px solid var(--bs-secondary-color);
         border-radius: 50%;
-        background: var(--bs-card-bg, var(--bs-body-bg));
+        background: var(--timeline-bg);
     }
 
-    &:last-child {
-        padding-bottom: 0;
+    &:has(> .timeline-marker)::after {
+        content: none;
+    }
+}
 
-        &::before {
-            display: none;
+// Current: a filled dot with a soft halo, and the rail tinted down to the next
+// entry, so the coloured part of the rail is what is still held.
+.timeline-item-current {
+    &::after {
+        border-color: var(--bs-primary);
+        background: var(--bs-primary);
+        box-shadow: 0 0 0 .2rem var(--bs-primary-bg-subtle);
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: var(--timeline-anchor);
+        bottom: calc(-1 * var(--timeline-anchor));
+        left: calc(var(--timeline-rail-x) - 1px);
+        width: 2px;
+        background: var(--bs-primary-border-subtle);
+    }
+
+    &:last-child::before {
+        bottom: 0;
+    }
+}
+
+// What happened, as an icon on the rail. The tone comes from the markup, e.g.
+// "bg-success-subtle text-success-emphasis".
+.timeline-marker {
+    position: absolute;
+    top: calc(var(--timeline-anchor) - var(--timeline-marker) / 2);
+    left: calc(var(--timeline-rail-x) - var(--timeline-marker) / 2);
+    width: var(--timeline-marker);
+    height: var(--timeline-marker);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    box-shadow: 0 0 0 .25rem var(--timeline-bg);
+    font-size: .875rem;
+    line-height: 1;
+}
+
+.timeline-aside {
+    grid-area: aside;
+    min-width: 0;
+    text-align: end;
+    font-size: .8125rem;
+    line-height: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-secondary-color);
+}
+
+.timeline-day {
+    font-weight: 600;
+    color: var(--bs-body-color);
+}
+
+.timeline-time {
+    display: block;
+
+    > span {
+        display: block;
+    }
+
+    // A permalink to the record: quiet until pointed at.
+    &:is(a) {
+        color: inherit;
+        text-decoration: underline dotted;
+        text-underline-offset: .2em;
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-link-hover-color);
+            text-decoration-style: solid;
         }
     }
 }
 
-// What the person holds right now: a filled dot with a soft halo.
-.timeline-item-current::after {
-    border-color: var(--bs-primary);
-    background: var(--bs-primary);
-    box-shadow: 0 0 0 .2rem var(--bs-primary-bg-subtle);
+// Wraps rather than truncates: "Unknown user" is long in some languages.
+.timeline-who {
+    line-height: 1.25rem;
+    overflow-wrap: anywhere;
 }
 
-.timeline-date {
-    font-size: .75rem;
-    font-weight: 600;
-    line-height: 1.5;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: var(--bs-secondary-color);
+.timeline-body {
+    grid-area: body;
+    min-width: 0;
+}
 
-    .timeline-item-current & {
-        color: var(--bs-primary-text-emphasis);
+.timeline-title {
+    line-height: 1.5rem;
+}
+
+.timeline-text {
+    font-size: .9375rem;
+}
+
+// Phones: the rail moves to the edge and the aside becomes one line above the body.
+@include media-breakpoint-down(sm) {
+    .timeline {
+        --timeline-gutter: 2.25rem;
+        --timeline-rail-x: calc(var(--timeline-gutter) / 2);
+    }
+
+    .timeline-item {
+        grid-template-columns: var(--timeline-gutter) minmax(0, 1fr);
+        grid-template-areas: ". aside" ". body";
+    }
+
+    .timeline-aside {
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: .75rem;
+        text-align: start;
+    }
+
+    .timeline-time > span {
+        display: inline;
+    }
+
+    .timeline-who {
+        line-height: 1.5rem;
     }
 }

@@ -6,9 +6,9 @@ The person's lendings as a timeline, current first. Expects: lendings
 (persons.assignments.Assignment of LENT records).
 
 One entry per lending, however many record copies store it; the latest copy is
-the record linked to. Start and end come from the Assignment: a lending that
-ended without a return (e.g. the device went missing) ends with its record's
-validity.
+the record the period links to. Start and end come from the Assignment: a
+lending that ended without a return (e.g. the device went missing) ends with
+its record's validity.
 Links appear only for a user who may open the target, so none leads to a refusal.
 {% endcomment %}
 {% load i18n %}
@@ -24,42 +24,33 @@ Links appear only for a user who may open the target, so none leads to a refusal
         {% for assignment in lendings %}
           {% with record=assignment.latest %}
             <li class="timeline-item{% if record.is_active %} timeline-item-current{% endif %}">
-              <div class="timeline-date">
-                {% if record.is_active %}
-                  {% translate "Since" %} {{ assignment.began|date:"Y-m-d" }}
-                  {% if record.lent_desired_end_date %}· {% translate "Due" %} {{ record.lent_desired_end_date|date:"Y-m-d" }}{% endif %}
-                {% else %}
-                  {{ assignment.began|date:"Y-m-d" }} – {{ assignment.ended|date:"Y-m-d"|default:"—" }}
-                {% endif %}
+              <div class="timeline-aside">
+                {% include "persons/includes/_period.html" with began=assignment.began ended=assignment.ended %}
               </div>
-              <div class="d-flex flex-wrap align-items-baseline gap-2">
-                <span class="fw-semibold font-monospace">
-                  <i class="bi {{ record.device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
+              <div class="timeline-body">
+                <div class="timeline-title">
+                  <i class="bi {{ record.device.device_type.icon_class|default:'bi-pc-display' }} text-body-secondary me-1"></i>
                   {% if perms.core.view_device %}
-                    <a href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</a>
+                    <a class="fw-semibold font-monospace" href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</a>
                   {% else %}
-                    {{ record.device.edv_id|default:record.device.sap_id|default:"—" }}
+                    <span class="fw-semibold font-monospace">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</span>
                   {% endif %}
-                </span>
-                {% if record.device.manufacturer or record.device.series %}
-                  <span>{{ record.device.manufacturer|default:"" }} {{ record.device.series|default:"" }}</span>
-                {% endif %}
-                {% if record.is_active %}
-                  <span class="badge text-bg-primary ms-auto">{% translate "Lent" %}</span>
-                {% endif %}
-              </div>
-              <div class="small d-flex flex-wrap align-items-baseline gap-2">
-                {% if record.room %}
-                  <span class="text-muted"><i class="bi bi-door-open"></i> {{ record.room }}</span>
-                {% endif %}
-                <span class="ms-auto d-flex gap-3">
+                  <span class="text-body-secondary ms-1">{{ record.device.manufacturer|default:"" }} {{ record.device.series|default:"" }}</span>
+                </div>
+                <div class="timeline-text">
+                  {% if record.is_active and record.lent_desired_end_date %}
+                    {% if record.room %}
+                      {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" room=record.room.number %}Due {{ due }}, in room {{ room }}{% endblocktranslate %}
+                    {% else %}
+                      {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" %}Due {{ due }}{% endblocktranslate %}
+                    {% endif %}
+                  {% elif record.room %}
+                    {% blocktranslate with room=record.room.number %}In room {{ room }}{% endblocktranslate %}
+                  {% endif %}
                   {% if record.is_active and perms.core.transition_can_lend_device %}
-                    <a href="{% url 'lending:detail' record.pk %}">{% translate "Lending" %}</a>
+                    <a class="ms-2" href="{% url 'lending:detail' record.pk %}">{% translate "Lending" %}</a>
                   {% endif %}
-                  {% if perms.core.view_record %}
-                    <a href="{% url 'assets:record_detail' record.pk %}">{% translate "Record" %}</a>
-                  {% endif %}
-                </span>
+                </div>
               </div>
             </li>
           {% endwith %}

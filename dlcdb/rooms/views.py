@@ -11,16 +11,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
-from dlcdb.core.models import Room
+from dlcdb.core.models import Record, Room
 from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.helpers import get_denormalized_user
+from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import build_filterbar
+from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
 
@@ -28,6 +30,7 @@ from .filters import RoomFilter
 from .forms import RoomForm
 
 ROOMS_PER_PAGE = 25
+CHANGES_PER_PAGE = 25
 
 
 def _room_queryset():
@@ -37,6 +40,47 @@ def _room_queryset():
     the room — the same count the admin's DeviceCountMixin shows.
     """
     return Room.objects.annotate(assets_count=Count("record", distinct=True, filter=Q(record__is_active=True)))
+
+
+def _room_changes(request, room):
+    """
+    The room's stock changes, newest first: the records with which a device
+    arrived in the room or left it, in the user's tenants.
+
+    Each device's records follow one another by ``pk``. A record is a change if
+    its room differs from the room of the device's previous record:
+
+    - arrived: the record is in the room, the previous one elsewhere or absent;
+    - left: the previous record is in the room, this one elsewhere or nowhere
+      (not locatable, removed). The superseding record is the event: when the
+      device left, who moved it and where it went.
+
+    Consecutive records in the same room (copies left by inventories, a lending
+    to someone in the same room) change nothing and are skipped.
+
+    Records have no field history of their own, so two things cannot be told:
+    a lent device moved in place (``lifecycle.relocate_lending``) shows only its
+    latest room, and a lending's user is overwritten when it is returned or
+    moved, so its arrival names that user rather than the lender.
+    """
+    previous = Record.objects.filter(device=OuterRef("device"), pk__lt=OuterRef("pk")).order_by("-pk")
+    # A negated filter on an annotation, unlike ~Q(room=room) on the field
+    # itself, gets no NULL handling: "no previous record" is spelled out.
+    arrived = Q(room=room) & (Q(previous_room__isnull=True) | ~Q(previous_room=room))
+    left = Q(previous_room=room) & ~Q(room=room)
+    changes = (
+        # Only devices that were ever in the room need their previous record.
+        Record.objects.filter(device__in=Record.objects.filter(room=room).values("device"))
+        .select_related("device", "device__device_type", "device__manufacturer", "room", "person", "user")
+        .annotate(
+            previous_room=Subquery(previous.values("room")[:1]),
+            previous_room_number=Subquery(previous.values("room__number")[:1]),
+            state_color=active_record_color_case(field="record_type"),
+        )
+        .filter(arrived | left)
+        .order_by("-created_at", "-pk")
+    )
+    return tenant_scoped_queryset(changes, request, tenant_field="device__tenant")
 
 
 @permission_required("core.view_room", raise_exception=True)
@@ -110,6 +154,15 @@ def room_detail(request, pk):
     else:
         form = RoomForm(instance=room)
 
+    # Devices that arrived in or left the room, for a user who may read the
+    # record trail they come from.
+    changes = None
+    if request.user.has_perm("core.view_record"):
+        changes = paginate(request, _room_changes(request, room), CHANGES_PER_PAGE)
+        # The card's pager swaps only the card.
+        if request.htmx:
+            return TemplateResponse(request, "rooms/includes/_changes.html", {"room": room, "changes": changes})
+
     return TemplateResponse(
         request,
         "rooms/detail.html",
@@ -119,6 +172,7 @@ def room_detail(request, pk):
             "can_change": can_change,
             "index_url": index_url,
             "form_action": form_action,
+            "changes": changes,
         },
     )
 

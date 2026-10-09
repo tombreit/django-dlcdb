@@ -5,8 +5,8 @@ SPDX-License-Identifier: EUPL-1.2
 Small items issued to the person as a timeline, still issued first. Expects:
 person, assigned_things (smallstuff.AssignedThing).
 
-There is no page per assignment; issuing and returning happen on smallstuff's
-own person page, which the header links to.
+There is no page per assignment, so the period links nowhere; issuing and
+returning happen on smallstuff's own person page, which the header links to.
 {% endcomment %}
 {% load i18n %}
 
@@ -21,18 +21,17 @@ own person page, which the header links to.
       <ol class="timeline">
         {% for assignment in assigned_things %}
           <li class="timeline-item{% if not assignment.unassigned_at %} timeline-item-current{% endif %}">
-            <div class="timeline-date">
-              {% if assignment.unassigned_at %}
-                {{ assignment.assigned_at|date:"Y-m-d"|default:"—" }} – {{ assignment.unassigned_at|date:"Y-m-d" }}
-              {% else %}
-                {% translate "Since" %} {{ assignment.assigned_at|date:"Y-m-d"|default:"—" }}
-              {% endif %}
+            <div class="timeline-aside">
+              <div class="timeline-time">
+                {% if assignment.unassigned_at %}
+                  <span>{{ assignment.assigned_at|date:"Y-m-d"|default:"—" }}</span> <span>– {{ assignment.unassigned_at|date:"Y-m-d" }}</span>
+                {% else %}
+                  <span>{% translate "Since" %}</span> <span>{{ assignment.assigned_at|date:"Y-m-d"|default:"—" }}</span>
+                {% endif %}
+              </div>
             </div>
-            <div class="d-flex flex-wrap align-items-baseline gap-2">
-              <span class="fw-semibold">{{ assignment.thing }}</span>
-              {% if not assignment.unassigned_at %}
-                <span class="badge text-bg-primary ms-auto">{% translate "Issued" %}</span>
-              {% endif %}
+            <div class="timeline-body">
+              <div class="timeline-title fw-semibold">{{ assignment.thing }}</div>
             </div>
           </li>
         {% endfor %}

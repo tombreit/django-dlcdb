@@ -3845,6 +3845,95 @@ msgstr "Zugriff verweigert."
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
 
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:22
+msgid "Stock changes"
+msgstr "Bestandsänderungen"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:25
+#, python-format
+msgid "%(counter)s change"
+msgid_plural "%(counter)s changes"
+msgstr[0] "%(counter)s Änderung"
+msgstr[1] "%(counter)s Änderungen"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:39
+msgid "Open the record of this change"
+msgstr "Record dieser Änderung öffnen"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:46 dlcdb/rooms/templates/rooms/includes/_changes.html:74
+msgctxt "room change"
+msgid "Arrived"
+msgstr "Zugang"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:50 dlcdb/rooms/templates/rooms/includes/_changes.html:54 dlcdb/rooms/templates/rooms/includes/_changes.html:90
+msgctxt "room change"
+msgid "Left"
+msgstr "Abgang"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:72 dlcdb/rooms/templates/rooms/includes/_changes.html:80
+#, python-format
+msgctxt "room change"
+msgid "Lent to %(person)s"
+msgstr "Verliehen an %(person)s"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:77
+msgctxt "room change"
+msgid "from"
+msgstr "aus"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:81
+msgctxt "room change"
+msgid "in"
+msgstr "in"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:83
+msgctxt "room change"
+msgid "Moved to"
+msgstr "Umgezogen nach"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:85
+msgctxt "room change"
+msgid "Marked as not locatable"
+msgstr "Als nicht auffindbar markiert"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:87
+msgctxt "room change"
+msgid "Decommissioned"
+msgstr "Ausgemustert"
+
+#: dlcdb/rooms/templates/rooms/includes/_changes.html:99
+msgid "No device has arrived in or left this room yet."
+msgstr "In diesem Raum gab es noch keine Zu- oder Abgänge."
+
+#: dlcdb/persons/templates/persons/includes/_lendings.html:43
+#, python-format
+msgid "Due %(due)s, in room %(room)s"
+msgstr "Fällig am %(due)s, in Raum %(room)s"
+
+#: dlcdb/persons/templates/persons/includes/_lendings.html:45
+#, python-format
+msgid "Due %(due)s"
+msgstr "Fällig am %(due)s"
+
+#: dlcdb/persons/templates/persons/includes/_lendings.html:48
+#, python-format
+msgid "In room %(room)s"
+msgstr "In Raum %(room)s"
+
+#: dlcdb/persons/templates/persons/includes/_licences.html:41
+#, python-format
+msgid "Expires %(date)s"
+msgstr "Läuft am %(date)s ab"
+
+#: dlcdb/persons/templates/persons/includes/_licences.html:44
+#, python-format
+msgid "inventory ID %(sap_id)s"
+msgstr "Inventarnummer %(sap_id)s"
+
+#: dlcdb/persons/templates/persons/includes/_period.html:11
+msgid "Open the record"
+msgstr "Record öffnen"
+
 #~ msgid "License History"
 #~ msgstr "Lizenz Historie"
 

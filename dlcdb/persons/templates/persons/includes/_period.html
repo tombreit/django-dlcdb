@@ -1,0 +1,20 @@
+{% comment %}
+SPDX-FileCopyrightText: Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+
+The period of an assignment in a timeline aside: "Since <began>" while its
+record is active, else "<began> – <ended>". Links to the record for a user who
+may open it. Expects: record, began, ended.
+{% endcomment %}
+{% load i18n %}
+{% if perms.core.view_record %}
+  <a class="timeline-time" href="{% url 'assets:record_detail' record.pk %}" title="{% translate 'Open the record' %}">
+{% else %}
+  <div class="timeline-time">
+{% endif %}
+  {% if record.is_active %}
+    <span>{% translate "Since" %}</span> <span>{{ began|date:"Y-m-d" }}</span>
+  {% else %}
+    <span>{{ began|date:"Y-m-d" }}</span> <span>– {{ ended|date:"Y-m-d"|default:"—" }}</span>
+  {% endif %}
+{% if perms.core.view_record %}</a>{% else %}</div>{% endif %}

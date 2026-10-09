@@ -215,7 +215,7 @@ class PersonAssignmentsTests(TestCase):
     def test_past_lending_links_to_its_record_only(self):
         response = self.client.get(self.url)
 
-        self.assertContains(response, "2025-01-01 – 2025-02-01")
+        self.assertContains(response, "<span>2025-01-01</span> <span>– 2025-02-01</span>")
         self.assertContains(response, reverse("assets:record_detail", args=[self.past_lending.pk]))
         self.assertNotContains(response, reverse("lending:detail", args=[self.past_lending.pk]))
 
@@ -298,7 +298,9 @@ class PersonAssignmentsTests(TestCase):
         lending.refresh_from_db()
 
         response = self.client.get(self.url)
-        self.assertContains(response, f"2025-06-01 – {localtime(lending.effective_until):%Y-%m-%d}")
+        self.assertContains(
+            response, f"<span>2025-06-01</span> <span>– {localtime(lending.effective_until):%Y-%m-%d}</span>"
+        )
 
     def test_licence_copies_are_one_entry_since_the_first_copy(self):
         licence = Device.objects.create(edv_id="LIC-COPIED", series="Design Suite", is_licence=True, tenant=self.tenant)
@@ -308,7 +310,7 @@ class PersonAssignmentsTests(TestCase):
 
         response = self.client.get(self.url)
         self.assertContains(response, "Design Suite", count=1)
-        self.assertContains(response, "Since 2021-05-10")
+        self.assertContains(response, "<span>Since</span> <span>2021-05-10</span>")
 
     def test_a_relocated_licence_stays_one_current_assignment(self):
         licence = Device.objects.create(edv_id="LIC-MOVED", series="CAD Suite", is_licence=True, tenant=self.tenant)
@@ -319,7 +321,7 @@ class PersonAssignmentsTests(TestCase):
 
         response = self.client.get(self.url)
         self.assertContains(response, "CAD Suite", count=1)
-        self.assertContains(response, "Since 2022-03-01")
+        self.assertContains(response, "<span>Since</span> <span>2022-03-01</span>")
 
     def test_smallstuff_lists_issued_and_returned_items(self):
         response = self.client.get(self.url)

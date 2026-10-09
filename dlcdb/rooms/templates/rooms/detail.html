@@ -58,6 +58,13 @@
   </section>
 {% endblock detail_readonly %}
 
+{% block detail_related %}
+  {# Only for a user who may read the record trail; the view then passes changes. #}
+  {% if changes is not None %}
+    {% include "rooms/includes/_changes.html" %}
+  {% endif %}
+{% endblock detail_related %}
+
 {% block detail_sidebar %}
   <section class="card mb-3">
     <div class="card-header d-flex align-items-center gap-2">

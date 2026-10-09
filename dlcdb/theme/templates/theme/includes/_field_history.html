@@ -1,9 +1,10 @@
 {# SPDX-FileCopyrightText: Thomas Breitner #}
 {# SPDX-License-Identifier: EUPL-1.2 #}
 {% comment %}
-An object's field history as a timeline, newest first: when (date), who (user)
-and what (action badge, change reason, Field | Before | After table). The newest
-entry gets the filled "current" dot: it is the object as it is now.
+An object's field history as a timeline, newest first: when and who on the
+left, what on the right (action badge, change reason, Field | Before | After
+table). The newest entry gets the filled "current" dot: it is the object as it
+is now.
 
 Params:
   entries — list of HistoryEntry from dlcdb.theme.field_history.build_field_history()
@@ -13,35 +14,41 @@ Params:
   <ol class="timeline">
     {% for entry in entries %}
       <li class="timeline-item{% if forloop.first %} timeline-item-current{% endif %}">
-        <div class="timeline-date">{{ entry.date|date:"Y-m-d H:i" }}</div>
-        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-          <span><i class="bi bi-person text-muted"></i> {{ entry.user|default:_("Unknown user") }}</span>
-          <span class="badge text-bg-{{ entry.color }}">{{ entry.action }}</span>
-        </div>
-        {% if entry.reason %}
-          <p class="small mb-2">{{ entry.reason }}</p>
-        {% endif %}
-        {% if entry.changes %}
-          {% comment %}
-          A table built from the grid rather than <table>: the columns line up from
-          entry to entry, and on phones the field name takes its own line above
-          Before | After instead of squeezing three columns.
-          {% endcomment %}
-          <div class="small">
-            <div class="row gx-3 fw-semibold border-bottom py-1">
-              <div class="col-md-3 d-none d-md-block">{% translate "Field" %}</div>
-              <div class="col-6 col-md">{% translate "Before" %}</div>
-              <div class="col-6 col-md">{% translate "After" %}</div>
-            </div>
-            {% for change in entry.changes %}
-              <div class="row gx-3 border-bottom py-1">
-                <div class="col-12 col-md-3 fw-medium text-secondary">{{ change.field }}</div>
-                <div class="col-6 col-md text-body-secondary text-break" style="white-space: pre-line;">{{ change.old }}</div>
-                <div class="col-6 col-md text-break" style="white-space: pre-line;">{{ change.new }}</div>
-              </div>
-            {% endfor %}
+        <div class="timeline-aside">
+          <div class="timeline-time"><span>{{ entry.date|date:"Y-m-d" }}</span> <span>{{ entry.date|date:"H:i" }}</span></div>
+          <div class="timeline-who" title="{{ entry.user.email|default:'' }}">
+            <i class="bi bi-person"></i> {{ entry.user.email_localpart|default:entry.user|default:_("Unknown user") }}
           </div>
-        {% endif %}
+        </div>
+        <div class="timeline-body">
+          <div class="timeline-title mb-2">
+            <span class="badge text-bg-{{ entry.color }}">{{ entry.action }}</span>
+          </div>
+          {% if entry.reason %}
+            <p class="small mb-2">{{ entry.reason }}</p>
+          {% endif %}
+          {% if entry.changes %}
+            {% comment %}
+            A table built from the grid rather than <table>: the columns line up from
+            entry to entry, and on phones the field name takes its own line above
+            Before | After instead of squeezing three columns.
+            {% endcomment %}
+            <div class="small">
+              <div class="row gx-3 fw-semibold border-bottom py-1">
+                <div class="col-md-3 d-none d-md-block">{% translate "Field" %}</div>
+                <div class="col-6 col-md">{% translate "Before" %}</div>
+                <div class="col-6 col-md">{% translate "After" %}</div>
+              </div>
+              {% for change in entry.changes %}
+                <div class="row gx-3 border-bottom py-1">
+                  <div class="col-12 col-md-3 fw-medium text-secondary">{{ change.field }}</div>
+                  <div class="col-6 col-md text-body-secondary text-break" style="white-space: pre-line;">{{ change.old }}</div>
+                  <div class="col-6 col-md text-break" style="white-space: pre-line;">{{ change.new }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
       </li>
     {% endfor %}
   </ol>

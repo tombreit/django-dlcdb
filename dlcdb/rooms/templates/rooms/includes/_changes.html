@@ -1,0 +1,102 @@
+{% comment %}
+SPDX-FileCopyrightText: Thomas Breitner
+SPDX-License-Identifier: EUPL-1.2
+
+The room's stock changes as a timeline, newest first. Expects: room, changes (a
+Page of the records with which a device arrived in the room or left it, see
+rooms.views._room_changes).
+
+A record in this room is an arrival; any other record is a departure, and its
+room and state tell where the device went. The time links to that record. The
+day is shown once per day, and again at the top of each page.
+
+The card is its own HTMX fragment: the pager swaps only the card, without
+pushing the page number into the URL. Device links appear only for a user who
+may open the device.
+{% endcomment %}
+{% load i18n %}
+
+<section id="room-changes" class="card mb-3" hx-target="this" hx-swap="outerHTML">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-arrow-left-right text-primary"></i>
+    <h2 class="h6 mb-0 me-auto">{% translate "Stock changes" %}</h2>
+    {% if changes %}
+      <span class="small text-body-secondary">
+        {% blocktranslate count counter=changes.paginator.count %}{{ counter }} change{% plural %}{{ counter }} changes{% endblocktranslate %}
+      </span>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    {% if changes %}
+      <ol class="timeline">
+        {% for change in changes %}
+          <li class="timeline-item">
+            <div class="timeline-aside">
+              {% ifchanged change.created_at|date:"Y-m-d" %}
+                <div class="timeline-day">{{ change.created_at|date:"Y-m-d" }}</div>
+              {% endifchanged %}
+              <a class="timeline-time" href="{% url 'assets:record_detail' change.pk %}"
+                 title="{% translate 'Open the record of this change' %}">{{ change.created_at|date:"H:i" }}</a>
+              <div class="timeline-who" title="{{ change.user.email|default:change.username }}">
+                <i class="bi bi-person"></i> {{ change.user.email_localpart|default:change.username|default:_("Unknown user") }}
+              </div>
+            </div>
+
+            {% if change.room_id == room.pk %}
+              <span class="timeline-marker bg-success-subtle text-success-emphasis" title="{% translate 'Arrived' context 'room change' %}">
+                <i class="bi bi-plus-lg"></i>
+              </span>
+            {% elif change.record_type == "LOST" %}
+              <span class="timeline-marker bg-danger-subtle text-danger-emphasis" title="{% translate 'Left' context 'room change' %}">
+                <i class="bi bi-dash-lg"></i>
+              </span>
+            {% else %}
+              <span class="timeline-marker bg-secondary-subtle text-secondary-emphasis" title="{% translate 'Left' context 'room change' %}">
+                <i class="bi bi-dash-lg"></i>
+              </span>
+            {% endif %}
+
+            <div class="timeline-body">
+              <div class="timeline-title">
+                <i class="bi {{ change.device.device_type.icon_class|default:'bi-pc-display' }} text-body-secondary me-1"></i>
+                {% if perms.core.view_device %}
+                  <a class="fw-semibold font-monospace" href="{% url 'assets:device_detail' change.device.pk %}">{{ change.device.edv_id|default:change.device.sap_id|default:"—" }}</a>
+                {% else %}
+                  <span class="fw-semibold font-monospace">{{ change.device.edv_id|default:change.device.sap_id|default:"—" }}</span>
+                {% endif %}
+                <span class="text-body-secondary ms-1">{{ change.device.manufacturer|default:"" }} {{ change.device.series|default:"" }}</span>
+              </div>
+              <div class="timeline-text">
+                {% if change.room_id == room.pk %}
+                  {% if change.is_type_lent %}
+                    {% blocktranslate with person=change.person|default:"—" context "room change" %}Lent to {{ person }}{% endblocktranslate %}
+                  {% else %}
+                    {% translate "Arrived" context "room change" %}
+                  {% endif %}
+                  {% if change.previous_room %}
+                    {% translate "from" context "room change" %} <a href="{% url 'rooms:detail' change.previous_room %}">{{ change.previous_room_number }}</a>
+                  {% endif %}
+                {% elif change.is_type_lent %}
+                  {% blocktranslate with person=change.person|default:"—" context "room change" %}Lent to {{ person }}{% endblocktranslate %}
+                  {% translate "in" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
+                {% elif change.room %}
+                  {% translate "Moved to" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
+                {% elif change.record_type == "LOST" %}
+                  {% translate "Marked as not locatable" context "room change" %}
+                {% elif change.record_type == "REMOVED" %}
+                  {% translate "Decommissioned" context "room change" %}
+                {% else %}
+                  {# Old records without a room. #}
+                  {% translate "Left" context "room change" %}
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+      {% include "theme/includes/_pagination.html" with page_obj=changes %}
+    {% else %}
+      <p class="text-muted mb-0">{% translate "No device has arrived in or left this room yet." %}</p>
+    {% endif %}
+  </div>
+</section>

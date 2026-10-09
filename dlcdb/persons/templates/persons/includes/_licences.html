@@ -7,7 +7,7 @@ Licences assigned to the person as a timeline, current first. Expects: licences
 
 A licence assignment has no dates of its own: it begins with its first record
 and ends when its latest record is superseded (see Assignment.began / ended).
-The latest record is the one linked to. The licence name links to
+The period links to the latest record. The licence name links to
 licenses:edit, the licence's only frontend page, which needs the change
 permission.
 {% endcomment %}
@@ -24,33 +24,26 @@ permission.
         {% for assignment in licences %}
           {% with record=assignment.latest %}
             <li class="timeline-item{% if record.is_active %} timeline-item-current{% endif %}">
-              <div class="timeline-date">
-                {% if record.is_active %}
-                  {% translate "Since" %} {{ assignment.began|date:"Y-m-d" }}
-                {% else %}
-                  {{ assignment.began|date:"Y-m-d" }} – {{ assignment.ended|date:"Y-m-d"|default:"—" }}
-                {% endif %}
+              <div class="timeline-aside">
+                {% include "persons/includes/_period.html" with began=assignment.began ended=assignment.ended %}
               </div>
-              <div class="d-flex flex-wrap align-items-baseline gap-2">
-                <span class="fw-semibold">
+              <div class="timeline-body">
+                <div class="timeline-title fw-semibold">
                   {% if perms.core.change_licencerecord %}
                     <a href="{% url 'licenses:edit' record.device.pk %}">{{ record.device.manufacturer|default:"" }} {{ record.device.series|default:record.device.edv_id|default:"—" }}</a>
                   {% else %}
                     {{ record.device.manufacturer|default:"" }} {{ record.device.series|default:record.device.edv_id|default:"—" }}
                   {% endif %}
-                </span>
-                {% if record.is_active %}
-                  <span class="badge text-bg-primary ms-auto">{% translate "Assigned" %}</span>
-                {% endif %}
-              </div>
-              <div class="small d-flex flex-wrap align-items-baseline gap-2">
-                <span class="text-muted">
-                  {% if record.device.contract_expiration_date %}{% translate "Expires" %}: {{ record.device.contract_expiration_date|date:"Y-m-d" }}{% endif %}
-                  {% if record.device.contract_expiration_date and record.device.sap_id %} · {% endif %}
-                  {% if record.device.sap_id %}{% translate "Inventory ID" %}: {{ record.device.sap_id }}{% endif %}
-                </span>
-                {% if perms.core.view_record %}
-                  <a class="ms-auto" href="{% url 'assets:record_detail' record.pk %}">{% translate "Record" %}</a>
+                </div>
+                {% if record.device.contract_expiration_date or record.device.sap_id %}
+                  <div class="timeline-text text-body-secondary">
+                    {% if record.device.contract_expiration_date %}
+                      {% blocktranslate with date=record.device.contract_expiration_date|date:"Y-m-d" %}Expires {{ date }}{% endblocktranslate %}{% if record.device.sap_id %},{% endif %}
+                    {% endif %}
+                    {% if record.device.sap_id %}
+                      {% blocktranslate with sap_id=record.device.sap_id %}inventory ID {{ sap_id }}{% endblocktranslate %}
+                    {% endif %}
+                  </div>
                 {% endif %}
               </div>
             </li>

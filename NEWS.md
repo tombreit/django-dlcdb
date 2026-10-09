@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Room detail page lists the room's stock changes: when each device arrived or left, and who recorded it
 * Docs moved to GitHub Pages: https://tombreit.github.io/django-dlcdb/; existing instances update the documentation URL under Branding
 * Pip installation: each GitHub release carries a wheel with frontend assets, docs and collected static files; `python -m dlcdb dlcdb_init` creates the instance directory's `.env` (with a fresh secret key), `manage.py`, `wsgi.py` and a README, so the instance runs with `./manage.py` like any Django project
 * Dashboard: a Journal tile counts the critical, error and warning entries of the last 30 days
