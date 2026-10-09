@@ -78,7 +78,10 @@ may open the device.
                   {% endif %}
                 {% elif change.is_type_lent %}
                   {% blocktranslate with person=change.person|default:"—" context "room change" %}Lent to {{ person }}{% endblocktranslate %}
-                  {% translate "in" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
+                  {# Old lendings may have no room. #}
+                  {% if change.room %}
+                    {% translate "in" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
+                  {% endif %}
                 {% elif change.room %}
                   {% translate "Moved to" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
                 {% elif change.record_type == "LOST" %}

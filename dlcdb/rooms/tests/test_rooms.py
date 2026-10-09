@@ -219,6 +219,22 @@ class RoomChangesTests(BaseTest):
         self.assertContains(response, f'href="{reverse("rooms:detail", args=[self.other_room.pk])}"')
         self.assertContains(response, "Musterfrau, Erika")
 
+    def test_device_lent_without_a_room_is_listed(self):
+        # Old lendings were stored without a room.
+        device = self._create_device(edv_id="EDV-LENT-NOWHERE")
+        self._record(InRoomRecord, device, room=self.room)
+        self._record(
+            LentRecord,
+            device,
+            person=Person.objects.create(first_name="Max", last_name="Mustermann", email="max@example.com"),
+            lent_start_date=datetime.date(2016, 1, 1),
+            lent_desired_end_date=datetime.date(2016, 6, 1),
+        )
+
+        response = self.client.get(self.url, {"show_all": "1"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mustermann, Max")
+
     def test_device_of_another_tenant_is_hidden(self):
         device = self._create_device(edv_id="EDV-FOREIGN", tenant=Tenant.objects.create(name="Other tenant"))
         self._record(InRoomRecord, device, room=self.room)
