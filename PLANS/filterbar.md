@@ -158,7 +158,7 @@ iteration (see *Open follow-ups*).
 
 ## Open follow-ups
 
-- **Bar redesign (next iteration).** It covers:
+- **Bar redesign (next iteration):** planned in `PLANS/filterbar-redesign.md`. It covers:
   - layout of search, dropdowns and sort;
   - a reset inside the bar and the mobile offcanvas panel;
   - the status line, which is written three ways: `theme/includes/_list_status.html`,
