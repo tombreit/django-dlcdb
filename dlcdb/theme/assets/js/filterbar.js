@@ -88,7 +88,7 @@ document.addEventListener('click', (event) => {
         return;
     }
 
-    // "Clear all": reset search, every filter and the sort — every modification
+    // "Clear filters": reset search, every filter and the sort — every modification
     // the user made to the viewset. Clearing the sort submits no `ordering`, so
     // the view re-injects its default; that matches what the no-JS
     // bar.clear_all_href renders.

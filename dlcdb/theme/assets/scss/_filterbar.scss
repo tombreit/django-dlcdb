@@ -6,12 +6,61 @@
 
 // Filterbar: reusable search/filter/sort bar (see theme/templates/theme/filterbar/).
 
+// The bar's button tone: the form-control hairline and text colour, so the
+// search field and the filter buttons read as one rail. Also used by the
+// "Clear filters" button in the status line, outside the bar.
+.filterbar-btn {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-bg: var(--bs-body-bg);
+    --bs-btn-border-color: var(--bs-border-color);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--bs-tertiary-bg);
+    --bs-btn-hover-border-color: var(--bs-border-color);
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: var(--bs-secondary-bg);
+    --bs-btn-active-border-color: var(--bs-border-color);
+    --bs-btn-focus-box-shadow: 0 0 0 var(--bs-focus-ring-width) var(--bs-focus-ring-color);
+}
+
 .filterbar {
     .filterbar-search {
         flex: 1 1 16rem;
+        border-radius: var(--bs-border-radius-sm);
+
+        // The icon sits inside the field: no box of its own, one border and one
+        // focus ring around both parts.
+        .input-group-text {
+            background-color: var(--bs-body-bg);
+            border-right: 0;
+            color: var(--bs-secondary-color);
+        }
+
+        .form-control {
+            border-left: 0;
+            padding-left: 0;
+        }
+
+        &:focus-within {
+            box-shadow: $input-focus-box-shadow;
+
+            > * {
+                border-color: $input-focus-border-color;
+            }
+
+            .form-control {
+                box-shadow: none;
+            }
+        }
+    }
+
+    // A filter with a value, and "More filters" while a secondary filter has one.
+    .filterbar-filter:has(input:checked:not([value=""])) > .filterbar-btn,
+    .filterbar-group:has(+ .collapse input:checked:not([value=""])) > .filterbar-more {
+        font-weight: 600;
     }
 
     .filterbar-menu {
+        --bs-dropdown-font-size: #{$font-size-sm};
         max-height: 60vh;
         overflow-y: auto;
         min-width: 14rem;
@@ -25,16 +74,24 @@
         }
     }
 
-    // Inside the mobile offcanvas panel, controls stack full-width.
+    // Inside the mobile offcanvas panel the rail stacks: full-width buttons,
+    // each with its own corners again, no joining overlap.
     @include media-breakpoint-down(md) {
-        .offcanvas-body {
-            .filterbar-filter,
-            .filterbar-filter > .btn {
-                width: 100%;
+        .offcanvas-body .filterbar-group {
+            flex-direction: column;
+            align-items: stretch;
+            gap: .5rem;
+
+            > .btn,
+            > .btn-group {
+                margin-left: 0;
             }
 
-            .filterbar-filter > .btn {
+            > .btn,
+            > .btn-group > .btn {
+                width: 100%;
                 text-align: start;
+                border-radius: var(--bs-border-radius-sm);
             }
         }
     }

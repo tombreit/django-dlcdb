@@ -1,7 +1,7 @@
 {% load i18n %}
 {% comment %}
-The bar's reset control: "Clear all" next to the chips, "Clear filters" in a
-list's empty state. Expects ``bar``; ``label`` and ``link_class`` are optional.
+The bar's reset control, a "Clear filters" button: at the end of the chip row
+and in a list's empty state. Expects ``bar``.
 
 It carries the attributes filterbar.js needs — with JS it resets the form's
 widgets and lets the form's own hx-get fire, so there is one request path and
@@ -13,8 +13,8 @@ and a form still holding the values that were meant to be cleared. That is
 exactly how the eight empty-state copies of this anchor had drifted before it
 was factored out here.
 {% endcomment %}
-<a{% if link_class %} class="{{ link_class }}"{% endif %}
+<a class="btn btn-sm filterbar-btn text-nowrap"
   href="{{ bar.clear_all_href }}"
   data-filterbar-clear-all
   data-filterbar-form="{{ bar.bar_id }}"
->{% if label %}{{ label }}{% else %}{% translate "Clear all" %}{% endif %}</a>
+><i class="bi bi-x-circle"></i> {% translate "Clear filters" %}</a>

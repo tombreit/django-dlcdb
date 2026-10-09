@@ -169,7 +169,7 @@ class LendingIndexViewTests(BaseTest):
         self.assertIn("State: Overdue", content)
         self.assertIn('data-filterbar-remove="state"', content)
         self.assertIn('data-filterbar-remove="person"', content)
-        self.assertIn("Clear all", content)
+        self.assertIn("data-filterbar-clear-all", content)
         self.assertNotIn("<form", content)
 
     def test_filterbar_chip_removal_hrefs(self):
@@ -181,7 +181,7 @@ class LendingIndexViewTests(BaseTest):
         self.assertNotIn("state=", state_chip.remove_href)
         self.assertIn(f"person={self.person.id}", state_chip.remove_href)
         self.assertIn("ordering=-due", state_chip.remove_href)
-        # "Clear all" drops the sort along with the filters; the view re-injects
+        # "Clear filters" drops the sort along with the filters; the view re-injects
         # its default ordering.
         self.assertEqual(bar.clear_all_href, self.url)
 
@@ -198,11 +198,11 @@ class LendingIndexViewTests(BaseTest):
         # list must still show no chips at all.
         content = self.client.get(self.url, headers={"HX-Request": "true"}).content.decode()
         self.assertNotIn('data-filterbar-remove="ordering"', content)
-        self.assertNotIn("Clear all", content)
+        self.assertNotIn("data-filterbar-clear-all", content)
 
     @override_settings(LANGUAGE_CODE="en")
     def test_show_all_badge_removed(self):
-        # The legacy "Show all" reset is gone; the filterbar "Clear all" is the
+        # The legacy "Show all" reset is gone; the filterbar "Clear filters" is the
         # single reset now.
         response = self.client.get(self.url, {"state": "overdue"}, headers={"HX-Request": "true"})
         self.assertNotContains(response, "Show all")
@@ -216,7 +216,7 @@ class LendingIndexViewTests(BaseTest):
         content = response.content.decode()
         self.assertIn("Search: EDV-LENT", content)
         self.assertIn('data-filterbar-remove="search"', content)
-        self.assertIn("Clear all", content)
+        self.assertIn("data-filterbar-clear-all", content)
         # Count summary still renders.
         self.assertRegex(content, r"\d+ of \d+ device")
 

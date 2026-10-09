@@ -30,7 +30,7 @@ filter whose choices depend on the request (the tenant filter) without an
 dataclasses of strings) — no state, no template tags, no mixins.
 
 A sort counts as a user modification of the viewset, exactly like a filter: it
-gets its own removable chip and "Clear all" undoes it. What separates "the page
+gets its own removable chip and "Clear filters" undoes it. What separates "the page
 is sorted" from "the user sorted it" is whether ``?ordering=`` is in the
 request — so the bar reads every selection, filters and sort alike, from
 ``request.GET``, not from the FilterSet's data, which ``bind_filterset`` has
@@ -43,7 +43,7 @@ Conventions the consuming view/page must follow:
 - the HTMX-swapped fragment root carries hx-target/hx-swap/hx-push-url so the
   sortable column headers (``_sort_th.html``) can inherit them,
 - the FilterSet is bound through ``bind_filterset``, which seeds the view's
-  default ordering. This is load-bearing, not advisory: "Clear all" drops
+  default ordering. This is load-bearing, not advisory: "Clear filters" drops
   ``?ordering=`` and django-filter leaves the queryset untouched for an empty
   ordering, so a view without that default would paginate an unordered
   queryset.
@@ -146,7 +146,7 @@ def build_filterbar(
     filter it (``?device=`` on the record trail). The bar is a GET form, so a
     submit replaces the entire query string with the form's own fields: without
     a hidden input the scope would be lost on the first keystroke. They are the
-    only parameters "Clear all" keeps, for the same reason — resetting the bar
+    only parameters "Clear filters" keeps, for the same reason — resetting the bar
     must not silently widen the page to a different set of objects.
     """
     hidden_params = hidden_params or {}
@@ -327,7 +327,7 @@ def _remove_value_href(request, param, value):
 
 def _clear_all_href(request, keep_params):
     """Current URL minus everything the user chose — search, filters *and* the
-    ordering: "Clear all" undoes every modification of the viewset, and a custom
+    ordering: "Clear filters" undoes every modification of the viewset, and a custom
     sort is one of them. Dropping ``?ordering=`` lands on the view's own default
     because the view re-injects it; django-filter alone would leave the queryset
     unordered. Only the hidden scope params survive: they say which objects the

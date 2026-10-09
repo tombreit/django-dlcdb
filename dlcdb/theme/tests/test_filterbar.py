@@ -123,7 +123,7 @@ class BuildFilterbarTests(TestCase):
         self.assertIsNone(self._chip(self._bar("?state=open"), "search"))
 
     def test_clear_all_drops_ordering_too(self):
-        # "Clear all" undoes every modification the user made to the viewset,
+        # "Clear filters" undoes every modification the user made to the viewset,
         # sorting included; the view re-injects its own default ordering.
         bar = self._bar("?search=laptop&state=open&tags=a&ordering=-modified")
         self.assertEqual(bar.clear_all_href, "/items/")

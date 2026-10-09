@@ -1,14 +1,15 @@
 {% load i18n %}
 {% comment %}
 One filter of the filterbar. Expects ``spec`` (a FilterSpec) in context.
+A nested btn-group, so the enclosing group joins it to its neighbours.
 Radios/checkboxes carry the real GET parameter name, so native form submit
 and the form-level HTMX trigger both work. The first (empty-value) radio is
 the in-dropdown reset.
 {% endcomment %}
-<div class="dropdown filterbar-filter">
+<div class="btn-group filterbar-filter">
   <button
     type="button"
-    class="btn btn-outline-secondary dropdown-toggle"
+    class="btn btn-sm filterbar-btn dropdown-toggle"
     data-bs-toggle="dropdown"
     {% if spec.multiple %}data-bs-auto-close="outside"{% endif %}
     data-filterbar-label="{{ spec.label }}"

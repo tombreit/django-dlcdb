@@ -75,9 +75,10 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
 
 ## Decisions taken
 
-1. **Sizes:** `input-group input-group-sm` for the search, `btn-group btn-group-sm` for
-   filters + More + Sort, `btn-sm` for the mobile toggle. No `-lg` anywhere, no custom
-   heights.
+1. **Sizes:** `input-group input-group-sm` for the search, `btn-sm` on every button of
+   the rail and on the mobile toggle. Not `btn-group-sm`: it sizes only direct children,
+   and the dropdown buttons sit in nested groups (found in batch 1, the nested buttons
+   stayed 38 px and stretched the rail). No `-lg` anywhere, no custom heights.
 2. **One tone, one class:** `filterbar-btn` on every button of the bar (and on the "Clear
    filters" button from `PLANS/filterbar.md` batch 3). It sets Bootstrap's button CSS
    variables (`--bs-btn-color`, `--bs-btn-bg`, `--bs-btn-border-color`, hover/active
@@ -178,8 +179,8 @@ sort shows "Sort: Modified ↓". "More" is bold while a secondary filter is acti
 
 ## Progress
 
-- [x] 0 — This document (baseline screenshots still to take, with batch 1)
-- [ ] 1 — One rail
+- [x] 0 — This document, baseline screenshots
+- [x] 1 — One rail
 - [ ] 2 — One status line
 - [ ] 3 — Small screens
 

@@ -57,7 +57,7 @@ def _scope_device(request):
     """The device named by ``?device=<pk>``, or None.
 
     The scope narrows the base queryset before the FilterSet, so the "x of y"
-    line and the "Clear all" reset both speak about this one device's records
+    line and the "Clear filters" reset both speak about this one device's records
     rather than about all of them. Non-numeric input is ignored rather than
     fatal (get_object_or_404 raises ValueError, not Http404, on a bad pk); an
     unknown or out-of-tenant device is a 404, same as the device page itself.

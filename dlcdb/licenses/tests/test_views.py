@@ -100,7 +100,7 @@ class LicensesIndexViewTests(BaseTest):
         content = response.content.decode()
         self.assertIn("Search: Alpha", content)
         self.assertIn('data-filterbar-remove="search"', content)
-        self.assertIn("Clear all", content)
+        self.assertIn("data-filterbar-clear-all", content)
         # The fragment carries chips but not the bar's <form>.
         self.assertNotIn("<form", content)
 

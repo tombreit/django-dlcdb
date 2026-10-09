@@ -14,14 +14,14 @@ counts.
 With JS, clicking a chip clears the matching input in the bar's form and lets
 the form's own hx-get fire (one request path, widgets stay in sync). The href is
 the no-JS / middle-click fallback and reloads the page with that value removed.
-"Clear all" resets search, every filter and the sort; dropping the ordering
-lands on the view's default, not on an unordered list.
+"Clear filters" resets search, every filter and the sort; dropping the
+ordering lands on the view's default, not on an unordered list.
 {% endcomment %}
 {% if bar.chips %}
   <span class="filterbar-chips d-inline-flex flex-wrap align-items-center gap-2">
     {% for chip in bar.chips %}
       {% include "theme/filterbar/_chip.html" with chip=chip bar_id=bar.bar_id %}
     {% endfor %}
-    {% include "theme/filterbar/_clear_all.html" with bar=bar link_class="small text-decoration-none" %}
+    {% include "theme/filterbar/_clear_all.html" with bar=bar %}
   </span>
 {% endif %}

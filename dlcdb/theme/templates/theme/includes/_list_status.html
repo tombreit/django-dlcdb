@@ -17,10 +17,6 @@ breaking plural forms. Build it with ``asvar`` in the page:
 page that has no export simply does not set one.
 
 Params: bar (the filterbar), count_label.
-
-Deliberately not named ``label``: theme/filterbar/_clear_all.html takes an
-optional ``label`` of its own, and this include does not use ``only``, so the
-name would leak down and relabel the "Clear all" link.
 {% endcomment %}
 
 <div class="filterbar-status d-flex flex-wrap align-items-center gap-2 mb-2 text-muted small">

@@ -157,17 +157,6 @@ class IndexFrameTests(BaseTest):
     def setUp(self):
         self.client.force_login(self.user)
 
-    def test_list_status_does_not_relabel_the_clear_all_link(self):
-        # _list_status.html includes chips.html without `only`, and
-        # theme/filterbar/_clear_all.html takes an optional `label` of its own.
-        # Passing the count sentence as `label` would leak down and rename
-        # "Clear all" to "1 of 1 room".
-        response = self.client.get(reverse("rooms:index"), {"search": "A1"}, headers={"HX-Request": "true"})
-        content = response.content.decode()
-
-        self.assertIn("Clear all", content)
-        self.assertIn("of 1 room", content)
-
     def test_heading_stays_outside_the_licenses_swap_target(self):
         # The "Add license" button swaps its form into #licenses-content-wrapper.
         # If the shared frame wrapped the heading in that div too, opening the

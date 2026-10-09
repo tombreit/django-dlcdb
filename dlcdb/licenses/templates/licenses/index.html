@@ -133,7 +133,7 @@
               {% if total_count == 0 %}
                 {% if can_add %}{% include "licenses/includes/add_button.html" with style="btn" %}{% endif %}
               {% else %}
-                {% include "theme/filterbar/_clear_all.html" with bar=filterbar label=_("Clear filters") %}
+                {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}
               {% endif %}
             </td>
           </tr>
