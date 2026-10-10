@@ -122,13 +122,12 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 INTERNAL_IPS = ["127.0.0.1"] if DEBUG else []
 
 AUTH_USER_MODEL = "accounts.CustomUser"
-LOGIN_FIELD = "email"
 AUTHENTICATION_BACKENDS = [
     # "django.contrib.auth.backends.ModelBackend",
     "dlcdb.accounts.auth_backends.EmailModelBackend",
 ]
 
-
+# https://docs.djangoproject.com/en/4.1/ref/contrib/sites/#enabling-the-sites-framework
 SITE_ID = 1
 
 # Error mails, ADMINS and the email variables in .env: see docs/betrieb/setup.md (Error mails)
@@ -311,9 +310,6 @@ TIME_ZONE = "Europe/Berlin"  # 'UTC'
 FORMAT_MODULE_PATH = [
     "dlcdb.core.formats",
 ]
-
-# https://docs.djangoproject.com/en/4.1/ref/contrib/sites/#enabling-the-sites-framework
-SITE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
