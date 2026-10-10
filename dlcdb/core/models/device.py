@@ -333,10 +333,10 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         """
         timeline = []
 
-        added_date = self.created_at.date()
+        added_date = timezone.localdate(self.created_at)
         start_date = self.contract_start_date
         end_date = self.contract_expiration_date
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         # Return early
         if not start_date or not end_date:

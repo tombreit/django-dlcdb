@@ -2,11 +2,14 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import datetime
+from unittest import mock
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Person, Record, RemovedRecord
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Person, Record, RemovedRecord, Room
 
 
 @pytest.mark.django_db
@@ -161,3 +164,28 @@ def test_get_last_found_returns_latest_found_record():
 
     # Now the inroom_record should be the most recent found record
     assert most_recent_timestamp == device.active_record.get_last_found()
+
+
+@pytest.mark.django_db
+def test_a_return_dated_today_is_accepted_just_after_local_midnight(settings, lentable_device, room):
+    """
+    The return form prefills the local date, so clean() must compare with the
+    local date too. 00:30 in Berlin is still the previous day in UTC. The frozen
+    clock is far ahead of the real one, so a check against the real date rejects
+    the return as well.
+    """
+    settings.MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
+    Room.objects.create(number="RETURN", is_auto_return_room=True)
+    record = LentRecord(
+        device=lentable_device,
+        person=Person.objects.create(first_name="Max", last_name="Mustermann"),
+        room=room,
+        lent_start_date=datetime.date(2098, 10, 1),
+        lent_desired_end_date=datetime.date(2098, 10, 31),
+        lent_end_date=datetime.date(2098, 10, 11),
+    )
+    just_after_midnight = datetime.datetime(2098, 10, 10, 22, 30, tzinfo=datetime.UTC)  # 00:30 CEST
+
+    with mock.patch("django.utils.timezone.now", return_value=just_after_midnight):
+        assert timezone.localdate() == record.lent_end_date
+        record.clean()  # must not raise

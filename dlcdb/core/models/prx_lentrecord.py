@@ -7,7 +7,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .record import Record
@@ -54,7 +54,7 @@ class LentRecord(Record):
                 {"lent_desired_end_date": _("The desired return date cannot be before the lending start date!")}
             )
 
-        if self.lent_end_date and self.lent_end_date > datetime.date(now()):
+        if self.lent_end_date and self.lent_end_date > timezone.localdate():
             raise ValidationError({"lent_end_date": _("The return date cannot be in the future!")})
 
         if self.lent_end_date and self.lent_end_date < self.lent_start_date:

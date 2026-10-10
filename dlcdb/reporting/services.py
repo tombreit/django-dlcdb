@@ -13,6 +13,7 @@ builds on reporting, not the other way around.
 import uuid
 
 from django.core.files import File
+from django.utils import timezone
 from django.utils.text import slugify
 
 from .models import Report
@@ -24,10 +25,12 @@ def create_report(*, records, event, condition="", window_start, window_end) -> 
     Create and persist a Report for the given records, covering the time
     window [window_start, window_end].
     """
-    title = f"DLCDB Report: from {window_start.date()} to {window_end.date()} for {event} ({records.count()})"
+    # Local dates: window_start may be a subscription's last run, read back in UTC.
+    start, end = timezone.localdate(window_start), timezone.localdate(window_end)
+    title = f"DLCDB Report: from {start} to {end} for {event} ({records.count()})"
 
     # Spreadsheet titles must not exceed 31 characters.
-    spreadsheet_title = f"{event}_{window_start.date():%Y%m%d}-{window_end.date():%Y%m%d}"
+    spreadsheet_title = f"{event}_{start:%Y%m%d}-{end:%Y%m%d}"
 
     text_rows = get_records_as_text(records=records, title=title, event=event, condition=condition)
     spreadsheet = get_records_as_spreadsheet(records=records, title=spreadsheet_title, event=event)

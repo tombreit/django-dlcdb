@@ -6,6 +6,7 @@
 Tests for the report artifact generation (xlsx spreadsheets, Report model).
 """
 
+import datetime
 import io
 import tempfile
 
@@ -61,3 +62,18 @@ class CreateReportTests(TestCase):
         self.assertTrue(report.body)
         self.assertTrue(report.spreadsheet.name.endswith(".xlsx"))
         self.assertGreater(report.spreadsheet.size, 0)
+
+    def test_report_title_uses_local_dates(self):
+        """A window start read back from the database is in UTC; 22:30 UTC is already the next day in Berlin."""
+        records = create_inroom_records(1)
+        window_start = datetime.datetime(2026, 10, 10, 22, 30, tzinfo=datetime.UTC)  # 00:30 CEST
+        window_end = timezone.localtime(window_start + datetime.timedelta(days=1))
+
+        report = create_report(
+            records=records,
+            event=Record.INROOM,
+            window_start=window_start,
+            window_end=window_end,
+        )
+
+        self.assertIn("from 2026-10-11 to 2026-10-12", report.title)

@@ -547,7 +547,8 @@ class DeviceFrontendTests(BaseTest):
         content = response.content.decode()
 
         self.assertIn("ago", content)  # EDV-RECENT's naturaltime rendering
-        self.assertIn(old_modified_at.strftime("%Y-%m-%d"), content)
+        # The page shows the local date; old_modified_at is in UTC.
+        self.assertIn(timezone.localdate(old_modified_at).isoformat(), content)
 
     def test_more_filters_toggle_is_collapsed_by_default(self):
         response = self.client.get(self.index_url)

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
+from unittest import mock
 
 import pytest
 from django.urls import reverse
@@ -70,3 +71,20 @@ def test_is_unmodified_distinguishes_an_untouched_row_from_an_edited_one():
 
     # An unsaved instance has neither stamp; it must not blow up in a template.
     assert not Device().is_unmodified
+
+
+@pytest.mark.django_db
+def test_timeline_dates_are_local_dates():
+    """00:30 in Berlin is still the previous day in UTC; the timeline shows the local day."""
+    just_after_midnight = datetime.datetime(2026, 10, 10, 22, 30, tzinfo=datetime.UTC)  # 00:30 CEST
+
+    with mock.patch("django.utils.timezone.now", return_value=just_after_midnight):
+        licence = Device.objects.create(
+            is_licence=True,
+            contract_start_date=datetime.date(2026, 10, 1),
+            contract_expiration_date=datetime.date(2027, 9, 30),
+        )
+        dates = {event.event_type: event.date for event in licence.get_timeline()}
+
+    assert dates["added"] == datetime.date(2026, 10, 11)
+    assert dates["today"] == datetime.date(2026, 10, 11)
