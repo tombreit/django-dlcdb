@@ -31,6 +31,18 @@ It has three parts:
    proxy model do the actual writing (the proxies already stamp ``record_type``,
    normalise their fields and validate entry).
 
+``Record.save()`` checks every new record against the table. Code that replays
+history the live lifecycle would reject skips that check with
+``save(check_transition=False)``. These are all such writes; a new one is a
+review item:
+
+* ``dlcdb/dataexchange/importer.py::_import_transaction`` (three saves): a CSV or
+  SAP CSV import may bring a device straight into any state.
+* ``dlcdb/inventory/management/commands/fix_inventory_lost_lendings.py`` (one
+  save): the repair command re-appends a LENT record over a LOST one.
+
+Tests set up states the same way, through ``core/tests/testingutils.establish_state``.
+
 The proxies are resolved lazily via ``apps.get_model`` so this module can be
 imported by ``record.py`` (which imports *it*) without a cycle.
 """

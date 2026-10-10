@@ -244,7 +244,8 @@ class Record(AuditBaseModel):
 
         On insert, the lifecycle enforces that the new ``record_type`` is a legal
         next state for the device (``check_transition``). Importers and repair
-        commands that replay historical chains pass ``check_transition=False``.
+        commands that replay historical chains pass ``check_transition=False``;
+        the lifecycle module docstring lists them.
         """
 
         # set is active if instance is created
