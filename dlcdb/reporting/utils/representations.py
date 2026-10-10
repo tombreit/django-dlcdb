@@ -12,7 +12,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, NamedStyle, PatternFill
 from openpyxl.utils import get_column_letter
 
-from ..settings import EXPOSED_FIELDS
+from ..fields import EXPOSED_FIELDS
 
 
 def get_record_data_row(record, event):

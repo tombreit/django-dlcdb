@@ -14,8 +14,8 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, Record
+from dlcdb.reporting.fields import EXPOSED_FIELDS
 from dlcdb.reporting.services import create_report
-from dlcdb.reporting.settings import EXPOSED_FIELDS
 from dlcdb.reporting.utils.representations import get_records_as_spreadsheet
 
 TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="dlcdb-test-media-")

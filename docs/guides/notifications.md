@@ -36,4 +36,4 @@ Die IT-Adresse ist die Kontakt-Email des [Mandanten](berechtigungen.md#mandanten
 
 ## Betrieb
 
-Ein Task des Task Runners prüft jede Minute, welche Abonnements fällig sind, und versendet deren Mails; ohne laufenden Task Runner geht keine Mail hinaus (siehe [Setup](../betrieb/setup.md)). Im Django-Admin lassen sich alle Nachrichten (Status, Vorschau, *Send Now*) und die erzeugten Berichte einsehen. Welche Felder ein Bericht enthält, legt `EXPOSED_FIELDS` in `dlcdb/reporting/settings.py` fest.
+Ein Task des Task Runners prüft jede Minute, welche Abonnements fällig sind, und versendet deren Mails; ohne laufenden Task Runner geht keine Mail hinaus (siehe [Setup](../betrieb/setup.md)). Im Django-Admin lassen sich alle Nachrichten (Status, Vorschau, *Send Now*) und die erzeugten Berichte einsehen. Welche Felder ein Bericht enthält, legt `EXPOSED_FIELDS` in `dlcdb/reporting/fields.py` fest.
