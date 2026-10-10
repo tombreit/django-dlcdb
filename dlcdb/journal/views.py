@@ -32,9 +32,9 @@ def _subject_url(entry):
     # A subject whose model is gone (a retired log table) has no model class.
     if entry.content_type is None or entry.content_type.model_class() is None:
         return ""
+    # Only models with a page of their own define get_absolute_url.
     get_absolute_url = getattr(entry.content_object, "get_absolute_url", None)
-    # May return None for objects without a page (a Device unless it is a licence).
-    return (get_absolute_url and get_absolute_url()) or ""
+    return get_absolute_url() if get_absolute_url else ""
 
 
 @permission_required("journal.view_journalentry", raise_exception=True)

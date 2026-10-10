@@ -13,6 +13,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.core import mail
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from dlcdb.core.models import Device, DeviceType, Person
@@ -124,6 +125,18 @@ class MessageDeliveryTests(TestCase):
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("moved", mail.outbox[0].subject)
+
+    def test_decommission_mail_links_a_regular_device(self):
+        """Only licences had a URL; the mail for any other device printed "URL: None"."""
+        self.device = Device.objects.create(edv_id="ntb001")
+        subscription = self.create_due_subscription(Subscription.NotificationEventChoices.DEVICE_DECOMMISSIONED)
+
+        message_id = queue_message.call_local(subscription.id)
+        send_message.call_local(message_id)
+
+        body = mail.outbox[0].body
+        self.assertIn(reverse("assets:device_detail", args=[self.device.pk]), body)
+        self.assertNotIn("URL: None", body)
 
     def test_email_body_contains_common_footer(self):
         branding = Branding.load()

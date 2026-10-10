@@ -418,14 +418,13 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     get_edv_id.short_description = _("IT ID")
 
     def get_absolute_url(self):
+        # A licence is edited in its own form; every other device has a detail page.
         if self.is_licence:
-            absolute_url = reverse("licenses:edit", kwargs={"license_id": self.pk})
-            return absolute_url
+            return reverse("licenses:edit", kwargs={"license_id": self.pk})
+        return reverse("assets:device_detail", args=[self.pk])
 
     def get_fqdn_url(self):
-        if self.get_absolute_url():
-            return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
-        return None
+        return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
 
     def get_state_data(self, *, user=None, app_name=None):
         return get_device_state_data(self, user=user, app_name=app_name)

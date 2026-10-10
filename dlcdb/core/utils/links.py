@@ -39,9 +39,8 @@ def obj_link(obj, label=None) -> SafeString:
     url = None
     try:
         if isinstance(obj, Device):
-            # Licences have their own edit form; get_absolute_url() knows about
-            # it and returns None for regular devices.
-            url = obj.get_absolute_url() or reverse("assets:device_detail", args=[obj.pk])
+            # A licence links to its own edit form; get_absolute_url() knows which.
+            url = obj.get_absolute_url()
         elif isinstance(obj, Room):
             url = reverse("rooms:detail", args=[obj.pk])
         elif isinstance(obj, Person):
