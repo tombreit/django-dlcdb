@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 23:21+0200\n"
-"PO-Revision-Date: 2026-10-09 23:27+0200\n"
+"POT-Creation-Date: 2026-10-10 14:04+0200\n"
+"PO-Revision-Date: 2026-10-10 14:05+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -449,14 +449,14 @@ msgstr[1] "%(counter)s von %(total)s Gerätetypen"
 #: dlcdb/assets/templates/assets/device_types/index.html:28
 #: dlcdb/assets/templates/assets/manufacturers/index.html:28
 #: dlcdb/assets/templates/assets/suppliers/index.html:28
-#: dlcdb/core/models/device_type.py:17 dlcdb/core/models/manufacturer.py:16
+#: dlcdb/core/models/device_type.py:18 dlcdb/core/models/manufacturer.py:16
 #: dlcdb/licenses/forms.py:145 dlcdb/persons/templates/persons/detail.html:77
 #: dlcdb/persons/templates/persons/index.html:28 dlcdb/tenants/models.py:17
 msgid "Name"
 msgstr "Name"
 
 #: dlcdb/assets/templates/assets/device_types/index.html:29
-#: dlcdb/core/models/device_type.py:22
+#: dlcdb/core/models/device_type.py:23
 msgid "Prefix"
 msgstr "Präfix"
 
@@ -1362,20 +1362,20 @@ msgstr "Passwort Backupverschlüsselung"
 msgid "E.g. macOS TimeMachine password for backup hard disk."
 msgstr "Z.B. macOS TimeMachine Passwort für Backupfestplatte."
 
-#: dlcdb/core/models/device_type.py:28
+#: dlcdb/core/models/device_type.py:29
 msgid "Icon"
 msgstr "Icon"
 
-#: dlcdb/core/models/device_type.py:29
-#, python-format
-msgid "Bootstrap Icons class, e.g. “bi-laptop”. See %(url)s."
-msgstr "Bootstrap-Icons-Klasse, z.B. “bi-laptop”. Siehe %(url)s."
+#: dlcdb/core/models/device_type.py:33
+#, python-brace-format
+msgid "Bootstrap Icons class, e.g. “bi-laptop”. See {url}."
+msgstr "Bootstrap-Icons-Klasse, z.B. “bi-laptop”. Siehe {url}."
 
-#: dlcdb/core/models/device_type.py:38
+#: dlcdb/core/models/device_type.py:42
 msgid "Device Type"
 msgstr "Geräteklasse"
 
-#: dlcdb/core/models/device_type.py:39
+#: dlcdb/core/models/device_type.py:43
 msgid "Device Types"
 msgstr "Geräteklassen"
 

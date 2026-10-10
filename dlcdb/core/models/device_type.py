@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.db import models
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 from .abstracts import SoftDeleteAuditBaseModel
@@ -26,8 +27,11 @@ class DeviceType(SoftDeleteAuditBaseModel):
         blank=True,
         default="",
         verbose_name=_("Icon"),
-        help_text=_("Bootstrap Icons class, e.g. “bi-laptop”. See %(url)s.")
-        % {"url": "https://icons.getbootstrap.com/"},
+        # format_lazy, not "%": "%" would translate at import time into the default
+        # language, and makemigrations would then see a changed help_text.
+        help_text=format_lazy(
+            _("Bootstrap Icons class, e.g. “bi-laptop”. See {url}."), url="https://icons.getbootstrap.com/"
+        ),
     )
     note = models.TextField(
         blank=True,
