@@ -4,15 +4,6 @@
 
 from datetime import datetime
 
-# Create a session store to pass the new created instance.pk from save_model()
-# to response_change(). Considered a dirty hack.
-# Ref: https://docs.djangoproject.com/en/dev/topics/http/sessions/#using-sessions-out-of-views
-#
-# Todo: refactor, get rid of session store and handle the redirect in a
-# friendlier way.
-from importlib import import_module
-
-from django.conf import settings
 from django.contrib import admin, messages
 from django.db.models import Case, CharField, Value, When
 from django.forms import ValidationError
@@ -32,9 +23,6 @@ from ..models import LentRecord, Record
 from ..utils.links import linked_message, obj_link
 from .base_admin import CustomBaseModelAdmin
 from .filters.lentstate_filter import LentStateRecordFilter
-
-SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
-session = SessionStore()
 
 
 @admin.register(LentRecord)
@@ -266,9 +254,6 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
         elif obj.record_type == Record.LENT:
             # War schon ein LENT record, wird lediglich geändert (kein Übergang):
             super().save_model(request, obj, form, change)
-            # Force redirect to this pk to avoid redirects to a pk stored in a
-            # previous session:
-            session["new_instance_pk"] = None
 
         elif obj.record_type == Record.INROOM:
             # War ein INROOM record, muss als neuer LENT record gespeichert werden:
@@ -284,13 +269,15 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
                 lent_accessories=obj.lent_accessories,
                 user=request.user,
             )
-            session["new_instance_pk"] = instance.pk
+            # response_change() redirects to the new lending. It runs in the same
+            # request, so the request carries it; nothing outlives the request.
+            request.new_lending = instance
 
         else:
             raise ValidationError("Lent state unknown - please report this issue!")
 
     def response_change(self, request, obj):
-        is_new_lending_action = bool(session.get("new_instance_pk"))
+        new_lending = getattr(request, "new_lending", None)
         is_return_action = bool(obj.lent_end_date)
 
         # Keep the "manufacturer - series" wording this admin has always used for
@@ -305,14 +292,14 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
-        elif is_new_lending_action:
+        elif new_lending is not None:
             msg = linked_message(
                 _("Device “{device}” lent to “{person}”."),
                 device=device_link,
                 person=obj.person,
             )
             self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = reverse("admin:core_lentrecord_change", args=(session["new_instance_pk"],))
+            redirect_url = reverse("admin:core_lentrecord_change", args=(new_lending.pk,))
             return HttpResponseRedirect(redirect_url)
         else:
             msg = linked_message(
