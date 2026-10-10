@@ -2,13 +2,17 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import random
+import itertools
 
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from dlcdb.core import models
 from dlcdb.tenants.models import Tenant
+
+# Running numbers for the IDs of generated test devices: both IDs are unique in
+# the database, and random numbers collided now and then.
+_device_numbers = itertools.count(1)
 
 
 class BaseTest(TestCase):
@@ -40,10 +44,12 @@ class BaseTest(TestCase):
         needs a tenant to be visible; tests about devices without tenant create
         them directly via ``Device.objects.create()``.
         """
+        number = next(_device_numbers)
         device = models.Device(
             device_type=device_type or models.DeviceType.objects.get_or_create(name="Notebook", prefix="NTB")[0],
-            edv_id=edv_id or random.randint(0, 19999),
-            sap_id=sap_id or random.randint(0, 19999),
+            edv_id=edv_id or f"auto-{number}",
+            # A valid SAP ID (main-sub); no test uses the main number 99999 itself.
+            sap_id=sap_id or f"99999-{number}",
             tenant=tenant or self._default_tenant(),
         )
         device.save()
