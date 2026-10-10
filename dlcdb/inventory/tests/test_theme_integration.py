@@ -10,6 +10,7 @@ the slim per-app asset bundle.
 
 import pytest
 from django.urls import reverse
+from rest_framework.authtoken.models import Token
 
 from dlcdb.accounts.models import CustomUser
 
@@ -97,6 +98,27 @@ def test_device_search_has_js_vars_island(su_client, inventory_1):
     html = response.content.decode()
     assert "qrToggleUrl" in html
     assert 'id="qr-toggle"' in html
+
+
+@pytest.mark.django_db
+def test_js_vars_carry_no_api_token(su_client, inventory_1):
+    # The scanner once borrowed the first API token in the database, which put
+    # another user's credential into the page source of every inventory page.
+    api_user = CustomUser.objects.create_user(username="api", email="api@example.org")
+    token = Token.objects.create(user=api_user)
+
+    html = su_client.get(reverse("inventory:inventorize-room-list")).content.decode()
+    assert 'id="js_vars"' in html
+    assert token.key not in html
+
+
+@pytest.mark.django_db
+def test_scanner_api_calls_need_only_the_session(su_client, device_1, room_1):
+    # inventorize.js fetches apiBaseUrl + "devices/<uuid>/" and "rooms/<uuid>/"
+    # without an Authorization header; the session must be enough.
+    api_base_url = reverse("api-v2-root")
+    assert su_client.get(f"{api_base_url}devices/{device_1.uuid}/").status_code == 200
+    assert su_client.get(f"{api_base_url}rooms/{room_1.uuid}/").status_code == 200
 
 
 @pytest.mark.django_db

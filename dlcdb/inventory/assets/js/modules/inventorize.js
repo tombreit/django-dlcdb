@@ -8,7 +8,6 @@ import { getJsVars, getPage } from './ui.js'
 const jsVars = getJsVars()
 const djangoDebug = jsVars.djangoDebug
 const apiBaseUrl = jsVars.apiBaseUrl
-const apiToken = jsVars.apiToken
 
 console.info('djangoDebug: ', djangoDebug)
 
@@ -28,21 +27,18 @@ const uuids_states_map = new Map()
 const getRowUuidSelector = uuid => `${ROW_UUID_PREFIX}${uuid}`
 
 
+// The API is same-origin, so fetch sends the session cookie and the API
+// authenticates the logged-in user; no token needed.
 async function getDeviceByUuid(uuid) {
   const apiDeviceQuery = `${apiBaseUrl}devices/${uuid}/`
-  const response = await fetch(
-    apiDeviceQuery, {
-      credentials: 'include',
-      headers: { Authorization: `Token ${apiToken}` },
-    },
-  )
+  const response = await fetch(apiDeviceQuery)
   const deviceData = await response.json()
   return deviceData
 }
 
 async function getRoomByUuid(uuid) {
   const apiRoomQuery = `${apiBaseUrl}rooms/${uuid}/`
-  const response = await fetch(apiRoomQuery, { headers: { Authorization: `Token ${apiToken}` } })
+  const response = await fetch(apiRoomQuery)
   const roomData = await response.json()
   return roomData
 }

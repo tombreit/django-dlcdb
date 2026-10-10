@@ -4,7 +4,6 @@
 
 from django.conf import settings
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 
 from dlcdb.core.models.inventory import get_active_inventory
 
@@ -22,14 +21,14 @@ def _get_js_vars(request):
     const jsVars = JSON.parse(document.getElementById('js_vars').textContent);
     const qrToggleUrl = jsVars.qrToggleUrl;
     ```
-    """
-    token = Token.objects.first()
 
+    No API token: the scanner's API calls are same-origin and authenticate
+    with the user's session (``SessionAuthentication``).
+    """
     return {
         "qrCodePrefix": settings.QRCODE_PREFIX,
         "djangoDebug": settings.DEBUG,
         "apiBaseUrl": reverse("api-v2-root"),
-        "apiToken": token.key if token else "",
         "qrToggleUrl": reverse("inventory:update-qrtoggle"),
         "qrScannerEnabled": bool(request.session.get("qrscanner_enabled")),
     }

@@ -7,8 +7,8 @@ SPDX-License-Identifier: CC0-1.0
 # Core review: dlcdb/core as the contract
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
-first, after checking every finding against the code. No step implemented yet. This is a
-living document: findings, decisions and progress are kept here.
+first, after checking every finding against the code. Step 0 done; core steps 1–36 not
+started. This is a living document: findings, decisions and progress are kept here.
 
 ## Why
 
@@ -604,7 +604,7 @@ Not part of the core review. It goes first because it is a security fix and smal
 ## Progress
 
 - [x] Plan written (2026-10-09), reordered into atomic steps (2026-10-10)
-- [ ] 0 — Inventory scanner token (out of band)
+- [x] 0 — Inventory scanner token (out of band)
 - [ ] 1 — Procure page removed
 - [ ] 2 — Unused files removed
 - [ ] 3 — Unused model methods removed
