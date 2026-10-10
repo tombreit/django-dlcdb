@@ -7,8 +7,7 @@ Characterization tests for the append-only record chain.
 
 "Records are append-only, the newest one is active" is the central promise of the
 data model (see ``docs/konzept.md``). Every state change is supposed to *append* a
-record rather than modify one. These tests pin that invariant down before the
-transition logic is consolidated into a central FSM.
+record rather than modify one. These tests pin that invariant down.
 
 Assertions are deliberately about *outcomes* (which record is active, what the
 device points at) rather than mechanisms, so they survive a refactoring that

@@ -3,18 +3,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Characterization tests for the device lifecycle state machine contract.
+Tests for the device lifecycle contract in ``dlcdb/core/lifecycle.py``: the state
+keys, the transition table and the state -> proxy registry.
 
-These pin down the pieces that currently live in ``dlcdb/core/models/record.py``
--- the ``STATE_TRANSITIONS`` table, the record-type -> proxy registry and the
-colour map -- so that consolidating them into a central FSM cannot silently
-change behaviour.
-
-Transition legality is asserted as *subset* checks on purpose. The table is known
-to be incomplete: production code performs REMOVED -> LOST
-(``device_admin.restore_removed_to_lost``) and REMOVED -> INROOM
-(``Inventory.inventorize_uuids_for_room``). Correcting the table must not break
-these tests.
+Transition legality is asserted as *subset* checks on purpose: adding a
+transition must not break these tests, losing one of the pinned moves must.
 """
 
 import pytest
@@ -95,9 +88,8 @@ def test_can_transition_agrees_with_the_table():
 
 def test_ordered_can_be_located_or_removed():
     """
-    ORDERED used to be a dead end (commented out of the old STATE_TRANSITIONS).
-    The corrected table gives it a way forward: an ordered device is located when
-    it arrives, or removed if the order is cancelled.
+    An ordered device is located when it arrives, or removed if the order is
+    cancelled.
     """
     assert _targets(Record.ORDERED) == {Record.INROOM, Record.REMOVED}
 
@@ -111,9 +103,8 @@ def test_unknown_state_yields_no_transitions_instead_of_raising():
 
 def test_every_record_type_resolves_to_a_proxy_model():
     """
-    Catches the "added a record type and forgot one of the four places" bug:
-    RECORD_TYPE_LIST, the proxy registry, RECORD_TYPE_COLORS and the proxy model
-    itself all have to agree.
+    Every state in ``lifecycle.STATES`` names an existing proxy model of
+    ``Record``; a wrong proxy name would otherwise only fail at the first write.
     """
     for key in RECORD_TYPE_KEYS:
         proxy = Record.get_proxy_model_by_record_type(key)
@@ -124,8 +115,8 @@ def test_every_record_type_resolves_to_a_proxy_model():
 @pytest.mark.django_db
 def test_every_proxy_stamps_its_own_record_type(plain_device):
     """
-    Each proxy's ``save()`` force-sets ``record_type``, which is what makes the
-    proxy the de-facto transition primitive today.
+    Each proxy's ``save()`` force-sets ``record_type``; the lifecycle transitions
+    rely on it to write the right state.
     """
     for key in RECORD_TYPE_KEYS:
         proxy = Record.get_proxy_model_by_record_type(key)
@@ -134,10 +125,6 @@ def test_every_proxy_stamps_its_own_record_type(plain_device):
         instance.save()
         assert instance.record_type == key
         assert Record.objects.get(pk=instance.pk).record_type == key
-
-
-# Presentation metadata (badge colours) has moved to dlcdb.theme.lifecycle_display;
-# see dlcdb/theme/tests/test_lifecycle_display.py.
 
 
 # --- Guards --------------------------------------------------------------

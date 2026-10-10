@@ -43,8 +43,8 @@ class LendableDeviceSelectForm(forms.Form):
 
 class LendingForm(forms.ModelForm):
     """
-    Lend / return / edit form for a single lending, used by the standalone
-    lending detail view. Replaces ``LentRecordAdminForm``.
+    Lend / edit form for a single lending, used by the standalone lending
+    detail view. The admin has its own form, ``LentRecordAdminForm``.
 
     The ``person`` field is a hidden input driven by the HTMX live-search
     person picker (see ``theme/js/picker.js``); ``record_type`` carries the

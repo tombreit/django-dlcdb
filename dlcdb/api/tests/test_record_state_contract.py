@@ -8,7 +8,7 @@ Characterization tests for the record state as a *public* contract.
 The read-only API v2 exposes ``record_type`` verbatim -- both as a serialised
 value and as the ``active_record__record_type`` query filter. Together with the
 DB CheckConstraint (``core/migrations/0060_*``) this pins the state keys down:
-a consolidated FSM may reorganise transitions freely, but renaming or dropping a
+the lifecycle may reorganise transitions freely, but renaming or dropping a
 state would break external consumers.
 
 This is the one place where exact equality on the state keys is the right

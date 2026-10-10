@@ -5,10 +5,9 @@
 """
 Characterization tests for ``get_device_state_data()``.
 
-This helper is the *only* consumer of ``Record.STATE_TRANSITIONS``: it turns the
-device's current state into a badge (label / colour / link) plus the list of
-actions offered to the user. It has had no direct test coverage, yet it is the
-piece a consolidated FSM would rewrite wholesale.
+This helper turns the device's current state into a badge (label / colour /
+link) plus the list of actions offered to the user, as decided by
+``lifecycle.available``.
 
 Assertions target URLs, flags and state keys rather than display labels, so they
 stay valid as the translated labels evolve. The suite runs under

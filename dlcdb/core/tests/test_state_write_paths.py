@@ -3,22 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Characterization tests for the state-changing paths that bypass the proxy layer.
+Characterization tests for the state changes made outside the lending flow:
 
-Several places move a device between states without going through a proxy
-model's ``save()``:
+* ``Inventory.inventorize_uuids_for_room`` (found / not found / unknown)
+* ``core/admin/device_admin.py::restore_removed_to_lost`` (REMOVED -> LOST)
+* ``dataexchange/remover.py::set_removed_record`` (the CSV bulk remover)
+* ``dataexchange/records.py::create_record`` (the records a CSV import row yields)
 
-* ``Inventory.inventorize_uuids_for_room`` rewrites ``record_type`` **in place**
-  on a cloned record (``core/models/inventory.py``)
-* ``dataexchange/remover.py`` writes a plain ``Record`` row via ``get_or_create``
-* ``core/admin/device_admin.py::restore_removed_to_lost`` moves REMOVED -> LOST,
-  a transition ``STATE_TRANSITIONS`` does not contain
-* ``dataexchange/records.py::create_record`` builds records directly for imports
-
-They are pinned here by **outcome only** -- which state the device ends up in,
-and which fields were cleaned up -- never by mechanism. A consolidated FSM is
-expected to change *how* these work (appending records instead of mutating them)
-while keeping the resulting state identical, which keeps these tests green.
+They are pinned by **outcome only** -- which state the device ends up in, and
+which fields were cleaned up -- never by mechanism, so the code behind them can
+change while these stay green.
 """
 
 import datetime
@@ -124,10 +118,7 @@ def test_inventory_found_recovers_a_removed_device_and_clears_removal_fields(
     inventory_1, inventory_rooms, inventory_user
 ):
     """
-    REMOVED -> INROOM. Note ``STATE_TRANSITIONS`` declares REMOVED terminal
-    (``REMOVED: [None]``), so this transition is performed by production code
-    but absent from the table -- one of the reasons the table must be corrected
-    rather than merely enforced.
+    REMOVED -> INROOM, the lifecycle's ``recover`` transition.
     """
     device = Device.objects.create(edv_id="EDV-INV-RM")
     RemovedRecord.objects.create(
@@ -203,9 +194,8 @@ def _run_admin_action(action_name, user, queryset):
 @pytest.mark.django_db
 def test_restore_removed_to_lost_moves_the_device_out_of_removed():
     """
-    ``device_admin.restore_removed_to_lost`` performs REMOVED -> LOST, another
-    transition missing from ``STATE_TRANSITIONS``. Pinned here so a corrected
-    table keeps it legal.
+    ``device_admin.restore_removed_to_lost`` performs REMOVED -> LOST, the
+    lifecycle's ``restore`` transition.
     """
     superuser = get_user_model().objects.create_superuser(email="root@example.com", password="secret")
     device = Device.objects.create(edv_id="EDV-RESTORE")

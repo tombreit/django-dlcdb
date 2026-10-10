@@ -59,9 +59,10 @@ LOST_DEVICE_NOT_LENDABLE = _('Device is currently "not locatable". It must be lo
 
 
 class Record(AuditBaseModel):
-    # New record types/proxys must be added to:
-    # * RECORD_TYPE_LIST
-    # * RECORD_TYPE_CLASSES
+    # A new record type needs a key and an entry in lifecycle.STATES, a proxy
+    # model (prx_*.py), a constant here, a badge colour in
+    # theme.lifecycle_display and a migration (the choices and the
+    # CheckConstraint follow lifecycle.STATES).
     ORDERED = "ORDERED"
     INROOM = "INROOM"
     LENT = "LENT"

@@ -3,20 +3,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Characterization tests for the *duplicated* transition logic.
-
-The lend/return state machine currently exists three times:
+Parity tests for the two places a lending is entered:
 
 * ``dlcdb/core/admin/lentrecord_admin.py::LentRecordAdmin.save_model``
-* ``dlcdb/lending/views.py::_apply_state_machine`` (whose docstring says it
-  "replicates" the admin one)
-* ``dlcdb/dataexchange/records.py::create_record`` (the CSV import variant)
+* ``dlcdb/lending/views.py::_apply_state_machine``
 
-and the rule "a lost device cannot be lent" exists three times on top of that.
+Both dispatch to the same lifecycle transitions. These tests assert that the two
+paths produce the same state changes and both refuse to lend a lost device. They
+compare outcomes only, so merging the two dispatchers is invisible to them.
 
-These tests assert the copies *agree*. They are the safety net for merging them:
-if a consolidated FSM changes behaviour, the two paths stop matching and these
-fail. They compare outcomes only, so the merge itself is invisible to them.
+The admin remove form's guards and the relocate branches are pinned here too.
 """
 
 import datetime
@@ -208,7 +204,7 @@ class LendReturnParityTests(BaseTest):
 
 
 class LostDeviceCannotBeLentTests(BaseTest):
-    """The same rule, asserted against each of its three implementations."""
+    """The same rule, asserted at the admin form, the lending form and the lending view."""
 
     @classmethod
     def setUpTestData(cls):
@@ -344,11 +340,8 @@ class RemoveTwiceTests(BaseTest):
 
     def test_removing_a_device_without_any_record_is_rejected_gracefully(self):
         """
-        Previously a known defect: ``RemovedRecordAdminForm.clean()`` read
-        ``device.active_record.record_type`` unguarded, so a device with no record
-        yet raised AttributeError. The consolidated FSM guard treats "no active
-        record" as a state (``state_of`` returns None), so this now fails
-        validation cleanly.
+        The admin form refuses a device with no record yet, although the lifecycle
+        allows None -> REMOVED for the bulk remover: it has to be localized first.
         """
         device = self._create_device(edv_id="EDV-RM-NONE", sap_id="17-17")
         self.assertIsNone(device.active_record)
@@ -360,10 +353,9 @@ class RemoveTwiceTests(BaseTest):
 
 class RelocateBranchTests(BaseTest):
     """
-    ``relocate_device`` is the one transition that has already been consolidated
-    (``core/utils/relocate.py``) and is the precedent a central FSM should follow.
-    ``assets/tests/test_relocate.py`` covers the HTTP layer; these cover the
-    branches it does not.
+    ``relocate_device`` (``core/utils/relocate.py``) moves a device for the admin
+    bulk relocate and the assets Move module. ``assets/tests/test_relocate.py``
+    covers the HTTP layer; these cover the branches it does not.
     """
 
     @classmethod
