@@ -270,19 +270,9 @@ class Record(AuditBaseModel):
         if is_new_record:
             self.update_active_record_on_device()
 
-    def get_proxy_instance(self):
-        """
-        Return the concrete proxy model instance
-        """
-        modelclass = self.get_proxy_model()
-        return modelclass.objects.get(id=self.id)
-
     @staticmethod
     def get_proxy_model_by_record_type(record_type):
         return lifecycle.proxy_for(record_type)
-
-    def get_proxy_model(self):
-        return Record.get_proxy_model_by_record_type(self.record_type)
 
     @classmethod
     def get_admin_action_url(cls):

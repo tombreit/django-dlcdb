@@ -136,16 +136,6 @@ def test_every_proxy_stamps_its_own_record_type(plain_device):
         assert Record.objects.get(pk=instance.pk).record_type == key
 
 
-@pytest.mark.django_db
-def test_get_proxy_instance_returns_the_concrete_proxy(plain_device, room):
-    from dlcdb.core.models import InRoomRecord
-
-    record = InRoomRecord.objects.create(device=plain_device, room=room)
-    base = Record.objects.get(pk=record.pk)
-    assert type(base) is Record
-    assert type(base.get_proxy_instance()) is InRoomRecord
-
-
 # Presentation metadata (badge colours) has moved to dlcdb.theme.lifecycle_display;
 # see dlcdb/theme/tests/test_lifecycle_display.py.
 

@@ -76,21 +76,6 @@ def test_has_active_record_set(room, lentable_device):
 
 
 @pytest.mark.django_db
-def test_get_proxy_instance(plain_device):
-    """
-    Tests the get_proxy_instance method. Ensures that the correct type is returned.
-    :return:
-    """
-    record = InRoomRecord.objects.create(device=plain_device)
-
-    assert isinstance(record.get_proxy_instance(), InRoomRecord)
-
-    assert not isinstance(record.get_proxy_instance(), LentRecord)
-
-    assert record.get_proxy_instance().__class__ != Record
-
-
-@pytest.mark.django_db
 def test_is_proxy_model(plain_device, room):
     # Creating records via the proxy records interface is allowed; clean() passes:
     proxy_record = InRoomRecord.objects.create(device=plain_device, room=room)

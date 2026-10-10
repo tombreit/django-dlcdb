@@ -97,23 +97,6 @@ class Room(SoftDeleteAuditBaseModel):
             # There is only one single is_external room allowed:
             Room.objects.all().exclude(id=self.id).update(is_external=False)
 
-    def get_active_records(self):
-        """
-        Returns the active InRoomRecords of this room
-        """
-        qs = self.record_set.filter(
-            is_active=True,
-        ).order_by("device__edv_id")
-        return qs
-
-    def get_lent_records(self):
-        """
-        Returns the active lent records associated with this room.
-        """
-        from . import LentRecord
-
-        return LentRecord.objects.filter(room=self, is_active=True)
-
     def get_latest_note(self):
         """
         Returns the latest note of the related room and the current inventory.
