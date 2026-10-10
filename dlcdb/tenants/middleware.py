@@ -10,7 +10,11 @@ from .shortcuts import get_user_tenants
 class CurrentTenantMiddleware(MiddlewareMixin):
     """
     Middleware that sets the `tenants` attribute (a tuple of the tenants the
-    user may see) on the request object.
+    user may see) on the request object. Views across the apps scope their
+    querysets by it.
+
+    Reads ``request.user``, so it must come after ``AuthenticationMiddleware``
+    in ``MIDDLEWARE``.
     """
 
     def process_request(self, request):

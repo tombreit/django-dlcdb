@@ -38,6 +38,9 @@ def inventory(request):
     """
     Provide navbar context (active-inventory badge, QR toggle) and the js_vars
     JSON island on every inventory page.
+
+    Registered for all templates in ``TEMPLATES``, so it runs on every request;
+    outside the inventory app it returns nothing.
     """
     resolver_match = getattr(request, "resolver_match", None)
     if not resolver_match or resolver_match.app_name != "inventory":

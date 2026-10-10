@@ -15,6 +15,9 @@ class DatabaseLoader(BaseLoader):
     """
     Template loader that serves LendingProfile.lent_sheet_template content
     for template names matching 'lending/db/<pk>.html'.
+
+    The content is edited in the admin, so this loader must stay outside the
+    cached loader in ``TEMPLATES``; an edit then shows up without a restart.
     """
 
     def get_template_sources(self, template_name):
