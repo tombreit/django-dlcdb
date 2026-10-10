@@ -13,9 +13,8 @@ change behaviour.
 Transition legality is asserted as *subset* checks on purpose. The table is known
 to be incomplete: production code performs REMOVED -> LOST
 (``device_admin.restore_removed_to_lost``) and REMOVED -> INROOM
-(``Inventory.inventorize_uuids_for_room``), and ORDERED is a dead end although
-``procure_forms`` still creates ORDERED records. Correcting the table must not
-break these tests.
+(``Inventory.inventorize_uuids_for_room``). Correcting the table must not break
+these tests.
 """
 
 import pytest
