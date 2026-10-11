@@ -225,7 +225,7 @@ def search_devices(request):
     # Add a custom attribute to each device in the current page
     for device in page_obj:
         device.state_data_rendered = render_to_string(
-            "core/device/state_btn_group.html",
+            "theme/device/state_btn_group.html",
             {
                 "state_data": device.get_state_data(user=request.user, app_name="inventory"),
                 "size": "sm",

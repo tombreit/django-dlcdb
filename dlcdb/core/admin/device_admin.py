@@ -278,7 +278,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     "inventorize_url": f"{reverse('inventory:search-devices')}?id={obj.pk}",
                 },
                 "state_data_rendered": render_to_string(
-                    "core/device/state_btn_group.html", {"state_data": obj.get_state_data(user=request.user)}
+                    "theme/device/state_btn_group.html", {"state_data": obj.get_state_data(user=request.user)}
                 ),
             }
         )
@@ -296,7 +296,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             "size": "sm",
         }
 
-        return render_to_string("core/device/state_btn_group.html", context)
+        return render_to_string("theme/device/state_btn_group.html", context)
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):
