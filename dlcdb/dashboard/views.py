@@ -12,10 +12,10 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
 from dlcdb.core.models import Inventory, LentRecord, Record
-from dlcdb.core.utils.helpers import get_icon_for_class
 from dlcdb.core.utils.htmx import htmx_login_required
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+from dlcdb.theme.icons import get_icon_for_class
 
 from . import stats
 from .search import run_search

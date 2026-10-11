@@ -530,54 +530,6 @@ PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
 DEVICE_HIDE_FIELDS = env.list("DEVICE_HIDE_FIELDS", default=[])
 
-# TODO: Move icon and color to class var for base model?
-THEME = {
-    "core.record": {
-        "ICON": "bi bi-stack",
-        "COLOR": "",
-    },
-    "core.device": {
-        "ICON": "bi bi-upc",
-        "COLOR": "",
-    },
-    "core.devicetype": {
-        "ICON": "bi bi-palette",
-        "COLOR": "",
-    },
-    "core.room": {
-        "ICON": "bi bi-door-open",
-        "COLOR": "",
-    },
-    "core.lentrecord": {
-        "ICON": "bi bi-arrow-left-right",
-        "COLOR": "",
-    },
-    "core.lostrecord": {
-        "ICON": "bi bi-stack",
-        "COLOR": "",
-    },
-    "core.licencerecord": {
-        "ICON": "bi bi-bank2",
-        "COLOR": "",
-    },
-    "core.inventory": {
-        "ICON": "bi bi-eyeglasses",
-        "COLOR": "",
-    },
-    "core.manufacturer": {
-        "ICON": "bi bi-building",
-        "COLOR": "",
-    },
-    "core.supplier": {
-        "ICON": "bi bi-truck",
-        "COLOR": "",
-    },
-    "smallstuff.assignedthing": {
-        "ICON": "bi bi-handbag",
-        "COLOR": "",
-    },
-}
-
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
 # IPYTHON_ARGUMENTS = [
 #     '--debug',

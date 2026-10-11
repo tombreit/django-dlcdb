@@ -14,9 +14,10 @@ from django.utils.http import urlencode
 
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+from dlcdb.theme.icons import get_icon_for_class
 
 from ..models import Device, DeviceType, Manufacturer, Room, Supplier
-from ..utils.helpers import get_denormalized_user, get_icon_for_class
+from ..utils.helpers import get_denormalized_user
 
 
 def get_has_note_badge(*, obj_type, has_note):
