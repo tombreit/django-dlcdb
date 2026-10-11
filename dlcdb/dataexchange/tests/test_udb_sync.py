@@ -520,18 +520,17 @@ def test_sync_skips_when_contract_end_precedes_lent_start():
 
 
 @pytest.mark.django_db
-def test_sync_skips_when_contract_end_exceeds_max_future(settings):
-    settings.MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
+def test_sync_takes_over_a_contract_end_far_in_the_future():
     _enable_sync()
     _sync_person_with_checkout("uuid-1", "2024-12-31")
     person = Person.objects.get(udb_person_uuid="uuid-1")
     lending = _make_lending(person, sync=True, desired_end=datetime.date(2024, 12, 31))
 
-    # Beyond MAX_FUTURE_LENT_DESIRED_END_DATE would violate the CheckConstraint -> skip.
+    # The desired return date has no upper bound (it used to stop at 2099-12-31).
     _sync_person_with_checkout("uuid-1", "2100-06-30")
 
     lending.refresh_from_db()
-    assert lending.lent_desired_end_date == datetime.date(2024, 12, 31)
+    assert lending.lent_desired_end_date == datetime.date(2100, 6, 30)
 
 
 @pytest.mark.django_db

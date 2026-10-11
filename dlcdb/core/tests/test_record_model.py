@@ -167,14 +167,13 @@ def test_get_last_found_returns_latest_found_record():
 
 
 @pytest.mark.django_db
-def test_a_return_dated_today_is_accepted_just_after_local_midnight(settings, lentable_device, room):
+def test_a_return_dated_today_is_accepted_just_after_local_midnight(lentable_device, room):
     """
     The return form prefills the local date, so clean() must compare with the
     local date too. 00:30 in Berlin is still the previous day in UTC. The frozen
     clock is far ahead of the real one, so a check against the real date rejects
     the return as well.
     """
-    settings.MAX_FUTURE_LENT_DESIRED_END_DATE = "2099-12-31"
     Room.objects.create(number="RETURN", is_auto_return_room=True)
     record = LentRecord(
         device=lentable_device,

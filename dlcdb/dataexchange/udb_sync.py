@@ -21,7 +21,6 @@ import json
 import logging
 import urllib.error
 import urllib.request
-from datetime import datetime
 
 from django.conf import settings
 from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
@@ -371,20 +370,15 @@ def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
     silently drop otherwise-valid lendings.
 
     The write is intentionally a direct ``save()`` that bypasses
-    ``LentRecord.clean()``, so we re-check here the two bounds the form/DB would
-    otherwise enforce, and skip (with a log) rather than raise mid-sync:
-    - a contract end before the lending's start date makes no sense;
-    - a contract end beyond ``MAX_FUTURE_LENT_DESIRED_END_DATE`` (the bound that
-      ``LentRecord.clean()`` enforces; the old ``valid_lent_desired_end_date``
-      CheckConstraint was removed in migration 0069).
+    ``LentRecord.clean()``, so we re-check here the bound the form would otherwise
+    enforce, and skip (with a log) rather than raise mid-sync: a contract end
+    before the lending's start date makes no sense.
 
     ``new_checkout`` is None-safe: a cleared contract end is not propagated (we
     never blank out a desired return date).
     """
     if not new_checkout:
         return
-
-    max_future = datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d").date()
 
     lendings = Record.objects.filter(
         person=person,
@@ -400,12 +394,6 @@ def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
             logger.warning(
                 f"[UDB] Skipping lent-date sync for record {lending.pk}: "
                 f"contract end {new_checkout} precedes lent start {lending.lent_start_date}."
-            )
-            continue
-        if new_checkout > max_future:
-            logger.warning(
-                f"[UDB] Skipping lent-date sync for record {lending.pk}: "
-                f"contract end {new_checkout} exceeds MAX_FUTURE_LENT_DESIRED_END_DATE {max_future}."
             )
             continue
 

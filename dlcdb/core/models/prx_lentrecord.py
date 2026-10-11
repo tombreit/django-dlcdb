@@ -2,9 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import datetime
-
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -59,16 +56,6 @@ class LentRecord(Record):
 
         if self.lent_end_date and self.lent_end_date < self.lent_start_date:
             raise ValidationError({"lent_end_date": _("The return date cannot be before the lending start date!")})
-
-        if self.lent_desired_end_date > datetime.strptime(settings.MAX_FUTURE_LENT_DESIRED_END_DATE, "%Y-%m-%d").date():
-            # Interpolate *outside* gettext: an f-string inside _() cannot be
-            # extracted by makemessages and its msgid would vary at runtime.
-            raise ValidationError(
-                {
-                    "lent_desired_end_date": _("The desired return date cannot be after %(max_date)s!")
-                    % {"max_date": settings.MAX_FUTURE_LENT_DESIRED_END_DATE}
-                }
-            )
 
         if not self.room:
             try:

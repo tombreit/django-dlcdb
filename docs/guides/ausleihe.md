@@ -24,7 +24,6 @@ Auch ein verliehenes Gerät hat einen Raum: den, in dem es voraussichtlich zu fi
 
 - Gerät-Ausleihe wird in DLCDB geöffnet
 - Ausleihfrist wird eingetragen
-  - Enddatum der Ausleihe darf aktuell nicht nach dem 31.12.2099 sein
 - Zubehör wird in Notiz-Feld hinterlegt
 - Ausleihzettel wird generiert und ausgedruckt
   - Einstellungen für den Druck: beidseitiger Druck, Kopf- und Fußzeilen drucken, Hintergrund drucken
