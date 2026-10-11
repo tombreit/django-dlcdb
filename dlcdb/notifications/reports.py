@@ -13,7 +13,7 @@ from collections import namedtuple
 from datetime import timedelta
 
 from django.contrib.sites.models import Site
-from django.db.models import DateField, ExpressionWrapper, F, Q
+from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -28,7 +28,9 @@ from .models import Message, Subscription
 
 logger = logging.getLogger(__name__)
 
-# A lending is overdue once lent_desired_end_date + tolerance <= today.
+# A lending is overdue once lent_desired_end_date + tolerance <= today. The query
+# subtracts the tolerance from today instead: adding days to a desired return date
+# near 9999-12-31, the last date Python knows, would overflow.
 LENT_OVERDUE_TOLERANCE_DAYS = 5
 
 # Reporting window when a subscription has never run before.
@@ -61,13 +63,7 @@ def get_lent_overdue_records(now):
         Record.objects.active_records()
         .filter(record_type=Record.LENT)
         .filter(~Q(lent_desired_end_date__isnull=True) | Q(lent_end_date__isnull=True))
-        .annotate(
-            lent_desired_end_date_with_tolerance=ExpressionWrapper(
-                F("lent_desired_end_date") + timedelta(days=LENT_OVERDUE_TOLERANCE_DAYS),
-                output_field=DateField(),
-            )
-        )
-        .filter(lent_desired_end_date_with_tolerance__lte=now)
+        .filter(lent_desired_end_date__lte=timezone.localdate(now) - timedelta(days=LENT_OVERDUE_TOLERANCE_DAYS))
     )
 
 

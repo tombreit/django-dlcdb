@@ -9,7 +9,7 @@ attachments and per-lender grouping.
 """
 
 import tempfile
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -333,6 +333,21 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
         notify_overdue_lenders.call_local()
 
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_a_desired_return_date_at_the_end_of_the_calendar_is_not_overdue(self):
+        """9999-12-31 is the last date Python knows: the overdue check must not add days to it."""
+        establish_state(
+            LentRecord,
+            device=create_device(edv_id="ntb107"),
+            person=self.lender1,
+            lent_start_date=timezone.localdate() - timedelta(days=100),
+            lent_desired_end_date=date.max,
+        )
+        self.create_lent_record(self.lender2, edv_id="ntb108", overdue_days=10)
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual([email.to for email in mail.outbox], [["sabine@example.org"]])
 
     def test_overdue_mails_can_be_redirected_to_it(self):
         self.set_lending_config(overdue_notifications_recipient="it")
