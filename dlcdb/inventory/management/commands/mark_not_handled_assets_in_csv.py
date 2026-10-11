@@ -8,9 +8,9 @@ import sys
 
 from django.core.management.base import BaseCommand
 
-from dlcdb.inventory.sap import get_match_for_sap_id
+from dlcdb.core.models import Device
 
-from ...models import Device
+from ...sap import get_match_for_sap_id
 
 
 class Command(BaseCommand):
