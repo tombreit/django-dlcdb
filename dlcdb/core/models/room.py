@@ -12,9 +12,8 @@ from django.utils import dateformat, timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.inventory.utils import uuid2qrcode
-
 from ..storage import OverwriteStorage
+from ..utils.qrcode import uuid2qrcode
 from .abstracts import SoftDeleteAuditBaseModel
 
 

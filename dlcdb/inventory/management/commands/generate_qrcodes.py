@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from dlcdb.core.models import Device, Room
-from dlcdb.inventory.utils import uuid2qrcode
+from dlcdb.core.utils.qrcode import uuid2qrcode
 
 
 class Command(BaseCommand):
