@@ -14,6 +14,7 @@ from dlcdb.core.models import DeviceType, InRoomRecord, LentRecord, Person, Reco
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingProfile
+from dlcdb.lending.starter import get_starter_lent_sheet_template
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -715,6 +716,17 @@ class LendingPrintSheetTests(BaseTest):
         self.assertContains(response, "2026-07-23")
         # Printing must not persist a lending.
         self.assertEqual(LentRecord.objects.count(), lent_before)
+
+    def test_print_with_the_starter_sheet_renders_interleaf_and_markdown_checklist(self):
+        """The starter sheet uses printout_base (with its interleaf) and the markdown checklist."""
+        LendingProfile.objects.update(
+            lent_sheet_template=get_starter_lent_sheet_template(),
+            lending_preparation_checklist="- [ ] Charger packed",
+        )
+        response = self.client.post(self.url, self._payload())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<div class="interleave">')
+        self.assertContains(response, "<input type='checkbox'> Charger packed")
 
     def test_print_get_not_allowed(self):
         response = self.client.get(self.url)
