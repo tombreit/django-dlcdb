@@ -528,6 +528,11 @@ Reviewed 2026-10-03 as sources of ideas only; none of them will be used.
   since huey doesn't propagate contextvars. Not needed while the HR sync writes only run entries.
 - **Per-object journal** on the device, person or import detail page: needs an index on
   `(content_type, object_id)`. It is a prerequisite for phasing out `ImporterList.messages`.
+- **Lifecycle transitions** (from the core review): an entry for each record a device gets.
+  Two facts to design around:
+  - `Record` has no tenant, so the call passes the device's tenant explicitly;
+  - explicit calls only (decision 8). `Record.save()` would also log every imported row and
+    every repair command's write (`save(check_transition=False)`).
 - ~~**Retention/purging**~~: done in batch 8 as a page, not a command (decision 18).
 - **`recorded_at`** (`auto_now_add`, journald `__REALTIME_TIMESTAMP=` vs
   `_SOURCE_REALTIME_TIMESTAMP=`): would show copied entries, whose `timestamp` is only

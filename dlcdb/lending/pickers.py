@@ -5,8 +5,8 @@
 """
 Lending's device-picker data source: the set of devices that can be lent.
 
-A device is lendable when its active record is INROOM (physically available),
-it is flagged ``is_lentable`` and it is not a licence.
+A device is lendable when its active record is INROOM (physically available)
+and it is flagged ``is_lentable``. A flagged licence is lendable too.
 """
 
 from dlcdb.core import lifecycle

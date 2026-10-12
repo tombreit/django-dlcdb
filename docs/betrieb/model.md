@@ -58,7 +58,7 @@ proxies' model validation or in the form layer.
 |---|---|
 | `OrderedRecord` | `ORDERED` |
 | `InRoomRecord` | `INROOM` |
-| `LentRecord` | `LENT` |
+| `LentRecord` | `LENT`. Its manager lists more than lendings: the active, not removed records of devices flagged `is_lentable`, in any state (also `INROOM`, `LOST`, `ORDERED`) |
 | `LostRecord` | `LOST` |
 | `RemovedRecord` | `REMOVED` |
 | `LicenceRecord` | none of its own: the active, not removed records of devices flagged `is_licence`, see [Lizenzen](../guides/lizenzen.md) |
