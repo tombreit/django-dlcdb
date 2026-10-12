@@ -14,7 +14,6 @@ from django.utils.translation import ngettext
 from simple_history.admin import SimpleHistoryAdmin
 
 from ..core.models import Device
-from ..core.utils.helpers import get_denormalized_user
 from ..dataexchange.models import ImporterList
 from .models import Tenant
 from .shortcuts import limit_tenant_field, tenant_scoped_queryset
@@ -63,7 +62,7 @@ class TenantAdmin(SimpleHistoryAdmin):
         return super().get_queryset(request).prefetch_related("groups")
 
     def save_model(self, request, obj, form, change):
-        obj.user, obj.username = get_denormalized_user(request.user)
+        obj.stamp_user(request.user)
         super().save_model(request, obj, form, change)
 
     @admin.display(description=_("Groups"))
@@ -126,7 +125,7 @@ class TenantAdmin(SimpleHistoryAdmin):
                 # audit fields record the change.
                 for device in confirmed_devices:
                     device.tenant = tenant
-                    device.user, device.username = get_denormalized_user(request.user)
+                    device.stamp_user(request.user)
                     device.save()
                 # Not via the import's admin form: ImporterListAdmin.save_model
                 # re-runs the import. The import's user stays the uploader.

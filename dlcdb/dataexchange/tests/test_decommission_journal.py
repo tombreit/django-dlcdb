@@ -39,6 +39,7 @@ def test_admin_decommissioning_adds_one_entry(client, tenant, join_tenant, plain
 
     assert response.status_code == 302
     remover_list = RemoverList.objects.get()
+    assert remover_list.user == admin
     assert Device.objects.get(edv_id="REM-1").active_record.record_type == Record.REMOVED
     entry = JournalEntry.objects.get(source="dataexchange.decommission")
     assert entry.event == "decommissioned"

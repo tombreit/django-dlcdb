@@ -17,7 +17,6 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.icons import get_icon_for_class
 
 from ..models import Device, DeviceType, Manufacturer, Room, Supplier
-from ..utils.helpers import get_denormalized_user
 
 
 def get_has_note_badge(*, obj_type, has_note):
@@ -63,25 +62,10 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
             "username",
         )
 
-    """
-    We need both: modified save_model and save_formset to capture all save
-    actions. Sorry, but I do not know why...
-    """
-
-    # https://docs.djangoproject.com/en/dev/ref/contrib/admin/#modeladmin-methods
     def save_model(self, request, obj, form, change):
-        obj.user, obj.username = get_denormalized_user(request.user)
+        """Stamps the editing user on the saved object (``AuditBaseModel.stamp_user``)."""
+        obj.stamp_user(request.user)
         super().save_model(request, obj, form, change)
-
-    # https://docs.djangoproject.com/en/3.0/ref/contrib/admin/#django.contrib.admin.ModelAdmin.save_formset
-    def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-        for obj in formset.deleted_objects:
-            obj.delete()
-        for instance in instances:
-            instance.user, instance.username = get_denormalized_user(request.user)
-            instance.save()
-        formset.save_m2m()
 
 
 class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):

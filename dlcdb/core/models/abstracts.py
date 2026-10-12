@@ -10,6 +10,8 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from ..utils.helpers import get_denormalized_user
+
 # auto_now_add and auto_now issue two separate timezone.now() calls when a row is
 # inserted, so a freshly created object's timestamps differ by microseconds
 # rather than being equal. Anything inside this window counts as "never touched
@@ -41,6 +43,13 @@ class AuditBaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def stamp_user(self, user):
+        """
+        Records ``user`` as the object's last editor, for the next save: the
+        foreign key, and in ``username`` a plain copy of the name.
+        """
+        self.user, self.username = get_denormalized_user(user)
 
     @property
     def is_unmodified(self):

@@ -7,7 +7,6 @@ from django.contrib import admin, messages
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, LentRecord
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.admin import TenantScopedAdmin
 
 from .csv_export import EXPORT_RELATIONS, csv_response
@@ -119,7 +118,7 @@ class ImporterListAdmin(TenantScopedAdmin):
     def save_model(self, request, obj, form, change):
         if not change:
             # The uploader owns the run; see OperationLogBase.
-            obj.user, obj.username = get_denormalized_user(request.user)
+            obj.stamp_user(request.user)
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
@@ -230,7 +229,7 @@ class RemoverListAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not change:
             # The uploader owns the run; see OperationLogBase.
-            obj.user, obj.username = get_denormalized_user(request.user)
+            obj.stamp_user(request.user)
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
