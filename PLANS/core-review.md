@@ -7,8 +7,9 @@ SPDX-License-Identifier: CC0-1.0
 # Core review: dlcdb/core as the contract
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
-first, after checking every finding against the code. Step 0 done; core steps 1–36 not
-started. This is a living document: findings, decisions and progress are kept here.
+first, after checking every finding against the code. Steps 0–14, 16, 17, 20, 21 and
+21b done, 15 skipped, 18 and 19 postponed; steps 22–36 not started. This is a living
+document: findings, decisions and progress are kept here.
 
 ## Why
 
@@ -58,7 +59,8 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
    records, not a state), `Room`, `Person`, `OrganizationalUnit`, `DeviceType`,
    `Manufacturer`, `Supplier`, `Inventory`, `Note`, `Link`, `Attachment`; the abstract
    bases `AuditBaseModel`, `SoftDeleteAuditBaseModel`, `SingletonBaseModel`,
-   `TenantAwareModel`. `RoomReconcile` stays for migration reasons only (its logic is in
+   `TenantAwareModel` (postponed: it still lives in `tenants`, see *Postponed*).
+   `RoomReconcile` stays for migration reasons only (its logic is in
    `rooms`).
 2. **Lifecycle.** `core/lifecycle.py` owns states, the transition table, and the only
    sanctioned ways to append a record (`transition_*`, `localise`). Record writes that
@@ -75,7 +77,10 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
    (`"tenants.Tenant"`, `"dataexchange.ImporterList"`) and URL names in
    `get_absolute_url` and `obj_link`. Anything that depends on *which app is rendering*
    (CSS classes, per-app action URLs, nav, hints) is presentation and lives in `theme` or
-   the rendering app.
+   the rendering app. Three postponed exceptions (see *Postponed*): `core/models/device.py`
+   imports `tenants.abstracts.TenantAwareModel`, `core/utils/device_methods.py` builds the
+   device state buttons with per-app action URLs, and `core/models/inventory.py` imports
+   `inventory.utils.update_inventory_note` for the scan workflow.
 6. **Admin.** The admin stays in core, all of it (decided 2026-10-09). It is the
    operators' second UI over the core models, and like any UI it may import admin helpers
    from consumer apps (`tenants.admin`, `dataexchange.admin.ExportCsvMixin`,
@@ -99,8 +104,8 @@ Verified against the code on 2026-10-10. Line numbers are as of that date.
 | Core file | Imports | Fix (step) |
 |---|---|---|
 | `models/device.py:19`, `models/room.py:15` | `inventory.utils.uuid2qrcode` | move to `core/utils/qrcode.py` (14) |
-| `models/inventory.py:13` | `inventory.utils.update_inventory_note` | goes away with the scan workflow (19); the helper stays in `inventory`, where all its other callers are |
-| `models/device.py:20` | `tenants.abstracts.TenantAwareModel` | moves into `core/models/abstracts.py`; `tenants/abstracts.py` is deleted (15) |
+| `models/inventory.py:13` | `inventory.utils.update_inventory_note` | was: goes away with the scan workflow (19); postponed with the inventory refactoring, see *Postponed* |
+| `models/device.py:20` | `tenants.abstracts.TenantAwareModel` | was: move into `core/models/abstracts.py` (15); postponed, see *Postponed* |
 | `models/prx_licencerecord.py:49` | `apps.get_model("notifications", "Subscription")` | the subscriber-email subquery moves to `licenses`, its only reader (25) |
 | `context_processors.py:21,80,185` | `dataexchange.ImporterList`, `assets.filters.STATE_NO_RECORD`, `organization.Branding` | `hints` and `nav` move to `theme/context_processors.py` (20, 21) |
 | `management/commands/mark_not_handled_assets_in_csv.py` | `inventory.sap` | move to `inventory/management/commands/` (11) |
@@ -122,7 +127,8 @@ Verified against the code on 2026-10-10. Line numbers are as of that date.
   `inventory/views.py:230`. It moves to `theme/device_state.py`, next to
   `theme/lifecycle_display.py`. `Device.get_state_data` is removed, and the three callers
   call the function directly. `core/templates/core/device/state_btn_group.html` moves
-  with it.
+  with it. The template moved in step 17; the function itself is postponed (step 18, see
+  *Postponed*).
 - `core/navigation.py`: three admin-changelist entries (Removed records, Inventories,
   Notes). Keep; it is the per-app convention.
 - `core/templatetags/markdown_extras.py` and
@@ -166,9 +172,9 @@ it does not fit the remaining hand-written sites:
   condition inside the same `filter()`/`Q` as the other conditions (multi-valued
   relation). A second `filter()` would match different records.
 
-What is left is the `TenantAwareModel` move (step 15). Rule: request-level scoping goes
-through the helper; querysets and functions that receive `tenants` filter with
-`tenant__in`.
+What was left is the `TenantAwareModel` move (step 15, postponed: see *Postponed*).
+Rule: request-level scoping goes through the helper; querysets and functions that receive
+`tenants` filter with `tenant__in`.
 
 ### Inventory workflow in a core model
 
@@ -177,7 +183,8 @@ inventory-scan workflow (found → `localise`, not found → `relocate_lending` 
 `transition_lose`, unknown → strip stamps). It is called only from `inventory/views.py:146`
 and from tests. The *rules* it applies are lifecycle calls; the *workflow* belongs to the
 inventory app. It moves to `inventory/services.py` as a plain function.
-`core/models/inventory.py` keeps the model and the queryset.
+`core/models/inventory.py` keeps the model and the queryset. Postponed (step 19): part of
+a separate inventory refactoring, see *Postponed*.
 
 ### Dead code (delete)
 
@@ -190,13 +197,19 @@ inventory app. It moves to `inventory/services.py` as a plain function.
 - `core/templates/core/room/records_snippet.html`,
   `core/static/core/proxyrecord_admin/add_form.css` (and the commented-out reference in
   `core/forms/proxyrecord_admin_form.py`).
+- `core/tests/test_record_type_choicer.py`: one empty test (`pass`) and a string holding
+  code from the initial commit (found during step 2).
 - `Room.get_active_records`, `Room.get_lent_records`, `Record.get_proxy_instance` (only
-  tests call them).
+  tests call them), and `Record.get_proxy_model`, whose only caller is
+  `get_proxy_instance` (found during step 3).
 - **Not dead:** `Device.get_fqdn_url`. Three notification mail templates (`*.txt`) use it.
 - Stale text: the `record.py:62-64` comment (`RECORD_TYPE_CLASSES`), the docstrings of
   `core/tests/test_transition_parity.py`, `test_state_write_paths.py` and
   `test_fsm_contract.py` (they describe removed mechanisms and the procure form), and the
   `LendingForm` docstring ("Replaces `LentRecordAdminForm`", which is still in use).
+  Found during step 4: the docstrings of `core/tests/test_device_state_data.py`,
+  `core/tests/test_record_append_only.py` and `api/tests/test_record_state_contract.py`
+  still name `STATE_TRANSITIONS` or a "consolidated FSM" to come.
 - Settings: `LOGIN_FIELD` (never read), the second `SITE_ID` (`base.py:132` and `:316`).
 
 ### Settings module
@@ -208,11 +221,15 @@ inventory app. It moves to `inventory/services.py` as a plain function.
   read only by `docs/conf.py`, which is fine. The `UDB_*` keys exist only in the local
   `.env`, not in `env.template`, so there is nothing to change in the repo.
 - **Parsed on every use:** `MAX_FUTURE_LENT_DESIRED_END_DATE` is a string, parsed with
-  `strptime` in `prx_lentrecord.py:63` and `udb_sync.py:387`. Parse it once in settings
-  into a `date`.
-- **App wiring in global settings** (keep, but comment each line with the owning app):
-  `lending.loader.DatabaseLoader` as the first template loader, the `inventory` context
-  processor on every request, the `tenants` middleware, the `journal` logging handlers.
+  `strptime` in `prx_lentrecord.py:63` and `udb_sync.py:387`. Resolved in step 10: the
+  bound is gone, not parsed once.
+- **App wiring in global settings** (keep): `lending.loader.DatabaseLoader` as the first
+  template loader, the `inventory` context processor on every request, the `tenants`
+  middleware, the `journal` logging handlers. The dotted path already names the app.
+  Rule (2026-10-11): a docstring says what a component does, what it needs and who reads
+  its output; a settings comment is only for what the settings alone show, such as a
+  position in a list (order, inside or outside the template cache) or where a handler
+  must not be attached.
 - **Security bug, independent of this review:** `inventory/context_processors.py:26`
   puts `Token.objects.first().key` into `js_vars` on inventory pages. `Token`'s primary key
   is the key itself, so this is the token whose key sorts first: in practice the dedicated
@@ -252,11 +269,42 @@ inventory app. It moves to `inventory/services.py` as a plain function.
 
 ### Bugs found on the way
 
-- `core/admin/lentrecord_admin.py:36-37`: `session = SessionStore()` at module level. One
-  unsaved session object is shared by every request in the process, and holds the
-  "new lending" pk between `save_model` and `response_change`.
-- Out of scope, noted: `Device.get_absolute_url` returns `None` for non-licence devices, so
-  device mails (`default_body.txt`, `device_decommissioned_body.txt`) print `URL: None`.
+- **Fixed (2026-10-11, step 9):** `core/admin/lentrecord_admin.py:36-37`:
+  `session = SessionStore()` at module level. One unsaved session object was shared by
+  every request in the process, and held the "new lending" pk between `save_model` and
+  `response_change`, so overlapping lends could redirect to each other's lending.
+- **Fixed (2026-10-11):** `Device.get_absolute_url` returned `None` for non-licence devices,
+  so device mails (`default_body.txt`, `device_decommissioned_body.txt`) printed
+  `URL: None`. Regular devices now get their detail page (`assets:device_detail`);
+  `obj_link` and the journal no longer work around the `None`, and the admin shows "View on
+  site" for every device.
+- **Fixed (2026-10-11):** `LentRecord.clean()` (`prx_lentrecord.py:57`) checked
+  `lent_end_date` against the UTC date (`datetime.date(now())`), while the return form
+  prefills `timezone.localdate()`. From midnight to 02:00 CEST (01:00 CET), returning a
+  lending with the prefilled date failed with "The return date cannot be in the future!".
+  `Device.get_timeline` and the report titles (`reporting/services.py`, the window start
+  is read back in UTC) also used the UTC date. Two tests failed in that window too:
+  `test_form_round_trip[lending_return]` (this bug) and
+  `test_modified_column_uses_naturaltime_for_recent_edits_only` (it formatted a UTC date
+  that the page shows in local time). `date.today()` is not affected: Django sets the
+  process timezone to `TIME_ZONE`.
+- **Fixed (2026-10-11):** `BaseTest._create_device` drew a random `sap_id` from 0–19999; a
+  test creating 26 devices collided in about 1.6 % of runs
+  (`test_pager_swaps_only_the_card_newest_first`). Generated IDs are now running numbers
+  (`auto-<n>`, `99999-<n>`).
+- **Fixed (2026-10-11, before step 10):** the overdue query (`notifications/reports.py`
+  `get_lent_overdue_records`) added the 5-day tolerance to every desired return date in
+  the database. On SQLite, Django does that in Python, so one lending dated near
+  9999-12-31 (the last date Python knows) crashed the overdue report and the overdue
+  reminder mails (`DataError: string or blob too big`). The query now subtracts the
+  tolerance from today. This is the overflow `MAX_FUTURE_LENT_DESIRED_END_DATE` guarded
+  against (step 10).
+- Out of scope, noted (2026-10-12): the 403 page (`templates/403.html`) shows only
+  `DEFAULT_FROM_EMAIL` as contact, while the login page and the mails use the Branding IT
+  address first (`get_contact_email`). Found while tracing `django_settings` (step 21b).
+- Out of scope, noted (2026-10-11): the licence iCal export (`licenses/views_calendar.py:59`)
+  computes `date + 1 day` for a licence's contract dates and overflows for 9999-12-31.
+  Licence dates never had a bound.
 
 ### What stays in core although it looks domain-specific
 
@@ -307,8 +355,8 @@ first draft and need the user's confirmation:
 - `Device.get_fqdn_url` is not dead (mail templates); it stays.
 - `env.template` has no `UDB_*` keys; that item is gone.
 - `update_inventory_note` does not become a `Note` manager method. Once the scan workflow
-  has moved (step 19), core no longer calls it, and all remaining callers are in
-  `inventory`.
+  has moved (step 19, now postponed), core no longer calls it, and all remaining callers
+  are in `inventory`.
 - The icon map goes to `theme`, not `dashboard`, because the core admin reads it too.
 - `links.py` stays in core (it has no connection to `hints`).
 - `dataexchange/reporting.py` has no state keys (its `REMOVED` is an import outcome).
@@ -333,6 +381,72 @@ first draft and need the user's confirmation:
   every known instance has run it?
 - Should lifecycle transitions write a journal entry (one `JournalEntry.objects.log` in
   `Record.save`)? Not now; noted as an idea.
+
+## Postponed
+
+Topics taken out of this review on purpose. They are kept here so that later steps and
+the contract do not quietly assume them done.
+
+### Where `TenantAwareModel` lives (step 15, skipped 2026-10-11)
+
+- **Today:** the abstract `TenantAwareModel` (the `tenant` foreign key: `PROTECT`, nullable
+  for legacy devices) is in `tenants/abstracts.py`. Its only user is
+  `core/models/device.py` (`Device(TenantAwareModel, SoftDeleteAuditBaseModel)`). The
+  module is kept apart from `tenants/models.py` to break an import cycle: core's models
+  import it, and `tenants.models` imports core's `AuditBaseModel`.
+- **What step 15 would have done:** move it into `core/models/abstracts.py` and delete
+  `tenants/abstracts.py`. Skipped by user decision.
+- **Consequences while it stays:**
+  - Rule 5 has one exception: `core/models/device.py` imports Python from `tenants`.
+  - Rule 1 lists `TenantAwareModel` among core's abstract bases, which is not true yet.
+  - The contract text (step 36) has to name this exception, unless the move is done by
+    then.
+- **If it is taken up again:** a small move (one abstract model, one importer, same field
+  definition). `makemigrations --check` must stay clean; see *Pitfalls*.
+
+### Device state buttons built in core (step 18, postponed 2026-10-12)
+
+- **Today:** `core/utils/device_methods.py` (`get_device_state_data`, reached through
+  `Device.get_state_data`) builds the state badge and its action dropdown: label, CSS
+  classes, the badge link, and an action URL per screen. `app_name == "assets"` routes to
+  `assets:relocate`, `assets:device_order` and `lending:detail`; `"inventory"` to
+  `inventory:inventorize-room`; otherwise to admin pages. *Which* actions are offered
+  comes from `lifecycle.available`, which stays in core either way. Callers: the core
+  DeviceAdmin (2), `assets/views/devices.py`, `inventory/views.py`. The template it fills
+  is in theme since step 17 (`theme/device/state_btn_group.html`).
+- **What step 18 would have done:** move the module to `theme/device_state.py`, remove
+  `Device.get_state_data`, let the callers call the function, and move
+  `core/tests/test_device_state_data.py` to `theme/tests/`.
+- **Why postponed (user decision):** nothing is broken. The module imports no Python
+  from another app; it only passes URL names to `reverse()`. The move changes no behaviour
+  but touches three callers, the model and about 490 lines of tests. Its gain is
+  structural: core would stop knowing how other apps route their screens.
+- **Consequences while it stays:**
+  - Rule 5 has a second exception: core names `assets:`, `lending:` and `inventory:` URLs
+    outside `get_absolute_url` and `obj_link`.
+  - A new screen that wants its own action routing needs a new `app_name` branch in core.
+  - The template is in theme, the data that fills it in core.
+- **If it is taken up again:** as step 18 describes. Also update the references in the
+  `lifecycle.py` docstring and the `assets/…/_set_state.html` comment.
+
+### Inventory scan workflow in the `Inventory` model (step 19, postponed 2026-10-12)
+
+- **Today:** `Inventory.inventorize_uuids_for_room` (`core/models/inventory.py`) is the
+  inventory scan workflow: found → `lifecycle.localise`, not found → `relocate_lending` or
+  `transition_lose`, unknown → strip the inventory stamps. It is called from
+  `inventory/views.py` and from tests (`inventory/tests/test_inventory.py`,
+  `core/tests/test_state_write_paths.py`). For the inventory notes it imports
+  `inventory.utils.update_inventory_note`.
+- **What step 19 would have done:** move the method to `inventory/services.py` as a plain
+  function (`inventorize_room(...)`), so that core no longer imports from `inventory`.
+- **Why postponed (user decision):** the inventory app gets its own refactoring as a
+  separate task; this move belongs there.
+- **Consequences while it stays:**
+  - Rule 5 has a third exception: `core/models/inventory.py` imports from `inventory`.
+  - Core keeps a workflow that is not a shared rule (the rules it applies are lifecycle
+    calls).
+- **For the inventory task:** the move as described, then `update_inventory_note` has
+  only inventory callers left (see *Changes against the first draft*).
 
 ## Steps
 
@@ -362,26 +476,30 @@ Not part of the core review. It goes first because it is a security fix and smal
 #### 2 — Unused files
 - Delete `core/forms/lentlocalization_form.py`, `core/templates/core/room/records_snippet.html`
   and `core/static/core/proxyrecord_admin/add_form.css`, with its commented-out reference in
-  `proxyrecord_admin_form.py`.
-- Commit: `Core review, step 2: unused LentLocalizationForm, room records snippet and admin
-  add_form.css removed`
+  `proxyrecord_admin_form.py`, plus the empty `core/tests/test_record_type_choicer.py`.
+- Commit: `Core review, step 2: unused LentLocalizationForm, room records snippet, admin
+  add_form.css and an empty test file removed`
 
 #### 3 — Unused model methods
-- Delete `Room.get_active_records`, `Room.get_lent_records` and `Record.get_proxy_instance`,
-  plus the tests that cover only them (`test_record_model.py`, `test_fsm_contract.py`).
-- Commit: `Core review, step 3: unused Room.get_active_records, Room.get_lent_records and
-  Record.get_proxy_instance removed`
+- Delete `Room.get_active_records`, `Room.get_lent_records`, `Record.get_proxy_instance`
+  and `Record.get_proxy_model` (its only caller), plus the tests that cover only them
+  (`test_record_model.py`, `test_fsm_contract.py`).
+- Commit: `Core review, step 3: unused Room.get_active_records, Room.get_lent_records,
+  Record.get_proxy_instance and Record.get_proxy_model removed`
 
 #### 4 — Stale text
 - `record.py:62-64` comment; docstrings of `test_transition_parity.py`,
-  `test_state_write_paths.py`, `test_fsm_contract.py` describe today's code; the
-  `LendingForm` docstring no longer claims to replace `LentRecordAdminForm`.
+  `test_state_write_paths.py`, `test_fsm_contract.py`, `test_device_state_data.py`,
+  `test_record_append_only.py` and `api/tests/test_record_state_contract.py` describe
+  today's code; the `LendingForm` docstring no longer claims to replace
+  `LentRecordAdminForm`.
 - Commit: `Core review, step 4: comments and test docstrings describe the current lifecycle
   instead of removed mechanisms`
 
 #### 5 — Lifecycle docstring lists the bypasses
 - List the `check_transition=False` call sites: `dataexchange/importer.py` (3) and
   `inventory/management/commands/fix_inventory_lost_lendings.py` (1). (Decision 4.)
+  `Record.save()` points to the list.
 - Commit: `Core review, step 5: the lifecycle docstring lists every record write that skips
   the transition check`
 
@@ -390,35 +508,58 @@ Not part of the core review. It goes first because it is a security fix and smal
 - Commit: `Core review, step 6: settings lose the unread LOGIN_FIELD and the duplicate
   SITE_ID`
 
-#### 7 — Owning app on settings wiring
-- Add a comment naming the owning app to the lending template loader, the inventory
-  context processor, the tenants middleware and the journal logging handlers.
-- Commit: `Core review, step 7: app-specific lines in the global settings name the app that
-  needs them`
+#### 7 — Wiring requirements in the docstrings
+- The docstrings of `CurrentTenantMiddleware` (needs `request.user`, so after
+  `AuthenticationMiddleware`; views across the apps read `request.tenants`),
+  `lending.loader.DatabaseLoader` (stays outside the cached loader) and the `inventory`
+  context processor (runs on every request, empty outside the inventory app) state their
+  wiring requirements. `settings/base.py` is unchanged: its existing comments on the
+  lending loader and the journal handlers explain a position and stay. (First done as
+  "owning app" comments in settings; reworked on 2026-10-11, see the settings finding.)
+- Commit: `Core review, step 7: middleware, template loader and context processor
+  docstrings state their wiring requirements`
 
 #### 8 — `reporting/settings.py` → `reporting/fields.py`
-- Readers: `reporting/utils/representations.py`, `reporting/tests/test_reports.py`.
+- Readers: `reporting/utils/representations.py`, `reporting/tests/test_reports.py`, and the
+  path in `docs/guides/notifications.md`.
 - Commit: `Core review, step 8: reporting's field list moves to reporting/fields.py, out of
   a module named settings`
 
 ### Phase B — Small standalone fixes
 
 #### 9 — Lending admin without a process-wide session
-- `lentrecord_admin.py`: replace the module-level `session = SessionStore()` with
-  `request.session` in `save_model` and `response_change`. A test that a lend followed by
-  an edit redirects to the right record.
+- `lentrecord_admin.py`: replace the module-level `session = SessionStore()` with an
+  attribute on the request (`request.new_lending`), set in `save_model` and read in
+  `response_change`. Both run in the same request, so nothing needs to persist;
+  `request.session` (the first idea) would have carried the pk into later requests.
+  Tests: two overlapping lends each redirect to their own lending, and a lend followed by
+  an edit redirects to the right record (`core/tests/test_lentrecord_admin.py`).
 - Commit: `Core review, step 9: the lending admin keeps the new-lending redirect per request,
   not in one session object shared by all requests`
 
-#### 10 — `MAX_FUTURE_LENT_DESIRED_END_DATE` is a date
-- Parse it once in settings (`date.fromisoformat`). `prx_lentrecord.py` and `udb_sync.py`
-  drop `strptime`, and `test_udb_sync.py` sets a `date`.
-- Commit: `Core review, step 10: MAX_FUTURE_LENT_DESIRED_END_DATE is parsed once into a date`
+#### 10 — No upper bound for the desired return date
+- First planned as "parse `MAX_FUTURE_LENT_DESIRED_END_DATE` once into a date". Its history
+  (git): 2022 a constant 2099-12-31 (DB CheckConstraint plus `LentRecord.clean()`);
+  2026-06 the HR sync has to skip contract ends past it; 2026-07 an env var (the user's
+  instance: 2999-12-31) and the DB constraint removed. Its reason: adding days to a date
+  near 9999-12-31, the last date Python knows, overflows. The only such calculation was
+  the overdue query, now written without it (fixed before this step).
+- Decision (2026-10-11): remove the bound instead of moving it into the lending
+  configuration. Deleted: the check in `LentRecord.clean()`, the skip in the HR sync, the
+  setting, the env var (`env.template`) and the 31.12.2099 line in `docs/guides/ausleihe.md`.
+  A NEWS line says the env var can go from `.env`. The sync test now pins that a contract
+  end in 2100 is taken over.
+- Commits: `Overdue lendings: the tolerance is subtracted from today instead of added to
+  every desired return date, so dates near 9999-12-31 cannot overflow`, then `Core review,
+  step 10: the desired return date has no upper bound; the
+  MAX_FUTURE_LENT_DESIRED_END_DATE setting and env var are gone`
+- The first commit changes the overdue query that steps 29–31 consolidate later.
 
 ### Phase C — Moves, no behaviour change (one move per commit)
 
 #### 11 — `mark_not_handled_assets_in_csv` → `inventory/management/commands/`
-- The command name stays the same, so the docs are unaffected.
+- The command name stays the same; its row in `docs/betrieb/management_commands.md` moves
+  to the inventory commands.
 - Commit: `Core review, step 11: the SAP CSV check command moves to inventory`
 
 #### 12 — `populate_devicetype_icons` → `assets/management/commands/`
@@ -427,25 +568,29 @@ Not part of the core review. It goes first because it is a security fix and smal
 #### 13 — Lending print helpers → `lending`
 - `markdown_extras` → `lending/templatetags/` (same library name; DB-stored profiles load
   it). `interleaf.html` → `lending/templates/lending/includes/`, and the include in
-  `printout_base.html` is updated.
+  `printout_base.html` is updated. `core/templatetags/` is gone. A print test with the
+  starter sheet covers both (`lending/tests/test_views.py`).
 - Commit: `Core review, step 13: the markdown filter and the print interleaf move to lending,
   their only user`
 
 #### 14 — `uuid2qrcode` → `core/utils/qrcode.py`
 - Callers import it from core: `core/models/device.py`, `core/models/room.py` and
   `inventory/management/commands/generate_qrcodes.py`. Removed from `inventory/utils.py`.
-- Commit: `Core review, step 14: QR code generation is a core helper; core models no longer
-  import inventory`
+- `core/models/inventory.py` still imports `inventory.utils.update_inventory_note`; that
+  belongs to step 19, now postponed.
+- Commit: `Core review, step 14: QR code generation is a core helper; Device and Room no
+  longer import inventory`
 
-#### 15 — `TenantAwareModel` → `core/models/abstracts.py`
-- Delete `tenants/abstracts.py` (its only importer is `core/models/device.py`). Same field
-  definition, so `makemigrations --check` must stay clean (see *Pitfalls*).
-- Commit: `Core review, step 15: TenantAwareModel lives with the other core abstract bases`
+#### 15 — Skipped
+- Skipped (2026-10-11, user decision). The plan was: move `TenantAwareModel` from
+  `tenants/abstracts.py` to `core/models/abstracts.py`. It stays in `tenants`.
+  `core/models/device.py` keeps importing it. See *Postponed*.
 
 #### 16 — Model icons → `theme`
 - `settings.THEME` becomes a dict in `theme` (e.g. `theme/icons.py`), together with
   `get_icon_for_class`. `COLOR` is dropped. Readers: `dashboard/views.py`,
-  `core/admin/base_admin.py`.
+  `core/admin/base_admin.py`. Done as `theme/icons.py` (`MODEL_ICONS`); a small test
+  pins it (`theme/tests/test_icons.py`), none covered the icons before.
 - Commit: `Core review, step 16: the model icon map moves from settings to theme`
 
 #### 17 — `state_btn_group.html` → `theme/templates/theme/device/`
@@ -453,32 +598,36 @@ Not part of the core review. It goes first because it is a security fix and smal
   the path first.
 - Commit: `Core review, step 17: the device state button template moves to theme`
 
-#### 18 — Device state data → `theme/device_state.py`
-- Move `core/utils/device_methods.py` and remove `Device.get_state_data`. The callers
-  (`core/admin/device_admin.py`, `assets/views/devices.py`, `inventory/views.py`) call
-  `get_device_state_data(device, …)`. `core/tests/test_device_state_data.py` moves to
-  `theme/tests/`. Update the references in the `lifecycle.py` docstring and the
-  `assets/…/_set_state.html` comment.
-- Commit: `Core review, step 18: device state buttons (labels, CSS, per-app action URLs) are
-  built in theme, not on the Device model`
+#### 18 — Postponed
+- Postponed (2026-10-12, user decision). The plan was: move `core/utils/device_methods.py`
+  to `theme/device_state.py` and remove `Device.get_state_data`. It stays in core for now.
+  See *Postponed*.
 
-#### 19 — Inventory scan workflow → `inventory/services.py`
-- `Inventory.inventorize_uuids_for_room` becomes `inventorize_room(...)`. Callers:
-  `inventory/views.py`, `inventory/tests/test_inventory.py`,
-  `core/tests/test_state_write_paths.py`. Core stops importing `update_inventory_note`.
-- Commit: `Core review, step 19: the inventory scan workflow moves from the Inventory model to
-  inventory/services.py`
+#### 19 — Postponed
+- Postponed (2026-10-12, user decision): the whole inventory refactoring is a separate
+  task. The plan was: move `Inventory.inventorize_uuids_for_room` to
+  `inventory/services.py`. See *Postponed*.
 
 #### 20 — `nav` → `theme/context_processors.py`
 - `nav` and `_app_navigation`; update `TEMPLATES[...]["context_processors"]` and the test
   imports.
 - Commit: `Core review, step 20: the navbar context processor moves to theme`
 
-#### 21 — `hints` and `django_settings` → `theme/context_processors.py`
-- Delete `core/context_processors.py`. Move `test_hints.py` and
-  `test_context_processor_queries.py` to `theme/tests/`. Run the guard grep.
-- Commit: `Core review, step 21: the setup hints move to theme; core has no context
-  processors left`
+#### 21 — `hints` → `theme/context_processors.py`
+- Split from `django_settings` on 2026-10-12 (see 21b). `hints` (with its nested
+  `StickyMessage`) moves unchanged; `test_hints.py` and `test_context_processor_queries.py`
+  move to `theme/tests/`. Core's context processors no longer import `dataexchange`.
+- Commit: `Core review, step 21: the setup hints move to theme`
+
+#### 21b — `django_settings` → `theme/context_processors.py`
+- Traced on 2026-10-12: it exposes only `DEFAULT_FROM_EMAIL`, read by two project-level
+  templates, `templates/403.html` and `templates/registration/login.html`, for their
+  contact line. Offered alternative: a `contact_email` from core's `get_contact_email()`.
+  Decision (user): move it unchanged, as planned.
+- Delete `core/context_processors.py`. Run the guard grep. No test covered the contact
+  line, so `theme/tests/test_contact_line.py` now checks it on both pages.
+- Commit: `Core review, step 21b: the settings context processor moves to theme; core has
+  no context processors left`
 
 ### Phase D — One definition per rule
 
@@ -605,27 +754,28 @@ Not part of the core review. It goes first because it is a security fix and smal
 
 - [x] Plan written (2026-10-09), reordered into atomic steps (2026-10-10)
 - [x] 0 — Inventory scanner token (out of band)
-- [ ] 1 — Procure page removed
-- [ ] 2 — Unused files removed
-- [ ] 3 — Unused model methods removed
-- [ ] 4 — Stale text
-- [ ] 5 — Lifecycle docstring lists the bypasses
-- [ ] 6 — Unread settings
-- [ ] 7 — Owning app on settings wiring
-- [ ] 8 — `reporting/fields.py`
-- [ ] 9 — Lending admin without a process-wide session
-- [ ] 10 — `MAX_FUTURE_LENT_DESIRED_END_DATE` is a date
-- [ ] 11 — `mark_not_handled_assets_in_csv` → inventory
-- [ ] 12 — `populate_devicetype_icons` → assets
-- [ ] 13 — Lending print helpers → lending
-- [ ] 14 — `uuid2qrcode` → core
-- [ ] 15 — `TenantAwareModel` → core
-- [ ] 16 — Model icons → theme
-- [ ] 17 — `state_btn_group.html` → theme
-- [ ] 18 — Device state data → theme
-- [ ] 19 — Inventory scan workflow → inventory
-- [ ] 20 — `nav` → theme
-- [ ] 21 — `hints`, `django_settings` → theme
+- [x] 1 — Procure page removed
+- [x] 2 — Unused files removed
+- [x] 3 — Unused model methods removed
+- [x] 4 — Stale text
+- [x] 5 — Lifecycle docstring lists the bypasses
+- [x] 6 — Unread settings
+- [x] 7 — Wiring requirements in the docstrings
+- [x] 8 — `reporting/fields.py`
+- [x] 9 — Lending admin without a process-wide session
+- [x] 10 — No upper bound for the desired return date
+- [x] 11 — `mark_not_handled_assets_in_csv` → inventory
+- [x] 12 — `populate_devicetype_icons` → assets
+- [x] 13 — Lending print helpers → lending
+- [x] 14 — `uuid2qrcode` → core
+- ~~15 — `TenantAwareModel` → core~~ skipped (2026-10-11)
+- [x] 16 — Model icons → theme
+- [x] 17 — `state_btn_group.html` → theme
+- ~~18 — Device state data → theme~~ postponed (2026-10-12)
+- ~~19 — Inventory scan workflow → inventory~~ postponed (2026-10-12)
+- [x] 20 — `nav` → theme
+- [x] 21 — `hints` → theme
+- [x] 21b — `django_settings` → theme
 - [ ] 22 — State keys
 - [ ] 23 — Licence device-type prefixes
 - [ ] 24 — Expires-soon notice
@@ -650,6 +800,9 @@ Not part of the core review. It goes first because it is a security fix and smal
 - `.venv/bin/pytest .`
 - A grep guard, run after steps 14, 15, 19, 21, 25 and 36:
   `grep -rn "from dlcdb\.\(assets\|inventory\|lending\|licenses\|theme\|journal\|organization\|dataexchange\|tenants\|notifications\)\|get_model(\"notifications" dlcdb/core/models dlcdb/core/lifecycle.py dlcdb/core/utils`
-  must end up listing only the accepted exception (`Branding` in `get_contact_email`).
+  must end up listing only the accepted exception (`Branding` in `get_contact_email`) and
+  the postponed ones: `tenants.abstracts` in `models/device.py` (step 15) and
+  `inventory.utils` in `models/inventory.py` (step 19). Step 18 does not show up here: it
+  names URLs, it imports nothing.
 - `/verify` after steps 0 (scanner), 17–21 (device list state buttons, inventory room
   page, navbar, hints band), 30 and 32 (admin and frontend lend/return).
