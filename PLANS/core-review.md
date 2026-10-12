@@ -1264,6 +1264,8 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 - An alias of `lifecycle.proxy_for`, read only by two tests in `test_fsm_contract.py`;
   `test_lifecycle.py` covers `proxy_for` already. First noted under *Admin-only members on core
   models*.
+- Done: the stamping test in `test_fsm_contract.py` calls `lifecycle.proxy_for`; the other
+  was a copy of `test_lifecycle.py::test_every_state_maps_to_a_proxy_model` and is gone.
 
 #### 45 — The `LicenceRecord` manager without leftovers
 - `prx_licencerecord.py`, no behaviour change:
@@ -1325,7 +1327,7 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 ### Progress (pre-merge review)
 
 - [x] 43 — Stale text
-- [ ] 44 — `get_proxy_model_by_record_type` removed
+- [x] 44 — `get_proxy_model_by_record_type` removed
 - [ ] 45 — `LicenceRecord` manager without leftovers
 - [ ] 46 — Dead state checks in the licence admin
 - [ ] 47 — `DeviceAdmin` keeps no request on the shared admin

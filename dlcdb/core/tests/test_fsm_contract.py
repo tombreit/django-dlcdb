@@ -101,17 +101,6 @@ def test_unknown_state_yields_no_transitions_instead_of_raising():
 # --- Registry completeness ----------------------------------------------
 
 
-def test_every_record_type_resolves_to_a_proxy_model():
-    """
-    Every state in ``lifecycle.STATES`` names an existing proxy model of
-    ``Record``; a wrong proxy name would otherwise only fail at the first write.
-    """
-    for key in RECORD_TYPE_KEYS:
-        proxy = Record.get_proxy_model_by_record_type(key)
-        assert proxy._meta.proxy, f"{proxy.__name__} must be a proxy model"
-        assert issubclass(proxy, Record)
-
-
 @pytest.mark.django_db
 def test_every_proxy_stamps_its_own_record_type(plain_device):
     """
@@ -119,7 +108,7 @@ def test_every_proxy_stamps_its_own_record_type(plain_device):
     rely on it to write the right state.
     """
     for key in RECORD_TYPE_KEYS:
-        proxy = Record.get_proxy_model_by_record_type(key)
+        proxy = lifecycle.proxy_for(key)
         # Deliberately pass a wrong record_type: save() must overwrite it.
         instance = proxy(device=plain_device, record_type="WRONG")
         instance.save()

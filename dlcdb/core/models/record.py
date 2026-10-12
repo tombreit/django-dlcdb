@@ -271,10 +271,6 @@ class Record(AuditBaseModel):
         if is_new_record:
             self.update_active_record_on_device()
 
-    @staticmethod
-    def get_proxy_model_by_record_type(record_type):
-        return lifecycle.proxy_for(record_type)
-
     def get_latest_note(self):
         """
         Returns the latest note of the related device.
