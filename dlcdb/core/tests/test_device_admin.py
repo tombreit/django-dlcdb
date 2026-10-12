@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import admin
+from django.contrib.admin.utils import lookup_field
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import override_settings
+from django.test import RequestFactory, override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Room
@@ -150,6 +151,43 @@ class DeviceAdminTenantTests(basetest.BaseTest):
         changelist = self.client.get(changelist_url).context["cl"]
         self.assertNotIn("tenant", changelist.list_display)
         self.assertNotIn(("tenant", admin.RelatedOnlyFieldListFilter), changelist.list_filter)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class DeviceAdminActionsColumnTests(basetest.BaseTest):
+    """The state buttons on the changelist are built for the user of the request."""
+
+    def _list_display(self, user):
+        request = RequestFactory().get(reverse("admin:core_device_changelist"))
+        request.user = user
+        request.tenants = (self._default_tenant(),)
+        return admin.site._registry[Device].get_list_display(request)
+
+    def _buttons(self, list_display, device):
+        """The actions cell of ``device``, rendered as the changelist renders it."""
+        [column] = [entry for entry in list_display if getattr(entry, "__name__", entry) == "get_device_actions"]
+        _, _, html = lookup_field(column, device, admin.site._registry[Device])
+        return html
+
+    def test_overlapping_changelists_build_state_buttons_for_their_own_user(self):
+        """
+        The admin instance is shared by all requests: building the columns of a
+        second request must not change the buttons of the first.
+        """
+        device = self._create_device()  # no record yet: it can be taken into service
+        superuser = get_user_model().objects.create_superuser(
+            email="admin@example.org", password="secret", username="admin"
+        )
+        viewer = get_user_model().objects.create_user(
+            email="viewer@example.org", password="secret", username="viewer", is_staff=True
+        )
+        locate = f"{reverse('admin:core_inroomrecord_add')}?device={device.pk}"
+
+        columns_of_superuser = self._list_display(superuser)
+        columns_of_viewer = self._list_display(viewer)
+
+        self.assertIn(locate, self._buttons(columns_of_superuser, device))
+        self.assertNotIn(locate, self._buttons(columns_of_viewer, device))
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)

@@ -87,12 +87,6 @@ name. Possible fix: create the `AUTH_LDAP_MIRROR_GROUPS` groups in `post_migrate
 Scoping is opt-in per view (`tenant_scoped_queryset`). A django-scopes-style default (querysets
 refuse to evaluate without a scope) is the natural hardening if more apps are added.
 
-### `DeviceAdmin.get_list_display` stores the request on the admin
-
-`self.request = request` sets state on the shared `ModelAdmin` instance (thread-unsafe), so that a
-display method can call `obj.get_state_data(user=self.request.user)`. This is older than the
-tenant work.
-
 ## Pitfalls
 
 - **Permissions carry over between tenants** (decision 1). A user in "ops-a" (edit, tenant A)

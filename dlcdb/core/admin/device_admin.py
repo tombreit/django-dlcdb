@@ -85,8 +85,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "device_type",
         "manufacturer",
         "series",
-        "get_device_actions",
-    ]  # + CustomBaseModelAdmin.list_display
+    ]  # + the actions column, built per request in get_list_display()
 
     readonly_fields = (
         "is_imported",
@@ -211,14 +210,14 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         Return a sequence containing the fields to be displayed on the
         changelist.
         """
-        self.request = request
-
         # A copy: the class attribute must not change between requests.
         list_display = list(super().get_list_display(request))
         if settings.DEVICE_HIDE_FIELDS:
             list_display = [entry for entry in list_display if entry not in settings.DEVICE_HIDE_FIELDS]
             # set() operations do not preserve order
             # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
+
+        list_display.append(self.get_device_actions_column(request))
 
         # The tenant only tells devices apart for users with several tenants.
         if len(request.tenants) > 1:
@@ -289,14 +288,22 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
             extra_context=extra_context,
         )
 
-    @admin.display(description="Actions")
-    def get_device_actions(self, obj):
-        context = {
-            "state_data": obj.get_state_data(user=self.request.user),
-            "size": "sm",
-        }
+    def get_device_actions_column(self, request):
+        """
+        The state buttons for the changelist. They depend on the user's permissions,
+        so the column is built per request: the admin instance is shared by all
+        requests and must not hold one.
+        """
 
-        return render_to_string("theme/device/state_btn_group.html", context)
+        @admin.display(description="Actions")
+        def get_device_actions(obj):
+            context = {
+                "state_data": obj.get_state_data(user=request.user),
+                "size": "sm",
+            }
+            return render_to_string("theme/device/state_btn_group.html", context)
+
+        return get_device_actions
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):

@@ -1301,6 +1301,12 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 - Already listed in `PLANS/flexible-tenants.md` under *Open follow-ups*.
 - Fix: `get_list_display` builds the actions column per request (a callable that closes over
   the request); nothing is stored on the instance. A test in the style of step 9.
+- Done: `get_device_actions_column(request)` returns the column, appended in
+  `get_list_display`; the class-level `list_display` no longer names it. Column order, header
+  and CSS classes are unchanged. The test (`core/tests/test_device_admin.py`) builds the columns
+  of a superuser and then of a user without transition permissions, and renders each cell as
+  the changelist does; on the old admin the superuser's cell came out without buttons. The
+  entry in `PLANS/flexible-tenants.md` (*Open follow-ups*) is removed.
 
 ### Noted, not proposed
 
@@ -1339,4 +1345,4 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 - [x] 44 — `get_proxy_model_by_record_type` removed
 - [x] 45 — `LicenceRecord` manager without leftovers
 - [x] 46 — Dead state checks in the licence admin
-- [ ] 47 — `DeviceAdmin` keeps no request on the shared admin
+- [x] 47 — `DeviceAdmin` keeps no request on the shared admin
