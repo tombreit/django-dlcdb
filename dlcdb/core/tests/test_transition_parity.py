@@ -6,11 +6,12 @@
 Parity tests for the two places a lending is entered:
 
 * ``dlcdb/core/admin/lentrecord_admin.py::LentRecordAdmin.save_model``
-* ``dlcdb/lending/views.py::_apply_state_machine``
+* ``dlcdb/lending/views.py::_save_lending``
 
-Both dispatch to the same lifecycle transitions. These tests assert that the two
-paths produce the same state changes and both refuse to lend a lost device. They
-compare outcomes only, so merging the two dispatchers is invisible to them.
+Both save through ``LentRecord.apply_lending`` and show
+``LentRecord.contract_warnings``. These tests assert that the two paths produce the
+same record chain, stamp the same editor, show the same warnings and both refuse to
+lend a lost device. They compare outcomes only.
 
 The admin remove form's guards and the relocate branches are pinned here too.
 """
@@ -18,6 +19,7 @@ The admin remove form's guards and the relocate branches are pinned here too.
 import datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages import WARNING, get_messages
 from django.forms import modelform_factory
 from django.test import override_settings
 from django.urls import reverse
@@ -201,6 +203,89 @@ class LendReturnParityTests(BaseTest):
         self.assertEqual(admin_state["record_type"], Record.LENT)
         self.assertEqual(admin_state["chain_length"], 1)
         self.assertEqual(admin_state, snapshot(front_device))
+
+    def test_editing_a_lending_stamps_the_editor_on_both_paths(self):
+        """The test lendings have no editor yet; saving an edit records the helpdesk user."""
+        _admin_device, admin_record = self._lent_device("EDV-ADM-EDITOR", "11-11")
+        _front_device, front_record = self._lent_device("EDV-FE-EDITOR", "12-12")
+
+        self._post_admin(admin_record, lent_note="Charger included")
+        self._post_frontend(front_record, lent_note="Charger included")
+
+        for record in (admin_record, front_record):
+            record.refresh_from_db()
+            self.assertEqual(record.user, self.user)
+            self.assertEqual(record.username, "helpdesk@example.com")
+
+    # --- lend, edit and return in a row ------------------------------------
+
+    @staticmethod
+    def _chain(device):
+        """The device's records, oldest first, with what the lending screens write."""
+        return [
+            (record.record_type, record.room.number, record.lent_note, record.lent_end_date, record.username)
+            for record in device.record_set.order_by("pk")
+        ]
+
+    def test_lend_edit_and_return_leave_the_same_record_chain_on_both_paths(self):
+        admin_device, admin_record = self._available_device("EDV-ADM-CHAIN", "13-13")
+        front_device, front_record = self._available_device("EDV-FE-CHAIN", "14-14")
+
+        self._post_admin(admin_record)
+        admin_lending = LentRecord.objects.get(device=admin_device, record_type=Record.LENT)
+        self._post_admin(admin_lending, lent_note="Charger included")
+        self._post_admin(admin_lending, lent_note="Charger included", lent_end_date=RETURN_DATE)
+
+        self._post_frontend(front_record)
+        front_lending = LentRecord.objects.get(device=front_device, record_type=Record.LENT)
+        self._post_frontend(front_lending, lent_note="Charger included")
+        self._post_frontend_return(front_lending, lent_note="Charger included")
+
+        returned = datetime.date.fromisoformat(RETURN_DATE)
+        self.assertEqual(
+            self._chain(admin_device),
+            [
+                (Record.INROOM, self.room.number, "", None, ""),
+                (Record.LENT, self.room.number, "Charger included", returned, "helpdesk@example.com"),
+                (Record.INROOM, self.auto_return_room.number, "", None, "helpdesk@example.com"),
+            ],
+        )
+        self.assertEqual(self._chain(admin_device), self._chain(front_device))
+
+    # --- contract warnings -----------------------------------------------
+
+    def _warnings(self, response):
+        """
+        The warnings the save added. The client then drops the message cookie, so
+        the next save in the same test starts without them.
+        """
+        warnings = [str(message) for message in get_messages(response.wsgi_request) if message.level == WARNING]
+        self.client.cookies.pop("messages", None)
+        return warnings
+
+    def test_both_paths_warn_about_a_missing_contract_end_date(self):
+        _admin_device, admin_record = self._available_device("EDV-ADM-NO-CONTRACT", "15-15")
+        _front_device, front_record = self._available_device("EDV-FE-NO-CONTRACT", "16-16")
+
+        admin_warnings = self._warnings(self._post_admin(admin_record))
+        front_warnings = self._warnings(self._post_frontend(front_record))
+
+        self.assertEqual(admin_warnings, ["Warning: No HR contract end date found for Mustermann, Max!"])
+        self.assertEqual(admin_warnings, front_warnings)
+
+    def test_both_paths_warn_about_a_contract_ending_before_the_desired_return(self):
+        self.person.udb_contract_planned_checkout = datetime.date.fromisoformat(LEND_DESIRED_END) - datetime.timedelta(
+            days=1
+        )
+        self.person.save()
+        _admin_device, admin_record = self._available_device("EDV-ADM-SHORT-CONTRACT", "17-17")
+        _front_device, front_record = self._available_device("EDV-FE-SHORT-CONTRACT", "18-18")
+
+        admin_warnings = self._warnings(self._post_admin(admin_record))
+        front_warnings = self._warnings(self._post_frontend(front_record))
+
+        self.assertEqual(admin_warnings, ["Warning: Contract ends before the desired return date!"])
+        self.assertEqual(admin_warnings, front_warnings)
 
 
 class LostDeviceCannotBeLentTests(BaseTest):

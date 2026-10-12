@@ -4,7 +4,6 @@
 
 from django.contrib import admin, messages
 from django.db.models import Case, CharField, Value, When
-from django.forms import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.formats import date_format
@@ -15,7 +14,6 @@ from dlcdb.dataexchange.admin import ExportCsvMixin
 from dlcdb.lending.models import LendingConfiguration
 from dlcdb.tenants.admin import TenantScopedRecordAdmin
 
-from .. import lifecycle
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
 from ..models import LentRecord, Record
 from ..utils.links import linked_message, obj_link
@@ -225,54 +223,19 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
 
     def save_model(self, request, obj, form, change):
         """
-        By saving a record, check original record type and create new records
-        if neccessary.
+        Shows the HR contract warnings and saves through the lend, return and edit
+        dispatch the lending frontend uses too (``LentRecord.contract_warnings``,
+        ``LentRecord.apply_lending``).
+
+        After a lend, ``response_change()`` redirects to the new lending. It runs in
+        the same request, so the request carries it; nothing outlives the request.
         """
+        for warning in obj.contract_warnings():
+            messages.warning(request, warning)
 
-        # Soft warnings
-        desired_lent_end_date = obj.lent_desired_end_date
-        contract_end_date = obj.person.udb_contract_planned_checkout
-
-        if not contract_end_date:
-            messages.warning(
-                request, _("Warning: No HR contract end date found for %(person)s!") % {"person": obj.person}
-            )
-
-        if contract_end_date:
-            if desired_lent_end_date > contract_end_date:
-                messages.warning(request, _("Warning: Contract ends before the desired return date!"))
-
-        # Save logic -- the same lend/return/edit dispatch as the lending
-        # frontend, routed through the lifecycle transitions.
-        if obj.record_type == Record.LENT and obj.lent_end_date and obj.active_device_record:
-            # War ein LENT record und hat jetzt einen Rückgabe-Timestamp: Rückgabe
-            # stempeln und das Gerät in seinen Raum zurückführen.
-            lifecycle.transition_return_lending(obj, user=request.user, lent_end_date=obj.lent_end_date)
-
-        elif obj.record_type == Record.LENT:
-            # War schon ein LENT record, wird lediglich geändert (kein Übergang):
-            super().save_model(request, obj, form, change)
-
-        elif obj.record_type == Record.INROOM:
-            # War ein INROOM record, muss als neuer LENT record gespeichert werden:
-            instance = lifecycle.transition_lend(
-                obj.device,
-                person=obj.person,
-                room=obj.room,
-                lent_start_date=obj.lent_start_date,
-                lent_desired_end_date=obj.lent_desired_end_date,
-                sync_lent_end_date=obj.sync_lent_end_date,
-                lent_note=obj.lent_note,
-                lent_reason=obj.lent_reason,
-                lent_accessories=obj.lent_accessories,
-                user=request.user,
-            )
-            # response_change() redirects to the new lending. It runs in the same
-            # request, so the request carries it; nothing outlives the request.
-            request.new_lending = instance
-
-        else:
-            raise ValidationError("Lent state unknown - please report this issue!")
+        lending = obj.apply_lending(user=request.user)
+        if obj.record_type == Record.INROOM:
+            request.new_lending = lending
 
     def response_change(self, request, obj):
         new_lending = getattr(request, "new_lending", None)

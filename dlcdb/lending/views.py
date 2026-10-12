@@ -20,7 +20,6 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import LentRecord, Person, Record, Room
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.links import linked_message
 from dlcdb.dataexchange.csv_export import (
@@ -209,75 +208,24 @@ def _get_scoped_inroom_record(request, device_pk):
     return record
 
 
-def _lending_soft_warnings(request, form):
-    """
-    Non-blocking warnings mirroring ``LentRecordAdmin.save_model``: flag a
-    missing UDB contract end date and a desired return date that runs past it.
-    """
-    person = form.cleaned_data.get("person")
-    desired_end = form.cleaned_data.get("lent_desired_end_date")
-    if not person:
-        return
-
-    contract_end = person.udb_contract_planned_checkout
-    if not contract_end:
-        messages.warning(request, _("Warning: No HR contract end date found for %(person)s!") % {"person": person})
-    elif desired_end and desired_end > contract_end:
-        messages.warning(request, _("Warning: Contract ends before the desired return date!"))
-
-
-def _apply_state_machine(record, form, user, username):
-    """
-    Dispatch a lend/return/edit to the lifecycle transitions:
-
-    - INROOM (available) -> ``transition_lend`` (append a new LENT record).
-    - LENT + return date -> ``transition_return_lending`` (stamp the return, then
-      auto-return the device to its room).
-    - LENT, no return date -> a plain in-place save of the edited LENT record
-      (editing a lending is not a transition).
-    """
-    obj = form.save(commit=False)
-
-    if record.record_type == Record.LENT and obj.lent_end_date:
-        lifecycle.transition_return_lending(obj, user=user, lent_end_date=obj.lent_end_date)
-
-    elif record.record_type == Record.LENT:
-        obj.user, obj.username = user, username
-        obj.save()
-
-    elif record.record_type == Record.INROOM:
-        lifecycle.transition_lend(
-            record.device,
-            person=form.cleaned_data["person"],
-            room=form.cleaned_data["room"],
-            lent_start_date=form.cleaned_data["lent_start_date"],
-            lent_desired_end_date=form.cleaned_data["lent_desired_end_date"],
-            sync_lent_end_date=form.cleaned_data.get("sync_lent_end_date", False),
-            lent_note=form.cleaned_data.get("lent_note", ""),
-            lent_reason=form.cleaned_data.get("lent_reason", ""),
-            lent_accessories=form.cleaned_data.get("lent_accessories", ""),
-            user=user,
-        )
-
-    else:
-        raise ValidationError(_("Lent state unknown - please report this issue!"))
-
-
 def _save_lending(request, record, form):
     """
-    Run the soft warnings and the lend/return/edit state machine in one
-    transaction. Returns True on success (caller should redirect) or False if a
-    form error was added (caller should re-render). Shared by all three flows of
-    ``lend``.
+    Show the HR contract warnings, then save through the lend/return/edit dispatch
+    the admin uses too (``LentRecord.contract_warnings``,
+    ``LentRecord.apply_lending``), in one transaction. Returns True on success
+    (caller should redirect) or False if a form error was added (caller should
+    re-render). Shared by all three flows of ``lend``.
     """
-    user, username = get_denormalized_user(request.user)
-    # Soft warnings sanity-check a lending's dates against the borrower's contract;
-    # they do not apply when the submit is acknowledging a return (lent_end_date set).
+    edited = form.save(commit=False)
+    # The contract warnings sanity-check a lending's dates against the borrower's
+    # contract; they do not apply when the submit is acknowledging a return
+    # (lent_end_date set).
     if not form.cleaned_data.get("lent_end_date"):
-        _lending_soft_warnings(request, form)
+        for warning in edited.contract_warnings():
+            messages.warning(request, warning)
     try:
         with transaction.atomic():
-            _apply_state_machine(record, form, user, username)
+            edited.apply_lending(user=request.user)
     except Room.DoesNotExist as exc:
         messages.error(request, _("Configuration error: %(err)s") % {"err": exc})
         return False

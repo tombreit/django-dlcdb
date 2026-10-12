@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from .. import lifecycle
 from .record import Record
 from .room import Room
 
@@ -63,6 +64,56 @@ class LentRecord(Record):
             lent_end_date__isnull=True,
             lent_desired_end_date__lte=today - timedelta(days=tolerance_days),
         )
+
+    def apply_lending(self, *, user):
+        """
+        Saves what a lending screen (the lending frontend or the admin) changed on
+        this record, the device's active one, the way the lifecycle wants it:
+
+        - The device is available (INROOM): ``transition_lend`` appends a new LENT
+          record with this record's lending fields. This record stays unsaved.
+        - A lending with a return date: ``transition_return_lending`` stamps the
+          return and moves the device to the auto-return room.
+        - A lending without one: a plain save, because editing a lending is not a
+          transition.
+
+        Returns the lending: the new LENT record when the device was lent, else
+        this record. Any other state raises a ``ValidationError``.
+        """
+        if self.record_type == Record.INROOM:
+            return lifecycle.transition_lend(
+                self.device,
+                person=self.person,
+                room=self.room,
+                lent_start_date=self.lent_start_date,
+                lent_desired_end_date=self.lent_desired_end_date,
+                sync_lent_end_date=self.sync_lent_end_date,
+                lent_note=self.lent_note,
+                lent_reason=self.lent_reason,
+                lent_accessories=self.lent_accessories,
+                user=user,
+            )
+        if self.record_type == Record.LENT and self.lent_end_date:
+            lifecycle.transition_return_lending(self, user=user, lent_end_date=self.lent_end_date)
+            return self
+        if self.record_type == Record.LENT:
+            self.stamp_user(user)
+            self.save()
+            return self
+        raise ValidationError(_("Lent state unknown - please report this issue!"))
+
+    def contract_warnings(self):
+        """
+        The lending screens' warnings about the borrower's HR contract: it has no
+        end date, or it ends before the desired return date. They do not stop the
+        save.
+        """
+        contract_end = self.person.udb_contract_planned_checkout
+        if not contract_end:
+            return [_("Warning: No HR contract end date found for %(person)s!") % {"person": self.person}]
+        if self.lent_desired_end_date and self.lent_desired_end_date > contract_end:
+            return [_("Warning: Contract ends before the desired return date!")]
+        return []
 
     def clean(self):
         if self.device.is_lentable is False:
