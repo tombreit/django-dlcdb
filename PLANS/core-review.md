@@ -8,8 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–31 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–36 not started. This is a
-living document: findings, decisions and progress are kept here.
+27–31 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–40 not started. Steps
+37–40 (admin-only model members, added 2026-10-12) run before phase E. This is a living
+document: findings, decisions and progress are kept here.
 
 ## Why
 
@@ -89,11 +90,18 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
    (`core/views/relocate_views.py`) are part of the admin too. Rule 5 therefore does not
    apply to the admin. What the admin may not do is hold a rule of its own: the
    lend/return dispatch it shares with `lending/views.py` becomes one core function
-   (step 32).
+   (step 32). The admin is being phased out (2026-10-12); rule 8 keeps the models free
+   of it.
 7. **Plumbing that is not domain but has no better home** stays and is labelled as such
    in the docstring: `middleware.py` (WhiteNoise for docs), `storage.py`, `tasks.py`
    (SQLite snapshot), `formats/`, `management/commands/dlcdb_init.py`,
    `anonymize_data`, the `audit_*`/`fix_*` repair commands.
+8. **Admin-only code lives in the admin** (2026-10-12). A model method or property that
+   only the admin reads is part of the admin: a `ModelAdmin` method, the admin form, or
+   the context the admin passes to its templates. The models keep what core itself, a
+   frontend app or a command reads, so retiring the admin later means deleting
+   `core/admin`, its forms and templates, without touching the models. See *Admin-only
+   members on core models* and steps 37–40.
 
 ## Findings
 
@@ -211,6 +219,42 @@ a separate inventory refactoring, see *Postponed*.
   `core/tests/test_record_append_only.py` and `api/tests/test_record_state_contract.py`
   still name `STATE_TRANSITIONS` or a "consolidated FSM" to come.
 - Settings: `LOGIN_FIELD` (never read), the second `SITE_ID` (`base.py:132` and `:316`).
+
+### Admin-only members on core models
+
+Scanned on 2026-10-12 (rule 8). The scan is a procedure, run by hand in step 37 and
+again in step 36:
+
+1. List every method and property (not `save`, `clean`, `__str__`,
+   `get_absolute_url` and other Django hooks) of the classes in `dlcdb/core/models`, with
+   `ast`. On 2026-10-12: 55.
+2. `grep -rnw` each name over `dlcdb` (`*.py`, `*.html`, `*.txt`, `*.js`), without
+   migrations and without the definitions of that name.
+3. Sort the readers into admin, frontend, tests and models. Admin code is
+   `core/admin/**`, `*admin.py`, `core/templates/admin/**`, the admin's own templates
+   `core/templates/core/{device,inroomrecord,lentrecord,lostrecord,record,room,actions}/`
+   (its `change_form_template` and `change_list_template`),
+   `core/forms/adminactions_forms.py` and `core/views/relocate_views.py`. A
+   `list_display` string that names the admin's own `def name(self, obj)` is not a
+   reader of the model member.
+4. A member with admin readers and no frontend reader, or with no reader at all, is a
+   candidate. Check each candidate by hand: generic names give false hits.
+
+| Member | Only reader | Fix (step) |
+|---|---|---|
+| `Device.get_lent_start_date`, `get_lent_desired_end_date`, `get_lent_end_date`, `get_lent_note`, `get_room`, `get_edv_id` (+ `short_description`) | none, and no dynamic `getattr`; the lending and licence admins define their own `get_edv_id` and `get_lent_desired_end_date` | delete (37) |
+| `Device.has_record_notes()` | `DeviceAdmin.has_record_notes_badge` | into `DeviceAdmin` (38) |
+| `Device.get_is_currently_lented`, `Device.get_person` | `core/inroomrecord/change_form.html` (`InRoomRecordAdmin`) | `InRoomRecordAdmin.render_change_form` passes the device's unreturned lending (39) |
+| `Record.get_admin_action_url()` | `core/utils/device_methods.py`, the admin branch of the state buttons | the URL is built there (40) |
+
+Noted, not moved:
+- Members that both the admin and a frontend app read stay, for example
+  `Device.get_state_data`, `Device.get_current_inventory_record` and
+  `Record.is_type_lent`.
+- `Record.get_proxy_model_by_record_type` is read only by tests. It isn't admin code;
+  it's a candidate for the dead-code list.
+- Outside core, only `inventory.SapList.get_file_name` is admin-only. It waits for the
+  postponed inventory refactoring (see *Postponed*).
 
 ### Settings module
 
@@ -350,6 +394,10 @@ a separate inventory refactoring, see *Postponed*.
 9. **No `has_any_perm` helper** (2026-10-10). It would replace three one-line
    `any(user.has_perm(p) for p in perms)` and delete nothing; no real gain. Step 26 is
    dropped. The other step numbers stay as they are.
+10. **The admin is being phased out** (2026-10-12, user). Members that only the admin
+    reads leave the models (rule 8). The scan that finds them is a plan step (37), re-run
+    in step 36; it is not a test or a script. Steps 37–40 run before phase E and keep
+    numbers after 36, so that 32–36 keep theirs.
 
 ## Changes against the first draft (2026-10-10)
 
@@ -759,6 +807,34 @@ Not part of the core review. It goes first because it is a security fix and smal
 - Commit: `Core review, step 31: overdue reports and reminder mails use the shared overdue
   rule with their 5-day tolerance`
 
+### Phase D2 — Admin-only members leave the models (runs before phase E)
+
+Rule 8. The findings are in *Admin-only members on core models*.
+
+#### 37 — Admin-only scan; unused `Device` getters removed
+- Re-run the scan and update the finding. Delete the six `Device` members nobody reads,
+  `get_edv_id.short_description` included.
+- Commit: `Core review, step 37: unused Device lending and IT-ID getters removed`
+
+#### 38 — `Device.has_record_notes` → `DeviceAdmin`
+- The query moves into `has_record_notes_badge` (or a private admin method). Add a test
+  for the badge if none exists.
+- Commit: `Core review, step 38: the device admin checks for record notes itself`
+
+#### 39 — `get_is_currently_lented`, `get_person` → `InRoomRecordAdmin`
+- `render_change_form` adds `current_lending`: the device's active record if it is a
+  LENT record without a return date, else None. The template reads
+  `current_lending.person` and `current_lending.pk`. Test: the add form for a lent
+  device shows the warning naming the lender; for a device in a room it does not.
+- Commit: `Core review, step 39: the room-assignment admin form looks up the current
+  lending itself`
+
+#### 40 — `Record.get_admin_action_url` → `core/utils/device_methods.py`
+- The admin add-view URL is built where the state buttons need it, and it moves with
+  that module if step 18 is ever done. Check that the state-button tests cover the admin
+  URLs.
+- Commit: `Core review, step 40: state buttons build the admin add-view URL themselves`
+
 ### Phase E — Needs design care
 
 #### 32 — One lend dispatch for frontend and admin
@@ -789,7 +865,8 @@ Not part of the core review. It goes first because it is a security fix and smal
 
 #### 36 — The contract is written down
 - `dlcdb/core/__init__.py` gets the contract (section *The contract*) as its module
-  docstring, and `AGENTS.md` gets one line pointing at it. The final guard grep is clean.
+  docstring, and `AGENTS.md` gets one line pointing at it. The final guard grep is clean,
+  and a re-run of the admin-only scan finds nothing on the core models (rule 8).
 - Commit: `Core review, step 36: core/__init__.py states the contract other apps rely on`
 
 ## Alternatives considered and rejected
@@ -800,7 +877,8 @@ Not part of the core review. It goes first because it is a security fix and smal
 | Moving `Tenant` into core | Migration churn for a model that only core references by string anyway. |
 | Signals on `Record` for journaling/notifications | Project rule (journal plan, decision 8): explicit calls, no signals. |
 | Moving the model admins to the frontend apps | Asked and rejected (decision 6): one UI over the core models reads better in one place; the admin may import consumer helpers. |
-| Retiring the admin UI for lending/licences | Out of scope; the admin is still the operators' second UI. |
+| Retiring the admin UI for lending/licences | Out of scope for this review. The admin is being phased out (decision 10); this review keeps the models free of admin-only code (rule 8). |
+| A pytest guard or a script for the admin-only scan | Grep-based and heuristic (generic names, `list_display` strings, admin templates). A documented procedure, run by hand in steps 37 and 36, is enough (decision 10). |
 | Putting thresholds into settings | Nobody tunes them per deployment; a named constant next to its one definition is easier to find. |
 | Large batches per theme (first draft) | Core changes deserve atomic commits that can be reviewed and reverted one by one (decision 7). |
 | `tenant_scoped_queryset` everywhere | Takes a request; does not fit querysets that get `tenants`, nor conditions that must stay in one `filter()` (see *Tenant scoping*). |
@@ -856,6 +934,10 @@ Not part of the core review. It goes first because it is a security fix and smal
 - [x] 29 — `overdue()`, same-meaning readers
 - [x] 30 — Admin overdue
 - [x] 31 — Overdue report
+- [ ] 37 — Admin-only scan; unused `Device` getters removed
+- [ ] 38 — `has_record_notes` → `DeviceAdmin`
+- [ ] 39 — `get_is_currently_lented`/`get_person` → `InRoomRecordAdmin`
+- [ ] 40 — `get_admin_action_url` → state buttons
 - [ ] 32 — One lend dispatch
 - [ ] 33 — Lost-device check once (open question)
 - [ ] 34 — `ldap.py`
@@ -876,3 +958,5 @@ Not part of the core review. It goes first because it is a security fix and smal
   names URLs, it imports nothing.
 - `/verify` after steps 0 (scanner), 17–21 (device list state buttons, inventory room
   page, navbar, hints band), 30 and 32 (admin and frontend lend/return).
+- The admin-only scan (*Admin-only members on core models*) after steps 37–40 and in
+  step 36.
