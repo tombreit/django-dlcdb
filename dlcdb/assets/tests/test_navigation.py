@@ -5,7 +5,7 @@
 """
 The "Devices" and "Move" navbar entries share the assets: app namespace (see
 AssetsConfig.nav_entries), which used to make both entries active together
-regardless of which page was open (core.context_processors.nav matched on
+regardless of which page was open (the nav context processor matched on
 namespace only). Guards the active_url_names disambiguation added to fix that.
 """
 

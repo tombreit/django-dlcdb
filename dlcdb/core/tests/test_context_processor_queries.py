@@ -17,11 +17,12 @@ from django.db import connection
 from django.test import RequestFactory
 from django.test.utils import CaptureQueriesContext
 
-from dlcdb.core.context_processors import hints, nav
+from dlcdb.core.context_processors import hints
 from dlcdb.core.models import Inventory, Room
 from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.tenants.shortcuts import get_user_tenants
+from dlcdb.theme.context_processors import nav
 
 
 class ContextProcessorQueryTests(BaseTest):

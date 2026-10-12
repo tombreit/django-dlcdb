@@ -19,7 +19,7 @@ class DashboardConfig(AppConfig):
     #         "icon": "bi bi-speedometer2",
     #         "url": "dashboard:index",
     #         # "true" disables permission checking, so the dashboard is visible
-    #         # to any authenticated user (see core.context_processors.nav).
+    #         # to any authenticated user (see theme.context_processors.nav).
     #         "required_permission": "true",
     #     },
     # ]
