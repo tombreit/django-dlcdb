@@ -8,7 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–35, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; step 36 not started. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
+27–35, 37–41 and 21b done, 15 skipped, 18 and 19 postponed; step 36 not started.
+Step 41 (the dashboard's lent bar, found while checking the contract for step 36) runs
+before 36. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
 This is a living document: findings, decisions and progress are kept here.
 
 ## Why
@@ -1030,10 +1032,54 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - Commit: `Core review, step 35: one rule for which persons match a search term,
   Person.search_q`
 
+#### 41 — The dashboard's "Verliehen" bar counts lent devices
+- Found on 2026-10-12, while checking the contract against the code for step 36. Rule 3
+  says "what is lent" is one rule. The dashboard's record chart counted its "Verliehen"
+  bar as every active record of a lentable device that is neither removed nor a licence.
+  That includes available and lost devices, and an available one also counted under
+  "Lokalisiert". It goes back to a `LentRecord.objects.count()` (see *Pitfalls*); the
+  query optimisation in fc48e810 kept that meaning on purpose. Its comment had drifted
+  too: `LentRecordManager` no longer excludes licences.
+- User decision: fix it before step 36, in its own commit, because the chart changes.
+- Done 2026-10-12. `dashboard/stats.py`: the counts move out of the plotly function into
+  `active_record_counts(*, tenants)`, like `devices_per_month` for the timeline. Lent
+  means `record_type=Record.LENT`, like the other bars count their state. A lent licence
+  now counts as lent.
+- Test: `dashboard/tests/test_stats.py` counts one available, one lent and one lost
+  lentable device as one each. With the old condition the lent count is 3, and the test
+  fails.
+- Commit: `Core review, step 41: the dashboard's lent bar counts lent devices, not every
+  lentable one`
+
 #### 36 — The contract is written down
 - `dlcdb/core/__init__.py` gets the contract (section *The contract*) as its module
   docstring, and `AGENTS.md` gets one line pointing at it. The final guard grep is clean,
   and a re-run of the admin-only scan finds nothing on the core models (rule 8).
+- Checked against the code on 2026-10-12, before writing it down:
+  - **Rule 1** holds.
+  - **Rule 2** overstated it. The admin's add views for the state proxies (in room, lost,
+    removed, ordered) save the proxy directly. `Record.save()` checks them against the
+    transition table, but they do not go through `transition_*`. The docstring says so.
+  - **Rule 3**: "what is lent" was not one rule; fixed in step 41. The rules now also
+    live as `*_q` methods and as model methods (`overdue_q`, `search_q`,
+    `apply_lending`), not only on managers.
+  - **Rule 4** holds. `core/utils/helpers.py` also has two helpers with one consumer
+    each: `get_user_email` (inventory) and `save_base64img_as_fileimg` (the UDB sync).
+    Noted, not moved.
+  - **Rule 5**: the guard grep is clean. It lists only `Branding` (accepted),
+    `tenants.abstracts` and `inventory.utils` (both postponed). The rest of core imports
+    no consumer app either, apart from the admin.
+  - **Rule 6**: the admin also imports `tenants.shortcuts`, `tenants.models` and
+    `theme.icons`. Also part of the admin: `navigation.py` (the admin-changelist nav
+    entries), `urls.py` (the relocate action target) and every form in `core/forms/`.
+  - **Rule 7** also covers `views/error_views.py` (the error-mail check),
+    `utils/sqlite_snapshot.py` (behind `tasks.py`) and `rename_lifecycle_permissions`
+    (see *Open questions*). The only `fix_*` command left in core is
+    `fix_record_modified_at_timestamps`.
+  - **Rule 8**: the admin-only scan finds 49 members and no candidate. The remaining
+    hits are helpers read only inside their own model file, plus
+    `Record.get_proxy_model_by_record_type`, which only tests read (as noted under
+    *Admin-only members*).
 - Commit: `Core review, step 36: core/__init__.py states the contract other apps rely on`
 
 ## Alternatives considered and rejected
@@ -1057,7 +1103,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
   core resolves it the other way round (`tenants.models` imports core, and core references
   `"tenants.Tenant"` only as a string). Check that `makemigrations --check` stays clean.
 - `LentRecord.objects` includes INROOM records. Any new "lent" query must filter
-  `record_type=LENT` explicitly (the dashboard stat at `stats.py:76` does not).
+  `record_type=LENT` explicitly (the dashboard stat did not; fixed in step 41).
 - The lifecycle `transition_*` functions check state, not permissions. Permission checks
   stay in views/admins (`lifecycle.available`).
 - Before moving or deleting a template or method, grep `.html`, `.txt` (mail templates)
@@ -1110,6 +1156,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 33 — Lost-device check once
 - [x] 34 — `ldap.py`
 - [x] 35 — Search methods
+- [x] 41 — Dashboard lent bar
 - [ ] 36 — The contract is written down
 
 ## Verification (each step)

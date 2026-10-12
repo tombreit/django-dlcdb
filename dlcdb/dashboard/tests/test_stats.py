@@ -2,12 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""Month counting behind the dashboard's record timeline."""
+"""Counting behind the dashboard's record charts: the months of the timeline, the states of the record chart."""
 
 import datetime
 
-from dlcdb.core.models import Record
-from dlcdb.dashboard.stats import devices_per_month
+import pytest
+
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Record, Room
+from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.dashboard.stats import active_record_counts, devices_per_month
 
 NOW = datetime.datetime(2026, 10, 15, 12, tzinfo=datetime.UTC)
 
@@ -61,3 +64,25 @@ def test_a_device_counts_once_per_month():
 
     counts = devices_per_month(records, now=_at(2026, 4))[Record.INROOM]
     assert {month: sorted(devices) for month, devices in counts.items()} == {"2026-03": [1, 2], "2026-04": [1, 2]}
+
+
+@pytest.mark.django_db
+def test_the_record_chart_counts_each_device_once_by_its_state(tenant):
+    """A lentable device is lent only while its active record is LENT, not while available or lost."""
+    room = Room.objects.create(number="A1.23")
+
+    def lentable(edv_id, proxy_model, **fields):
+        device = Device.objects.create(edv_id=edv_id, is_lentable=True, tenant=tenant)
+        establish_state(proxy_model, device=device, **fields)
+
+    lentable("EDV-AVAILABLE", InRoomRecord, room=room)
+    lentable(
+        "EDV-LENT",
+        LentRecord,
+        room=room,
+        lent_start_date=datetime.date(2026, 1, 1),
+        lent_desired_end_date=datetime.date(2026, 12, 31),
+    )
+    lentable("EDV-LOST", LostRecord)
+
+    assert active_record_counts(tenants=[tenant]) == {"inroom": 1, "lent": 1, "lost": 1, "removed": 0}

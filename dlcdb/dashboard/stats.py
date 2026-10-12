@@ -66,23 +66,26 @@ def devices_per_month(records, *, now):
     return type_month_devices
 
 
+def active_record_counts(*, tenants):
+    """
+    How many of the tenants' devices are in each state the record chart shows, counted
+    by their active record. Lent means a LENT record; ``LentRecord.objects`` would also
+    count the available and lost lentable devices.
+    """
+    return Record.objects.filter(is_active=True, device__tenant__in=tenants).aggregate(
+        inroom=Count("pk", filter=Q(record_type=Record.INROOM)),
+        lent=Count("pk", filter=Q(record_type=Record.LENT)),
+        lost=Count("pk", filter=Q(record_type=Record.LOST)),
+        removed=Count("pk", filter=Q(record_type=Record.REMOVED)),
+    )
+
+
 def get_record_fraction_html(*, tenants):
     """
     Returns a plotly HTML div showing the fraction of active records by type.
     """
     labels = ["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"]
-    base = Record.objects.filter(is_active=True, device__tenant__in=tenants)
-
-    # "Verliehen" mirrors LentRecordManager's WHERE (core/models/prx_lentrecord.py):
-    # active + lentable device, excluding removed/licence — NOT a pure record_type=LENT count.
-    lent_filter = Q(device__is_lentable=True) & ~Q(record_type=Record.REMOVED) & ~Q(device__is_licence=True)
-
-    counts_map = base.aggregate(
-        inroom=Count("pk", filter=Q(record_type=Record.INROOM)),
-        lent=Count("pk", filter=lent_filter),
-        lost=Count("pk", filter=Q(record_type=Record.LOST)),
-        removed=Count("pk", filter=Q(record_type=Record.REMOVED)),
-    )
+    counts_map = active_record_counts(tenants=tenants)
     counts = [counts_map["inroom"], counts_map["lent"], counts_map["lost"], counts_map["removed"]]
 
     colors = [COLORS["primary"], COLORS["accent"], COLORS["muted"], COLORS["accent_light"]]
