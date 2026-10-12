@@ -248,8 +248,9 @@ class AdHocReportTriggerTests(TestCase):
 
 class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
     """
-    Overdue semantics: a lending is overdue once
-    lent_desired_end_date + 5 days tolerance <= today (inclusive).
+    Overdue semantics (``LentRecord.overdue_q``): a lending is overdue once
+    lent_desired_end_date + 5 days tolerance <= today (inclusive) and it has no
+    return date.
 
     The recipient mode lives on the LendingConfiguration singleton; tests set
     it via ``set_lending_config``. The base cases rely on the model default
@@ -333,6 +334,16 @@ class OverdueLendersMailTests(ImmediateHueyMixin, TestCase):
         notify_overdue_lenders.call_local()
 
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_a_lending_with_a_return_date_is_not_reported(self):
+        """Even while its record is still the active one, a returned lending is not overdue."""
+        returned = self.create_lent_record(self.lender1, edv_id="ntb106", overdue_days=10)
+        returned.lent_end_date = timezone.localdate() - timedelta(days=1)
+        returned.save()
+
+        notify_overdue_lenders.call_local()
+
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_a_desired_return_date_at_the_end_of_the_calendar_is_not_overdue(self):
         """9999-12-31 is the last date Python knows: the overdue check must not add days to it."""

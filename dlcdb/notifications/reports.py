@@ -18,7 +18,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
-from dlcdb.core.models import Record
+from dlcdb.core.models import LentRecord, Record
 from dlcdb.reporting.services import create_report
 from dlcdb.reporting.utils.representations import get_records_as_text
 
@@ -28,9 +28,8 @@ from .models import Message, Subscription
 
 logger = logging.getLogger(__name__)
 
-# A lending is overdue once lent_desired_end_date + tolerance <= today. The query
-# subtracts the tolerance from today instead: adding days to a desired return date
-# near 9999-12-31, the last date Python knows, would overflow.
+# Overdue reports and reminder mails wait this many days past the desired return
+# date (LentRecord.overdue_q's tolerance_days).
 LENT_OVERDUE_TOLERANCE_DAYS = 5
 
 # Reporting window when a subscription has never run before.
@@ -56,14 +55,12 @@ def get_admin_url_for_recordtype(recordtype):
 
 def get_lent_overdue_records(now):
     """
-    All active lent records whose desired end date (plus tolerance) has
-    passed. Also used for the overdue lender reminder mails.
+    The active lendings that are overdue on the day of ``now``, with
+    ``LENT_OVERDUE_TOLERANCE_DAYS`` of grace (``LentRecord.overdue_q``). Also used
+    for the overdue lender reminder mails.
     """
-    return (
-        Record.objects.active_records()
-        .filter(record_type=Record.LENT)
-        .filter(~Q(lent_desired_end_date__isnull=True) | Q(lent_end_date__isnull=True))
-        .filter(lent_desired_end_date__lte=timezone.localdate(now) - timedelta(days=LENT_OVERDUE_TOLERANCE_DAYS))
+    return Record.objects.active_records().filter(
+        LentRecord.overdue_q(today=timezone.localdate(now), tolerance_days=LENT_OVERDUE_TOLERANCE_DAYS)
     )
 
 
