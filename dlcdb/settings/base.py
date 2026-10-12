@@ -196,7 +196,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "dlcdb.theme.context_processors.hints",
                 "dlcdb.theme.context_processors.nav",
-                "dlcdb.core.context_processors.django_settings",
+                "dlcdb.theme.context_processors.django_settings",
                 "dlcdb.theme.context_processors.project_meta",
                 "dlcdb.organization.context_processors.branding",
                 "dlcdb.inventory.context_processors.inventory",

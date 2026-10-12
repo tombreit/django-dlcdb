@@ -7,6 +7,7 @@ from importlib import import_module
 from operator import itemgetter
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count, Min, Q
@@ -346,3 +347,14 @@ def hints(request):
             messages.add_message(request, message.level, message.get_formatted_msg())
 
     return {}  # empty dict to make context_processor happy
+
+
+def django_settings(request):
+    """
+    Expose some cherry picked Django settings to the templates.
+    """
+    return {
+        "django_settings": {
+            "DEFAULT_FROM_EMAIL": settings.DEFAULT_FROM_EMAIL,
+        }
+    }
