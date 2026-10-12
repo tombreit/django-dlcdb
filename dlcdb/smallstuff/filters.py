@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import django_filters
-from django.db.models import Q
 
 from dlcdb.core.models import Person
 
@@ -35,6 +34,6 @@ class PersonFilter(django_filters.FilterSet):
         if not value:
             qs = Person.objects.none()
         elif value != "*":
-            qs = qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))
+            qs = qs.filter(Person.search_q(value))
 
         return qs

@@ -7,7 +7,6 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -241,9 +240,7 @@ def person_search(request):
     if not value:
         people = people.none()
     elif value != "*":
-        people = people.filter(
-            Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value)
-        )
+        people = people.filter(Person.search_q(value))
 
     people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(

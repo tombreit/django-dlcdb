@@ -8,8 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–34, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 35 and 36 not
-started. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
+27–35, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; step 36 not started. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
 This is a living document: findings, decisions and progress are kept here.
 
 ## Why
@@ -68,7 +67,8 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
    bypass it (`save(check_transition=False)`) are allowed only in the importer and in
    repair commands, and are listed in the lifecycle docstring.
 3. **Shared rules live once, in core, on the model's manager or in lifecycle:** what is
-   "overdue", what is "lent", what makes a device a licence, what may be relocated.
+   "overdue", what is "lent", what makes a device a licence, what may be relocated,
+   which persons match a search term.
    Consumers call them; they do not re-spell them.
 4. **Shared helpers:** `get_denormalized_user` (through `AuditBaseModel.stamp_user()`),
    `get_contact_email`, `rollback_atomic`, the two htmx decorators, `relocate_device`,
@@ -164,7 +164,7 @@ Verified against the code on 2026-10-10. Line numbers are as of that date.
 | Licence "expires soon" notice (30 days before expiry) | `licenses/subscribers.py:60`, `notifications/tasks.py:167` | Both compute a schedule date, not a queryset, so the rule becomes one named constant in `notifications`. The 93-day warning in the `LicenceRecord` annotation is a different rule and stays |
 | Licence device-type prefixes `Lizenz::/License::/Licence::` | `licenses/forms.py:40`, `licenses/filters.py:28` | one constant in `licenses` (device-type choices still need it; the `is_licence` flag is the rule for devices) |
 | Audit stamp `obj.user, obj.username = get_denormalized_user(request.user)` | 17 call sites in 8 files | `AuditBaseModel.stamp_user(user)`, so call sites become `obj.stamp_user(request.user)` (a `save(user=…)` keyword was planned first; see step 27) |
-| Person live search, room search, device text search | several copies each (has-note is already done: `theme/filters.py`, filterbar step 2) | one queryset method per model in core (needs an inventory first: step 35) |
+| Person live search, room search, device text search | several copies each (has-note is already done: `theme/filters.py`, filterbar step 2) | After the inventory (step 35): only "a person matches by name or email" is one rule, now `Person.search_q`. Room and device searches are per-page choices and stay |
 
 ### Tenant scoping
 
@@ -988,6 +988,47 @@ Rule 8. The findings are in *Admin-only members on core models*.
 #### 35 — Search methods on the model querysets
 - First take stock of the person live search, room search and device text search copies,
   then split them into steps here. The has-note part is done (`theme/filters.py`).
+- Inventory (2026-10-12):
+
+  | Search | Where | Matches |
+  |---|---|---|
+  | Person pickers | `lending/filters.py` `LendingPersonFilter`, `assets/views/devices.py` `person_search`, `smallstuff/filters.py` `PersonFilter` | first name, last name, email |
+  | Person through a relation | `lending` `LentRecordFilter`, `assets` `DeviceFilter` and `RecordFilter`, `dashboard/search.py` `_smallstuff_search` | the same three |
+  | Persons list (and the dashboard's persons group) | `persons/filters.py` `PersonFilter` | the same three plus the UDB-mirrored names and business email |
+  | Room picker | `assets/views/relocate.py` `room_search` | number, nickname |
+  | Rooms list (and the dashboard) | `rooms/filters.py` `RoomFilter` | number, nickname, description, note |
+  | Device picker | `core/utils/device_search.py` `search_devices`, through `theme/views.py` | IDs, manufacturer, series, serial; ranked |
+  | Device lists | `assets` `DeviceFilter` (also the dashboard's devices and licences), `lending` `LentRecordFilter`, `licenses` `LicenceRecordFilter`, `assets` `RecordFilter` | different per page |
+  | Inventory | `inventory/filters.py` `RoomFilter`, `DeviceFilter` | postponed with the inventory refactoring |
+
+- What the inventory shows, against the plan's assumption of "several copies each":
+  - Room and device searches are not copies of one rule. Each list page picks the
+    columns its search box covers: lending also finds notes and accessories, the records
+    trail `removed_info`, licences the supplier. One queryset method per model would
+    either change what pages find, or need parameters that read worse than the field
+    lists. The device picker search is in core already.
+  - The dashboard search reuses each page's FilterSet; it is not a copy.
+  - One rule was spelled seven times, identically: a person matches by first name, last
+    name or email.
+  - The picker convention (an empty term finds nothing, `*` finds everything) is UI, not
+    core. It is repeated in the pickers and in `search_devices`; a matter for `theme`,
+    not for this review.
+- User decision: `Person.search_q(term, *, prefix="")`, a `Q` like
+  `LentRecord.overdue_q`. `prefix` reaches the person through a relation, e.g.
+  `"person__"`.
+  - The seven sites call it.
+  - The persons list adds its UDB fields to it.
+  - Room and device searches stay per page.
+- Done 2026-10-12. No behaviour change: the same fields at every site.
+  - **Tests:** `core/tests/test_person_search.py` checks the rule, case-insensitivity,
+    that the UDB names are not part of it, and the prefix.
+  - **Mutation check:** I made each call site match nothing, one at a time. At first
+    only two of the eight noticed. I added a person-search test to the lending list,
+    the asset list, the records trail, the smallstuff search and the dashboard's
+    smallstuff group. The persons list was already covered by the dashboard test.
+    Now each of the eight fails a test.
+- Commit: `Core review, step 35: one rule for which persons match a search term,
+  Person.search_q`
 
 #### 36 — The contract is written down
 - `dlcdb/core/__init__.py` gets the contract (section *The contract*) as its module
@@ -1068,7 +1109,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 32 — One lend dispatch
 - [x] 33 — Lost-device check once
 - [x] 34 — `ldap.py`
-- [ ] 35 — Search methods (needs stocktaking)
+- [x] 35 — Search methods
 - [ ] 36 — The contract is written down
 
 ## Verification (each step)

@@ -19,7 +19,7 @@ from django.contrib.auth.models import Permission
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from dlcdb.core.models import InRoomRecord, LostRecord, Record, Room
+from dlcdb.core.models import InRoomRecord, LostRecord, Person, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
 
 from ..filters import RecordFilter
@@ -77,6 +77,20 @@ class RecordNoteFilterTests(BaseTest, TestCase):
             set(self._filtered(record_type=Record.LOST)),
             set(LostRecord.objects.all()),
         )
+
+
+class RecordSearchTests(BaseTest, TestCase):
+    def test_search_matches_the_records_person(self):
+        room = Room.objects.create(number="R1.02")
+        person = Person.objects.create(first_name="Ada", last_name="Lovelace", email="ada@example.org")
+        with_person = InRoomRecord.objects.create(
+            device=self._create_device(edv_id="REC-ADA", sap_id="8003"), room=room, person=person
+        )
+        InRoomRecord.objects.create(device=self._create_device(edv_id="REC-NOBODY", sap_id="8004"), room=room)
+
+        found = RecordFilter({"search": "ada@example"}, queryset=Record.objects.all()).qs
+
+        self.assertEqual(list(found), [with_person])
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)

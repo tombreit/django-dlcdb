@@ -92,6 +92,11 @@ class LendingIndexViewTests(BaseTest):
         self.assertContains(response, "EDV-LENT")
         self.assertNotContains(response, "EDV-AVAIL")
 
+    def test_search_matches_the_borrower(self):
+        response = self.client.get(self.url, {"search": "mustermann"}, headers={"HX-Request": "true"})
+        self.assertContains(response, "EDV-LENT")
+        self.assertNotContains(response, "EDV-AVAIL")
+
     def test_state_filter_available(self):
         response = self.client.get(self.url, {"state": "available"}, headers={"HX-Request": "true"})
         self.assertContains(response, "EDV-AVAIL")

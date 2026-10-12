@@ -108,6 +108,9 @@ class GlobalSearchTests(TestCase):
         self.assertIn("smallstuff", self._group_keys(response))
         self.assertContains(response, reverse("smallstuff:person_detail", args=[self.person.pk]))
 
+    def test_smallstuff_assignment_is_found_by_its_persons_name(self):
+        self.assertIn("smallstuff", self._group_keys(self._search("Zebrowski")))
+
     # --- group order ------------------------------------------------------
 
     def test_groups_appear_in_the_configured_order(self):

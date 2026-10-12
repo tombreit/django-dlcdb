@@ -53,6 +53,17 @@ def test_without_any_permission_the_index_is_refused(client, plain_static):
 
 
 @pytest.mark.django_db
+def test_the_search_finds_a_person_by_name(client, plain_static, assignment):
+    client.force_login(_make_user("view_assignedthing"))
+
+    def search(term):
+        return client.post(reverse("smallstuff:person_search"), {"search": term}, headers={"HX-Request": "true"})
+
+    assert "Lovelace" in search("lovelace").content.decode()
+    assert "Lovelace" not in search("babbage").content.decode()
+
+
+@pytest.mark.django_db
 def test_view_permission_opens_the_person_detail(client, plain_static, person):
     client.force_login(_make_user("view_assignedthing"))
     assert client.get(reverse("smallstuff:person_detail", args=[person.pk])).status_code == 200

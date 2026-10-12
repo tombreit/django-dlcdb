@@ -91,9 +91,7 @@ class LentRecordFilter(django_filters.FilterSet):
             | Q(device__sap_id__icontains=value)
             | Q(device__manufacturer__name__icontains=value)
             | Q(device__series__icontains=value)
-            | Q(person__first_name__icontains=value)
-            | Q(person__last_name__icontains=value)
-            | Q(person__email__icontains=value)
+            | Person.search_q(value, prefix="person__")
             | Q(lent_note__icontains=value)
             | Q(lent_accessories__icontains=value)
         )
@@ -128,4 +126,4 @@ class LendingPersonFilter(django_filters.FilterSet):
             return Person.objects.none()
         if value == "*":
             return qs
-        return qs.filter(Q(first_name__icontains=value) | Q(last_name__icontains=value) | Q(email__icontains=value))
+        return qs.filter(Person.search_q(value))

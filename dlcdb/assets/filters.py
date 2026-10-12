@@ -13,7 +13,7 @@ import django_filters
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Record, Room, Supplier
+from dlcdb.core.models import Device, DeviceType, Inventory, Manufacturer, Person, Record, Room, Supplier
 from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.shortcuts import filterable_tenants, tenant_scoped_queryset
@@ -154,9 +154,7 @@ class DeviceFilter(django_filters.FilterSet):
             | Q(series__icontains=value)
             | Q(order_number__icontains=value)
             | Q(note__icontains=value)
-            | Q(active_record__person__first_name__icontains=value)
-            | Q(active_record__person__last_name__icontains=value)
-            | Q(active_record__person__email__icontains=value)
+            | Person.search_q(value, prefix="active_record__person__")
         )
 
     def state_filter(self, queryset, name, value):
@@ -281,9 +279,7 @@ class RecordFilter(django_filters.FilterSet):
             Q(device__edv_id__icontains=value)
             | Q(device__sap_id__icontains=value)
             | Q(device__serial_number__icontains=value)
-            | Q(person__first_name__icontains=value)
-            | Q(person__last_name__icontains=value)
-            | Q(person__email__icontains=value)
+            | Person.search_q(value, prefix="person__")
             | Q(room__number__icontains=value)
             # The free-text fields are what make a trail searchable at all
             # ("why was this scrapped", "where did it go").

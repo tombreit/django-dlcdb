@@ -44,9 +44,7 @@ class PersonFilter(django_filters.FilterSet):
     def search_filter(self, queryset, name, value):
         # Mirrors the admin's search_fields, including the UDB-mirrored names.
         return queryset.filter(
-            Q(last_name__icontains=value)
-            | Q(first_name__icontains=value)
-            | Q(email__icontains=value)
+            Person.search_q(value)
             | Q(udb_person_last_name__icontains=value)
             | Q(udb_person_first_name__icontains=value)
             | Q(udb_person_email_internal_business__icontains=value)

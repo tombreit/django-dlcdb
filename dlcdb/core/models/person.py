@@ -181,6 +181,20 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
             first_name=self.first_name, last_name=self.last_name, delimiter=", " if self.first_name else ""
         )
 
+    @staticmethod
+    def search_q(term, *, prefix=""):
+        """
+        What makes a person match a search term, as a ``Q``: the term is part of
+        the first name, the last name or the email address, ignoring case.
+        ``prefix`` reaches the person through a relation, e.g. ``"person__"`` on a
+        record queryset.
+        """
+        return (
+            Q(**{f"{prefix}first_name__icontains": term})
+            | Q(**{f"{prefix}last_name__icontains": term})
+            | Q(**{f"{prefix}email__icontains": term})
+        )
+
     def clean(self):
         # Prepare the queryset for soft-deleted objects with the same email
         soft_deleted_qs = Person.only_softdeleted_objects.filter(email=self.email)

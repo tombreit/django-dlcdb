@@ -154,12 +154,7 @@ def _smallstuff_queryset(request):
 
 
 def _smallstuff_search(queryset, term, request):
-    return queryset.filter(
-        Q(thing__name__icontains=term)
-        | Q(person__first_name__icontains=term)
-        | Q(person__last_name__icontains=term)
-        | Q(person__email__icontains=term)
-    )
+    return queryset.filter(Q(thing__name__icontains=term) | Person.search_q(term, prefix="person__"))
 
 
 # Declaration order is display order: the groups appear on the dashboard exactly

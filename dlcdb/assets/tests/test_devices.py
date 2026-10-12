@@ -88,6 +88,16 @@ class DeviceFrontendTests(BaseTest):
         self.assertContains(response, "EDV-AVAILABLE")
         self.assertNotContains(response, "EDV-NO-RECORD")
 
+    def test_search_matches_the_person_on_the_active_record(self):
+        person = Person.objects.create(first_name="Ada", last_name="Lovelace", email="ada@example.org")
+        device = self._create_device(edv_id="EDV-ADA", sap_id="5-5")
+        InRoomRecord.objects.create(device=device, room=self.room, person=person)
+
+        response = self.client.get(self.index_url, {"search": "lovelace"}, headers={"HX-Request": "true"})
+
+        self.assertContains(response, "EDV-ADA")
+        self.assertNotContains(response, "EDV-AVAILABLE")
+
     def test_duplicate_serial_filter_uses_the_visible_queryset(self):
         response = self.client.get(
             self.index_url,
