@@ -8,9 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–31 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–40 not started. Steps
-37–40 (admin-only model members, added 2026-10-12) run before phase E. This is a living
-document: findings, decisions and progress are kept here.
+27–31, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–36 not
+started. Steps 37–40 (admin-only model members, added 2026-10-12) run before phase E.
+This is a living document: findings, decisions and progress are kept here.
 
 ## Why
 
@@ -238,7 +238,11 @@ again in step 36:
    `list_display` string that names the admin's own `def name(self, obj)` is not a
    reader of the model member.
 4. A member with admin readers and no frontend reader, or with no reader at all, is a
-   candidate. Check each candidate by hand: generic names give false hits.
+   candidate. Check each candidate by hand: generic names give false hits. A member read
+   only inside its own model file is a helper, not a candidate.
+   `core/utils/device_methods.py` builds the state buttons for the admin and the
+   frontend, so its readers need a look too (that is how `get_admin_action_url` was
+   found).
 
 | Member | Only reader | Fix (step) |
 |---|---|---|
@@ -814,11 +818,16 @@ Rule 8. The findings are in *Admin-only members on core models*.
 #### 37 — Admin-only scan; unused `Device` getters removed
 - Re-run the scan and update the finding. Delete the six `Device` members nobody reads,
   `get_edv_id.short_description` included.
+- Done 2026-10-12. The re-run found the same members as the first scan; the finding stays
+  as it is. The six getters are deleted. The msgid "IT ID" stays: the `edv_id` field, the
+  asset filter and the device detail page use it too.
 - Commit: `Core review, step 37: unused Device lending and IT-ID getters removed`
 
 #### 38 — `Device.has_record_notes` → `DeviceAdmin`
 - The query moves into `has_record_notes_badge` (or a private admin method). Add a test
   for the badge if none exists.
+- Done 2026-10-12: the query sits in `has_record_notes_badge`. No test covered the badge;
+  `DeviceAdminRecordNotesBadgeTests` (`core/tests/test_device_admin.py`) now does.
 - Commit: `Core review, step 38: the device admin checks for record notes itself`
 
 #### 39 — `get_is_currently_lented`, `get_person` → `InRoomRecordAdmin`
@@ -826,6 +835,11 @@ Rule 8. The findings are in *Admin-only members on core models*.
   LENT record without a return date, else None. The template reads
   `current_lending.person` and `current_lending.pk`. Test: the add form for a lent
   device shows the warning naming the lender; for a device in a room it does not.
+- Done 2026-10-12. No test covered the warning; `core/tests/test_inroomrecord_admin.py`
+  now checks it for a lent device, a returned lending and a device in a room. It passes
+  on the old and the new code (no behaviour change), and fails when the not-returned
+  check or the context value is dropped. The warning text is German and untranslated, as
+  before; the admin is being phased out, so it stays.
 - Commit: `Core review, step 39: the room-assignment admin form looks up the current
   lending itself`
 
@@ -833,6 +847,12 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - The admin add-view URL is built where the state buttons need it, and it moves with
   that module if step 18 is ever done. Check that the state-button tests cover the admin
   URLs.
+- Done 2026-10-12: `reverse(f"admin:core_{proxy_model._meta.model_name}_add")` in
+  `get_device_state_data`. `core/tests/test_device_state_data.py` already checks the admin
+  add-view URLs (10 of its tests fail with a wrong URL). `record.py` no longer imports
+  `reverse`.
+- Scan re-run after steps 37–40: 45 members, no candidate left; the remaining hits are
+  helpers read only inside their own model file.
 - Commit: `Core review, step 40: state buttons build the admin add-view URL themselves`
 
 ### Phase E — Needs design care
@@ -934,10 +954,10 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 29 — `overdue()`, same-meaning readers
 - [x] 30 — Admin overdue
 - [x] 31 — Overdue report
-- [ ] 37 — Admin-only scan; unused `Device` getters removed
-- [ ] 38 — `has_record_notes` → `DeviceAdmin`
-- [ ] 39 — `get_is_currently_lented`/`get_person` → `InRoomRecordAdmin`
-- [ ] 40 — `get_admin_action_url` → state buttons
+- [x] 37 — Admin-only scan; unused `Device` getters removed
+- [x] 38 — `has_record_notes` → `DeviceAdmin`
+- [x] 39 — `get_is_currently_lented`/`get_person` → `InRoomRecordAdmin`
+- [x] 40 — `get_admin_action_url` → state buttons
 - [ ] 32 — One lend dispatch
 - [ ] 33 — Lost-device check once (open question)
 - [ ] 34 — `ldap.py`
