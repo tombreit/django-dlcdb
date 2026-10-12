@@ -189,28 +189,7 @@ class LicenceRecordAdmin(TenantScopedRecordAdmin, CustomBaseModelAdmin):
     def get_device_human_readable(self, obj):
         return f"{obj.device.manufacturer} - {obj.device.series}"
 
-    # def get_contract_expiration_date(self, obj):
-    #     return obj.device.contract_expiration_date
-    # get_contract_expiration_date.short_description = 'Licence expiry date'
-
     @admin.display(description="Licence expiry date")
     def get_contract_expiration_date(self, obj):
-        _title = ""
-        if obj.license_state == "80-warning":
-            _title = "Läuft in weniger als 60 Tagen ab!"
-        elif obj.license_state == "90-danger":
-            _title = "Ist schon abgelaufen!"
-
-        return format_html(
-            '<span title="{title}" class="licence-state alert-{license_state}">{contract_expiration_date}</span>',
-            contract_expiration_date=date_format(obj.device.contract_expiration_date, format="DATE_FORMAT")
-            if obj.device.contract_expiration_date
-            else "-",
-            license_state=obj.license_state,
-            title=_title,
-        )
-
-    # get_contract_expiration_date.admin_order_field = 'obj.device.contract_expiration_date'
-
-    class Media:
-        js = ("core/licencerecord/licence.js",)
+        expiration_date = obj.device.contract_expiration_date
+        return date_format(expiration_date, format="DATE_FORMAT") if expiration_date else "-"

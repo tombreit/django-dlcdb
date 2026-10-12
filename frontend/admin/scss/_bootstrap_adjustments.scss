@@ -54,22 +54,18 @@ a.text-bg-info {
 }
 
 
-.alert-90-danger,
 tr.lent-state-10-unknown {
     @extend .text-bg-danger;
 }
 
-.alert-80-warning,
 tr.lent-state-20-overdue {
     @extend .text-bg-warning;
 }
 
-// tr.licence-state-30-available,
 // tr.lent-state-30-available {
 //     @extend .bg-white;
 // }
 
-tr.licence-state-40-lent,
 tr.lent-state-40-lent {
     // @extend .text-muted;
     @extend .text-bg-light;

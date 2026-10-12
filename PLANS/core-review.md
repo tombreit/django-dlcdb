@@ -1286,6 +1286,12 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 - User decision:
   - drop the two branches (the admin is being phased out), or
   - check `expiring` and `expired` instead, so the tooltip shows again (a visible change).
+- Decided (2026-10-12): drop. The row colours were dead too: `licence.js` copied the
+  `alert-<state>` class onto the row, and the admin SCSS styled only `alert-80-warning` and
+  `alert-90-danger`. Removed: the tooltip, the classes on the date, `licence.js` and its
+  `Media`, and the licence selectors in `frontend/admin/scss/_bootstrap_adjustments.scss`
+  (including `tr.licence-state-40-lent`, which never matched). The lent-row rules stay. The
+  column shows the date only; nothing visible changes.
 
 #### 47 — `DeviceAdmin` keeps no request on the shared admin
 - `get_list_display` stores `self.request`, and `get_device_actions` reads it to build the
@@ -1332,5 +1338,5 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 - [x] 43 — Stale text
 - [x] 44 — `get_proxy_model_by_record_type` removed
 - [x] 45 — `LicenceRecord` manager without leftovers
-- [ ] 46 — Dead state checks in the licence admin
+- [x] 46 — Dead state checks in the licence admin
 - [ ] 47 — `DeviceAdmin` keeps no request on the shared admin
