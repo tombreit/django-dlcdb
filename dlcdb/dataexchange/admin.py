@@ -123,14 +123,15 @@ class ImporterListAdmin(TenantScopedAdmin):
 
         # We only have a primary key for this object after saving
         try:
-            report = run_device_import(
-                file=obj.file,
-                tenant=obj.tenant,
-                import_format=obj.import_format,
-                user=request.user,
-                importer_list=obj,
-                write=True,
-            )
+            with obj.file.open("rb") as file:
+                report = run_device_import(
+                    file=file,
+                    tenant=obj.tenant,
+                    import_format=obj.import_format,
+                    user=request.user,
+                    importer_list=obj,
+                    write=True,
+                )
         except IMPORT_ERRORS as error:
             # Same failures, same wording as the frontend importer. Without this
             # any import error here was an unhandled 500 with a traceback page.
@@ -233,12 +234,13 @@ class RemoverListAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
         # We only have a primary key for this object after saving
-        report = set_removed_record(
-            obj.file,
-            tenants=request.tenants,
-            username=request.user.username,
-            write=True,
-        )
+        with obj.file.open("rb") as file:
+            report = set_removed_record(
+                file,
+                tenants=request.tenants,
+                username=request.user.username,
+                write=True,
+            )
         report.persist(obj)
         # Without a tenant, like the decommissioning list itself: one file may
         # cover devices of several of the uploader's tenants.

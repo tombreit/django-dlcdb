@@ -151,14 +151,15 @@ def device_import_confirm(request, pk):
         return _after_import_redirect(request)
 
     try:
-        report = run_device_import(
-            file=importer_list.file,
-            tenant=importer_list.tenant,
-            import_format=importer_list.import_format,
-            user=request.user,
-            importer_list=importer_list,
-            write=True,
-        )
+        with importer_list.file.open("rb") as file:
+            report = run_device_import(
+                file=file,
+                tenant=importer_list.tenant,
+                import_format=importer_list.import_format,
+                user=request.user,
+                importer_list=importer_list,
+                write=True,
+            )
     except IMPORT_ERRORS as error:
         messages.error(
             request, _("Import failed, nothing was written: %(error)s") % {"error": import_error_message(error)}

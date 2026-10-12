@@ -98,11 +98,8 @@ class EmailChannel(NotificationChannel):
             # Attach the report spreadsheet, if any. Read via the storage
             # API, so this also works for non-filesystem storages.
             if message.report and message.report.spreadsheet:
-                email.attach(
-                    os.path.basename(message.report.spreadsheet.name),
-                    message.report.spreadsheet.read(),
-                    XLSX_CONTENT_TYPE,
-                )
+                with message.report.spreadsheet.open("rb") as spreadsheet:
+                    email.attach(os.path.basename(spreadsheet.name), spreadsheet.read(), XLSX_CONTENT_TYPE)
 
             email.send()
 

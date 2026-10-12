@@ -95,6 +95,9 @@ whichever test runs when the object is collected, so the failing tests vary.
   path (`sap_converter.py`) shares the importer's file.
 - `core/tests/test_sqlite_snapshot.py:33,44,59`: `with sqlite3.connect()` commits but does not
   close. Use `contextlib.closing`.
+- Done: the callers that pass a stored file open it with `with … open("rb")`: the import
+  confirm view, the import and decommission admins, the report mail. A form's upload needs
+  nothing; Django closes it after the request. `pytest -W error` passed twice in a row.
 
 #### 51 — Warnings fail the suite
 - `filterwarnings = ["error"]` in `[tool.pytest]` of `pyproject.toml`.
@@ -346,7 +349,7 @@ whichever test runs when the object is collected, so the failing tests vary.
 - [x] 0–47 — done (see `a266e9a4` for the full plan)
 - [x] 48 — Stale text and docs
 - [x] 49 — Licence notices as aware datetimes
-- [ ] 50 — Files and connections closed
+- [x] 50 — Files and connections closed
 - [ ] 51 — Warnings fail the suite
 - [ ] 52 — `nav` leftovers
 - [ ] 53 — The 403 page names the IT address first

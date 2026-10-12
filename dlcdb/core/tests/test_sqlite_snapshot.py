@@ -5,6 +5,7 @@
 """The copyable SQLite snapshot for file-based backups."""
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -30,7 +31,7 @@ def wal_database(tmp_path):
 
 
 def _rows(path):
-    with sqlite3.connect(path) as reader:
+    with closing(sqlite3.connect(path)) as reader:
         return reader.execute("SELECT count(*) FROM item").fetchone()[0]
 
 
@@ -41,7 +42,7 @@ def test_snapshot_contains_the_commits_still_in_the_wal(wal_database):
     write_snapshot(writer, snapshot)
 
     assert _rows(snapshot) == 100
-    with sqlite3.connect(snapshot) as reader:
+    with closing(sqlite3.connect(snapshot)) as reader:
         assert reader.execute("PRAGMA journal_mode").fetchone()[0] == "delete"
     assert not snapshot.with_name("db.sqlite3.snapshot.tmp").exists()
 
@@ -56,7 +57,7 @@ def test_snapshot_leaves_out_free_pages(wal_database):
 
     write_snapshot(writer, snapshot)
 
-    with sqlite3.connect(snapshot) as reader:
+    with closing(sqlite3.connect(snapshot)) as reader:
         assert reader.execute("PRAGMA freelist_count").fetchone()[0] == 0
     assert snapshot.stat().st_size < path.stat().st_size
     assert _rows(snapshot) == 100
