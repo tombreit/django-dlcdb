@@ -7,7 +7,6 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -280,14 +279,6 @@ class Record(AuditBaseModel):
     @staticmethod
     def get_proxy_model_by_record_type(record_type):
         return lifecycle.proxy_for(record_type)
-
-    @classmethod
-    def get_admin_action_url(cls):
-        """
-        Returns the admin add url. Whenever this method is called on a concrete
-        proxy model it returns the add url of this proxy model.
-        """
-        return reverse(f"admin:core_{cls.__name__.lower()}_add", args=[])
 
     def get_latest_note(self):
         """

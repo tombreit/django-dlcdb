@@ -107,7 +107,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
         # Default target: the target proxy model's admin add-view. Admin
         # add-views require is_staff, so mark these as "external" links;
         # surfaces that gate on is_staff (see the assets frontend) use this flag.
-        action_url = f"{proxy_model.get_admin_action_url()}?device={device.pk}"
+        action_url = f"{reverse(f'admin:core_{proxy_model._meta.model_name}_add')}?device={device.pk}"
         action_label = transition.label
         external = True
         # How the dropdown submits the action: a plain link, or a POST form for
