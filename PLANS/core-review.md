@@ -7,9 +7,9 @@ SPDX-License-Identifier: CC0-1.0
 # Core review: dlcdb/core as the contract
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
-first, after checking every finding against the code. Steps 0–14, 16, 17, 20, 21 and
-21b done, 15 skipped, 18 and 19 postponed; steps 22–36 not started. This is a living
-document: findings, decisions and progress are kept here.
+first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
+27–31 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–36 not started. This is a
+living document: findings, decisions and progress are kept here.
 
 ## Why
 
@@ -69,7 +69,7 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
 3. **Shared rules live once, in core, on the model's manager or in lifecycle:** what is
    "overdue", what is "lent", what makes a device a licence, what may be relocated.
    Consumers call them; they do not re-spell them.
-4. **Shared helpers:** `get_denormalized_user` (through `AuditBaseModel.save(user=…)`),
+4. **Shared helpers:** `get_denormalized_user` (through `AuditBaseModel.stamp_user()`),
    `get_contact_email`, `rollback_atomic`, the two htmx decorators, `relocate_device`,
    `obj_link`/`linked_message`, `search_devices`, QR code generation.
 5. **Dependency rule.** `core/models`, `core/lifecycle.py` and `core/utils` import no
@@ -150,12 +150,12 @@ Verified against the code on 2026-10-10. Line numbers are as of that date.
 | Rule | Copies | One place |
 |---|---|---|
 | State keys | `lifecycle.py:54-58`, `Record.INROOM…` (`record.py:65-69`), `notifications/models.py:45-49` (report events) | `Record.X = lifecycle.X`. Keep the `Record.X` spelling (235 uses). The notification events reuse `lifecycle.X` as their values. (`dataexchange/reporting.py`'s `Outcome.REMOVED` is an import outcome, not a state key, so it stays.) |
-| Overdue | `lending/views.py:68`, `lending/filters.py:105`, `dashboard/views.py:162`, `core/admin/filters/lentstate_filter.py:26`, `core/admin/lentrecord_admin.py:143` (no not-returned check), `notifications/reports.py:55-71` (+5 days tolerance, OR instead of AND) | `LentRecord.objects.overdue(as_of=None, tolerance_days=0)` in `prx_lentrecord.py`, built on one `Q` so the admin's `Case/When` annotation can share it |
+| Overdue | `lending/views.py:68`, `lending/filters.py:105`, `dashboard/views.py:162`, `core/admin/filters/lentstate_filter.py:26`, `core/admin/lentrecord_admin.py:143` (no not-returned check), `notifications/reports.py:55-71` (+5 days tolerance, OR instead of AND) | `LentRecord.objects.overdue(today=None, tolerance_days=0)` in `prx_lentrecord.py`, built on one `Q` so the admin's `Case/When` annotation can share it |
 | Lend / return / edit dispatch | `lending/views.py:_apply_state_machine`, `core/admin/lentrecord_admin.py:save_model`, and the soft warnings twice | `apply_lending(…)` and `lending_warnings(person, desired_end)` next to `LentRecord` in `prx_lentrecord.py`. View and admin call both |
 | "Lost device cannot be lent" | `core/forms/lentrecordadmin_form.py:30`, `lending/forms.py:79`, and a GET-time guard in `lending/views.py:339` | Not a pure duplicate (see step 33): neither dispatch calls `transition_lend` for a LOST record. The view guard is UX and stays |
 | Licence "expires soon" notice (30 days before expiry) | `licenses/subscribers.py:60`, `notifications/tasks.py:167` | Both compute a schedule date, not a queryset, so the rule becomes one named constant in `notifications`. The 93-day warning in the `LicenceRecord` annotation is a different rule and stays |
 | Licence device-type prefixes `Lizenz::/License::/Licence::` | `licenses/forms.py:40`, `licenses/filters.py:28` | one constant in `licenses` (device-type choices still need it; the `is_licence` flag is the rule for devices) |
-| Audit stamp `obj.user, obj.username = get_denormalized_user(request.user)` | 17 call sites in 8 files | `AuditBaseModel.save(self, *args, user=None, **kwargs)` stamps the user when one is given, so call sites become `obj.save(user=request.user)` |
+| Audit stamp `obj.user, obj.username = get_denormalized_user(request.user)` | 17 call sites in 8 files | `AuditBaseModel.stamp_user(user)`, so call sites become `obj.stamp_user(request.user)` (a `save(user=…)` keyword was planned first; see step 27) |
 | Person live search, room search, device text search | several copies each (has-note is already done: `theme/filters.py`, filterbar step 2) | one queryset method per model in core (needs an inventory first: step 35) |
 
 ### Tenant scoping
@@ -305,6 +305,10 @@ a separate inventory refactoring, see *Postponed*.
 - Out of scope, noted (2026-10-11): the licence iCal export (`licenses/views_calendar.py:59`)
   computes `date + 1 day` for a licence's contract dates and overflows for 9999-12-31.
   Licence dates never had a bound.
+- Out of scope, noted (2026-10-12): the licence form schedules the licence notices with
+  a plain date (`licenses/subscribers.py`), so Django warns about a naive datetime and
+  takes local midnight; the scheduler (`notifications/tasks.py`) makes the same moment
+  aware itself. Same result, but one warning per notice. Found in step 24.
 
 ### What stays in core although it looks domain-specific
 
@@ -633,52 +637,106 @@ Not part of the core review. It goes first because it is a security fix and smal
 
 #### 22 — State keys
 - `Record.ORDERED = lifecycle.ORDERED` and so on. The notification report events use
-  `lifecycle.X` as their values.
+  `lifecycle.X` as their values. A test pins that the report events are exactly the state
+  keys (`notifications/tests/test_report_selection.py`).
 - Commit: `Core review, step 22: state keys are defined once in lifecycle; Record and the
   notification events reuse them`
 
 #### 23 — Licence device-type prefixes
-- One constant in `licenses`, read by `forms.py` and `filters.py`.
+- `LICENSE_DEVICE_TYPE_PREFIXES` and `license_device_types()` in `licenses/models.py`;
+  `forms.py` and `filters.py` both take the queryset from it. A test pins that both offer
+  exactly the prefixed types (`licenses/tests/test_device_types.py`). The user guide
+  (`docs/guides/lizenzen.md`) named the example type *Lizenz - Grafik*, which no licence
+  form offers; it now names the prefixes.
 - Commit: `Core review, step 23: the licence device-type prefixes are one constant`
 
 #### 24 — Contract "expires soon" notice
-- One named 30-day constant in `notifications`, read by `licenses/subscribers.py` and
-  `notifications/tasks.py`.
+- `Subscription.CONTRACT_EXPIRES_SOON_DAYS = 30`, read by `licenses/subscribers.py` and
+  `notifications/tasks.py`. A test pins that the licence form and the scheduler schedule
+  the notice for the same moment (`licenses/tests/test_subscribers.py`).
 - Commit: `Core review, step 24: the 30-day contract expiry notice is one constant`
 
 #### 25 — Subscriber emails → `licenses`
-- The annotation leaves the `LicenceRecord` manager. `licenses` annotates where
-  `index.html` needs it, and `test_licencerecord_subscribers.py` moves to `licenses/tests/`.
+- The annotation leaves the `LicenceRecord` manager and becomes `subscriber_emails()` in
+  `licenses/subscribers.py`. The licence list view annotates it as `subscriber_emails`
+  (was `get_subscribers`), and `index.html` reads that. `test_licencerecord_subscribers.py`
+  moves to `licenses/tests/test_subscriber_emails.py`; a new view test checks that the
+  list shows a subscriber's email. Also gone from core: the commented-out
+  `Device.get_subscribers` and a commented-out `prefetch_related("device__subscription_set")`.
+  Guard grep: only `Branding` and the postponed `tenants`/`inventory` imports remain.
+- Reviewed on 2026-10-12: the licence list was the only reader of `get_subscribers`, ever
+  (since 2024-12). The licence admin computed the subquery per row without showing it; it
+  no longer does. `dashboard/search.py` cited it as one reason to search licences as
+  Devices; the other two reasons stand, so that comment lost its third.
 - Commit: `Core review, step 25: licence subscriber emails are annotated in licenses; core no
   longer looks up notifications`
 
 #### 26 — Dropped
 - No `has_any_perm` helper (decision 9).
 
-#### 27 — `AuditBaseModel.save(user=…)`, admin side
-- Add the keyword. Admin call sites: `core/admin/base_admin.py` (2), `tenants/admin.py` (2),
-  `dataexchange/admin.py` (2).
-- Commit: `Core review, step 27: audit models stamp the user on save(user=…); the admins use
-  it`
+#### 27 — `AuditBaseModel.stamp_user()`, admin side
+- Decision (user, 2026-10-12): a model method `stamp_user(user)` instead of a
+  `save(user=…)` keyword. In the admin, `save(user=…)` would have meant skipping
+  `super().save_model()`, Django's documented idiom (set the fields, then call super),
+  and in `TenantAdmin` also django-simple-history's `save_model`. A method also needs no
+  keyword threaded through the eight `save()` overrides, and no `update_fields` handling.
+- Admin call sites: `core/admin/base_admin.py`, `tenants/admin.py` (2) and
+  `dataexchange/admin.py` (2) call `obj.stamp_user(request.user)`.
+  `CustomBaseModelAdmin.save_formset` is removed (user decision): none of the 14 admins
+  built on it has inlines, so it never ran.
+- Tests: `core/tests/test_audit_stamp.py` (`CustomBaseModelAdmin` and `TenantAdmin`), and
+  `test_decommission_journal.py` now checks the remover admin's stamp. The importer admin
+  and the tenant-assign action were already covered.
+- Commit: `Core review, step 27: audit models stamp their editor through stamp_user(); the
+  admins use it`
 
-#### 28 — `save(user=…)`, frontend side
+#### 28 — `stamp_user()`, frontend side
 - `tenants/views.py` (3), `persons/views.py` (2), `rooms/views.py` (2),
   `assets/views/devices.py` (2), `assets/views/masterdata.py` (2), `dataexchange/views.py`
   (1). `lending/views.py` follows in step 32. `lifecycle.py` and `journal` read
   `get_denormalized_user` differently and stay as they are.
-- Commit: `Core review, step 28: frontend views stamp the user through save(user=…)`
+- Done 2026-10-12. The existing tests covered the create views and the three tenant views,
+  not the four edit views. `test_edit_unsynced_person` and
+  `test_edit_room_returns_to_the_filtered_index` now also check the stamp, and the new
+  `test_edit_device_stamps_the_editor` and `test_edit_device_type_stamps_the_editor`
+  cover devices and device types. Each of the 12 call sites now fails a test without its
+  stamp.
+- Commit: `Core review, step 28: frontend views stamp the user through stamp_user()`
 
 #### 29 — `LentRecord.objects.overdue()`, same-meaning readers
 - Add the method, built on one `Q` and filtering `record_type=LENT` explicitly (see
-  *Pitfalls*), plus one test that pins the meaning: desired end + tolerance ≤ as_of, not
+  *Pitfalls*), plus one test that pins the meaning: desired end + tolerance ≤ today, not
   returned. Switch over the readers that already mean exactly this: `lending/views.py`,
   `lending/filters.py`, `dashboard/views.py`.
+- Done 2026-10-12. `LentRecord.overdue_q(today=None, tolerance_days=0)` (a staticmethod,
+  so annotations and plain `Record` querysets can use it) and
+  `LentRecord.objects.overdue()` on a `LentRecordQuerySet`. Without `today` it is
+  `timezone.localdate()`, Django's today in the current time zone (`timezone.now().date()`
+  would be the UTC date); the tolerance is subtracted from `today` (the overflow fixed
+  before step 10, see *Bugs found on the way*). The parameter was `as_of` first; renamed
+  to `today` (user, 2026-10-12). `core/tests/test_lentrecord_overdue.py` pins the meaning,
+  including INROOM, tolerance, 9999-12-31 and local time; each of four broken variants of
+  the rule fails it.
+- Behaviour: the three readers gain `record_type=LENT`. Only an INROOM record carrying a
+  desired return date and no return date could drop out, and no current writer creates
+  one (the importer and the HR sync write lending dates only on LENT records; a return
+  appends a fresh INROOM record).
 - Commit: `Core review, step 29: "overdue" is defined once on LentRecord; lending and the
   dashboard use it`
 
 #### 30 — Admin overdue filter and highlighting
 - `lentstate_filter.py` and the `LentRecordAdmin` annotation use the shared `Q`.
   Behaviour change: the highlighting gains the not-returned check.
+- Done 2026-10-12. The filter calls `queryset.overdue()`, the annotation
+  `When(LentRecord.overdue_q(), …)`; both drop their own `datetime.today()`. No test
+  covered either; `core/tests/test_lentrecord_admin.py` now checks the filter and the
+  highlighting (an active LENT record with a return date set is marked "lent", not
+  "overdue"; the old annotation fails that).
+- Behaviour: the highlighting gains the not-returned and the LENT check, the filter the
+  LENT check. Only an active LENT record that carries a return date, or an INROOM record
+  with a desired return date, changes. No current writer leaves either behind: a return
+  sets the date and appends an INROOM record in one transaction, and the importer does the
+  same for returned loans.
 - Commit: `Core review, step 30: the lending admin marks and filters overdue lendings by the
   shared rule`
 
@@ -686,6 +744,18 @@ Not part of the core review. It goes first because it is a security fix and smal
 - `get_lent_overdue_records` uses `overdue(tolerance_days=LENT_OVERDUE_TOLERANCE_DAYS)`.
   Behaviour change: AND instead of OR. Say in the commit whether that can change a real
   report.
+- Done 2026-10-12. The query is `Record.objects.active_records()` filtered by
+  `LentRecord.overdue_q()`, with `today=timezone.localdate(now)` and
+  `tolerance_days=LENT_OVERDUE_TOLERANCE_DAYS`. The base stays `Record`, not
+  `LentRecord.objects`, which would also require `device__is_lentable` and so change more
+  than planned. New test: a lending with a return date is not reported
+  (`test_report_flows.py`); the old query fails it.
+- Behaviour: the old OR (`desired date set OR not returned`) was always true next to the
+  date filter, so returned lendings counted. Now only an active LENT record that carries
+  a return date drops out of the overdue report and the reminder mails. No current writer
+  leaves one behind (see step 30), so a real report changes only for such old rows.
+- After this step the rule is spelled once: `LentRecord.overdue_q` in
+  `core/models/prx_lentrecord.py`.
 - Commit: `Core review, step 31: overdue reports and reminder mails use the shared overdue
   rule with their 5-day tolerance`
 
@@ -776,16 +846,16 @@ Not part of the core review. It goes first because it is a security fix and smal
 - [x] 20 — `nav` → theme
 - [x] 21 — `hints` → theme
 - [x] 21b — `django_settings` → theme
-- [ ] 22 — State keys
-- [ ] 23 — Licence device-type prefixes
-- [ ] 24 — Expires-soon notice
-- [ ] 25 — Subscriber emails → licenses
+- [x] 22 — State keys
+- [x] 23 — Licence device-type prefixes
+- [x] 24 — Expires-soon notice
+- [x] 25 — Subscriber emails → licenses
 - ~~26 — `has_any_perm`~~ dropped (decision 9)
-- [ ] 27 — `save(user=…)`, admin
-- [ ] 28 — `save(user=…)`, frontend
-- [ ] 29 — `overdue()`, same-meaning readers
-- [ ] 30 — Admin overdue
-- [ ] 31 — Overdue report
+- [x] 27 — `stamp_user()`, admin
+- [x] 28 — `stamp_user()`, frontend
+- [x] 29 — `overdue()`, same-meaning readers
+- [x] 30 — Admin overdue
+- [x] 31 — Overdue report
 - [ ] 32 — One lend dispatch
 - [ ] 33 — Lost-device check once (open question)
 - [ ] 34 — `ldap.py`
