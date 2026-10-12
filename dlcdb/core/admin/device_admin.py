@@ -316,10 +316,11 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         )
 
     def has_record_notes_badge(self, request, object_id):
+        """The note badge for the "Records history" link, when a record of the device has a note."""
         obj = self.get_object(request, object_id)
         # In case the object is not part of a tenant-filtered queryset,
         # we do not get any object.
-        if obj and obj.has_record_notes():
+        if obj and obj.record_set.exclude(note__isnull=True).exclude(note__exact="").exists():
             return get_has_note_badge(obj_type="core.record", has_note=True)
 
     # Custom Django admin actions

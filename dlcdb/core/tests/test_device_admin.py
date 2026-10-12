@@ -150,3 +150,29 @@ class DeviceAdminTenantTests(basetest.BaseTest):
         changelist = self.client.get(changelist_url).context["cl"]
         self.assertNotIn("tenant", changelist.list_display)
         self.assertNotIn(("tenant", admin.RelatedOnlyFieldListFilter), changelist.list_filter)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class DeviceAdminRecordNotesBadgeTests(basetest.BaseTest):
+    """The "Records history" link carries a note badge when a record of the device has a note."""
+
+    def setUp(self):
+        user = get_user_model().objects.create_superuser(email="admin@example.org", password="secret")
+        self._join_default_tenant(user)
+        self.device = self._create_device()
+        self.room = Room.objects.create(number="123")
+        self.client.force_login(user)
+
+    def _badge(self):
+        response = self.client.get(reverse("admin:core_device_change", args=[self.device.pk]))
+        return response.context["has_record_notes_badge"]
+
+    def test_badge_when_a_record_has_a_note(self):
+        InRoomRecord.objects.create(device=self.device, room=self.room, note="Display cracked")
+
+        self.assertIn("Notes exists", self._badge())
+
+    def test_no_badge_without_record_notes(self):
+        InRoomRecord.objects.create(device=self.device, room=self.room)
+
+        self.assertIsNone(self._badge())
