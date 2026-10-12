@@ -8,9 +8,9 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–35, 37–41 and 21b done, 15 skipped, 18 and 19 postponed; step 36 not started.
-Step 41 (the dashboard's lent bar, found while checking the contract for step 36) runs
-before 36. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
+27–41 and 21b done, 15 skipped, 18 and 19 postponed. All steps are done; what is left
+is under *Postponed* and *Open questions*. Step 41 (the dashboard's lent bar, found
+while checking the contract for step 36) ran before 36. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
 This is a living document: findings, decisions and progress are kept here.
 
 ## Why
@@ -56,6 +56,10 @@ deleted, not added.
 
 What `dlcdb/core` is, in one screen. This text becomes the module docstring of
 `dlcdb/core/__init__.py` once it is true (last step), and `AGENTS.md` points at it.
+
+Written down in step 36 (2026-10-12) as a short docstring with only the rules that
+cannot be read off the code (see step 36). The lists below stay here as planning notes;
+they are not code documentation.
 
 1. **Models.** `Device`, `Record` and its five state proxies, `LicenceRecord` (a view on
    records, not a state), `Room`, `Person`, `OrganizationalUnit`, `DeviceType`,
@@ -1080,6 +1084,31 @@ Rule 8. The findings are in *Admin-only members on core models*.
     hits are helpers read only inside their own model file, plus
     `Record.get_proxy_model_by_record_type`, which only tests read (as noted under
     *Admin-only members*).
+- First draft: the whole corrected contract, about 70 lines, as the module docstring.
+  The user questioned it (2026-10-12). It is just prose, and a clear interface would
+  rather export the consumable parts through `__init__.py`. Honest answer:
+  - A Django app's `__init__.py` cannot re-export models. `"dlcdb.core"` is in
+    `INSTALLED_APPS`, so Django imports the package before models can be defined
+    (`AppRegistryNotReady`).
+  - Core's facades are its modules. Other apps import from `dlcdb.core.models` (51
+    imports; its `__init__` re-exports every model), `dlcdb.core.lifecycle` (19) and
+    `dlcdb.core.utils.*` (20), plus a few deep imports.
+  - The lists of models, helpers, admin files and plumbing duplicate the code and would
+    drift.
+- User decisions:
+  - a short docstring with only the rules that cannot be read off the code, and no
+    lists;
+  - no import test: rule 5 stays documentation, and the guard grep stays a manual
+    check.
+- Done 2026-10-12. `dlcdb/core/__init__.py` is 18 lines. It names:
+  - where other apps import from, and why nothing is re-exported there;
+  - the dependency rule with its three exceptions, and the admin's place;
+  - records appended through the lifecycle, with the `Record.save()` check;
+  - shared rules living once in core, and lentable versus lent;
+  - admin-only methods belonging in the admin.
+
+  A script resolved every name it mentions, and the guard grep lists exactly its three
+  exceptions. `AGENTS.md` points at the docstring.
 - Commit: `Core review, step 36: core/__init__.py states the contract other apps rely on`
 
 ## Alternatives considered and rejected
@@ -1091,6 +1120,8 @@ Rule 8. The findings are in *Admin-only members on core models*.
 | Signals on `Record` for journaling/notifications | Project rule (journal plan, decision 8): explicit calls, no signals. |
 | Moving the model admins to the frontend apps | Asked and rejected (decision 6): one UI over the core models reads better in one place; the admin may import consumer helpers. |
 | Retiring the admin UI for lending/licences | Out of scope for this review. The admin is being phased out (decision 10); this review keeps the models free of admin-only code (rule 8). |
+| Re-exporting core's interface from `dlcdb/core/__init__.py` (step 36) | Django imports the app package before models can be defined (`AppRegistryNotReady`). Core's facades are its modules: `dlcdb.core.models`, `dlcdb.core.lifecycle`, `dlcdb.core.utils`. |
+| An import-boundary test for rule 5 (step 36) | User decision (2026-10-12): the rule stays documentation in `dlcdb/core/__init__.py`, and the guard grep stays a manual check. |
 | A pytest guard or a script for the admin-only scan | Grep-based and heuristic (generic names, `list_display` strings, admin templates). A documented procedure, run by hand in steps 37 and 36, is enough (decision 10). |
 | `apply_ldap(globals())` for the LDAP settings (step 34) | A function that writes into the module namespace is harder to read than the plain assignments it replaces; settings stay dead simple (user, 2026-10-12). |
 | Putting thresholds into settings | Nobody tunes them per deployment; a named constant next to its one definition is easier to find. |
@@ -1157,7 +1188,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 34 — `ldap.py`
 - [x] 35 — Search methods
 - [x] 41 — Dashboard lent bar
-- [ ] 36 — The contract is written down
+- [x] 36 — The contract is written down
 
 ## Verification (each step)
 

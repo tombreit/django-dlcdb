@@ -28,6 +28,7 @@ Device Lifecycle Database
 - If possible, do not introduce custom Django template tags
 - Write the code for human inspection, favour readability
 - If in doubt: ask me
+- `dlcdb/core` is the contract the other apps rely on; its rules are the module docstring of `dlcdb/core/__init__.py`. Read it before changing core or how an app uses it
 - `PLANS/` holds living design documents for work that is planned but not yet implemented
 - You may suggest commit messages, but do not commit on your own
 - If adding SPDX license headers: omit the year
