@@ -9,14 +9,14 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Column, Div, Layout, Row
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, DeviceType, Person
+from dlcdb.core.models import Device, Person
 from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.widgets import TomSelectMultipleWidget
 
+from .models import license_device_types
 from .subscribers import manage_subscribers
 
 
@@ -35,10 +35,7 @@ class LicenseForm(forms.ModelForm):
 
         limit_tenant_field(self.fields["tenant"], tenants)
 
-        # Limit device-type choices to "License-type" choices
-        self.fields["device_type"].queryset = DeviceType.objects.filter(
-            Q(name__startswith="Lizenz::") | Q(name__startswith="License::") | Q(name__startswith="Licence::")
-        )
+        self.fields["device_type"].queryset = license_device_types()
         # Set initial value for contract_termination checkbox
         self.fields["contract_termination"].initial = bool(self.instance.contract_termination_date)
 

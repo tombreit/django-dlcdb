@@ -2,15 +2,14 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from functools import reduce
-from operator import or_
-
 import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import DeviceType, LicenceRecord, Supplier
+from dlcdb.core.models import LicenceRecord, Supplier
 from dlcdb.tenants.shortcuts import filterable_tenants
+
+from .models import license_device_types
 
 
 class LicenceRecordFilter(django_filters.FilterSet):
@@ -25,11 +24,9 @@ class LicenceRecordFilter(django_filters.FilterSet):
             | Q(device_human_title__icontains=value)
         )
 
-    _license_type_prefixes = ["Lizenz::", "License::", "Licence::"]
-    _license_type_queries = [Q(name__startswith=prefix) for prefix in _license_type_prefixes]
     device__device_type = django_filters.ModelChoiceFilter(
         label=_("License type"),
-        queryset=DeviceType.objects.filter(reduce(or_, _license_type_queries)),
+        queryset=license_device_types(),
         empty_label=_("License type..."),
     )
 

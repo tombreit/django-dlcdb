@@ -34,7 +34,7 @@ Eine Lizenz sollte:
 
 - Eine Datumsangabe bei *Beschaffung › Kaufdatum* haben
 - Eine Datumsangabe bei *Beschaffung › Ablaufdatum Lizenz- oder Wartungsvertrag* haben
-- Einen passenden Eintrag beim *Geräte-Typ* (z.B. *Lizenz - Grafik*) haben
+- Einen passenden Eintrag beim *Geräte-Typ* haben: Lizenzverwaltung und Lizenzfilter bieten nur Geräte-Typen an, deren Name mit `Lizenz::`, `License::` oder `Licence::` beginnt (z.B. *Lizenz::Grafik*)
 - Entsprechende Lizenzinformationen (Seriennummer, Ansprechpartner, Ablage Keyfile etc.) im Notizfeld haben
 - Eine Lizenzverlängerung, die eine neue SAP-Nummer bekommt, wird als neues Device eingetragen (z.B. bisheriges Lizenz-Device öffnen und *Als neu speichern*)
 
