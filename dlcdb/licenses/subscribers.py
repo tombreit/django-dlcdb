@@ -55,9 +55,9 @@ def manage_subscribers(device, subscribers):
         scheduled_times = {
             # For a newly created subscription, immediate notification
             Subscription.NotificationEventChoices.CONTRACT_ADDED: timezone.now(),
-            # For expires_soon, 30 days before expiration (adjust as needed)
+            # For expires_soon, CONTRACT_EXPIRES_SOON_DAYS before expiration
             Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON: device.contract_expiration_date
-            - timedelta(days=30)
+            - timedelta(days=Subscription.CONTRACT_EXPIRES_SOON_DAYS)
             if device.contract_expiration_date
             else None,
             # For expired, on expiration date

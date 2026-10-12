@@ -157,14 +157,14 @@ def _update_license_subscriptions():
         for subscription in subscriptions:
             previous = subscription.next_scheduled
 
-            # For CONTRACT_EXPIRES_SOON, set to 30 days before expiration
+            # For CONTRACT_EXPIRES_SOON, set to CONTRACT_EXPIRES_SOON_DAYS before expiration
             if (
                 subscription.event == Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON
                 and device.contract_expiration_date
             ):
                 expiration_date = _ensure_aware_dt(device.contract_expiration_date)
                 if expiration_date:  # Only proceed if not None
-                    notify_date = expiration_date - timedelta(days=30)
+                    notify_date = expiration_date - timedelta(days=Subscription.CONTRACT_EXPIRES_SOON_DAYS)
                     subscription.schedule_next_message(datetime_obj=notify_date)
 
             # For CONTRACT_EXPIRED, set to expiration date

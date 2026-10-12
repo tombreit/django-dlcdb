@@ -56,6 +56,10 @@ class Subscription(models.Model):
         NotificationEventChoices.CONTRACT_EXPIRED,
     ]
 
+    # CONTRACT_EXPIRES_SOON is due this many days before the contract expiration
+    # date, whether the licence form or the scheduler sets the date.
+    CONTRACT_EXPIRES_SOON_DAYS = 30
+
     # Values equal Record.record_type, so report record selection can filter
     # record_type=subscription.event directly.
     REPORT_EVENTS = [
