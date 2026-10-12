@@ -54,23 +54,6 @@ def nav(request):
     nav_items = []
     dlcdb_apps = [app for app in apps.get_app_configs()]
 
-    def _get_is_active():
-        #     # convert "/djangoapp/path/in/app" to "path/in/app"
-        #     app_path = "/".join(request.path.split("/")[2:])
-        #     for nav_item in nav:
-        #         if 'active_prefixes' in nav_item:
-        #             if re.match("|".join(nav_item['active_prefixes']), app_path):
-        #                 nav_item['active'] = True
-        #             else:
-        #                 nav_item['active'] = False
-        #         else:
-        #             # 'active_prefixes' is optional, and if not specified, assume
-        #             # current item is active
-        #             nav_item['active'] = True
-        raise NotImplementedError(
-            "Function _get_is_active to retrieve the active navigation entry is not implemented (yet)."
-        )
-
     def _get_has_permission(user, permission):
         if not user or not permission:
             return False
@@ -99,16 +82,11 @@ def nav(request):
     current_url_name = resolver_match.url_name if resolver_match else None
 
     for app in dlcdb_apps:
-        # print(f"{app}: name: {app.name}; verbose_name: {app.verbose_name}; label: {app.label}")
-
         nav_module = _app_navigation(app.name)
         if nav_module is None:
             continue
 
         for nav_entry in getattr(nav_module, "nav_entries", []):
-            # name: dlcdb.reporting; verbose_name: Reporting; label: reporting
-            # for a concrete permission string we need the app name without the project prefix
-            # so 'app.label' seems to fit
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, required_permission)
 
