@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import Device
 
 from .email_footer import email_footer_context
@@ -41,12 +42,13 @@ class Subscription(models.Model):
         CONTRACT_EXPIRED = "CONTRACT_EXPIRED", "Contract Expired"
         MOVED = "MOVED", "Moved"
         DEVICE_DECOMMISSIONED = "DEVICE_DECOMMISSIONED", "Device decommissioned"
-        # Report events: periodic report about records of this record type
-        ORDERED = "ORDERED", "Report: Ordered devices"
-        INROOM = "INROOM", "Report: Located devices"
-        LENT = "LENT", "Report: Lent devices"
-        LOST = "LOST", "Report: Lost devices"
-        REMOVED = "REMOVED", "Report: Removed devices"
+        # Report events: periodic report about records of this record type. The
+        # values are the lifecycle state keys.
+        ORDERED = lifecycle.ORDERED, "Report: Ordered devices"
+        INROOM = lifecycle.INROOM, "Report: Located devices"
+        LENT = lifecycle.LENT, "Report: Lent devices"
+        LOST = lifecycle.LOST, "Report: Lost devices"
+        REMOVED = lifecycle.REMOVED, "Report: Removed devices"
 
     LICENSE_EVENTS = [
         NotificationEventChoices.CONTRACT_ADDED,

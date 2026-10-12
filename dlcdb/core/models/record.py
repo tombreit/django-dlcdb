@@ -43,12 +43,10 @@ class RecordManager(models.Manager):
         return self.get_queryset().active_records()
 
 
-# The state vocabulary now lives in ``dlcdb.core.lifecycle``, the single source of
-# truth for states and transitions. These names are re-exported here because the
-# ``record_type`` field choices and the CheckConstraint (below) need them at
-# class-body evaluation time, and many call sites import them from this module.
-# The keys are stable identifiers: written to the database, checked by the
-# CheckConstraint and exposed verbatim by the API. Only the labels are translated.
+# The record_type choices and the list of keys, from lifecycle's states: the field
+# choices and the CheckConstraint below are built from them. The keys are stable
+# identifiers, written to the database, checked by the CheckConstraint and exposed
+# verbatim by the API. Only the labels are translated.
 RECORD_TYPE_LIST = lifecycle.RECORD_TYPE_LIST
 RECORD_TYPE_KEYS = lifecycle.RECORD_TYPE_KEYS
 
@@ -59,15 +57,22 @@ LOST_DEVICE_NOT_LENDABLE = _('Device is currently "not locatable". It must be lo
 
 
 class Record(AuditBaseModel):
-    # A new record type needs a key and an entry in lifecycle.STATES, a proxy
-    # model (prx_*.py), a constant here, a badge colour in
-    # theme.lifecycle_display and a migration (the choices and the
+    # The state keys. A device's state is the record_type of its active record,
+    # so code that filters or compares records names a state through the model it
+    # works with: ``record_type=Record.LENT``. The keys themselves belong to
+    # lifecycle, which defines the states together with their transitions; the
+    # names here are aliases of lifecycle's, never literals of their own, so every
+    # key is written down exactly once.
+    #
+    # A new state starts in lifecycle (its key and its entry in STATES). It then
+    # needs a proxy model (prx_*.py), an alias here, a badge colour in
+    # theme.lifecycle_display and a migration (the record_type choices and the
     # CheckConstraint follow lifecycle.STATES).
-    ORDERED = "ORDERED"
-    INROOM = "INROOM"
-    LENT = "LENT"
-    LOST = "LOST"
-    REMOVED = "REMOVED"
+    ORDERED = lifecycle.ORDERED
+    INROOM = lifecycle.INROOM
+    LENT = lifecycle.LENT
+    LOST = lifecycle.LOST
+    REMOVED = lifecycle.REMOVED
 
     RECORD_TYPE_CHOICES = RECORD_TYPE_LIST
 

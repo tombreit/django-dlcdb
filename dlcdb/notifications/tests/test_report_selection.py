@@ -12,6 +12,7 @@ from datetime import timedelta
 from django.test import TestCase
 from django.utils import timezone
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, DeviceType, InRoomRecord
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Subscription
@@ -113,3 +114,8 @@ class GetAffectedRecordsTests(TestCase):
 
         expected_days = FALLBACK_WINDOW_DAYS[NotificationInterval.YEARLY]
         self.assertEqual(result.window_start, now - timedelta(days=expected_days))
+
+
+def test_report_events_are_the_lifecycle_state_keys():
+    """Report selection filters record_type=subscription.event, so every state has its event."""
+    assert [event.value for event in Subscription.REPORT_EVENTS] == lifecycle.RECORD_TYPE_KEYS
