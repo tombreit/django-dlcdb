@@ -53,11 +53,19 @@ class InRoomRecordAdmin(TenantScopedRecordAdmin, RedirectToDeviceMixin, CustomBa
             return super().response_change(request, obj, post_url_continue=post_url_continue)
 
     def render_change_form(self, request, context, add=False, change=False, form_url="", obj=None):
+        """
+        Hides the extra save buttons. For the device the add view was opened for
+        (``?device=``), passes its lending as ``current_lending`` when the device is
+        lent out right now, so the form can warn that locating it ends the lending.
+        """
+        active_record = getattr(context.get("device"), "active_record", None)
+        lent_out = active_record is not None and active_record.is_type_lent and active_record.lent_end_date is None
         context.update(
             {
                 "show_save_and_add_another": False,
                 "show_save_and_continue": False,
                 "show_activate_deactivate": False,
+                "current_lending": active_record if lent_out else None,
             }
         )
         return super().render_change_form(request, context, add, change, form_url, obj)

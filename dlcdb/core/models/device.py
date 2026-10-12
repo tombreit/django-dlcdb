@@ -266,22 +266,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         return self.device_notes.filter(inventory__is_active=True).order_by("-created_at").first()
 
     @property
-    def get_is_currently_lented(self):
-        if not self.active_record:
-            return False
-        else:
-            return all(
-                [
-                    self.active_record.is_type_lent,
-                    self.active_record.lent_end_date is None,
-                ]
-            )
-
-    @property
-    def get_person(self):
-        return self.active_record.person
-
-    @property
     def get_current_inventory_records(self):
         """
         Try to get the latest record which has an inventory stamp attached.
