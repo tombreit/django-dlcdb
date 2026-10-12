@@ -350,7 +350,7 @@ whichever test runs when the object is collected, so the failing tests vary.
 - [x] 48 — Stale text and docs
 - [x] 49 — Licence notices as aware datetimes
 - [x] 50 — Files and connections closed
-- [ ] 51 — Warnings fail the suite
+- [x] 51 — Warnings fail the suite
 - [ ] 52 — `nav` leftovers
 - [ ] 53 — The 403 page names the IT address first
 - [ ] 54 — One picker convention

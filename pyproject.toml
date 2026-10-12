@@ -136,3 +136,6 @@ testpaths = ["dlcdb"]
 # `pytest .` must not collect the package copy a `make wheel` leaves in run/release/.
 norecursedirs = ["run", ".venv", "node_modules"]
 required_plugins = ["pytest-django"]
+# Every warning fails the suite, e.g. a naive datetime or a file left open. A leak
+# is reported in whichever test runs when it is collected, not in the one causing it.
+filterwarnings = ["error"]
