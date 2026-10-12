@@ -104,7 +104,7 @@ class TenantAdmin(SimpleHistoryAdmin):
         if not self.has_assign_permission(request):
             raise PermissionDenied
         tenant = get_object_or_404(Tenant, pk=tenant_id)
-        # Same querysets as the "without tenant" hints (core.context_processors.hints),
+        # Same querysets as the "without tenant" hints (theme.context_processors.hints),
         # each only for users who may change that kind of object.
         user = request.user
         devices = (

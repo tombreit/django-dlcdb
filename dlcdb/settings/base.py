@@ -194,7 +194,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "dlcdb.core.context_processors.hints",
+                "dlcdb.theme.context_processors.hints",
                 "dlcdb.theme.context_processors.nav",
                 "dlcdb.core.context_processors.django_settings",
                 "dlcdb.theme.context_processors.project_meta",

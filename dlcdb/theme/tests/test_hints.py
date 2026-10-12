@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-The sticky hint messages (core.context_processors.hints) point to the frontend
+The sticky hint messages (theme.context_processors.hints) point to the frontend
 apps, not the legacy admin changelists.
 """
 

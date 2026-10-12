@@ -11,9 +11,9 @@ useful when the device and the room are clickable. ``linked_message`` does the
 so the message text (the translatable msgid) stays exactly as it was.
 
 Putting HTML into a Django message is an established pattern in this project:
-``dlcdb.core.context_processors.StickyMessage.get_formatted_msg`` already does
-it, and both message renderers (``theme/_base.html`` and the django-admin
-default) pass a ``SafeString`` through untouched.
+``StickyMessage.get_formatted_msg`` in ``dlcdb.theme.context_processors.hints``
+already does it, and both message renderers (``theme/_base.html`` and the
+django-admin default) pass a ``SafeString`` through untouched.
 """
 
 from django.urls import NoReverseMatch, reverse
