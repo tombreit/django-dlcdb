@@ -25,7 +25,6 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
@@ -87,7 +86,7 @@ def device_import(request):
 
     if request.method == "POST" and form.is_valid():
         importer_list = form.save(commit=False)
-        importer_list.user, importer_list.username = get_denormalized_user(request.user)
+        importer_list.stamp_user(request.user)
         # Archive the file and create the audit row up front: failed attempts
         # are part of the import history (run_device_import marks the row with
         # status "error"); status stays empty until a confirmed write.

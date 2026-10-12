@@ -108,6 +108,7 @@ class PersonFrontendTests(TestCase):
         self.assertRedirects(response, self.index_url)
         self.local_person.refresh_from_db()
         self.assertEqual(self.local_person.email, "erika.m@example.com")
+        self.assertEqual(self.local_person.user, self.user)
 
     def test_udb_synced_person_is_readonly_even_for_superusers(self):
         url = reverse("persons:detail", args=[self.synced_person.pk])

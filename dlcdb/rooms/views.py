@@ -19,7 +19,6 @@ from django.views.generic import TemplateView
 
 from dlcdb.core.models import Record, Room
 from dlcdb.core.models.room import RoomReconcile
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
@@ -115,7 +114,7 @@ def room_add(request):
     form = RoomForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         room = form.save(commit=False)
-        room.user, room.username = get_denormalized_user(request.user)
+        room.stamp_user(request.user)
         # Room.save() generates the QR code and keeps the single
         # auto-return/external room invariants.
         room.save()
@@ -145,7 +144,7 @@ def room_detail(request, pk):
         form = RoomForm(request.POST, instance=room)
         if form.is_valid():
             saved_room = form.save(commit=False)
-            saved_room.user, saved_room.username = get_denormalized_user(request.user)
+            saved_room.stamp_user(request.user)
             saved_room.save()
             messages.success(request, _("Room “%(room)s” was updated.") % {"room": saved_room})
             return redirect(index_url)

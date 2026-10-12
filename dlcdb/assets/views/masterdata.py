@@ -22,7 +22,6 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
@@ -151,7 +150,7 @@ def _masterdata_add(request, spec):
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
         if spec.has_audit_fields:
-            obj.user, obj.username = get_denormalized_user(request.user)
+            obj.stamp_user(request.user)
         obj.save()
         messages.success(
             request,
@@ -188,7 +187,7 @@ def _masterdata_detail(request, spec, pk):
         if form.is_valid():
             saved_obj = form.save(commit=False)
             if spec.has_audit_fields:
-                saved_obj.user, saved_obj.username = get_denormalized_user(request.user)
+                saved_obj.stamp_user(request.user)
             saved_obj.save()
             messages.success(
                 request,

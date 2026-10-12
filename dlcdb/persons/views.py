@@ -13,7 +13,6 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Person, Record
-from dlcdb.core.utils.helpers import get_denormalized_user
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
@@ -75,7 +74,7 @@ def person_add(request):
     form = PersonForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         person = form.save(commit=False)
-        person.user, person.username = get_denormalized_user(request.user)
+        person.stamp_user(request.user)
         person.save()
         messages.success(request, _("Person “%(person)s” was created.") % {"person": person})
         return redirect("persons:detail", pk=person.pk)
@@ -108,7 +107,7 @@ def person_detail(request, pk):
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
             saved_person = form.save(commit=False)
-            saved_person.user, saved_person.username = get_denormalized_user(request.user)
+            saved_person.stamp_user(request.user)
             saved_person.save()
             messages.success(request, _("Person “%(person)s” was updated.") % {"person": saved_person})
             return redirect(index_url)

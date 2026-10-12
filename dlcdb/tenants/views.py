@@ -17,8 +17,6 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from dlcdb.core.utils.helpers import get_denormalized_user
-
 from .forms import TenantForm
 from .models import Tenant
 
@@ -80,7 +78,7 @@ def toggle(request, pk, group_pk):
             tenant.groups.add(group)
         else:
             tenant.groups.remove(group)
-        tenant.user, tenant.username = get_denormalized_user(request.user)
+        tenant.stamp_user(request.user)
         tenant.save()
 
     return TemplateResponse(request, "tenants/index.html#user-count", {"tenant": _tenant_queryset().get(pk=pk)})
@@ -91,7 +89,7 @@ def add(request):
     form = TenantForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         tenant = form.save(commit=False)
-        tenant.user, tenant.username = get_denormalized_user(request.user)
+        tenant.stamp_user(request.user)
         tenant.save()
         messages.success(
             request,
@@ -119,7 +117,7 @@ def detail(request, pk):
         form = TenantForm(request.POST, instance=tenant)
         if form.is_valid():
             tenant = form.save(commit=False)
-            tenant.user, tenant.username = get_denormalized_user(request.user)
+            tenant.stamp_user(request.user)
             tenant.save()
             messages.success(request, _("Tenant “%(tenant)s” was updated.") % {"tenant": tenant})
             return redirect(index_url)

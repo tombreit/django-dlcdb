@@ -374,6 +374,18 @@ class DeviceFrontendTests(BaseTest):
         bar = self.client.get(reverse("assets:device_index")).context["filterbar"]
         self.assertNotIn("tenant", [spec.param for spec in bar.specs + bar.secondary_specs])
 
+    def test_edit_device_stamps_the_editor(self):
+        device = self.inroom_device
+        url = reverse("assets:device_detail", args=[device.pk])
+        form = self.client.get(url).context["form"]
+        payload = {name: (form[name].value() or "") for name in form.fields}
+
+        self.client.post(url, {**payload, "note": "edited"})
+
+        device.refresh_from_db()
+        self.assertEqual(device.note, "edited")
+        self.assertEqual(device.user, self.user)
+
     def test_view_only_user_gets_readonly_detail_and_cannot_post(self):
         user, tenant = self._tenant_viewer()
         device = self._create_device(edv_id="EDV-TENANT", sap_id="7-7")

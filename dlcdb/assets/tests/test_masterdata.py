@@ -127,6 +127,16 @@ class MasterdataFrontendTests(BaseTest):
         self.supplier.refresh_from_db()
         self.assertEqual(self.supplier.contact, "hotline@example.com")
 
+    def test_edit_device_type_stamps_the_editor(self):
+        self.client.post(
+            reverse("assets:device_type_detail", args=[self.device_type.pk]),
+            {"name": "Notebook", "prefix": "NTB", "icon": "", "note": "Loan pool devices, renewed"},
+        )
+
+        self.device_type.refresh_from_db()
+        self.assertEqual(self.device_type.note, "Loan pool devices, renewed")
+        self.assertEqual(self.device_type.user, self.user)
+
     def test_view_only_user_gets_readonly_detail_and_cannot_post(self):
         viewer = get_user_model().objects.create_user(
             username="masterdata-viewer", email="viewer@example.com", password="secret"

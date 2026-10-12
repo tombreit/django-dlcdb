@@ -106,6 +106,7 @@ class RoomFrontendTests(BaseTest):
         self.assertRedirects(response, f"{self.index_url}?search=F2")
         self.plain_room.refresh_from_db()
         self.assertEqual(self.plain_room.nickname, "Renamed")
+        self.assertEqual(self.plain_room.user, self.user)
 
     def test_auto_return_room_stays_unique_after_frontend_edit(self):
         self.server_room.is_auto_return_room = True
