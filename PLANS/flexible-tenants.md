@@ -57,7 +57,7 @@ Once production shows no "devices/imports without tenant" hint:
 - add the migrations;
 - give the tenant-less test device creations a tenant;
 - remove in one go:
-  - both hints (`core/context_processors.py:hints`);
+  - both hints (`theme/context_processors.py:hints`);
   - the Tenant admin action and its page (`tenants/admin.py`, `tenants/actions/assign.html`);
   - their docs (`berechtigungen.md`, *Geräte und Importe ohne Tenant*).
 

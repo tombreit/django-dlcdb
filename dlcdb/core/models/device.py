@@ -290,7 +290,9 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def get_timeline(self):
         """
-        Returns the license timelicense.get_license_state_labelline as a list of tuples.
+        Returns the contract timeline as a list of ``TimelineEvent``: added, start, today
+        and expiry in date order, each with its share of the bar in percent. Empty if a
+        contract date is missing.
         """
         timeline = []
 

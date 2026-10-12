@@ -1206,3 +1206,126 @@ Rule 8. The findings are in *Admin-only members on core models*.
   page, navbar, hints band), 30 and 32 (admin and frontend lend/return).
 - The admin-only scan (*Admin-only members on core models*) after steps 37–40 and in
   step 36.
+
+## Pre-merge review (2026-10-12)
+
+The branch `core-consolidation` was reviewed as a whole before merging into `main`. The
+questions: did the code drift from the plan, did a later step undo an earlier one, and what is
+left to clean up in core? The steps and checklist below are this section's own; the sections
+above stay as they were.
+
+### How it was reviewed
+
+- **Merge readiness:** `main` has no commits since the branch point (9b0556b3), so the merge
+  has no conflicts. 49 commits, 135 files.
+- **Gates** on a scratch DB:
+  - `ruff check` and `ruff format --check`: clean;
+  - `manage.py check`: no issues;
+  - `makemigrations --check --dry-run`: no changes;
+  - `pytest`: 1077 passed. Its two warnings are the naive licence-notice datetime (see *Bugs
+    found on the way*).
+- **The diff against the merge base** (`git diff main...core-consolidation`), file by file:
+  - core's models, lifecycle, utils, admin, forms and templates;
+  - every consumer app;
+  - settings and docs.
+- **Moves:**
+  - `hints`, `nav`, `_app_navigation` and `django_settings` in `theme/context_processors.py`
+    are identical to the code deleted from core (compared with `ast`);
+  - the other moves are plain renames or changed only their imports.
+- **Removed and moved names:** a sweep over `.py`, `.html`, `.txt`, `.js`, `.md`, `.toml` and
+  the templates finds no reader left. The only hit outside this file is
+  `PLANS/flexible-tenants.md` (step 43).
+- **Steps against each other:**
+  - overdue and the person search are each spelled once;
+  - the `check_transition=False` sites match the lifecycle docstring (3 + 1);
+  - the guard grep lists only the three exceptions in `dlcdb/core/__init__.py`;
+  - each new model method has a reader outside the admin (rule 8);
+  - removed tests covered only deleted methods; no test was weakened;
+  - new files carry SPDX headers without a year.
+
+### Verdict
+
+The branch is consistent: no step undid another, the moves are faithful, and the gates are
+green. Steps 43–47 are follow-ups; the problems they fix are older than the branch.
+
+### Follow-ups in core (easiest first, one commit each)
+
+#### 43 — Stale text
+- `Device.get_timeline`: the docstring has been garbled since 2024-12 ("Returns the license
+  timelicense.get_license_state_labelline …").
+- `PLANS/flexible-tenants.md` (*Open follow-ups*) names `core/context_processors.py:hints`; it
+  is `theme/context_processors.py` now.
+- `dashboard/views.py` and `lending/filters.py`: two blank lines left where an import was
+  removed.
+- `licenses/tests/test_subscriber_emails.py`: the helper is still called `_get_subscribers`,
+  after the annotation it no longer reads (step 25).
+
+#### 44 — `Record.get_proxy_model_by_record_type` removed
+- An alias of `lifecycle.proxy_for`, read only by two tests in `test_fsm_contract.py`;
+  `test_lifecycle.py` covers `proxy_for` already. First noted under *Admin-only members on core
+  models*.
+
+#### 45 — The `LicenceRecord` manager without leftovers
+- `prx_licencerecord.py`, no behaviour change:
+  - the 93-day "expiring" window becomes a named constant (decision 5), and the "make threshold
+    configurable" TODO goes;
+  - `timezone.localdate()` instead of `datetime.today().date()`: the same value, the spelling
+    the rest of the branch uses;
+  - removed: the "80-warning" TODO (the states are named already), the commented-out `When`
+    clauses and the double `Q(Q(...))`.
+
+#### 46 — Dead state checks in the licence admin
+- `LicenceRecordAdmin.get_contract_expiration_date` compares `license_state` with `"80-warning"`
+  and `"90-danger"`. The manager stopped producing these in 2024-11 (a1fcef4c), so the tooltip
+  never shows.
+- User decision:
+  - drop the two branches (the admin is being phased out), or
+  - check `expiring` and `expired` instead, so the tooltip shows again (a visible change).
+
+#### 47 — `DeviceAdmin` keeps no request on the shared admin
+- `get_list_display` stores `self.request`, and `get_device_actions` reads it to build the
+  state buttons. The `ModelAdmin` instance is shared by all requests, as the `SessionStore` was
+  in step 9: two overlapping changelist requests can get state buttons built with the other
+  user's permissions.
+- Already listed in `PLANS/flexible-tenants.md` under *Open follow-ups*.
+- Fix: `get_list_display` builds the actions column per request (a callable that closes over
+  the request); nothing is stored on the instance. A test in the style of step 9.
+
+### Noted, not proposed
+
+- After `apply_lending`, both screens work out again what happened, for their messages and the
+  redirect: the admin in `save_model` (`record_type == INROOM`) and `response_change`, the
+  lending frontend in `_save_lending`. There, `edited` is `record` itself
+  (`form.save(commit=False)` returns the form's instance), so
+  `record.lent_end_date or form.cleaned_data.get("lent_end_date")` checks the same value twice.
+  Presentation only, too small for a step.
+- `print_sheet` raises the same 404 in two places.
+- Open question: the overdue report and the reminder mails count every active LENT record; the
+  dashboard tile and the lending list only those of lentable devices (`LentRecord.objects`).
+  Kept on purpose in step 31. Align them?
+- `core/utils/helpers.py` keeps two helpers with one consumer each (step 36):
+  `get_user_email` and `save_base64img_as_fileimg`.
+- Outside core:
+  - theme's `nav` carries a nested `_get_is_active` that is never called and only raises
+    `NotImplementedError` (moved unchanged in step 20);
+  - `mark_not_handled_assets_in_csv` has debug `print`s and commented-out code, for the
+    inventory refactoring.
+- Docs, optional: the `LentRecord` row in `docs/betrieb/model.md` could say that its manager
+  lists lentable devices, not lent ones.
+
+### Merge
+
+- From `main`: `git merge --no-ff core-consolidation`. It keeps the atomic commits, each
+  revertable on its own (decision 7), and adds one merge commit that reverts the whole review.
+  `--ff-only` works too, for a linear history. A squash would lose the per-step reverts.
+- Before merging: the gates again, after each follow-up done on the branch.
+- After the merge: `PLANS/` is for work not done yet (AGENTS.md). Trim this file to
+  *Postponed*, *Open questions* and this section, or delete it. User decision.
+
+### Progress (pre-merge review)
+
+- [x] 43 — Stale text
+- [ ] 44 — `get_proxy_model_by_record_type` removed
+- [ ] 45 — `LicenceRecord` manager without leftovers
+- [ ] 46 — Dead state checks in the licence admin
+- [ ] 47 — `DeviceAdmin` keeps no request on the shared admin

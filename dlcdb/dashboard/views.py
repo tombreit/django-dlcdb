@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-
 from django.apps import apps
 from django.db.models import Count, Q
 from django.template.response import TemplateResponse

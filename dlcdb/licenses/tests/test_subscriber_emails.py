@@ -27,7 +27,7 @@ class SubscriberEmailsTests(BaseTest):
         InRoomRecord.objects.create(device=device, room=room)
         return device
 
-    def _get_subscribers(self, device):
+    def _subscriber_emails(self, device):
         return (
             LicenceRecord.objects.annotate(subscriber_emails=subscriber_emails()).get(device=device).subscriber_emails
         )
@@ -51,11 +51,11 @@ class SubscriberEmailsTests(BaseTest):
         )
 
         # Deduped (ann once) and ordered by email (ann < bob), newline-joined.
-        self.assertEqual(self._get_subscribers(device), "ann@example.org\nbob@example.org")
+        self.assertEqual(self._subscriber_emails(device), "ann@example.org\nbob@example.org")
 
     def test_no_subscribers_returns_none(self):
         device = self._create_licence_device()
-        self.assertIsNone(self._get_subscribers(device))
+        self.assertIsNone(self._subscriber_emails(device))
 
     def test_subscriber_without_email_is_ignored(self):
         device = self._create_licence_device()
@@ -68,7 +68,7 @@ class SubscriberEmailsTests(BaseTest):
             event=Subscription.NotificationEventChoices.CONTRACT_ADDED, subscriber=with_email, device=device
         )
 
-        self.assertEqual(self._get_subscribers(device), "has@example.org")
+        self.assertEqual(self._subscriber_emails(device), "has@example.org")
 
     def test_subscribers_are_scoped_to_the_device(self):
         # A subscription on another device must not leak into this device's list.
@@ -83,5 +83,5 @@ class SubscriberEmailsTests(BaseTest):
             event=Subscription.NotificationEventChoices.CONTRACT_ADDED, subscriber=there, device=other_device
         )
 
-        self.assertEqual(self._get_subscribers(device), "here@example.org")
-        self.assertEqual(self._get_subscribers(other_device), "there@example.org")
+        self.assertEqual(self._subscriber_emails(device), "here@example.org")
+        self.assertEqual(self._subscriber_emails(other_device), "there@example.org")
