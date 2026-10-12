@@ -104,14 +104,12 @@ def _device_queryset(request):
 
 
 # --- Licences --------------------------------------------------------------
-# Searched as Devices, not as LicenceRecords, for three reasons:
+# Searched as Devices, not as LicenceRecords, for two reasons:
 #   * ``licenses:edit`` is routed ``<int:license_id>`` and resolves a *Device*,
 #     so a device pk is all a link needs (and Device.get_absolute_url() already
 #     routes licence devices there);
 #   * LicenceRecordFilter.search matches on ``device_human_title``, an
-#     annotation only the licenses index view supplies;
-#   * LicenceRecord.objects annotates a correlated subscriber StringAgg
-#     subquery per row -- far too heavy for a keystroke-debounced endpoint.
+#     annotation only the licenses index view supplies.
 
 
 def _licence_queryset(request):

@@ -112,7 +112,7 @@
               {{ license.device.contract_expiration_date|date:"Y-m-d"|default:"n/a" }}
             </td>
             <td class="small">
-              {{ license.get_subscribers|default:""|linebreaksbr }}
+              {{ license.subscriber_emails|default:""|linebreaksbr }}
             </td>
             <td>
               {% if can_change %}

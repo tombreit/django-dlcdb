@@ -27,6 +27,7 @@ from dlcdb.theme.pagination import paginate
 from .filters import LicenceRecordFilter
 from .forms import LicenseForm
 from .models import LicenseAsset, LicensesConfiguration
+from .subscribers import subscriber_emails
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,10 @@ def index(request):
 
     base_qs = tenant_scoped_queryset(
         LicenceRecord.objects.annotate(
-            device_human_title=Subquery(LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1])
+            device_human_title=Subquery(
+                LicenseAsset.objects.filter(pk=OuterRef("device_id")).values("human_title")[:1]
+            ),
+            subscriber_emails=subscriber_emails(),
         ),
         request,
         tenant_field="device__tenant",

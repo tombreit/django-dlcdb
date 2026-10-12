@@ -402,16 +402,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         timeline.sort(key=lambda x: x.date)
         return timeline
 
-    # @property
-    # def get_subscribers(self):
-    #     # Todo: Refactor to use a annotated queryset or load this via HTMX
-    #     subscriber_ids = self.subscription_set.all().values_list("subscriber", flat=True)
-    #     subscribers_emails = (
-    #         Person.objects.filter(id__in=subscriber_ids).exclude(email__isnull=True).exclude(email="")
-    #     ).values_list("email", flat=True)
-
-    #     return subscribers_emails
-
     def get_edv_id(self):
         return self.edv_id or "----"
 

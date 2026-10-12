@@ -4,6 +4,7 @@
 
 from datetime import timedelta
 
+from django.db.models import CharField, OuterRef, StringAgg, Subquery, Value
 from django.utils import timezone
 from simple_history.utils import update_change_reason
 
@@ -11,6 +12,31 @@ from dlcdb.core.models import Person
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Subscription
 from dlcdb.notifications.services import create_license_subscriptions, delete_license_subscriptions
+
+
+def subscriber_emails():
+    """
+    The email addresses subscribed to a licence, as an annotation for
+    ``LicenceRecord`` querysets: ``.annotate(subscriber_emails=subscriber_emails())``.
+    Each address once, ordered, joined by newlines; None without subscribers.
+
+    Each address appears once because the persons are selected with ``pk__in``
+    (``Person.email`` is unique); ``StringAgg(distinct=True)`` is not an option, as
+    SQLite rejects it together with a delimiter. ``OuterRef(OuterRef("device_id"))``
+    reaches the record's device across the two subquery levels.
+    """
+    subscriber_pks = Subscription.objects.filter(
+        device=OuterRef(OuterRef("device_id")),
+        subscriber__email__isnull=False,
+    ).values("subscriber")
+    emails = (
+        Person.objects.filter(pk__in=subscriber_pks, email__isnull=False)
+        .order_by()
+        .values(_grp=Value(1))
+        .annotate(emails=StringAgg("email", delimiter=Value("\n"), order_by="email"))
+        .values("emails")
+    )
+    return Subquery(emails, output_field=CharField())
 
 
 def manage_subscribers(device, subscribers):

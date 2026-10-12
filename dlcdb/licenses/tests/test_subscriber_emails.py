@@ -3,21 +3,19 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Tests for the ``LicenceRecord.get_subscribers`` queryset annotation
-(dlcdb/core/models/prx_licencerecord.py), which concatenates the distinct
-subscriber emails of a licence device's subscriptions — newline-separated and
-ordered by email. This replaced a raw GROUP_CONCAT subquery; the cases below
-lock in the load-bearing dedup and ordering behaviour.
+The ``subscriber_emails()`` annotation (dlcdb/licenses/subscribers.py): the
+distinct subscriber emails of a licence, newline-separated and ordered by email.
 """
 
 import datetime
 
 from dlcdb.core.models import InRoomRecord, LicenceRecord, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.licenses.subscribers import subscriber_emails
 from dlcdb.notifications.models import Subscription
 
 
-class LicenceRecordSubscribersTests(BaseTest):
+class SubscriberEmailsTests(BaseTest):
     def _create_licence_device(self):
         device = self._create_device()
         device.is_licence = True
@@ -30,7 +28,9 @@ class LicenceRecordSubscribersTests(BaseTest):
         return device
 
     def _get_subscribers(self, device):
-        return LicenceRecord.objects.get(device=device).get_subscribers
+        return (
+            LicenceRecord.objects.annotate(subscriber_emails=subscriber_emails()).get(device=device).subscriber_emails
+        )
 
     def test_multiple_subscribers_are_deduped_and_ordered_by_email(self):
         device = self._create_licence_device()

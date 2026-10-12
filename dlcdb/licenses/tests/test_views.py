@@ -12,9 +12,10 @@ from django.test import override_settings
 from django.urls import reverse
 from simple_history.utils import update_change_reason
 
-from dlcdb.core.models import Device, InRoomRecord, Room
+from dlcdb.core.models import Device, InRoomRecord, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.journal.models import JournalEntry
+from dlcdb.notifications.models import Subscription
 from dlcdb.tenants.models import Tenant
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
@@ -61,6 +62,16 @@ class LicensesIndexViewTests(BaseTest):
         self.assertContains(response, "<table")
         self.assertContains(response, "Alpha")
         self.assertContains(response, "Beta")
+
+    def test_list_shows_the_subscriber_emails(self):
+        subscriber = Person.objects.create(first_name="Ann", last_name="Aa", email="ann@example.org")
+        Subscription.objects.create(
+            event=Subscription.NotificationEventChoices.CONTRACT_ADDED, subscriber=subscriber, device=self.license_alpha
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "ann@example.org", count=1)
 
     def test_htmx_returns_fragment_only(self):
         response = self.client.get(self.url, headers={"HX-Request": "true"})
