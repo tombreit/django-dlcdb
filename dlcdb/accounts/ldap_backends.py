@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-The LDAP authentication backend, only used with AUTH_LDAP (dlcdb/settings/ldap.py).
+The LDAP authentication backend, only used with AUTH_LDAP (dlcdb/settings/base.py).
 
 It lives apart from auth_backends.py, because django_auth_ldap is installed only
 with the `ldap` extra.

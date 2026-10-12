@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–33, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 34–36 not
+27–34, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 35 and 36 not
 started. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
 This is a living document: findings, decisions and progress are kept here.
 
@@ -304,8 +304,8 @@ Noted, not moved:
   proxy treats `Authorization` (`WSGIPassAuthorization` is still needed for real token
   clients).
 - **`ldap.py`** star-imports from a partially initialised `base` (circular). It works.
-  Make it a function `apply_ldap(globals())`, or inline the block guarded by
-  `env("AUTH_LDAP")`.
+  The block moves into `base.py`, guarded by `env("AUTH_LDAP")` (step 34; a function
+  `apply_ldap(globals())` was rejected, see *Alternatives*).
 - **Business thresholds hard-coded in code**, not settings: 5-day overdue tolerance,
   93-day licence warning, 30-day expires-soon notice, 48-hour rescan, `UDB_SYNC_FILTERS`,
   licence name prefixes, `pc`/`ntb` report prefixes, the Archibus building code. Decision:
@@ -952,7 +952,37 @@ Rule 8. The findings are in *Admin-only members on core models*.
 #### 34 — `ldap.py` without the circular import
 - `apply_ldap(globals())`, or inline the block. A test imports the settings with
   `AUTH_LDAP` on.
-- Commit: `Core review, step 34: LDAP settings apply without importing a half-loaded base
+- Decision (user, 2026-10-12): no `globals()`; Django settings should be dead simple.
+  The LDAP block moves into `base.py`, under `if env("AUTH_LDAP"):`. Its two imports stay
+  inside the `if`, because django-auth-ldap and python-ldap come only with the `ldap`
+  extra.
+- Done 2026-10-12. `dlcdb/settings/ldap.py` is gone, and with it:
+  - the circular import of the half-loaded `base`;
+  - the star import back, which also copied `logger`, `ldap`, `env` and the imported
+    classes into `base`;
+  - the logger stanza;
+  - a dead `DJANGO_DEBUG` block.
+
+  The stanza attached a second console handler to `django_auth_ldap`, and the root
+  logger already prints INFO, so every LDAP log line was printed twice (checked against
+  a copy of the old settings). Now it is printed once. The variant choice is a plain
+  `if`/`elif`, with the same error message. Setting names and values are unchanged:
+  a dump of every `AUTH_LDAP*` setting, `LDAP_VARIANT` and `AUTHENTICATION_BACKENDS` is
+  identical before and after, for `msad` and `openldap`.
+- Test: `accounts/tests/test_ldap_settings.py` imports the settings in a fresh process
+  and checks:
+  - with LDAP on: the backend order, the user search, the flags and both group types;
+  - an unknown variant stops the start;
+  - with LDAP off: only the email login.
+
+  It passed on the old code before the move. `manage.py check` with LDAP on reports no
+  issues.
+- Noticed along the way: `env.list("AUTH_LDAP_MIRROR_GROUPS")` keeps the spaces after
+  the commas, and `env.template` wrote the value as `group1, group2, …`. A `.env` copied
+  from it mirrored `" group2"`, which matches no LDAP group. Fixed in the template (user
+  decision, 2026-10-12): the example has no spaces, and a comment says that a space after
+  a comma becomes part of the next name. The settings still take the value as written.
+- Commit: `Core review, step 34: LDAP settings live in base.py, without a second settings
   module`
 
 #### 35 — Search methods on the model querysets
@@ -975,6 +1005,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
 | Moving the model admins to the frontend apps | Asked and rejected (decision 6): one UI over the core models reads better in one place; the admin may import consumer helpers. |
 | Retiring the admin UI for lending/licences | Out of scope for this review. The admin is being phased out (decision 10); this review keeps the models free of admin-only code (rule 8). |
 | A pytest guard or a script for the admin-only scan | Grep-based and heuristic (generic names, `list_display` strings, admin templates). A documented procedure, run by hand in steps 37 and 36, is enough (decision 10). |
+| `apply_ldap(globals())` for the LDAP settings (step 34) | A function that writes into the module namespace is harder to read than the plain assignments it replaces; settings stay dead simple (user, 2026-10-12). |
 | Putting thresholds into settings | Nobody tunes them per deployment; a named constant next to its one definition is easier to find. |
 | Large batches per theme (first draft) | Core changes deserve atomic commits that can be reviewed and reverted one by one (decision 7). |
 | `tenant_scoped_queryset` everywhere | Takes a request; does not fit querysets that get `tenants`, nor conditions that must stay in one `filter()` (see *Tenant scoping*). |
@@ -1036,7 +1067,7 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 40 — `get_admin_action_url` → state buttons
 - [x] 32 — One lend dispatch
 - [x] 33 — Lost-device check once
-- [ ] 34 — `ldap.py`
+- [x] 34 — `ldap.py`
 - [ ] 35 — Search methods (needs stocktaking)
 - [ ] 36 — The contract is written down
 

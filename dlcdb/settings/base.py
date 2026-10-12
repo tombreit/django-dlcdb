@@ -536,9 +536,54 @@ DEVICE_HIDE_FIELDS = env.list("DEVICE_HIDE_FIELDS", default=[])
 #     '--NotebookApp.iopub_data_rate_limit=10000000000.0',
 # ]
 
+# LDAP / Active Directory login (https://django-auth-ldap.readthedocs.io/), switched on by
+# AUTH_LDAP in .env. django-auth-ldap and python-ldap come only with the `ldap` extra, so
+# they are imported here and not at the top.
 if env("AUTH_LDAP"):
-    from .ldap import *
-    # print("[i] AUTH_LDAP activated via .env")
-else:
-    # print("[i] AUTH_LDAP disabled in .env")
-    pass
+    import ldap
+    from django_auth_ldap.config import ActiveDirectoryGroupType, LDAPGroupQuery, LDAPSearch, PosixGroupType
+
+    AUTH_LDAP_SERVER_URI = env.str("AUTH_LDAP_SERVER_URI")
+    AUTH_LDAP_BIND_DN = env.str("AUTH_LDAP_BIND_DN")
+    AUTH_LDAP_BIND_PASSWORD = env.str("AUTH_LDAP_BIND_PASSWORD")
+    AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
+
+    # The email login first, then LDAP.
+    AUTHENTICATION_BACKENDS += ["dlcdb.accounts.ldap_backends.EmailLDAPBackend"]
+
+    LDAP_VARIANT = env.str("LDAP_VARIANT", default="msad").lower()
+    if LDAP_VARIANT == "msad":
+        AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
+    elif LDAP_VARIANT == "openldap":
+        AUTH_LDAP_GROUP_TYPE = PosixGroupType()
+    else:
+        raise ImproperlyConfigured(f"Unsupported LDAP_VARIANT={LDAP_VARIANT!r}. Expected one of: ['msad', 'openldap']")
+
+    AUTH_LDAP_FIND_GROUP_PERMS = True
+    AUTH_LDAP_ALWAYS_UPDATE_USER = True
+    AUTH_LDAP_CACHE_TIMEOUT = 0
+
+    # Users log in with their email address, not their sAMAccountName.
+    AUTH_LDAP_USER_SEARCH = LDAPSearch(env.str("AUTH_LDAP_USERS_DN"), ldap.SCOPE_SUBTREE, "(mail=%(user)s)")
+    AUTH_LDAP_GROUP_SEARCH = LDAPSearch(env.str("AUTH_LDAP_USERS_DN"), ldap.SCOPE_SUBTREE, "(objectClass=group)")
+
+    AUTH_LDAP_USER_ATTR_MAP = {
+        "first_name": "givenName",
+        "last_name": "sn",
+        "email": "mail",
+        "username": "mail",
+    }
+
+    # https://django-auth-ldap.readthedocs.io/en/latest/groups.html#limiting-access
+    AUTH_LDAP_REQUIRE_GROUP = (
+        LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS"))
+        | LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF"))
+        | LDAPGroupQuery(env.str("AUTH_LDAP_REQUIRE_GROUP"))
+    )
+
+    AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+        "is_active": AUTH_LDAP_REQUIRE_GROUP,
+        "is_staff": LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS"))
+        | LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_STAFF")),
+        "is_superuser": LDAPGroupQuery(env.str("AUTH_LDAP_GROUP_SUPERUSERS")),
+    }
