@@ -2,10 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import datetime
-
 from django.contrib.admin import SimpleListFilter
-from django.db.models import Q
 
 from ...models import Record
 
@@ -23,7 +20,7 @@ class LentStateRecordFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "overdue":
-            return queryset.filter(Q(lent_desired_end_date__lte=datetime.datetime.today()) & Q(lent_end_date=None))
+            return queryset.overdue()
         elif self.value() == "lentable":
             return queryset.filter(record_type=Record.INROOM)
         elif self.value() == "lent":

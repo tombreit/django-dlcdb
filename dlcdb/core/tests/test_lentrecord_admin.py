@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-The lending admin's redirect after a lend: to the new LENT record, which only the
-request that created it knows about.
+The lending admin: the redirect after a lend (to the new LENT record, which only the
+request that created it knows about), and how it marks and filters overdue lendings
+(``LentRecord.overdue_q``).
 """
 
 import datetime
+from datetime import timedelta
 
 import pytest
 from django.contrib.admin.sites import site as admin_site
@@ -15,8 +17,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.test import RequestFactory
 from django.urls import reverse
+from django.utils import timezone
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Room
+from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.lending.models import LendingConfiguration
 
 
 @pytest.fixture
@@ -114,3 +119,50 @@ def test_lend_redirects_to_the_new_lending_and_an_edit_stays_on_it(
     assert response.url == lending_url
     device.refresh_from_db()
     assert device.active_record.lent_note == "edited"
+
+
+@pytest.fixture
+def lendings(tenant, lending_rooms, person):
+    """One device per lending state the admin tells apart, keyed by edv_id."""
+    today = timezone.localdate()
+    desk = lending_rooms["desk"]
+
+    def _lent(edv_id, **fields):
+        device = Device.objects.create(edv_id=edv_id, is_lentable=True, tenant=tenant)
+        fields = {"lent_start_date": today - timedelta(days=60), **fields}
+        establish_state(LentRecord, device=device, person=person, room=desk, **fields)
+
+    _lent("EDV-OVERDUE", lent_desired_end_date=today - timedelta(days=1))
+    _lent("EDV-DUE-LATER", lent_desired_end_date=today + timedelta(days=30))
+    # A lending stamped as returned but still active: not overdue.
+    _lent("EDV-RETURNED", lent_desired_end_date=today - timedelta(days=10), lent_end_date=today - timedelta(days=5))
+    _available_device("EDV-AVAILABLE", tenant, desk)
+
+
+def _changelist(client, **params):
+    response = client.get(reverse("admin:core_lentrecord_changelist"), params)
+    return {record.device.edv_id: record for record in response.context["cl"].result_list}
+
+
+@pytest.mark.django_db
+def test_overdue_filter_lists_only_the_overdue_lendings(client, plain_static, helpdesk, lendings):
+    client.force_login(helpdesk)
+
+    assert set(_changelist(client, record_type="overdue")) == {"EDV-OVERDUE"}
+
+
+@pytest.mark.django_db
+def test_only_the_overdue_lendings_are_highlighted(client, plain_static, helpdesk, lendings):
+    configuration = LendingConfiguration.load()
+    configuration.admin_mark_overdue = True
+    configuration.save()
+    client.force_login(helpdesk)
+
+    states = {edv_id: record.lent_state for edv_id, record in _changelist(client).items()}
+
+    assert states == {
+        "EDV-OVERDUE": "20-overdue",
+        "EDV-DUE-LATER": "40-lent",
+        "EDV-RETURNED": "40-lent",
+        "EDV-AVAILABLE": "30-available",
+    }

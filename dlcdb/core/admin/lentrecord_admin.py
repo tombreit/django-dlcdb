@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import datetime
-
 from django.contrib import admin, messages
 from django.db.models import Case, CharField, Value, When
 from django.forms import ValidationError
@@ -128,7 +126,7 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
         # see: https://docs.djangoproject.com/en/3.0/ref/models/conditional-expressions/#django.db.models.expressions.Case
         when_clauses = []
         if admin_mark_overdue:
-            when_clauses.append(When(lent_desired_end_date__lte=datetime.today().date(), then=Value("20-overdue")))
+            when_clauses.append(When(LentRecord.overdue_q(), then=Value("20-overdue")))
 
         when_clauses.extend(
             [
