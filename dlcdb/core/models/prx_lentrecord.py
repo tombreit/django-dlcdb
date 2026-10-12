@@ -2,8 +2,11 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -11,7 +14,13 @@ from .record import Record
 from .room import Room
 
 
-class LentRecordManager(models.Manager):
+class LentRecordQuerySet(models.QuerySet):
+    def overdue(self, *, today=None, tolerance_days=0):
+        """The overdue lendings among these records, see ``LentRecord.overdue_q``."""
+        return self.filter(LentRecord.overdue_q(today=today, tolerance_days=tolerance_days))
+
+
+class LentRecordManager(models.Manager.from_queryset(LentRecordQuerySet)):
     def get_queryset(self):
         # Lendability is decided by is_lentable alone (see the ``lend``
         # transition in ``dlcdb.core.lifecycle``): a lentable licence can be
@@ -33,6 +42,27 @@ class LentRecordManager(models.Manager):
 
 class LentRecord(Record):
     objects = LentRecordManager()
+
+    @staticmethod
+    def overdue_q(*, today=None, tolerance_days=0):
+        """
+        What makes a lending overdue, as a ``Q`` for filters and for ``When()`` in
+        annotations: a LENT record, not returned yet, whose desired return date
+        plus ``tolerance_days`` is on or before ``today``. Without ``today``, it is
+        the real today in the current time zone (``timezone.localdate()``, Django's
+        today). ``LentRecord.objects.overdue()`` filters by it.
+
+        The tolerance is subtracted from ``today`` rather than added to the return
+        date: adding days to a desired return date near 9999-12-31, the last date
+        Python knows, would overflow.
+        """
+        if today is None:
+            today = timezone.localdate()
+        return Q(
+            record_type=Record.LENT,
+            lent_end_date__isnull=True,
+            lent_desired_end_date__lte=today - timedelta(days=tolerance_days),
+        )
 
     def clean(self):
         if self.device.is_lentable is False:

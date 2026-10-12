@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import date
 
 from django.apps import apps
 from django.db.models import Count, Q
@@ -156,10 +155,10 @@ def index(request):
         _build_tile(model_name=name, url=url, request=request, base_params=params) for name, url, params in tile_specs
     ]
 
-    # Overdue tile: same predicate as the lending list's "state=overdue" filter
-    # (lending/filters.py), so the count always matches the linked list.
+    # Overdue tile: LentRecord.objects.overdue(), like the lending list's
+    # "state=overdue" filter it links to, so the count matches the list.
     overdue_qs = tenant_scoped_queryset(
-        LentRecord.objects.filter(lent_desired_end_date__lte=date.today(), lent_end_date__isnull=True),
+        LentRecord.objects.overdue(),
         request,
         tenant_field="device__tenant",
     )

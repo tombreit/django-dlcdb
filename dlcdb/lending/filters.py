@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import datetime
 
 import django_filters
 from django.db.models import Q
@@ -101,10 +100,7 @@ class LentRecordFilter(django_filters.FilterSet):
 
     def state_filter_method(self, queryset, name, value):
         if value == STATE_OVERDUE:
-            return queryset.filter(
-                lent_desired_end_date__lte=datetime.date.today(),
-                lent_end_date__isnull=True,
-            )
+            return queryset.overdue()
         elif value == STATE_LENT:
             return queryset.filter(record_type=Record.LENT)
         elif value == STATE_AVAILABLE:

@@ -63,9 +63,8 @@ def _annotate_lent_state(queryset):
     color and a sort weight (most urgent first). Whether overdue lendings are
     highlighted is controlled by LendingConfiguration.admin_mark_overdue.
     """
-    today = datetime.date.today()
     mark_overdue = LendingConfiguration.load().admin_mark_overdue
-    overdue = Q(lent_desired_end_date__lte=today) & Q(lent_end_date__isnull=True)
+    overdue = LentRecord.overdue_q()
 
     state_whens, color_whens, sort_whens = [], [], []
 
