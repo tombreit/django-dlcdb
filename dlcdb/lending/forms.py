@@ -3,12 +3,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, LentRecord, Person, Record, Room
-from dlcdb.core.models.record import LOST_DEVICE_NOT_LENDABLE
+from dlcdb.core.models import Device, LentRecord, Person, Room
 from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
 
 from .pickers import lend_queryset
@@ -47,17 +45,15 @@ class LendingForm(forms.ModelForm):
     detail view. The admin has its own form, ``LentRecordAdminForm``.
 
     The ``person`` field is a hidden input driven by the HTMX live-search
-    person picker (see ``theme/js/picker.js``); ``record_type`` carries the
-    device's current state so ``clean()`` can block lending a "lost" device,
-    mirroring ``LentRecordAdminForm``.
+    person picker (see ``theme/js/picker.js``). Whether the device can be lent at
+    all is the view's question (``LentRecord.check_lending``).
 
     Ending a lending is not part of this form: ``lent_end_date`` lives in
     ``LendingReturnForm``, so editing a lending can never (accidentally or via a
     hand-crafted POST) return the device.
     """
 
-    def __init__(self, *args, record_type=None, **kwargs):
-        self.record_type = record_type
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for field_name in ("person", "room", "lent_start_date", "lent_desired_end_date"):
@@ -72,12 +68,6 @@ class LendingForm(forms.ModelForm):
         # (potentially huge) person queryset as <option>s.
         self.fields["person"].queryset = Person.objects.all()
         self.fields["room"].queryset = Room.objects.all()
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if self.record_type == Record.LOST:
-            raise ValidationError(LOST_DEVICE_NOT_LENDABLE)
-        return cleaned_data
 
     class Meta:
         model = LentRecord

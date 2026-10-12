@@ -213,14 +213,6 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
     def get_is_currently_lented(self, obj):
         return obj.is_type_lent
 
-    def get_form(self, request, obj=None, **kwargs):
-        """
-        Pass current record_type of device to form for validation.
-        """
-        form = super().get_form(request, obj=obj, **kwargs)
-        form.record_type = obj.record_type
-        return form
-
     def save_model(self, request, obj, form, change):
         """
         Shows the HR contract warnings and saves through the lend, return and edit

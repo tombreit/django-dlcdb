@@ -24,14 +24,24 @@ from django.forms import modelform_factory
 from django.test import override_settings
 from django.urls import reverse
 
-from dlcdb.core.forms.lentrecordadmin_form import LentRecordAdminForm
+from dlcdb.core import lifecycle
 from dlcdb.core.forms.removedrecord_form import RemovedRecordAdminForm
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Person, Record, RemovedRecord, Room
+from dlcdb.core.models import (
+    Device,
+    InRoomRecord,
+    LentRecord,
+    LostRecord,
+    OrderedRecord,
+    Person,
+    Record,
+    RemovedRecord,
+    Room,
+)
 from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.core.utils.relocate import relocate_device
-from dlcdb.lending.forms import LendingForm
+from dlcdb.lending.models import LendingProfile
 
 # Plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -288,104 +298,131 @@ class LendReturnParityTests(BaseTest):
         self.assertEqual(admin_warnings, front_warnings)
 
 
+# The lifecycle's refusals (``lifecycle.check``), as the lending screens show them.
+LOST_REFUSAL = "“Lend” is not allowed for a device in state “Not locatable”."
+ORDERED_REFUSAL = "“Lend” is not allowed for a device in state “Ordered”."
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LostDeviceCannotBeLentTests(BaseTest):
-    """The same rule, asserted at the admin form, the lending form and the lending view."""
+    """
+    The lending screens can act on a lending and on a device that can be lent now;
+    the lifecycle decides which (``LentRecord.check_lending``). A lost or an ordered
+    device gets the lifecycle's refusal on both screens: no lending, no server error,
+    no lending screen.
+    """
 
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
         cls.room = Room.objects.create(number="A1.23")
         cls.auto_return_room = Room.objects.create(number="RETURN", is_auto_return_room=True)
         cls.external_room = Room.objects.create(number="EXTERN", is_external=True)
         cls.person = Person.objects.create(first_name="Max", last_name="Mustermann")
 
-    def _form_data(self):
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def _lentable_device_in(self, proxy_model, edv_id, sap_id, **fields):
+        """
+        A lentable device whose active record is of ``proxy_model``, resolved through
+        the LentRecord proxy the way both screens receive it. Everything except the
+        state is fit for lending, so a refusal can only come from the state.
+        """
+        device = self._create_device(edv_id=edv_id, sap_id=sap_id)
+        device.is_lentable = True
+        device.save()
+        record = establish_state(proxy_model, device=device, **fields)
+        return LentRecord.objects.get(pk=record.pk)
+
+    def _refused(self):
+        """A lost and an ordered device, each with the refusal the screens show for it."""
+        return (
+            (self._lentable_device_in(LostRecord, "EDV-LOST", "20-20"), LOST_REFUSAL),
+            (self._lentable_device_in(OrderedRecord, "EDV-ORDERED", "21-21"), ORDERED_REFUSAL),
+        )
+
+    def _payload(self):
         return {
             "person": self.person.id,
             "room": self.room.id,
             "lent_start_date": LEND_START,
             "lent_desired_end_date": LEND_DESIRED_END,
+            "lent_accessories": "",
+            "lent_note": "",
         }
 
-    @staticmethod
-    def _admin_form(**kwargs):
-        """
-        ``LentRecordAdminForm`` declares ``exclude = []``; the admin narrows it
-        to the editable fields of ``LentRecordAdmin.fieldsets``. Mirror that,
-        otherwise ``device``/``record_type`` come out spuriously required.
-        """
-        form_class = modelform_factory(
+    def test_check_lending_passes_an_available_device_and_a_lending(self):
+        available = self._lentable_device_in(InRoomRecord, "EDV-AVAILABLE", "22-22", room=self.room)
+        lending = self._lentable_device_in(
             LentRecord,
-            form=LentRecordAdminForm,
-            fields=(
-                "person",
-                "room",
-                "lent_start_date",
-                "lent_desired_end_date",
-                "sync_lent_end_date",
-                "lent_end_date",
-                "lent_accessories",
-                "lent_note",
-            ),
+            "EDV-LENT",
+            "23-23",
+            person=self.person,
+            room=self.room,
+            lent_start_date=datetime.date(2026, 1, 1),
+            lent_desired_end_date=datetime.date(2099, 1, 1),
         )
-        return form_class(**kwargs)
 
-    def _lost_lentable_record(self, edv_id, sap_id):
+        available.check_lending()
+        lending.check_lending()
+
+    def test_check_lending_refuses_a_lost_and_an_ordered_device(self):
+        for record, refusal in self._refused():
+            with self.subTest(record.record_type), self.assertRaisesMessage(lifecycle.IllegalTransition, refusal):
+                record.check_lending()
+
+    def test_apply_lending_refuses_a_lost_device_and_writes_nothing(self):
+        record = self._lentable_device_in(LostRecord, "EDV-LOST-APPLY", "24-24")
+        record.person, record.room = self.person, self.room
+        record.lent_start_date = datetime.date.fromisoformat(LEND_START)
+        record.lent_desired_end_date = datetime.date.fromisoformat(LEND_DESIRED_END)
+
+        with self.assertRaisesMessage(lifecycle.IllegalTransition, LOST_REFUSAL):
+            record.apply_lending(user=self.user)
+
+        self.assertEqual(record.device.record_set.count(), 1)
+
+    def test_the_admin_shows_the_refusal_instead_of_lending(self):
+        for record, refusal in self._refused():
+            with self.subTest(record.record_type):
+                response = self.client.post(
+                    reverse("admin:core_lentrecord_change", args=[record.pk]), {**self._payload(), "_save": ""}
+                )
+
+                self.assertContains(response, refusal)
+                self.assertEqual(record.device.record_set.count(), 1)
+
+    def _assert_refused(self, response, refusal):
         """
-        A lost device that is otherwise perfectly lendable, resolved through the
-        LentRecord proxy the way both forms receive it in production. Everything
-        except the "lost" state is valid, so a rejection can only come from the
-        guard under test.
+        The lending screen sent the user back to the index with the refusal. The
+        client then drops the message cookie, so the next request starts without it.
         """
-        device = self._create_device(edv_id=edv_id, sap_id=sap_id)
-        device.is_lentable = True
-        device.save()
-        lost = establish_state(LostRecord, device=device)
-        return LentRecord.objects.get(pk=lost.pk)
+        self.assertRedirects(response, reverse("lending:index"), fetch_redirect_response=False)
+        self.assertEqual([str(message) for message in get_messages(response.wsgi_request)], [refusal])
+        self.client.cookies.pop("messages", None)
 
-    def test_admin_form_rejects_lending_a_lost_device(self):
-        instance = self._lost_lentable_record("EDV-LOST-ADM", "20-20")
-        form = self._admin_form(data=self._form_data(), instance=instance)
-        form.record_type = Record.LOST
+    def test_the_lending_screen_shows_the_refusal_instead_of_opening(self):
+        for record, refusal in self._refused():
+            url = reverse("lending:detail", args=[record.pk])
+            with self.subTest(record.record_type):
+                self._assert_refused(self.client.get(url), refusal)
+                self._assert_refused(self.client.post(url, self._payload()), refusal)
+                self.assertEqual(record.device.record_set.count(), 1)
 
-        self.assertFalse(form.is_valid())
-        self.assertIn("not locatable", str(form.errors))
+    def test_only_a_device_that_can_be_lent_gets_a_lending_slip(self):
+        available = self._lentable_device_in(InRoomRecord, "EDV-SLIP", "25-25", room=self.room)
+        # The device type prints a slip, so a 404 below can only come from the state.
+        LendingProfile.objects.create(device_type=available.device.device_type, lent_sheet_template="Slip")
 
-    def test_lending_form_rejects_lending_a_lost_device(self):
-        instance = self._lost_lentable_record("EDV-LOST-FE", "21-21")
-        form = LendingForm(data=self._form_data(), instance=instance, record_type=Record.LOST)
+        def print_sheet(record):
+            return self.client.post(reverse("lending:print_sheet", args=[record.device.pk]), self._payload())
 
-        self.assertFalse(form.is_valid())
-        self.assertIn("not locatable", str(form.errors))
-
-    def test_both_forms_accept_an_available_device(self):
-        """The guards must not reject a normal lending -- otherwise the tests above prove nothing."""
-        device = self._create_device(edv_id="EDV-OK", sap_id="22-22")
-        device.is_lentable = True
-        device.save()
-        inroom = InRoomRecord.objects.create(device=device, room=self.room)
-        instance = LentRecord.objects.get(pk=inroom.pk)
-
-        admin_form = self._admin_form(data=self._form_data(), instance=instance)
-        admin_form.record_type = Record.INROOM
-        self.assertTrue(admin_form.is_valid(), admin_form.errors)
-
-        lending_form = LendingForm(data=self._form_data(), instance=instance, record_type=Record.INROOM)
-        self.assertTrue(lending_form.is_valid(), lending_form.errors)
-
-    def test_lending_view_rejects_lending_a_lost_device(self):
-        device = self._create_device(edv_id="EDV-LOST-LEND", sap_id="11-11")
-        device.is_lentable = True
-        device.save()
-        record = establish_state(LostRecord, device=device)
-
-        self.client.force_login(self.user)
-        response = self.client.post(reverse("lending:detail", args=[record.pk]), self._form_data())
-
-        # The view refuses to open a lend flow on a non-INROOM record.
-        self.assertIn(response.status_code, (302, 404))
-        device.refresh_from_db()
-        self.assertEqual(device.active_record.record_type, Record.LOST)
+        self.assertEqual(print_sheet(available).status_code, 200)
+        for record, _refusal in self._refused():
+            with self.subTest(record.record_type):
+                self.assertEqual(print_sheet(record).status_code, 404)
 
 
 class RemoveTwiceTests(BaseTest):

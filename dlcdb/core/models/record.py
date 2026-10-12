@@ -49,11 +49,6 @@ class RecordManager(models.Manager):
 RECORD_TYPE_LIST = lifecycle.RECORD_TYPE_LIST
 RECORD_TYPE_KEYS = lifecycle.RECORD_TYPE_KEYS
 
-# The rule "a device that cannot be located cannot be lent" is enforced in more
-# than one place (the admin form and the lending form). Keep the wording in one
-# place so the copies cannot drift.
-LOST_DEVICE_NOT_LENDABLE = _('Device is currently "not locatable". It must be located before it can be lent.')
-
 
 class Record(AuditBaseModel):
     # The state keys. A device's state is the record_type of its active record,

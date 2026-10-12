@@ -283,8 +283,12 @@ def lend(request, pk=None):
     else:
         record = _get_scoped_record(request, pk)
         device = record.device
-        if record.record_type == Record.LOST:
-            messages.error(request, _('Device is currently "not locatable" and must be located first.'))
+        # A lending can be edited or returned; anything else must be lendable now,
+        # which a lost or an ordered device is not.
+        try:
+            record.check_lending()
+        except lifecycle.IllegalTransition as error:
+            messages.error(request, " ".join(error.messages))
             return redirect(index_url)
 
     # The three flows of this screen, resolved once. A LENT record is "returned"
@@ -312,13 +316,11 @@ def lend(request, pk=None):
                 return redirect("lending:lend")
             device = record.device
 
-        form_kwargs = {} if is_return_flow else {"record_type": record.record_type}
-        form = form_class(request.POST, instance=record, **form_kwargs)
+        form = form_class(request.POST, instance=record)
         if form.is_valid() and _save_lending(request, record, form):
             return redirect(index_url)
     else:
-        form_kwargs = {} if is_return_flow else {"record_type": record.record_type if record else Record.INROOM}
-        form = form_class(instance=record, **form_kwargs)
+        form = form_class(instance=record)
 
     # Keep the visually selected person card in sync after a failed POST, where
     # the picked person lives only in the submitted (hidden) person field. In
@@ -444,17 +446,22 @@ def print_sheet(request, pk):
     from the device's current record plus the submitted form data.
     """
     # The device's current, tenant-visible record — INROOM (about to be lent) or
-    # LENT (reprint for an active lending). LOST must be located first.
+    # LENT (reprint for an active lending). Nothing else has a lending to print,
+    # for example a lost device (``LentRecord.check_lending``).
     record = (
         _tenant_scoped(LentRecord.objects.select_related("device", "person", "room"), request)
         .filter(device_id=pk)
         .first()
     )
-    if record is None or record.record_type == Record.LOST:
+    if record is None:
+        raise Http404("No printable lending record for this device.")
+    try:
+        record.check_lending()
+    except lifecycle.IllegalTransition:
         raise Http404("No printable lending record for this device.")
     device = record.device
 
-    form = LendingForm(request.POST, instance=record, record_type=record.record_type)
+    form = LendingForm(request.POST, instance=record)
     # Populate cleaned_data without hard-blocking on validation: a slip should
     # print even from a partially filled form.
     form.is_valid()

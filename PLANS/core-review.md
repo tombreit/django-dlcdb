@@ -8,8 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** planned (2026-10-09). Reordered on 2026-10-10 into atomic steps, easiest
 first, after checking every finding against the code. Steps 0–14, 16, 17, 20–25,
-27–31, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 32–36 not
-started. Steps 37–40 (admin-only model members, added 2026-10-12) run before phase E.
+27–33, 37–40 and 21b done, 15 skipped, 18 and 19 postponed; steps 34–36 not
+started. Steps 37–40 (admin-only model members, added 2026-10-12) ran before phase E.
 This is a living document: findings, decisions and progress are kept here.
 
 ## Why
@@ -89,9 +89,9 @@ What `dlcdb/core` is, in one screen. This text becomes the module docstring of
    (`core/forms/adminactions_forms.py`) and the relocate action target
    (`core/views/relocate_views.py`) are part of the admin too. Rule 5 therefore does not
    apply to the admin. What the admin may not do is hold a rule of its own: the
-   lend/return dispatch it shares with `lending/views.py` becomes one core function
-   (step 32). The admin is being phased out (2026-10-12); rule 8 keeps the models free
-   of it.
+   lend/return dispatch it shares with `lending/views.py` is one core method,
+   `LentRecord.apply_lending` (step 32). The admin is being phased out (2026-10-12);
+   rule 8 keeps the models free of it.
 7. **Plumbing that is not domain but has no better home** stays and is labelled as such
    in the docstring: `middleware.py` (WhiteNoise for docs), `storage.py`, `tasks.py`
    (SQLite snapshot), `formats/`, `management/commands/dlcdb_init.py`,
@@ -159,8 +159,8 @@ Verified against the code on 2026-10-10. Line numbers are as of that date.
 |---|---|---|
 | State keys | `lifecycle.py:54-58`, `Record.INROOM…` (`record.py:65-69`), `notifications/models.py:45-49` (report events) | `Record.X = lifecycle.X`. Keep the `Record.X` spelling (235 uses). The notification events reuse `lifecycle.X` as their values. (`dataexchange/reporting.py`'s `Outcome.REMOVED` is an import outcome, not a state key, so it stays.) |
 | Overdue | `lending/views.py:68`, `lending/filters.py:105`, `dashboard/views.py:162`, `core/admin/filters/lentstate_filter.py:26`, `core/admin/lentrecord_admin.py:143` (no not-returned check), `notifications/reports.py:55-71` (+5 days tolerance, OR instead of AND) | `LentRecord.objects.overdue(today=None, tolerance_days=0)` in `prx_lentrecord.py`, built on one `Q` so the admin's `Case/When` annotation can share it |
-| Lend / return / edit dispatch | `lending/views.py:_apply_state_machine`, `core/admin/lentrecord_admin.py:save_model`, and the soft warnings twice | `apply_lending(…)` and `lending_warnings(person, desired_end)` next to `LentRecord` in `prx_lentrecord.py`. View and admin call both |
-| "Lost device cannot be lent" | `core/forms/lentrecordadmin_form.py:30`, `lending/forms.py:79`, and a GET-time guard in `lending/views.py:339` | Not a pure duplicate (see step 33): neither dispatch calls `transition_lend` for a LOST record. The view guard is UX and stays |
+| Lend / return / edit dispatch | `lending/views.py:_apply_state_machine`, `core/admin/lentrecord_admin.py:save_model`, and the soft warnings twice | `LentRecord.apply_lending(user=…)` and `LentRecord.contract_warnings()` in `prx_lentrecord.py`. View and admin call both (done in step 32) |
+| "Lost device cannot be lent" | `core/forms/lentrecordadmin_form.py:30`, `lending/forms.py:79`, a guard in `lending/views.py:339` and `print_sheet` | The rule was already in the lifecycle (`lend` starts only from INROOM). `LentRecord.check_lending()` asks it; the admin form, the lending view and `print_sheet` call it (done in step 33) |
 | Licence "expires soon" notice (30 days before expiry) | `licenses/subscribers.py:60`, `notifications/tasks.py:167` | Both compute a schedule date, not a queryset, so the rule becomes one named constant in `notifications`. The 93-day warning in the `LicenceRecord` annotation is a different rule and stays |
 | Licence device-type prefixes `Lizenz::/License::/Licence::` | `licenses/forms.py:40`, `licenses/filters.py:28` | one constant in `licenses` (device-type choices still need it; the `is_licence` flag is the rule for devices) |
 | Audit stamp `obj.user, obj.username = get_denormalized_user(request.user)` | 17 call sites in 8 files | `AuditBaseModel.stamp_user(user)`, so call sites become `obj.stamp_user(request.user)` (a `save(user=…)` keyword was planned first; see step 27) |
@@ -421,8 +421,8 @@ first draft and need the user's confirmation:
 - The tenant-scoping batch shrinks to the `TenantAwareModel` move (see *Tenant scoping*).
 - The lost-device checks cannot simply be deleted: neither dispatch reaches
   `transition_lend` for a LOST record, and the admin can show a `ValidationError` only from
-  form `clean()`. This now comes after the shared dispatch and needs a design decision
-  (step 33).
+  form `clean()`. This now comes after the shared dispatch (step 33, where it was
+  decided).
 - The contract docstring in `core/__init__.py` is written last, when it is true. Until
   then this document is the map.
 - The module-level `SessionStore` in the lending admin is fixed on its own (step 9),
@@ -430,9 +430,6 @@ first draft and need the user's confirmation:
 
 ## Open questions
 
-- Step 33: where does the single "lost device cannot be lent" check live? Candidates:
-  in `apply_lending` (the admin would then need to call it from `LentRecordAdminForm.clean`),
-  or in the lifecycle's `IllegalTransition` message for LOST → LENT.
 - `rename_lifecycle_permissions` (201 lines): a one-off migration helper. Delete it once
   every known instance has run it?
 - Should lifecycle transitions write a journal entry (one `JournalEntry.objects.log` in
@@ -745,7 +742,7 @@ Not part of the core review. It goes first because it is a security fix and smal
 #### 28 — `stamp_user()`, frontend side
 - `tenants/views.py` (3), `persons/views.py` (2), `rooms/views.py` (2),
   `assets/views/devices.py` (2), `assets/views/masterdata.py` (2), `dataexchange/views.py`
-  (1). `lending/views.py` follows in step 32. `lifecycle.py` and `journal` read
+  (1). `lending/views.py` followed in step 32. `lifecycle.py` and `journal` read
   `get_denormalized_user` differently and stay as they are.
 - Done 2026-10-12. The existing tests covered the create views and the three tenant views,
   not the four edit views. `test_edit_unsynced_person` and
@@ -865,13 +862,92 @@ Rule 8. The findings are in *Admin-only members on core models*.
   `_lending_soft_warnings`, the audit stamp) and `LentRecordAdmin.save_model` call them.
 - Test: the admin and the view produce the same record chain for lend → edit → return.
 - `/verify`: an admin lend/return round trip and a frontend lend/return round trip.
+- Done 2026-10-12, as two `LentRecord` methods rather than functions:
+  `apply_lending(*, user)` and `contract_warnings()`. Both screens hand over the edited
+  record (`form.save(commit=False)`), so the separate `edited` argument was not needed.
+  `apply_lending` returns the lending, the new LENT record after a lend, which the admin
+  keeps on the request for its redirect. The edit branch stamps the editor
+  (`stamp_user`), so `lending/views.py` no longer imports `get_denormalized_user`.
+- Behaviour kept as it was:
+  - The admin shows the contract warnings on every save, including a return; the
+    frontend skips them on a return. Aligning the admin would change what its users see,
+    so it would be a commit of its own. With the admin being phased out, it is not
+    planned.
+  - The admin's return branch also checked `obj.active_device_record`. That reverse
+    one-to-one either returns the device or raises, so it never made the check false.
+    `transition_return_lending` refuses an inactive record itself.
+  - The admin's edit branch no longer goes through `super().save_model()`, which did the
+    same thing: it stamped the user and saved. `Record` keeps no history, so
+    django-simple-history's history user does not apply.
+  - No msgid changes. The admin's untranslated "Lent state unknown" now uses the
+    frontend's translated msgid.
+- Tests: `core/tests/test_transition_parity.py` adds the lend → edit → return chain, the
+  editor stamp on an edit and both contract warnings, each compared across admin and
+  frontend. Mutation checks: dropping the stamp, the warnings (in the method or in the
+  admin), the admin's new-lending redirect, or the return branch each fails a test.
+- `/verify` on a scratch DB: the admin and the frontend each lent, edited and returned
+  a device. Both left the same chain (in room → lent, edited and returned →
+  auto-return room), stamped with the editing user.
 - Commit: `Core review, step 32: the lending frontend and the admin share one lend, return and
   edit dispatch and one set of contract warnings`
 
 #### 33 — "Lost device cannot be lent", once
-- Blocked on the open question. Today two form `clean()` checks give the message. Without
-  them the dispatch would answer "Lent state unknown". Keep the view's GET-time guard.
-- Commit: decided with the design.
+- Was blocked on the open question. Today two form `clean()` checks give the message.
+  Without them the dispatch would answer "Lent state unknown". Keep the view's GET-time
+  guard.
+- Looked at again on 2026-10-12, at the user's request (what is it for, is it needed,
+  isn't there a shared mechanism?). The message stops an operator from lending a device
+  marked "not locatable". It was spelled in four places:
+  - `LentRecordAdminForm.clean()`, from 2023 (982fbc20), before the lifecycle module
+    existed. Reachable: the lending admin lists LOST records of lentable devices, and
+    without the check the save would end in a server error.
+  - `LendingForm.clean()`, copied from it in 2026-06. Unreachable: the view redirects a
+    LOST record before it binds the form.
+  - The view's guard in `lend`, with its own msgid. Reachable from the dashboard search
+    and the person's lendings list, which link a LOST record.
+  - `print_sheet`'s LOST test (a 404).
+- The rule itself was never missing: `lend` starts only from INROOM, and
+  `transition_lend` enforces it through `lifecycle.check()`. The copies existed because
+  `apply_lending` (step 32) never asked the lifecycle about a record that is neither
+  INROOM nor LENT. A lentable ORDERED device fell into the same gap: a server error in
+  the admin, and in the frontend an edit screen whose save failed with "Lent state
+  unknown".
+- Done 2026-10-12, in the style of step 32. `LentRecord.check_lending()` raises
+  `IllegalTransition` unless the lending screens can act on the record: a lending always,
+  anything else only if `lifecycle.check(device, "lend")` passes. Callers:
+  - `LentRecordAdminForm.clean()`, the admin's only place to show an error (like
+    `RemovedRecordAdminForm`);
+  - the `lend` view, which redirects with the message (like
+    `assets/views/devices.py`);
+  - `print_sheet` (a 404).
+- `apply_lending` hands every record that is not a lending to `transition_lend`, so the
+  "Lent state unknown" branch is gone. Also removed: `LendingForm.clean()` and its
+  `record_type` argument, `LentRecordAdmin.get_form` and `LOST_DEVICE_NOT_LENDABLE`.
+- User decision: the screens show the lifecycle's message, "“Lend” is not allowed for a
+  device in state “Not locatable”." It is translated already; the "locate it first" hint
+  goes.
+- What users see now:
+  - a lost device: that message in the admin form and on the lending screen;
+  - an ordered lentable device: "… in state “Ordered”." in both screens instead of a
+    server error or a failing edit screen, and a 404 instead of a lending slip.
+- msgids that go: the old lost-device text, the view guard's text and "Lent state
+  unknown - please report this issue!". No new msgid.
+- Tests: `LostDeviceCannotBeLentTests` in `core/tests/test_transition_parity.py` now
+  checks the screens instead of the two form classes:
+  - `check_lending` passes INROOM and LENT and refuses LOST and ORDERED;
+  - `apply_lending` refuses a LOST record and writes nothing;
+  - the admin form shows the refusal (200, no new record);
+  - the lending screen redirects with it on GET and POST;
+  - only a lendable device gets a slip.
+  The old view test accepted a 404 and never reached the guard; its user now joins the
+  tenant. Mutation checks: dropping any of the three calls, or `check_lending` passing
+  everything, fails a test.
+- `/verify` on a scratch DB with a lost and an ordered lentable device: the admin form
+  and the lending screen (GET and POST) show the lifecycle's refusal, in English and
+  German. The dashboard search's lending link for the lost device does too. No records
+  are written and no server error occurs.
+- Commit: `Core review, step 33: the lending screens ask the lifecycle whether a device
+  can be lent`
 
 #### 34 — `ldap.py` without the circular import
 - `apply_ldap(globals())`, or inline the block. A test imports the settings with
@@ -958,8 +1034,8 @@ Rule 8. The findings are in *Admin-only members on core models*.
 - [x] 38 — `has_record_notes` → `DeviceAdmin`
 - [x] 39 — `get_is_currently_lented`/`get_person` → `InRoomRecordAdmin`
 - [x] 40 — `get_admin_action_url` → state buttons
-- [ ] 32 — One lend dispatch
-- [ ] 33 — Lost-device check once (open question)
+- [x] 32 — One lend dispatch
+- [x] 33 — Lost-device check once
 - [ ] 34 — `ldap.py`
 - [ ] 35 — Search methods (needs stocktaking)
 - [ ] 36 — The contract is written down

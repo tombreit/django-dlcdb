@@ -3,10 +3,8 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
-from django.core.exceptions import ValidationError
 
-from ..models import LentRecord, Record
-from ..models.record import LOST_DEVICE_NOT_LENDABLE
+from ..models import LentRecord
 
 
 class LentRecordAdminForm(forms.ModelForm):
@@ -25,9 +23,14 @@ class LentRecordAdminForm(forms.ModelForm):
                     self.fields[key].required = True
 
     def clean(self):
-        cleaned_data = super().clean()  # NOQA
-        if self.record_type == Record.LOST:
-            raise ValidationError(LOST_DEVICE_NOT_LENDABLE)
+        """
+        Refuses a record the lending screens cannot act on, for example a lost
+        device (``LentRecord.check_lending``). The admin shows an error only from
+        here; ``save_model`` would fail with a server error.
+        """
+        cleaned_data = super().clean()
+        self.instance.check_lending()
+        return cleaned_data
 
     class Meta:
         model = LentRecord

@@ -65,34 +65,33 @@ class LentRecord(Record):
             lent_desired_end_date__lte=today - timedelta(days=tolerance_days),
         )
 
+    def check_lending(self):
+        """
+        Raises ``lifecycle.IllegalTransition`` unless the lending screens (the
+        lending frontend and the admin) can act on this record, the device's active
+        one. A lending can always be edited or returned. Any other record is there
+        to be lent, so the lifecycle decides: it refuses, for example, a lost or an
+        ordered device.
+        """
+        if self.record_type != Record.LENT:
+            lifecycle.check(self.device, "lend")
+
     def apply_lending(self, *, user):
         """
         Saves what a lending screen (the lending frontend or the admin) changed on
         this record, the device's active one, the way the lifecycle wants it:
 
-        - The device is available (INROOM): ``transition_lend`` appends a new LENT
-          record with this record's lending fields. This record stays unsaved.
         - A lending with a return date: ``transition_return_lending`` stamps the
           return and moves the device to the auto-return room.
         - A lending without one: a plain save, because editing a lending is not a
           transition.
+        - Any other record: ``transition_lend`` appends a new LENT record with this
+          record's lending fields. This record stays unsaved. The lifecycle raises
+          ``IllegalTransition`` for a device that cannot be lent (``check_lending``).
 
         Returns the lending: the new LENT record when the device was lent, else
-        this record. Any other state raises a ``ValidationError``.
+        this record.
         """
-        if self.record_type == Record.INROOM:
-            return lifecycle.transition_lend(
-                self.device,
-                person=self.person,
-                room=self.room,
-                lent_start_date=self.lent_start_date,
-                lent_desired_end_date=self.lent_desired_end_date,
-                sync_lent_end_date=self.sync_lent_end_date,
-                lent_note=self.lent_note,
-                lent_reason=self.lent_reason,
-                lent_accessories=self.lent_accessories,
-                user=user,
-            )
         if self.record_type == Record.LENT and self.lent_end_date:
             lifecycle.transition_return_lending(self, user=user, lent_end_date=self.lent_end_date)
             return self
@@ -100,7 +99,18 @@ class LentRecord(Record):
             self.stamp_user(user)
             self.save()
             return self
-        raise ValidationError(_("Lent state unknown - please report this issue!"))
+        return lifecycle.transition_lend(
+            self.device,
+            person=self.person,
+            room=self.room,
+            lent_start_date=self.lent_start_date,
+            lent_desired_end_date=self.lent_desired_end_date,
+            sync_lent_end_date=self.sync_lent_end_date,
+            lent_note=self.lent_note,
+            lent_reason=self.lent_reason,
+            lent_accessories=self.lent_accessories,
+            user=user,
+        )
 
     def contract_warnings(self):
         """
