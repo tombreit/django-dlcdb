@@ -1275,6 +1275,9 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
     the rest of the branch uses;
   - removed: the "80-warning" TODO (the states are named already), the commented-out `When`
     clauses and the double `Q(Q(...))`.
+- Done: the constant is `EXPIRING_WITHIN_DAYS` in `prx_licencerecord.py`, its only reader. No
+  test covered the states, so `core/tests/test_licencerecord_state.py` pins the window's edges
+  and that removed licences are not listed; it passes on the old manager too.
 
 #### 46 — Dead state checks in the licence admin
 - `LicenceRecordAdmin.get_contract_expiration_date` compares `license_state` with `"80-warning"`
@@ -1328,6 +1331,6 @@ green. Steps 43–47 are follow-ups; the problems they fix are older than the br
 
 - [x] 43 — Stale text
 - [x] 44 — `get_proxy_model_by_record_type` removed
-- [ ] 45 — `LicenceRecord` manager without leftovers
+- [x] 45 — `LicenceRecord` manager without leftovers
 - [ ] 46 — Dead state checks in the licence admin
 - [ ] 47 — `DeviceAdmin` keeps no request on the shared admin

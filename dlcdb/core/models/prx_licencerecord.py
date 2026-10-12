@@ -2,19 +2,21 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.db import models
-from django.db.models import Case, CharField, Q, Value, When
+from django.db.models import Case, CharField, Value, When
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .record import Record
 
+# A running licence is "expiring" from this many days before its contract expiration date.
+EXPIRING_WITHIN_DAYS = 93
+
 
 class BaseLicenceRecordManager(models.Manager):
     def get_queryset(self):
-        removed_records = Q(Q(record_type=Record.REMOVED))
-
         # Basic queryset
         qs = (
             super()
@@ -29,17 +31,14 @@ class BaseLicenceRecordManager(models.Manager):
                 is_active=True,
                 device__is_licence=True,
             )
-            .exclude(removed_records)
+            .exclude(record_type=Record.REMOVED)
             .order_by("-modified_at")
         )
 
         # Annotate with licence state
-        today = datetime.today().date()
+        today = timezone.localdate()
+        expiration_warning_threshold = today + timedelta(days=EXPIRING_WITHIN_DAYS)
 
-        # TODO: make threshold configurable
-        expiration_warning_threshold = today + timedelta(days=93)
-
-        # TODO: use descriptive license_state wording like "expires_soon", "expired" instead of "80-warning"
         qs = qs.annotate(
             license_state=Case(
                 # Ordering matters: the first When() condition that is met will be used.
@@ -67,15 +66,6 @@ class BaseLicenceRecordManager(models.Manager):
                     device__contract_expiration_date__gt=today,
                     then=Value("active"),
                 ),
-                # When(
-                #     device__contract_expiration_date__lte=now,
-                #     then=Value("90-danger"),
-                # ),
-                # When(
-                #     device__contract_expiration_date__gt=now,
-                #     device__contract_expiration_date__lte=expiration_warning_threshold,
-                #     then=Value("80-warning"),
-                # ),
                 default=Value("10-unknown"),
                 output_field=CharField(),
             ),
