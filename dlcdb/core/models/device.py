@@ -281,28 +281,8 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             )
 
     @property
-    def get_lent_start_date(self):
-        return self.active_record.lent_start_date
-
-    @property
-    def get_lent_desired_end_date(self):
-        return self.active_record.lent_desired_end_date
-
-    @property
-    def get_lent_end_date(self):
-        return self.active_record.lent_end_date
-
-    @property
     def get_person(self):
         return self.active_record.person
-
-    @property
-    def get_lent_note(self):
-        return self.active_record.lent_note
-
-    @property
-    def get_room(self):
-        return self.active_record.room
 
     @property
     def get_current_inventory_records(self):
@@ -401,11 +381,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         # Sort timeline events by percentage chronologically
         timeline.sort(key=lambda x: x.date)
         return timeline
-
-    def get_edv_id(self):
-        return self.edv_id or "----"
-
-    get_edv_id.short_description = _("IT ID")
 
     def get_absolute_url(self):
         # A licence is edited in its own form; every other device has a detail page.
