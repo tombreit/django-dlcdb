@@ -11,7 +11,7 @@ from simple_history.utils import update_change_reason
 from dlcdb.core.models import Person
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Subscription
-from dlcdb.notifications.services import create_license_subscriptions, delete_license_subscriptions
+from dlcdb.notifications.services import create_license_subscriptions, delete_license_subscriptions, local_midnight
 
 
 def subscriber_emails():
@@ -78,18 +78,17 @@ def manage_subscribers(device, subscribers):
         _subscribers_added = []
 
         # Create scheduled_times dict based on license data
+        expires_at = local_midnight(device.contract_expiration_date) if device.contract_expiration_date else None
         scheduled_times = {
             # For a newly created subscription, immediate notification
             Subscription.NotificationEventChoices.CONTRACT_ADDED: timezone.now(),
             # For expires_soon, CONTRACT_EXPIRES_SOON_DAYS before expiration
-            Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON: device.contract_expiration_date
+            Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON: expires_at
             - timedelta(days=Subscription.CONTRACT_EXPIRES_SOON_DAYS)
-            if device.contract_expiration_date
+            if expires_at
             else None,
             # For expired, on expiration date
-            Subscription.NotificationEventChoices.CONTRACT_EXPIRED: device.contract_expiration_date
-            if device.contract_expiration_date
-            else None,
+            Subscription.NotificationEventChoices.CONTRACT_EXPIRED: expires_at,
         }
 
         # Remove None values

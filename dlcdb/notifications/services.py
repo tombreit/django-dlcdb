@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import datetime
 import logging
+
+from django.utils import timezone
 
 from .intervals import NotificationInterval
 from .models import Message, Subscription
@@ -10,6 +13,15 @@ from .models import Message, Subscription
 logger = logging.getLogger(__name__)
 
 # PUBLIC API - exposed to other apps
+
+
+def local_midnight(date):
+    """
+    ``date`` at 00:00 in the current time zone, as an aware datetime: the moment a
+    contract notice is due on that day (``Subscription.next_scheduled`` is a
+    DateTimeField, the contract dates are dates).
+    """
+    return timezone.make_aware(datetime.datetime.combine(date, datetime.time.min))
 
 
 def create_license_subscriptions(

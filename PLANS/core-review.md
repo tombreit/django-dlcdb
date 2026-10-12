@@ -81,6 +81,8 @@ whichever test runs when the object is collected, so the failing tests vary.
   It becomes a public helper in `notifications/services.py`, which `subscribers.py` already
   imports, and both use it.
 - No behaviour change: the same stored moment, pinned by `licenses/tests/test_subscribers.py`.
+- Done: the helper is `local_midnight(date)` in `notifications/services.py`. It takes only a
+  date, which is all both callers pass, so the scheduler's `None` checks after it went too.
 
 #### 50 — Files and connections are closed
 - FieldFiles opened implicitly and never closed:
@@ -343,7 +345,7 @@ whichever test runs when the object is collected, so the failing tests vary.
 
 - [x] 0–47 — done (see `a266e9a4` for the full plan)
 - [x] 48 — Stale text and docs
-- [ ] 49 — Licence notices as aware datetimes
+- [x] 49 — Licence notices as aware datetimes
 - [ ] 50 — Files and connections closed
 - [ ] 51 — Warnings fail the suite
 - [ ] 52 — `nav` leftovers

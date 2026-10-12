@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import datetime
 import logging
 from datetime import timedelta
 
@@ -19,6 +18,7 @@ from .intervals import INTERVAL_DETAILS, NotificationInterval
 from .models import Message, Subscription
 from .overdue_lenders import create_overdue_lender_messages
 from .reports import create_report_message, create_report_messages, get_window_start
+from .services import local_midnight
 
 logger = logging.getLogger(__name__)
 
@@ -26,22 +26,6 @@ logger = logging.getLogger(__name__)
 #######################################################################
 # task utilities
 #######################################################################
-
-
-def _ensure_aware_dt(dt):
-    """Ensure datetime is timezone-aware"""
-    if dt is None:
-        return None
-
-    # If it's a date object, convert it to datetime at midnight
-    if isinstance(dt, datetime.date) and not isinstance(dt, datetime.datetime):
-        dt = datetime.datetime.combine(dt, datetime.time.min)
-
-    # Now make it timezone-aware if needed
-    if not timezone.is_aware(dt):
-        dt = timezone.make_aware(dt)
-
-    return dt
 
 
 def _update_subscription_after_send(subscription):
@@ -162,19 +146,17 @@ def _update_license_subscriptions():
                 subscription.event == Subscription.NotificationEventChoices.CONTRACT_EXPIRES_SOON
                 and device.contract_expiration_date
             ):
-                expiration_date = _ensure_aware_dt(device.contract_expiration_date)
-                if expiration_date:  # Only proceed if not None
-                    notify_date = expiration_date - timedelta(days=Subscription.CONTRACT_EXPIRES_SOON_DAYS)
-                    subscription.schedule_next_message(datetime_obj=notify_date)
+                notify_date = local_midnight(device.contract_expiration_date) - timedelta(
+                    days=Subscription.CONTRACT_EXPIRES_SOON_DAYS
+                )
+                subscription.schedule_next_message(datetime_obj=notify_date)
 
             # For CONTRACT_EXPIRED, set to expiration date
             elif (
                 subscription.event == Subscription.NotificationEventChoices.CONTRACT_EXPIRED
                 and device.contract_expiration_date
             ):
-                expiration_date = _ensure_aware_dt(device.contract_expiration_date)
-                if expiration_date:  # Only proceed if not None
-                    subscription.schedule_next_message(datetime_obj=expiration_date)
+                subscription.schedule_next_message(datetime_obj=local_midnight(device.contract_expiration_date))
 
             # This runs every minute for 48 hours after a device edit: save and
             # regenerate only when the date really changed.
