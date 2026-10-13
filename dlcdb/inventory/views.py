@@ -54,6 +54,7 @@ from dlcdb.theme.pagination import paginate
 
 from .filters import DeviceFilter, RoomFilter
 from .forms import DeviceAddForm, InventorizeRoomForm, NoteForm
+from .inventorize import inventorize_uuids_for_room
 from .models import SapList
 from .sap import create_sap_list_comparison
 
@@ -143,7 +144,7 @@ class InventorizeRoomView(PermissionRequiredMixin, View):
 
         try:
             if uuids:
-                Inventory.inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
+                inventorize_uuids_for_room(uuids=uuids, room_pk=room_pk, user=request.user)
             else:
                 messages.add_message(request, messages.WARNING, "Nothing marked as inventorized.")
         except IllegalTransition as illegal_transition:

@@ -6,11 +6,13 @@ import json
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, InRoomRecord, Inventory, Note, Record
+from dlcdb.inventory.inventorize import inventorize_uuids_for_room
 from dlcdb.inventory.utils import update_inventory_note
 from dlcdb.tenants.models import Tenant
 
@@ -141,7 +143,7 @@ def test_inventorize_uuids_for_room(device_1, device_2, room_1, external_room, i
     assert device_2.active_record.pk == device_2_record_1.pk
 
     # Test successful inventory
-    Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
+    inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
 
     # Verify device_1 was marked as found
     device_1.refresh_from_db()
@@ -174,7 +176,7 @@ def test_inventorize_uuids_rolls_back_on_illegal_transition(
     }
 
     with pytest.raises(IllegalTransition):
-        Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
+        inventorize_uuids_for_room(uuids=json.dumps(uuids_states), room_pk=external_room.pk, user=user)
 
     device_1.refresh_from_db()
     assert device_1.active_record.pk == device_1_record.pk
@@ -196,7 +198,7 @@ def test_inventorize_uuids_unknown(device_1, room_1, external_room, inventory_1,
 
     # Test unknown state
     uuids_states_unknown_state = {str(device_1.uuid): "dev_state_unknown"}
-    Inventory.inventorize_uuids_for_room(uuids=json.dumps(uuids_states_unknown_state), room_pk=room_1.pk, user=user)
+    inventorize_uuids_for_room(uuids=json.dumps(uuids_states_unknown_state), room_pk=room_1.pk, user=user)
 
     # Verify device with unknown state
     device_1.refresh_from_db()
@@ -228,3 +230,9 @@ def test_device_search_offers_own_tenants_unless_tenant_unaware(client, plain_st
     inventory_1.device_search_tenant_aware = False
     inventory_1.save()
     assert tenant_choices() == {tenant, foreign}
+
+
+@pytest.mark.django_db
+def test_inventorize_uuids_names_a_missing_room(user):
+    with pytest.raises(ObjectDoesNotExist, match="pk=999999"):
+        inventorize_uuids_for_room(uuids="{}", room_pk=999999, user=user)

@@ -5,7 +5,7 @@
 """
 Characterization tests for the state changes made outside the lending flow:
 
-* ``Inventory.inventorize_uuids_for_room`` (found / not found / unknown)
+* ``inventory/inventorize.py::inventorize_uuids_for_room`` (found / not found / unknown)
 * ``core/admin/device_admin.py::restore_removed_to_lost`` (REMOVED -> LOST)
 * ``dataexchange/remover.py::set_removed_record`` (the CSV bulk remover)
 * ``dataexchange/records.py::create_record`` (the records a CSV import row yields)
@@ -29,7 +29,6 @@ from django.test import RequestFactory
 from dlcdb.core.models import (
     Device,
     InRoomRecord,
-    Inventory,
     LentRecord,
     LostRecord,
     Person,
@@ -41,6 +40,7 @@ from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dataexchange.records import create_record
 from dlcdb.dataexchange.remover import set_removed_record
+from dlcdb.inventory.inventorize import inventorize_uuids_for_room
 from dlcdb.tenants.models import Tenant
 
 
@@ -59,7 +59,7 @@ def inventory_rooms(db):
 
 
 def _inventorize(device, state, room, user):
-    Inventory.inventorize_uuids_for_room(
+    inventorize_uuids_for_room(
         uuids=json.dumps({str(device.uuid): state}),
         room_pk=room.pk,
         user=user,

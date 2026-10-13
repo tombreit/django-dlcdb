@@ -510,7 +510,7 @@ Reviewed 2026-10-03 as sources of ideas only; none of them will be used.
 ## Open follow-ups
 
 - **Inventory note appends** (`inventory/utils.py:update_inventory_note`,
-  `core/models/inventory.py`): a candidate emitter.
+  `inventory/inventorize.py`): a candidate emitter.
 - **Silent broad handlers** worth a logger call, so they reach the journal through decision 14:
   - ~~`licenses/views.py`: a save error is shown to the user with its stack trace, never logged~~:
     done, unexpected save errors are logged and the user sees a generic message;

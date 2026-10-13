@@ -414,10 +414,13 @@ write nothing belongs to the inventory refactoring (task 67).
 - `inventory/sap.py:66` repeats the expression of `SapList.get_file_name`, whose only reader is
   the admin. It calls the method.
 
-#### 67 — The inventory scan workflow moves to `inventory/services.py`
+#### 67 — The inventory scan workflow moves to `inventory/inventorize.py`
 - Was postponed as step 19. `Inventory.inventorize_uuids_for_room`
-  (`core/models/inventory.py:268-359`) and its helper `_found_inventory_note` move verbatim to
-  `inventory/services.py`, as a plain function.
+  (`core/models/inventory.py`) and its helper `_found_inventory_note` move verbatim to
+  `inventory/inventorize.py`, as a plain function.
+- Module name (user, 2026-10-13): not `services.py`. `inventorize.py` is named after the action,
+  like `dataexchange/importer.py` and `inventory/sap.py`, in the app's own word
+  (`InventorizeRoomView`, `can_inventorize`, `inventorize.js`). The function keeps its name.
 - Keep `@transaction.atomic` (a rollback test depends on it) and the exceptions the view catches
   (`IllegalTransition`, `RuntimeError`, `ObjectDoesNotExist`).
 - Name: not `inventorize_room`, a view in `inventory/views.py` has that name.
@@ -429,11 +432,24 @@ write nothing belongs to the inventory refactoring (task 67).
   `inventory.utils` exception.
 - The "not found" branch writes its note with `" *** "`, while `update_inventory_note` uses
   `"; "`. Moved as it is; aligning them would change stored text.
+- Done (2026-10-13), after a fresh review of the code:
+  - The source was copied by a script, not retyped. An `ast` comparison shows every statement of
+    both functions identical; the docstring differs only in indentation, and `@staticmethod` is
+    the only decorator that went.
+  - Core's five now-unused imports went: `json`, `ObjectDoesNotExist`, `transaction`,
+    `lifecycle` and `update_inventory_note`.
+  - Callers: `inventory/views.py`, `inventory/tests/test_inventory.py`,
+    `core/tests/test_state_write_paths.py`. No test patched the old path.
+  - `core/__init__.py` lists two exceptions now, and the guard grep shows only those two.
+    `PLANS/journal.md` names the new place.
 
 #### 68 — Fixes found on the move
-- The message at the old `inventory.py:283` lacks its `f` prefix and prints `{room_pk}`
-  literally.
-- A leftover `# print(...)` (old :277).
+- In `inventory/inventorize.py` `inventorize_uuids_for_room` (moved unchanged in task 67):
+  - the "room does not exist" message lacks its `f` prefix and prints `{room_pk}` literally;
+  - a leftover `# print(...)` at the top of the function.
+- Done (2026-10-13, in the task 67 commit, user decision): the `f` prefix and the `# print` line.
+  A test asks for a room that does not exist and expects its pk in the message; it failed
+  before.
 
 ### Core contract
 
@@ -516,8 +532,8 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 64 — Literals become constants
 - [x] 65 — `mark_not_handled_assets_in_csv` tidied
 - [x] 66 — `sap.py` uses `SapList.get_file_name`
-- [ ] 67 — Inventory scan workflow → `inventory/services.py`
-- [ ] 68 — Fixes found on the move
+- [x] 67 — Inventory scan workflow → `inventory/inventorize.py`
+- [x] 68 — Fixes found on the move
 - [ ] 69 — `TenantAwareModel` → core
 - [ ] 70 — Device state buttons → theme
 - [ ] 71 — Contract check before the merge
