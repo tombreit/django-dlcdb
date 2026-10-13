@@ -339,6 +339,10 @@ with the current stamp". So the page can show a green badge above unticked devic
   go.
 - Test first: a device scanned twice and a device moved away after counting. Today's code shows
   the room green; after the fix it is "in progress" with the right numbers.
+- Done (2026-10-13): a subquery counts the room's devices with a stamped record
+  (`core/models/inventory.py`); `get_inventory_status` keeps three plain branches. The test
+  (`core/tests/test_inventory_model.py`) showed room 1 as "completed" before the fix; now it is
+  "1 / 3", in progress, and the room the device moved to is "1 / 1".
 
 **Step 61b, colour out of the model.**
 - `get_inventory_status` returns the status word and the "3 / 10" text, no Bootstrap colour.

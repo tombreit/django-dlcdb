@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import pytest
 from django.test import TestCase
 
-from dlcdb.core import models
+from dlcdb.core import lifecycle, models
 
 
 class InventoryTests(TestCase):
@@ -26,3 +27,30 @@ class InventoryTests(TestCase):
         i1 = models.Inventory.objects.get(id=i1.id)
         self.assertFalse(i1.is_active)
         self.assertTrue(i2.is_active)
+
+
+def _room_status(room, tenant):
+    return models.Inventory.objects.tenant_aware_room_objects(tenants=[tenant]).get(pk=room.pk).get_inventory_status
+
+
+@pytest.mark.django_db
+def test_the_room_badge_counts_devices_not_records(tenant, user, room_1, room_2, inventory_1):
+    """
+    A scan appends a stamped record even when the device is already in the room, and
+    a device found elsewhere leaves its stamped record behind. Neither may make a
+    room look counted while devices in it were never scanned.
+    """
+    devices = {}
+    for edv_id in ("SCANNED-TWICE", "NEVER-SCANNED-1", "NEVER-SCANNED-2", "MOVED-AWAY"):
+        devices[edv_id] = models.Device.objects.create(edv_id=edv_id, tenant=tenant)
+        models.InRoomRecord.objects.create(device=devices[edv_id], room=room_1)
+
+    for _scan in range(2):
+        lifecycle.localise(devices["SCANNED-TWICE"], room=room_1, user=user, inventory=inventory_1)
+    lifecycle.localise(devices["MOVED-AWAY"], room=room_1, user=user, inventory=inventory_1)
+    lifecycle.localise(devices["MOVED-AWAY"], room=room_2, user=user, inventory=inventory_1)
+
+    assert _room_status(room_1, tenant).status_str == "inprogress"
+    assert _room_status(room_1, tenant).n_of_ns == "1 / 3"
+    assert _room_status(room_2, tenant).status_str == "completed"
+    assert _room_status(room_2, tenant).n_of_ns == "1 / 1"

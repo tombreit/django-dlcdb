@@ -111,8 +111,6 @@ class Room(SoftDeleteAuditBaseModel):
         * outstanding: no devices with current inventory
         * inprogress: some devices with current inventory
         * completed: all devices with current inventory
-
-        Special case: room_devices_count < room_inventorized_devices_count
         """
 
         inventory_status = namedtuple(
@@ -126,22 +124,15 @@ class Room(SoftDeleteAuditBaseModel):
 
         n_of_ns = f"{self.room_inventorized_devices_count} / {self.room_devices_count}"
 
-        if self.room_devices_count == self.room_inventorized_devices_count or self.room_devices_count == 0:
+        if self.room_inventorized_devices_count == self.room_devices_count:
             status_str = "completed"
             css_class = "success"
-        elif self.room_devices_count and not self.room_inventorized_devices_count:
+        elif not self.room_inventorized_devices_count:
             status_str = "outstanding"
             css_class = "warning"
-        elif self.room_devices_count > self.room_inventorized_devices_count:
+        else:
             status_str = "inprogress"
             css_class = "primary"
-        elif self.room_devices_count < self.room_inventorized_devices_count:
-            status_str = "completed"
-            css_class = "success"
-            n_of_ns = f"{self.room_devices_count} / {self.room_devices_count}"
-        else:
-            status_str = "FIXME"
-            css_class = "danger"
 
         return inventory_status(status_str, css_class, n_of_ns)
 

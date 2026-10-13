@@ -7,7 +7,8 @@ from collections import namedtuple
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
-from django.db.models import Count, Exists, OuterRef, Q, Subquery
+from django.db.models import Count, Exists, IntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.inventory.utils import update_inventory_note
@@ -117,6 +118,25 @@ class InventoryQuerySet(models.QuerySet):
             has_inventory_note=Exists(current_inventory_room_note)
         )
 
+        # The room's devices that are counted in the current inventory. A device
+        # counts once, if any of its records carries the current stamp: what the
+        # room's device list (``already_inventorized``) and the overall progress
+        # count too. Counting the room's stamped records instead counted a device
+        # scanned twice twice, and kept counting one that had moved on.
+        counted_devices = (
+            Device.objects.filter(
+                active_record__room=OuterRef("pk"),
+                active_record__is_active=True,
+                deleted_at__isnull=True,
+                tenant__in=tenants,
+                record__inventory__is_active=True,
+            )
+            .order_by()
+            .values("active_record__room")
+            .annotate(count=Count("pk", distinct=True))
+            .values("count")
+        )
+
         # Some inventory stats done by the database. Rooms are shared by all
         # tenants, only their device counts are tenant-scoped.
         qs = qs.annotate(
@@ -128,15 +148,7 @@ class InventoryQuerySet(models.QuerySet):
                     record__device__tenant__in=tenants,
                 ),
             ),
-            room_inventorized_devices_count=Count(
-                "record",
-                filter=Q(
-                    Q(Q(record__record_type=Record.INROOM) | Q(record__record_type=Record.LENT)),
-                    record__device__deleted_at__isnull=True,
-                    record__inventory__is_active=True,
-                    record__device__tenant__in=tenants,
-                ),
-            ),
+            room_inventorized_devices_count=Coalesce(Subquery(counted_devices, output_field=IntegerField()), 0),
         )
 
         return qs.order_by("number")
