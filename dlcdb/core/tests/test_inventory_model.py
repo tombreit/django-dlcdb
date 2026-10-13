@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import pytest
+from django.template.loader import render_to_string
 from django.test import TestCase
+from django.utils import translation
 
 from dlcdb.core import lifecycle, models
 
@@ -54,3 +56,27 @@ def test_the_room_badge_counts_devices_not_records(tenant, user, room_1, room_2,
     assert _room_status(room_1, tenant).n_of_ns == "1 / 3"
     assert _room_status(room_2, tenant).status_str == "completed"
     assert _room_status(room_2, tenant).n_of_ns == "1 / 1"
+
+
+@pytest.mark.django_db
+def test_the_room_badge_picks_colour_and_label_for_each_status(tenant, user, inventory_1):
+    expected = {
+        "completed": ("success", "Completed", 1, 1),
+        "outstanding": ("warning", "Outstanding", 0, 1),
+        "inprogress": ("primary", "In progress", 1, 2),
+    }
+    for status, (colour, label, counted, in_room) in expected.items():
+        room = models.Room.objects.create(number=f"ROOM-{status}")
+        for index in range(in_room):
+            device = models.Device.objects.create(edv_id=f"{status}-{index}", tenant=tenant)
+            models.InRoomRecord.objects.create(device=device, room=room)
+            if index < counted:
+                lifecycle.localise(device, room=room, user=user, inventory=inventory_1)
+        room = models.Inventory.objects.tenant_aware_room_objects(tenants=[tenant]).get(pk=room.pk)
+
+        with translation.override("en"):
+            button = render_to_string("inventory/includes/inventory_status_badge.html", {"room": room})
+            badge = render_to_string("inventory/includes/inventory_status_badge.html", {"room": room, "style": "badge"})
+
+        assert f"btn-{colour}" in button and label in button
+        assert f"text-bg-{colour}" in badge and f"{counted} / {in_room}" in badge

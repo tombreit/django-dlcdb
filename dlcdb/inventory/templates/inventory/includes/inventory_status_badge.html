@@ -1,12 +1,15 @@
+{% load i18n %}
+{% with status=room.get_inventory_status %}
 {% if style == "badge" %}
-    <span class="badge text-bg-{{ room.get_inventory_status.css_class }}">
-        {{ room.get_inventory_status.n_of_ns }}
+    <span class="badge text-bg-{% if status.status_str == 'completed' %}success{% elif status.status_str == 'outstanding' %}warning{% else %}primary{% endif %}">
+        {{ status.n_of_ns }}
     </span>
 {% else %}
-    <span class="btn btn-sm btn-{{ room.get_inventory_status.css_class }}">
+    <span class="btn btn-sm btn-{% if status.status_str == 'completed' %}success{% elif status.status_str == 'outstanding' %}warning{% else %}primary{% endif %}">
         <span class="badge text-bg-light">
-            {{ room.get_inventory_status.n_of_ns }}
+            {{ status.n_of_ns }}
         </span>
-        {{ room.get_inventory_status.status_str }}
+        {% if status.status_str == "completed" %}{% translate "Completed" %}{% elif status.status_str == "outstanding" %}{% translate "Outstanding" %}{% else %}{% translate "In progress" %}{% endif %}
     </span>
 {% endif %}
+{% endwith %}

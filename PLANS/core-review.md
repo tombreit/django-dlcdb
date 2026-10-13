@@ -348,6 +348,10 @@ with the current stamp". So the page can show a green badge above unticked devic
 - `get_inventory_status` returns the status word and the "3 / 10" text, no Bootstrap colour.
 - The badge template picks the colour and a translated label with a plain `{% if %}`. The room
   list stops showing raw English words ("inprogress").
+- Done (2026-10-13): `get_inventory_status` returns `status_str` and `n_of_ns`; the badge
+  template reads it once (`{% with %}`) and picks the Bootstrap colour per status and the label
+  "Completed", "Outstanding" or "In progress" (new msgids). A test renders both badge styles for
+  each status.
 
 **If it is not done.** Rooms can show as completed while devices in them were never counted, so
 an inventory can be closed with gaps. The room list keeps raw English words.
@@ -491,7 +495,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 58 — The lending screens ask the record what a save does
 - [x] 59 — Importer refuses LENT rows on non-lendable devices
 - [x] 60 — `Device.get_timeline` without dead colours
-- [ ] 61 — The inventory badge counts devices, and picks its own colour
+- [x] 61 — The inventory badge counts devices, and picks its own colour
 - [ ] 62 — Single-consumer helpers leave core
 - [ ] 63 — `DEVICE_HIDE_FIELDS` removed
 - [ ] 64 — Literals become constants

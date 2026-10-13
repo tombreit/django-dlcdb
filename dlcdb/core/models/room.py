@@ -111,30 +111,23 @@ class Room(SoftDeleteAuditBaseModel):
         * outstanding: no devices with current inventory
         * inprogress: some devices with current inventory
         * completed: all devices with current inventory
+
+        The inventory badge (``inventory/includes/inventory_status_badge.html``)
+        picks colour and label for each status.
         """
 
-        inventory_status = namedtuple(
-            "inventory_status",
-            [
-                "status_str",
-                "css_class",
-                "n_of_ns",
-            ],
-        )
+        inventory_status = namedtuple("inventory_status", ["status_str", "n_of_ns"])
 
         n_of_ns = f"{self.room_inventorized_devices_count} / {self.room_devices_count}"
 
         if self.room_inventorized_devices_count == self.room_devices_count:
             status_str = "completed"
-            css_class = "success"
         elif not self.room_inventorized_devices_count:
             status_str = "outstanding"
-            css_class = "warning"
         else:
             status_str = "inprogress"
-            css_class = "primary"
 
-        return inventory_status(status_str, css_class, n_of_ns)
+        return inventory_status(status_str, n_of_ns)
 
 
 def timestamped_file_path(instance, filename):
