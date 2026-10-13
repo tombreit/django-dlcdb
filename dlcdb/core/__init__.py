@@ -9,8 +9,7 @@ rely on. Other apps import from ``dlcdb.core.models``, ``dlcdb.core.lifecycle`` 
 models can be defined.
 
 - ``models/``, ``lifecycle.py`` and ``utils/`` import no other app of the project,
-  except ``organization.Branding`` (in ``get_contact_email``) and
-  ``tenants.abstracts.TenantAwareModel``.
+  except ``organization.Branding`` (in ``get_contact_email``).
   The admin (``admin/``, ``forms/``, their views and templates) is a UI like any other
   and may import other apps; it is being phased out.
 - Code appends records through the lifecycle (``transition_*``, ``localise``).

@@ -16,12 +16,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
-from dlcdb.tenants.abstracts import TenantAwareModel
-
 from ..storage import OverwriteStorage
 from ..utils.device_methods import get_device_state_data
 from ..utils.qrcode import uuid2qrcode
-from .abstracts import SoftDeleteAuditBaseModel
+from .abstracts import SoftDeleteAuditBaseModel, TenantAwareModel
 from .supplier import Supplier
 
 

@@ -463,6 +463,11 @@ write nothing belongs to the inventory refactoring (task 67).
 - `ImporterList.tenant` and `JournalEntry.tenant` stay as they are. Their fields differ
   (help text, `blank`, verbose name), and the abstract model would add migrations.
 - `makemigrations --check` must stay clean. No migration names the module.
+- Done (2026-10-13): the class was copied by a script (`ast`: identical) to the end of
+  `core/models/abstracts.py`, with a comment on why it can live there. `device.py` imports it from
+  `.abstracts`; `tenants/abstracts.py` is deleted. Both import orders (tenants first, core first)
+  load, and `makemigrations --check` shows no change. `core/__init__.py` names one exception now,
+  `organization.Branding`, and the guard grep shows only that one.
 
 #### 70 — The device state buttons move to theme
 - Was postponed as step 18. `core/utils/device_methods.py` builds the badge and the action
@@ -534,7 +539,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 66 — `sap.py` uses `SapList.get_file_name`
 - [x] 67 — Inventory scan workflow → `inventory/inventorize.py`
 - [x] 68 — Fixes found on the move
-- [ ] 69 — `TenantAwareModel` → core
+- [x] 69 — `TenantAwareModel` → core
 - [ ] 70 — Device state buttons → theme
 - [ ] 71 — Contract check before the merge
 

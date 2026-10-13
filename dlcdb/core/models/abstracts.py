@@ -169,3 +169,19 @@ class SingletonBaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+# The device's tenant. Core refers to the tenants app only by the string
+# "tenants.Tenant", so tenants.models can import core's AuditBaseModel without a cycle.
+class TenantAwareModel(models.Model):
+    tenant = models.ForeignKey(
+        "tenants.Tenant",
+        # A tenant with devices cannot be deleted: SET_NULL would orphan its
+        # devices, which then are invisible to every tenant-scoped user.
+        on_delete=models.PROTECT,
+        # Nullable for legacy devices only; forms require a tenant.
+        null=True,
+    )
+
+    class Meta:
+        abstract = True
