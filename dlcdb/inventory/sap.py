@@ -58,7 +58,7 @@ def create_sap_list_comparison(sap_list_obj):
         )
         comparison.save()
 
-        original_name = sap_list_obj.file.name.split("/")[-1]
+        original_name = sap_list_obj.get_file_name()
         file_name = f"result_{comparison.id}_{original_name}"
         file_path = os.path.join(settings.MEDIA_ROOT, settings.SAP_LIST_COMPARISON_RESULT_FOLDER, file_name)
 

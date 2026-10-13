@@ -515,7 +515,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 63 — `DEVICE_HIDE_FIELDS` removed
 - [x] 64 — Literals become constants
 - [x] 65 — `mark_not_handled_assets_in_csv` tidied
-- [ ] 66 — `sap.py` uses `SapList.get_file_name`
+- [x] 66 — `sap.py` uses `SapList.get_file_name`
 - [ ] 67 — Inventory scan workflow → `inventory/services.py`
 - [ ] 68 — Fixes found on the move
 - [ ] 69 — `TenantAwareModel` → core
