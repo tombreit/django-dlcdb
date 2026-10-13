@@ -32,7 +32,7 @@ Jeden Montag erhält jede Person mit überfälligen Ausleihen eine Mail, die ihr
 - *Lender, IT in CC*: an die Person, die IT in Kopie
 - *IT only*: nur an die IT (zum Testen: dieselbe Mail, umgeleitet)
 
-Die IT-Adresse ist die Kontakt-Email des [Mandanten](berechtigungen.md#mandanten) der Geräte, ersatzweise die IT-Adresse aus dem Branding, zuletzt `DEFAULT_FROM_EMAIL`. Unabhängig davon zeigt das Dashboard die Zahl der überfälligen Ausleihen.
+Die IT-Adresse ist die Kontakt-Email des [Mandanten](berechtigungen.md#mandanten) der Geräte, ersatzweise die IT-Adresse aus dem Branding, zuletzt `DEFAULT_FROM_EMAIL`. Als überfällig gilt eine Ausleihe hier 5 Tage nach dem gewünschten Rückgabedatum. Das Dashboard und die Ausleih-Liste zählen sie schon ab dem gewünschten Rückgabedatum, und nur in den eigenen Mandanten.
 
 ## Betrieb
 

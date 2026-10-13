@@ -510,6 +510,7 @@ def test_import_report_details_describe_the_records(tenant, import_user):
             "EDV_ID": "DET0002",
             "ROOM": "102",
             "RECORD_TYPE": Record.LENT,
+            "IS_LENTABLE": "yes",
             "LENDER_EMAIL": "ada.lovelace@example.com",
             "LENT_START_DATE": "2024-01-15",
             "LENT_DESIRED_END_DATE": "2024-06-15",
@@ -676,6 +677,7 @@ def test_lender_name_collision_is_reported_with_the_email(tenant, import_user):
         "EDV_ID": "COLLIDE-1",
         "ROOM": "355",
         "RECORD_TYPE": Record.LENT,
+        "IS_LENTABLE": "yes",
         "LENDER_FIRST_NAME": "Ada",
         "LENDER_LAST_NAME": "Lovelace",
         # Same human, different address -> lookup misses, insert collides.
@@ -706,6 +708,7 @@ def test_blank_lender_names_collide_and_are_reported(tenant, import_user):
             "EDV_ID": f"BLANK-{index}",
             "ROOM": "355",
             "RECORD_TYPE": Record.LENT,
+            "IS_LENTABLE": "yes",
             "LENDER_EMAIL": f"nameless{index}@example.com",
             "LENT_START_DATE": "2024-01-15",
         }
@@ -770,6 +773,7 @@ def test_soft_deleted_lender_still_imports(tenant, import_user):
         "EDV_ID": "SOFTDEL-1",
         "ROOM": "355",
         "RECORD_TYPE": Record.LENT,
+        "IS_LENTABLE": "yes",
         "LENDER_FIRST_NAME": "Alan",
         "LENDER_LAST_NAME": "Turing",
         "LENDER_EMAIL": "alan@example.com",
@@ -813,3 +817,39 @@ def test_ragged_row_is_an_error_row_not_a_crash(tenant, import_user):
 
     assert [row.outcome for row in report.rows] == [Outcome.ERROR]
     assert report.rows[0].row == 2
+
+
+@pytest.mark.django_db
+def test_an_open_lending_needs_a_lendable_device(tenant, import_user):
+    """
+    A lending without LENT_END_DATE on a device that is not lendable would be mailed
+    as overdue, but the lending screens could neither list nor return it. A returned
+    loan on such a device stays importable: it ends in an INROOM record.
+    """
+    lending = {
+        "ROOM": "355",
+        "RECORD_TYPE": Record.LENT,
+        "LENDER_FIRST_NAME": "Ada",
+        "LENDER_LAST_NAME": "Lovelace",
+        "LENDER_EMAIL": "ada@example.com",
+        "LENT_START_DATE": "2026-03-01",
+        "LENT_DESIRED_END_DATE": "2026-09-01",
+    }
+    rows = [
+        {**lending, "EDV_ID": "OPEN-NOT-LENTABLE", "IS_LENTABLE": "no"},
+        {**lending, "EDV_ID": "OPEN-LENTABLE", "IS_LENTABLE": "yes"},
+        {**lending, "EDV_ID": "RETURNED-NOT-LENTABLE", "IS_LENTABLE": "no", "LENT_END_DATE": "2026-04-01"},
+    ]
+
+    with translation.override("en"):
+        report = run_device_import(
+            file=_csv_bytes(rows),
+            tenant=tenant,
+            import_format=ImporterList.ImportFormatChoices.INTERNALCSV,
+            user=import_user,
+            write=False,
+        )
+
+    errors = _errors_by_edv_id(report)
+    assert set(errors) == {"OPEN-NOT-LENTABLE"}
+    assert "IS_LENTABLE" in errors["OPEN-NOT-LENTABLE"].detail

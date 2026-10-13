@@ -77,6 +77,11 @@ def create_record(
     elif record_type == Record.LENT:
         if not room:
             raise ValidationError(_("ROOM: a room number is required to import a LENT record."))
+        # An open lending of a device that is not lendable would be mailed as
+        # overdue, but the lending screens could neither list nor return it. A
+        # returned loan ends in an INROOM record, so it does not matter there.
+        if not lent_end_date and not device.is_lentable:
+            raise ValidationError(_("IS_LENTABLE: a LENT record without LENT_END_DATE needs a lendable device."))
 
         room_obj = create_fk_obj(model_class=Room, instance_key="number", instance_value=room)
 

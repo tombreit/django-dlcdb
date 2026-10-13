@@ -288,6 +288,13 @@ With the shared rule the admin says "lent" and opens the new lending.
 - Records already in a database: a shell snippet for the user to run on production. Do not run
   it against the dev database.
 - NEWS line, because operators see new import errors.
+- Done (2026-10-13): `dataexchange/records.py` `create_record` refuses only an *open* lending
+  (no `LENT_END_DATE`) of a device without `IS_LENTABLE`. A returned loan ends in an INROOM record
+  and stays importable, so a device's lending history can still be imported after it stopped
+  being lendable. Four older import tests now mark their open lendings `IS_LENTABLE: yes`.
+  Records already in a database, to check on production:
+  `./manage.py shell -c "from dlcdb.core.models import Record; print(list(Record.objects.filter(is_active=True, record_type=Record.LENT, lent_end_date__isnull=True, device__is_lentable=False).values_list('device__edv_id', 'device__sap_id', 'person__email')))"`.
+  Each hit is a device to mark lendable, so the lending screens list it and can return it.
 
 ### Core models and utils
 
@@ -449,7 +456,7 @@ With the shared rule the admin says "lent" and opens the new lending.
 - [x] 56 — Two pages ignore the tenant boundary
 - ~~57 — `print_sheet` raises its 404 once~~ dropped (2026-10-13)
 - [x] 58 — The lending screens ask the record what a save does
-- [ ] 59 — Importer refuses LENT rows on non-lendable devices
+- [x] 59 — Importer refuses LENT rows on non-lendable devices
 - [ ] 60 — `Device.get_timeline` without dead colours
 - [ ] 61 — `Room.get_inventory_status` returns a status
 - [ ] 62 — Single-consumer helpers leave core
