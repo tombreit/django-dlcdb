@@ -24,7 +24,6 @@ from .filters.lentstate_filter import LentStateRecordFilter
 @admin.register(LentRecord)
 class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAdmin):
     form = LentRecordAdminForm
-    change_form_template = "core/lentrecord/change_form.html"
     change_list_template = "core/lentrecord/change_list.html"
 
     search_fields = [

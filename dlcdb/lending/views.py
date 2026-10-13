@@ -440,7 +440,6 @@ def print_sheet(request, pk):
     Render the "Ausleihzettel" (lending slip) from the *unsaved* form data, so
     helpdesk can print and have it signed before committing the lending — and so
     an active lending can be reprinted with the edits currently on screen.
-    Generalizes ``print_lent_sheet`` (below), which renders a saved record.
 
     ``pk`` is the device pk (the device picker's option id); the slip is built
     from the device's current record plus the submitted form data.
@@ -482,29 +481,3 @@ def print_sheet(request, pk):
         f"lending/db/{profile.pk}.html",
         {"record": unsaved_record, "lending_profile": profile},
     )
-
-
-@permission_required("core.view_lentrecord", raise_exception=True)
-def print_lent_sheet(request, pk):
-    """
-    Render the lending slip for an already *saved* lent record. Reached from
-    the LentRecord admin change form (moved unchanged from dlcdb.core, now
-    with a permission gate); ``print_sheet`` above is the unsaved-form variant.
-    """
-    record = get_object_or_404(LentRecord, pk=pk)
-
-    device_type = record.device.device_type
-    if not device_type:
-        raise Http404("Device has no device type assigned.")
-
-    try:
-        profile = LendingProfile.objects.exclude(lent_sheet_template="").get(device_type=device_type)
-    except LendingProfile.DoesNotExist:
-        raise Http404(f"No lending slip template configured for device type '{device_type}'.")
-
-    template_name = f"lending/db/{profile.pk}.html"
-    context = {
-        "record": record,
-        "lending_profile": profile,
-    }
-    return TemplateResponse(request, template_name, context)

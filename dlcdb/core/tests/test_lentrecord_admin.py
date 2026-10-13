@@ -4,8 +4,8 @@
 
 """
 The lending admin: the redirect after a lend (to the new LENT record, which only the
-request that created it knows about), and how it marks and filters overdue lendings
-(``LentRecord.overdue_q``).
+request that created it knows about), how it marks and filters overdue lendings
+(``LentRecord.overdue_q``), and that it prints no slips.
 """
 
 import datetime
@@ -166,3 +166,19 @@ def test_only_the_overdue_lendings_are_highlighted(client, plain_static, helpdes
         "EDV-RETURNED": "40-lent",
         "EDV-AVAILABLE": "30-available",
     }
+
+
+@pytest.mark.django_db
+def test_the_change_form_has_no_print_button(client, plain_static, helpdesk, tenant, lending_rooms, person):
+    # Slips print from the lending screen, which applies the tenant filter.
+    device = Device.objects.create(edv_id="EDV-PRINT", is_lentable=True, tenant=tenant)
+    establish_state(
+        LentRecord, device=device, person=person, room=lending_rooms["desk"], lent_start_date=timezone.localdate()
+    )
+    device.refresh_from_db()
+    client.force_login(helpdesk)
+
+    response = client.get(reverse("admin:core_lentrecord_change", args=[device.active_record.pk]))
+
+    assert response.status_code == 200
+    assert "/print/" not in response.content.decode()

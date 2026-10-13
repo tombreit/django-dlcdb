@@ -158,19 +158,63 @@ whichever test runs when the object is collected, so the failing tests vary.
 
 ### Lending
 
-#### 56 — `print_lent_sheet` is tenant-scoped
-- `lending/views.py:494` loads the lending with `get_object_or_404(LentRecord, pk=pk)`, without
-  the tenant scope that `print_sheet` applies (`_tenant_scoped`).
-- First check how the view is reached (URL, links), then scope it like `print_sheet`.
-- Test: a lending of another tenant gives a 404. Bug fix, its own commit.
-- Found in task 55: the licence iCal export (`licenses/views_calendar.py` `license_calendar`)
-  loads the licence by UUID without the tenant scope the other licence views apply
-  (`tenant_scoped_queryset`). Same fix, same commit or the next.
+#### 56 — Two pages ignore the tenant boundary
 
-#### 57 — The print views without duplication
-- `print_sheet` raises the same 404 in two places (:451-461). Check once.
-- `print_sheet` and `print_lent_sheet` both look up the device type and its print profile
-  (:471-478, :496-503). One helper.
+**In short.** Every device belongs to one tenant (*Mandant*), and a user sees only the devices of
+their own tenants (`docs/guides/berechtigungen.md`, *Mandanten*). Almost every page checks that.
+Two pages don't: they load their record straight from the number or ID in the URL.
+
+1. **Printing the slip of a saved lending** (`/lending/record/<number>/print/`,
+   `lending/views.py` `print_lent_sheet`).
+   - Only the print button on the old admin's lending form links to it.
+   - It needs `core.view_lentrecord`.
+   - The number is the record's database ID, a counter. Change it by hand, and the page prints
+     the slip of any active lending, also one of another tenant: the borrower's name and
+     organizational unit, the reason, the device with serial and inventory number, and the
+     dates.
+2. **The licence's calendar file** (`/licenses/<uuid>/calendar.ics`,
+   `licenses/views_calendar.py` `license_calendar`).
+   - It needs `core.view_licencerecord`.
+   - The UUID is random, so it can't be guessed, only copied from somewhere the licence was
+     visible.
+   - The file holds the licence's name and ID and its contract dates. No persons.
+
+**Fix.** Both views load their record through the tenant filter that the views next to them
+already use: `_tenant_scoped` in lending, `tenant_scoped_queryset` in licenses. A record of
+another tenant then gives "not found" (404), as everywhere else. One test per view: a record of
+another tenant gives a 404. Small, its own commit.
+
+**If it is not done.**
+- Nothing stops working; this closes a gap, it adds no feature.
+- The lending slip is the real risk.
+  - An account with `core.view_lentrecord` can read, page by page, who has borrowed which device
+    in every other tenant: personal data across the boundary the docs promise. The docs' list of
+    known exceptions doesn't mention it.
+  - Limits: only active lendings, read only, only by typing URLs by hand.
+  - It does not matter if the instance has one tenant, or if everyone with that permission sees
+    all tenants anyway.
+- The calendar file is a small risk: the UUID can't be guessed, and the file holds no personal
+  data.
+- If the fix is not wanted, both pages belong in the docs' list of exceptions
+  (`berechtigungen.md`, "Nicht auf die eigenen Mandanten eingeschränkt sind").
+
+**Alternative for the slip.** The lending screen already prints the same slip, tenant-scoped,
+also for an active lending (`print_sheet`). `print_lent_sheet` could be deleted together with its
+button in the old admin, which is being phased out. Then admin users print from the lending
+screen instead.
+
+**Decided (2026-10-13):** the admin's print action goes, with no replacement link, and with it
+`print_lent_sheet` and its URL. The calendar file gets the tenant filter.
+- Done (56a): the admin's lending form template (`core/lentrecord/change_form.html`, which only
+  held the print button) and its `change_form_template` line are gone, and so are
+  `print_lent_sheet` and its URL. Slips print from the lending screen, which needs the lending
+  permission, not only `core.view_lentrecord`. A test checks that the admin form has no print
+  link; it failed before the removal.
+
+#### 57 — `print_sheet` raises its 404 once
+- `print_sheet` raises the same 404 in two places (`lending/views.py`, after the record lookup and
+  after `check_lending`). Check once.
+- The duplicated profile lookup is gone with `print_lent_sheet` (task 56).
 - No behaviour change.
 
 #### 58 — `apply_lending` says what it did
@@ -362,8 +406,8 @@ whichever test runs when the object is collected, so the failing tests vary.
 - [ ] 53 — The 403 page names the IT address first
 - [x] 54 — One picker convention
 - [x] 55 — iCal export survives 9999-12-31
-- [ ] 56 — `print_lent_sheet` tenant-scoped
-- [ ] 57 — Print views without duplication
+- [ ] 56 — Two pages ignore the tenant boundary
+- [ ] 57 — `print_sheet` raises its 404 once
 - [ ] 58 — `apply_lending` says what it did
 - [ ] 59 — Importer refuses LENT rows on non-lendable devices
 - [ ] 60 — `Device.get_timeline` without dead colours
