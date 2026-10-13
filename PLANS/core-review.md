@@ -210,6 +210,8 @@ screen instead.
   `print_lent_sheet` and its URL. Slips print from the lending screen, which needs the lending
   permission, not only `core.view_lentrecord`. A test checks that the admin form has no print
   link; it failed before the removal.
+- Done (56b): `license_calendar` loads the licence through `tenant_scoped_queryset`, like the
+  licence history page. A licence of another tenant gives a 404 (the test got 200 before).
 
 #### 57 — `print_sheet` raises its 404 once
 - `print_sheet` raises the same 404 in two places (`lending/views.py`, after the record lookup and
@@ -406,7 +408,7 @@ screen instead.
 - [ ] 53 — The 403 page names the IT address first
 - [x] 54 — One picker convention
 - [x] 55 — iCal export survives 9999-12-31
-- [ ] 56 — Two pages ignore the tenant boundary
+- [x] 56 — Two pages ignore the tenant boundary
 - [ ] 57 — `print_sheet` raises its 404 once
 - [ ] 58 — `apply_lending` says what it did
 - [ ] 59 — Importer refuses LENT rows on non-lendable devices
