@@ -406,6 +406,9 @@ write nothing belongs to the inventory refactoring (task 67).
   - a help text with a backslash continuation that embeds spaces.
 - The commented `print`s in `inventory/sap.py:41-44`.
 - Only change: less output on stdout.
+- Done (2026-10-13, user request): instead of the debug `print`s the command reports through
+  `self.stdout`: the SAP IDs it compares with, the rows read, the matches per type, the rows not in
+  this DLCDB and the output file; `-v 2` lists each matched row. The docs row says so.
 
 #### 66 — `sap.py` uses `SapList.get_file_name`
 - `inventory/sap.py:66` repeats the expression of `SapList.get_file_name`, whose only reader is
@@ -511,7 +514,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [ ] 62 — Single-consumer helpers leave core
 - [x] 63 — `DEVICE_HIDE_FIELDS` removed
 - [x] 64 — Literals become constants
-- [ ] 65 — `mark_not_handled_assets_in_csv` tidied
+- [x] 65 — `mark_not_handled_assets_in_csv` tidied
 - [ ] 66 — `sap.py` uses `SapList.get_file_name`
 - [ ] 67 — Inventory scan workflow → `inventory/services.py`
 - [ ] 68 — Fixes found on the move

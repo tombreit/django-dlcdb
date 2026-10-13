@@ -38,11 +38,6 @@ def get_match_for_sap_id(sap_ids, sap_anlagennummer, sap_anlagenunternummer=None
         match_msg = f"anlagenummeronly ({sap_id_anlagennummeronly} vs. {anlagennummer}/{anlagenunternummer})"
         matched_device_sap_id = sap_id_anlagennummeronly
 
-    # print(80 * '~')
-    # print(f"{match_msg=}")
-    # print(f"{matched_device_sap_id=}")
-    # print(f"{type(matched_device_sap_id)=}")
-
     return matched_device_sap_id if return_type == "device_sap_id" else match_msg
 
 
