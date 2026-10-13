@@ -163,6 +163,9 @@ whichever test runs when the object is collected, so the failing tests vary.
   the tenant scope that `print_sheet` applies (`_tenant_scoped`).
 - First check how the view is reached (URL, links), then scope it like `print_sheet`.
 - Test: a lending of another tenant gives a 404. Bug fix, its own commit.
+- Found in task 55: the licence iCal export (`licenses/views_calendar.py` `license_calendar`)
+  loads the licence by UUID without the tenant scope the other licence views apply
+  (`tenant_scoped_queryset`). Same fix, same commit or the next.
 
 #### 57 — The print views without duplication
 - `print_sheet` raises the same 404 in two places (:451-461). Check once.
@@ -358,7 +361,7 @@ whichever test runs when the object is collected, so the failing tests vary.
 - [x] 52 — `nav` leftovers
 - [ ] 53 — The 403 page names the IT address first
 - [x] 54 — One picker convention
-- [ ] 55 — iCal export survives 9999-12-31
+- [x] 55 — iCal export survives 9999-12-31
 - [ ] 56 — `print_lent_sheet` tenant-scoped
 - [ ] 57 — Print views without duplication
 - [ ] 58 — `apply_lending` says what it did

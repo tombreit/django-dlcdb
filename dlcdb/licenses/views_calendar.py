@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import datetime
 from datetime import timedelta
 
 import icalendar
@@ -45,22 +46,14 @@ def _add_license_ical_event(cal, device, date, event_type, prefix=None, add_alar
     event.add("summary", summary)
     event.add("description", description)
 
-    # Handle date vs datetime
-    if hasattr(date, "hour"):
-        # It's a datetime object
-        event.add("dtstart", date)
-    else:
-        # It's a date object, not datetime - make it an all-day event
-        event.add("dtstart", date)
-
-        # Add end date as the next day (icalendar standard: end date is exclusive)
-        import datetime
-
-        next_day = date + datetime.timedelta(days=1)
-        event.add("dtend", next_day)
-
-        # For Microsoft Outlook compatibility
-        event.add("x-microsoft-cdo-alldayevent", "TRUE")
+    # An all-day event: the contract dates are dates.
+    event.add("dtstart", date)
+    # DTEND is exclusive, so the next day. The last date Python knows (9999-12-31)
+    # has no next day; without DTEND an all-day event lasts one day (RFC 5545).
+    if date < datetime.date.max:
+        event.add("dtend", date + timedelta(days=1))
+    # For Microsoft Outlook compatibility
+    event.add("x-microsoft-cdo-alldayevent", "TRUE")
 
     # Add unique ID
     event["uid"] = f"{event_type}-{device.uuid}@dlcdb.example.org"
