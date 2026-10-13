@@ -1,6 +1,6 @@
 {
   "name": "dlcdb",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Django Device Lifecycle Database",
   "directories": {
     "doc": "docs"
