@@ -50,6 +50,7 @@ from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, Inventory, Note, Room
 from dlcdb.core.utils.helpers import get_user_email
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.theme.device_state import get_device_state_data
 from dlcdb.theme.pagination import paginate
 
 from .filters import DeviceFilter, RoomFilter
@@ -228,7 +229,7 @@ def search_devices(request):
         device.state_data_rendered = render_to_string(
             "theme/device/state_btn_group.html",
             {
-                "state_data": device.get_state_data(user=request.user, app_name="inventory"),
+                "state_data": get_device_state_data(device, user=request.user, app_name="inventory"),
                 "size": "sm",
             },
         )

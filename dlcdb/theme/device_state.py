@@ -2,13 +2,21 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+"""
+The device state badge and its action buttons, for each screen that shows them:
+the admin, the assets device page and the inventory search. Which actions a user
+gets is ``lifecycle.available``'s decision; this module only labels them and
+routes each to the screen's own URL. ``theme/device/state_btn_group.html`` and
+the assets "Set state" dropdown render the result.
+"""
+
 from dataclasses import dataclass
 
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from .. import lifecycle
-from ..models.record import Record
+from dlcdb.core import lifecycle
+from dlcdb.core.models import Record
 
 # The transitions the assets frontend serves with its own "Move" module rather
 # than an admin add-view. The module works out which one applies from the

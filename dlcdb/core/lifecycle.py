@@ -279,7 +279,7 @@ def available(device, *, user=None):
     holds its permission, and the device satisfies its ``device_precondition``.
     Those three conditions are the whole rule -- there is no separate notion of a
     move being legal but deliberately unsurfaced. This is the single gate for
-    rendering transition actions in any UI (see ``core.utils.device_methods``).
+    rendering transition actions in any UI (see ``theme.device_state``).
 
     Note that a superuser passes every permission check, and so is offered every
     legal transition from the current state.

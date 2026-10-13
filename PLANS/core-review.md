@@ -481,6 +481,17 @@ write nothing belongs to the inventory refactoring (task 67).
 - `core/tests/test_device_state_data.py` (487 lines) moves to `theme/tests/`.
 - Text references: `core/lifecycle.py:282` and `assets/.../includes/_set_state.html:3`.
 - Core then names no frontend URL outside `get_absolute_url` and `obj_link`. No behaviour change.
+- Done (2026-10-13), after a fresh review: the module was copied by a script, with only its two
+  relative imports made absolute and a module docstring added. An `ast` comparison shows
+  `RELOCATE_TRANSITIONS`, `DeviceStateData` and `get_device_state_data` identical.
+  - `Device.get_state_data` and `core/utils/device_methods.py` are gone; the admin (2), the assets
+    device page and the inventory search call `get_device_state_data` directly.
+  - The tests moved to `theme/tests/test_device_state.py`, with their 28 calls rewritten. All 31
+    functions match the old file in `ast`, apart from the one whose import moved to the top.
+  - The guard grep still shows only `Branding`. Core names frontend URLs only in
+    `get_absolute_url` and `obj_link`.
+  - The `.po` files still name the old path in their location comments. That is left to
+    `makemessages`; the msgids are unchanged.
 
 #### 71 — Contract check before the merge
 - The guard grep (*Verification*) lists only `organization.Branding` in `get_contact_email`.
@@ -540,7 +551,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 67 — Inventory scan workflow → `inventory/inventorize.py`
 - [x] 68 — Fixes found on the move
 - [x] 69 — `TenantAwareModel` → core
-- [ ] 70 — Device state buttons → theme
+- [x] 70 — Device state buttons → theme
 - [ ] 71 — Contract check before the merge
 
 ## Verification (each task)

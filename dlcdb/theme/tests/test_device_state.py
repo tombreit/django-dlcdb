@@ -31,6 +31,7 @@ from dlcdb.core.models import (
     RemovedRecord,
 )
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.theme.device_state import RELOCATE_TRANSITIONS, get_device_state_data
 
 ALL_LIFECYCLE_PERMISSIONS = [
     "transition_can_order_device",
@@ -82,7 +83,7 @@ def test_device_without_a_record_offers_every_legal_first_step(plain_device, sup
     All three are legal from the initial state; a superuser holds every
     permission, so all three are offered.
     """
-    state_data = plain_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(plain_device, user=superuser)
 
     assert state_data.label == "No active record"
     assert "disabled" in state_data.css_classes
@@ -96,7 +97,7 @@ def test_device_without_a_record_offers_every_legal_first_step(plain_device, sup
 def test_a_record_less_device_offers_only_what_the_user_may_do(plain_device, make_user):
     """The same device, seen by someone who may only take devices into service."""
     user = make_user("transition_can_locate_device")
-    state_data = plain_device.get_state_data(user=user)
+    state_data = get_device_state_data(plain_device, user=user)
 
     assert _targets(state_data) == [f"{reverse('admin:core_inroomrecord_add')}?device={plain_device.pk}"]
 
@@ -106,12 +107,12 @@ def test_the_assets_surface_orders_natively_via_post(plain_device, make_user):
     """On the frontend, Order is a POST to the assets view, not the admin add-view."""
     user = make_user("transition_can_order_device")
 
-    [action] = plain_device.get_state_data(user=user, app_name="assets").actions
+    [action] = get_device_state_data(plain_device, user=user, app_name="assets").actions
     assert action["url"] == reverse("assets:device_order", args=[plain_device.pk])
     assert action["external"] is False
     assert action["method"] == "post"
 
-    [action] = plain_device.get_state_data(user=user).actions
+    [action] = get_device_state_data(plain_device, user=user).actions
     assert action["url"] == f"{reverse('admin:core_orderedrecord_add')}?device={plain_device.pk}"
     assert action["method"] == "get"
 
@@ -124,7 +125,7 @@ def test_inroom_badge_shows_the_room(lentable_device, room, superuser):
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert str(room.number) in state_data.label
     assert str(lentable_device.pk) in state_data.url
@@ -143,7 +144,7 @@ def test_lent_badge_shows_room_and_person(lentable_device, room, superuser):
     )
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert str(room.number) in state_data.label
     assert str(person) in state_data.label
@@ -155,7 +156,7 @@ def test_lost_badge_is_danger_coloured(lentable_device, superuser):
     establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
-    assert "btn-danger" in lentable_device.get_state_data(user=superuser).css_classes
+    assert "btn-danger" in get_device_state_data(lentable_device, user=superuser).css_classes
 
 
 @pytest.mark.django_db
@@ -163,7 +164,7 @@ def test_removed_badge_is_warning_coloured(lentable_device, superuser):
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
 
-    assert "btn-warning" in lentable_device.get_state_data(user=superuser).css_classes
+    assert "btn-warning" in get_device_state_data(lentable_device, user=superuser).css_classes
 
 
 @pytest.mark.django_db
@@ -175,7 +176,7 @@ def test_inroom_record_without_a_room_is_flagged(lentable_device, superuser):
     InRoomRecord.objects.create(device=lentable_device, room=None)
     lentable_device.refresh_from_db()
 
-    assert lentable_device.get_state_data(user=superuser).label == "Room not set!"
+    assert get_device_state_data(lentable_device, user=superuser).label == "Room not set!"
 
 
 # --- Offered actions per state ------------------------------------------
@@ -186,7 +187,7 @@ def test_inroom_offers_move_lend_lost_and_removed(lentable_device, room, superus
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
@@ -211,7 +212,7 @@ def test_lent_offers_return_loss_and_removal(lentable_device, room, superuser):
     )
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert _offers(state_data, reverse("admin:core_lentrecord_change", args=[record.pk]))
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
@@ -224,7 +225,7 @@ def test_lost_offers_found_removal_and_re_marking_but_not_lending(lentable_devic
     establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
     assert _offers(state_data, reverse("admin:core_removedrecord_add"))
@@ -247,7 +248,7 @@ def test_removed_offers_the_two_ways_back_to_a_holder_of_both(lentable_device, s
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     labels = {action["label"] for action in state_data.actions}
     assert labels == {"Restore", "Recover"}
@@ -267,7 +268,7 @@ def test_removed_is_still_a_dead_end_for_ordinary_users(lentable_device, make_us
 
     user = make_user("transition_can_relocate_device", "transition_can_lose_device", "transition_can_find_device")
 
-    assert lentable_device.get_state_data(user=user).actions == []
+    assert get_device_state_data(lentable_device, user=user).actions == []
 
 
 # --- Permission gating ---------------------------------------------------
@@ -278,7 +279,7 @@ def test_no_user_means_no_actions(lentable_device, room):
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    assert lentable_device.get_state_data(user=None).actions == []
+    assert get_device_state_data(lentable_device, user=None).actions == []
 
 
 @pytest.mark.django_db
@@ -287,7 +288,7 @@ def test_actions_are_gated_by_the_transition_permission(lentable_device, room, m
     lentable_device.refresh_from_db()
 
     user = make_user("transition_can_lose_device")
-    state_data = lentable_device.get_state_data(user=user)
+    state_data = get_device_state_data(lentable_device, user=user)
 
     assert _offers(state_data, reverse("admin:core_lostrecord_add"))
     assert not _offers(state_data, reverse("admin:core_removedrecord_add"))
@@ -301,7 +302,7 @@ def test_one_permission_covers_both_lending_and_returning(lentable_device, room,
 
     record = InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
-    assert [a["label"] for a in lentable_device.get_state_data(user=user).actions] == ["Lend"]
+    assert [a["label"] for a in get_device_state_data(lentable_device, user=user).actions] == ["Lend"]
 
     lending = establish_state(
         LentRecord,
@@ -311,7 +312,7 @@ def test_one_permission_covers_both_lending_and_returning(lentable_device, room,
         lent_desired_end_date=datetime.date(2099, 1, 1),
     )
     lentable_device.refresh_from_db()
-    assert [a["label"] for a in lentable_device.get_state_data(user=user).actions] == ["Return"]
+    assert [a["label"] for a in get_device_state_data(lentable_device, user=user).actions] == ["Return"]
     assert record.pk != lending.pk
 
 
@@ -322,7 +323,7 @@ def test_non_lentable_devices_are_never_offered_lending(room, make_user):
     device.refresh_from_db()
 
     user = make_user(*ALL_LIFECYCLE_PERMISSIONS)
-    state_data = device.get_state_data(user=user)
+    state_data = get_device_state_data(device, user=user)
 
     assert not _offers(state_data, "lentrecord")
     # ... while the other INROOM transitions stay available.
@@ -337,7 +338,7 @@ def test_assets_rewrites_inroom_to_the_native_move_view(lentable_device, room, s
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
 
     move = [a for a in state_data.actions if a["url"].startswith(reverse("assets:relocate"))]
     assert len(move) == 1
@@ -351,7 +352,7 @@ def test_assets_rewrites_lend_to_the_native_lending_view(lentable_device, room, 
     record = InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
 
     lend = [a for a in state_data.actions if a["label"] == "Lend"]
     assert len(lend) == 1
@@ -366,7 +367,7 @@ def test_assets_keeps_each_move_labelled_as_itself(lentable_device, room, superu
     establish_state(LostRecord, device=lentable_device)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
 
     found = [a for a in state_data.actions if a["url"].startswith(reverse("assets:relocate"))]
     assert len(found) == 1
@@ -377,13 +378,11 @@ def test_assets_keeps_each_move_labelled_as_itself(lentable_device, room, superu
 def test_frontend_move_routing_matches_the_localisation_declaration():
     """The buttons routed to the Move module are exactly the moves it performs.
 
-    ``device_methods`` decides which actions link to ``assets:relocate``; the
+    ``device_state`` decides which actions link to ``assets:relocate``; the
     module's picker and ``relocate_device`` are built from
     ``lifecycle.LOCALISING_MOVES``. If the two ever diverge the result is a
     button that the view then refuses, which is how ``recover`` first went wrong.
     """
-    from dlcdb.core.utils.device_methods import RELOCATE_TRANSITIONS
-
     assert RELOCATE_TRANSITIONS == set(lifecycle.LOCALISING_MOVES)
     assert "recover" not in RELOCATE_TRANSITIONS
 
@@ -401,7 +400,7 @@ def test_recovery_does_not_route_into_the_move_module(lentable_device, superuser
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
 
     recover = [a for a in state_data.actions if a["label"] == "Recover"]
     assert len(recover) == 1
@@ -422,7 +421,7 @@ def test_assets_routes_a_return_to_the_lending_form(lentable_device, room, super
     )
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="assets")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
 
     returns = [a for a in state_data.actions if a["label"] == "Return"]
     assert len(returns) == 1
@@ -437,7 +436,7 @@ def test_inventory_rewrites_inroom_to_the_room_inventory_view(lentable_device, r
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser, app_name="inventory")
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="inventory")
 
     assert state_data.url == reverse("inventory:inventorize-room", kwargs={"pk": room.pk})
 
@@ -451,7 +450,7 @@ def test_admin_actions_are_marked_external(lentable_device, room, superuser):
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     lost = [a for a in state_data.actions if reverse("admin:core_lostrecord_add") in a["url"]]
     assert lost[0]["external"] is True
@@ -463,7 +462,7 @@ def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     admin_actions = [a for a in state_data.actions if a["external"]]
     assert admin_actions
@@ -482,6 +481,6 @@ def test_removed_badge_links_to_the_removal_record(lentable_device, room, superu
     lentable_device.refresh_from_db()
     assert record.pk != lentable_device.pk, "test setup failed to diverge the pk sequences"
 
-    state_data = lentable_device.get_state_data(user=superuser)
+    state_data = get_device_state_data(lentable_device, user=superuser)
 
     assert state_data.url == reverse("admin:core_record_change", args=[record.pk])

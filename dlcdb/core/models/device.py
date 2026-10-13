@@ -17,7 +17,6 @@ from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
 from ..storage import OverwriteStorage
-from ..utils.device_methods import get_device_state_data
 from ..utils.qrcode import uuid2qrcode
 from .abstracts import SoftDeleteAuditBaseModel, TenantAwareModel
 from .supplier import Supplier
@@ -367,6 +366,3 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def get_fqdn_url(self):
         return f"https://{Site.objects.get_current().domain}{self.get_absolute_url()}"
-
-    def get_state_data(self, *, user=None, app_name=None):
-        return get_device_state_data(self, user=user, app_name=app_name)

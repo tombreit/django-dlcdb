@@ -17,6 +17,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from dlcdb.dataexchange.admin import ExportCsvMixin
 from dlcdb.tenants.admin import TenantScopedAdmin
+from dlcdb.theme.device_state import get_device_state_data
 
 from .. import lifecycle
 from ..models import Device, Record
@@ -255,7 +256,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     "inventorize_url": f"{reverse('inventory:search-devices')}?id={obj.pk}",
                 },
                 "state_data_rendered": render_to_string(
-                    "theme/device/state_btn_group.html", {"state_data": obj.get_state_data(user=request.user)}
+                    "theme/device/state_btn_group.html", {"state_data": get_device_state_data(obj, user=request.user)}
                 ),
             }
         )
@@ -276,7 +277,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         @admin.display(description="Actions")
         def get_device_actions(obj):
             context = {
-                "state_data": obj.get_state_data(user=request.user),
+                "state_data": get_device_state_data(obj, user=request.user),
                 "size": "sm",
             }
             return render_to_string("theme/device/state_btn_group.html", context)

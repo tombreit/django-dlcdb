@@ -19,6 +19,7 @@ from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
+from dlcdb.theme.device_state import get_device_state_data
 from dlcdb.theme.export import export_href
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
@@ -178,7 +179,7 @@ def device_detail(request, pk):
             "save_as_new_url": reverse("assets:device_add") if request.user.has_perm("core.add_device") else None,
             # Shared state-machine data (same builder the admin uses); the
             # "assets" surface swaps in native frontend URLs for Move/Lend.
-            "state_data": device.get_state_data(user=request.user, app_name="assets"),
+            "state_data": get_device_state_data(device, user=request.user, app_name="assets"),
             "lending_url": _lending_url(request.user, device),
         },
     )
