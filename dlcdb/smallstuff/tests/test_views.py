@@ -64,6 +64,17 @@ def test_the_search_finds_a_person_by_name(client, plain_static, assignment):
 
 
 @pytest.mark.django_db
+def test_an_empty_search_finds_nobody_and_star_finds_everyone(client, plain_static, assignment):
+    client.force_login(_make_user("view_assignedthing"))
+
+    def search(term):
+        return client.post(reverse("smallstuff:person_search"), {"search": term}, headers={"HX-Request": "true"})
+
+    assert "Lovelace" not in search("").content.decode()
+    assert "Lovelace" in search("*").content.decode()
+
+
+@pytest.mark.django_db
 def test_view_permission_opens_the_person_detail(client, plain_static, person):
     client.force_login(_make_user("view_assignedthing"))
     assert client.get(reverse("smallstuff:person_detail", args=[person.pk])).status_code == 200

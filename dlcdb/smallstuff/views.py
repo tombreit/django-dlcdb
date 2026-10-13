@@ -19,7 +19,9 @@ from .models import AssignedThing
 @permission_required("smallstuff.view_assignedthing", raise_exception=True)
 def person_search(request):
     # query = request.GET.get("q")
-    filter = PersonFilter(request.POST)
+    # Start from an empty queryset: django-filter skips empty filter values, so
+    # a blank search box must yield no people rather than the whole directory.
+    filter = PersonFilter(request.POST, queryset=Person.objects.none())
     template = "smallstuff/person_search.html"
     context = {"filter": filter}
 
