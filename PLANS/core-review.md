@@ -316,14 +316,7 @@ With the shared rule the admin says "lent" and opens the new lending.
 - No test covers it yet; add one.
 - Visible only as translated labels.
 
-#### 62 — Helpers with one consumer leave core
-- `core/utils/helpers.py`:
-  - `get_user_email`: only `inventory/views.py`. Move it to inventory.
-  - `save_base64img_as_fileimg`: only `dataexchange/udb_sync.py`. Move it there; the tests
-    patch it on `udb_sync` already. Core's helpers then no longer import PIL.
-  - `rollback_atomic`/`DoRollback`: only `dataexchange` (importer, remover). Check, and move it
-    if nothing else needs it.
-- No behaviour change.
+#### 62 — Helpers with one consumer leave core - DROPPED
 
 ### Core admin and settings
 
