@@ -307,14 +307,50 @@ With the shared rule the admin says "lent" and opens the new lending.
   `timeline-row`). Delete it.
 - Visible only as translated labels.
 
-#### 61 — `Room.get_inventory_status` returns a status, not CSS
-- `core/models/room.py:106-146` returns a status string, a Bootstrap class and the counts. Its
-  only reader is `inventory/includes/inventory_status_badge.html`.
-- The method returns the status key and the counts. The template picks the badge class and a
-  translated label.
-- The "FIXME"/danger branch can't be reached with integer counts. It goes.
-- No test covers it yet; add one.
-- Visible only as translated labels.
+#### 61 — The inventory badge counts devices, and picks its own colour
+
+**In short.** During an inventory, the inventory app shows for each room how far the count is:
+a badge like "3 / 10", green when done, yellow when not started, blue in between. The numbers
+come from `Inventory.objects.tenant_aware_room_objects` (`core/models/inventory.py`), the colour
+and the status word from `Room.get_inventory_status` (`core/models/room.py`). Its only reader is
+the inventory badge (`inventory/includes/inventory_status_badge.html`), on the room list and the
+room page.
+
+**The bug: green although devices are missing.** The second number, "already counted", counts
+the room's *records* with the current inventory's stamp, old ones included, not its *devices*.
+- A scan appends a new stamped record even when the device is already in the room
+  (`lifecycle.localise` → `transition_relocate`). A device scanned again on a second pass counts
+  twice.
+- A device counted here and then found in another room leaves its stamped record behind. It goes
+  on counting here.
+
+When "already counted" ends up larger than the number of devices, the method shows the room as
+complete (green) and rewrites the text to "N / N". Example: 10 devices, 8 counted, one of them
+scanned twice, one counted here and moved away → green "10 / 10", with 2 devices never counted.
+The room's device list and the overall progress count differently: per device, "has any record
+with the current stamp". So the page can show a green badge above unticked devices.
+
+**Step 61a, bug fix.**
+- "Already counted" becomes the number of the room's devices (active record in the room, same
+  tenant filter) that have a record with the current stamp. That is the definition the device
+  list and the overall progress use.
+- It is one subquery, no raw SQL.
+- It can no longer exceed the device count. The "N / N" rewrite and the unreachable "FIXME" branch
+  go.
+- Test first: a device scanned twice and a device moved away after counting. Today's code shows
+  the room green; after the fix it is "in progress" with the right numbers.
+
+**Step 61b, colour out of the model.**
+- `get_inventory_status` returns the status word and the "3 / 10" text, no Bootstrap colour.
+- The badge template picks the colour and a translated label with a plain `{% if %}`. The room
+  list stops showing raw English words ("inprogress").
+
+**If it is not done.** Rooms can show as completed while devices in them were never counted, so
+an inventory can be closed with gaps. The room list keeps raw English words.
+
+**Not in this task.** A scan appending a record for a device that is already in the room and
+already counted. Counting devices makes it harmless for the badge. Whether a re-scan should
+write nothing belongs to the inventory refactoring (task 67).
 
 #### 62 — Helpers with one consumer leave core - DROPPED
 
@@ -451,7 +487,7 @@ With the shared rule the admin says "lent" and opens the new lending.
 - [x] 58 — The lending screens ask the record what a save does
 - [x] 59 — Importer refuses LENT rows on non-lendable devices
 - [x] 60 — `Device.get_timeline` without dead colours
-- [ ] 61 — `Room.get_inventory_status` returns a status
+- [ ] 61 — The inventory badge counts devices, and picks its own colour
 - [ ] 62 — Single-consumer helpers leave core
 - [ ] 63 — `DEVICE_HIDE_FIELDS` removed
 - [ ] 64 — Literals become constants
