@@ -31,12 +31,6 @@ class OrganizationalUnit(AuditBaseModel):
 
 
 class PersonQuerySet(models.QuerySet):
-    def active_contract_objects(self):
-        return self.filter(
-            udb_contract_planned_checkin__lte=timezone.now(),
-            udb_contract_planned_checkout__gte=timezone.now(),
-        )
-
     def smallstuff_person_objects(self):
         """
         Queryset which contains all active persons or persons who
@@ -67,11 +61,6 @@ class PersonQuerySet(models.QuerySet):
         return qs
 
 
-class ActiveContractObjectsManager(models.Manager):
-    def get_queryset(self):
-        return PersonQuerySet(self.model, using=self._db).active_contract_objects()
-
-
 class SmallstuffPersonObjectsManager(models.Manager):
     def get_queryset(self):
         return PersonQuerySet(self.model, using=self._db).smallstuff_person_objects()
@@ -82,7 +71,6 @@ class ActiveContractObjectsBaseModel(models.Model):
     https://docs.djangoproject.com/en/4.0/topics/db/managers/#custom-managers-and-model-inheritance
     """
 
-    active_contract_objects = ActiveContractObjectsManager()
     smallstuff_person_objects = SmallstuffPersonObjectsManager()
 
     class Meta:

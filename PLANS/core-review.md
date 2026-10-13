@@ -10,6 +10,8 @@ SPDX-License-Identifier: CC0-1.0
 (`git log --grep "Core review, step"`). The full plan, with its findings and the notes for each
 step, is in git: `git show a266e9a4:PLANS/core-review.md`. This file was trimmed on 2026-10-13
 to what is left before the merge into `main`: tasks 48–71 below, grouped by component.
+All of them are resolved (2026-10-13): done, except 53 (skipped), 57 and 62 (dropped). The
+branch is ready to merge (*Merge*).
 
 ## Why
 
@@ -499,6 +501,17 @@ write nothing belongs to the inventory refactoring (task 67).
 - The admin-only scan (`git show a266e9a4:PLANS/core-review.md`, *Admin-only members on core
   models*) finds nothing on the core models.
 - All gates green, with no warnings.
+- Done (2026-10-13):
+  - The guard grep lists only `organization.Branding`, and `dlcdb/core/__init__.py` names that
+    one exception.
+  - The admin-only scan covered 43 members and found no admin-only one. A check by hand of the
+    thin hits found a dead one that the word search had hidden behind a comment:
+    `Person.active_contract_objects` (the manager, `ActiveContractObjectsManager` and
+    `PersonQuerySet.active_contract_objects`), read only by a commented-out block in
+    `smallstuff/filters.py`. All of it is removed (user decision), the comment too.
+    `Person`'s default manager stays `objects`, and `makemigrations --check` shows no change.
+  - Gates: ruff, `manage.py check`, `makemigrations --check`, and `pytest` (1093 passed),
+    where warnings are errors.
 
 ## Not in this plan
 
@@ -534,7 +547,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 50 — Files and connections closed
 - [x] 51 — Warnings fail the suite
 - [x] 52 — `nav` leftovers
-- [ ] 53 — The 403 page names the IT address first
+- ~~53 — The 403 page names the IT address first~~ skipped (2026-10-13)
 - [x] 54 — One picker convention
 - [x] 55 — iCal export survives 9999-12-31
 - [x] 56 — Two pages ignore the tenant boundary
@@ -543,7 +556,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 59 — Importer refuses LENT rows on non-lendable devices
 - [x] 60 — `Device.get_timeline` without dead colours
 - [x] 61 — The inventory badge counts devices, and picks its own colour
-- [ ] 62 — Single-consumer helpers leave core
+- ~~62 — Single-consumer helpers leave core~~ dropped (2026-10-13)
 - [x] 63 — `DEVICE_HIDE_FIELDS` removed
 - [x] 64 — Literals become constants
 - [x] 65 — `mark_not_handled_assets_in_csv` tidied
@@ -552,7 +565,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 68 — Fixes found on the move
 - [x] 69 — `TenantAwareModel` → core
 - [x] 70 — Device state buttons → theme
-- [ ] 71 — Contract check before the merge
+- [x] 71 — Contract check before the merge
 
 ## Verification (each task)
 
