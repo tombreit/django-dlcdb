@@ -1,7 +1,7 @@
 # Development
 
-How the dependencies are pinned and how a release is made. Setting up a
-development environment is described in [Setup › Development
+How the dependencies are pinned, and how a release is checked, tried and made.
+Setting up a development environment is described in [Setup › Development
 setup](setup.md#development-setup).
 
 ## Dependencies and lock files
@@ -44,60 +44,141 @@ that changes, the project stays with pip-compile.
 
 ## Release
 
-In the activated dev venv:
+Steps 1–3 can be repeated and undone; step 4 publishes. Everything runs in the
+activated dev venv, on `main`.
+
+### 1. Check
+
+- Everything for the release is committed, and `main` is not behind GitHub
+  (`git fetch <github-remote> && git status`).
+- `NEWS.md` names the significant changes.
+- Optional: fresh pins with `make requirements`, committed before the checks.
+
+```bash
+ruff check . && ruff format --check .
+# DATABASE_URL per command, never exported: the release build would inherit it
+DATABASE_URL=sqlite://:memory: ./manage.py check
+DATABASE_URL=sqlite://:memory: ./manage.py makemigrations --check --dry-run
+DATABASE_URL=sqlite://:memory: pytest .
+make compilemessages && git status --short  # prints nothing: the wheel ships the committed .mo
+```
+
+### 2. Build the candidate
 
 ```bash
 make release VERSION=X.Y.Z
-git commit --all --message "Version X.Y.Z"
-git tag vX.Y.Z
-git push <github-remote> main vX.Y.Z
 ```
 
-`make release` refuses to run with uncommitted changes, with a version not of
-the form `X.Y.Z`, or when the tag exists already. It writes the version to
-`dlcdb/__init__.py`, `package.json` and `package-lock.json`, then builds the
-wheel from exactly the state you are about to commit and tries it in a fresh
-virtual environment (`make wheel`). Everything it builds stays in
-`run/release/`, outside the working tree. The logic lives in
-`scripts/prepare_release.sh` and `scripts/build_wheel.sh`; the `Makefile` only
-calls them.
+- writes `X.Y.Z` to `dlcdb/__init__.py`, `package.json` and `package-lock.json`
+- builds `run/release/dist/dlcdb-X.Y.Z-py3-none-any.whl` from exactly that state
+- smoke test: installs the wheel into a fresh `run/release/venv/` with the
+  newest dependencies, sets up `run/release/instance/`, runs `check` and
+  `migrate`, fetches the login page
+- commits and tags nothing; refuses uncommitted changes, a malformed version
+  and an existing tag
 
-`make wheel` alone builds and tries a release candidate from `HEAD`; the wheel
-lands in `run/release/dist/`.
-
-The pushed tag starts `.github/workflows/release.yml` on GitHub. It runs
-`make wheel` on the tag, with the smoke test on Python 3.12, and attaches the
-wheel to a new GitHub release. A tag that does not match both version numbers
-fails the workflow.
-
-## Trying a wheel in a container
-
-To try a wheel before it is released, install it into a fresh container, the
-way an operator installs a release:
+To back out, or after a fix:
 
 ```bash
-make wheel  # builds run/release/dist/dlcdb-X.Y.Z-py3-none-any.whl from HEAD
-podman run --rm -it --publish 8000:8000 \
-    --volume ./run/release/dist:/wheels:ro,Z \
-    docker.io/library/debian:trixie-slim bash
+git checkout -- dlcdb/__init__.py package.json package-lock.json
+# fix and commit, then:
+make release VERSION=X.Y.Z
 ```
 
-In the container, follow [Setup › Pip installation](setup.md#pip-installation),
-with the wheel file instead of the release URL:
+Every build first deletes `run/release/`: stop what runs from it. `make wheel`
+builds and tries `HEAD` the same way, without setting a version. The logic
+lives in `scripts/prepare_release.sh` and `scripts/build_wheel.sh`.
+
+### 3. Try the candidate
+
+Each time, look at: logging in, the dashboard and a few lists (styled, scripts
+working), the admin, the handbook at `/docs/`, the changes in `NEWS.md`. The
+generated `.env` allows `127.0.0.1`, not `localhost`.
+
+**a) Locally**, in the instance of the smoke test (runs the wheel, not the
+checkout):
+
+```bash
+cd run/release/instance
+./manage.py createsuperuser
+./manage.py runserver 8765  # http://127.0.0.1:8765
+./manage.py run_huey        # optional, in a second terminal: the task runner
+```
+
+**b) Fresh installation in a container**, the steps of [Setup › Pip
+installation](setup.md#pip-installation):
+
+```bash
+podman run --rm -it --publish 8000:8000 \
+    --volume ./run/release:/release:ro,Z \
+    docker.io/library/debian:trixie-slim bash
+```
 
 ```bash
 apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
 useradd --create-home --home-dir /srv/dlcdb dlcdb && su - dlcdb
 python3 -m venv /srv/dlcdb/venv
-/srv/dlcdb/venv/bin/pip install /wheels/dlcdb-*.whl
+/srv/dlcdb/venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
 DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init
 cd /srv/dlcdb
 ./manage.py migrate
 ./manage.py createsuperuser
-./manage.py runserver 0.0.0.0:8000
+./manage.py runserver 0.0.0.0:8000  # http://127.0.0.1:8000
 ```
 
-Then open <http://127.0.0.1:8000>. The generated `.env` allows `127.0.0.1`,
-not `localhost`. For Python 3.12, the lowest supported version, use
-`docker.io/library/python:3.12-slim` instead and skip the `apt-get` line.
-`--rm` discards the container on exit.
+Variants:
+
+- Python 3.12, the lowest supported version and the one the workflow tests:
+  image `docker.io/library/python:3.12-slim`, without the `apt-get` line
+- locked versions: `pip install … --constraint /release/src/requirements/prod.txt`
+- LDAP: `apt-get install` also `libldap2-dev libsasl2-dev python3-dev gcc`,
+  `pip install "/release/dist/dlcdb-X.Y.Z-py3-none-any.whl[ldap]"`
+
+**c) Update from the last release** `vA.B.C`: as b), but install the last
+release first:
+
+```bash
+/srv/dlcdb/venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vA.B.C/dlcdb-A.B.C-py3-none-any.whl"
+```
+
+Create some data, then update as in [Setup › Pip
+installation](setup.md#pip-installation):
+
+```bash
+/srv/dlcdb/venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
+./manage.py dlcdb_init  # adds files that are new in this release
+./manage.py migrate
+./manage.py runserver 0.0.0.0:8000  # the data from before is still there
+```
+
+**d) Production data**: copy the nightly snapshot `data/db/db.sqlite3.snapshot`
+([Backup](setup.md#backup)) into a directory of its own, readable for others
+(the container's `dlcdb` user is not you), add
+`--volume <directory>:/snapshot:ro,Z` to `podman run`, and in b) before
+`migrate`:
+
+```bash
+cp /snapshot/db.sqlite3.snapshot /srv/dlcdb/data/db/db.sqlite3
+```
+
+### 4. Tag and push
+
+```bash
+git commit --all --message "Version X.Y.Z"
+make wheel TAG=vX.Y.Z  # optional: the workflow's check, before the tag exists
+git tag vX.Y.Z
+git push <github-remote> main vX.Y.Z
+```
+
+The tag starts `.github/workflows/release.yml`: `make wheel TAG=vX.Y.Z` with
+the smoke test on Python 3.12, then, only if that passed, a GitHub release with
+the wheel.
+
+**If the workflow fails**, there is a tag but no release. For a transient
+failure, rerun the workflow on GitHub. Otherwise remove the tag, fix, and start
+again at step 1:
+
+```bash
+git push <github-remote> --delete vX.Y.Z
+git tag --delete vX.Y.Z
+```
