@@ -315,28 +315,25 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
             percentage: int
             date: object  # date object
             description: str
-            bg: str = "#ff0000"
 
         # Calculate durations between events and convert to percentages
         events = [
-            (added_date, "added", "Added", "#ff0000"),
-            (start_date, "start", "Start date", "#00ff00"),
-            (today, "today", "Today", "#ff0000"),
-            (end_date, "end", "Expiry date", "#ff0000"),
+            (added_date, "added", _("Added")),
+            (start_date, "start", _("Start date")),
+            (today, "today", _("Today")),
+            (end_date, "end", _("Expiry date")),
         ]
         events.sort()  # Sort events chronologically
 
         # Calculate percentages based on duration between events
         running_percentage = 0
         for i in range(len(events) - 1):
-            current_date, event_type, description, bg = events[i]
+            current_date, event_type, description = events[i]
             duration = (events[i + 1][0] - current_date).days
             percentage = int((duration / total_days) * 100)
 
             timeline.append(
-                TimelineEvent(
-                    event_type=event_type, percentage=percentage, date=current_date, description=description, bg=bg
-                )
+                TimelineEvent(event_type=event_type, percentage=percentage, date=current_date, description=description)
             )
             running_percentage += percentage
 
@@ -347,7 +344,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
                 percentage=int(100 - running_percentage),
                 date=events[-1][0],
                 description=events[-1][2],
-                bg=events[-1][3],
             )
         )
 
@@ -357,7 +353,7 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
                     event_type="termination",
                     percentage=int(((self.contract_termination_date - added_date).days / total_days) * 100),
                     date=self.contract_termination_date,
-                    description="Termination date",
+                    description=_("Termination date"),
                 )
             )
 

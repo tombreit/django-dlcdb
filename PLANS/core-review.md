@@ -450,7 +450,7 @@ With the shared rule the admin says "lent" and opens the new lending.
 - ~~57 — `print_sheet` raises its 404 once~~ dropped (2026-10-13)
 - [x] 58 — The lending screens ask the record what a save does
 - [x] 59 — Importer refuses LENT rows on non-lendable devices
-- [ ] 60 — `Device.get_timeline` without dead colours
+- [x] 60 — `Device.get_timeline` without dead colours
 - [ ] 61 — `Room.get_inventory_status` returns a status
 - [ ] 62 — Single-consumer helpers leave core
 - [ ] 63 — `DEVICE_HIDE_FIELDS` removed
