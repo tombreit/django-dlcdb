@@ -31,6 +31,10 @@ from .forms import RoomForm
 ROOMS_PER_PAGE = 25
 CHANGES_PER_PAGE = 25
 
+# The room reconciliation's Archibus export names a room by building and number.
+# Rooms of these buildings carry a prefix before their number in the DLCDB.
+ARCHIBUS_BUILDING_ROOM_PREFIXES = {"STRA-SFU": "F"}
+
 
 def _room_queryset():
     """
@@ -218,10 +222,6 @@ class ReconcileRoomsView(PermissionRequiredMixin, TemplateView):
         dlcdb_rooms_matched = set()
         room_reconciliation = []
 
-        archibus_building_fue = "STRA-SFU"
-        # archibus_building_gue = "STRA-MST"
-        # archibus_building_rat = "STRA-M01"
-
         css_classes_notmatched = "bg-warning"
         css_classes_matched = "bg-success text-white"
 
@@ -240,10 +240,7 @@ class ReconcileRoomsView(PermissionRequiredMixin, TemplateView):
             csv_building_id = row["rm.bl_id"]
             csv_room = row["rm_id"]
             csv_room_name = row["name"]
-            building_prefix = ""
-
-            if csv_building_id == archibus_building_fue:
-                building_prefix = "F"
+            building_prefix = ARCHIBUS_BUILDING_ROOM_PREFIXES.get(csv_building_id, "")
 
             try:
                 dlcdb_room = dlcdb_rooms.get(number=f"{building_prefix}{csv_room}")

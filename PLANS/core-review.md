@@ -387,6 +387,14 @@ write nothing belongs to the inventory refactoring (task 67).
   alternatives.
 - Both become named constants next to their one reader. No behaviour change.
 - `UDB_SYNC_FILTERS` stays as it is: its code says on purpose that it is not configurable.
+- Done (2026-10-13): `PC_DEVICE_TYPE_PREFIX` and `NOTEBOOK_DEVICE_TYPE_PREFIX` in
+  `notifications/reports.py` (the two "PC or notebook" conditions now use `__in`), and
+  `ARCHIBUS_BUILDING_ROOM_PREFIXES = {"STRA-SFU": "F"}` in `rooms/views.py`, which replaces the
+  local variable, its `if` and the two commented-out building codes.
+- Decided (2026-10-13, user): the four PC/notebook conditions compared the device type's prefix
+  exactly with lowercase "pc" and "ntb", while `DeviceType` stores the prefix as entered (the
+  user's instance: "PC"/"NTB"), so they selected nothing. They now match ignoring case
+  (`_device_type_prefix_q`, `iexact`). A test with "PC"/"NTB" failed before. NEWS line.
 
 ### Inventory
 
@@ -502,7 +510,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 61 — The inventory badge counts devices, and picks its own colour
 - [ ] 62 — Single-consumer helpers leave core
 - [x] 63 — `DEVICE_HIDE_FIELDS` removed
-- [ ] 64 — Literals become constants
+- [x] 64 — Literals become constants
 - [ ] 65 — `mark_not_handled_assets_in_csv` tidied
 - [ ] 66 — `sap.py` uses `SapList.get_file_name`
 - [ ] 67 — Inventory scan workflow → `inventory/services.py`

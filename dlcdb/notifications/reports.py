@@ -32,6 +32,20 @@ logger = logging.getLogger(__name__)
 # date (LentRecord.overdue_q's tolerance_days).
 LENT_OVERDUE_TOLERANCE_DAYS = 5
 
+# The device types the PC and notebook conditions select, by their prefix.
+PC_DEVICE_TYPE_PREFIX = "pc"
+NOTEBOOK_DEVICE_TYPE_PREFIX = "ntb"
+
+
+def _device_type_prefix_q(*prefixes):
+    """Records of devices whose type has one of ``prefixes``, ignoring case: device
+    types store their prefix as entered, "NTB" or "ntb"."""
+    q = Q()
+    for prefix in prefixes:
+        q |= Q(device__device_type__prefix__iexact=prefix)
+    return q
+
+
 # Reporting window when a subscription has never run before.
 FALLBACK_WINDOW_DAYS = {
     NotificationInterval.IMMEDIATELY: 1,
@@ -95,17 +109,17 @@ def get_affected_records(subscription, now):
     if condition == conditions.HAS_SAP_ID:
         records = records.filter(in_window).exclude(device__sap_id__isnull=True).exclude(device__sap_id__exact="")
     elif condition == conditions.IS_PC:
-        records = records.filter(in_window).filter(device__device_type__prefix="pc")
+        records = records.filter(in_window).filter(_device_type_prefix_q(PC_DEVICE_TYPE_PREFIX))
     elif condition == conditions.IS_NOTEBOOK:
-        records = records.filter(in_window).filter(device__device_type__prefix="ntb")
+        records = records.filter(in_window).filter(_device_type_prefix_q(NOTEBOOK_DEVICE_TYPE_PREFIX))
     elif condition == conditions.IS_PC_OR_NOTEBOOK:
         records = records.filter(in_window).filter(
-            Q(device__device_type__prefix="pc") | Q(device__device_type__prefix="ntb")
+            _device_type_prefix_q(PC_DEVICE_TYPE_PREFIX, NOTEBOOK_DEVICE_TYPE_PREFIX)
         )
     elif condition == conditions.IS_NEW_PC_OR_NOTEBOOK:
         records = (
             records.filter(in_window)
-            .filter(Q(device__device_type__prefix="pc") | Q(device__device_type__prefix="ntb"))
+            .filter(_device_type_prefix_q(PC_DEVICE_TYPE_PREFIX, NOTEBOOK_DEVICE_TYPE_PREFIX))
             .exclude(device__edv_id__exact="")
             .exclude(device__serial_number__exact="")
             .exclude(device__mac_address__exact="")

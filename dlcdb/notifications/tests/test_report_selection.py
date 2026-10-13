@@ -72,6 +72,20 @@ class GetAffectedRecordsTests(TestCase):
             {"pc1", "ntb1"},
         )
 
+    def test_the_prefixes_match_regardless_of_case(self):
+        InRoomRecord.objects.create(device=create_device("pc1", prefix="PC"))
+        InRoomRecord.objects.create(device=create_device("ntb1", prefix="NTB"))
+        InRoomRecord.objects.create(device=create_device("srv1", prefix="SRV"))
+
+        def selected(condition):
+            result = get_affected_records(report_subscription(condition=condition), self.now)
+            return {record.device.edv_id for record in result.records}
+
+        conditions = Subscription.ConditionChoices
+        self.assertEqual(selected(conditions.IS_PC), {"pc1"})
+        self.assertEqual(selected(conditions.IS_NOTEBOOK), {"ntb1"})
+        self.assertEqual(selected(conditions.IS_PC_OR_NOTEBOOK), {"pc1", "ntb1"})
+
     def test_is_new_pc_or_notebook_requires_identifiers(self):
         complete = create_device("complete", prefix="pc", serial_number="sn-1", mac_address="aa:bb")
         InRoomRecord.objects.create(device=complete)
