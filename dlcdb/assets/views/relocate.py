@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from dlcdb.core.models import Record, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.relocate import relocate_device
+from dlcdb.theme.pickers import picker_filter
 
 from ..forms import RelocateForm
 from ..pickers import MOVE_PERMISSIONS, move_queryset
@@ -32,13 +33,9 @@ SEARCH_RESULT_LIMIT = 25
 def room_search(request):
     """HTMX live-search backing the room picker. Empty query yields nothing."""
     value = (request.POST.get(ROOM_SEARCH_PARAM) or "").strip()
-    rooms = Room.objects.filter(deleted_at__isnull=True)
-
-    if not value:
-        rooms = rooms.none()
-    elif value != "*":
-        rooms = rooms.filter(Q(number__icontains=value) | Q(nickname__icontains=value))
-
+    rooms = picker_filter(
+        Room.objects.filter(deleted_at__isnull=True), value, Q(number__icontains=value) | Q(nickname__icontains=value)
+    )
     rooms = rooms.order_by("number")[:SEARCH_RESULT_LIMIT]
     return TemplateResponse(
         request,

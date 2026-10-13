@@ -25,6 +25,7 @@ from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.pickers import picker_filter
 
 from ..filters import DeviceFilter
 from ..forms import DeviceForm
@@ -235,13 +236,7 @@ def person_search(request):
     (capped). Mirrors ``relocate.room_search``.
     """
     value = (request.POST.get(PERSON_SEARCH_PARAM) or "").strip()
-    people = Person.objects.all()
-
-    if not value:
-        people = people.none()
-    elif value != "*":
-        people = people.filter(Person.search_q(value))
-
+    people = picker_filter(Person.objects.all(), value, Person.search_q(value))
     people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(
         request,

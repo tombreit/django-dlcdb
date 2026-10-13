@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import DeviceType, LentRecord, Person, Record
 from dlcdb.tenants.shortcuts import filterable_tenants
+from dlcdb.theme.pickers import picker_filter
 
 # Lending state keys. This filter is the single source of truth for lending
 # state in the standalone lending app; it intentionally does not import from
@@ -119,10 +120,4 @@ class LendingPersonFilter(django_filters.FilterSet):
         fields = ["search"]
 
     def search_method(self, queryset, name, value):
-        qs = Person.objects.order_by("last_name", "first_name")
-
-        if not value:
-            return Person.objects.none()
-        if value == "*":
-            return qs
-        return qs.filter(Person.search_q(value))
+        return picker_filter(Person.objects.order_by("last_name", "first_name"), value, Person.search_q(value))

@@ -5,6 +5,7 @@
 import django_filters
 
 from dlcdb.core.models import Person
+from dlcdb.theme.pickers import picker_filter
 
 
 class PersonFilter(django_filters.FilterSet):
@@ -30,10 +31,4 @@ class PersonFilter(django_filters.FilterSet):
         # )
 
         qs = Person.smallstuff_person_objects.order_by("-assigned_things_count")
-
-        if not value:
-            qs = Person.objects.none()
-        elif value != "*":
-            qs = qs.filter(Person.search_q(value))
-
-        return qs
+        return picker_filter(qs, value, Person.search_q(value))

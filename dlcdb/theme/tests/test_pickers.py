@@ -15,11 +15,12 @@ permissions and so cannot be expressed as one required string.
 import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.db.models import Q
 from django.urls import reverse
 
 from dlcdb.core import lifecycle
-from dlcdb.core.models import Device
-from dlcdb.theme.pickers import PickerSource, get_picker_source
+from dlcdb.core.models import Device, Room
+from dlcdb.theme.pickers import PickerSource, get_picker_source, picker_filter
 
 pytestmark = pytest.mark.django_db
 
@@ -125,3 +126,15 @@ def test_an_anonymous_request_is_sent_to_the_login_page(client):
     response = client.post(reverse("theme:device_search"), data={"source": "lend", "q": "x"})
     assert response.status_code == 302
     assert "/accounts/login/" in response.url
+
+
+def test_picker_filter_finds_nothing_for_an_empty_term_everything_for_a_star():
+    office = Room.objects.create(number="A1.01")
+    lab = Room.objects.create(number="B2.02")
+
+    def found(term):
+        return set(picker_filter(Room.objects.all(), term, Q(number__icontains=term)))
+
+    assert found("") == set()
+    assert found("*") == {office, lab}
+    assert found("b2") == {lab}

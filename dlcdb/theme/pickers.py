@@ -16,6 +16,8 @@ imports lending/assets models and there is no circular dependency.
 A source carries *no* rendering or card configuration: base-queryset
 construction (including tenant scoping) lives entirely in the owning app's
 ``get_queryset`` callable.
+
+``picker_filter`` is the search-term convention of the person and room pickers.
 """
 
 from collections.abc import Callable
@@ -59,3 +61,16 @@ def register_picker_source(source: PickerSource) -> None:
 def get_picker_source(name) -> PickerSource | None:
     """Return the registered source for ``name`` (or ``None`` if unknown)."""
     return _REGISTRY.get(name) if name else None
+
+
+def picker_filter(queryset, term, condition):
+    """
+    The live-search convention of the pickers: an empty term finds nothing, so a
+    picker starts blank; ``*`` finds the whole ``queryset``; any other term finds
+    the rows matching ``condition``, a ``Q``. ``term`` comes stripped.
+    """
+    if not term:
+        return queryset.none()
+    if term == "*":
+        return queryset
+    return queryset.filter(condition)

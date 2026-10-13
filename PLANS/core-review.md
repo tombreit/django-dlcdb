@@ -142,6 +142,10 @@ whichever test runs when the object is collected, so the failing tests vary.
   - `*` in the assets person picker;
   - an empty term and `*` in the room picker;
   - an empty term and `*` in smallstuff.
+- Done narrower than planned (54a, 54b): `theme.pickers.picker_filter(queryset, term, condition)`
+  takes a `Q`; the person and room pickers call it. The device picker keeps its own lines in
+  `search_devices` (a ranking, not a `Q`; core may not import theme), and both FilterSets stay.
+  54a fixed the smallstuff view; one unit test covers `picker_filter`.
 
 ### Licences
 
@@ -353,7 +357,7 @@ whichever test runs when the object is collected, so the failing tests vary.
 - [x] 51 — Warnings fail the suite
 - [x] 52 — `nav` leftovers
 - [ ] 53 — The 403 page names the IT address first
-- [ ] 54 — One picker convention
+- [x] 54 — One picker convention
 - [ ] 55 — iCal export survives 9999-12-31
 - [ ] 56 — `print_lent_sheet` tenant-scoped
 - [ ] 57 — Print views without duplication
