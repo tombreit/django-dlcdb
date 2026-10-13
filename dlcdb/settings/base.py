@@ -528,8 +528,6 @@ SAP_LIST_COMPARISON_RESULT_FOLDER = "sap_list_comparison_results"
 
 PERSON_IMAGE_UPLOAD_DIR = "person_images"
 
-DEVICE_HIDE_FIELDS = env.list("DEVICE_HIDE_FIELDS", default=[])
-
 # https://django-extensions.readthedocs.io/en/latest/shell_plus.html#configuration
 # IPYTHON_ARGUMENTS = [
 #     '--debug',

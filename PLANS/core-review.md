@@ -374,6 +374,10 @@ write nothing belongs to the inventory refactoring (task 67).
   - `visible_columns` in `dataexchange/csv_export.py`;
   - the entry in `core/templates/core/init/env.template` (spelled `DEVIC_HIDE_FIELDS` there).
 - NEWS line: the setting is gone.
+- Done (2026-10-13): also gone are the admin's `get_fieldsets` override, the `json` and `settings`
+  imports, and `device_export_columns()`/`lending_export_columns()`, which only passed the column
+  lists through `visible_columns`; the callers read `DEVICE_EXPORT_COLUMNS` and
+  `LENDING_EXPORT_COLUMNS`. No test covered the setting.
 
 ### Notifications and rooms: named constants (decision 5)
 
@@ -497,7 +501,7 @@ write nothing belongs to the inventory refactoring (task 67).
 - [x] 60 — `Device.get_timeline` without dead colours
 - [x] 61 — The inventory badge counts devices, and picks its own colour
 - [ ] 62 — Single-consumer helpers leave core
-- [ ] 63 — `DEVICE_HIDE_FIELDS` removed
+- [x] 63 — `DEVICE_HIDE_FIELDS` removed
 - [ ] 64 — Literals become constants
 - [ ] 65 — `mark_not_handled_assets_in_csv` tidied
 - [ ] 66 — `sap.py` uses `SapList.get_file_name`

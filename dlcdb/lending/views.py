@@ -23,9 +23,9 @@ from dlcdb.core.models import LentRecord, Person, Record, Room
 from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
 from dlcdb.core.utils.links import linked_message
 from dlcdb.dataexchange.csv_export import (
+    LENDING_EXPORT_COLUMNS,
     LENDING_EXPORT_RELATIONS,
     csv_response,
-    lending_export_columns,
 )
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
@@ -170,7 +170,7 @@ def lending_export_csv(request):
     """
     return csv_response(
         _lending_filter(request).qs.select_related(*LENDING_EXPORT_RELATIONS),
-        columns=lending_export_columns(),
+        columns=LENDING_EXPORT_COLUMNS,
         slug="core-lentrecord",
     )
 

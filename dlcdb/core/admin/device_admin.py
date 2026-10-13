@@ -2,10 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-import json
 from urllib.parse import urlencode
 
-from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.options import ActionLocation
 from django.contrib.contenttypes.models import ContentType
@@ -212,32 +210,12 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         """
         # A copy: the class attribute must not change between requests.
         list_display = list(super().get_list_display(request))
-        if settings.DEVICE_HIDE_FIELDS:
-            list_display = [entry for entry in list_display if entry not in settings.DEVICE_HIDE_FIELDS]
-            # set() operations do not preserve order
-            # list_display = list(set(list_display) - set(settings.DEVICE_HIDE_FIELDS))
-
         list_display.append(self.get_device_actions_column(request))
 
         # The tenant only tells devices apart for users with several tenants.
         if len(request.tenants) > 1:
             list_display.append("tenant")
         return list_display
-
-    def get_fieldsets(self, request, obj=None):
-        orig_fieldsets = super().get_fieldsets(request, obj)
-
-        # TODO: Possibly dangerous serialization to text format, str.replace()
-        # our DEVICE_HIDE_FIELDS and de-serializize to django fieldsets.
-        if settings.DEVICE_HIDE_FIELDS:
-            _new_fieldsets = json.dumps(orig_fieldsets)
-            for hide_field in settings.DEVICE_HIDE_FIELDS:
-                _new_fieldsets = _new_fieldsets.replace(f'"{hide_field}",', "")
-            new_fieldsets = json.loads(_new_fieldsets)
-            fieldsets = tuple(new_fieldsets)
-        else:
-            fieldsets = orig_fieldsets
-        return fieldsets
 
     def get_queryset(self, request):
         return (

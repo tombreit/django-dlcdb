@@ -28,7 +28,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from io import StringIO
 
-from django.conf import settings
 from django.http import HttpResponse
 from django.utils import dateformat, timezone
 
@@ -221,42 +220,6 @@ LENDING_EXPORT_RELATIONS = (
 )
 
 
-def visible_columns(columns, *, device_prefix):
-    """``columns`` minus any exposing a Device field that DEVICE_HIDE_FIELDS hides.
-
-    The setting names Device fields, and it is honoured in the admin's
-    list_display and fieldsets already (see ``core.admin.DeviceAdmin``): a field
-    an installation keeps off the screen should not leave through a download
-    either.
-
-    ``device_prefix`` says how the column set reaches the Device -- "" when the
-    rows *are* devices, "device." when they are records. It has to be explicit:
-    ``Device`` and ``Record`` share field names (both have ``note``), so guessing
-    a column's root from its path alone would hide the wrong ones.
-    """
-    hidden = set(settings.DEVICE_HIDE_FIELDS or ())
-    if not hidden:
-        return list(columns)
-
-    def device_field(path):
-        """The Device field this path exposes, or None if it touches no device."""
-        if not path.startswith(device_prefix):
-            return None
-        return path[len(device_prefix) :].split(".")[0]
-
-    return [column for column in columns if device_field(column.path) not in hidden]
-
-
-def device_export_columns():
-    """The device columns a request may see."""
-    return visible_columns(DEVICE_EXPORT_COLUMNS, device_prefix="")
-
-
-def lending_export_columns():
-    """The lending columns a request may see."""
-    return visible_columns(LENDING_EXPORT_COLUMNS, device_prefix="device.")
-
-
 def _cell(value):
     """Render one value.
 
@@ -279,7 +242,7 @@ def write_csv(queryset, columns=None):
     """Render ``queryset`` as CSV text, one row per object.
 
     ``columns`` defaults to the device set, which is what most callers want; the
-    lending list passes ``lending_export_columns()``.
+    lending list passes ``LENDING_EXPORT_COLUMNS``.
 
     ``.iterator()`` keeps the queryset result cache out of memory and enables
     server-side cursors on PostgreSQL, which is safe because callers use only
@@ -287,7 +250,7 @@ def write_csv(queryset, columns=None):
     unfiltered export is single-digit MB, and the device list page already
     renders the same rows as HTML under ``?show_all=1``.
     """
-    columns = device_export_columns() if columns is None else columns
+    columns = DEVICE_EXPORT_COLUMNS if columns is None else columns
 
     buffer = StringIO()
     writer = csv.writer(buffer, dialect=EXPORT_DIALECT)
