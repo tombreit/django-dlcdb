@@ -218,6 +218,9 @@ screen instead.
   after `check_lending`). Check once.
 - The duplicated profile lookup is gone with `print_lent_sheet` (task 56).
 - No behaviour change.
+- Dropped (2026-10-13, user decision): there is no yes/no variant of `check_lending`, so raising
+  once needs a flag and a nested `try`. That is longer than today and hides that there are two
+  separate reasons (no record, record not lendable). The code stays as it is.
 
 #### 58 — `apply_lending` says what it did
 - After `LentRecord.apply_lending`, both screens work out again what happened, for their message
@@ -409,7 +412,7 @@ screen instead.
 - [x] 54 — One picker convention
 - [x] 55 — iCal export survives 9999-12-31
 - [x] 56 — Two pages ignore the tenant boundary
-- [ ] 57 — `print_sheet` raises its 404 once
+- ~~57 — `print_sheet` raises its 404 once~~ dropped (2026-10-13)
 - [ ] 58 — `apply_lending` says what it did
 - [ ] 59 — Importer refuses LENT rows on non-lendable devices
 - [ ] 60 — `Device.get_timeline` without dead colours
