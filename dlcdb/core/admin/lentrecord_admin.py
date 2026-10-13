@@ -225,18 +225,17 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
             messages.warning(request, warning)
 
         lending = obj.apply_lending(user=request.user)
-        if obj.record_type == Record.INROOM:
+        if obj.lending_action() == "lent":
             request.new_lending = lending
 
     def response_change(self, request, obj):
-        new_lending = getattr(request, "new_lending", None)
-        is_return_action = bool(obj.lent_end_date)
+        action = obj.lending_action()
 
         # Keep the "manufacturer - series" wording this admin has always used for
         # the device, but make it a link to the device detail.
         device_link = obj_link(obj.device, label=self.get_device_human_readable(obj))
 
-        if is_return_action:
+        if action == "returned":
             msg = linked_message(
                 _("Return of “{device}” from “{person}” acknowledged."),
                 device=device_link,
@@ -244,14 +243,14 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
             )
             self.message_user(request, msg, messages.SUCCESS)
             return self.response_post_save_change(request, obj)
-        elif new_lending is not None:
+        elif action == "lent":
             msg = linked_message(
                 _("Device “{device}” lent to “{person}”."),
                 device=device_link,
                 person=obj.person,
             )
             self.message_user(request, msg, messages.SUCCESS)
-            redirect_url = reverse("admin:core_lentrecord_change", args=(new_lending.pk,))
+            redirect_url = reverse("admin:core_lentrecord_change", args=(request.new_lending.pk,))
             return HttpResponseRedirect(redirect_url)
         else:
             msg = linked_message(

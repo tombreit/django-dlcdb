@@ -214,18 +214,18 @@ def _save_lending(request, record, form):
     the admin uses too (``LentRecord.contract_warnings``,
     ``LentRecord.apply_lending``), in one transaction. Returns True on success
     (caller should redirect) or False if a form error was added (caller should
-    re-render). Shared by all three flows of ``lend``.
+    re-render). Shared by all three flows of ``lend``. ``record`` is the form's
+    instance; validating the form has already filled it in.
     """
-    edited = form.save(commit=False)
+    action = record.lending_action()
     # The contract warnings sanity-check a lending's dates against the borrower's
-    # contract; they do not apply when the submit is acknowledging a return
-    # (lent_end_date set).
-    if not form.cleaned_data.get("lent_end_date"):
-        for warning in edited.contract_warnings():
+    # contract; they do not apply to a return.
+    if action != "returned":
+        for warning in record.contract_warnings():
             messages.warning(request, warning)
     try:
         with transaction.atomic():
-            edited.apply_lending(user=request.user)
+            record.apply_lending(user=request.user)
     except Room.DoesNotExist as exc:
         messages.error(request, _("Configuration error: %(err)s") % {"err": exc})
         return False
@@ -233,18 +233,13 @@ def _save_lending(request, record, form):
         form.add_error(None, exc)
         return False
 
-    if record.record_type == Record.INROOM:
+    if action == "lent":
         msg = _("Device “{device}” lent to “{person}”.")
-    elif record.lent_end_date or form.cleaned_data.get("lent_end_date"):
+    elif action == "returned":
         msg = _("Return of “{device}” from “{person}” acknowledged.")
     else:
         msg = _("Lending of “{device}” to “{person}” saved.")
-    messages.success(
-        request,
-        # The return form does not carry the borrower (it cannot be changed while
-        # returning), so fall back to the one stored on the record.
-        linked_message(msg, device=record.device, person=form.cleaned_data.get("person") or record.person),
-    )
+    messages.success(request, linked_message(msg, device=record.device, person=record.person))
     return True
 
 

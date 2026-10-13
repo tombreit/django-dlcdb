@@ -222,21 +222,56 @@ screen instead.
   once needs a flag and a nested `try`. That is longer than today and hides that there are two
   separate reasons (no record, record not lendable). The code stays as it is.
 
-#### 58 — `apply_lending` says what it did
-- After `LentRecord.apply_lending`, both screens work out again what happened, for their message
-  and redirect:
-  - the frontend in `lending/views.py` `_save_lending`;
-  - the admin in `save_model` and `response_change` (`core/admin/lentrecord_admin.py`).
-- `apply_lending` returns the outcome (lent, returned, edited) with the lending, and both screens
-  use it.
-- In `_save_lending`, `edited` is `record` itself (`form.save(commit=False)` returns the form's
-  instance). So `record.lent_end_date or form.cleaned_data.get("lent_end_date")` and
-  `form.cleaned_data.get("person") or record.person` each check one value twice. They go.
-- Suspected admin bug, found by reading the code, not run yet: the admin form shows
-  `lent_end_date` on an available device too. A lend with a return date filled in lends the
-  device, but the admin says "Return … acknowledged" and redirects to the changelist. Check it
-  with a test first. If it is real, fix it in its own commit.
-- Kept: the admin shows the contract warnings on a return too (step 32).
+#### 58 — The lending screens ask the record what a save does
+
+**In short.** Saving a lending, on the lending screen or in the admin, does one of three things:
+lend the device, acknowledge its return, or save edits to a running lending.
+`LentRecord.apply_lending` decides which. Afterwards each screen needs to know what happened,
+for its message ("lent to …", "return acknowledged", "saved") and, in the admin, for the page it
+goes to next. `apply_lending` doesn't tell them, so each screen guesses again from the record's
+fields, in its own way:
+- the lending screen (`lending/views.py` `_save_lending`) asks "was it in a room?", then "is there
+  a return date?";
+- the admin (`core/admin/lentrecord_admin.py` `response_change`) asks "is there a return date?"
+  first.
+
+**Change.** The rule is written once, as a small method on the record: `lending_action()` returns
+"lent", "returned" or "edited". `apply_lending` uses it to decide, and both screens use it to pick
+their message and redirect.
+- Clean-ups in `_save_lending`: `edited` is the same object as `record`
+  (`form.save(commit=False)` returns the form's instance). So two checks there read one value
+  twice: `record.lent_end_date or form.cleaned_data.get("lent_end_date")` and
+  `form.cleaned_data.get("person") or record.person`. They become `record.…`.
+- Kept: the admin also shows the contract warnings on a return (step 32).
+
+**The admin's wrong message (suspected, not yet run).** The admin form shows the *Return* field
+(`lent_end_date`) on every lending, also on an available device. Nothing refuses a return date
+on a lend. If someone fills it in while lending:
+- the device is lent, correctly, and the return date is ignored;
+- but the admin answers "Return of … acknowledged" and goes back to the list instead of to the
+  new lending, because it checks the return date first.
+
+With the shared rule the admin says "lent" and opens the new lending.
+
+**Steps.**
+- 58a, no behaviour change: `lending_action()` on `LentRecord`, used by `apply_lending` and by the
+  lending screen. Its tests cover the three cases.
+- 58b, the admin: first a test that lends an available device with a return date filled in. If
+  it fails, the bug is real, and the admin switches to `lending_action()`, which fixes it. If it
+  passes, the admin switches anyway; then there is no behaviour change.
+
+**If it is not done.**
+- The lending screen: nothing changes for users; the double checks stay as noise.
+- The admin: someone who fills in a return date while lending gets a wrong message and lands on
+  the list. The device is still lent correctly. Rare, and the admin is being phased out.
+- The rule "which of the three" stays spelled three times. A change to it, for example a new
+  case, has to find all three.
+
+- Done (2026-10-13), 58a and 58b in one commit (user decision): `LentRecord.lending_action()`;
+  `apply_lending`, `_save_lending` and the admin's `save_model`/`response_change` use it.
+  `_save_lending` no longer calls `form.save(commit=False)`: validating the form already filled
+  in `record`. The admin bug was real: the test's lend with a return date went back to the list;
+  now it opens the new lending and says "lent". Tests in `core/tests/test_transition_parity.py`.
 
 ### dataexchange
 
@@ -413,7 +448,7 @@ screen instead.
 - [x] 55 — iCal export survives 9999-12-31
 - [x] 56 — Two pages ignore the tenant boundary
 - ~~57 — `print_sheet` raises its 404 once~~ dropped (2026-10-13)
-- [ ] 58 — `apply_lending` says what it did
+- [x] 58 — The lending screens ask the record what a save does
 - [ ] 59 — Importer refuses LENT rows on non-lendable devices
 - [ ] 60 — `Device.get_timeline` without dead colours
 - [ ] 61 — `Room.get_inventory_status` returns a status

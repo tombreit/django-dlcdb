@@ -76,6 +76,19 @@ class LentRecord(Record):
         if self.record_type != Record.LENT:
             lifecycle.check(self.device, "lend")
 
+    def lending_action(self):
+        """
+        What saving this record on a lending screen does (``apply_lending``):
+        "lent" for any record that is not a lending, "returned" for a lending with a
+        return date, "edited" for a lending without one. The screens pick their
+        message and their next page from it.
+        """
+        if self.record_type != Record.LENT:
+            return "lent"
+        if self.lent_end_date:
+            return "returned"
+        return "edited"
+
     def apply_lending(self, *, user):
         """
         Saves what a lending screen (the lending frontend or the admin) changed on
@@ -90,12 +103,13 @@ class LentRecord(Record):
           ``IllegalTransition`` for a device that cannot be lent (``check_lending``).
 
         Returns the lending: the new LENT record when the device was lent, else
-        this record.
+        this record. Which of the three happens is ``lending_action``.
         """
-        if self.record_type == Record.LENT and self.lent_end_date:
+        action = self.lending_action()
+        if action == "returned":
             lifecycle.transition_return_lending(self, user=user, lent_end_date=self.lent_end_date)
             return self
-        if self.record_type == Record.LENT:
+        if action == "edited":
             self.stamp_user(user)
             self.save()
             return self

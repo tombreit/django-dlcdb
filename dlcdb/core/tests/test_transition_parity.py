@@ -170,6 +170,29 @@ class LendReturnParityTests(BaseTest):
             self.assertFalse(record.is_active)
             self.assertIsNotNone(record.effective_until)
 
+    def test_lending_action_names_what_a_save_does(self):
+        _device, available = self._available_device("EDV-ACTION-IN", "30-30")
+        _device, lending = self._lent_device("EDV-ACTION-LENT", "31-31")
+
+        self.assertEqual(LentRecord.objects.get(pk=available.pk).lending_action(), "lent")
+        self.assertEqual(lending.lending_action(), "edited")
+        lending.lent_end_date = datetime.date.fromisoformat(RETURN_DATE)
+        self.assertEqual(lending.lending_action(), "returned")
+
+    def test_the_admin_reports_a_lend_with_a_return_date_filled_in_as_a_lend(self):
+        # The admin form shows the return field on an available device too. Lending
+        # ignores the date, so the admin must say "lent" and open the new lending.
+        device, record = self._available_device("EDV-ADM-LEND-END", "32-32")
+
+        response = self._post_admin(record, lent_end_date=RETURN_DATE)
+
+        lending = LentRecord.objects.get(device=device, record_type=Record.LENT)
+        self.assertIsNone(lending.lent_end_date)
+        self.assertRedirects(
+            response, reverse("admin:core_lentrecord_change", args=[lending.pk]), fetch_redirect_response=False
+        )
+        self.assertIn("lent to", " ".join(str(message) for message in get_messages(response.wsgi_request)))
+
     # --- return ----------------------------------------------------------
 
     def test_return_via_admin_and_via_frontend_agree(self):
