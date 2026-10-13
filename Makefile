@@ -14,7 +14,7 @@ help:
 	@echo "test - run test suite"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "assets - build static assets with npm"
-	@echo "messages - extract translatable strings into dlcdb/locale/de (then edit the .po)"
+	@echo "makemessages - extract translatable strings into dlcdb/locale/de (then edit the .po)"
 	@echo "compilemessages - compile the edited .po into the committed .mo"
 	@echo "wheel - build the wheel from HEAD in run/release/ and try it in a fresh venv"
 	@echo "release VERSION=X.Y.Z - set the version everywhere, then build and try the wheel"
@@ -34,7 +34,7 @@ tests:
 # From the repository root, so the .po keeps its dlcdb/... locations. The ignores
 # keep the virtualenv, node_modules and a build left in run/release/ (a second
 # copy of the package plus a site-packages) out of the catalog.
-messages:
+makemessages:
 	python3 manage.py makemessages --locale de --ignore=.venv/* --ignore=run/* --ignore=node_modules/*
 
 compilemessages:
