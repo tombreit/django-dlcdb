@@ -5,7 +5,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.decorators import login_not_required
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import include, path, reverse_lazy
 from django.views.generic.base import RedirectView
 from django.views.i18n import set_language
@@ -56,6 +56,8 @@ urlpatterns = [
     path("admin/logout/", RedirectView.as_view(url=reverse_lazy("logout")), name="logout"),
     # Ahead of the auth URLs: their login view, but with the email login form.
     path("accounts/login/", LoginView.as_view(authentication_form=EmailAuthenticationForm)),
+    # Public: logging out with an expired session still shows the logged-out page.
+    path("accounts/logout/", login_not_required(LogoutView.as_view())),
     path("accounts/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("", RedirectView.as_view(url=reverse_lazy("dashboard:index")), name="dashboard"),

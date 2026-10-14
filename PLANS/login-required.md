@@ -32,8 +32,9 @@ names the missing permission only for `htmx_permission_required`.
 2. **`dlcdb.accounts.middleware.LoginRequiredMiddleware`** subclasses Django's middleware and
    overrides `handle_no_permission` for HTMX. It lives in `accounts`, the app that owns login.
 3. **Public views are marked with `login_not_required`:** `favicon`, `set_language` (the
-   language switcher shows on the login page) and the `admin/login/` redirect. The auth views, the
-   admin login, the debug toolbar and DRF views exempt themselves. A test pins this allowlist.
+   language switcher shows on the login page), the `admin/login/` redirect and the logout view.
+   Django's login and password-reset views, the admin login, the debug toolbar and DRF views exempt
+   themselves. A test pins this allowlist.
 4. **The per-view login decorators go** (`htmx_login_required`, plain `login_required`). The
    middleware runs before every view decorator and answers the same way, so they can no longer
    fire.
@@ -85,6 +86,10 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 - **Admin views carry `login_url = admin:login`**, so the middleware sends anonymous admin
   requests to `/admin/login/?next=…`. The project's redirect from there to `/accounts/login/`
   needs `query_string=True`, or `next` is lost (it was lost before batch 1 too).
+- **Django's `LogoutView` is not exempt by itself.** With an expired session, the logout POST went
+  to the login page with `next=/accounts/logout/`, and after logging in the user got a 405, because
+  the view accepts only POST. Found in the merge review; the project's `accounts/logout/` route
+  marks it `login_not_required`.
 
 ## Batches
 

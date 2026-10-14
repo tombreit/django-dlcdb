@@ -14,6 +14,7 @@ from django.urls import URLResolver, get_resolver, reverse
 # DEFAULT_PERMISSION_CLASSES instead.
 PUBLIC_ROUTES = {
     "accounts/login/",
+    "accounts/logout/",
     "accounts/password_reset/",
     "accounts/password_reset/done/",
     "accounts/reset/<uidb64>/<token>/",
@@ -70,6 +71,15 @@ def test_the_admin_keeps_next_through_its_login_redirect(client):
 
     response = client.get(response.url)
     assert response.url == f"{reverse('login')}?next=/admin/"
+
+
+def test_logging_out_with_an_expired_session_shows_the_logged_out_page(client, db, plain_static):
+    # Not the login page with next=/accounts/logout/, which would end on a 405
+    # after logging in: the logout view accepts only POST.
+    response = client.post("/accounts/logout/")
+
+    assert response.status_code == 200
+    assert "registration/logged_out.html" in [template.name for template in response.templates]
 
 
 def test_anonymous_can_switch_the_language(client):
