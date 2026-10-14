@@ -166,6 +166,7 @@ Mandanten vergeben **keine** Berechtigungen: Was ein Benutzer tun darf, bestimme
 Nicht auf die eigenen Mandanten eingeschränkt sind:
 
 - die *Devices*-Übersicht der Inventur-App, wenn bei der Inventur *Geräte-Suche ist Tenant-spezifisch* ausgeschaltet ist (siehe [Inventur](inventur.md)),
+- das Erfassen gescannter Geräte in der Inventur und die Notizen der laufenden Inventur: Ein Scan erfasst jedes Gerät im Raum, auch eines anderen Mandanten,
 - die [REST-API](../betrieb/api.md): Ein API-Token liefert die Geräte aller Mandanten,
 - die *Notizen* im Django-Admin (*Datenhaltung › Notizen*),
 - der *SAP-Abgleich* der Inventur: Er vergleicht den gesamten Bestand.

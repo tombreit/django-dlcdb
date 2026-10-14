@@ -107,7 +107,7 @@ refuse to evaluate without a scope) is the natural hardening if more apps are ad
   as sibling conditions on the same relation.
 - **Deliberately unscoped:**
   - the REST API;
-  - inventory writes by uuid;
+  - inventory writes by uuid: scans and the active inventory's notes;
   - rooms frontend device counts;
   - notification reports;
   - the SAP comparison;

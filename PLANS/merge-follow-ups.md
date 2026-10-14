@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Follow-ups before the merge
 
-**Status:** planned (2026-10-14). Branch `LoginRequiredMiddleware`, before it merges into `main`.
+**Status:** batch 1 implemented (2026-10-14). Branch `LoginRequiredMiddleware`, before it merges into `main`.
 Follow-up of `PLANS/protected-media.md` and its merge review. This is a living document.
 
 ## Why
@@ -59,7 +59,8 @@ Which media directories belong to tenant-owned objects (checked 2026-10-14):
      and records other tenants' devices found in the room. Notes on those devices belong to the
      same workflow: "inventory writes by uuid" in `PLANS/flexible-tenants.md`.
    - The views are hardened instead:
-     - an unknown `obj_type`, uuid or pk gives a 404;
+     - an unknown `obj_type` or uuid gives a 404. An unknown pk on delete keeps its existing
+       "No note found" message, which never raised;
      - the views work on the active inventory only: without one they answer 404, and
        `delete_note_view` deletes only notes of the active inventory, the same ones
        `update_note_view` edits (`get_latest_note` filters on `inventory__is_active`).
@@ -97,7 +98,7 @@ Which media directories belong to tenant-owned objects (checked 2026-10-14):
   `PLANS/flexible-tenants.md` (*Deliberately unscoped*): name the inventory notes next to the
   scan writes.
 - Tests in `inventory/tests/test_note_views.py`:
-  - unknown `obj_type`, uuid or pk gives 404;
+  - unknown `obj_type` or uuid gives 404;
   - no active inventory gives 404;
   - deleting a note of another inventory or a non-inventory note leaves it in place;
   - deleting a note of the active inventory still works.
@@ -124,5 +125,5 @@ Which media directories belong to tenant-owned objects (checked 2026-10-14):
 ## Progress
 
 - [x] **0. This document**
-- [ ] **1. Inventory note views: 404 instead of 500, active inventory only**
+- [x] **1. Inventory note views: 404 instead of 500, active inventory only**
 - [ ] **2. Media files of tenant-owned objects follow their tenant**

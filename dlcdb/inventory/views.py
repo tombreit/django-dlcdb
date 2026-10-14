@@ -32,8 +32,15 @@ from datetime import date
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, HttpResponseServerError, JsonResponse
-from django.shortcuts import render
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+    HttpResponseServerError,
+    JsonResponse,
+)
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -46,6 +53,7 @@ from django_filters.views import FilterView
 
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, Inventory, Note, Room
+from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.core.utils.helpers import get_user_email
 from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.device_state import get_device_state_data
@@ -289,25 +297,45 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
+# The note views are not scoped by tenant, by design: a scan records the devices
+# found in a room whatever their tenant, and notes belong to that workflow
+# (docs/guides/berechtigungen.md, "Mandanten"). They work on the active
+# inventory's notes only.
+
+
+def _active_inventory_or_404(request):
+    inventory = get_active_inventory(request)
+    if inventory is None:
+        raise Http404
+    return inventory
+
+
 @htmx_permission_required("core.can_inventorize")
 def get_note_btn(request, obj_type, obj_uuid):
+    _active_inventory_or_404(request)
     if obj_type == "device":
-        obj = Inventory.objects.tenant_unaware_device_objects().get(uuid=obj_uuid)
+        queryset = Inventory.objects.tenant_unaware_device_objects()
     elif obj_type == "room":
-        obj = Inventory.objects.tenant_aware_room_objects(tenants=request.tenants).get(uuid=obj_uuid)
+        queryset = Inventory.objects.tenant_aware_room_objects(tenants=request.tenants)
+    else:
+        raise Http404
+    obj = get_object_or_404(queryset, uuid=obj_uuid)
 
     return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj": obj})
 
 
 @htmx_permission_required("core.can_inventorize")
 def update_note_view(request, obj_type, obj_uuid):
-    inventory = Inventory.objects.active_inventory()
+    inventory = _active_inventory_or_404(request)
     request_user_email = get_user_email(request.user)
 
     if obj_type == "room":
-        obj = Room.objects.get(uuid=obj_uuid)
+        queryset = Room.objects
     elif obj_type == "device":
-        obj = Device.objects.get(uuid=obj_uuid)
+        queryset = Device.objects
+    else:
+        raise Http404
+    obj = get_object_or_404(queryset, uuid=obj_uuid)
 
     hx_post_url = reverse("inventory:note-update", args=[obj_type, obj.uuid])
 
@@ -382,8 +410,10 @@ def update_note_view(request, obj_type, obj_uuid):
 
 @htmx_permission_required("core.can_inventorize")
 def delete_note_view(request, pk):
+    _active_inventory_or_404(request)
     if request.method == "POST":
-        note = Note.objects.filter(pk=pk)
+        # Only the active inventory's notes, the ones the note form edits.
+        note = Note.objects.filter(pk=pk, inventory__is_active=True)
         if note.exists():
             note.delete()
             msg = f"Note (pk={pk}) deleted successfully."
