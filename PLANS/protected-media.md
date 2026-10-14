@@ -85,24 +85,16 @@ What lies there (directory → model, screen that links it):
 
 ## Open follow-ups
 
-### Tenant scoping per file
+Planned in `PLANS/merge-follow-ups.md`, to be settled before the merge:
 
-Batch 2 checks permissions, not tenants. A user can fetch another tenant's attachment, QR code or
-person image if they know its path. Scoping would map a path back to its object and run
-`tenant_scoped_queryset`.
+- **Tenant scoping per file.** Batch 2 checks permissions, not tenants: a user can fetch another
+  tenant's attachment, device QR code or import CSV if they know its path.
+- **Hardening of the inventory note views.** Found in the merge review; it predates this work.
+  They stay tenant-unscoped by design, like the inventory's scan writes, but unknown objects give a
+  500, and deleting works on any note by pk.
 
-### Reporting spreadsheets over HTTP
-
-They are mailed as attachments and only linked from the report admin. They might not need to be
-served at all.
-
-### Tenant scoping of the inventory note views
-
-Found in the merge review (2026-10-14); it predates this work.
-- `update_note_view` and `delete_note_view` (`inventory/views.py`) load `Room`, `Device` and `Note`
-  without `tenant_scoped_queryset`. A user with `core.can_inventorize` can therefore edit or delete
-  another tenant's notes.
-- An unknown `obj_type` leaves `obj` unbound, which raises `UnboundLocalError` (500).
+Closed: **report spreadsheets stay served over HTTP** (`reporting.view_report`). The report
+admin is the documented place for generated reports; see `PLANS/merge-follow-ups.md`, decision 3.
 
 ## Pitfalls
 
