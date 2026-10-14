@@ -232,6 +232,7 @@ def search_devices(request):
                 "state_data": get_device_state_data(device, user=request.user, app_name="inventory"),
                 "size": "sm",
             },
+            request=request,
         )
 
     context = {

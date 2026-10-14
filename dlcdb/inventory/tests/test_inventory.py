@@ -233,6 +233,27 @@ def test_device_search_offers_own_tenants_unless_tenant_unaware(client, plain_st
 
 
 @pytest.mark.django_db
+def test_device_search_offers_frontend_state_changes_to_non_staff_users(
+    client, plain_static, inventory_1, join_tenant, device_1, device_2, room_1
+):
+    """Without the Staff flag: the state buttons open frontend screens, not the admin."""
+    user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
+    for codename in ("can_inventorize", "view_device", "transition_can_remove_device", "transition_can_order_device"):
+        user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+    client.force_login(join_tenant(user))
+    InRoomRecord.objects.create(device=device_1, room=room_1)
+
+    html = client.get(reverse("inventory:search-devices"), headers={"HX-Request": "true"}).content.decode()
+
+    assert f'href="{reverse("assets:device_transition", args=[device_1.pk, "remove"])}"' in html
+    # device_2 has no record yet, so it may be ordered: a POST form with its CSRF token
+    assert f'action="{reverse("assets:device_order", args=[device_2.pk])}"' in html
+    assert "csrfmiddlewaretoken" in html
+    assert reverse("admin:core_removedrecord_add") not in html
+    assert reverse("admin:core_orderedrecord_add") not in html
+
+
+@pytest.mark.django_db
 def test_inventorize_uuids_names_a_missing_room(user):
     with pytest.raises(ObjectDoesNotExist, match="pk=999999"):
         inventorize_uuids_for_room(uuids="{}", room_pk=999999, user=user)

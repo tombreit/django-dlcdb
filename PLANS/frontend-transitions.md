@@ -6,8 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Every state change in the frontend
 
-**Status:** in progress, batch 1 of 3 done: the assets device page runs Lose, Remove,
-Restore and Recover in forms of its own. Before, they ran only in Django admin forms, which
+**Status:** in progress, batches 1 and 2 of 4 done: the assets device page runs Lose,
+Remove, Restore and Recover in forms of its own, and the inventory device search uses the
+same frontend screens. Before, they ran only in Django admin forms, which
 need the Staff flag and an `add_*record` permission on top of the transition permission.
 In the end every transition runs in the frontend, gated by `lifecycle.available` (its
 transition permission) and the tenant scope alone, and the admin and frontend device pages
@@ -29,10 +30,17 @@ behave the same.
 5. **Remove follows the lifecycle table everywhere**, including a device without any
    record (`None → REMOVED`), as the bulk remover does. The admin form's "localise it
    first" refusal is deleted: both device pages offered a button the form then refused.
-6. **After a state change the user lands on the assets device page**, as after Order. The
-   inventory example group holds `core.view_device`.
+6. **After a state change the user lands on the assets device page**, as after Order.
+   A screen that sends users to the device page's forms or to Order passes
+   `?back=<its URL>` to get them back; the inventory search does, so its users stay in
+   their workflow and need no `core.view_device`. Move and Lend/Return keep their own
+   landing pages. (`?next=` already carries an index querystring in the frontend, hence
+   `back`.)
 7. **Recover picks its room in a searchable select**, not the Move module: recovering
    stays a separate act with its own permission (`lifecycle.LOCALISING_MOVES`).
+8. **State badges in the frontend link to the device page**, only for users with
+   `core.view_device`; without it the badge has no link. The admin's badge links stay
+   in the admin; the inventory's room badge keeps opening its room inventory.
 
 ## Alternatives considered and rejected
 
@@ -51,5 +59,6 @@ behave the same.
 
 - [x] 0. This document
 - [x] 1. Lose, Remove, Restore, Recover on the assets device page; Remove aligned
-- [ ] 2. The inventory device search uses the frontend flows
-- [ ] 3. Docs (`berechtigungen.md`) and NEWS
+- [x] 2. The inventory device search uses the frontend flows
+- [ ] 3. Inventory search: state badges link to the device page; state changes return to the search (`?back=`)
+- [ ] 4. Docs (`berechtigungen.md`) and NEWS

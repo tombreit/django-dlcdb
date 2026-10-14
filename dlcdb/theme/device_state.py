@@ -29,6 +29,11 @@ from dlcdb.core.models import Record
 # test pins the two against each other.
 RELOCATE_TRANSITIONS = set(lifecycle.LOCALISING_MOVES)
 
+# The screens whose state changes run in the frontend: the assets device page and
+# the inventory device search. Without an app name (the admin) the actions open
+# the admin's own forms.
+FRONTEND_SURFACES = {"assets", "inventory"}
+
 
 @dataclass
 class DeviceStateData:
@@ -109,10 +114,11 @@ def get_device_state_data(device, *, user=None, app_name=None):
     # ``lifecycle.available``. This function only maps each offered transition
     # to a URL and label for the requesting app.
     actions = []
+    frontend = app_name in FRONTEND_SURFACES
     for transition in lifecycle.available(device, user=user):
-        # Default target: on the assets surface the device page's own form for
-        # this state change, elsewhere the target proxy model's admin add-view.
-        if app_name == "assets":
+        # Default target: in the frontend the device page's own form for this
+        # state change, in the admin the target proxy model's add-view.
+        if frontend:
             action_url = reverse("assets:device_transition", args=[device.pk, transition.name])
         else:
             proxy_model = lifecycle.proxy_for(transition.target)
@@ -126,18 +132,18 @@ def get_device_state_data(device, *, user=None, app_name=None):
         # moves write an InRoomRecord, and dispatching on the target would
         # collapse them into one button -- labelling a device's recovery from
         # decommission as "Move", say. The label always stays the transition's own.
-        if transition.name in RELOCATE_TRANSITIONS and app_name == "assets":
+        if transition.name in RELOCATE_TRANSITIONS and frontend:
             # Native "Move" module (single-device prefill via ?device=). It
             # dispatches through ``lifecycle.localise``, which picks the right
             # transition for the device's current state.
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
-        elif transition.name == "order" and app_name == "assets":
+        elif transition.name == "order" and frontend:
             # Native frontend action: a POST that writes the ORDERED record and
             # returns to the device page.
             action_url = reverse("assets:device_order", args=[device.pk])
             method = "post"
         elif transition.name == "lend":
-            if app_name == "assets" and active_record:
+            if frontend and active_record:
                 # Native frontend lending flow. LENT is only reachable from an
                 # INROOM active record, so active_record.pk is always valid here.
                 action_url = reverse("lending:detail", args=[active_record.pk])
@@ -148,7 +154,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
             # only then puts the device back. Both surfaces route to the lending
             # form that does that. The source state is LENT, so active_record is
             # always the lending in question.
-            if app_name == "assets":
+            if frontend:
                 action_url = f"{reverse('lending:detail', args=[active_record.pk])}?flow=return"
             else:
                 action_url = reverse("admin:core_lentrecord_change", args=[active_record.pk])

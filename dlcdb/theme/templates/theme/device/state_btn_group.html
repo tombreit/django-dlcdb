@@ -33,13 +33,25 @@ SPDX-License-Identifier: EUPL-1.2
       <i class="bi bi-plus-lg"></i>
     </button>
     <div class="dropdown-menu">
+        {% comment %}
+        A "post" action (Order, frontend only) changes state directly, so it is a
+        form button; render this template with the request for its CSRF token.
+        The admin gets links only, so its changelist form never nests a form.
+        {% endcomment %}
         {% for action in state_data.actions %}
+        {% if action.method == "post" %}
+        <form method="post" action="{{ action.url }}">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item">{{ action.label|title }}</button>
+        </form>
+        {% else %}
         <a
             class="dropdown-item"
             href="{{ action.url }}"
         >
             {{ action.label|title }}
         </a>
+        {% endif %}
         {% endfor %}
     </div>
   </div>

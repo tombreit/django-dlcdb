@@ -450,6 +450,25 @@ def test_inventory_rewrites_inroom_to_the_room_inventory_view(lentable_device, r
 
 
 @pytest.mark.django_db
+def test_inventory_offers_the_same_frontend_screens_as_the_device_page(lentable_device, plain_device, room, superuser):
+    """No state change in the inventory search leads into the admin; Order posts."""
+    InRoomRecord.objects.create(device=lentable_device, room=room)
+    lentable_device.refresh_from_db()
+
+    for device in (lentable_device, plain_device):
+        inventory = get_device_state_data(device, user=superuser, app_name="inventory")
+        assert inventory.actions == get_device_state_data(device, user=superuser, app_name="assets").actions
+        assert not _offers(inventory, "/admin/")
+
+    [order] = [
+        a
+        for a in get_device_state_data(plain_device, user=superuser, app_name="inventory").actions
+        if a["label"] == "Order"
+    ]
+    assert order["method"] == "post"
+
+
+@pytest.mark.django_db
 def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
     """Every admin add-action prefills ``?device=<pk>`` so the form knows its target."""
     InRoomRecord.objects.create(device=lentable_device, room=room)
