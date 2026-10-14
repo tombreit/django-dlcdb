@@ -4,6 +4,7 @@
 
 from django.contrib import admin
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html_join
 
 from ..models import Attachment, Link
@@ -49,13 +50,15 @@ class AttachmentAdmin(CustomBaseModelAdmin):
         if related_records:
             return format_html_join(
                 "",
-                "<a href='{}'>{} / {} / {:%Y-%m-%d}</a><br>",
+                # format_html escapes each value first, so a format spec like
+                # {:%Y-%m-%d} would meet a string: pass the date ready to print.
+                "<a href='{}'>{} / {} / {}</a><br>",
                 (
                     (
                         reverse("admin:core_record_change", args=(record.pk,)),
                         record,
                         record.record_type,
-                        record.created_at,
+                        timezone.localdate(record.created_at),
                     )
                     for record in related_records
                 ),
