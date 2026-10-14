@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 19:21+0200\n"
-"PO-Revision-Date: 2026-10-13 19:23+0200\n"
+"POT-Creation-Date: 2026-10-14 17:26+0200\n"
+"PO-Revision-Date: 2026-10-14 17:28+0200\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -225,8 +225,8 @@ msgid "Any inventory..."
 msgstr "Jede Inventur..."
 
 #: dlcdb/assets/filters.py:90
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:92
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:95
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:83
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:86
 msgid "Imported"
 msgstr "Importiert"
 
@@ -278,7 +278,7 @@ msgstr "Inventarnummer"
 
 #: dlcdb/assets/filters.py:124 dlcdb/assets/filters.py:252
 #: dlcdb/assets/filters.py:309
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:67
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:58
 #: dlcdb/assets/templates/assets/devices/index.html:42
 #: dlcdb/assets/templates/assets/records/detail.html:106
 #: dlcdb/assets/templates/assets/records/detail.html:253
@@ -397,7 +397,7 @@ msgstr "Bitte mindestens ein zu verschiebendes Gerät auswählen."
 msgid "Please select a target room."
 msgstr "Bitte einen Zielraum auswählen."
 
-#: dlcdb/assets/forms.py:132
+#: dlcdb/assets/forms.py:167
 msgid "Loanability cannot be changed while this device is lent."
 msgstr "Verleih-Attribut kann während des Verleihs nicht geändert werden."
 
@@ -499,6 +499,7 @@ msgid "URL"
 msgstr "URL"
 
 #: dlcdb/assets/templates/assets/devices/form.html:15
+#: dlcdb/assets/templates/assets/devices/transition.html:19
 #: dlcdb/assets/templates/assets/masterdata/form.html:12
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:80
 #: dlcdb/journal/templates/journal/cleanup.html:90
@@ -576,7 +577,7 @@ msgstr ""
 "Speichern Sie Zugangsdaten hier nur dann, wenn dies gemäß Ihrer "
 "Betriebsanweisung erforderlich ist."
 
-#: dlcdb/assets/templates/assets/devices/includes/_set_state.html:17
+#: dlcdb/assets/templates/assets/devices/includes/_set_state.html:14
 msgid "New state"
 msgstr "Neuer Zustand"
 
@@ -594,50 +595,41 @@ msgid "Records history"
 msgstr "Records Historie"
 
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:53
+#: dlcdb/theme/device_state.py:126
 msgid "Device details"
 msgstr "Geräte-Details"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:58
-#: dlcdb/lending/templates/lending/lend.html:32
-#: dlcdb/licenses/templates/licenses/form_partial.html:18
-msgid "Admin view"
-msgstr "Admin Ansicht"
-
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:61
-msgid "Open in admin"
-msgstr "In Admin-Ansicht öffnen"
-
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:76
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:67
 #: dlcdb/assets/templates/assets/records/detail.html:262
 msgid "Last modified"
 msgstr "Zuletzt geändert"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:87
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:78
 msgid "Origin"
 msgstr "Ursprung"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:98
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:89
 msgid "Manual entry"
 msgstr "Manueller Eintrag"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:100
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:91
 msgid "Legacy"
 msgstr "Legacy"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:104
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:95
 msgid "UUID"
 msgstr "UUID"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:109
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:100
 msgid "Deleted"
 msgstr "Gelöscht"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:125
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:116
 #: dlcdb/rooms/templates/rooms/detail.html:91
 msgid "QR code"
 msgstr "QR-Code"
 
-#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:129
+#: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:120
 msgid "Device QR code"
 msgstr "Geräte QR-Code"
 
@@ -646,7 +638,7 @@ msgid "Show this lending"
 msgstr "Verleih anzeigen"
 
 #: dlcdb/assets/templates/assets/devices/index.html:11
-#: dlcdb/assets/views/devices.py:141
+#: dlcdb/assets/views/devices.py:142
 msgid "Add device"
 msgstr "Gerät hinzufügen"
 
@@ -939,28 +931,33 @@ msgstr "Kontakt"
 msgid "No suppliers match these filters."
 msgstr "Keine Distributoren gefunden, die diesen Filtern entsprechen."
 
-#: dlcdb/assets/views/devices.py:91
+#: dlcdb/assets/views/devices.py:92
 msgid "Search IT ID, serial number, model, person name/email, note..."
 msgstr "Suche nach IDs, Seriennummer, Modell, Person Name/Email, Notiz..."
 
-#: dlcdb/assets/views/devices.py:135
+#: dlcdb/assets/views/devices.py:136
 #, python-format
 msgid "Device “%(device)s” was created."
 msgstr "Gerät “%(device)s” wurde hinzugefügt."
 
-#: dlcdb/assets/views/devices.py:141
+#: dlcdb/assets/views/devices.py:142
 msgid "Create device"
 msgstr "Gerät erstellen"
 
-#: dlcdb/assets/views/devices.py:164
+#: dlcdb/assets/views/devices.py:165
 #, python-format
 msgid "Device “%(device)s” was updated."
 msgstr "Gerät “%(device)s” wurde modifiziert."
 
-#: dlcdb/assets/views/devices.py:211
+#: dlcdb/assets/views/devices.py:213
 #, python-format
 msgid "Device “%(device)s” was marked as ordered."
 msgstr "Gerät “%(device)s” wurde als Bestellt markiert."
+
+#: dlcdb/assets/views/devices.py:253
+#, python-format
+msgid "“%(action)s” was recorded for device “%(device)s”."
+msgstr "“%(action)s” wurde für Gerät “%(device)s” erfasst."
 
 #: dlcdb/assets/views/masterdata.py:72
 msgid "Create device type"
@@ -1007,11 +1004,6 @@ msgstr "Wiederherstellung von REMOVED auf LOST"
 #: dlcdb/core/admin/filters/licence_filters.py:34
 msgid "Licence type"
 msgstr "Lizenztyp"
-
-#: dlcdb/core/admin/inroomrecord_admin.py:49 dlcdb/core/utils/relocate.py:89
-#, python-brace-format
-msgid "Device “{device}” moved to room “{room}”."
-msgstr "Gerät “{device}” verschoben nach Raum “{room}”."
 
 #: dlcdb/core/admin/lentrecord_admin.py:105 dlcdb/core/lifecycle.py:151
 #: dlcdb/lending/templates/lending/index.html:74
@@ -1078,20 +1070,6 @@ msgstr "Verschrottet"
 msgid "Core"
 msgstr "Core"
 
-#: dlcdb/core/forms/removedrecord_form.py:26
-msgid "Record already of type \"REMOVED\" - can not be removed again!"
-msgstr ""
-"Record ist bereits vom Typ \"REMOVED\" und kann nicht erneut entfernt werden!"
-
-#: dlcdb/core/forms/removedrecord_form.py:31
-msgid "This device has no record yet and cannot be removed. Localize it first."
-msgstr ""
-"Dieses Gerät hat noch keinen Record und kann daher nicht entfernt werden. "
-
-#: dlcdb/core/forms/removedrecord_form.py:33
-msgid "This device cannot be removed in its current state."
-msgstr "Dieses Gerät kann im aktuellen Status nicht entfernt werden."
-
 #: dlcdb/core/lifecycle.py:89 dlcdb/core/models/prx_licencerecord.py:86
 msgid "Ordered"
 msgstr "Bestellt"
@@ -1132,16 +1110,16 @@ msgstr "Wiederherstellen"
 msgid "Recover"
 msgstr "Wiedereingliedern"
 
-#: dlcdb/core/lifecycle.py:327
+#: dlcdb/core/lifecycle.py:326
 #, python-format
 msgid "“%(action)s” is not allowed for a device in state “%(state)s”."
 msgstr "“%(action)s” ist für ein Gerät im Status “%(state)s” nicht erlaubt."
 
-#: dlcdb/core/lifecycle.py:328
+#: dlcdb/core/lifecycle.py:327
 msgid "not yet recorded"
 msgstr "hat noch keinen Record"
 
-#: dlcdb/core/lifecycle.py:332
+#: dlcdb/core/lifecycle.py:331
 #, python-format
 msgid ""
 "“%(action)s” is not allowed for device “%(device)s” in its current "
@@ -1150,21 +1128,21 @@ msgstr ""
 "“%(action)s” ist für Gerät “%(device)s” in der aktuellen Konfiguration nicht "
 "erlaubt."
 
-#: dlcdb/core/lifecycle.py:348
+#: dlcdb/core/lifecycle.py:347
 #, python-format
 msgid "Illegal state change for device %(device)s: %(current)s -> %(target)s."
 msgstr ""
 "Unzulässiger Statuswechsel für Gerät %(device)s: %(current)s -> %(target)s."
 
-#: dlcdb/core/lifecycle.py:349
+#: dlcdb/core/lifecycle.py:348
 msgid "no record"
 msgstr "kein Record"
 
-#: dlcdb/core/lifecycle.py:434
+#: dlcdb/core/lifecycle.py:433
 msgid "Only the active lending record of a device can be returned."
 msgstr "Nur der aktive Verleih-Record eines Geräts kann zurückgegeben werden."
 
-#: dlcdb/core/lifecycle.py:528
+#: dlcdb/core/lifecycle.py:527
 msgid "Only the active lending record of a device can be moved in place."
 msgstr ""
 "Nur beim aktiven Verleih-Record eines Geräts kann der Raum direkt geändert "
@@ -1367,7 +1345,7 @@ msgstr ""
 
 #: dlcdb/core/models/prx_inroomrecord.py:25
 msgid "Room assignment"
-msgstr "Raumzurodnung"
+msgstr "Raumzuordnung"
 
 #: dlcdb/core/models/prx_inroomrecord.py:26
 msgid "Room assignments"
@@ -1627,6 +1605,11 @@ msgstr ""
 #, python-brace-format
 msgid "Device “{device}” is already in room “{room}”."
 msgstr "Gerät “{device}” ist schon in “{room}”."
+
+#: dlcdb/core/utils/relocate.py:89
+#, python-brace-format
+msgid "Device “{device}” moved to room “{room}”."
+msgstr "Gerät “{device}” verschoben nach Raum “{room}”."
 
 #: dlcdb/core/views/relocate_views.py:77
 msgid ""
@@ -2398,6 +2381,11 @@ msgstr "Bearbeiten"
 #: dlcdb/lending/templates/lending/lend.html:24
 msgid "Back to overview"
 msgstr "Zurück zur Übersicht"
+
+#: dlcdb/lending/templates/lending/lend.html:32
+#: dlcdb/licenses/templates/licenses/form_partial.html:18
+msgid "Admin view"
+msgstr "Admin Ansicht"
 
 #: dlcdb/lending/templates/lending/lend.html:39
 msgid "Pick an available device and a person, choose a room, then lend."
@@ -3700,15 +3688,15 @@ msgstr "Keine Kontakt-Email der IT-Abteilung im Branding konfiguriert!"
 msgid "Configure it?"
 msgstr "Konfigurieren?"
 
-#: dlcdb/theme/device_state.py:92 dlcdb/theme/device_state.py:105
+#: dlcdb/theme/device_state.py:104 dlcdb/theme/device_state.py:117
 msgid "Previous records for this device"
 msgstr "Frühere Records dieses Devices"
 
-#: dlcdb/theme/device_state.py:96
+#: dlcdb/theme/device_state.py:108
 msgid "Edit lending"
 msgstr "Verleih bearbeiten"
 
-#: dlcdb/theme/device_state.py:100
+#: dlcdb/theme/device_state.py:112
 msgid "Show removal record"
 msgstr "Zeige Entfernt-Record"
 
@@ -3934,6 +3922,22 @@ msgstr "Zugriff verweigert."
 #: dlcdb/theme/widgets.py:37 dlcdb/theme/widgets.py:56
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
+
+#~ msgid "Open in admin"
+#~ msgstr "In Admin-Ansicht öffnen"
+
+#~ msgid "Record already of type \"REMOVED\" - can not be removed again!"
+#~ msgstr ""
+#~ "Record ist bereits vom Typ \"REMOVED\" und kann nicht erneut entfernt "
+#~ "werden!"
+
+#~ msgid ""
+#~ "This device has no record yet and cannot be removed. Localize it first."
+#~ msgstr ""
+#~ "Dieses Gerät hat noch keinen Record und kann daher nicht entfernt werden. "
+
+#~ msgid "This device cannot be removed in its current state."
+#~ msgstr "Dieses Gerät kann im aktuellen Status nicht entfernt werden."
 
 #, python-format
 #~ msgid "The desired return date cannot be after %(max_date)s!"
