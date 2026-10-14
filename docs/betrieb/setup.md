@@ -113,14 +113,15 @@ In a throwaway podman container, with the wheel of a [GitHub
 release](https://github.com/tombreit/django-dlcdb/releases):
 
 ```bash
-podman run --rm -it --publish 8000:8000 docker.io/library/debian:trixie-slim bash
+podman run --rm -it --publish 8000:8000 --env DEBIAN_FRONTEND=noninteractive \
+    docker.io/library/debian:trixie-slim bash
 ```
 
 In the container:
 
 ```bash
 apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
-useradd --home-dir /srv/dlcdb dlcdb && install -d --owner dlcdb /srv/dlcdb && su - dlcdb
+mkdir /srv/dlcdb && cd /srv/dlcdb
 python3 -m venv venv
 venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
 venv/bin/python -m dlcdb dlcdb_init

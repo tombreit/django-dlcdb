@@ -109,14 +109,14 @@ cd run/release/instance
 installation](setup.md#pip-installation):
 
 ```bash
-podman run --rm -it --publish 8000:8000 \
+podman run --rm -it --publish 8000:8000 --env DEBIAN_FRONTEND=noninteractive \
     --volume ./run/release:/release:ro,Z \
     docker.io/library/debian:trixie-slim bash
 ```
 
 ```bash
 apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
-useradd --home-dir /srv/dlcdb dlcdb && install -d --owner dlcdb /srv/dlcdb && su - dlcdb
+mkdir /srv/dlcdb && cd /srv/dlcdb
 python3 -m venv venv
 venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
 venv/bin/python -m dlcdb dlcdb_init
@@ -133,17 +133,18 @@ Variants:
 - LDAP: `apt-get install` also `libldap2-dev libsasl2-dev python3-dev gcc`,
   `pip install "/release/dist/dlcdb-X.Y.Z-py3-none-any.whl[ldap]"`
 
-**c) Update from the last release** `vX.Y.Z`: as b), but install the last
-release first:
+**c) Update from the last release** `vA.B.C` to the candidate, in a container
+started as in b):
 
 ```bash
-venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
-```
-
-Create some data, then update as in [Setup › Pip
-installation](setup.md#pip-installation):
-
-```bash
+apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
+mkdir /srv/dlcdb && cd /srv/dlcdb
+python3 -m venv venv
+venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vA.B.C/dlcdb-A.B.C-py3-none-any.whl"
+DLCDB_HOME=. venv/bin/python -m dlcdb dlcdb_init  # DLCDB_HOME=.: needed up to v0.9.5
+./manage.py migrate
+./manage.py createsuperuser
+./manage.py runserver 0.0.0.0:8000  # create some data, then Ctrl-C
 venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
 ./manage.py dlcdb_init  # adds files that are new in this release
 ./manage.py migrate
@@ -151,8 +152,7 @@ venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
 ```
 
 **d) Production data**: copy the nightly snapshot `data/db/db.sqlite3.snapshot`
-([Backup](setup.md#backup)) into a directory of its own, readable for others
-(the container's `dlcdb` user is not you), add
+([Backup](setup.md#backup)) into a directory of its own, add
 `--volume <directory>:/snapshot:ro,Z` to `podman run`, and in b) before
 `migrate`:
 
