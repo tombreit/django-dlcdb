@@ -6,7 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Protected media files
 
-**Status:** batch 1 implemented (2026-10-14): Django serves `/media/` behind the login.
+**Status:** implemented (batches 1–2, 2026-10-14): Django serves `/media/` behind the login, and
+each directory requires the permission of the screens that link its files. What is left is under
+*Open follow-ups*.
 Follow-up of `PLANS/login-required.md`. This is a living document.
 
 ## Why
@@ -134,30 +136,42 @@ served at all.
 
 ### 2. Each directory requires the permission of its screens
 
-Proposal, to re-check against the code at the start of the batch:
+As implemented (`MEDIA_PERMISSIONS` in `core/views/media_views.py`):
 
 | Directory | Permission (any of) |
 |---|---|
-| `person_images/` | `core.view_person`, `smallstuff.view_assignedthing`, the lend transition permission, `core.change_device` |
-| `attachments/` | `core.view_record` |
+| `person_images/` | `core.view_person`, `core.view_device`, `core.change_device`, the lend transition permission, `smallstuff.view_assignedthing` |
+| `attachments/` | `core.view_record`, `core.view_attachment` |
 | `qrcode/` | `core.view_device`, `core.view_room`, `core.can_inventorize` |
 | `rooms_reconcile/` | `core.view_roomreconcile` |
-| `sap_csv/`, `sap_list_comparison_results/` | `core.change_inventory` |
-| `imported_csv/` | `core.add_device` |
+| `sap_csv/` | `inventory.view_saplist` |
+| `sap_list_comparison_results/` | `core.change_inventory` |
+| `imported_csv/` | `dataexchange.view_importerlist` |
 | `toremove_csv/` | `dataexchange.view_removerlist` |
 | `reporting/` | `reporting.view_report` |
 | `branding/` | login only (organization-wide, printed on every sheet) |
 | `links/` | public |
 
-- The table sits next to the view. A missing permission answers like
-  `htmx_permission_required`: a 403 that names the permission.
+Corrections to the proposal, after checking the code:
+- `person_images/` also needs `core.view_device`: the device page renders its form for view-only
+  users too, with the contact person's photo.
+- `attachments/` gained `core.view_attachment` for the attachment admin.
+- `sap_csv/` files are linked only from their admin (`inventory.view_saplist`); the comparison page
+  only names them.
+- `imported_csv/` files are linked from the import detail, which is guarded by
+  `dataexchange.view_importerlist`, not `core.add_device`.
+
+Behaviour and tests:
+- The permission is checked before `Last-Modified`, so a refused user gets no 304 either. A
+  refusal answers like `htmx_permission_required`: a 403 that names the permissions.
 - Tests:
-  - per directory, a user without the permission is refused and a user with it gets the file;
-  - the coverage test now requires an entry per directory.
+  - per directory and permission: refused without, served with;
+  - every listed permission exists, since a typo would refuse everyone but superusers;
+  - the coverage test compares the table's keys with the upload directories.
 - NEWS.
 
 ## Progress
 
 - [x] **0. This document**
 - [x] **1. Django serves media behind the login**
-- [ ] **2. Each directory requires the permission of its screens**
+- [x] **2. Each directory requires the permission of its screens**

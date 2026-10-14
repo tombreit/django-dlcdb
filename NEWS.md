@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Uploaded files require a permission of the pages that show them; person photos, for example, need a persons, device or lending permission
 * Uploaded files under `/media/` require a login (regulation files on lent sheets stay public); remove `Alias /media` and its `<Directory>` block from the Apache configuration, or Apache keeps serving them publicly
 * The API schema and its Swagger UI require a login; clients fetching the schema need their API token
 * Not locatable, Remove, Restore and Recover run in the frontend, on the device page and in the inventory search, and need only their transition permission, no Staff flag; the admin opens the same screens and no longer adds ordered, room-assignment, not-locatable or removed records

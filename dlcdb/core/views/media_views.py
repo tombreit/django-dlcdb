@@ -15,25 +15,37 @@ import posixpath
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_not_required
-from django.core.exceptions import SuspiciousFileOperation
+from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
 from django.core.files.storage import default_storage
 from django.http import FileResponse, Http404
 from django.views.decorators.http import last_modified, require_safe
 
-# The directories directly under MEDIA_ROOT; anything else is refused. A test
-# checks this against the upload directories of all FileFields.
-MEDIA_DIRECTORIES = {
-    "attachments",
-    "branding",
-    "imported_csv",
-    "links",
-    "reporting",
-    "rooms_reconcile",
-    "sap_csv",
-    "toremove_csv",
-    settings.PERSON_IMAGE_UPLOAD_DIR,
-    settings.QRCODE_DIR,
-    settings.SAP_LIST_COMPARISON_RESULT_FOLDER,
+from .. import lifecycle
+from ..utils.htmx import missing_permission_message
+
+# The directories directly under MEDIA_ROOT, each with the permissions of the
+# screens that link its files; any one of them suffices, none means any
+# logged-in user. Other directories are refused. A test checks the keys against
+# the upload directories of all FileFields.
+MEDIA_PERMISSIONS = {
+    "attachments": ("core.view_record", "core.view_attachment"),
+    "branding": (),  # logos on every printout
+    "imported_csv": ("dataexchange.view_importerlist",),
+    "links": (),  # public, see PUBLIC_MEDIA_DIRECTORY
+    "reporting": ("reporting.view_report",),
+    "rooms_reconcile": ("core.view_roomreconcile",),
+    "sap_csv": ("inventory.view_saplist",),
+    "toremove_csv": ("dataexchange.view_removerlist",),
+    # Persons list and detail, device contact person, lending and smallstuff.
+    settings.PERSON_IMAGE_UPLOAD_DIR: (
+        "core.view_person",
+        "core.view_device",
+        "core.change_device",
+        lifecycle.BY_NAME["lend"].permission,
+        "smallstuff.view_assignedthing",
+    ),
+    settings.QRCODE_DIR: ("core.view_device", "core.view_room", "core.can_inventorize"),
+    settings.SAP_LIST_COMPARISON_RESULT_FOLDER: ("core.change_inventory",),
 }
 
 # Public: the lent sheet prints these regulation files' URLs for borrowers,
@@ -47,17 +59,21 @@ ACTIVE_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "image/svg+xml", "
 ACTIVE_CONTENT_POLICY = "default-src 'none'; style-src 'unsafe-inline'"
 
 
-def _media_path(path):
-    """The storage name for a requested path, or 404."""
+def _media_path(request, path):
+    """The storage name for a path the user may fetch; 404 or 403 otherwise."""
+    directory = path.split("/", 1)[0]
     # Only canonical paths: "links/../person_images/x.jpg" must not pass as links/.
-    if posixpath.normpath(path) != path or path.split("/", 1)[0] not in MEDIA_DIRECTORIES:
+    if posixpath.normpath(path) != path or directory not in MEDIA_PERMISSIONS:
         raise Http404
+    permissions = MEDIA_PERMISSIONS[directory]
+    if permissions and not any(request.user.has_perm(permission) for permission in permissions):
+        raise PermissionDenied(missing_permission_message(*permissions))
     return path
 
 
 def _modified_time(request, path):
     try:
-        return default_storage.get_modified_time(_media_path(path))
+        return default_storage.get_modified_time(_media_path(request, path))
     except (OSError, SuspiciousFileOperation):
         return None
 
@@ -66,7 +82,7 @@ def _modified_time(request, path):
 @last_modified(_modified_time)
 def media(request, path):
     try:
-        file = default_storage.open(_media_path(path), "rb")
+        file = default_storage.open(_media_path(request, path), "rb")
     except (OSError, SuspiciousFileOperation) as error:  # missing, a directory, outside MEDIA_ROOT
         raise Http404 from error
 
