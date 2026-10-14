@@ -21,6 +21,7 @@ PUBLIC_ROUTES = {
     "admin/login/",
     "favicon.ico",
     "i18n/setlang/",
+    "media/links/<path:path>",  # regulation files, printed on the lent sheet
 }
 
 

@@ -158,10 +158,9 @@ Without LDAP, leave out `[ldap]`.
 installation, with `ExecStart=/srv/dlcdb/manage.py run_huey`.
 
 **Apache and mod_wsgi:** the [Apache configuration](#apache-and-mod_wsgi) of the
-source installation, with `/srv/dlcdb/data/media` for `/media`,
-`/srv/dlcdb/wsgi.py` (written by `dlcdb_init`) as `WSGIScriptAlias` and in
-`<Directory /srv/dlcdb>`, and `python-home=/srv/dlcdb/venv` without
-`python-path`.
+source installation, with `/srv/dlcdb/wsgi.py` (written by `dlcdb_init`) as
+`WSGIScriptAlias` and in `<Directory /srv/dlcdb>`, and
+`python-home=/srv/dlcdb/venv` without `python-path`.
 
 ### Update
 
@@ -306,11 +305,6 @@ make docs
 <VirtualHost *:443>
     ServerName dlcdb.fqdn
 
-    Alias /media /path/to/data/media
-    <Directory /path/to/data/media>
-        Require all granted
-    </Directory>
-
     <Directory /path/to/dlcdb>
         <Files wsgi.py>
             Require all granted
@@ -328,6 +322,10 @@ make docs
         locale=en_US.UTF-8
 </VirtualHost>
 ```
+
+Django serves the uploaded files under `/media/` itself, behind the login; only
+the regulation files linked from the lent sheet are public. Do not let Apache
+serve the data directory: an `Alias /media` would bypass the login.
 
 ## Operations
 

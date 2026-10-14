@@ -6,8 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Protected media files
 
-**Status:** planned (2026-10-14). Follow-up of `PLANS/login-required.md`. This is a living
-document.
+**Status:** batch 1 implemented (2026-10-14): Django serves `/media/` behind the login.
+Follow-up of `PLANS/login-required.md`. This is a living document.
 
 ## Why
 
@@ -60,10 +60,12 @@ What lies there (directory → model, screen that links it):
 5. **Browser caching:** `Last-Modified` with conditional GET (304), and
    `Cache-Control: private, no-cache`. Shared caches keep nothing; browsers revalidate cheaply.
    Person images and QR codes are overwritten in place.
-6. **No active content from uploads.** Media responses carry a restrictive
-   `Content-Security-Policy`, so an uploaded HTML or SVG file opened directly cannot run script in
-   the app's origin. QR codes are SVG. `X-Content-Type-Options: nosniff` already comes from
-   `SecurityMiddleware`.
+6. **No active content from uploads.** HTML, SVG and XML responses carry
+   `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`, so an uploaded file of
+   that kind, opened directly, cannot run script in the app's origin.
+   - QR codes are SVG; shown in an `<img>`, they are not affected.
+   - PDFs and other files get no CSP, which keeps the browsers' PDF viewers out of it.
+   - `X-Content-Type-Options: nosniff` already comes from `SecurityMiddleware`.
 
 ## Alternatives considered and rejected
 
@@ -97,8 +99,11 @@ served at all.
 - **Every media file is now a Django request**: session and user lookup, tenant middleware. A
   persons list page with thumbnails makes one request per image. The 304s keep repeat visits
   cheap.
-- **The CSP must not break what the browser shows inline:** `<img>` QR codes, person images,
-  logos, PDFs. Check in a browser (batch 1).
+- **The CSP must not break what the browser shows inline.** Checked in a headless Chromium
+  (batch 1):
+  - QR codes, person images and the print sheet's logo display;
+  - a QR code opened directly renders;
+  - an SVG with a script, opened directly, renders without running it.
 - **`Link.display_url`** builds absolute URLs from `Site.domain` and `MEDIA_URL`. They keep
   working, since the path stays the same.
 - **`inventory/models.py`** builds SAP result URLs by hand (`os.path.join(MEDIA_URL, …)`). They
@@ -154,5 +159,5 @@ Proposal, to re-check against the code at the start of the batch:
 ## Progress
 
 - [x] **0. This document**
-- [ ] **1. Django serves media behind the login**
+- [x] **1. Django serves media behind the login**
 - [ ] **2. Each directory requires the permission of its screens**

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.views import LoginView
@@ -12,7 +11,7 @@ from django.views.generic.base import RedirectView
 from django.views.i18n import set_language
 
 from dlcdb.accounts.forms import EmailAuthenticationForm
-from dlcdb.core.views import error_views
+from dlcdb.core.views import error_views, media_views
 from dlcdb.organization import views as organization_views
 
 admin.site.site_header = "DLCDB Admin"
@@ -21,6 +20,8 @@ admin.site.index_title = "DLCDB Administration"
 admin.site.enable_nav_sidebar = False
 admin.site.login_form = EmailAuthenticationForm
 admin.site.logout_template = "accounts/logout.html"
+
+media_prefix = settings.MEDIA_URL.lstrip("/")
 
 
 urlpatterns = [
@@ -43,6 +44,9 @@ urlpatterns = [
     # Public: the language switcher shows on the login page too.
     path("i18n/setlang/", login_not_required(set_language), name="set_language"),
     path("favicon.ico", organization_views.favicon),
+    # Uploaded and generated files, behind the login except for the regulations.
+    path(f"{media_prefix}{media_views.PUBLIC_MEDIA_DIRECTORY}/<path:path>", media_views.public_media),
+    path(f"{media_prefix}<path:path>", media_views.media),
     # The admin sends anonymous visitors here; query_string keeps their ?next=.
     path(
         "admin/login/",
@@ -60,7 +64,6 @@ urlpatterns = [
 if settings.DEBUG:
     import debug_toolbar
 
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns = [
         path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns
