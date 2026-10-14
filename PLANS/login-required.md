@@ -61,6 +61,8 @@ names the missing permission only for `htmx_permission_required`.
 
 ### Media files
 
+Planned in `PLANS/protected-media.md`.
+
 Apache serves `/media/` with `Require all granted` (`docs/betrieb/setup.md`). That includes
 attachments, HR person images and SAP comparison results. Django middleware never sees these
 requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-level rule.
