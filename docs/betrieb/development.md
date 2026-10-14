@@ -133,14 +133,14 @@ Variants:
 - LDAP: `apt-get install` also `libldap2-dev libsasl2-dev python3-dev gcc`,
   `pip install "/release/dist/dlcdb-X.Y.Z-py3-none-any.whl[ldap]"`
 
-**c) Update from the last release** `vA.B.C` to the candidate, in a container
+**c) Update from the last release** `vX.Y.Z` to the candidate, in a container
 started as in b):
 
 ```bash
 apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
 mkdir /srv/dlcdb && cd /srv/dlcdb
 python3 -m venv venv
-venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vA.B.C/dlcdb-A.B.C-py3-none-any.whl"
+venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
 DLCDB_HOME=. venv/bin/python -m dlcdb dlcdb_init  # DLCDB_HOME=.: needed up to v0.9.5
 ./manage.py migrate
 ./manage.py createsuperuser
