@@ -25,8 +25,8 @@ from dlcdb.core.models import Record
 # This mirrors ``lifecycle.LOCALISING_MOVES``, which is what the module's picker
 # and ``relocate_device`` are built from -- so ``recover`` is absent here for the
 # same reason REMOVED is absent there: bringing a decommissioned device back is a
-# separate act with its own permission, offered from the admin. A test pins the
-# two against each other.
+# separate act with its own permission and its own form on the device page. A
+# test pins the two against each other.
 RELOCATE_TRANSITIONS = set(lifecycle.LOCALISING_MOVES)
 
 
@@ -110,14 +110,14 @@ def get_device_state_data(device, *, user=None, app_name=None):
     # to a URL and label for the requesting app.
     actions = []
     for transition in lifecycle.available(device, user=user):
-        proxy_model = lifecycle.proxy_for(transition.target)
-
-        # Default target: the target proxy model's admin add-view. Admin
-        # add-views require is_staff, so mark these as "external" links;
-        # surfaces that gate on is_staff (see the assets frontend) use this flag.
-        action_url = f"{reverse(f'admin:core_{proxy_model._meta.model_name}_add')}?device={device.pk}"
+        # Default target: on the assets surface the device page's own form for
+        # this state change, elsewhere the target proxy model's admin add-view.
+        if app_name == "assets":
+            action_url = reverse("assets:device_transition", args=[device.pk, transition.name])
+        else:
+            proxy_model = lifecycle.proxy_for(transition.target)
+            action_url = f"{reverse(f'admin:core_{proxy_model._meta.model_name}_add')}?device={device.pk}"
         action_label = transition.label
-        external = True
         # How the dropdown submits the action: a plain link, or a POST form for
         # native actions that change state directly without a form page.
         method = "get"
@@ -131,19 +131,16 @@ def get_device_state_data(device, *, user=None, app_name=None):
             # dispatches through ``lifecycle.localise``, which picks the right
             # transition for the device's current state.
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
-            external = False
         elif transition.name == "order" and app_name == "assets":
             # Native frontend action: a POST that writes the ORDERED record and
             # returns to the device page.
             action_url = reverse("assets:device_order", args=[device.pk])
-            external = False
             method = "post"
         elif transition.name == "lend":
             if app_name == "assets" and active_record:
                 # Native frontend lending flow. LENT is only reachable from an
                 # INROOM active record, so active_record.pk is always valid here.
                 action_url = reverse("lending:detail", args=[active_record.pk])
-                external = False
             else:
                 action_url = f"{reverse('admin:core_lentrecord_changelist')}?q={device.uuid}"
         elif transition.name == "return_lending":
@@ -153,7 +150,6 @@ def get_device_state_data(device, *, user=None, app_name=None):
             # always the lending in question.
             if app_name == "assets":
                 action_url = f"{reverse('lending:detail', args=[active_record.pk])}?flow=return"
-                external = False
             else:
                 action_url = reverse("admin:core_lentrecord_change", args=[active_record.pk])
 
@@ -161,7 +157,6 @@ def get_device_state_data(device, *, user=None, app_name=None):
             {
                 "url": action_url,
                 "label": action_label,
-                "external": external,
                 "method": method,
             }
         )

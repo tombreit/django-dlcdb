@@ -54,15 +54,6 @@ and mirror the admin's read-only status.
     <div class="card-body">
       <dl class="device-meta">
         <div>
-          <dt>{% translate "Admin view" %}</dt>
-          <dd>
-            <a href="{% url 'admin:core_device_change' device.pk %}">
-              {% translate "Open in admin" %}
-              <i class="bi bi-box-arrow-up-right small text-muted"></i>
-            </a>
-          </dd>
-        </div>
-        <div>
           <dt>{% translate "Created" %}</dt>
           <dd>
             {{ device.created_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}

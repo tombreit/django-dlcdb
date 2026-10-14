@@ -15,6 +15,7 @@ urlpatterns = [
     path("devices/<int:pk>/", views.device_detail, name="device_detail"),
     path("devices/<int:pk>/history/", views.device_history, name="device_history"),
     path("devices/<int:pk>/order/", views.device_order, name="device_order"),
+    path("devices/<int:pk>/state/<slug:name>/", views.device_transition, name="device_transition"),
     path("device-types/", views.device_type_index, name="device_type_index"),
     path("device-types/add/", views.device_type_add, name="device_type_add"),
     path("device-types/<int:pk>/", views.device_type_detail, name="device_type_detail"),

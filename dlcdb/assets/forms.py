@@ -47,6 +47,41 @@ class RelocateForm(forms.Form):
             self.fields["devices"].widget.user = request.user
 
 
+# The forms of the state changes the device page performs itself (see
+# ``views.devices.TRANSITION_FORMS``). Their fields are those of the matching admin
+# add-forms, built from the Record fields so the labels match, and their
+# cleaned data are the keyword arguments of the ``lifecycle.transition_*`` function.
+
+
+class TransitionNoteForm(forms.Form):
+    """A state change that records just a note: Not locatable, Restore."""
+
+    note = Record._meta.get_field("note").formfield(widget=forms.Textarea(attrs={"rows": 3}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+
+class RemoveForm(TransitionNoteForm):
+    """Decommissioning; the attachments of the admin form stay in the admin."""
+
+    note = None
+    disposition_state = Record._meta.get_field("disposition_state").formfield()
+    removed_info = Record._meta.get_field("removed_info").formfield(widget=forms.Textarea(attrs={"rows": 3}))
+
+
+class RecoverForm(TransitionNoteForm):
+    """A decommissioned device back into a room."""
+
+    room = forms.ModelChoiceField(
+        queryset=Room.objects.filter(deleted_at__isnull=True).order_by("number"),
+        label=Record._meta.get_field("room").verbose_name,
+        widget=TomSelectWidget(),
+    )
+    field_order = ["room", "note"]
+
+
 class DeviceForm(forms.ModelForm):
     """The editable operational fields of a device.
 

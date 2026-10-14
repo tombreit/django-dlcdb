@@ -5,8 +5,9 @@
 import datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -29,7 +30,7 @@ from dlcdb.theme.pagination import paginate
 from dlcdb.theme.pickers import picker_filter
 
 from ..filters import DeviceFilter
-from ..forms import DeviceForm
+from ..forms import DeviceForm, RecoverForm, RemoveForm, TransitionNoteForm
 
 # Rows this many per page. The old changelist rendered up to 5000 rows at once;
 # paging keeps the HTMX payload and template render small (the SQL was never the
@@ -210,6 +211,55 @@ def device_order(request, pk):
     else:
         messages.success(request, _("Device “%(device)s” was marked as ordered.") % {"device": device})
     return redirect("assets:device_detail", pk=device.pk)
+
+
+# The state changes the device page performs in a form of its own, each with the
+# form that collects its fields and the transition function that writes it. The
+# other transitions have their own screens: Move, Order, Lend and Return.
+TRANSITION_FORMS = {
+    "lose": (TransitionNoteForm, lifecycle.transition_lose),
+    "remove": (RemoveForm, lifecycle.transition_remove),
+    "restore": (TransitionNoteForm, lifecycle.transition_restore),
+    "recover": (RecoverForm, lifecycle.transition_recover),
+}
+
+
+@login_required
+def device_transition(request, pk, name):
+    """Change a device's state in a small form, from its "New state" menu.
+
+    The frontend counterpart of the admin add-forms for these records, gated on
+    the transition's own permission only.
+    """
+    if name not in TRANSITION_FORMS:
+        raise Http404
+    form_class, transition_function = TRANSITION_FORMS[name]
+    transition = lifecycle.BY_NAME[name]
+    if not request.user.has_perm(transition.permission):
+        raise PermissionDenied
+    device = _get_device(request, pk)
+    detail_url = reverse("assets:device_detail", args=[device.pk])
+
+    form = form_class(request.POST or None)
+    try:
+        lifecycle.check(device, name)
+        if request.method == "POST" and form.is_valid():
+            transition_function(device, user=request.user, **form.cleaned_data)
+            messages.success(
+                request,
+                _("“%(action)s” was recorded for device “%(device)s”.")
+                % {"action": transition.label, "device": device},
+            )
+            return redirect(detail_url)
+    except lifecycle.IllegalTransition as error:
+        messages.error(request, " ".join(error.messages))
+        return redirect(detail_url)
+
+    return TemplateResponse(
+        request,
+        "assets/devices/transition.html",
+        {"device": device, "form": form, "title": transition.label, "detail_url": detail_url},
+    )
 
 
 def _lending_url(user, device):

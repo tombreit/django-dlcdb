@@ -205,8 +205,7 @@ BY_NAME = {t.name: t for t in TRANSITIONS}
 # all, so it has no permission of its own.
 #
 # REMOVED is absent on purpose. Recovering a decommissioned device is a separate
-# act with its own permission, offered from the admin rather than folded into a
-# bulk mover.
+# act with its own permission and its own form, not folded into a bulk mover.
 LOCALISING_MOVES = {
     "locate": (None, ORDERED),
     "relocate": (INROOM, LENT),

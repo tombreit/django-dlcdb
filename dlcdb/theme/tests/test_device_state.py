@@ -109,7 +109,6 @@ def test_the_assets_surface_orders_natively_via_post(plain_device, make_user):
 
     [action] = get_device_state_data(plain_device, user=user, app_name="assets").actions
     assert action["url"] == reverse("assets:device_order", args=[plain_device.pk])
-    assert action["external"] is False
     assert action["method"] == "post"
 
     [action] = get_device_state_data(plain_device, user=user).actions
@@ -343,7 +342,6 @@ def test_assets_rewrites_inroom_to_the_native_move_view(lentable_device, room, s
     move = [a for a in state_data.actions if a["url"].startswith(reverse("assets:relocate"))]
     assert len(move) == 1
     assert move[0]["label"] == "Move"
-    assert move[0]["external"] is False
     assert f"device={lentable_device.pk}" in move[0]["url"]
 
 
@@ -357,7 +355,6 @@ def test_assets_rewrites_lend_to_the_native_lending_view(lentable_device, room, 
     lend = [a for a in state_data.actions if a["label"] == "Lend"]
     assert len(lend) == 1
     assert lend[0]["url"] == reverse("lending:detail", args=[record.pk])
-    assert lend[0]["external"] is False
 
 
 @pytest.mark.django_db
@@ -372,7 +369,6 @@ def test_assets_keeps_each_move_labelled_as_itself(lentable_device, room, superu
     found = [a for a in state_data.actions if a["url"].startswith(reverse("assets:relocate"))]
     assert len(found) == 1
     assert found[0]["label"] == "Found"
-    assert found[0]["external"] is False
 
 
 def test_frontend_move_routing_matches_the_localisation_declaration():
@@ -393,9 +389,9 @@ def test_recovery_does_not_route_into_the_move_module(lentable_device, superuser
 
     ``assets.pickers.MOVEABLE_RECORD_TYPES`` restates the moveable states by
     hand, so sending a recovery there yields a form that rejects the device
-    ("not a valid choice"). Recovery goes to the admin add-view instead, which
-    the lifecycle accepts. If that picker is ever derived from the transition
-    table, this can move back into the Move module.
+    ("not a valid choice"). Recovery has its own form on the device page
+    instead. If that picker is ever derived from the transition table, this can
+    move back into the Move module.
     """
     RemovedRecord.objects.create(device=lentable_device)
     lentable_device.refresh_from_db()
@@ -404,9 +400,22 @@ def test_recovery_does_not_route_into_the_move_module(lentable_device, superuser
 
     recover = [a for a in state_data.actions if a["label"] == "Recover"]
     assert len(recover) == 1
-    assert recover[0]["url"].startswith(reverse("admin:core_inroomrecord_add"))
-    assert recover[0]["external"] is True
+    assert recover[0]["url"] == reverse("assets:device_transition", args=[lentable_device.pk, "recover"])
     assert not _offers(state_data, reverse("assets:relocate"))
+
+
+@pytest.mark.django_db
+def test_assets_routes_the_other_state_changes_to_the_device_page_forms(lentable_device, room, superuser):
+    """Not locatable and Remove have no screen of their own; the device page's
+    forms serve them, so no assets action leads into the admin."""
+    InRoomRecord.objects.create(device=lentable_device, room=room)
+    lentable_device.refresh_from_db()
+
+    state_data = get_device_state_data(lentable_device, user=superuser, app_name="assets")
+
+    for name in ("lose", "remove"):
+        assert _offers(state_data, reverse("assets:device_transition", args=[lentable_device.pk, name]))
+    assert not _offers(state_data, "/admin/")
 
 
 @pytest.mark.django_db
@@ -427,7 +436,6 @@ def test_assets_routes_a_return_to_the_lending_form(lentable_device, room, super
     assert len(returns) == 1
     # Same return screen the lending list's "Return" button opens.
     assert returns[0]["url"] == f"{reverse('lending:detail', args=[record.pk])}?flow=return"
-    assert returns[0]["external"] is False
     assert not _offers(state_data, reverse("assets:relocate"))
 
 
@@ -442,21 +450,6 @@ def test_inventory_rewrites_inroom_to_the_room_inventory_view(lentable_device, r
 
 
 @pytest.mark.django_db
-def test_admin_actions_are_marked_external(lentable_device, room, superuser):
-    """
-    Admin add-views require ``is_staff``; surfaces that gate on it rely on this
-    flag to decide whether to render the link.
-    """
-    InRoomRecord.objects.create(device=lentable_device, room=room)
-    lentable_device.refresh_from_db()
-
-    state_data = get_device_state_data(lentable_device, user=superuser)
-
-    lost = [a for a in state_data.actions if reverse("admin:core_lostrecord_add") in a["url"]]
-    assert lost[0]["external"] is True
-
-
-@pytest.mark.django_db
 def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
     """Every admin add-action prefills ``?device=<pk>`` so the form knows its target."""
     InRoomRecord.objects.create(device=lentable_device, room=room)
@@ -464,9 +457,8 @@ def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
 
     state_data = get_device_state_data(lentable_device, user=superuser)
 
-    admin_actions = [a for a in state_data.actions if a["external"]]
-    assert admin_actions
-    for action in admin_actions:
+    assert state_data.actions
+    for action in state_data.actions:
         assert f"device={lentable_device.pk}" in action["url"] or str(lentable_device.uuid) in action["url"]
 
 

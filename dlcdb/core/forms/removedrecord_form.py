@@ -15,8 +15,8 @@ class RemovedRecordAdminForm(ProxyRecordAdminForm):
         # Legality (which states may be removed) comes from the lifecycle table,
         # not a hardcoded state check -- so this guard and the write-time
         # enforcement cannot drift. state_of() treats "no active record" as a
-        # state of its own, so a device without any record is rejected gracefully
-        # instead of raising AttributeError.
+        # state of its own, which may be removed like in the frontend and the
+        # bulk remover.
         device = self.cleaned_data.get("device")
         if device is None:
             return self.cleaned_data
@@ -24,11 +24,6 @@ class RemovedRecordAdminForm(ProxyRecordAdminForm):
         state = lifecycle.state_of(device)
         if state == Record.REMOVED:
             raise forms.ValidationError(_('Record already of type "REMOVED" - can not be removed again!'))
-        # The bulk remover may decommission a bare device (None -> REMOVED is a
-        # legal initial transition), but the admin add-form should not: a device
-        # with no record has no state to remove from -- localize it first.
-        if state is None:
-            raise forms.ValidationError(_("This device has no record yet and cannot be removed. Localize it first."))
         if not lifecycle.can_transition(state, Record.REMOVED):
             raise forms.ValidationError(_("This device cannot be removed in its current state."))
         return self.cleaned_data

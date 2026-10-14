@@ -1,0 +1,37 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% comment %}
+One state change of a device in a small form (Not locatable, Remove, Restore,
+Recover), opened from the "New state" menu of the device page. See
+assets.views.devices.device_transition.
+{% endcomment %}
+
+{% block title %}{{ title }}: {{ device }}{% endblock title %}
+
+{% block body %}
+<div class="device-page">
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <div class="device-tile"><i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }}"></i></div>
+    <h1 class="h3 mb-0 me-auto">
+      {{ title }}: <span class="font-monospace">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</span>
+    </h1>
+    <a href="{{ detail_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "theme/includes/_non_field_errors.html" with form=form %}
+        <div class="row g-3">
+          {% for field in form %}
+            {% include "theme/includes/_field.html" with field=field %}
+          {% endfor %}
+        </div>
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=detail_url submit_label=title %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock body %}

@@ -17,6 +17,7 @@ from .devices import (
     device_history,
     device_index,
     device_order,
+    device_transition,
     person_search,
 )
 from .masterdata import (
@@ -40,6 +41,7 @@ __all__ = [
     "device_history",
     "device_index",
     "device_order",
+    "device_transition",
     "device_type_add",
     "device_type_detail",
     "device_type_index",

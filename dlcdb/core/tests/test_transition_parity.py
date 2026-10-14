@@ -483,17 +483,36 @@ class RemoveTwiceTests(BaseTest):
 
         self.assertTrue(form.is_valid(), form.errors)
 
-    def test_removing_a_device_without_any_record_is_rejected_gracefully(self):
+    def test_a_device_without_any_record_can_be_removed(self):
         """
-        The admin form refuses a device with no record yet, although the lifecycle
-        allows None -> REMOVED for the bulk remover: it has to be localized first.
+        The lifecycle allows None -> REMOVED and both device pages offer it, so the
+        admin form accepts it, like the frontend form and the bulk remover.
         """
         device = self._create_device(edv_id="EDV-RM-NONE", sap_id="17-17")
         self.assertIsNone(device.active_record)
 
         form = self._form(device=device.pk, disposition_state=SCRAPPED)
 
-        self.assertFalse(form.is_valid())
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_the_admin_and_the_frontend_form_remove_a_device_alike(self):
+        user = get_user_model().objects.create_superuser(email="remover@example.com", password="secret")
+        self._join_default_tenant(user)
+        self.client.force_login(user)
+        data = {"disposition_state": SCRAPPED, "removed_info": "Recycling yard"}
+
+        admin_device = self._create_device(edv_id="EDV-RM-ADMIN", sap_id="18-18")
+        self._form(device=admin_device.pk, **data).save()
+        frontend_device = self._create_device(edv_id="EDV-RM-FRONTEND", sap_id="19-19")
+        self.client.post(reverse("assets:device_transition", args=[frontend_device.pk, "remove"]), data)
+
+        def outcome(device):
+            device.refresh_from_db()
+            record = device.active_record
+            return record.record_type, record.disposition_state, record.removed_info
+
+        self.assertEqual(outcome(frontend_device), (Record.REMOVED, SCRAPPED, "Recycling yard"))
+        self.assertEqual(outcome(admin_device), outcome(frontend_device))
 
 
 class RelocateBranchTests(BaseTest):
