@@ -19,14 +19,6 @@
       <br>
       {% blocktrans with email=django_settings.DEFAULT_FROM_EMAIL %}If you believe this is an error, please contact <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktrans %}
     </p>
-
-    {% if not request.user.is_authenticated %}
-      <p>
-        {% translate "If you are not logged in, please log in:" %}
-        <br>
-        <a class="mt-2 btn btn-primary" href="{% url 'login' %}">{% translate "Log in" %}</a>
-      </p>
-    {% endif %}
   </div>
 </div>
 {% endblock body %}

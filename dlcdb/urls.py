@@ -5,9 +5,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.views import LoginView
 from django.urls import include, path, reverse_lazy
 from django.views.generic.base import RedirectView
+from django.views.i18n import set_language
 
 from dlcdb.accounts.forms import EmailAuthenticationForm
 from dlcdb.core.views import error_views
@@ -38,9 +40,15 @@ urlpatterns = [
     path("theme/", include("dlcdb.theme.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("api/v2/", include("dlcdb.api.urls")),
-    path("i18n/", include("django.conf.urls.i18n")),
+    # Public: the language switcher shows on the login page too.
+    path("i18n/setlang/", login_not_required(set_language), name="set_language"),
     path("favicon.ico", organization_views.favicon),
-    path("admin/login/", RedirectView.as_view(url=reverse_lazy("login")), name="login"),
+    # The admin sends anonymous visitors here; query_string keeps their ?next=.
+    path(
+        "admin/login/",
+        login_not_required(RedirectView.as_view(url=reverse_lazy("login"), query_string=True)),
+        name="login",
+    ),
     path("admin/logout/", RedirectView.as_view(url=reverse_lazy("logout")), name="logout"),
     # Ahead of the auth URLs: their login view, but with the email login form.
     path("accounts/login/", LoginView.as_view(authentication_form=EmailAuthenticationForm)),

@@ -154,6 +154,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    # After HtmxMiddleware: answers anonymous HTMX requests differently.
+    "dlcdb.accounts.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "dlcdb.tenants.middleware.CurrentTenantMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

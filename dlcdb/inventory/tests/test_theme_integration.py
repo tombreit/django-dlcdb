@@ -173,7 +173,7 @@ def test_lending_report_is_not_public(client, plain_user, room_1):
     """It lists every lent device with its borrower, so it needs a permission."""
     url = reverse("inventory:inventory-lending-report")
 
-    assert client.get(url).status_code == 403
+    assert client.get(url).status_code == 302  # to the login
 
     client.force_login(plain_user)
     assert client.get(url).status_code == 403

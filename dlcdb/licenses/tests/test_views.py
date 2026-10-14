@@ -125,11 +125,10 @@ class LicensesIndexViewTests(BaseTest):
         self.assertIn("License state: Active", content)
         self.assertNotIn("[invalid name]", content)
 
-    def test_anonymous_is_refused(self):
-        # An unauthorized request is a 403 whatever the reason; the 403 page
-        # offers anonymous visitors a log-in link.
+    def test_anonymous_is_sent_to_the_login(self):
         self.client.logout()
-        self.assertEqual(self.client.get(self.url).status_code, 403)
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f"{reverse('login')}?next={self.url}", fetch_redirect_response=False)
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
