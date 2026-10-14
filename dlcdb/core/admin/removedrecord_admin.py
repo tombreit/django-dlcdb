@@ -6,14 +6,12 @@ from django.contrib import admin
 
 from dlcdb.tenants.admin import TenantScopedRecordAdmin
 
-from ..forms.removedrecord_form import RemovedRecordAdminForm
 from ..models import RemovedRecord
-from .base_admin import CustomBaseProxyModelAdmin, RedirectToDeviceMixin
+from .base_admin import CustomBaseProxyModelAdmin
 
 
 @admin.register(RemovedRecord)
-class RemovedRecordAdmin(TenantScopedRecordAdmin, RedirectToDeviceMixin, CustomBaseProxyModelAdmin):
-    form = RemovedRecordAdminForm
+class RemovedRecordAdmin(TenantScopedRecordAdmin, CustomBaseProxyModelAdmin):
     change_form_template = "core/record/change_form.html"
     fields = ("device", "disposition_state", "removed_info", "attachments")
     # readonly_fields = ('get_attachments',)
@@ -28,20 +26,6 @@ class RemovedRecordAdmin(TenantScopedRecordAdmin, RedirectToDeviceMixin, CustomB
             # editing an existing object
             readonly_fields = readonly_fields + ("device", "disposition_state")
         return readonly_fields
-
-    def get_fields(self, request, obj=None):
-        fields = super().get_fields(request, obj=None)
-
-        if not obj:
-            # Editing a new object
-            fields = list(fields)
-            try:
-                fields.remove("get_attachments")
-                fields = tuple(fields)
-            except ValueError:
-                pass
-
-        return fields
 
     @admin.display(
         description="SAP",

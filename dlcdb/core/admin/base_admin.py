@@ -6,17 +6,15 @@ from django.contrib import admin
 from django.contrib.admin.options import ActionLocation
 from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.http import urlencode
 
 from dlcdb.journal.models import JournalEntry
-from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.icons import get_icon_for_class
 
-from ..models import Device, DeviceType, Manufacturer, Room, Supplier
+from ..models import DeviceType, Manufacturer, Room, Supplier
 
 
 def get_has_note_badge(*, obj_type, has_note):
@@ -80,30 +78,6 @@ class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
             readonly_fields = tuple(readonly_fields) + ("device", "room")
 
         return readonly_fields
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-
-        _device = request.GET.get("device", None)
-
-        if _device:
-            form.base_fields["device"].initial = _device
-
-        if not obj:
-            form.base_fields["device"].disabled = False
-
-        return form
-
-    def add_view(self, request, form_url="", extra_context=None):
-        device_id = request.GET.get("device")
-        extra_context = extra_context or {}
-
-        if device_id:
-            # Scoped, so a crafted ?device= cannot reveal a foreign device.
-            device = get_object_or_404(tenant_scoped_queryset(Device.objects.all(), request), id=device_id)
-            extra_context["device"] = device
-
-        return super().add_view(request, form_url, extra_context=extra_context)
 
 
 class SoftDeleteModelAdmin(admin.ModelAdmin):
@@ -241,20 +215,6 @@ class NoModificationModelAdminMixin:
 
     def has_change_permission(self, request, obj=None):
         return request.user.is_superuser
-
-
-class RedirectToDeviceMixin:
-    """
-    Most of our admins redirect to the admin instance changelist after adding
-    a new record. But we like to be redirected to the corresponding device admin.
-    """
-
-    def response_post_save_add(self, request, obj):
-        from ..models import Device
-
-        device_obj = Device.objects.get(id=obj.device_id)
-
-        return HttpResponseRedirect(reverse("admin:core_device_change", args=[device_obj.pk]))
 
 
 class DeviceCountMixin:

@@ -6,14 +6,14 @@ SPDX-License-Identifier: CC0-1.0
 
 # Every state change in the frontend
 
-**Status:** in progress, batches 0 to 5 of 6 done. Every transition runs in the frontend,
+**Status:** implemented (2026-10-14). Every transition runs in the frontend,
 gated by `lifecycle.available` (its transition permission) and the tenant scope alone: the
 assets device page runs Lose, Remove, Restore and Recover in forms of its own, the
 inventory device search uses the same screens, returns to itself afterwards and has no
 admin links left, and the admin's device page opens these screens too. Before, the four ran
 only in Django admin forms, which need the Staff flag and an `add_*record` permission on top
-of the transition permission. Left: deleting the admin code that only served the record
-add-forms (batch 6).
+of the transition permission. The admin code that only served the record add-forms is
+gone.
 
 ## Decisions taken
 
@@ -62,4 +62,4 @@ add-forms (batch 6).
 - [x] 3. Inventory search: state badges link to the device page; state changes return to the search (`?back=`)
 - [x] 4. Docs (`berechtigungen.md`) and NEWS
 - [x] 5. The admin's device page opens the frontend screens; the record admins add nothing
-- [ ] 6. Delete the admin code that only served the record add-forms
+- [x] 6. Delete the admin code that only served the record add-forms

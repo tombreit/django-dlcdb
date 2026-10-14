@@ -13,19 +13,17 @@ Both save through ``LentRecord.apply_lending`` and show
 same record chain, stamp the same editor, show the same warnings and both refuse to
 lend a lost device. They compare outcomes only.
 
-The admin remove form's guards and the relocate branches are pinned here too.
+The relocate branches are pinned here too.
 """
 
 import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.messages import WARNING, get_messages
-from django.forms import modelform_factory
 from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core import lifecycle
-from dlcdb.core.forms.removedrecord_form import RemovedRecordAdminForm
 from dlcdb.core.models import (
     Device,
     InRoomRecord,
@@ -37,7 +35,6 @@ from dlcdb.core.models import (
     RemovedRecord,
     Room,
 )
-from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.core.utils.relocate import relocate_device
@@ -446,73 +443,6 @@ class LostDeviceCannotBeLentTests(BaseTest):
         for record, _refusal in self._refused():
             with self.subTest(record.record_type):
                 self.assertEqual(print_sheet(record).status_code, 404)
-
-
-class RemoveTwiceTests(BaseTest):
-    """
-    ``RemovedRecordAdminForm`` carries no ``Meta.model``; the admin supplies it.
-    Build it the same way, mirroring ``RemovedRecordAdmin.fields``.
-    """
-
-    @staticmethod
-    def _form(**data):
-        form_class = modelform_factory(
-            RemovedRecord,
-            form=RemovedRecordAdminForm,
-            fields=("device", "disposition_state", "removed_info"),
-        )
-        return form_class(data=data)
-
-    def test_removed_device_cannot_be_removed_again(self):
-        device = self._create_device(edv_id="EDV-RM", sap_id="12-12")
-        RemovedRecord.objects.create(device=device)
-        device.refresh_from_db()
-
-        form = self._form(device=device.pk, disposition_state=SCRAPPED)
-
-        self.assertFalse(form.is_valid())
-        self.assertIn("can not be removed again", str(form.errors))
-
-    def test_a_located_device_can_be_removed(self):
-        room = Room.objects.create(number="B2.01")
-        device = self._create_device(edv_id="EDV-RM-OK", sap_id="13-13")
-        InRoomRecord.objects.create(device=device, room=room)
-        device.refresh_from_db()
-
-        form = self._form(device=device.pk, disposition_state=SCRAPPED)
-
-        self.assertTrue(form.is_valid(), form.errors)
-
-    def test_a_device_without_any_record_can_be_removed(self):
-        """
-        The lifecycle allows None -> REMOVED and both device pages offer it, so the
-        admin form accepts it, like the frontend form and the bulk remover.
-        """
-        device = self._create_device(edv_id="EDV-RM-NONE", sap_id="17-17")
-        self.assertIsNone(device.active_record)
-
-        form = self._form(device=device.pk, disposition_state=SCRAPPED)
-
-        self.assertTrue(form.is_valid(), form.errors)
-
-    def test_the_admin_and_the_frontend_form_remove_a_device_alike(self):
-        user = get_user_model().objects.create_superuser(email="remover@example.com", password="secret")
-        self._join_default_tenant(user)
-        self.client.force_login(user)
-        data = {"disposition_state": SCRAPPED, "removed_info": "Recycling yard"}
-
-        admin_device = self._create_device(edv_id="EDV-RM-ADMIN", sap_id="18-18")
-        self._form(device=admin_device.pk, **data).save()
-        frontend_device = self._create_device(edv_id="EDV-RM-FRONTEND", sap_id="19-19")
-        self.client.post(reverse("assets:device_transition", args=[frontend_device.pk, "remove"]), data)
-
-        def outcome(device):
-            device.refresh_from_db()
-            record = device.active_record
-            return record.record_type, record.disposition_state, record.removed_info
-
-        self.assertEqual(outcome(frontend_device), (Record.REMOVED, SCRAPPED, "Recycling yard"))
-        self.assertEqual(outcome(admin_device), outcome(frontend_device))
 
 
 class RelocateBranchTests(BaseTest):
