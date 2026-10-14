@@ -63,8 +63,10 @@ What lies there (directory → model, screen that links it):
    `Cache-Control: private, no-cache`. Shared caches keep nothing; browsers revalidate cheaply.
    Person images and QR codes are overwritten in place.
 6. **No active content from uploads.** HTML, SVG and XML responses carry
-   `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'`, so an uploaded file of
-   that kind, opened directly, cannot run script in the app's origin.
+   `Content-Security-Policy: default-src 'none'; style-src 'unsafe-inline'; sandbox`, so an uploaded
+   file of that kind, opened directly, cannot act in the app's origin. `sandbox` gives it an opaque
+   origin without scripts, forms or navigation; it was added after the merge review, because
+   `default-src` alone would still let a phishing form submit.
    - QR codes are SVG; shown in an `<img>`, they are not affected.
    - PDFs and other files get no CSP, which keeps the browsers' PDF viewers out of it.
    - `X-Content-Type-Options: nosniff` already comes from `SecurityMiddleware`.
@@ -94,6 +96,14 @@ person image if they know its path. Scoping would map a path back to its object 
 They are mailed as attachments and only linked from the report admin. They might not need to be
 served at all.
 
+### Tenant scoping of the inventory note views
+
+Found in the merge review (2026-10-14); it predates this work.
+- `update_note_view` and `delete_note_view` (`inventory/views.py`) load `Room`, `Device` and `Note`
+  without `tenant_scoped_queryset`. A user with `core.can_inventorize` can therefore edit or delete
+  another tenant's notes.
+- An unknown `obj_type` leaves `obj` unbound, which raises `UnboundLocalError` (500).
+
 ## Pitfalls
 
 - **The Apache `Alias /media` must go**, in the source and pip installations alike. Django cannot
@@ -101,6 +111,11 @@ served at all.
 - **Every media file is now a Django request**: session and user lookup, tenant middleware. A
   persons list page with thumbnails makes one request per image. The 304s keep repeat visits
   cheap.
+- **Caching stays `no-cache`.** The merge review proposed a `max-age`, but then a shared PC's
+  browser could show cached person photos or files after logout without asking the server.
+- **The gate runs before `Last-Modified`:** `media()` checks path and permission, then calls the
+  `last_modified`-decorated `_file_response()`. A refused user therefore gets no 304. A NUL byte in
+  the path is a 404; it used to raise `ValueError` (500), also on the public route.
 - **The CSP must not break what the browser shows inline.** Checked in a headless Chromium
   (batch 1):
   - QR codes, person images and the print sheet's logo display;

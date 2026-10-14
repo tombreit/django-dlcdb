@@ -53,17 +53,19 @@ MEDIA_PERMISSIONS = {
 PUBLIC_MEDIA_DIRECTORY = "links"
 
 # Content a browser runs when the file is opened directly. An uploaded HTML or
-# SVG file must not run script in the app's origin; showing an SVG in an <img>
-# (the QR codes) is not affected.
+# SVG file must not act in the app's origin: sandbox gives it an opaque origin
+# without scripts, forms or navigation. Showing an SVG in an <img> (the QR
+# codes) is not affected.
 ACTIVE_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "image/svg+xml", "text/xml", "application/xml"}
-ACTIVE_CONTENT_POLICY = "default-src 'none'; style-src 'unsafe-inline'"
+ACTIVE_CONTENT_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
 
 
 def _media_path(request, path):
     """The storage name for a path the user may fetch; 404 or 403 otherwise."""
     directory = path.split("/", 1)[0]
-    # Only canonical paths: "links/../person_images/x.jpg" must not pass as links/.
-    if posixpath.normpath(path) != path or directory not in MEDIA_PERMISSIONS:
+    # Only canonical paths: "links/../person_images/x.jpg" must not pass as
+    # links/. A NUL byte would make the file system calls raise ValueError.
+    if posixpath.normpath(path) != path or "\x00" in path or directory not in MEDIA_PERMISSIONS:
         raise Http404
     permissions = MEDIA_PERMISSIONS[directory]
     if permissions and not any(request.user.has_perm(permission) for permission in permissions):
@@ -71,18 +73,23 @@ def _media_path(request, path):
     return path
 
 
-def _modified_time(request, path):
+def _modified_time(request, name):
     try:
-        return default_storage.get_modified_time(_media_path(request, path))
+        return default_storage.get_modified_time(name)
     except (OSError, SuspiciousFileOperation):
         return None
 
 
 @require_safe
-@last_modified(_modified_time)
 def media(request, path):
+    # 404 and 403 come first: a refused user gets no 304 either.
+    return _file_response(request, _media_path(request, path))
+
+
+@last_modified(_modified_time)
+def _file_response(request, name):
     try:
-        file = default_storage.open(_media_path(request, path), "rb")
+        file = default_storage.open(name, "rb")
     except (OSError, SuspiciousFileOperation) as error:  # missing, a directory, outside MEDIA_ROOT
         raise Http404 from error
 

@@ -67,6 +67,8 @@ def test_a_logged_in_user_gets_the_file(logged_in, files):
     assert response["Content-Type"] == "image/svg+xml"
     assert response["Cache-Control"] == "private, no-cache"
     assert response["Content-Security-Policy"] == media_views.ACTIVE_CONTENT_POLICY
+    # An opaque origin without forms: an uploaded page cannot phish in the app's name.
+    assert "sandbox" in response["Content-Security-Policy"]
     assert _content(response) == SVG.encode()
 
 
@@ -89,6 +91,7 @@ def test_an_unchanged_file_answers_304(logged_in, files):
         "/media/qrcode/",
         "/media/qrcode/../secret/notes.txt",
         "/media/qrcode/../../manage.py",
+        "/media/qrcode/a%00b.svg",  # the file system calls would raise ValueError
     ],
 )
 def test_anything_else_is_not_found(logged_in, files, path):
@@ -97,6 +100,10 @@ def test_anything_else_is_not_found(logged_in, files, path):
 
 def test_the_public_directory_cannot_be_left(client, files):
     assert client.get("/media/links/../qrcode/DLCDB-1.svg").status_code == 404
+
+
+def test_a_nul_byte_in_a_public_path_is_not_found(client, files):
+    assert client.get("/media/links/a%00b.pdf").status_code == 404
 
 
 def test_every_upload_directory_is_known():
