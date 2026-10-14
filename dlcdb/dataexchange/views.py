@@ -14,7 +14,6 @@ list and detail pages offer no edit, delete or re-run.
 import datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db.models import Count
 from django.http import HttpResponse
@@ -25,6 +24,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
@@ -79,7 +79,7 @@ def _report_context(report):
     }
 
 
-@permission_required("core.add_device", raise_exception=True)
+@htmx_permission_required("core.add_device")
 def device_import(request):
     """Step 1: upload a CSV, dry-run it and show the preview; nothing is written."""
     form = DeviceImportForm(request.POST or None, request.FILES or None, request=request)
@@ -135,7 +135,7 @@ def _after_import_redirect(request):
 
 
 @require_POST
-@permission_required("core.add_device", raise_exception=True)
+@htmx_permission_required("core.add_device")
 def device_import_confirm(request, pk):
     """Step 2: write the previously uploaded and previewed file for real."""
     # Scoped like the import history, so imports of other tenants (and
@@ -170,7 +170,7 @@ def device_import_confirm(request, pk):
     return _after_import_redirect(request)
 
 
-@permission_required("core.add_device", raise_exception=True)
+@htmx_permission_required("core.add_device")
 def device_import_template(request):
     """Header-only CSV template with all importable columns."""
     response = HttpResponse(build_import_template_csv(), content_type="text/csv; charset=utf-8")
@@ -186,7 +186,7 @@ def _importer_list_queryset(request):
     return tenant_scoped_queryset(queryset, request, tenant_field="tenant")
 
 
-@permission_required("dataexchange.view_importerlist", raise_exception=True)
+@htmx_permission_required("dataexchange.view_importerlist")
 def importer_index(request):
     """Read-only, tenant-scoped import history."""
     template = "dataexchange/importer_index.html#importer-list" if request.htmx else "dataexchange/importer_index.html"
@@ -215,7 +215,7 @@ def importer_index(request):
 
 
 @require_GET
-@permission_required("dataexchange.view_importerlist", raise_exception=True)
+@htmx_permission_required("dataexchange.view_importerlist")
 def importer_detail(request, pk):
     """One import with its stored log. Read-only: there is nothing to change after the fact."""
     importer_list = get_object_or_404(_importer_list_queryset(request), pk=pk)

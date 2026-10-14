@@ -31,8 +31,6 @@ from datetime import date
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, HttpResponseServerError, JsonResponse
 from django.shortcuts import render
@@ -60,7 +58,7 @@ from .models import SapList
 from .sap import create_sap_list_comparison
 
 
-@permission_required("core.can_inventorize", raise_exception=True)
+@htmx_permission_required("core.can_inventorize")
 def update_session_qrtoggle(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -86,7 +84,7 @@ class InventorizeRoomFormView(SingleObjectMixin, FormView):
         return reverse("inventory:inventorize-room", kwargs={"pk": self.object.pk})
 
 
-@permission_required("core.can_inventorize", raise_exception=True)
+@htmx_permission_required("core.can_inventorize")
 def inventorize_room(request, pk):
     template = "inventory/inventorize_room_detail.html"
     current_inventory = Inventory.objects.active_inventory()
@@ -130,10 +128,8 @@ def inventorize_room(request, pk):
     return TemplateResponse(request, template, context)
 
 
-class InventorizeRoomView(PermissionRequiredMixin, View):
-    permission_required = "core.can_inventorize"
-    raise_exception = True
-
+@method_decorator(htmx_permission_required("core.can_inventorize"), name="dispatch")
+class InventorizeRoomView(View):
     def get(self, request, *args, **kwargs):
         return inventorize_room(request, *args, **kwargs)
 
@@ -160,12 +156,11 @@ class InventorizeRoomView(PermissionRequiredMixin, View):
         return view(request, *args, **kwargs)
 
 
-class InventorizeRoomListView(PermissionRequiredMixin, FilterView):
+@method_decorator(htmx_permission_required("core.can_inventorize"), name="dispatch")
+class InventorizeRoomListView(FilterView):
     model = Room
     context_object_name = "rooms"
     filterset_class = RoomFilter
-    permission_required = "core.can_inventorize"
-    raise_exception = True
 
     def get_queryset(self):
         try:
@@ -212,7 +207,7 @@ class InventorizeRoomListView(PermissionRequiredMixin, FilterView):
         return response
 
 
-@permission_required("core.can_inventorize", raise_exception=True)
+@htmx_permission_required("core.can_inventorize")
 def search_devices(request):
     if request.htmx:
         template = "inventory/partials/device_search_htmx.html"
@@ -246,9 +241,8 @@ def search_devices(request):
     return TemplateResponse(request, template, context)
 
 
-class QrCodesForRoomDetailView(PermissionRequiredMixin, DetailView):
-    permission_required = "core.can_inventorize"
-    raise_exception = True
+@method_decorator(htmx_permission_required("core.can_inventorize"), name="dispatch")
+class QrCodesForRoomDetailView(DetailView):
     model = Room
     context_object_name = "room"
     template_name = "inventory/room_qrcodes_detail.html"
@@ -261,7 +255,7 @@ class QrCodesForRoomDetailView(PermissionRequiredMixin, DetailView):
 
 
 @method_decorator(
-    permission_required("core.can_inventorize", raise_exception=True),
+    htmx_permission_required("core.can_inventorize"),
     name="dispatch",
 )
 class InventoryReportView(TemplateView):
@@ -279,7 +273,7 @@ class InventoryReportView(TemplateView):
 
 
 @method_decorator(
-    permission_required("core.change_inventory", raise_exception=True),
+    htmx_permission_required("core.change_inventory"),
     name="dispatch",
 )
 class SapCompareListView(DetailView):

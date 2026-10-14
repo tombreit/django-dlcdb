@@ -6,12 +6,12 @@ import datetime
 from datetime import timedelta
 
 import icalendar
-from django.contrib.auth.decorators import permission_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from icalendar import Calendar, Event
 
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.notifications.models import Subscription
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 
@@ -106,7 +106,7 @@ def _get_notification_content_for_event(device, event_type):
     return subject, body
 
 
-@permission_required("core.view_licencerecord", raise_exception=True)
+@htmx_permission_required("core.view_licencerecord")
 def license_calendar(request, license_uuid):
     """Generate an iCal file for a specific license"""
     device = get_object_or_404(tenant_scoped_queryset(LicenseAsset.objects.all(), request), uuid=license_uuid)

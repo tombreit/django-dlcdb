@@ -8,17 +8,17 @@ import csv
 from operator import itemgetter
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
 from dlcdb.core.models import Record, Room
 from dlcdb.core.models.room import RoomReconcile
+from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
@@ -86,7 +86,7 @@ def _room_changes(request, room):
     return tenant_scoped_queryset(changes, request, tenant_field="device__tenant")
 
 
-@permission_required("core.view_room", raise_exception=True)
+@htmx_permission_required("core.view_room")
 def room_index(request):
     """Room overview, with progressive HTMX filtering."""
     template = "rooms/index.html#room-list" if request.htmx else "rooms/index.html"
@@ -112,7 +112,7 @@ def room_index(request):
     return TemplateResponse(request, template, context)
 
 
-@permission_required("core.add_room", raise_exception=True)
+@htmx_permission_required("core.add_room")
 def room_add(request):
     """Create a room and attach its audit information to the current user."""
     form = RoomForm(request.POST or None)
@@ -132,7 +132,7 @@ def room_add(request):
     )
 
 
-@permission_required("core.view_room", raise_exception=True)
+@htmx_permission_required("core.view_room")
 def room_detail(request, pk):
     """Read and edit one room in the same straightforward page."""
     room = get_object_or_404(_room_queryset(), pk=pk)
@@ -144,7 +144,7 @@ def room_detail(request, pk):
 
     if request.method == "POST":
         if not can_change:
-            raise PermissionDenied
+            raise PermissionDenied(missing_permission_message("core.change_room"))
         form = RoomForm(request.POST, instance=room)
         if form.is_valid():
             saved_room = form.save(commit=False)
@@ -178,15 +178,14 @@ def room_detail(request, pk):
     )
 
 
-class ReconcileRoomsView(PermissionRequiredMixin, TemplateView):
+@method_decorator(htmx_permission_required("core.view_roomreconcile"), name="dispatch")
+class ReconcileRoomsView(TemplateView):
     """
     Compare the DLCDB rooms against an uploaded Archibus CSV export. Reached
     from the RoomReconcile admin changelist (moved unchanged from dlcdb.core,
     now with a permission gate).
     """
 
-    permission_required = "core.view_roomreconcile"
-    raise_exception = True
     template_name = "rooms/reconcile_rooms.html"
 
     def cleanup_file(self, file):

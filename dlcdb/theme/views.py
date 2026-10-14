@@ -17,11 +17,11 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest
 from django.template.response import TemplateResponse
-from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django_htmx.http import HttpResponseClientRefresh
 
 from dlcdb.core.utils.device_search import search_devices
+from dlcdb.core.utils.htmx import missing_permission_message
 
 from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
@@ -39,7 +39,7 @@ def device_search(request):
     # gets a client refresh (never a 403 page swapped into the results
     # container), a plain navigation gets the ordinary 403.
     if not source.grants_access(request.user):
-        message = _("Permission denied.")
+        message = missing_permission_message(*source.permissions)
         if getattr(request, "htmx", False):
             messages.error(request, message)
             return HttpResponseClientRefresh()

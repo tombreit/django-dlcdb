@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
@@ -14,6 +13,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from .. import lifecycle
 from ..forms.adminactions_forms import RelocateActionForm
 from ..models import Device
+from ..utils.htmx import htmx_permission_required
 from ..utils.links import linked_message
 from ..utils.relocate import relocate_device
 
@@ -24,7 +24,7 @@ EDIT_DEVICE_PERM = "core.change_device"
 
 
 @method_decorator(
-    permission_required(lifecycle.BY_NAME["relocate"].permission, raise_exception=True),
+    htmx_permission_required(lifecycle.BY_NAME["relocate"].permission),
     name="dispatch",
 )
 class DevicesRelocateView(FormView):

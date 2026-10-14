@@ -14,18 +14,27 @@ import functools
 from django.contrib import messages
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
+from django.utils.translation import ngettext
 from django_htmx.http import HttpResponseClientRefresh
 
 
-def _missing_permission_message(perms):
-    """Name the permissions a request lacks, in the wording end users see."""
-    # codename is not unique across apps, so a bare get() can raise
-    # MultipleObjectsReturned — first() is enough for a message.
+def missing_permission_message(*perms):
+    """
+    Name the permissions ("app_label.codename") a request lacks, as the group
+    admin lists them, so the user can ask for exactly that. Several permissions
+    are alternatives, as in ``htmx_permission_required``.
+    """
     names = []
     for perm in perms:
-        perm_obj = Permission.objects.filter(codename=perm.split(".")[-1]).first()
-        names.append(str(perm_obj or perm))
-    return f"Permission denied. You need the permission: {' or '.join(names)}"
+        app_label, codename = perm.split(".")
+        # codename is unique per model, not per app: first() is enough for a name.
+        permission = Permission.objects.filter(content_type__app_label=app_label, codename=codename).first()
+        names.append(str(permission or perm))
+    return ngettext(
+        "Permission denied. You need the permission: %(permissions)s",
+        "Permission denied. You need one of these permissions: %(permissions)s",
+        len(names),
+    ) % {"permissions": ", ".join(names)}
 
 
 def htmx_permission_required(*perms):
@@ -47,7 +56,7 @@ def htmx_permission_required(*perms):
         @functools.wraps(view_func)
         def wrapped_view(request, *args, **kwargs):
             if not any(request.user.has_perm(perm) for perm in perms):
-                message = _missing_permission_message(perms)
+                message = missing_permission_message(*perms)
                 if getattr(request, "htmx", False):
                     messages.error(request, message)
                     return HttpResponseClientRefresh()

@@ -11,7 +11,6 @@ implementation, parameterized by a small spec per model.
 from dataclasses import dataclass
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.forms import ModelForm
@@ -22,6 +21,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
+from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
 from dlcdb.theme.pagination import paginate
@@ -182,7 +182,7 @@ def _masterdata_detail(request, spec, pk):
 
     if request.method == "POST":
         if not can_change:
-            raise PermissionDenied
+            raise PermissionDenied(missing_permission_message(spec.change_permission))
         form = spec.form_class(request.POST, instance=obj)
         if form.is_valid():
             saved_obj = form.save(commit=False)
@@ -214,46 +214,46 @@ def _masterdata_detail(request, spec, pk):
     )
 
 
-@permission_required("core.view_devicetype", raise_exception=True)
+@htmx_permission_required("core.view_devicetype")
 def device_type_index(request):
     return _masterdata_index(request, DEVICE_TYPE_SPEC)
 
 
-@permission_required("core.add_devicetype", raise_exception=True)
+@htmx_permission_required("core.add_devicetype")
 def device_type_add(request):
     return _masterdata_add(request, DEVICE_TYPE_SPEC)
 
 
-@permission_required("core.view_devicetype", raise_exception=True)
+@htmx_permission_required("core.view_devicetype")
 def device_type_detail(request, pk):
     return _masterdata_detail(request, DEVICE_TYPE_SPEC, pk)
 
 
-@permission_required("core.view_manufacturer", raise_exception=True)
+@htmx_permission_required("core.view_manufacturer")
 def manufacturer_index(request):
     return _masterdata_index(request, MANUFACTURER_SPEC)
 
 
-@permission_required("core.add_manufacturer", raise_exception=True)
+@htmx_permission_required("core.add_manufacturer")
 def manufacturer_add(request):
     return _masterdata_add(request, MANUFACTURER_SPEC)
 
 
-@permission_required("core.view_manufacturer", raise_exception=True)
+@htmx_permission_required("core.view_manufacturer")
 def manufacturer_detail(request, pk):
     return _masterdata_detail(request, MANUFACTURER_SPEC, pk)
 
 
-@permission_required("core.view_supplier", raise_exception=True)
+@htmx_permission_required("core.view_supplier")
 def supplier_index(request):
     return _masterdata_index(request, SUPPLIER_SPEC)
 
 
-@permission_required("core.add_supplier", raise_exception=True)
+@htmx_permission_required("core.add_supplier")
 def supplier_add(request):
     return _masterdata_add(request, SUPPLIER_SPEC)
 
 
-@permission_required("core.view_supplier", raise_exception=True)
+@htmx_permission_required("core.view_supplier")
 def supplier_detail(request, pk):
     return _masterdata_detail(request, SUPPLIER_SPEC, pk)

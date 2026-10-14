@@ -6,7 +6,6 @@
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Prefetch, ProtectedError, Q
@@ -16,6 +15,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
+
+from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 
 from .forms import TenantForm
 from .models import Tenant
@@ -33,7 +34,7 @@ def _tenant_queryset():
     ).order_by(Lower("name"))
 
 
-@permission_required("tenants.view_tenant", raise_exception=True)
+@htmx_permission_required("tenants.view_tenant")
 def index(request):
     """
     A group × tenant checkbox matrix: a row is what a group sees, a column who
@@ -61,7 +62,7 @@ def index(request):
 
 
 @require_POST
-@permission_required("tenants.change_tenant", raise_exception=True)
+@htmx_permission_required("tenants.change_tenant")
 def toggle(request, pk, group_pk):
     """
     One checkbox of the matrix (htmx). The checkbox posts the desired state
@@ -84,7 +85,7 @@ def toggle(request, pk, group_pk):
     return TemplateResponse(request, "tenants/index.html#user-count", {"tenant": _tenant_queryset().get(pk=pk)})
 
 
-@permission_required("tenants.add_tenant", raise_exception=True)
+@htmx_permission_required("tenants.add_tenant")
 def add(request):
     form = TenantForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -104,7 +105,7 @@ def add(request):
     )
 
 
-@permission_required("tenants.view_tenant", raise_exception=True)
+@htmx_permission_required("tenants.view_tenant")
 def detail(request, pk):
     """Read and edit one tenant; its groups are edited in the matrix only."""
     tenant = get_object_or_404(_tenant_queryset(), pk=pk)
@@ -113,7 +114,7 @@ def detail(request, pk):
 
     if request.method == "POST":
         if not can_change:
-            raise PermissionDenied
+            raise PermissionDenied(missing_permission_message("tenants.change_tenant"))
         form = TenantForm(request.POST, instance=tenant)
         if form.is_valid():
             tenant = form.save(commit=False)
@@ -146,7 +147,7 @@ def detail(request, pk):
     )
 
 
-@permission_required("tenants.delete_tenant", raise_exception=True)
+@htmx_permission_required("tenants.delete_tenant")
 def delete(request, pk):
     """Confirm, then hard delete. PROTECT refuses a tenant that still has devices or imports."""
     tenant = get_object_or_404(Tenant, pk=pk)

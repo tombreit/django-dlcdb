@@ -4,19 +4,19 @@
 
 # from datetime import datetime
 
-from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 
 from dlcdb.core.models import Person
+from dlcdb.core.utils.htmx import htmx_permission_required
 
 from .filters import PersonFilter
 from .forms import AssignedThingsForm
 from .models import AssignedThing
 
 
-@permission_required("smallstuff.view_assignedthing", raise_exception=True)
+@htmx_permission_required("smallstuff.view_assignedthing")
 def person_search(request):
     # query = request.GET.get("q")
     # Start from an empty queryset: django-filter skips empty filter values, so
@@ -31,7 +31,7 @@ def person_search(request):
     return render(request, template, context)
 
 
-@permission_required("smallstuff.view_assignedthing", raise_exception=True)
+@htmx_permission_required("smallstuff.view_assignedthing")
 def person_detail(request, person_id):
     try:
         person = Person.smallstuff_person_objects.get(id=person_id)
@@ -49,7 +49,7 @@ def person_detail(request, person_id):
     return render(request, template, context)
 
 
-@permission_required("smallstuff.view_assignedthing", raise_exception=True)
+@htmx_permission_required("smallstuff.view_assignedthing")
 def get_assignements(request, person_id, state):
     if state == "issued":
         assignments = AssignedThing.currently_assigned_objects.filter(person=person_id)
@@ -63,7 +63,7 @@ def get_assignements(request, person_id, state):
     return render(request, template, context)
 
 
-@permission_required("smallstuff.change_assignedthing", raise_exception=True)
+@htmx_permission_required("smallstuff.change_assignedthing")
 def remove_assignement(request, assignment_id):
     to_unassign_assignment = AssignedThing.currently_assigned_objects.get(id=assignment_id)
     to_unassign_assignment.unassigned_at = timezone.localtime(timezone.now())  # datetime.now()
@@ -76,7 +76,7 @@ def remove_assignement(request, assignment_id):
     return response
 
 
-@permission_required("smallstuff.add_assignedthing", raise_exception=True)
+@htmx_permission_required("smallstuff.add_assignedthing")
 def add_assignement(request, person_id):
     if request.method == "POST":
         form = AssignedThingsForm(request.POST)

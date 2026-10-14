@@ -6,8 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Login required by default
 
-**Status:** batches 1–2 implemented (2026-10-14): the middleware makes login the default, and
-the per-view login decorators are gone. This is a living document.
+**Status:** batches 1–3 implemented (2026-10-14): the middleware makes login the default, the
+per-view login decorators are gone, and every 403 names the missing permission. This is a living
+document.
 
 ## Why
 
@@ -71,6 +72,12 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 - **`htmx_permission_required` means "any of"**, Django's `permission_required` means "all of".
   Every current use passes a single permission.
 - **The admin keeps its own guards and bare 403s.** It is being phased out.
+- **Codenames repeat across apps:** the `accounts.Group` proxy gives `accounts.*_group` beside
+  `auth.*_group`. `missing_permission_message` looks permissions up by app label and codename.
+- **A UDB-synced person is refused without a permission name.** The user may hold
+  `core.change_person`; the person is read-only because the HR sync manages it.
+- **Permission names are mixed-language:** the model part is translated, but the permission name
+  is stored in English at migrate time, as the group admin shows it.
 - **Admin views carry `login_url = admin:login`**, so the middleware sends anonymous admin
   requests to `/admin/login/?next=…`. The project's redirect from there to `/accounts/login/`
   needs `query_string=True`, or `next` is lost (it was lost before batch 1 too).
@@ -105,17 +112,19 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 
 ### 3. Every 403 names the missing permission
 
-- `core/utils/htmx.py`: `missing_permission_message(perms)` becomes public. Its message
+- `core/utils/htmx.py`: `missing_permission_message(*perms)` becomes public. Its message
   becomes translatable (`ngettext`) and it looks the permission up by app label and codename.
 - Django's `permission_required(…, raise_exception=True)` becomes `htmx_permission_required(…)`
-  (~45 call sites).
+  (51 call sites in 14 files).
 - The 4 `PermissionRequiredMixin` views use `method_decorator(htmx_permission_required(…))`.
-- The inline `raise PermissionDenied` checks in the frontend views pass the message.
+- The inline `raise PermissionDenied` checks in the frontend views and the device picker pass the
+  message.
 - `403.html`: contact address `branding.organization_it_dept_email|default:DEFAULT_FROM_EMAIL`.
 - Tests:
   - the 403 page names the permission, for a decorator and for an inline check;
   - the HTMX flash message names it too;
-  - the 403 page shows the Branding IT address.
+  - the 403 page shows the Branding IT address;
+  - the tenant matrix toggle over HTMX without the change permission refreshes instead of a 403.
 
 ### 4. API schema requires authentication
 
@@ -129,5 +138,5 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 - [x] **0. This document**
 - [x] **1. Middleware, public exemptions**
 - [x] **2. Drop the now-dead login decorators**
-- [ ] **3. Every 403 names the missing permission**
+- [x] **3. Every 403 names the missing permission**
 - [ ] **4. API schema requires authentication**

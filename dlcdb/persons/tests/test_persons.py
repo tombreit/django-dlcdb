@@ -121,6 +121,8 @@ class PersonFrontendTests(TestCase):
 
         denied = self.client.post(url, {"last_name": "Hacked", "first_name": "Max", "email": "max@example.com"})
         self.assertEqual(denied.status_code, 403)
+        # The superuser has every permission; the 403 names none.
+        self.assertNotContains(denied, "You need the permission", status_code=403)
         self.synced_person.refresh_from_db()
         self.assertEqual(self.synced_person.last_name, "Mustermann")
 
@@ -133,7 +135,8 @@ class PersonFrontendTests(TestCase):
 
         url = reverse("persons:detail", args=[self.local_person.pk])
         self.assertEqual(self.client.get(url).status_code, 200)
-        self.assertEqual(self.client.post(url, {"last_name": "X", "first_name": "Y"}).status_code, 403)
+        denied = self.client.post(url, {"last_name": "X", "first_name": "Y"})
+        self.assertContains(denied, "You need the permission: Core | Person | Can change Person", status_code=403)
 
     def test_index_requires_view_permission(self):
         nobody = get_user_model().objects.create_user(

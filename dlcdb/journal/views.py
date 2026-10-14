@@ -5,7 +5,6 @@
 """The journal in the frontend: a read-only list and detail of its entries."""
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -15,6 +14,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_GET
 
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import index_url
 from dlcdb.theme.pagination import paginate
@@ -37,7 +37,7 @@ def _subject_url(entry):
     return get_absolute_url() if get_absolute_url else ""
 
 
-@permission_required("journal.view_journalentry", raise_exception=True)
+@htmx_permission_required("journal.view_journalentry")
 def journal_index(request):
     """Read-only journal list, with progressive HTMX filtering."""
     template = "journal/index.html#journal-list" if request.htmx else "journal/index.html"
@@ -64,7 +64,7 @@ def journal_index(request):
 
 
 @require_GET
-@permission_required("journal.view_journalentry", raise_exception=True)
+@htmx_permission_required("journal.view_journalentry")
 def journal_detail(request, pk):
     """One entry with its details. Entries are never changed, so nothing is editable."""
     visible = JournalEntry.objects.visible_to(request.tenants)
@@ -77,7 +77,7 @@ def journal_detail(request, pk):
     return TemplateResponse(request, "journal/detail.html", context)
 
 
-@permission_required("journal.delete_journalentry", raise_exception=True)
+@htmx_permission_required("journal.delete_journalentry")
 def journal_cleanup(request):
     """
     Confirm, then remove: repeated HR sync runs and anomalies (keeping the first

@@ -17,7 +17,7 @@
     <p>
       {% translate "You do not have permission to access this page or perform this action." %}
       <br>
-      {% blocktrans with email=django_settings.DEFAULT_FROM_EMAIL %}If you believe this is an error, please contact <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktrans %}
+      {% blocktrans with email=branding.organization_it_dept_email|default:django_settings.DEFAULT_FROM_EMAIL %}If you believe this is an error, please contact <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktrans %}
     </p>
   </div>
 </div>

@@ -5,7 +5,6 @@
 """The standalone Person frontend: list, add and edit persons outside the admin."""
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
@@ -13,6 +12,7 @@ from django.template.response import TemplateResponse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Person, Record
+from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls
@@ -42,7 +42,7 @@ def _person_records(request, person):
     return tenant_scoped_queryset(queryset, request, tenant_field="device__tenant")
 
 
-@permission_required("core.view_person", raise_exception=True)
+@htmx_permission_required("core.view_person")
 def person_index(request):
     """Person overview, with progressive HTMX filtering."""
     template = "persons/index.html#person-list" if request.htmx else "persons/index.html"
@@ -68,7 +68,7 @@ def person_index(request):
     return TemplateResponse(request, template, context)
 
 
-@permission_required("core.add_person", raise_exception=True)
+@htmx_permission_required("core.add_person")
 def person_add(request):
     """Create a DLCDB-owned person and attach the audit information."""
     form = PersonForm(request.POST or None)
@@ -86,7 +86,7 @@ def person_add(request):
     )
 
 
-@permission_required("core.view_person", raise_exception=True)
+@htmx_permission_required("core.view_person")
 def person_detail(request, pk):
     """
     Read and edit one person in the same page. A person matched with a UDB
@@ -102,8 +102,10 @@ def person_detail(request, pk):
     index_url, form_action = detail_urls(request, "persons:index", "persons:detail", person.pk)
 
     if request.method == "POST":
+        if is_udb_synced:
+            raise PermissionDenied  # read-only here, the page offers no form
         if not can_change:
-            raise PermissionDenied
+            raise PermissionDenied(missing_permission_message("core.change_person"))
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
             saved_person = form.save(commit=False)

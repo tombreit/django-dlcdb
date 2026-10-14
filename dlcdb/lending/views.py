@@ -6,7 +6,6 @@ import datetime
 from urllib.parse import urlencode
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import BooleanField, Case, CharField, Count, IntegerField, Q, Value, When
@@ -115,7 +114,7 @@ def _lending_filter(request):
     return bind_filterset(LentRecordFilter, request, base_qs, default_ordering=DEFAULT_ORDERING)
 
 
-@permission_required("core.view_lentrecord", raise_exception=True)
+@htmx_permission_required("core.view_lentrecord")
 def index(request):
     """
     Overview of lendable devices: what is currently lent to whom and what is
@@ -157,7 +156,7 @@ def index(request):
     return TemplateResponse(request, template, context)
 
 
-@permission_required("core.view_lentrecord", raise_exception=True)
+@htmx_permission_required("core.view_lentrecord")
 def lending_export_csv(request):
     """The current lending list as a CSV download.
 

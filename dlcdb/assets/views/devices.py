@@ -5,7 +5,6 @@
 import datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
@@ -17,7 +16,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, Person, Record
-from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.device_state import get_device_state_data
@@ -74,7 +73,7 @@ def _device_filter(request):
     return bind_filterset(DeviceFilter, request, _device_queryset(request), default_ordering=DEFAULT_ORDERING)
 
 
-@permission_required("core.view_device", raise_exception=True)
+@htmx_permission_required("core.view_device")
 def device_index(request):
     """Tenant-scoped Device overview, with progressive HTMX filtering."""
     template = "assets/devices/index.html#device-list" if request.htmx else "assets/devices/index.html"
@@ -106,7 +105,7 @@ def device_index(request):
     return TemplateResponse(request, template, context)
 
 
-@permission_required("core.view_device", raise_exception=True)
+@htmx_permission_required("core.view_device")
 def device_export_csv(request):
     """The current device list as a CSV download.
 
@@ -125,7 +124,7 @@ def _get_device(request, pk):
     return get_object_or_404(_device_queryset(request), pk=pk)
 
 
-@permission_required("core.add_device", raise_exception=True)
+@htmx_permission_required("core.add_device")
 def device_add(request):
     """Create a device and attach its audit information to the current user."""
     form = DeviceForm(request.POST or None, request=request)
@@ -143,7 +142,7 @@ def device_add(request):
     )
 
 
-@permission_required("core.view_device", raise_exception=True)
+@htmx_permission_required("core.view_device")
 def device_detail(request, pk):
     """Read and edit one device in the same straightforward page."""
     device = _get_device(request, pk)
@@ -156,7 +155,7 @@ def device_detail(request, pk):
 
     if request.method == "POST":
         if not can_change:
-            raise PermissionDenied
+            raise PermissionDenied(missing_permission_message("core.change_device"))
         form = DeviceForm(request.POST, instance=device, request=request)
         if form.is_valid():
             saved_device = form.save(commit=False)
@@ -186,7 +185,7 @@ def device_detail(request, pk):
     )
 
 
-@permission_required("core.view_device", raise_exception=True)
+@htmx_permission_required("core.view_device")
 def device_history(request, pk):
     """When who changed which field of one device (django-simple-history)."""
     device = _get_device(request, pk)
@@ -238,7 +237,7 @@ def device_transition(request, pk, name):
     form_class, transition_function = TRANSITION_FORMS[name]
     transition = lifecycle.BY_NAME[name]
     if not request.user.has_perm(transition.permission):
-        raise PermissionDenied
+        raise PermissionDenied(missing_permission_message(transition.permission))
     device = _get_device(request, pk)
     done_url = back_url(request, reverse("assets:device_detail", args=[device.pk]))
 

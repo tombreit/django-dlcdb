@@ -5,7 +5,6 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import OuterRef, Subquery
@@ -35,7 +34,7 @@ logger = logging.getLogger(__name__)
 LICENSES_PER_PAGE = 25
 
 
-@permission_required("core.view_licencerecord", raise_exception=True)
+@htmx_permission_required("core.view_licencerecord")
 def index(request):
     template = "licenses/index.html#licenses-list" if request.htmx else "licenses/index.html"
 
@@ -218,7 +217,7 @@ def new(request):
     )
 
 
-@permission_required("core.view_licencerecord", raise_exception=True)
+@htmx_permission_required("core.view_licencerecord")
 def history(request, license_id):
     """When who changed which field of one licence (django-simple-history).
 

@@ -14,13 +14,13 @@ Reached either as the whole trail (``/assets/records/``) or scoped to one device
 (``?device=<pk>``), which is how the device sidebar links here.
 """
 
-from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Device, Record
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
@@ -69,7 +69,7 @@ def _scope_device(request):
     return get_object_or_404(devices, pk=value)
 
 
-@permission_required("core.view_record", raise_exception=True)
+@htmx_permission_required("core.view_record")
 def record_index(request):
     """The record trail, optionally scoped to one device, with HTMX filtering."""
     template = "assets/records/index.html#record-list" if request.htmx else "assets/records/index.html"
@@ -107,7 +107,7 @@ def record_index(request):
     return TemplateResponse(request, template, context)
 
 
-@permission_required("core.view_record", raise_exception=True)
+@htmx_permission_required("core.view_record")
 def record_detail(request, pk):
     """One record, read only: no form, no POST branch, nothing to save."""
     record = get_object_or_404(

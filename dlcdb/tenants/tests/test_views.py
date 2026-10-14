@@ -130,7 +130,10 @@ def test_matrix_checkboxes_save_each_click(login, setup):
 def test_toggle_needs_the_change_permission(login, setup):
     tenant_a, _tenant_b, _it, _ops_a, helpdesk = setup
 
-    assert _toggle(login("tenants.view_tenant"), tenant_a, helpdesk, sees=True).status_code == 403
+    response = _toggle(login("tenants.view_tenant"), tenant_a, helpdesk, sees=True)
+
+    # Over htmx the guard flashes the missing permission and refreshes the page.
+    assert response["HX-Refresh"] == "true"
     assert helpdesk not in tenant_a.groups.all()
 
 
