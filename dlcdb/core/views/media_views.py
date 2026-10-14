@@ -13,6 +13,7 @@ mod_wsgi and gunicorn), so no ``X-Sendfile`` module is needed.
 
 import posixpath
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_not_required
 from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
@@ -48,6 +49,18 @@ MEDIA_PERMISSIONS = {
     settings.SAP_LIST_COMPARISON_RESULT_FOLDER: ("core.change_inventory",),
 }
 
+# Directories whose files belong to tenant-owned objects, with their owners as
+# (model, file lookup, tenant lookup). Such a file is served only when the
+# user sees one of its owners' tenants, otherwise it is a 404 like the owner's
+# own pages. A file no such object references (a room's QR code, an attachment
+# on no record) needs only the permission; an owner without tenant still owns
+# its file, as tenant scoping never includes objects without tenant.
+MEDIA_TENANT_OWNERS = {
+    settings.QRCODE_DIR: [("core.Device", "qrcode", "tenant")],
+    "attachments": [("core.Record", "attachments__file", "device__tenant")],
+    "imported_csv": [("dataexchange.ImporterList", "file", "tenant")],
+}
+
 # Public: the lent sheet prints these regulation files' URLs for borrowers,
 # who usually have no login.
 PUBLIC_MEDIA_DIRECTORY = "links"
@@ -70,7 +83,22 @@ def _media_path(request, path):
     permissions = MEDIA_PERMISSIONS[directory]
     if permissions and not any(request.user.has_perm(permission) for permission in permissions):
         raise PermissionDenied(missing_permission_message(*permissions))
+    if not _visible_in_tenants(request, directory, path):
+        raise Http404
     return path
+
+
+def _visible_in_tenants(request, directory, name):
+    owned = False
+    for label, file_lookup, tenant_lookup in MEDIA_TENANT_OWNERS.get(directory, ()):
+        # _base_manager: soft-deleted owners still own their files.
+        owners = apps.get_model(label)._base_manager
+        # One filter() call: the file lookup may cross a multi-valued relation
+        # (Record.attachments), and the tenant condition must apply to the same row.
+        if owners.filter(**{file_lookup: name, f"{tenant_lookup}__in": request.tenants}).exists():
+            return True
+        owned = owned or owners.filter(**{file_lookup: name}).exists()
+    return not owned
 
 
 def _modified_time(request, name):

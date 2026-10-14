@@ -5,7 +5,8 @@
 """
 Django serves MEDIA_ROOT behind the login (``core.views.media_views``); only
 the regulation files under links/ are public. Each directory requires the
-permission of the screens that link its files.
+permission of the screens that link its files, and files of tenant-owned
+objects follow their tenant.
 """
 
 import pytest
@@ -15,7 +16,11 @@ from django.contrib.auth.models import Permission
 from django.db import models
 from django.urls import reverse
 
+from dlcdb.core.models import Attachment, Device, InRoomRecord, Room
+from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.core.views import media_views
+from dlcdb.dataexchange.models import ImporterList
+from dlcdb.tenants.models import Tenant
 
 pytestmark = pytest.mark.django_db
 
@@ -172,3 +177,85 @@ def test_branding_is_open_to_every_logged_in_user(client, make_user, media_root)
 
     assert response.status_code == 200
     assert _content(response) == SVG.encode()
+
+
+# --- tenants -------------------------------------------------------------
+
+
+@pytest.fixture
+def tenants(db):
+    return Tenant.objects.create(name="A"), Tenant.objects.create(name="B")
+
+
+def _status(client, user, url):
+    client.force_login(user)
+    response = client.get(url)
+    if response.status_code == 200:
+        _content(response)
+    return response.status_code
+
+
+def _attachment(media_root):
+    (media_root / "attachments").mkdir(exist_ok=True)
+    (media_root / "attachments" / "invoice.pdf").write_text("%PDF-1.4")
+    return Attachment.objects.create(title="Invoice", file="attachments/invoice.pdf")
+
+
+def test_a_device_qr_code_follows_the_device_tenant(client, make_user, media_root, tenants, plain_static):
+    tenant_a, tenant_b = tenants
+    url = f"/media/{Device.objects.create(sap_id='1', tenant=tenant_a).qrcode.name}"
+
+    assert _status(client, make_user("core.view_device", tenants=[tenant_a], email="a@example.com"), url) == 200
+    assert _status(client, make_user("core.view_device", tenants=[tenant_b], email="b@example.com"), url) == 404
+
+
+def test_the_qr_code_of_a_device_without_tenant_is_not_served(client, make_user, media_root, tenants, plain_static):
+    url = f"/media/{Device.objects.create(sap_id='1', tenant=None).qrcode.name}"
+
+    assert _status(client, make_user("core.view_device", tenants=tenants), url) == 404
+
+
+def test_a_room_qr_code_needs_only_the_permission(client, make_user, media_root):
+    url = f"/media/{Room.objects.create(number='1').qrcode.name}"
+
+    assert _status(client, make_user("core.view_room"), url) == 200
+
+
+def test_an_attachment_follows_the_tenant_of_its_records(client, make_user, media_root, tenants, plain_static):
+    tenant_a, tenant_b = tenants
+    record = establish_state(
+        InRoomRecord, device=Device.objects.create(sap_id="1", tenant=tenant_a), room=Room.objects.create(number="1")
+    )
+    record.attachments.add(_attachment(media_root))
+
+    a_user = make_user("core.view_record", tenants=[tenant_a], email="a@example.com")
+    b_user = make_user("core.view_record", tenants=[tenant_b], email="b@example.com")
+    assert _status(client, a_user, "/media/attachments/invoice.pdf") == 200
+    assert _status(client, b_user, "/media/attachments/invoice.pdf") == 404
+
+
+def test_an_attachment_on_no_record_needs_only_the_permission(client, make_user, media_root):
+    _attachment(media_root)
+
+    assert _status(client, make_user("core.view_attachment"), "/media/attachments/invoice.pdf") == 200
+
+
+def test_an_import_file_follows_the_import_tenant(client, make_user, media_root, tenants, plain_static):
+    tenant_a, tenant_b = tenants
+    (media_root / "imported_csv").mkdir()
+    (media_root / "imported_csv" / "devices.csv").write_text("edv_id")
+    ImporterList.objects.create(file="imported_csv/devices.csv", tenant=tenant_b)
+    url = "/media/imported_csv/devices.csv"
+
+    a_user = make_user("dataexchange.view_importerlist", tenants=[tenant_a], email="a@example.com")
+    b_user = make_user("dataexchange.view_importerlist", tenants=[tenant_b], email="b@example.com")
+    assert _status(client, a_user, url) == 404
+    assert _status(client, b_user, url) == 200
+
+
+def test_every_tenant_owner_lookup_resolves():
+    for directory, owners in media_views.MEDIA_TENANT_OWNERS.items():
+        assert directory in media_views.MEDIA_PERMISSIONS
+        for label, file_lookup, tenant_lookup in owners:
+            # A wrong lookup raises FieldError.
+            apps.get_model(label)._base_manager.filter(**{file_lookup: "", f"{tenant_lookup}__in": []}).exists()

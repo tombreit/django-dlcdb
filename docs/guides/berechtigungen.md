@@ -149,6 +149,8 @@ Welche Mandanten ein Benutzer sieht, ergibt sich aus seinen **Gruppen**: Ein Man
 - Kein Mandant → er sieht **keine Geräte** und kann keine anlegen. Jede Seite zeigt dann den Hinweis *Keine Ihrer Gruppen gehört zu einem Mandanten, daher sehen Sie keine Geräte.* (nur für Benutzer mit `core.view_device`).
 - Das gilt auch für Superuser.
 
+Dateien folgen dem Mandanten ihres Objekts: QR-Codes von Geräten, Anhänge von Records und Import-Dateien liefert die DLCDB nur an Benutzer, die den Mandanten des Geräts bzw. Imports sehen.
+
 Beim Anlegen und Importieren ist ein Mandant Pflicht. Das Feld *Mandant* eines Geräts, einer Lizenz oder eines Imports bietet nur die eigenen Mandanten an; bei genau einem ist er vorausgewählt. Wer mehrere Mandanten sieht und `core.change_device` besitzt, kann ein Gerät zwischen ihnen verschieben: auf der Geräte-Detailseite oder, für mehrere Geräte, mit der Aktion *Ausgewählte Geräte umziehen* im Geräte-Admin.
 
 **Alle Mandanten sehen.** Eine Gruppe, die alle Mandanten sehen soll (z.B. Administratoren, IT, Revision), wird **jedem** Mandanten zugeordnet, auch jedem neu angelegten. In der Mandanten-Übersicht ist das eine Zeile mit Haken in jeder Spalte; eine Lücke darin ist ein vergessener Mandant.

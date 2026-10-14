@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Device QR codes, record attachments and import files are served only to users who see their tenant
 * Uploaded files require a permission of the pages that show them; person photos, for example, need a persons, device or lending permission
 * Uploaded files under `/media/` require a login (regulation files on lent sheets stay public); remove `Alias /media` and its `<Directory>` block from the Apache configuration, or Apache keeps serving them publicly
 * The API schema and its Swagger UI require a login; clients fetching the schema need their API token

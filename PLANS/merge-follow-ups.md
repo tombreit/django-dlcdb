@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Follow-ups before the merge
 
-**Status:** batch 1 implemented (2026-10-14). Branch `LoginRequiredMiddleware`, before it merges into `main`.
+**Status:** implemented (batches 1–2, 2026-10-14). Branch `LoginRequiredMiddleware`, before it merges into `main`.
 Follow-up of `PLANS/protected-media.md` and its merge review. This is a living document.
 
 ## Why
@@ -126,4 +126,4 @@ Which media directories belong to tenant-owned objects (checked 2026-10-14):
 
 - [x] **0. This document**
 - [x] **1. Inventory note views: 404 instead of 500, active inventory only**
-- [ ] **2. Media files of tenant-owned objects follow their tenant**
+- [x] **2. Media files of tenant-owned objects follow their tenant**
