@@ -25,7 +25,7 @@ from dlcdb.theme.export import export_href
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
-from dlcdb.theme.navigation import detail_urls
+from dlcdb.theme.navigation import back_url, detail_urls
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.pickers import picker_filter
 
@@ -197,7 +197,8 @@ def device_history(request, pk):
 @require_POST
 @htmx_permission_required(lifecycle.BY_NAME["order"].permission)
 def device_order(request, pk):
-    """Record a device as ordered (None -> ORDERED) and return to its detail page.
+    """Record a device as ordered (None -> ORDERED) and return to its detail page,
+    or to the ``?back=`` URL of the screen that offered it.
 
     The frontend counterpart of the admin OrderedRecord add-view, offered from
     the device's "New state" menu. Gated on the transition's own permission only;
@@ -210,7 +211,7 @@ def device_order(request, pk):
         messages.error(request, " ".join(error.messages))
     else:
         messages.success(request, _("Device “%(device)s” was marked as ordered.") % {"device": device})
-    return redirect("assets:device_detail", pk=device.pk)
+    return redirect(back_url(request, reverse("assets:device_detail", args=[device.pk])))
 
 
 # The state changes the device page performs in a form of its own, each with the
@@ -229,7 +230,9 @@ def device_transition(request, pk, name):
     """Change a device's state in a small form, from its "New state" menu.
 
     The frontend counterpart of the admin add-forms for these records, gated on
-    the transition's own permission only.
+    the transition's own permission only. Afterwards, and on Cancel, the user
+    returns to the device page or to the ``?back=`` URL of the screen that
+    offered the change.
     """
     if name not in TRANSITION_FORMS:
         raise Http404
@@ -238,7 +241,7 @@ def device_transition(request, pk, name):
     if not request.user.has_perm(transition.permission):
         raise PermissionDenied
     device = _get_device(request, pk)
-    detail_url = reverse("assets:device_detail", args=[device.pk])
+    done_url = back_url(request, reverse("assets:device_detail", args=[device.pk]))
 
     form = form_class(request.POST or None)
     try:
@@ -250,15 +253,15 @@ def device_transition(request, pk, name):
                 _("“%(action)s” was recorded for device “%(device)s”.")
                 % {"action": transition.label, "device": device},
             )
-            return redirect(detail_url)
+            return redirect(done_url)
     except lifecycle.IllegalTransition as error:
         messages.error(request, " ".join(error.messages))
-        return redirect(detail_url)
+        return redirect(done_url)
 
     return TemplateResponse(
         request,
         "assets/devices/transition.html",
-        {"device": device, "form": form, "title": transition.label, "detail_url": detail_url},
+        {"device": device, "form": form, "title": transition.label, "cancel_url": done_url},
     )
 
 

@@ -32,6 +32,7 @@ from dlcdb.core.models import (
 )
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.theme.device_state import RELOCATE_TRANSITIONS, get_device_state_data
+from dlcdb.theme.navigation import with_back
 
 ALL_LIFECYCLE_PERMISSIONS = [
     "transition_can_order_device",
@@ -466,6 +467,44 @@ def test_inventory_offers_the_same_frontend_screens_as_the_device_page(lentable_
         if a["label"] == "Order"
     ]
     assert order["method"] == "post"
+
+
+@pytest.mark.django_db
+def test_the_device_page_forms_and_order_return_to_the_back_url(plain_device, superuser):
+    """The inventory search passes its own URL; Move keeps its own landing page."""
+    back = "/inventory/devices/?q=EDV"
+
+    actions = get_device_state_data(plain_device, user=superuser, app_name="inventory", back=back).actions
+    urls = {action["label"]: action["url"] for action in actions}
+
+    assert urls["Order"] == with_back(reverse("assets:device_order", args=[plain_device.pk]), back)
+    assert urls["Remove"] == with_back(reverse("assets:device_transition", args=[plain_device.pk, "remove"]), back)
+    assert "back=" not in urls["Locate"]
+
+
+@pytest.mark.django_db
+def test_frontend_badges_link_to_the_device_page_for_its_viewers(lentable_device, plain_device, room, make_user):
+    """A lent or lost device's badge opens the device page, not the admin, and
+    only for users who may see it."""
+    establish_state(
+        LentRecord,
+        device=lentable_device,
+        room=room,
+        lent_start_date=datetime.date(2026, 1, 1),
+        lent_desired_end_date=datetime.date(2099, 1, 1),
+    )
+    establish_state(LostRecord, device=plain_device)
+    viewer = make_user("view_device")
+    other = get_user_model().objects.create_user(email="other@example.com", username="other", password="secret")
+
+    for device in (lentable_device, plain_device):
+        device.refresh_from_db()
+        assert get_device_state_data(device, user=viewer, app_name="inventory").url == reverse(
+            "assets:device_detail", args=[device.pk]
+        )
+        assert get_device_state_data(device, user=other, app_name="inventory").url == ""
+        # The admin keeps its own pages.
+        assert get_device_state_data(device, user=viewer).url.startswith("/admin/")
 
 
 @pytest.mark.django_db

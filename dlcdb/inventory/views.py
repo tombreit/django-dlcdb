@@ -229,7 +229,9 @@ def search_devices(request):
         device.state_data_rendered = render_to_string(
             "theme/device/state_btn_group.html",
             {
-                "state_data": get_device_state_data(device, user=request.user, app_name="inventory"),
+                "state_data": get_device_state_data(
+                    device, user=request.user, app_name="inventory", back=request.get_full_path()
+                ),
                 "size": "sm",
             },
             request=request,

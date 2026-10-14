@@ -11,6 +11,7 @@ SPDX-License-Identifier: EUPL-1.2
     aria-label="Button group with nested dropdown"
 >
 
+  {% if state_data.url %}
   <a
     href="{{ state_data.url }}"
     class="{{ state_data.css_classes }} text-nowrap"
@@ -18,6 +19,9 @@ SPDX-License-Identifier: EUPL-1.2
   >
     {{ state_data.label|title }}
   </a>
+  {% else %}
+  <span class="{{ state_data.css_classes }} text-nowrap">{{ state_data.label|title }}</span>
+  {% endif %}
 
   {% if state_data.actions %}
   <div

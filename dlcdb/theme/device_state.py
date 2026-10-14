@@ -18,6 +18,8 @@ from django.utils.translation import gettext_lazy as _
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Record
 
+from .navigation import with_back
+
 # The transitions the assets frontend serves with its own "Move" module rather
 # than an admin add-view. The module works out which one applies from the
 # device's current state (see ``lifecycle.localise``).
@@ -50,7 +52,7 @@ class DeviceStateData:
     actions: list
 
 
-def get_device_state_data(device, *, user=None, app_name=None):
+def get_device_state_data(device, *, user=None, app_name=None, back=None):
     """
     Return a data structure with the current information about the device and
     currently possible actions that can be performed on it.
@@ -70,9 +72,13 @@ def get_device_state_data(device, *, user=None, app_name=None):
     Which actions are possible is decided by the state machine in
     ``dlcdb.core.lifecycle`` (via ``lifecycle.available``); this function only
     presents them for the requesting app.
+
+    ``back`` is the URL the device page's forms and Order return to afterwards
+    (see ``theme.navigation.back_url``); the inventory search passes its own.
     """
 
     active_record = device.active_record
+    frontend = app_name in FRONTEND_SURFACES
 
     # Current state attributes
     label = active_record.get_record_type_display() if active_record else "No active record"
@@ -109,17 +115,25 @@ def get_device_state_data(device, *, user=None, app_name=None):
             label = active_record.get_record_type_display()
             title = _("Previous records for this device")
 
+        # The admin pages above need is_staff. In the frontend every badge but the
+        # inventory's room badge leads to the device page instead, and only for
+        # users who may see it.
+        opens_room_inventory = active_record.record_type == Record.INROOM and app_name == "inventory"
+        if frontend and not opens_room_inventory:
+            may_view = user is not None and user.has_perm("core.view_device")
+            url = reverse("assets:device_detail", args=[device.pk]) if may_view else ""
+            title = _("Device details") if may_view else ""
+
     # Possible actions: whether a transition is offered here -- state, user
     # permission and device precondition -- is decided solely by
     # ``lifecycle.available``. This function only maps each offered transition
     # to a URL and label for the requesting app.
     actions = []
-    frontend = app_name in FRONTEND_SURFACES
     for transition in lifecycle.available(device, user=user):
         # Default target: in the frontend the device page's own form for this
         # state change, in the admin the target proxy model's add-view.
         if frontend:
-            action_url = reverse("assets:device_transition", args=[device.pk, transition.name])
+            action_url = with_back(reverse("assets:device_transition", args=[device.pk, transition.name]), back)
         else:
             proxy_model = lifecycle.proxy_for(transition.target)
             action_url = f"{reverse(f'admin:core_{proxy_model._meta.model_name}_add')}?device={device.pk}"
@@ -140,7 +154,7 @@ def get_device_state_data(device, *, user=None, app_name=None):
         elif transition.name == "order" and frontend:
             # Native frontend action: a POST that writes the ORDERED record and
             # returns to the device page.
-            action_url = reverse("assets:device_order", args=[device.pk])
+            action_url = with_back(reverse("assets:device_order", args=[device.pk]), back)
             method = "post"
         elif transition.name == "lend":
             if frontend and active_record:

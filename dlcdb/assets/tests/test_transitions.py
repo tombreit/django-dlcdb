@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
+from django.utils.html import escape
 
 from dlcdb.assets.views.devices import TRANSITION_FORMS
 from dlcdb.core import lifecycle
@@ -18,6 +19,7 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.device_state import RELOCATE_TRANSITIONS
+from dlcdb.theme.navigation import with_back
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -145,6 +147,38 @@ class DeviceTransitionTests(BaseTest):
         self.assertTrue(response.context["form"].errors["room"])
         device.refresh_from_db()
         self.assertEqual(device.active_record.record_type, Record.REMOVED)
+
+    def test_the_form_returns_to_the_back_url_of_the_screen_that_offered_it(self):
+        self._login("lose")
+        device = self._located_device()
+        back = "/inventory/devices/?q=EDV"
+        url = with_back(self._url(device, "lose"), back)
+
+        self.assertContains(self.client.get(url), f'href="{escape(back)}"')
+        response = self.client.post(url, {"note": "Not in its room"})
+
+        self.assertRedirects(response, back, fetch_redirect_response=False)
+        device.refresh_from_db()
+        self.assertEqual(device.active_record.record_type, Record.LOST)
+
+    def test_order_returns_to_the_back_url(self):
+        self._login("order")
+        device = self._create_device()
+        back = "/inventory/devices/"
+
+        response = self.client.post(with_back(reverse("assets:device_order", args=[device.pk]), back))
+
+        self.assertRedirects(response, back, fetch_redirect_response=False)
+        device.refresh_from_db()
+        self.assertEqual(device.active_record.record_type, Record.ORDERED)
+
+    def test_a_back_url_off_this_site_is_ignored(self):
+        self._login("lose")
+        device = self._located_device()
+
+        response = self.client.post(with_back(self._url(device, "lose"), "https://evil.example/"), {"note": "?"})
+
+        self.assertRedirects(response, reverse("assets:device_detail", args=[device.pk]))
 
     def test_anonymous_users_are_sent_to_the_login(self):
         device = self._located_device()

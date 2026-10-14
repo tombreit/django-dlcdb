@@ -16,7 +16,7 @@ assets.views.devices.device_transition.
     <h1 class="h3 mb-0 me-auto">
       {{ title }}: <span class="font-monospace">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</span>
     </h1>
-    <a href="{{ detail_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    <a href="{{ cancel_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
   </div>
 
   <div class="row g-4">
@@ -29,7 +29,7 @@ assets.views.devices.device_transition.
             {% include "theme/includes/_field.html" with field=field %}
           {% endfor %}
         </div>
-        {% include "theme/includes/_form_action_bar.html" with cancel_url=detail_url submit_label=title %}
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=cancel_url submit_label=title %}
       </form>
     </div>
   </div>

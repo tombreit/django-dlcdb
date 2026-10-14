@@ -11,10 +11,13 @@ from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
 from dlcdb.core.lifecycle import IllegalTransition
-from dlcdb.core.models import Device, InRoomRecord, Inventory, Note, Record
+from dlcdb.core.models import Device, InRoomRecord, Inventory, LostRecord, Note, Record
+from dlcdb.core.models.record import SCRAPPED
+from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.inventory.inventorize import inventorize_uuids_for_room
 from dlcdb.inventory.utils import update_inventory_note
 from dlcdb.tenants.models import Tenant
+from dlcdb.theme.navigation import with_back
 
 
 @pytest.mark.django_db
@@ -243,14 +246,46 @@ def test_device_search_offers_frontend_state_changes_to_non_staff_users(
     client.force_login(join_tenant(user))
     InRoomRecord.objects.create(device=device_1, room=room_1)
 
-    html = client.get(reverse("inventory:search-devices"), headers={"HX-Request": "true"}).content.decode()
+    search_url = reverse("inventory:search-devices")
+    html = client.get(search_url, headers={"HX-Request": "true"}).content.decode()
 
-    assert f'href="{reverse("assets:device_transition", args=[device_1.pk, "remove"])}"' in html
+    remove_url = reverse("assets:device_transition", args=[device_1.pk, "remove"])
+    assert f'href="{with_back(remove_url, search_url)}"' in html
     # device_2 has no record yet, so it may be ordered: a POST form with its CSRF token
-    assert f'action="{reverse("assets:device_order", args=[device_2.pk])}"' in html
+    assert f'action="{with_back(reverse("assets:device_order", args=[device_2.pk]), search_url)}"' in html
     assert "csrfmiddlewaretoken" in html
     assert reverse("admin:core_removedrecord_add") not in html
     assert reverse("admin:core_orderedrecord_add") not in html
+
+
+@pytest.mark.django_db
+def test_inventory_users_without_view_device_change_states_and_return_to_the_search(
+    client, plain_static, inventory_1, join_tenant, device_1, device_2, room_1
+):
+    """
+    The state changes return to the search, so they work without core.view_device,
+    and a badge the user could not open has no link.
+    """
+    user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
+    for codename in ("can_inventorize", "transition_can_remove_device"):
+        user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+    client.force_login(join_tenant(user))
+    InRoomRecord.objects.create(device=device_1, room=room_1)
+    establish_state(LostRecord, device=device_2)
+    search_url = reverse("inventory:search-devices")
+    remove_url = with_back(reverse("assets:device_transition", args=[device_1.pk, "remove"]), search_url)
+
+    html = client.get(search_url, headers={"HX-Request": "true"}).content.decode()
+    assert f'href="{remove_url}"' in html
+    assert '<span class="btn btn-danger text-nowrap">' in html  # device_2's badge
+
+    response = client.post(remove_url, {"disposition_state": SCRAPPED})
+
+    assert response.status_code == 302
+    assert response["Location"] == search_url
+    assert client.get(search_url).status_code == 200
+    device_1.refresh_from_db()
+    assert device_1.active_record.record_type == Record.REMOVED
 
 
 @pytest.mark.django_db
