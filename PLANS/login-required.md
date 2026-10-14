@@ -6,9 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Login required by default
 
-**Status:** batches 1–3 implemented (2026-10-14): the middleware makes login the default, the
-per-view login decorators are gone, and every 403 names the missing permission. This is a living
-document.
+**Status:** implemented (batches 1–4, 2026-10-14): the middleware makes login the default, the
+per-view login decorators are gone, every 403 names the missing permission, and the API schema
+needs authentication. What is left is under *Open follow-ups*.
 
 ## Why
 
@@ -42,7 +42,9 @@ names the missing permission only for `htmx_permission_required`.
    403 page shows the Branding IT address, like the login page.
 6. **The OpenAPI schema and Swagger UI require authentication**
    (`SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"]`). The middleware cannot cover them because DRF
-   views opt out of it. The API itself is guarded by DRF's `IsAuthenticated`.
+   views opt out of it. The API itself is guarded by DRF's `IsAuthenticated`. The Swagger UI is a
+   browser page, so it also carries Django's `login_required`: anonymous visitors are sent to the
+   login page instead of a 403 page that has no log-in link since batch 1.
 
 ## Alternatives considered and rejected
 
@@ -128,9 +130,11 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 
 ### 4. API schema requires authentication
 
-- `SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"]`.
+- `SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"]`; `login_required` on the Swagger UI URL.
 - One sentence in `docs/betrieb/api.md`.
-- Test: refused when anonymous, 200 when authenticated.
+- Tests in `api/tests/test_schema.py`:
+  - schema: refused when anonymous, 200 with a token or a session;
+  - Swagger UI: login redirect when anonymous, 200 when logged in.
 - NEWS.
 
 ## Progress
@@ -139,4 +143,4 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 - [x] **1. Middleware, public exemptions**
 - [x] **2. Drop the now-dead login decorators**
 - [x] **3. Every 403 names the missing permission**
-- [ ] **4. API schema requires authentication**
+- [x] **4. API schema requires authentication**

@@ -470,6 +470,9 @@ SPECTACULAR_SETTINGS = {
     # when the API changes, independently of dlcdb.__version__.
     "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # The schema views are DRF views and skip the LoginRequiredMiddleware;
+    # they allow anyone by default.
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # https://django-simple-history.readthedocs.io/en/latest/admin.html#disabling-the-option-to-revert-an-object

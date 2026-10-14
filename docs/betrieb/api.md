@@ -2,6 +2,9 @@
 
 ```{admonition} Interactive REST API Documentation
 **{{ api_swagger_url }}**
+
+The documentation needs a login; the schema behind it (`/api/v2/schema/`) is also
+available with a token.
 ```
 
 ## Token Authentication

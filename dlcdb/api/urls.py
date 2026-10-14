@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from django.contrib.auth.decorators import login_required
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework import routers
@@ -18,5 +19,7 @@ urlpatterns = [
     path("", views.api_root, name="api-v2-root"),
     path("", include(router.urls)),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    # A page for browsers: DRF views skip the LoginRequiredMiddleware, so send
+    # anonymous visitors to the login page here instead of a bare 403.
+    path("schema/swagger-ui/", login_required(SpectacularSwaggerView.as_view(url_name="schema")), name="swagger-ui"),
 ]
