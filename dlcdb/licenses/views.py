@@ -18,7 +18,7 @@ from django_htmx.http import HttpResponseClientRedirect
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, LicenceRecord, Room
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
@@ -76,7 +76,6 @@ def index(request):
     return TemplateResponse(request, template, context)
 
 
-@htmx_login_required
 @htmx_permission_required("core.change_licencerecord")
 def edit(request, license_id):
     if request.htmx:
@@ -143,7 +142,6 @@ def edit(request, license_id):
     )
 
 
-@htmx_login_required
 @htmx_permission_required("core.add_licencerecord")
 def new(request):
     if request.htmx:

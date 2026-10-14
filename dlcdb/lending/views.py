@@ -20,7 +20,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import LentRecord, Person, Record, Room
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.core.utils.links import linked_message
 from dlcdb.dataexchange.csv_export import (
     LENDING_EXPORT_COLUMNS,
@@ -243,7 +243,6 @@ def _save_lending(request, record, form):
     return True
 
 
-@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def lend(request, pk=None):
     """
@@ -389,7 +388,6 @@ def lend(request, pk=None):
     return TemplateResponse(request, "lending/lend.html", context)
 
 
-@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 def person_search(request):
     """HTMX live-search backing the person picker on the detail view."""
@@ -427,7 +425,6 @@ def _build_unsaved_lentrecord(device, form):
     )
 
 
-@htmx_login_required
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 @require_POST
 def print_sheet(request, pk):

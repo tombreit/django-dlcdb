@@ -10,7 +10,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
 from dlcdb.core.models import Inventory, LentRecord, Record
-from dlcdb.core.utils.htmx import htmx_login_required
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.icons import get_icon_for_class
@@ -104,7 +103,6 @@ def _build_tile(*, model_name, url, request, base_params=None):
     }
 
 
-@htmx_login_required
 def index(request):
     """
     Dashboard on the theme frontend: model tiles (counts + note badges) and
@@ -116,9 +114,7 @@ def index(request):
     gets only the results fragment -- the tile aggregates and the three Plotly
     figures are far too expensive to rebuild on every keystroke.
 
-    Guarded HTMX-aware rather than with plain ``login_required``: on an expired
-    session a 302 would otherwise swap the whole login page into the results
-    panel. Per-source permissions are applied inside ``run_search``.
+    Per-source permissions are applied inside ``run_search``.
     """
     term = (request.GET.get(GLOBAL_SEARCH_PARAM) or "").strip()
     search_context = {

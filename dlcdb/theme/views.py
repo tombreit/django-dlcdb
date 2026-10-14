@@ -8,10 +8,9 @@ Shared HTMX endpoint backing the centralized device picker.
 A single ``device_search`` view serves every picker source (lending, relocate,
 …). The POST ``source`` token selects a registered :class:`theme.pickers.PickerSource`,
 which supplies the tenant-scoped ``Device`` queryset and the required permission;
-the ranking and rendering are shared. The login guard is the shared
-``htmx_login_required``; the permission check has to stay inline because which
-permission applies is only known once the source is resolved, but it follows the
-same contract as ``htmx_permission_required``.
+the ranking and rendering are shared. The permission check has to stay inline
+because which permission applies is only known once the source is resolved, but
+it follows the same contract as ``htmx_permission_required``.
 """
 
 from django.contrib import messages
@@ -23,14 +22,12 @@ from django.views.decorators.http import require_POST
 from django_htmx.http import HttpResponseClientRefresh
 
 from dlcdb.core.utils.device_search import search_devices
-from dlcdb.core.utils.htmx import htmx_login_required
 
 from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
 
 
 @require_POST
-@htmx_login_required
 def device_search(request):
     """Live-search the devices of the requested picker source. Empty query -> none."""
     source = get_picker_source(request.POST.get("source"))

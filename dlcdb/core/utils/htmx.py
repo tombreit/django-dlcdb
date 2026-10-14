@@ -5,36 +5,16 @@
 """
 HTMX-aware request guards shared by the frontend apps (assets, lending,
 licenses). Kept here in ``core.utils`` so there is a single implementation to
-fix instead of one byte-for-byte copy per app.
+fix instead of one byte-for-byte copy per app. The login itself is checked for
+every view by ``dlcdb.accounts.middleware.LoginRequiredMiddleware``.
 """
 
 import functools
 
 from django.contrib import messages
 from django.contrib.auth.models import Permission
-from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django_htmx.http import HttpResponseClientRefresh
-
-
-def htmx_login_required(view_func):
-    """
-    Login guard for endpoints reached over HTMX. An unauthenticated request
-    triggers a full client-side refresh (the browser reloads and the normal
-    login redirect takes over) instead of letting HTMX swap the login page's
-    HTML into a results container. Non-HTMX requests get the usual login
-    redirect.
-    """
-
-    @functools.wraps(view_func)
-    def wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            if getattr(request, "htmx", False):
-                return HttpResponseClientRefresh()
-            return redirect_to_login(request.get_full_path())
-        return view_func(request, *args, **kwargs)
-
-    return wrapped_view
 
 
 def _missing_permission_message(perms):

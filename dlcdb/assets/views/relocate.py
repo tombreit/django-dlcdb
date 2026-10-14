@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from dlcdb.core.models import Record, Room
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.core.utils.relocate import relocate_device
 from dlcdb.theme.pickers import picker_filter
 
@@ -28,7 +28,6 @@ SEARCH_RESULT_LIMIT = 25
 
 
 @require_POST
-@htmx_login_required
 @htmx_permission_required(*MOVE_PERMISSIONS)
 def room_search(request):
     """HTMX live-search backing the room picker. Empty query yields nothing."""

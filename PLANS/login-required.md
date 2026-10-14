@@ -6,8 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # Login required by default
 
-**Status:** batch 1 implemented (2026-10-14): the middleware makes login the default. This is a
-living document.
+**Status:** batches 1–2 implemented (2026-10-14): the middleware makes login the default, and
+the per-view login decorators are gone. This is a living document.
 
 ## Why
 
@@ -128,6 +128,6 @@ requests. Protecting them needs a Django view with `X-Sendfile`, or an Apache-le
 
 - [x] **0. This document**
 - [x] **1. Middleware, public exemptions**
-- [ ] **2. Drop the now-dead login decorators**
+- [x] **2. Drop the now-dead login decorators**
 - [ ] **3. Every 403 names the missing permission**
 - [ ] **4. API schema requires authentication**

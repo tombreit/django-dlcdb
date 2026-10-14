@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -43,7 +42,6 @@ def _get_own_report_subscription(request, pk):
     )
 
 
-@login_required
 def index(request):
     person = _get_person(request)
 
@@ -73,7 +71,6 @@ def index(request):
     return TemplateResponse(request, "notifications/index.html", context)
 
 
-@login_required
 @require_POST
 def delete(request, pk):
     subscription = _get_own_report_subscription(request, pk)
@@ -82,7 +79,6 @@ def delete(request, pk):
     return redirect("notifications:index")
 
 
-@login_required
 @require_POST
 def trigger(request, pk):
     """Create and immediately send a report, without shifting the reporting window."""
@@ -95,7 +91,6 @@ def trigger(request, pk):
     return redirect("notifications:index")
 
 
-@login_required
 @require_POST
 def toggle(request, pk):
     subscription = _get_own_report_subscription(request, pk)

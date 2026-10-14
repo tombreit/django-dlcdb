@@ -49,7 +49,7 @@ from django_filters.views import FilterView
 from dlcdb.core.lifecycle import IllegalTransition
 from dlcdb.core.models import Device, Inventory, Note, Room
 from dlcdb.core.utils.helpers import get_user_email
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.device_state import get_device_state_data
 from dlcdb.theme.pagination import paginate
 
@@ -295,7 +295,6 @@ class SapCompareListView(DetailView):
         return HttpResponseRedirect(reverse("inventory:compare-sap-list", kwargs=dict(pk=sap_list.pk)))
 
 
-@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def get_note_btn(request, obj_type, obj_uuid):
     if obj_type == "device":
@@ -306,7 +305,6 @@ def get_note_btn(request, obj_type, obj_uuid):
     return render(request, "inventory/includes/note_btn.html", {"obj_type": obj_type, "obj": obj})
 
 
-@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def update_note_view(request, obj_type, obj_uuid):
     inventory = Inventory.objects.active_inventory()
@@ -388,7 +386,6 @@ def update_note_view(request, obj_type, obj_uuid):
     return render(request, template, context)
 
 
-@htmx_login_required
 @htmx_permission_required("core.can_inventorize")
 def delete_note_view(request, pk):
     if request.method == "POST":

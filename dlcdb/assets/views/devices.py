@@ -5,7 +5,7 @@
 import datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, Person, Record
-from dlcdb.core.utils.htmx import htmx_login_required, htmx_permission_required
+from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.device_state import get_device_state_data
@@ -225,7 +225,6 @@ TRANSITION_FORMS = {
 }
 
 
-@login_required
 def device_transition(request, pk, name):
     """Change a device's state in a small form, from its "New state" menu.
 
@@ -281,7 +280,6 @@ def _lending_url(user, device):
 
 
 @require_POST
-@htmx_login_required
 @htmx_permission_required("core.change_device")
 def person_search(request):
     """
