@@ -116,25 +116,20 @@ Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine
 | Ausleihen und Zurückgeben | Lokalisiert ↔ Verliehen | Core \| record \| Transition: Can lend a device and take it back | `core.transition_can_lend_device` |
 | Nicht auffindbar | Lokalisiert/Verliehen → Nicht auffindbar | Core \| record \| Transition: Can mark a device as not locatable | `core.transition_can_lose_device` |
 | Gefunden | Nicht auffindbar → Lokalisiert | Core \| record \| Transition: Can mark a lost device as found | `core.transition_can_find_device` |
-| Entfernen | Lokalisiert/Verliehen/Nicht auffindbar → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
+| Entfernen | *(kein Record)*/Bestellt/Lokalisiert/Verliehen/Nicht auffindbar → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
 | Wiederherstellen | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to not-locatable | `core.transition_can_restore_device` |
 | Wiedereingliedern | Entfernt → Lokalisiert | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
 
 ### Frontend oder Django-Admin?
 
-Die Berechtigung entscheidet, **ob** ein Statuswechsel angeboten wird. **Wo** er ausgeführt wird, hängt vom Übergang ab:
+Alle Statuswechsel laufen im Frontend: auf der [Geräte-Detailseite](devices.md) und in der Gerätesuche der [Inventur](inventur.md). Dort zählen allein die Berechtigung des Übergangs und der Zugriff auf den [Mandanten](#mandanten) des Geräts; das Staff-Flag und die Standard-Berechtigungen der Record-Typen (`core.add_removedrecord`, `core.change_lentrecord`, …) spielen keine Rolle. Aus der Gerätesuche der Inventur führt ein Statuswechsel zurück in die Suche, `core.view_device` ist dafür nicht nötig.
 
-| Übergang | Ausführung | benötigt zusätzlich |
-|---|---|---|
-| Bestellung, Lokalisieren, Umziehen, Gefunden, Ausleihen, Zurückgeben | Frontend | nichts |
-| Nicht auffindbar, Entfernen, Wiederherstellen, Wiedereingliedern | Django-Admin-Formular (Menüeintrag mit ↗-Symbol) | *Staff*-Flag **und** die *Can add*-Berechtigung des geschriebenen Records: `core.add_lostrecord`, `core.add_removedrecord` bzw. `core.add_inroomrecord` (Wiedereingliedern) |
-
-Ohne Staff-Flag erscheinen die Admin-gestützten Einträge gar nicht erst. Die übrigen Standard-Berechtigungen der Record-Typen (`core.add_lentrecord`, `core.change_lentrecord`, …) steuern keine Statuswechsel; im Frontend zählen allein die `transition_*`-Berechtigungen.
+Die Geräteseite des Django-Admins bietet dieselben Statuswechsel in eigenen Formularen an. Dort braucht der Benutzer zusätzlich das Staff-Flag und die *Can add*-Berechtigung des geschriebenen Records, z.B. `core.add_removedrecord`.
 
 :::{admonition} **Ausmusterung rückgängig machen**
 :class: note
 
-`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**; *Entfernt* ist damit standardmäßig ein Endzustand. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst einer eng gefassten Gruppe mit Staff-Flag zu.
+`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**; *Entfernt* ist damit standardmäßig ein Endzustand. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst einer eng gefassten Gruppe zu.
 :::
 
 :::{admonition} **Die Berechtigung gilt für die ganze Aktion**
@@ -203,7 +198,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
 - Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
-- die mit *(Admin)* markierten [Menüpunkte](#navigation) und die vier [Admin-gestützten Statuswechsel](#frontend-oder-django-admin),
+- die mit *(Admin)* markierten [Menüpunkte](#navigation),
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
 - die Änderungshistorie eines Mandanten, erzeugte Reports und den SAP-Import.
 

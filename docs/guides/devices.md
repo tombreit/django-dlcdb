@@ -50,11 +50,12 @@ Die Info-Spalte rechts zeigt:
 - **Aktueller Status** — der aktive Record (Zustand, Raum/Person) und der Button
   *Neuer Zustand* mit den erlaubten Übergängen (siehe
   [Statuswechsel](berechtigungen.md#statuswechsel)), u.a. *Umziehen* →
-  [Umziehen](umziehen.md) und *Ausleihen* → [Ausleihe](ausleihe.md).
+  [Umziehen](umziehen.md), *Ausleihen* → [Ausleihe](ausleihe.md) und
+  *Entfernen* → [Ausmustern](ausmustern.md).
 - **Verlauf** — *Alle Zustände* (vollständige Record-Kette) und *Felder Historie*
   (feldgenaue Änderungen als Zeitleiste: wann, wer, was; die
   Verschlüsselungs-Passwörter nur maskiert).
-- **Geräte-Details** — Admin-Ansicht, Erstellt/Zuletzt geändert, Ursprung, UUID.
+- **Geräte-Details** — Erstellt/Zuletzt geändert, Ursprung, UUID.
 - **QR-Code** — der automatisch erzeugte QR-Code des Geräts (für die
   [Inventur](inventur.md)).
 

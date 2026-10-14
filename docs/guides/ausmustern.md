@@ -13,9 +13,9 @@ Ausmustern ist ein "Verwaltungsakt", daher dient diese Doku nur der Inspiration 
 ## Einzelnes Gerät ausmustern
 
 1. Gerät in der Geräte-Übersicht (*Hauptmenü › Geräte*) aufrufen
-1. Auf der Detailseite *Neuer Zustand › Entfernen* wählen. Der Eintrag öffnet ein Formular des Django-Admins (siehe [Frontend oder Django-Admin?](berechtigungen.md#frontend-oder-django-admin))
-1. Verbleib nach Ausmusterung via Dropdown angeben (verkauft, verschrottet, …)
-1. Notiz (*removed_info*) angeben: z.B. "veraltet", "Speichermedium sicher gelöscht" etc.
+1. Auf der Detailseite *Neuer Zustand › Entfernen* wählen; benötigt wird nur die Berechtigung *Entfernen* (siehe [Statuswechsel](berechtigungen.md#statuswechsel))
+1. *Verbleib nach der Ausmusterung* via Dropdown angeben (verkauft, verschrottet, …)
+1. *Verbleib* als Freitext angeben: z.B. "veraltet", "Speichermedium sicher gelöscht" etc.
 
 ## CSV-Bulk-Ausmusterung
 
