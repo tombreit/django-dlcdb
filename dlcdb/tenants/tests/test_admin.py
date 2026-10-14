@@ -6,6 +6,7 @@
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
 from django.urls import reverse
 
@@ -234,26 +235,21 @@ def test_record_admin_lists_only_own_records(tenant_staff_client, tenant, foreig
     assert "EDV-FOREIGN" not in content
 
 
-def test_record_add_form_offers_only_own_devices(tenant_staff_client, tenant, foreign):
+def test_record_form_offers_only_own_devices(tenant_staff_client, tenant, foreign):
+    """A device field of an admin form lists and accepts only the own tenants' devices."""
+    licence = Device.objects.create(edv_id="LIC-OWN", is_licence=True, tenant=tenant)
+    record = InRoomRecord.objects.create(device=licence, room=Room.objects.create(number="A1.23"))
     own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
     foreign_device = Device.objects.create(edv_id="EDV-FOREIGN", tenant=foreign)
-    client = tenant_staff_client("core.add_orderedrecord")
-    url = reverse("admin:core_orderedrecord_add")
+    client = tenant_staff_client("core.change_licencerecord")
 
-    assert set(client.get(url).context["adminform"].form.fields["device"].queryset) == {own}
-    # A posted pk of a foreign device fails validation.
-    response = client.post(url, {"device": foreign_device.pk})
-    assert "device" in response.context["adminform"].form.errors
+    response = client.get(reverse("admin:core_licencerecord_change", args=[record.pk]))
+    field = response.context["adminform"].form.fields["assigned_device"]
 
-
-def test_record_add_view_does_not_reveal_a_foreign_device(tenant_staff_client, tenant, foreign):
-    own = Device.objects.create(edv_id="EDV-OWN", tenant=tenant)
-    foreign_device = Device.objects.create(edv_id="EDV-FOREIGN", tenant=foreign)
-    client = tenant_staff_client("core.add_inroomrecord")
-    url = reverse("admin:core_inroomrecord_add")
-
-    assert client.get(url, {"device": own.pk}).status_code == 200
-    assert client.get(url, {"device": foreign_device.pk}).status_code == 404
+    assert own in field.queryset
+    assert foreign_device not in field.queryset
+    with pytest.raises(ValidationError):
+        field.clean(foreign_device.pk)
 
 
 def test_record_changelist_does_not_reveal_a_foreign_device(tenant_staff_client, tenant, foreign):

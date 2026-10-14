@@ -6,13 +6,14 @@ SPDX-License-Identifier: CC0-1.0
 
 # Every state change in the frontend
 
-**Status:** implemented (2026-10-14). Every transition runs in the frontend, gated by
-`lifecycle.available` (its transition permission) and the tenant scope alone: the assets
-device page runs Lose, Remove, Restore and Recover in forms of its own, and the inventory
-device search uses the same screens, returns to itself afterwards and has no admin links
-left. Before, these four ran only in Django admin forms, which need the Staff flag and an
-`add_*record` permission on top of the transition permission. The admin and frontend
-device pages behave the same.
+**Status:** in progress, batches 0 to 5 of 6 done. Every transition runs in the frontend,
+gated by `lifecycle.available` (its transition permission) and the tenant scope alone: the
+assets device page runs Lose, Remove, Restore and Recover in forms of its own, the
+inventory device search uses the same screens, returns to itself afterwards and has no
+admin links left, and the admin's device page opens these screens too. Before, the four ran
+only in Django admin forms, which need the Staff flag and an `add_*record` permission on top
+of the transition permission. Left: deleting the admin code that only served the record
+add-forms (batch 6).
 
 ## Decisions taken
 
@@ -21,9 +22,13 @@ device pages behave the same.
    small form per transition; it calls the `lifecycle.transition_*` function.
 2. **The inventory device search routes to the same frontend flows** instead of the
    admin.
-3. **Admin and frontend behave the same; no new code in the admins.** The admin is being
-   phased out. Its forms may additionally need `is_staff` and their `add_*`/`change_*`
-   permission. Aligning removes admin code, it never adds any.
+3. **The admin uses the frontend screens; no new code in the admins.** The admin is being
+   phased out. Its device page opens the same frontend screens (Order as a link to the
+   device page: the admin's device list renders the buttons inside its own form), and the
+   ordered, room-assignment, not-locatable and removed record admins offer no "Add", like
+   the lending, licence and record admins already. Their add-forms checked only
+   `add_*record`, not the transition permission, so `core.add_inroomrecord` could recover
+   a decommissioned device. Aligning removes admin code, it never adds any.
 4. **The same fields on both sides.** Remove: disposition state and whereabouts;
    attachments stay admin-only (managed there; the record detail page lists them). Lose
    and Restore: a note. Recover: room and note.
@@ -49,12 +54,6 @@ device pages behave the same.
 - Let the admin add-forms check the transition permission: new admin code, for an admin
   that is being phased out.
 
-## Open follow-ups
-
-- An admin add-form opened directly (e.g. "Add" in a record list) checks only its
-  `add_*record` permission, not the transition permission. Accepted until the admin forms
-  are gone; via the device page the transition permission decides.
-
 ## Progress
 
 - [x] 0. This document
@@ -62,3 +61,5 @@ device pages behave the same.
 - [x] 2. The inventory device search uses the frontend flows
 - [x] 3. Inventory search: state badges link to the device page; state changes return to the search (`?back=`)
 - [x] 4. Docs (`berechtigungen.md`) and NEWS
+- [x] 5. The admin's device page opens the frontend screens; the record admins add nothing
+- [ ] 6. Delete the admin code that only served the record add-forms

@@ -124,7 +124,7 @@ Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine
 
 Alle Statuswechsel laufen im Frontend: auf der [Geräte-Detailseite](devices.md) und in der Gerätesuche der [Inventur](inventur.md). Dort zählen allein die Berechtigung des Übergangs und der Zugriff auf den [Mandanten](#mandanten) des Geräts; das Staff-Flag und die Standard-Berechtigungen der Record-Typen (`core.add_removedrecord`, `core.change_lentrecord`, …) spielen keine Rolle. Aus der Gerätesuche der Inventur führt ein Statuswechsel zurück in die Suche, `core.view_device` ist dafür nicht nötig.
 
-Die Geräteseite des Django-Admins bietet dieselben Statuswechsel in eigenen Formularen an. Dort braucht der Benutzer zusätzlich das Staff-Flag und die *Can add*-Berechtigung des geschriebenen Records, z.B. `core.add_removedrecord`.
+Auch die Geräteseite des Django-Admins führt für jeden Statuswechsel in diese Ansichten. Records legt der Django-Admin dafür nicht mehr selbst an: Die *Can add*-Berechtigungen `core.add_orderedrecord`, `core.add_inroomrecord`, `core.add_lostrecord` und `core.add_removedrecord` öffnen nichts mehr und können aus den Gruppen entfernt werden.
 
 :::{admonition} **Ausmusterung rückgängig machen**
 :class: note

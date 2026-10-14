@@ -74,6 +74,16 @@ def _offers(state_data, fragment):
     return any(fragment in url for url in _targets(state_data))
 
 
+def _form(device, name):
+    """The device page's own form for state change ``name``."""
+    return reverse("assets:device_transition", args=[device.pk, name])
+
+
+def _urls(state_data):
+    """The offered actions as {label: URL}."""
+    return {action["label"]: action["url"] for action in state_data.actions}
+
+
 # --- No active record ----------------------------------------------------
 
 
@@ -88,10 +98,11 @@ def test_device_without_a_record_offers_every_legal_first_step(plain_device, sup
 
     assert state_data.label == "No active record"
     assert "disabled" in state_data.css_classes
-    assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
-    assert _offers(state_data, reverse("admin:core_orderedrecord_add"))
-    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
-    assert len(state_data.actions) == 3
+    assert _urls(state_data) == {
+        "Locate": f"{reverse('assets:relocate')}?device={plain_device.pk}",
+        "Order": reverse("assets:device_detail", args=[plain_device.pk]),
+        "Remove": _form(plain_device, "remove"),
+    }
 
 
 @pytest.mark.django_db
@@ -100,12 +111,13 @@ def test_a_record_less_device_offers_only_what_the_user_may_do(plain_device, mak
     user = make_user("transition_can_locate_device")
     state_data = get_device_state_data(plain_device, user=user)
 
-    assert _targets(state_data) == [f"{reverse('admin:core_inroomrecord_add')}?device={plain_device.pk}"]
+    assert _targets(state_data) == [f"{reverse('assets:relocate')}?device={plain_device.pk}"]
 
 
 @pytest.mark.django_db
-def test_the_assets_surface_orders_natively_via_post(plain_device, make_user):
-    """On the frontend, Order is a POST to the assets view, not the admin add-view."""
+def test_order_posts_in_the_frontend_and_links_to_the_device_page_in_the_admin(plain_device, make_user):
+    """The admin's device list renders the buttons inside its own form, which
+    cannot hold a second one; there Order leads to the device page instead."""
     user = make_user("transition_can_order_device")
 
     [action] = get_device_state_data(plain_device, user=user, app_name="assets").actions
@@ -113,7 +125,7 @@ def test_the_assets_surface_orders_natively_via_post(plain_device, make_user):
     assert action["method"] == "post"
 
     [action] = get_device_state_data(plain_device, user=user).actions
-    assert action["url"] == f"{reverse('admin:core_orderedrecord_add')}?device={plain_device.pk}"
+    assert action["url"] == reverse("assets:device_detail", args=[plain_device.pk])
     assert action["method"] == "get"
 
 
@@ -184,24 +196,26 @@ def test_inroom_record_without_a_room_is_flagged(lentable_device, superuser):
 
 @pytest.mark.django_db
 def test_inroom_offers_move_lend_lost_and_removed(lentable_device, room, superuser):
-    InRoomRecord.objects.create(device=lentable_device, room=room)
+    record = InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()
 
     state_data = get_device_state_data(lentable_device, user=superuser)
 
-    assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
-    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
-    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
-    assert _offers(state_data, "lentrecord")
+    assert _urls(state_data) == {
+        "Move": f"{reverse('assets:relocate')}?device={lentable_device.pk}",
+        "Lend": reverse("lending:detail", args=[record.pk]),
+        "Not locatable": _form(lentable_device, "lose"),
+        "Remove": _form(lentable_device, "remove"),
+    }
 
 
 @pytest.mark.django_db
 def test_lent_offers_return_loss_and_removal(lentable_device, room, superuser):
     """Decommissioning a device while it is on loan is legal, so it is offered.
 
-    The return goes to the lending form rather than an InRoomRecord add-view: a
-    return stamps the lending's end date first and only then puts the device
-    back, which creating a room record on its own would not do.
+    The return goes to the lending form rather than the Move module: a return
+    stamps the lending's end date first and only then puts the device back, which
+    a move on its own would not do.
     """
     record = establish_state(
         LentRecord,
@@ -214,10 +228,11 @@ def test_lent_offers_return_loss_and_removal(lentable_device, room, superuser):
 
     state_data = get_device_state_data(lentable_device, user=superuser)
 
-    assert _offers(state_data, reverse("admin:core_lentrecord_change", args=[record.pk]))
-    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
-    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
-    assert not _offers(state_data, reverse("admin:core_inroomrecord_add"))
+    assert _urls(state_data) == {
+        "Return": f"{reverse('lending:detail', args=[record.pk])}?flow=return",
+        "Not locatable": _form(lentable_device, "lose"),
+        "Remove": _form(lentable_device, "remove"),
+    }
 
 
 @pytest.mark.django_db
@@ -227,13 +242,13 @@ def test_lost_offers_found_removal_and_re_marking_but_not_lending(lentable_devic
 
     state_data = get_device_state_data(lentable_device, user=superuser)
 
-    assert _offers(state_data, reverse("admin:core_inroomrecord_add"))
-    assert _offers(state_data, reverse("admin:core_removedrecord_add"))
-    assert not _offers(state_data, "lentrecord")
+    assert _offers(state_data, reverse("assets:relocate"))  # Found
+    assert _offers(state_data, _form(lentable_device, "remove"))
+    assert not _offers(state_data, "lending")
     # LOST -> LOST is legal, so an inventory can re-mark a device that is still
     # missing. Whether that is worth a button is now the operator's call, made by
     # granting transition_can_lose_device -- not something the state machine decides.
-    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
+    assert _offers(state_data, _form(lentable_device, "lose"))
 
 
 @pytest.mark.django_db
@@ -290,9 +305,7 @@ def test_actions_are_gated_by_the_transition_permission(lentable_device, room, m
     user = make_user("transition_can_lose_device")
     state_data = get_device_state_data(lentable_device, user=user)
 
-    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
-    assert not _offers(state_data, reverse("admin:core_removedrecord_add"))
-    assert not _offers(state_data, reverse("admin:core_inroomrecord_add"))
+    assert _targets(state_data) == [_form(lentable_device, "lose")]
 
 
 @pytest.mark.django_db
@@ -325,9 +338,9 @@ def test_non_lentable_devices_are_never_offered_lending(room, make_user):
     user = make_user(*ALL_LIFECYCLE_PERMISSIONS)
     state_data = get_device_state_data(device, user=user)
 
-    assert not _offers(state_data, "lentrecord")
+    assert not _offers(state_data, "lending")
     # ... while the other INROOM transitions stay available.
-    assert _offers(state_data, reverse("admin:core_lostrecord_add"))
+    assert _offers(state_data, _form(device, "lose"))
 
 
 # --- Frontend (app_name) variants ---------------------------------------
@@ -505,19 +518,6 @@ def test_frontend_badges_link_to_the_device_page_for_its_viewers(lentable_device
         assert get_device_state_data(device, user=other, app_name="inventory").url == ""
         # The admin keeps its own pages.
         assert get_device_state_data(device, user=viewer).url.startswith("/admin/")
-
-
-@pytest.mark.django_db
-def test_actions_carry_the_device_prefill(lentable_device, room, superuser):
-    """Every admin add-action prefills ``?device=<pk>`` so the form knows its target."""
-    InRoomRecord.objects.create(device=lentable_device, room=room)
-    lentable_device.refresh_from_db()
-
-    state_data = get_device_state_data(lentable_device, user=superuser)
-
-    assert state_data.actions
-    for action in state_data.actions:
-        assert f"device={lentable_device.pk}" in action["url"] or str(lentable_device.uuid) in action["url"]
 
 
 @pytest.mark.django_db

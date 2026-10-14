@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Not locatable, Remove, Restore and Recover run in the frontend, on the device page and in the inventory search, and need only their transition permission, no Staff flag
+* Not locatable, Remove, Restore and Recover run in the frontend, on the device page and in the inventory search, and need only their transition permission, no Staff flag; the admin opens the same screens and no longer adds ordered, room-assignment, not-locatable or removed records
 * Search and filter bar: smaller, one strip of search, filters and sort
 * Listings now support filtering by tenant (given the current user has multiple tenants)
 * Room detail page lists the room's stock changes: when each device arrived or left, and who recorded it

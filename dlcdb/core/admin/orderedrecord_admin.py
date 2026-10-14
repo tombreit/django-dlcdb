@@ -19,6 +19,10 @@ class OrderedRecordAdmin(TenantScopedRecordAdmin, NoModificationModelAdminMixin,
     list_display = ["get_device_link", "date_of_purchase"]
     fields = ["device"]
 
+    def has_add_permission(self, request):
+        # State changes run in the frontend, gated by their transition permission.
+        return False
+
     @admin.display(description="Gerät")
     def get_device_link(self, obj):
         return Template('<a href="{{url}}">{{label}}</a>').render(

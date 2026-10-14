@@ -181,7 +181,7 @@ class DeviceAdminActionsColumnTests(basetest.BaseTest):
         viewer = get_user_model().objects.create_user(
             email="viewer@example.org", password="secret", username="viewer", is_staff=True
         )
-        locate = f"{reverse('admin:core_inroomrecord_add')}?device={device.pk}"
+        locate = f"{reverse('assets:relocate')}?device={device.pk}"
 
         columns_of_superuser = self._list_display(superuser)
         columns_of_viewer = self._list_display(viewer)

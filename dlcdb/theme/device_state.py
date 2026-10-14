@@ -6,8 +6,9 @@
 The device state badge and its action buttons, for each screen that shows them:
 the admin, the assets device page and the inventory search. Which actions a user
 gets is ``lifecycle.available``'s decision; this module only labels them and
-routes each to the screen's own URL. ``theme/device/state_btn_group.html`` and
-the assets "Set state" dropdown render the result.
+routes each to its frontend screen, from every one of them. The badge links to a
+page of the same surface. ``theme/device/state_btn_group.html`` and the assets
+"Set state" dropdown render the result.
 """
 
 from dataclasses import dataclass
@@ -21,7 +22,7 @@ from dlcdb.core.models import Record
 from .navigation import with_back
 
 # The transitions the assets frontend serves with its own "Move" module rather
-# than an admin add-view. The module works out which one applies from the
+# than the device page's forms. The module works out which one applies from the
 # device's current state (see ``lifecycle.localise``).
 #
 # This mirrors ``lifecycle.LOCALISING_MOVES``, which is what the module's picker
@@ -31,9 +32,9 @@ from .navigation import with_back
 # test pins the two against each other.
 RELOCATE_TRANSITIONS = set(lifecycle.LOCALISING_MOVES)
 
-# The screens whose state changes run in the frontend: the assets device page and
-# the inventory device search. Without an app name (the admin) the actions open
-# the admin's own forms.
+# The screens of the frontend: the assets device page and the inventory device
+# search. Their badges link to frontend pages, and they order with one click.
+# Without an app name (the admin) the badge keeps its admin links.
 FRONTEND_SURFACES = {"assets", "inventory"}
 
 
@@ -64,8 +65,8 @@ def get_device_state_data(device, *, user=None, app_name=None, back=None):
         "url": "/admin/core/device/123/change",
         "css_classes": "btn btn-success",
         "actions": [
-            {"url": "/admin/core/lostrecord/add?device=123", "label": "Mark as lost"},
-            {"url": "/admin/core/lentrecord/add?device=123", "label": "Lend device"},
+            {"url": "/assets/relocate/?device=123", "label": "Move", "method": "get"},
+            {"url": "/assets/devices/123/state/lose/", "label": "Not locatable", "method": "get"},
         ]
     }
 
@@ -127,56 +128,48 @@ def get_device_state_data(device, *, user=None, app_name=None, back=None):
     # Possible actions: whether a transition is offered here -- state, user
     # permission and device precondition -- is decided solely by
     # ``lifecycle.available``. This function only maps each offered transition
-    # to a URL and label for the requesting app.
+    # to its frontend screen, on every surface, the admin included.
     actions = []
     for transition in lifecycle.available(device, user=user):
-        # Default target: in the frontend the device page's own form for this
-        # state change, in the admin the target proxy model's add-view.
-        if frontend:
-            action_url = with_back(reverse("assets:device_transition", args=[device.pk, transition.name]), back)
-        else:
-            proxy_model = lifecycle.proxy_for(transition.target)
-            action_url = f"{reverse(f'admin:core_{proxy_model._meta.model_name}_add')}?device={device.pk}"
-        action_label = transition.label
+        # Default target: the device page's own form for this state change.
+        action_url = with_back(reverse("assets:device_transition", args=[device.pk, transition.name]), back)
         # How the dropdown submits the action: a plain link, or a POST form for
-        # native actions that change state directly without a form page.
+        # Order, which changes state directly without a form page.
         method = "get"
 
         # Routing is by transition *name*, not by target state: four different
         # moves write an InRoomRecord, and dispatching on the target would
         # collapse them into one button -- labelling a device's recovery from
         # decommission as "Move", say. The label always stays the transition's own.
-        if transition.name in RELOCATE_TRANSITIONS and frontend:
-            # Native "Move" module (single-device prefill via ?device=). It
+        if transition.name in RELOCATE_TRANSITIONS:
+            # The "Move" module (single-device prefill via ?device=). It
             # dispatches through ``lifecycle.localise``, which picks the right
             # transition for the device's current state.
             action_url = f"{reverse('assets:relocate')}?device={device.pk}"
-        elif transition.name == "order" and frontend:
-            # Native frontend action: a POST that writes the ORDERED record and
-            # returns to the device page.
-            action_url = with_back(reverse("assets:device_order", args=[device.pk]), back)
-            method = "post"
-        elif transition.name == "lend":
-            if frontend and active_record:
-                # Native frontend lending flow. LENT is only reachable from an
-                # INROOM active record, so active_record.pk is always valid here.
-                action_url = reverse("lending:detail", args=[active_record.pk])
+        elif transition.name == "order":
+            if frontend:
+                # A POST that writes the ORDERED record and returns to the device page.
+                action_url = with_back(reverse("assets:device_order", args=[device.pk]), back)
+                method = "post"
             else:
-                action_url = f"{reverse('admin:core_lentrecord_changelist')}?q={device.uuid}"
+                # The admin's device list renders these buttons inside its own
+                # form, which cannot hold a second one: link to the device page,
+                # where ordering is one click.
+                action_url = reverse("assets:device_detail", args=[device.pk])
+        elif transition.name == "lend":
+            # LENT is only reachable from an INROOM active record, so
+            # active_record.pk is always valid here.
+            action_url = reverse("lending:detail", args=[active_record.pk])
         elif transition.name == "return_lending":
             # Returning is not a relocation: it stamps the lending's end date and
-            # only then puts the device back. Both surfaces route to the lending
-            # form that does that. The source state is LENT, so active_record is
-            # always the lending in question.
-            if frontend:
-                action_url = f"{reverse('lending:detail', args=[active_record.pk])}?flow=return"
-            else:
-                action_url = reverse("admin:core_lentrecord_change", args=[active_record.pk])
+            # only then puts the device back, in the lending form. The source
+            # state is LENT, so active_record is always the lending in question.
+            action_url = f"{reverse('lending:detail', args=[active_record.pk])}?flow=return"
 
         actions.append(
             {
                 "url": action_url,
-                "label": action_label,
+                "label": transition.label,
                 "method": method,
             }
         )

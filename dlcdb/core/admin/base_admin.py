@@ -69,6 +69,10 @@ class CustomBaseModelAdmin(admin.ModelAdmin):
 
 
 class CustomBaseProxyModelAdmin(CustomBaseModelAdmin):
+    def has_add_permission(self, request):
+        # State changes run in the frontend, gated by their transition permission.
+        return False
+
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
         if obj:
