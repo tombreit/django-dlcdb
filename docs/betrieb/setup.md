@@ -105,20 +105,46 @@ collected, so there is no `collectstatic` step either. For LDAP, pip builds
 A pip installation keeps its `.env` and `data/` (database, media files) in one
 directory, the instance directory. The management command `dlcdb_init` writes a
 `manage.py` and a `wsgi.py` there, which run DLCDB for that directory: from then
-on you work with `./manage.py` as in any Django project. Only the first
-`dlcdb_init` needs the directory in the environment variable `DLCDB_HOME`.
+on you work with `./manage.py` as in any Django project.
+
+### Try a release
+
+In a throwaway podman container, with the wheel of a [GitHub
+release](https://github.com/tombreit/django-dlcdb/releases):
+
+```bash
+podman run --rm -it --publish 8000:8000 docker.io/library/debian:trixie-slim bash
+```
+
+In the container:
+
+```bash
+apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
+useradd --home-dir /srv/dlcdb dlcdb && install -d --owner dlcdb /srv/dlcdb && su - dlcdb
+python3 -m venv venv
+venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+venv/bin/python -m dlcdb dlcdb_init
+./manage.py migrate
+./manage.py createsuperuser
+./manage.py runserver 0.0.0.0:8000
+```
+
+Then open <http://127.0.0.1:8000>; the generated `.env` allows `127.0.0.1`,
+not `localhost`. `--rm` discards the container and its data on exit.
 
 ### Install
 
-Run the commands as the user that runs DLCDB (the web server's daemon process,
-the task runner): `.env` is readable only by its owner.
+The instance directory must be empty: a new directory, owned by the user that
+runs DLCDB (the web server's daemon process, the task runner), without a clone
+of the repository, another venv or other files. Run the commands as that user:
+`.env` is readable only by its owner.
 
 ```bash
-python3 -m venv /srv/dlcdb/venv
-/srv/dlcdb/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/v0.9.4/dlcdb-0.9.4-py3-none-any.whl"
-DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init  # writes .env (with a fresh secret key), manage.py, wsgi.py, README.md
-# edit /srv/dlcdb/.env
 cd /srv/dlcdb
+python3 -m venv venv
+venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+venv/bin/python -m dlcdb dlcdb_init  # writes .env (with a fresh secret key), manage.py, wsgi.py, README.md
+# edit .env
 ./manage.py migrate
 ./manage.py createsuperuser
 ```
@@ -139,8 +165,8 @@ source installation, with `/srv/dlcdb/data/media` for `/media`,
 ### Update
 
 ```bash
-/srv/dlcdb/venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
 cd /srv/dlcdb
+venv/bin/pip install "dlcdb[ldap] @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
 ./manage.py dlcdb_init  # adds files that are new in this release
 # The task runner writes to the database every minute; stop it while the
 # migrations run, so they don't compete for the write lock.
@@ -175,6 +201,13 @@ pip install --upgrade pip setuptools wheel  # Update virtual environment
 pip install -r requirements/dev.txt  # Install development requirements
 ```
 
+**Build frontend assets**
+
+```bash
+npm install
+npm run build
+```
+
 **Set environment for project**
 
 ```bash
@@ -191,13 +224,6 @@ to match your directory: `msad` (default) for Microsoft Active Directory, or
 This selects the appropriate group type (`ActiveDirectoryGroupType` vs.
 `PosixGroupType`).
 :::
-
-**Build frontend assets**
-
-```bash
-npm install
-npm run build
-```
 
 **Run this project**
 

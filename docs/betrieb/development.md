@@ -116,11 +116,10 @@ podman run --rm -it --publish 8000:8000 \
 
 ```bash
 apt-get update && apt-get install -y --no-install-recommends python3 python3-venv
-useradd --create-home --home-dir /srv/dlcdb dlcdb && su - dlcdb
-python3 -m venv /srv/dlcdb/venv
-/srv/dlcdb/venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
-DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init
-cd /srv/dlcdb
+useradd --home-dir /srv/dlcdb dlcdb && install -d --owner dlcdb /srv/dlcdb && su - dlcdb
+python3 -m venv venv
+venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
+venv/bin/python -m dlcdb dlcdb_init
 ./manage.py migrate
 ./manage.py createsuperuser
 ./manage.py runserver 0.0.0.0:8000  # http://127.0.0.1:8000
@@ -134,18 +133,18 @@ Variants:
 - LDAP: `apt-get install` also `libldap2-dev libsasl2-dev python3-dev gcc`,
   `pip install "/release/dist/dlcdb-X.Y.Z-py3-none-any.whl[ldap]"`
 
-**c) Update from the last release** `vA.B.C`: as b), but install the last
+**c) Update from the last release** `vX.Y.Z`: as b), but install the last
 release first:
 
 ```bash
-/srv/dlcdb/venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vA.B.C/dlcdb-A.B.C-py3-none-any.whl"
+venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
 ```
 
 Create some data, then update as in [Setup › Pip
 installation](setup.md#pip-installation):
 
 ```bash
-/srv/dlcdb/venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
+venv/bin/pip install /release/dist/dlcdb-X.Y.Z-py3-none-any.whl
 ./manage.py dlcdb_init  # adds files that are new in this release
 ./manage.py migrate
 ./manage.py runserver 0.0.0.0:8000  # the data from before is still there
@@ -173,6 +172,8 @@ git push <github-remote> main vX.Y.Z
 The tag starts `.github/workflows/release.yml`: `make wheel TAG=vX.Y.Z` with
 the smoke test on Python 3.12, then, only if that passed, a GitHub release with
 the wheel.
+
+Then try the published release: [Setup › Try a release](setup.md#try-a-release).
 
 **If the workflow fails**, there is a tag but no release. For a transient
 failure, rerun the workflow on GitHub. Otherwise remove the tag, fix, and start

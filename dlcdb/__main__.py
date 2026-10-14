@@ -21,5 +21,8 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # `python -m dlcdb dlcdb_init` sets up the current directory as the instance
+    if sys.argv[1:2] == ["dlcdb_init"]:
+        os.environ.setdefault("DLCDB_HOME", os.getcwd())
     # Otherwise Django calls itself "python -m django" in its help texts
     main(["python -m dlcdb", *sys.argv[1:]])

@@ -59,7 +59,7 @@ git archive "$ref" | tar -x -C "$src"
 "$release_dir/venv/bin/pip" install --quiet "$release_dir"/dist/*.whl
 mkdir "$release_dir/instance"
 cd "$release_dir/instance"
-DLCDB_HOME=$PWD ../venv/bin/python -m dlcdb dlcdb_init
+"$release_dir/venv/bin/python" -m dlcdb dlcdb_init
 ./manage.py check
 ./manage.py migrate --noinput --verbosity 0
 ./manage.py shell --verbosity 0 --command \

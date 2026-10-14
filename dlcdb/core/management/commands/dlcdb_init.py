@@ -11,7 +11,7 @@ directory. A source checkout brings its own README, manage.py and dlcdb/wsgi.py.
 Existing files are never touched, so the command is safe to run again; after an
 update it only adds files that are new.
 
-    DLCDB_HOME=/srv/dlcdb /srv/dlcdb/venv/bin/python -m dlcdb dlcdb_init
+    venv/bin/python -m dlcdb dlcdb_init  # in the instance directory
     ./manage.py dlcdb_init
 """
 
