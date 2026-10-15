@@ -63,11 +63,11 @@ SPDX-License-Identifier: EUPL-1.2
                     {% if record.device.manufacturer or record.device.series %}
                         {{ record.device.manufacturer }} {{ record.device.device_type }} {{ record.device.series }} 
                         {% if record.device.serial_number %}
-                            ({{ record.device.serial_number }})
+                            (<span class="font-monospace">{{ record.device.serial_number }}</span>)
                         {% endif %}
                         <br>
                     {% endif %}
-                    {{ record.device }}, Inventarnummer: {{ record.device.sap_id|default:'n/a' }}
+                    <span class="font-monospace">{{ record.device }}</span>, Inventarnummer: <span class="font-monospace">{{ record.device.sap_id|default:'n/a' }}</span>
                 </strong>
                 <br>
                 <i style="font-size: smaller;">Tenant: {{ record.device.tenant }}</i>

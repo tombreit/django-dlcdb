@@ -29,6 +29,7 @@ class RoomForm(forms.ModelForm):
             "is_default_license_room",
         ]
         widgets = {
+            "number": forms.TextInput(attrs={"class": "font-monospace"}),
             "description": forms.Textarea(attrs={"rows": 3}),
             "note": forms.Textarea(attrs={"rows": 3}),
         }

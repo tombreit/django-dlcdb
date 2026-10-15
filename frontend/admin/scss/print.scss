@@ -19,6 +19,12 @@ $font-dir: "../../../theme/dist/fonts";
       -webkit-print-color-adjust: exact;
     }
 
+    // Identifiers, under the frontend's (Bootstrap's) class name: Plex Mono's
+    // zero is dotted, so 0 and O stay apart on paper too.
+    .font-monospace {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+    }
+
     *,
     *:before,
     *:after {

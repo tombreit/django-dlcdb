@@ -731,6 +731,8 @@ class LendingPrintSheetTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<div class="interleave">')
         self.assertContains(response, "<input type='checkbox'> Charger packed")
+        # The identifiers on the sheet are set in Plex Mono (print.scss).
+        self.assertContains(response, '<span class="font-monospace">9-9</span>')
 
     def test_print_get_not_allowed(self):
         response = self.client.get(self.url)

@@ -24,7 +24,7 @@ One device result row. Expects: row (core.Device, annotated with state_color).
     {% endif %}
   </div>
   <div class="small text-muted">
-    {% if row.serial_number %}{% translate "Serial" %}: {{ row.serial_number }}{% endif %}
+    {% if row.serial_number %}{% translate "Serial" %}: <span class="font-monospace">{{ row.serial_number }}</span>{% endif %}
     {% if row.serial_number and row.active_record.room %} · {% endif %}
     {% if row.active_record.room %}<i class="bi bi-door-open"></i> {{ row.active_record.room }}{% endif %}
     {% if row.active_record.person %} · <i class="bi bi-person"></i> {{ row.active_record.person }}{% endif %}

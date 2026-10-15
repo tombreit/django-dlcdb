@@ -12,7 +12,7 @@ SPDX-License-Identifier: CC0-1.0
   - batch 2, `card-filled` sections on the device, record and lending pages;
   - batch 3, the other detail pages;
   - batch 4, the dashboard;
-- planned 2026-10-15, from the follow-ups:
+- implemented 2026-10-15, from the follow-ups:
   - batch 5, read-only lists;
   - batch 6, the page headers of the lending and import detail pages;
   - batch 7, the last plain cards;
@@ -458,7 +458,7 @@ batch (decision 16).
     `bi bi-question-circle`.
   - `dashboard/search.py`: the device group's icon → `bi bi-pc-display`.
   - `theme/tests/test_icons.py` pins both.
-- [ ] **10. Identifiers in Plex Mono** (decision 17)
+- [x] **10. Identifiers in Plex Mono** (decision 17)
   - `theme/forms.py`: `add_bootstrap_classes` merges a declared class instead of overwriting it.
     Its docstring says so.
   - `assets/forms.py`:
@@ -817,3 +817,13 @@ last places that miss it, and it needs no new font source.
 - **Batch 8, the tile test fails without the fix:** checked by reverting `Device`'s names.
 - **Batch 9, checked in Chromium (2026-10-15):** the dashboard tiles and a search for "NTB". The
   admin's note badge takes the same map, so it changes with it.
+- **Batch 10, the dashboard search included:** its device rows showed the serial number in Plex
+  Sans, unlike every other list. It is in `.font-monospace` now.
+- **Batch 10, checked in Chromium (2026-10-15)** with `getComputedStyle` and
+  `CSS.getPlatformFontsForNode`, on scratch data with `0`/`O` traps (`NTB-O010`, `PF0O1I1lO`):
+  - device edit and add, room and device type: the identifier inputs in Plex Mono, the others in
+    Plex Sans;
+  - the inventory room page: the inventory numbers in Plex Mono;
+  - the slip for the Greek guest: serial number, IT ID and inventory number in Plex Mono, the
+    name in Plex Sans. In the checklist heading, the Greek letters fall back to the system's
+    monospace font (DejaVu Sans Mono), as decided.

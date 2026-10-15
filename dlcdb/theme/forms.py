@@ -22,6 +22,9 @@ def add_bootstrap_classes(form):
     as ``.invalid-feedback`` next to each control in the template.
     https://getbootstrap.com/docs/5.3/forms/validation/
 
+    A class the form declares on a widget stays, after Bootstrap's: identifiers
+    declare ``font-monospace`` in ``Meta.widgets``.
+
     Hidden (picker-driven) fields and TomSelect widgets are left alone: the
     former carry no visible control, the latter already ship their own classes.
     """
@@ -32,11 +35,13 @@ def add_bootstrap_classes(form):
         if isinstance(widget, (TomSelectWidget, TomSelectMultipleWidget)):
             continue
         if isinstance(widget, forms.CheckboxInput):
-            widget.attrs["class"] = "form-check-input"
+            bootstrap_class = "form-check-input"
         elif isinstance(widget, forms.Select):
-            widget.attrs["class"] = "form-select"
+            bootstrap_class = "form-select"
         else:
-            widget.attrs["class"] = "form-control"
+            bootstrap_class = "form-control"
+        declared = widget.attrs.get("class", "")
+        widget.attrs["class"] = f"{bootstrap_class} {declared}".strip()
 
     if form.is_bound:
         for name in form.errors:

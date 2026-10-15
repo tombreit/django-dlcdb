@@ -121,6 +121,12 @@ class DeviceForm(forms.ModelForm):
             "backup_encryption_key",
         ]
         widgets = {
+            # Codes read or typed character by character are set in Plex Mono,
+            # whose zero is dotted: 0 and O, 1 and l stay apart.
+            "edv_id": forms.TextInput(attrs={"class": "font-monospace"}),
+            "sap_id": forms.TextInput(attrs={"class": "font-monospace"}),
+            "serial_number": forms.TextInput(attrs={"class": "font-monospace"}),
+            "mac_address": forms.TextInput(attrs={"class": "font-monospace"}),
             # FK selects over small reference tables that benefit from
             # type-to-filter. TomSelectWidget carries the searchable-select
             # contract; theme.js enhances it client-side (same mechanism the
@@ -143,9 +149,9 @@ class DeviceForm(forms.ModelForm):
             # (theme/includes/_picker.html); a full <select> of every Person is
             # what made the detail page slow. Mirrors the admin autocomplete.
             "contact_person_internal": forms.HiddenInput(),
-            "extra_mac_addresses": forms.Textarea(attrs={"rows": 2}),
-            "machine_encryption_key": forms.Textarea(attrs={"rows": 3}),
-            "backup_encryption_key": forms.Textarea(attrs={"rows": 3}),
+            "extra_mac_addresses": forms.Textarea(attrs={"rows": 2, "class": "font-monospace"}),
+            "machine_encryption_key": forms.Textarea(attrs={"rows": 3, "class": "font-monospace"}),
+            "backup_encryption_key": forms.Textarea(attrs={"rows": 3, "class": "font-monospace"}),
         }
 
     def __init__(self, *args, request, **kwargs):
@@ -173,6 +179,7 @@ class DeviceTypeForm(forms.ModelForm):
         model = DeviceType
         fields = ["name", "prefix", "icon", "note"]
         widgets = {
+            "prefix": forms.TextInput(attrs={"class": "font-monospace"}),
             "icon": IconPickerWidget(),
             "note": forms.Textarea(attrs={"rows": 3}),
         }

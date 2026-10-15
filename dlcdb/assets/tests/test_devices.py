@@ -460,6 +460,17 @@ class DeviceFrontendTests(BaseTest):
         # {# #} does not comment in Django and renders verbatim).
         self.assertNotContains(response, "result-swap region")
 
+    def test_identifier_inputs_are_set_in_plex_mono(self):
+        """Codes read character by character take .font-monospace next to Bootstrap's class."""
+        response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))
+        form = response.context["form"]
+
+        for name in ("edv_id", "sap_id", "serial_number", "mac_address", "machine_encryption_key"):
+            with self.subTest(name):
+                self.assertEqual(form.fields[name].widget.attrs["class"], "form-control font-monospace")
+        self.assertEqual(form.fields["series"].widget.attrs["class"], "form-control")
+        self.assertContains(response, 'class="form-control font-monospace"', count=7)
+
     def test_person_search_returns_matches_only_for_a_query(self):
         person = Person.objects.create(first_name="Erika", last_name="Musterfrau")
         url = reverse("assets:person_search")
