@@ -173,7 +173,7 @@ SEARCH_SOURCES = (
     SearchSource(
         key="devices",
         label=_("Devices"),
-        icon="bi bi-upc",
+        icon="bi bi-pc-display",
         permissions=("core.view_device",),
         get_queryset=_device_queryset,
         search=lambda qs, term, request: _filtered(DeviceFilter, qs, term, request),

@@ -453,7 +453,7 @@ batch (decision 16).
     label stays, like the other sources' labels.
   - Test: under `translation.override("de")` the devices tile reads "Geräte". The compiled
     `django.mo` is in the repo.
-- [ ] **9. Icons** (decision 15)
+- [x] **9. Icons** (decision 15)
   - `theme/icons.py`: `core.device` → `bi bi-pc-display`, `core.lostrecord` →
     `bi bi-question-circle`.
   - `dashboard/search.py`: the device group's icon → `bi bi-pc-display`.
@@ -815,3 +815,5 @@ last places that miss it, and it needs no new font source.
   "Device" or "Record" in `gettext_lazy` changes nothing it records. `0079` alters only `Note`
   and `Person`, whose English names are new.
 - **Batch 8, the tile test fails without the fix:** checked by reverting `Device`'s names.
+- **Batch 9, checked in Chromium (2026-10-15):** the dashboard tiles and a search for "NTB". The
+  admin's note badge takes the same map, so it changes with it.

@@ -9,11 +9,11 @@ Shown on the dashboard tiles and in the admin's note badge.
 
 MODEL_ICONS = {
     "core.record": "bi bi-stack",
-    "core.device": "bi bi-upc",
+    "core.device": "bi bi-pc-display",
     "core.devicetype": "bi bi-palette",
     "core.room": "bi bi-door-open",
     "core.lentrecord": "bi bi-arrow-left-right",
-    "core.lostrecord": "bi bi-stack",
+    "core.lostrecord": "bi bi-question-circle",
     "core.licencerecord": "bi bi-bank2",
     "core.inventory": "bi bi-eyeglasses",
     "core.manufacturer": "bi bi-building",
