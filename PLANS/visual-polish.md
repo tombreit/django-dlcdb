@@ -439,7 +439,7 @@ batch (decision 16).
   - Tests in `dataexchange/tests/`:
     - the detail title and the list link show the file name without its folder;
     - an import without a file gets the fallback.
-- [ ] **7. The last plain cards** (decision 13)
+- [x] **7. The last plain cards** (decision 13)
   - `notifications/index.html`: `card card-filled mb-4`, with the header
     `<i class="bi bi-bell"></i><h2>…</h2>`.
   - `dataexchange/import.html`: `card card-filled mb-4`.
@@ -809,3 +809,5 @@ last places that miss it, and it needs no new font source.
   `file_name` too. The admin and the journal keep `str()`, the stored path.
 - **Batch 6, checked in Chromium (2026-10-15):** lending in picker mode (also at 390px and in
   dark mode), edit and return; import detail with and without a file; the import list.
+- **Batch 7, checked in Chromium (2026-10-15):** the subscriptions page (its form needs a person
+  with the user's e-mail) and the import page, light and dark, 1400px and 390px.

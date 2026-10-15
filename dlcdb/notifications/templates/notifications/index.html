@@ -20,9 +20,10 @@
 
 {% else %}
 
-  <div class="card mb-4">
+  <section class="card card-filled mb-4">
     <div class="card-header">
-      {% translate "Add a report subscription" %}
+      <i class="bi bi-bell"></i>
+      <h2>{% translate "Add a report subscription" %}</h2>
     </div>
     <div class="card-body">
       <form method="post" action="{% url 'notifications:index' %}">
@@ -34,7 +35,7 @@
         </button>
       </form>
     </div>
-  </div>
+  </section>
 
   <div class="table-responsive">
   <table class="table table-hover align-middle">
