@@ -254,16 +254,14 @@ class DashboardTileTargetTests(TestCase):
 
         self.assertIn(f"record_type={Record.LOST}", lost["query_params"])
 
-    def test_a_note_count_adds_the_note_filter_to_the_link(self):
+    def test_a_tile_links_to_its_list_without_the_note_filter(self):
+        """The notes caption is information only; the tile opens the whole list."""
         lost = next(tile for tile in self._tiles() if tile["url"] == "assets:record_index")
 
         self.assertTrue(lost["show_notes"])
-        self.assertIn("has_note=has_note", lost["query_params"])
-
-    def test_a_tile_without_a_note_count_carries_no_note_filter(self):
-        """Otherwise the link promises a filter the tile never advertised."""
+        self.assertEqual(lost["query_params"], f"record_type={Record.LOST}")
         for tile in self._tiles():
-            if not tile["show_notes"]:
+            with self.subTest(tile["url"]):
                 self.assertNotIn("has_note", tile["query_params"])
 
     def test_every_tile_link_is_accepted_by_its_target(self):

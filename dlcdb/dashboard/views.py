@@ -87,7 +87,8 @@ def _build_tile(*, model_name, url, request, base_params=None):
 
     ``base_params`` are the GET parameters the tile's target needs to show the
     same set the tile counts (e.g. the Lost tile scoping the record list to
-    LOST). The note filter is appended to them when the note count is shown.
+    LOST). The notes caption is information only: the tile opens its list
+    without a note filter.
     """
     ModelClass = apps.get_model(model_name)
     qs = _get_tenant_queryset(model_name, ModelClass, request)
@@ -118,20 +119,13 @@ def _build_tile(*, model_name, url, request, base_params=None):
         # Same msgid as the former badge's {% blocktranslate count %}.
         caption = ngettext("%(counter)s with note", "%(counter)s with notes", note_count) % {"counter": note_count}
 
-    # Keyed off show_notes, not note_count: a tile whose note count is suppressed
-    # must not link to a note-filtered list either, or the link promises a filter
-    # the tile never advertised.
-    params = dict(base_params or {})
-    if show_notes:
-        params["has_note"] = "has_note"
-
     return _tile(
         label=label,
         value=value,
         caption=caption,
         icon=get_icon_for_class(model_name),
         url=url,
-        query_params=urlencode(params),
+        query_params=urlencode(base_params or {}),
         show_notes=show_notes,
         note_count=note_count,
     )

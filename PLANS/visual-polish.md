@@ -220,8 +220,10 @@ the template markup as it is.
      - inventory shows the done % from `Inventory.get_inventory_progress(tenants=…)`, with a
        thin `.progress` bar and the inventory's name as caption;
      - the journal keeps its three level counts.
-   - **Notes:** the note badge becomes a caption ("N with notes"). The tile still links to the
-     note-filtered list, as today.
+   - **Notes:** the note badge becomes a caption ("N with notes"). The caption is information
+     only: since 2026-10-15 (user) a tile links to its list without the `has_note` filter. Only
+     the filter that defines what a tile counts stays: Lost (`record_type`) and Overdue
+     (`state=overdue`).
    - **Overdue tone:** a non-zero Overdue tile takes Bootstrap's warning tokens
      (`--bs-warning-bg-subtle`, `--bs-warning-border-subtle`, `--bs-warning-text-emphasis`), which
      work in light and dark mode.
