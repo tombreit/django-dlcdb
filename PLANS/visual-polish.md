@@ -6,13 +6,22 @@ SPDX-License-Identifier: CC0-1.0
 
 # Visual polish: typeface, lighter detail pages, dashboard
 
-**Status:** all batches implemented 2026-10-15:
-- batch 1, the typeface;
-- batch 2, `card-filled` sections on the device, record and lending pages;
-- batch 3, the other detail pages;
-- batch 4, the dashboard.
+**Status:**
+- implemented 2026-10-15:
+  - batch 1, the typeface;
+  - batch 2, `card-filled` sections on the device, record and lending pages;
+  - batch 3, the other detail pages;
+  - batch 4, the dashboard;
+- planned 2026-10-15, from the follow-ups:
+  - batch 5, read-only lists;
+  - batch 6, the page headers of the lending and import detail pages;
+  - batch 7, the last plain cards;
+  - batch 8, translated model names;
+  - batch 9, icons;
+  - batch 10, identifiers in Plex Mono.
 
-What is left is under *Open follow-ups*. This is a living document.
+What is left is under *Open follow-ups*. *Identifier glyphs* answers the question of another
+typeface. This is a living document.
 
 ## Why
 
@@ -197,7 +206,8 @@ the template markup as it is.
 7. **The primary colour stays indigo** (user decision, 2026-10-14).
 8. **`dl` lists keep their markup.**
    - The `.device-meta` labels lose their uppercase. This is a Sass change only.
-   - The different column ratios (`col-sm-3/9`, `4/8`, `5/7`, `6/6`) are an open follow-up.
+   - The different column ratios (`col-sm-3/9`, `4/8`, `5/7`, `6/6`) are unified in batch 5
+     (decision 11).
 9. **Dashboard**
    - **Two groups of tiles,** each under an `h2`:
      - *Needs attention*: overdue lendings, lost devices, journal problems and the active
@@ -240,10 +250,95 @@ the template markup as it is.
        which stack on the left (`col-lg-8`).
 10. **NEWS:** no entry per batch. At the end, one line is offered in the summary: this is polish
     (AGENTS.md).
+11. **Read-only `dl` lists: one layout per column** (batch 5).
+    - **Main column:** the label sits beside the value, `col-sm-4` / `col-sm-8`, with
+      `text-secondary fw-medium` labels. Every page but the lending page does this already.
+    - **Side column:** the label sits above the value, as on the device and record pages today.
+      - Today the side column uses three ratios: `4/8` (record data), `5/7` (HR API data) and
+        `6/6` (tenant usage). The values of two stacked panels start at different offsets.
+      - At about 270px, long German labels wrap at any ratio, e.g. "Benutzer mit Zugriff auf
+        diesen Mandanten" or "Voraussichtlicher Check-Out". UUIDs and e-mail addresses break
+        across lines.
+      - Stacked, both get the full width. The cost is height: the HR API data panel grows from
+        about 350 to 600px.
+      - Rendered with injected CSS on the scratch DB, side by side with today's look
+        (2026-10-15).
+    - **`.device-meta` becomes `.fact-list`:** read-only facts about an object, label above
+      value, a hairline between facts. It moves to its own partial, since persons, tenants and
+      the record data include use it too.
+      - It styles bare `dt`/`dd` pairs as well as the device page's `div`-grouped ones.
+      - So the device and record templates only change the class name.
+12. **The lending and import detail pages get the detail pages' header band** (batch 6):
+    `h1.h3`, a muted meta line under it, and actions plus the back button on the right
+    (`_detail_base.html`).
+    - **Lending:**
+      - the picker hint moves into the meta line;
+      - "Admin view" and "Back to overview" sit on the right, both at the default size;
+      - the back button goes through `_back_link.html`.
+    - **Import detail, re-checked:** the "small grey 'Import' line" was an artefact of the
+      scratch DB.
+      - The title is `str(ImporterList)`, the stored file path. It was empty for the seeded
+        import, which has no file. On real data it reads `imported_csv/<name>.csv`.
+      - The title becomes the file's name (`ImporterList.file_name`), or "Import without file".
+      - The import list's row link uses the same name: today it shows the folder too, and it is
+        empty without a file.
+13. **The last plain cards become filled panels** (batch 7):
+    - the subscription form on `notifications/index.html`, which gets a header icon and an `h2`;
+    - the intro card on `dataexchange/import.html`.
+
+    Two cards stay as they are, deliberately:
+    - the login form card: a single form on an empty page;
+    - the relocate page's step cards: their border carries the step's done state (principle 1).
+14. **Model names are translatable** (batch 8).
+    - **`Device`** was reported: its tile reads "Devices" in the German UI.
+    - **Its siblings in `core`** need the same one-line fix, and their msgids exist, so nothing
+      regresses in the German UI:
+      - `Person` and `Note`, hardcoded in German ("Personen", "Notiz");
+      - `Record`, `Attachment` and `Link`, hardcoded in English.
+
+      Strike them if `Device` alone is wanted.
+    - **Migration:** one `AlterModelOptions` migration, with no schema change.
+    - **Left out:**
+      - `RoomReconcile` ("Raum-Abgleich"): its msgid would be new, so the German UI would show
+        English until it is translated;
+      - other apps' names: they show only in the admin.
+15. **One icon per entity** (batch 9).
+    - **Device:** `bi-pc-display` wherever the icon stands for the device: the navbar, the
+      tiles, the search group, the section headers, and the default of `DeviceType.icon_class`.
+      - `bi-upc` stays where it marks a number, e.g. the ID line of a picker item.
+      - `bi-upc-scan` stays on the *Identification* section.
+    - **Lost:** `bi-question-circle`, the icon the inventory uses for a device not found yet,
+      instead of Records' `bi-stack`.
+16. **Batches 5–10 are committed by Claude**, one commit per batch (user's permission,
+    2026-10-15).
+    - The message is one self-explanatory line, "Visual polish, step N: …".
+    - The batch's box is ticked in the same commit.
+    - `/verify` runs before each commit.
+    - The plan update is committed first, once the user has reviewed it.
+17. **Identifiers are set in Plex Mono, in inputs and on the slip too** (batch 10; user,
+    2026-10-15, see *Identifier glyphs*).
+    - **Rule:** a code that is read or typed character by character is set in Plex Mono, whose
+      zero is dotted:
+      - IT ID, inventory number and serial number;
+      - MAC addresses and encryption keys;
+      - room number and device type prefix.
+
+      The read-only views already set the first group, the room number and the prefix in
+      `.font-monospace`. MAC addresses and keys are in mono nowhere yet.
+    - **Form inputs:** `add_bootstrap_classes` keeps a class the form declares, with Bootstrap's
+      class first. The forms declare `font-monospace` in `Meta.widgets`.
+    - **The slip:**
+      - `print.scss` has no Bootstrap. It gets its own `.font-monospace` rule with the Plex Mono
+        stack, so the slip templates use the frontend's class name.
+      - The checklist's inline `monospace` becomes the same stack.
+      - Glyphs outside Plex Mono's latin range fall back per character, as they do today.
+    - **Plex Sans stays from Fontsource.** IBM's own package is not used: it reports to IBM on
+      install in CI and in containers, it costs bytes, and it is a 0.x package.
 
 ## Progress
 
-After each batch, stop so the user can commit it.
+Batches 1–4: after each batch, stop so the user can commit it. Batches 5–10: Claude commits each
+batch (decision 16).
 
 - [x] **0. This document**
 - [x] **1. Typeface** (decisions 2–4). No template changes.
@@ -313,6 +408,85 @@ After each batch, stop so the user can commit it.
     `_dashboard.scss`.
   - Follow-up commit, after batch 4 had landed: the device type chart became the ranked list of
     the most deployed device types (decision 9).
+- [ ] **5. Read-only lists** (decision 11)
+  - New `dlcdb/theme/assets/scss/_fact-list.scss` with `.fact-list`, moved from `.device-meta`
+    in `_device-page.scss`.
+    - The separator rule covers `> div + div` and `> dd + dt`.
+    - `theme.scss` gets its import line.
+  - Side column: `<dl class="row mb-0 small">` with `col-sm-*` and label utilities becomes
+    `<dl class="fact-list">` with bare `dt` and `dd`:
+    - `theme/includes/_audit_data.html`, used on the person, room, master data, tenant and import
+      detail pages. The UUID keeps `font-monospace`;
+    - the HR API data on `persons/detail.html`;
+    - the usage on `tenants/detail.html`.
+  - `device-meta` → `fact-list` in `devices/includes/_sidebar.html` and `records/detail.html`.
+  - Main column: the *Lending details* list in `lending/lend.html` goes from `col-sm-3/9` to
+    `col-sm-4/8`, with `text-secondary fw-medium` labels.
+  - No test asserts these classes.
+  - Screenshots:
+    - person with HR API data, tenant, room, device, record;
+    - lending return, for the main-column list.
+- [ ] **6. Page headers: lending and import detail** (decision 12)
+  - `lending/lend.html`:
+    - the header band;
+    - the inline `<style>` with `.picker-option:hover` goes: `picker.css` loads in both branches
+      of `extra_css`.
+  - `dataexchange/models.py`: `ImporterList.file_name`, the base name of the stored file.
+    `__str__` stays: the journal stores it as `object_repr`.
+  - `dataexchange/importer_detail.html`: `<title>` and `h1` use the file name, with the fallback.
+    The back button goes through `_back_link.html`.
+  - `dataexchange/importer_index.html`: the row link uses the file name.
+  - Tests in `dataexchange/tests/`:
+    - the detail title and the list link show the file name without its folder;
+    - an import without a file gets the fallback.
+- [ ] **7. The last plain cards** (decision 13)
+  - `notifications/index.html`: `card card-filled mb-4`, with the header
+    `<i class="bi bi-bell"></i><h2>…</h2>`.
+  - `dataexchange/import.html`: `card card-filled mb-4`.
+- [ ] **8. Model names** (decision 14)
+  - Read the docstring of `dlcdb/core/__init__.py` first (AGENTS.md).
+  - `verbose_name` and `verbose_name_plural` through `gettext_lazy` in `core/models/device.py`,
+    `person.py`, `note.py`, `record.py` and `misc.py`.
+  - The migration comes from `DATABASE_URL=sqlite://:memory: ./manage.py makemigrations core`.
+    `makemigrations --check` is clean afterwards.
+  - `dashboard/search.py`: the comment about `Person`'s German verbose name goes. The explicit
+    label stays, like the other sources' labels.
+  - Test: under `translation.override("de")` the devices tile reads "Geräte". The compiled
+    `django.mo` is in the repo.
+- [ ] **9. Icons** (decision 15)
+  - `theme/icons.py`: `core.device` → `bi bi-pc-display`, `core.lostrecord` →
+    `bi bi-question-circle`.
+  - `dashboard/search.py`: the device group's icon → `bi bi-pc-display`.
+  - `theme/tests/test_icons.py` pins both.
+- [ ] **10. Identifiers in Plex Mono** (decision 17)
+  - `theme/forms.py`: `add_bootstrap_classes` merges a declared class instead of overwriting it.
+    Its docstring says so.
+  - `assets/forms.py`:
+    - `DeviceForm.Meta.widgets`: `edv_id`, `sap_id`, `serial_number` and `mac_address` become
+      `forms.TextInput(attrs={"class": "font-monospace"})`;
+    - its three `Textarea`s (`extra_mac_addresses` and both encryption keys) gain the class;
+    - `DeviceTypeForm`: `prefix`.
+  - `rooms/forms.py`: `number`.
+  - `frontend/admin/scss/print.scss`: `.font-monospace` with
+    `"IBM Plex Mono", ui-monospace, monospace`.
+  - `lending/includes/lent_sheet.html`: the serial number, the device and the inventory number in
+    `<span class="font-monospace">`.
+    - The DB-stored sheet templates include this file (starter: `lent_sheet_starter.html`), so
+      the change reaches every profile that includes it.
+  - `lending/includes/lent_checklist.html`: the inline `font-family` becomes the Plex Mono stack.
+  - Inventory: `text-monospace`, a Bootstrap 4 class, becomes `font-monospace` (seven times).
+    Bootstrap 5 dropped the old class, so these identifiers render in Plex Sans today. The files:
+    `inventory/inventorize_room_detail.html` and `inventory/partials/device_search_htmx.html`.
+    - The admin's `core/device/history_diff.html` keeps it: the admin is being phased out.
+  - Tests:
+    - new `theme/tests/test_forms.py`: a declared class survives, after Bootstrap's;
+    - assets: the device form renders `form-control font-monospace` on `edv_id` and on a key
+      field;
+    - lending: the printed sheet wraps the inventory number in `font-monospace`.
+  - Verify:
+    - device edit and add, room edit, device type edit, the inventory room page;
+    - the slip PDF: `CSS.getPlatformFontsForNode` shows Plex Mono on the identifiers, and a Greek
+      or Cyrillic guest name still in Plex Sans.
 
 Every batch:
 - `npm run build`
@@ -352,51 +526,117 @@ Batch 1 additionally:
 | Device types as a Plotly bar chart (batch 4's first version) | One bar per type with 10 or more devices: with real data far taller than its neighbours. |
 | Device types as a compact Plotly bar chart (top 15, 12px bars) | Bounded, but no links, and its text needs the dark-mode overrides. |
 | Device types as a treemap | Compact, but areas are hard to compare and small types get unreadable labels. |
+| One `col-sm-5/7` ratio for every side-column list | Values line up, but long German labels still wrap, and the device and record pages keep their stacked list: two looks for the same thing. |
+| A `.detail-aside dl` rule instead of a class on the list | A page-level descendant selector, rejected for the cards already. It would also have to fight the `row` grid. |
+| Showing the import's file name through `ImporterList.__str__` | The journal stores `str()` as `object_repr`, so old and new entries would differ, and the admin would change too. |
+| Another typeface for unambiguous identifiers | See *Identifier glyphs*: no face with the guests' scripts does better than Plex Sans. |
+| IBM's `@ibm/plex-sans-variable` for a slashed zero app-wide | It reports to IBM on install in CI and in containers. It adds about 21 KB on a latin page, and it is a 0.x package. |
+| Subsetting Google's full Plex Sans TTF ourselves, keeping `zero` | A Python build step next to the npm build. |
+| A loop after `add_bootstrap_classes` in each form, adding `font-monospace` | The same lines in three forms. One change to the helper serves them all. |
 
 ## Open follow-ups
 
 - **Primary colour:** indigo is kept for now. It is Tailwind's default, so it reads as generic.
 - **Plex Sans for other scripts:** self-host Plex Sans Arabic, Hebrew and so on if names in those
   scripts become common.
-- **Read-only `dl` column ratios:** unify them.
-- **Lending page polish:**
-  - align its header with `_detail_base` (back link right, `h1.h3`);
-  - drop the inline `.picker-option:hover` style, which duplicates `picker.css`.
-- **Plain cards left on non-detail pages:**
-  - the subscription form on `notifications/index.html`;
-  - the info card on `dataexchange/import.html`.
-
-  One `card-filled` each, if wanted.
-- **Page headers:** the import detail page's title is a small grey "Import" line, unlike the
-  other detail pages.
 - **Out of scope for this round:** list pages (`_index_base.html`), the filterbar, and one page
   header for index, detail and lending pages.
-- **New msgids to translate (batch 4):**
-  - "Needs attention" and "Stock";
-  - "of %(total)s lendable" and "%(done)s of %(total)s devices";
-  - "Devices by state";
-  - "Most deployed device types", "No deployed devices yet." and
-    "All %(counter)s device type" / "All %(counter)s device types".
+- **New msgids to translate:**
+  - batch 4:
+    - "Needs attention" and "Stock";
+    - "of %(total)s lendable" and "%(done)s of %(total)s devices";
+    - "Devices by state";
+    - "Most deployed device types", "No deployed devices yet." and
+      "All %(counter)s device type" / "All %(counter)s device types".
 
-  The chart's state labels reuse the lifecycle labels, and the notes caption reuses the old
-  badge's msgid.
-- **`Device` verbose names are untranslated:** the Devices tile reads "Devices" in the German UI.
-  This predates this work.
+    The chart's state labels reuse the lifecycle labels, and the notes caption reuses the old
+    badge's msgid.
+  - batch 6: "Import without file";
+  - batch 8: "Attachment", "Link" and "Links". "Attachments" and the other model names exist.
+- **A wrong German plural:** "%(counter)s devices" is translated as "%(counter)s Geräten" (dative),
+  so the import detail page reads "0 Geräten". This is a `.po` fix.
+- **Other untranslated model names** (decision 14): `RoomReconcile`, and the admin-only names in
+  dataexchange, inventory, lending, reporting and organization.
 - **Charts have no table view:** the dataviz method asks for one per chart. Values are reachable
   through the labels, the hover tooltips and the linked lists.
 - **Device detail:** the state badge shows twice, in the header and under *Current state*.
-- **Identifiers set in Plex Sans:** Plex Sans's zero has no inner mark, so `0`/`O` and `1`/`I`/`l`
-  look alike there. Plex Mono's zero has one. These identifiers are still in Sans:
-  - serial number and ID form inputs;
-  - the device line of the lending slip.
-
-  `.font-monospace` on them would need template changes.
-- **Lending slip checklist:** `lending/includes/lent_checklist.html` sets `font-family: monospace`
-  inline, which uses the system monospace font, not Plex Mono.
-- **Icons:**
-  - devices use `bi-upc` on the tiles but `bi-pc-display` in the navbar;
-  - Lost reuses Records' `bi-stack`.
 - **The admin keeps Roboto.** The admin is being phased out.
+
+## Identifier glyphs
+
+The question (2026-10-15): Plex Sans's zero has no inner mark. Is there a typeface that avoids
+this?
+
+**Decided (user, 2026-10-15):** Plex Sans stays, from Fontsource, and identifiers are set in Plex
+Mono (way 1 below). This is batch 10, decision 17.
+
+**Correction:** Plex Sans does tell `1`, `I` and `l` apart: `I` has slab serifs, `l` a tail and
+`1` a base. The earlier follow-up claimed otherwise. Only the zero is ambiguous. It is narrower
+than `O`, which helps only when both stand side by side.
+
+**No other typeface does better.** Checked 2026-10-15:
+- **Scope:** about forty popular faces were looked up in the Fontsource API. Eleven sans faces
+  among them cover the guests' scripts (latin-ext, Vietnamese, Greek, Cyrillic).
+  - They were rendered in Chromium from their Fontsource files.
+  - Their features and glyph widths were read with fontTools.
+- **The zero:** none of them marks it by default.
+  - The Fontsource builds (from Google Fonts) also drop the `zero` feature of every one of them,
+    Plex Sans's own included.
+  - The faces that mark their zero by default cover Latin only, so they fail the guests
+    requirement: Atkinson Hyperlegible Next (latin, latin-ext), B612, Luciole.
+- **`1`, `I`, `l`:**
+
+  | Face | What sets them apart |
+  |---|---|
+  | Fira Sans, Source Sans 3 | A tailed `l`, but a bare `I` |
+  | Noto Sans | A serifed `I`, but a bare `l` |
+  | Inter, Open Sans, Roboto Flex, Commissioner, Manrope, Geologica | Nothing: `I` and `l` look the same |
+  | Alegreya Sans | Old-style figures: its `0` is a small `o` |
+
+**Two ways to a marked zero without another typeface:**
+1. **Plex Mono where identifiers are typed or printed** (taken; details in decision 17):
+   - the inputs for identifiers and codes;
+   - the device line of the lending slip.
+
+   The lists and detail pages already set identifiers in Plex Mono (decision 2), and Plex Mono's
+   zero is dotted.
+   - The inputs get the class from their form, through `add_bootstrap_classes`, with no template
+     change.
+   - The slip's device line is in the file template `lent_sheet.html`, which the DB-stored sheet
+     templates include.
+2. **IBM's own build,** `@ibm/plex-sans-variable` (0.2.0, June 2025, from github.com/IBM/plex).
+   - The same design, with the same 1025 glyphs as Google's build.
+   - It keeps `zero` (slashed) and `ss04` (dotted), so `font-variant-numeric: slashed-zero` marks
+     the zero wherever it is set: on identifiers only, or app-wide.
+   - **Costs:**
+     - **Telemetry.** Every `@ibm/plex-*` package runs `ibmtelemetry` on install
+       (`postinstall`, with `@ibm/telemetry-js` as a dependency).
+       - It reports anonymised dependency data to IBM, only in CI and in containers.
+       - `container/Containerfile` runs `npm ci` in a container stage, so every image build
+         would report.
+       - The opt-out is `IBM_TELEMETRY_DISABLED=true` wherever npm installs. That runs against
+         decision 2's privacy reasoning.
+     - **Bytes:** 67 KB instead of 46 KB on a latin-only page, and 253 KB instead of 159 KB for
+       all six files. Most of the extra is the width axis, which we don't use.
+     - **Upkeep:**
+       - it is a 0.x package, with no release since June 2025;
+       - its file names contain spaces (`IBM Plex Sans Var-Roman-Latin1.woff2`);
+       - IBM splits the font into Latin1/2/3, Greek, Cyrillic and Pi, so `_fonts.scss` and
+         `build:theme:fonts` change;
+       - its split files leave out 13 combining accents that its complete file has.
+
+**Why Fontsource's Plex lacks the features.** The difference is in the delivery, not in the
+font:
+- Fontsource builds no fonts. It repackages the files the Google Fonts API serves.
+- Google's source file (IBM Plex Sans 3.201, January 2025, in the google/fonts repository) has
+  `zero` and `ss01`–`ss06`.
+- The API strips them when it cuts the web subsets. Its latin file keeps only ccmp, dnom, frac,
+  liga, numr and rvrn, exactly Fontsource's list.
+- Fontsource's weight-only files also fix the width axis (75–100, the condensed cut) at 100%.
+  That makes them smaller than the API's: 46 KB against 65 KB for latin.
+
+**Recommendation, taken:** way 1. It extends an existing rule (identifiers in Plex Mono) to the
+last places that miss it, and it needs no new font source.
 
 ## Pitfalls
 
