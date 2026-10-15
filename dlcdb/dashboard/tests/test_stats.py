@@ -8,14 +8,10 @@ import datetime
 
 import pytest
 
-from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, LostRecord, Record, Room
+from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, LostRecord, Record, RemovedRecord, Room
 from dlcdb.core.tests.testingutils import establish_state
-from dlcdb.dashboard.stats import (
-    DEVICE_TYPE_MIN_COUNT,
-    active_record_counts,
-    devices_per_month,
-    get_device_type_html,
-)
+from dlcdb.dashboard.stats import active_record_counts, device_type_ranking, devices_per_month
+from dlcdb.tenants.models import Tenant
 
 NOW = datetime.datetime(2026, 10, 15, 12, tzinfo=datetime.UTC)
 
@@ -93,15 +89,44 @@ def test_the_record_chart_counts_each_device_once_by_its_state(tenant):
     assert active_record_counts(tenants=[tenant]) == {"inroom": 1, "lent": 1, "lost": 1, "removed": 0}
 
 
+def _devices(device_type, count, tenant, prefix):
+    return [
+        Device.objects.create(edv_id=f"{prefix}-{number}", device_type=device_type, tenant=tenant)
+        for number in range(count)
+    ]
+
+
 @pytest.mark.django_db
-def test_the_device_type_chart_shows_only_types_with_enough_devices(tenant):
-    """Below the minimum there is no chart at all, so the template shows its note instead."""
+def test_the_device_type_ranking_counts_deployed_devices_most_first(tenant):
+    room = Room.objects.create(number="A1.23")
     beamer = DeviceType.objects.create(name="Beamer", prefix="BMR")
-    for number in range(DEVICE_TYPE_MIN_COUNT - 1):
-        Device.objects.create(edv_id=f"BMR-{number}", device_type=beamer, tenant=tenant)
+    camera = DeviceType.objects.create(name="Camera", prefix="CAM")
+    dock = DeviceType.objects.create(name="Dock", prefix="DCK")
+    DeviceType.objects.create(name="Unused", prefix="UNU")
 
-    assert get_device_type_html(tenants=[tenant]) == ""
+    for device in _devices(beamer, 3, tenant, "BMR"):
+        establish_state(InRoomRecord, device=device, room=room)
+    _devices(camera, 3, tenant, "CAM")  # no record at all: still deployed
+    docks = _devices(dock, 4, tenant, "DCK")
+    establish_state(RemovedRecord, device=docks[0])
+    docks[1].delete()  # soft delete
+    _devices(dock, 5, Tenant.objects.create(name="Other"), "OTHER")
 
-    Device.objects.create(edv_id="BMR-LAST", device_type=beamer, tenant=tenant)
+    rows, total = device_type_ranking(tenants=[tenant])
 
-    assert "Beamer" in get_device_type_html(tenants=[tenant])
+    assert [(row["device_type"].name, row["count"]) for row in rows] == [("Beamer", 3), ("Camera", 3), ("Dock", 2)]
+    assert [row["share"] for row in rows] == [100, 100, 67]
+    assert total == 3
+
+
+@pytest.mark.django_db
+def test_the_device_type_ranking_is_cut_but_counts_every_type(tenant):
+    for number in range(4):
+        _devices(
+            DeviceType.objects.create(name=f"Type {number}", prefix=f"T{number}"), number + 1, tenant, f"T{number}"
+        )
+
+    rows, total = device_type_ranking(tenants=[tenant], size=2)
+
+    assert [row["device_type"].name for row in rows] == ["Type 3", "Type 2"]
+    assert total == 4

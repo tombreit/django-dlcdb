@@ -23,6 +23,7 @@ from dlcdb.core.models import (
     Room,
 )
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.dashboard import stats
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
@@ -174,6 +175,24 @@ class DashboardTileTests(TestCase):
 
         self.assertEqual((overdue_tile()["value"], overdue_tile()["tone"]), (1, "warning"))
         self.assertContains(self.client.get(reverse("dashboard:index")), "dashboard-tile-warning")
+
+    def test_the_device_type_ranking_links_each_type_to_its_devices(self):
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertContains(response, f'href="{reverse("assets:device_index")}?device_type={self.device_type.pk}"')
+        # One type, all of it shown: no link to the full list.
+        self.assertNotContains(response, f"{reverse('assets:device_type_index')}?ordering=-assets")
+
+    def test_the_cut_device_type_ranking_links_to_all_types(self):
+        for number in range(stats.DEVICE_TYPE_RANKING_SIZE):
+            device_type = DeviceType.objects.create(name=f"Ranked {number}", prefix=f"R{number}")
+            Device.objects.create(edv_id=f"RANK-{number}", device_type=device_type, tenant=self.tenant)
+
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertEqual(len(response.context["device_type_ranking"]), stats.DEVICE_TYPE_RANKING_SIZE)
+        self.assertContains(response, f"{reverse('assets:device_type_index')}?ordering=-assets")
+        self.assertContains(response, f"All {stats.DEVICE_TYPE_RANKING_SIZE + 1} device types")
 
     def test_an_active_inventory_adds_a_progress_tile(self):
         Inventory.objects.create(name="2026", is_active=True)

@@ -47,17 +47,13 @@ MARK_COLORS = {
     "secondary": "#6c757d",
 }
 
-# A single series (devices by type): the indigo one step lighter than the
-# theme's primary, which keeps about 3:1 on the light and the dark panel.
-SERIES_COLOR = "#6366f1"
-
 # Bars are 22px thick in a 36px slot: thin marks, the rest is air. A chart is
 # as tall as its bars need, so the bars keep that thickness.
 BAR_SLOT = 36
 BAR_GAP = 0.4
 
-# The device type chart leaves out types with fewer devices.
-DEVICE_TYPE_MIN_COUNT = 10
+# How many device types the dashboard ranks; the rest is one link away.
+DEVICE_TYPE_RANKING_SIZE = 15
 
 
 def _state_color(state):
@@ -153,45 +149,31 @@ def get_record_fraction_html(*, tenants):
     return _to_html(fig)
 
 
-def get_device_type_html(*, tenants):
+def device_type_ranking(*, tenants, size=DEVICE_TYPE_RANKING_SIZE):
     """
-    Returns a plotly HTML div showing device counts by type, for types with at
-    least ``DEVICE_TYPE_MIN_COUNT`` devices, or "" when there is none.
+    The device types with the most deployed devices of ``tenants``, most first,
+    as ``(rows, total)``: the first ``size`` rows and the number of all types
+    with deployed devices.
+
+    A device is deployed unless its active record is REMOVED or the device is
+    soft-deleted; a device without any record counts. Each row is
+    ``{"device_type": …, "count": …, "share": …}``, with ``share`` the count in
+    percent of the top count, for the row's bar.
     """
-    count_filter = Q(device__tenant__in=tenants)
-    device_types_qs = (
-        DeviceType.objects.annotate(count=Count("device", filter=count_filter))
-        .exclude(count__lt=DEVICE_TYPE_MIN_COUNT)
-        .order_by("count")
+    deployed = Q(device__tenant__in=tenants, device__deleted_at__isnull=True) & ~Q(
+        device__active_record__record_type=Record.REMOVED
     )
-
-    labels = [dt.name for dt in device_types_qs]
-    counts = [dt.count for dt in device_types_qs]
-    if not labels:
-        return ""
-
-    # One series in one colour: bar length already shows the count.
-    fig = go.Figure(
-        go.Bar(
-            x=counts,
-            y=labels,
-            orientation="h",
-            marker=dict(color=SERIES_COLOR, cornerradius=4),
-            text=counts,
-            textposition="outside",
-            cliponaxis=False,
-            hovertemplate="%{y}: %{x}<extra></extra>",
-        )
+    device_types = list(
+        DeviceType.objects.annotate(deployed=Count("device", filter=deployed))
+        .filter(deployed__gt=0)
+        .order_by("-deployed", "name")
     )
-    fig.update_layout(
-        **PLOTLY_LAYOUT,
-        height=len(labels) * BAR_SLOT + 20,
-        margin=dict(l=10, r=50, t=10, b=10),
-        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
-        yaxis=dict(showgrid=False),
-        bargap=BAR_GAP,
-    )
-    return _to_html(fig)
+    top = device_types[0].deployed if device_types else 0
+    rows = [
+        {"device_type": device_type, "count": device_type.deployed, "share": round(device_type.deployed * 100 / top)}
+        for device_type in device_types[:size]
+    ]
+    return rows, len(device_types)
 
 
 def get_record_timeline_html(*, tenants):

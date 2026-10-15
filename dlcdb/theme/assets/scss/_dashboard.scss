@@ -109,6 +109,60 @@
   }
 }
 
+// The most deployed device types: one compact row per type, a link to its
+// devices, with a bar behind the row scaled to the count (`--share`, set per
+// row in the markup). The bar takes the tint of the section icons.
+.dashboard-ranking {
+  --app-ranking-bar: rgba(var(--bs-primary-rgb), .1);
+
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+@include color-mode(dark) {
+  .dashboard-ranking {
+    --app-ranking-bar: rgba(var(--bs-primary-rgb), .25);
+  }
+}
+
+.dashboard-ranking-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .5rem;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  background-image: linear-gradient(to right, var(--app-ranking-bar) var(--share), transparent 0);
+  border-radius: .375rem;
+  transition: background-color var(--app-transition);
+
+  > .bi {
+    color: var(--bs-secondary-color);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
+  }
+}
+
+.dashboard-ranking-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-ranking-count {
+  font-weight: $font-weight-semibold;
+}
+
 // Plotly renders each chart once, on the server, for both colour modes, and
 // writes its text colour inline. Axis labels, values and the legend take the
 // theme's text colour instead, so they stay readable on the dark panel. Hover

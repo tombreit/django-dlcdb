@@ -224,12 +224,14 @@ def index(request):
     ]
     stock_tiles = [_build_tile(model_name=name, url=url, request=request) for name, url in stock_specs]
 
+    device_type_ranking, device_type_total = stats.device_type_ranking(tenants=request.tenants)
+
     context = {
         "attention_tiles": attention_tiles,
         "stock_tiles": stock_tiles,
         "record_fraction_html": stats.get_record_fraction_html(tenants=request.tenants),
-        "device_type_html": stats.get_device_type_html(tenants=request.tenants),
-        "device_type_min_count": stats.DEVICE_TYPE_MIN_COUNT,
+        "device_type_ranking": device_type_ranking,
+        "device_type_total": device_type_total,
         "record_timeline_html": stats.get_record_timeline_html(tenants=request.tenants),
         **search_context,
     }

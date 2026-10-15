@@ -115,11 +115,14 @@ the template markup as it is.
      │          │ │ of 120   │ │ 7 w/notes│ │          │ │          │ │          │
      └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘
 
-     ▤ Devices by state               ▤ Devices by type
-     ──────────────────────           ──────────────────────
-     …                                …
-     ▤ Device history
-     ──────────────────────
+     ╭ Devices by state ─────────────────╮ ╭ Most deployed types ─╮
+     │ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ 355               │ │ ▒▒ Printer       34  │
+     │ ▄ 11                              │ │ ▒▒ Label printer 32  │
+     ╰───────────────────────────────────╯ │ ▒  Mouse         32  │
+     ╭ Device history ───────────────────╮ │ …  (top 15)          │
+     │      ___/‾‾‾‾\___                 │ │                      │
+     │  __/                              │ │ All 23 device types  │
+     ╰───────────────────────────────────╯ ╰──────────────────────╯
 
 ## Decisions taken
 
@@ -223,6 +226,18 @@ the template markup as it is.
      - "Devices by location" becomes "Devices by state", which is what it shows.
      - Axis text follows `--bs-body-color` in dark mode.
      - Load the `dataviz` skill before changing them.
+   - **Most deployed device types: a ranked list, not a chart.** User decisions, 2026-10-15,
+     after the Plotly bar chart grew far too tall with real data:
+     - the top 15 (`DEVICE_TYPE_RANKING_SIZE`), one compact row per type: icon, name, count, and
+       a bar behind the row scaled to the count;
+     - each row links to the device list filtered by that type
+       (`assets:device_index?device_type=<pk>`);
+     - when the list is cut, "All N device types" links to the device type list sorted by
+       device count (`?ordering=-assets`);
+     - a device counts unless its active record is REMOVED or it is soft-deleted. The linked list
+       also shows removed devices; the user accepted that;
+     - it sits in a right column (`col-lg-4`) beside "Devices by state" and "Device history",
+       which stack on the left (`col-lg-8`).
 10. **NEWS:** no entry per batch. At the end, one line is offered in the summary: this is polish
     (AGENTS.md).
 
@@ -296,6 +311,8 @@ After each batch, stop so the user can commit it.
     The test asserts the tile's class string.
   - Plotly writes the text `fill` as an inline style, so dark mode needs one scoped override in
     `_dashboard.scss`.
+  - Follow-up commit, after batch 4 had landed: the device type chart became the ranked list of
+    the most deployed device types (decision 9).
 
 Every batch:
 - `npm run build`
@@ -332,6 +349,9 @@ Batch 1 additionally:
 | Google Fonts | Privacy, and installs without internet access. |
 | A new primary colour | The user keeps indigo. |
 | Rendering the charts in the browser from CSS variables | A bigger change. Server-side Plotly with theme hex values is enough. |
+| Device types as a Plotly bar chart (batch 4's first version) | One bar per type with 10 or more devices: with real data far taller than its neighbours. |
+| Device types as a compact Plotly bar chart (top 15, 12px bars) | Bounded, but no links, and its text needs the dark-mode overrides. |
+| Device types as a treemap | Compact, but areas are hard to compare and small types get unreadable labels. |
 
 ## Open follow-ups
 
@@ -355,7 +375,8 @@ Batch 1 additionally:
   - "Needs attention" and "Stock";
   - "of %(total)s lendable" and "%(done)s of %(total)s devices";
   - "Devices by state";
-  - "No device type has %(count)s or more devices yet."
+  - "Most deployed device types", "No deployed devices yet." and
+    "All %(counter)s device type" / "All %(counter)s device types".
 
   The chart's state labels reuse the lifecycle labels, and the notes caption reuses the old
   badge's msgid.
@@ -512,15 +533,18 @@ Batch 1 additionally:
   - Some marks stay under 3:1, so values sit at the bar ends, and the lines carry a legend and
     end labels.
   - "Removed" stays grey, the de-emphasised state, as on its badge.
-  - Devices by type is one series in one colour, `#6366f1`, one indigo step lighter than the
-    primary: 4.2:1 light, 3.0:1 dark.
 - **Batch 4, chart form:**
   - Bars are 22px thick in a 36px slot, and each chart is as tall as its bars need.
   - Lines are 2px; only "in room", the bulk of the stock, gets a 10% wash.
   - Gridlines are hairlines that read on both panels.
   - The history chart has a unified hover over x.
-  - The device type chart shows a note instead of an empty plot when no type reaches
-    `DEVICE_TYPE_MIN_COUNT` (10, formerly a bare literal).
+- **Batch 4, the device type ranking** (`stats.device_type_ranking`):
+  - A pure data function returning `(rows, total)`, from one query on `DeviceType` with a
+    conditional `Count`.
+  - The negated REMOVED condition keeps devices without any record.
+  - The row bar is a `linear-gradient` on a per-row `--share` custom property, in the tint of
+    the section icon squares (10% primary, 25% in dark mode). It needs no Plotly overrides and
+    doubles as the table view the dataviz method asks for.
 - **Batch 4, chart text in dark mode:** `_dashboard.scss` overrides Plotly's inline `fill` for
   tick labels, axis titles, legend, annotations and bar text with `--bs-secondary-color`. Hover
   labels keep Plotly's colours, since they bring their own background.
@@ -531,5 +555,6 @@ Batch 1 additionally:
 - **Batch 4, checked in Chromium (2026-10-15)** on a scratch DB with backdated records, light and
   dark, 1400px and 390px:
   - tiles, with the overdue tone and the inventory progress;
-  - the three charts;
+  - the two charts and the ranking with 23 types: cut at 15, "All 23 device types", removed
+    and soft-deleted devices not counted, hover, the rows' links;
   - a search for "NTB" with two result groups.

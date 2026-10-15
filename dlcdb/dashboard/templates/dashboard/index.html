@@ -81,40 +81,55 @@ on wide screens.
   </div>
 </section>
 
+{% comment %}
+The charts on the left; on the right the ranking of the most deployed device
+types, a list rather than a chart: it stays one row per type however many types
+there are, and each row opens that type's devices.
+{% endcomment %}
 <div class="dashboard-charts row g-3">
-  <div class="col-lg-6">
-    <section class="card card-filled h-100">
+  <div class="col-lg-8 d-flex flex-column gap-3">
+    <section class="card card-filled">
       <div class="card-header">
         <i class="bi bi-bar-chart"></i>
         <h2>{% translate "Devices by state" %}</h2>
       </div>
       <div class="card-body dashboard-chart">{{ record_fraction_html|safe }}</div>
     </section>
-  </div>
-  <div class="col-lg-6">
-    <section class="card card-filled h-100">
-      <div class="card-header">
-        <i class="bi bi-bar-chart-steps"></i>
-        <h2>{% translate "Devices by type" %}</h2>
-      </div>
-      <div class="card-body dashboard-chart">
-        {% if device_type_html %}
-          {{ device_type_html|safe }}
-        {% else %}
-          <p class="text-body-secondary mb-0">
-            {% blocktranslate with count=device_type_min_count %}No device type has {{ count }} or more devices yet.{% endblocktranslate %}
-          </p>
-        {% endif %}
-      </div>
-    </section>
-  </div>
-  <div class="col-12">
-    <section class="card card-filled">
+    <section class="card card-filled flex-grow-1">
       <div class="card-header">
         <i class="bi bi-graph-up"></i>
         <h2>{% translate "Device history" %}</h2>
       </div>
       <div class="card-body dashboard-chart">{{ record_timeline_html|safe }}</div>
+    </section>
+  </div>
+  <div class="col-lg-4">
+    <section class="card card-filled h-100">
+      <div class="card-header">
+        <i class="bi bi-bar-chart-steps"></i>
+        <h2>{% translate "Most deployed device types" %}</h2>
+      </div>
+      <div class="card-body">
+        {% url "assets:device_index" as device_index_url %}
+        <ol class="dashboard-ranking">
+          {% for row in device_type_ranking %}
+            <li>
+              <a class="dashboard-ranking-row" href="{{ device_index_url }}?device_type={{ row.device_type.pk }}" style="--share: {{ row.share }}%">
+                <i class="bi {{ row.device_type.icon_class }}"></i>
+                <span class="dashboard-ranking-name">{{ row.device_type.name }}</span>
+                <span class="dashboard-ranking-count">{{ row.count }}</span>
+              </a>
+            </li>
+          {% empty %}
+            <li class="text-body-secondary">{% translate "No deployed devices yet." %}</li>
+          {% endfor %}
+        </ol>
+        {% if device_type_total > device_type_ranking|length %}
+          <a class="d-inline-block mt-3" href="{% url 'assets:device_type_index' %}?ordering=-assets">
+            {% blocktranslate count counter=device_type_total %}All {{ counter }} device type{% plural %}All {{ counter }} device types{% endblocktranslate %}
+          </a>
+        {% endif %}
+      </div>
     </section>
   </div>
 </div>
