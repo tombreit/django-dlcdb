@@ -132,7 +132,7 @@ class RoomFrontendTests(BaseTest):
         self.assertContains(response, f"{reverse('assets:device_index')}?active_record__room={self.server_room.pk}")
         self.assertContains(response, "1 device in this room")
         # The QR card is a native <details> without `open` (collapsed) and last.
-        self.assertContains(response, '<details class="card mb-3 card-collapse">')
+        self.assertContains(response, '<details class="card card-filled mb-3">')
         self.assertNotContains(response, "<details open")
 
     def test_view_only_user_gets_readonly_detail_and_cannot_post(self):

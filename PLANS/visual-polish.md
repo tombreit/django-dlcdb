@@ -8,9 +8,10 @@ SPDX-License-Identifier: CC0-1.0
 
 **Status:** implemented 2026-10-15:
 - batch 1, the typeface;
-- batch 2, `card-filled` sections on the device, record and lending pages.
+- batch 2, `card-filled` sections on the device, record and lending pages;
+- batch 3, the other detail pages.
 
-Batches 3 and 4 are open. This is a living document.
+Batch 4, the dashboard, is open. This is a living document.
 
 ## Why
 
@@ -164,6 +165,8 @@ the template markup as it is.
    - **Header rules:**
      - `.card-filled > .card-header` sets one title style: 1.125rem, semibold, icon and title
        side by side.
+     - Anything else in a header, such as a count or a "Manage" link, stays body text
+       (`> :where(a, span, small)`).
      - The first icon sits in a tinted 2rem square.
 
      So the three header idioms render the same without touching them:
@@ -270,7 +273,7 @@ After each batch, stop so the user can commit it.
     - the dead `border-success` on the return card goes; its `bg-success-subtle` header stays as
       the flow's emphasis.
   - The Bootstrap collapse markup stays, so the assertions in `lending/tests/test_views.py` hold.
-- [ ] **3. The other detail pages gain the modifier**
+- [x] **3. The other detail pages gain the modifier**
   - These templates add `card-filled` to their section cards:
     - persons: `detail.html`, `includes/_form_fields.html`, `_lendings.html`, `_licences.html`,
       `_smallstuff.html`;
@@ -279,11 +282,12 @@ After each batch, stop so the user can commit it.
     - tenants: `detail.html`, `includes/_form_fields.html`;
     - journal: `detail.html`, `cleanup.html`;
     - `dataexchange/importer_detail.html`;
-    - `theme/includes/_audit_data.html`.
-  - Rooms: `card-collapse` → `card-filled`, the caret gets `card-caret`, and the inline `<style>`
-    goes.
-    - Test `rooms/tests/test_rooms.py` asserts `<details class="card mb-3 card-collapse">`.
-  - The journal and importer detail pages wrap their side column in `.detail-aside`.
+    - `theme/includes/_audit_data.html`;
+    - `licenses/history.html`, the twin of the device field history.
+  - Rooms: `card-collapse` → `card-filled` and the inline `<style>` goes. The caret already was
+    `card-caret`.
+    - Test `rooms/tests/test_rooms.py` asserts the `<details>` class string and is updated.
+  - `_cards.scss`: secondary header content stays body text.
 - [ ] **4. Dashboard** (decision 9)
   - `dashboard/views.py`: the tile dicts get `value`, `caption`, `tone` and `group`.
   - Also: `dashboard/includes/_tile.html`, `dashboard/index.html`,
@@ -337,6 +341,13 @@ Batch 1 additionally:
 - **Lending page polish:**
   - align its header with `_detail_base` (back link right, `h1.h3`);
   - drop the inline `.picker-option:hover` style, which duplicates `picker.css`.
+- **Plain cards left on non-detail pages:**
+  - the subscription form on `notifications/index.html`;
+  - the info card on `dataexchange/import.html`.
+
+  One `card-filled` each, if wanted.
+- **Page headers:** the import detail page's title is a small grey "Import" line, unlike the
+  other detail pages.
 - **Out of scope for this round:** list pages (`_index_base.html`), the filterbar, and one page
   header for index, detail and lending pages.
 - **Device detail:** the state badge shows twice, in the header and under *Current state*.
@@ -385,6 +396,10 @@ Batch 1 additionally:
 - **Checking with `runserver --noreload`:** Django's cached template loader keeps the templates
   it has loaded. After editing templates, restart the server, or the page renders the old
   markup against the new CSS.
+- **Sass 1.77 (pinned) crashes on `:where(:not(h2, .bi))`.** The error is "components may not be
+  empty", in `@extend` handling: Bootstrap's `.small` extends `small`. Name the elements instead.
+  A crashed build leaves the old `theme.css` in `dist/`, so check the build's exit code, not its
+  output.
 - **Utilities win over the modifier.** `!important` utilities in existing markup override it,
   e.g. `bg-success-subtle` on the lending return header. Check them visually rather than fight
   them.
@@ -449,3 +464,21 @@ Batch 1 additionally:
   - lending in picker mode, edit and return (also at 390px);
   - the hover on a collapsed bar, and a toggled collapse;
   - an empty start date, which shows the warning box around the field.
+- **Batch 3, no `.detail-aside` wrapper on the journal and import detail pages.** The plan asked
+  for one, but the aside has had no style since batch 2's redesign. The wrapper would only
+  re-indent their side columns.
+- **Batch 3, `licenses/history.html` included:** it is the twin of the device field history,
+  which got the modifier in batch 2.
+- **Batch 3, secondary header content.** The header's title style made the room page's change
+  count and the person page's "Manage" link bold and 1.125rem. They are body text again.
+- **Batch 3, checked in Chromium (2026-10-15)** on a scratch DB, at 1400px, plus light and dark
+  and 390px where noted:
+  - person: light, dark and 390px;
+  - room, with the QR code open;
+  - device type, manufacturer, tenant;
+  - journal entry and journal cleanup;
+  - import detail;
+  - licence history.
+
+  Timelines pick up the panel colour by themselves: `_timeline.scss` falls back to
+  `--bs-card-bg`.

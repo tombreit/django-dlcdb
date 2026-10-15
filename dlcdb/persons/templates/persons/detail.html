@@ -32,7 +32,7 @@
 {% endblock detail_readonly_notice %}
 
 {% block detail_readonly %}
-  <section class="card mb-3">
+  <section class="card card-filled mb-3">
     <div class="card-header d-flex align-items-center gap-2">
       <i class="bi bi-person text-primary"></i>
       <h2 class="h6 mb-0">{% translate "Person" %}</h2>
@@ -67,7 +67,7 @@
 
 {% block detail_sidebar %}
   {% if is_udb_synced %}
-    <section class="card mb-3">
+    <section class="card card-filled mb-3">
       <div class="card-header d-flex align-items-center gap-2">
         <i class="bi bi-arrow-repeat text-primary"></i>
         <h2 class="h6 mb-0">{% translate "HR API data" %}</h2>

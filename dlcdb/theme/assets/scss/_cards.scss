@@ -60,6 +60,14 @@
       font-weight: inherit;
     }
 
+    // Anything else in a header, such as a count or a "Manage" link, is
+    // body text. (Sass 1.77 crashes on `:where(:not(h2, .bi))`, so the
+    // elements are named.)
+    > :where(a, span, small) {
+      font-size: $font-size-base;
+      font-weight: $font-weight-normal;
+    }
+
     > .bi:first-child {
       display: inline-grid;
       flex: none;

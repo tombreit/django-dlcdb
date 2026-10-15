@@ -3,16 +3,6 @@
 
 {% block title %}{{ room }}{% endblock title %}
 
-{% block extra_css %}
-  <style>
-    /* Native <details> card (QR code): hide the disclosure marker, rotate the caret. */
-    details.card-collapse > summary { cursor: pointer; list-style: none; }
-    details.card-collapse > summary::-webkit-details-marker { display: none; }
-    details.card-collapse > summary .card-caret { margin-left: auto; transition: transform .15s ease; }
-    details.card-collapse[open] > summary .card-caret { transform: rotate(180deg); }
-  </style>
-{% endblock extra_css %}
-
 {% block detail_title_class %} font-monospace{% endblock %}
 {% block detail_title %}{{ room.number }}{% endblock detail_title %}
 
@@ -32,7 +22,7 @@
 {% endblock detail_readonly_notice %}
 
 {% block detail_readonly %}
-  <section class="card mb-3">
+  <section class="card card-filled mb-3">
     <div class="card-header d-flex align-items-center gap-2">
       <i class="bi bi-door-open text-primary"></i>
       <h2 class="h6 mb-0">{% translate "Room" %}</h2>
@@ -66,7 +56,7 @@
 {% endblock detail_related %}
 
 {% block detail_sidebar %}
-  <section class="card mb-3">
+  <section class="card card-filled mb-3">
     <div class="card-header d-flex align-items-center gap-2">
       <i class="bi bi-pc-display text-primary"></i>
       <h2 class="h6 mb-0">{% translate "Usage" %}</h2>
@@ -85,7 +75,7 @@
 
   {% if room.qrcode %}
     {# Collapsed by default — same native <details> mechanism as the device QR card. #}
-    <details class="card mb-3 card-collapse">
+    <details class="card card-filled mb-3">
       <summary class="card-header d-flex align-items-center gap-2">
         <i class="bi bi-qr-code text-primary"></i>
         <h2 class="h6 mb-0">{% translate "QR code" %}</h2>
