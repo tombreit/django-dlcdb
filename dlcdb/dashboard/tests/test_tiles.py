@@ -145,6 +145,13 @@ class DashboardTileTests(TestCase):
         self.assertEqual(_tile(response, "licenses:index")["label"], LicenceRecord._meta.verbose_name_plural)
         self.assertEqual(_tile(response, "assets:device_index")["label"], Device._meta.verbose_name)
 
+    def test_the_model_tiles_are_labelled_in_the_users_language(self):
+        """The labels are the models' verbose names, so those must be translatable."""
+        response = self.client.get(reverse("dashboard:index"), headers={"accept-language": "de"})
+
+        self.assertContains(response, "<span>Gerät</span>", html=True)
+        self.assertNotContains(response, "<span>Device</span>", html=True)
+
     def test_the_lendings_tile_shows_the_lent_count_out_of_the_lendable_devices(self):
         lendable = Device.objects.create(
             edv_id="TILE-LEND", sap_id="7001-2", device_type=self.device_type, tenant=self.tenant, is_lentable=True

@@ -228,8 +228,8 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
     FIELD_HISTORY_SECRET = ("machine_encryption_key", "backup_encryption_key")
 
     class Meta:
-        verbose_name = "Device"
-        verbose_name_plural = "Devices"
+        verbose_name = _("Device")
+        verbose_name_plural = _("Devices")
         ordering = ["-modified_at", "edv_id"]
         indexes = [
             models.Index(fields=["edv_id", "sap_id", "modified_at"]),

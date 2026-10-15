@@ -154,8 +154,8 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
 
     class Meta:
         ordering = ["last_name", "first_name"]
-        verbose_name = "Person"
-        verbose_name_plural = "Personen"
+        verbose_name = _("Person")
+        verbose_name_plural = _("Persons")
         # unique_together = ['last_name', 'first_name']
         constraints = [
             models.UniqueConstraint(Lower("first_name"), Lower("last_name"), name="unique_dlcdb_person_name"),

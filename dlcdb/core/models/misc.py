@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .abstracts import AuditBaseModel
 
@@ -29,8 +30,8 @@ class Attachment(AuditBaseModel):
         return selfstring
 
     class Meta:
-        verbose_name = "Attachment"
-        verbose_name_plural = "Attachments"
+        verbose_name = _("Attachment")
+        verbose_name_plural = _("Attachments")
         ordering = ["-created_at"]
 
 
@@ -70,6 +71,6 @@ class Link(AuditBaseModel):
         return f"Link: '{self.linktext}'"
 
     class Meta:
-        verbose_name = "Link"
-        verbose_name_plural = "Links"
+        verbose_name = _("Link")
+        verbose_name_plural = _("Links")
         ordering = ["-created_at"]

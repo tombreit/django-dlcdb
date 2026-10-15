@@ -194,8 +194,6 @@ SEARCH_SOURCES = (
     ),
     SearchSource(
         key="persons",
-        # Explicit label: Person._meta.verbose_name_plural is the hardcoded,
-        # untranslated German string "Personen".
         label=_("Persons"),
         icon="bi bi-person",
         permissions=("core.view_person",),

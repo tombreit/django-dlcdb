@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class Note(models.Model):
@@ -43,8 +44,8 @@ class Note(models.Model):
     class Meta:
         # TODO: Define unique and unique_together constraints. Eg a
         # device could only have one inventory note per inventory.
-        verbose_name = "Notiz"
-        verbose_name_plural = "Notizen"
+        verbose_name = _("Note")
+        verbose_name_plural = _("Notes")
         indexes = [
             models.Index(fields=["created_at", "inventory"]),
         ]

@@ -189,8 +189,8 @@ class Record(AuditBaseModel):
     objects = RecordManager()
 
     class Meta:
-        verbose_name = "Record"
-        verbose_name_plural = "Records"
+        verbose_name = _("Record")
+        verbose_name_plural = _("Records")
         # One permission per lifecycle transition (see ``dlcdb.core.lifecycle``),
         # which is what decides whether a user is offered that action. They are
         # declared here rather than relying on the proxies' ``add_*`` permissions

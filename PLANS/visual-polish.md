@@ -443,7 +443,7 @@ batch (decision 16).
   - `notifications/index.html`: `card card-filled mb-4`, with the header
     `<i class="bi bi-bell"></i><h2>…</h2>`.
   - `dataexchange/import.html`: `card card-filled mb-4`.
-- [ ] **8. Model names** (decision 14)
+- [x] **8. Model names** (decision 14)
   - Read the docstring of `dlcdb/core/__init__.py` first (AGENTS.md).
   - `verbose_name` and `verbose_name_plural` through `gettext_lazy` in `core/models/device.py`,
     `person.py`, `note.py`, `record.py` and `misc.py`.
@@ -811,3 +811,7 @@ last places that miss it, and it needs no new font source.
   dark mode), edit and return; import detail with and without a file; the import list.
 - **Batch 7, checked in Chromium (2026-10-15):** the subscriptions page (its form needs a person
   with the user's e-mail) and the import page, light and dark, 1400px and 390px.
+- **Batch 8, a smaller migration:** Django compares a lazy name by its English text, so wrapping
+  "Device" or "Record" in `gettext_lazy` changes nothing it records. `0079` alters only `Note`
+  and `Person`, whose English names are new.
+- **Batch 8, the tile test fails without the fix:** checked by reverting `Device`'s names.
