@@ -426,7 +426,7 @@ batch (decision 16).
   - Screenshots:
     - person with HR API data, tenant, room, device, record;
     - lending return, for the main-column list.
-- [ ] **6. Page headers: lending and import detail** (decision 12)
+- [x] **6. Page headers: lending and import detail** (decision 12)
   - `lending/lend.html`:
     - the header band;
     - the inline `<style>` with `.picker-option:hover` goes: `picker.css` loads in both branches
@@ -804,3 +804,8 @@ last places that miss it, and it needs no new font source.
   - person with HR API data, tenant, room with UUID, device, record, journal entry, import detail;
   - the lending return flow, for the main-column list;
   - light and dark, 1400px and 390px.
+- **Batch 6, the file name everywhere on the import pages:** besides the title and the list link,
+  the *File* link on the detail page and the dry-run summary on the preview page show
+  `file_name` too. The admin and the journal keep `str()`, the stored path.
+- **Batch 6, checked in Chromium (2026-10-15):** lending in picker mode (also at 390px and in
+  dark mode), edit and return; import detail with and without a file; the import list.

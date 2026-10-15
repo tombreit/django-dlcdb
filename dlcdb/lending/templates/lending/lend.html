@@ -11,34 +11,29 @@ SPDX-License-Identifier: EUPL-1.2
 
 {% block extra_css %}
 {% if device_form %}{{ device_form.media.css }}{% else %}<link rel="stylesheet" href="{% static 'theme/widgets/picker.css' %}">{% endif %}
-<style>
-  .picker-option:hover { background-color: var(--bs-tertiary-bg); }
-</style>
 {% endblock extra_css %}
 
 {% block body %}
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <div>
-    <a href="{{ index_url }}" class="text-decoration-none small">
-      <i class="bi bi-arrow-left"></i> {% translate "Back to overview" %}
-    </a>
-    <h1 class="mb-0">
+{# The header band of the detail pages (theme/_detail_base.html). #}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+  <div class="me-auto">
+    <h1 class="h3 mb-1">
       {% if picker_mode %}<i class="bi bi-lightning-charge"></i> {% endif %}{{ title }}
     </h1>
+    {% if picker_mode %}
+      <div class="text-muted">
+        {% translate "Pick an available device and a person, choose a room, then lend." %}
+      </div>
+    {% endif %}
   </div>
   {% if obj_admin_url and request.user.is_staff %}
-    <a href="{{ obj_admin_url }}" class="btn btn-outline-warning btn-sm">
+    <a href="{{ obj_admin_url }}" class="btn btn-outline-warning">
       <i class="bi bi-box-arrow-up-right"></i> {% translate "Admin view" %}
     </a>
   {% endif %}
+  {% include "theme/includes/_back_link.html" with url=index_url label=_("Back to overview") %}
 </div>
-
-{% if picker_mode %}
-  <p class="text-muted">
-    {% translate "Pick an available device and a person, choose a room, then lend." %}
-  </p>
-{% endif %}
 
 {% include "theme/includes/_non_field_errors.html" with form=form %}
 

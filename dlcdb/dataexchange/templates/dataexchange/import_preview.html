@@ -20,7 +20,7 @@
 
     <div class="alert {{ report.alert_class }}">
       <strong>{% translate "Dry run" %} — {% translate "nothing has been written yet." %}</strong><br>
-      {{ importer_list.file }}: {{ report.summary }}
+      {{ importer_list.file_name }}: {{ report.summary }}
     </div>
 
     {% if report.has_errors %}

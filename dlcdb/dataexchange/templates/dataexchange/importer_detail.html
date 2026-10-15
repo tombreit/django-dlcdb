@@ -1,17 +1,15 @@
 {% extends "theme/_base.html" %}
 {% load i18n %}
 
-{% block title %}{{ importer_list }}{% endblock title %}
+{% block title %}{{ importer_list.file_name|default:_("Import without file") }}{% endblock title %}
 
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
     <div class="me-auto">
-      <h1 class="h3 mb-1">{{ importer_list }}</h1>
+      <h1 class="h3 mb-1">{{ importer_list.file_name|default:_("Import without file") }}</h1>
       <div class="text-muted">{% translate "Import" %}</div>
     </div>
-    <a href="{{ index_url }}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left"></i> {% translate "Back to list" %}
-    </a>
+    {% include "theme/includes/_back_link.html" with url=index_url %}
   </div>
 
   <div class="row g-4">
@@ -26,7 +24,7 @@
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "File" %}</dt>
             <dd class="col-sm-8">
               {% if importer_list.file %}
-                <a href="{{ importer_list.file.url }}"><i class="bi bi-filetype-csv"></i> {{ importer_list.file }}</a>
+                <a href="{{ importer_list.file.url }}"><i class="bi bi-filetype-csv"></i> {{ importer_list.file_name }}</a>
               {% else %}—{% endif %}
             </dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Status" %}</dt>

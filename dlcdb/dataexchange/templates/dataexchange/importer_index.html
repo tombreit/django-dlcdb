@@ -37,7 +37,7 @@
                 <td class="position-relative">
                   <a href="{% url 'dataexchange:importer_detail' importer_list.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
                      class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
-                    {{ importer_list }}
+                    {{ importer_list.file_name|default:_("Import without file") }}
                   </a>
                   {% if importer_list.summary %}<div class="small text-muted">{{ importer_list.summary }}</div>{% endif %}
                   {% if importer_list.note %}<div class="small text-muted text-truncate" style="max-width: 40ch;">{{ importer_list.note }}</div>{% endif %}

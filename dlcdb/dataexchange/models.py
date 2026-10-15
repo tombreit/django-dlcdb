@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from pathlib import Path
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
@@ -155,6 +157,15 @@ class ImporterList(OperationLogBase):
 
     def __str__(self):
         return f"{self.file}"
+
+    @property
+    def file_name(self):
+        """
+        The uploaded file's name without its upload folder, or "" without a
+        file. ``__str__`` keeps the stored path: the journal records it as
+        ``object_repr``.
+        """
+        return Path(self.file.name).name if self.file else ""
 
     def get_absolute_url(self):
         return reverse("dataexchange:importer_detail", args=[self.pk])

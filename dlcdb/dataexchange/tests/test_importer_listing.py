@@ -62,12 +62,30 @@ def test_index_lists_imports_with_status_and_device_count(superuser_client, conf
 
     assert response.status_code == 200
     content = response.content.decode()
-    assert str(confirmed_import.file) in content
-    assert str(unconfirmed.file) in content
+    assert confirmed_import.file_name in content
+    assert unconfirmed.file_name in content
     assert "Not confirmed" in content
     page_rows = {obj.pk: obj for obj in response.context["page_obj"]}
     assert page_rows[confirmed_import.pk].devices_count == Device.objects.filter(imported_by=confirmed_import).count()
     assert page_rows[confirmed_import.pk].devices_count > 0
+
+
+@_PLAIN_STATICFILES
+def test_an_import_is_named_by_its_file_without_the_upload_folder(superuser_client, tenant):
+    named = ImporterList.objects.create(file="imported_csv/spring.csv", tenant=tenant)
+    fileless = ImporterList.objects.create(file="", tenant=tenant)
+
+    with translation.override("en"):
+        index = superuser_client.get(reverse(INDEX_URL)).content.decode()
+        detail = superuser_client.get(reverse(DETAIL_URL, args=[named.pk])).content.decode()
+        fileless_detail = superuser_client.get(reverse(DETAIL_URL, args=[fileless.pk])).content.decode()
+
+    assert named.file_name == "spring.csv"
+    assert "spring.csv" in index
+    assert "imported_csv/spring.csv" not in index
+    assert "Import without file" in index
+    assert '<h1 class="h3 mb-1">spring.csv</h1>' in detail
+    assert '<h1 class="h3 mb-1">Import without file</h1>' in fileless_detail
 
 
 @_PLAIN_STATICFILES
