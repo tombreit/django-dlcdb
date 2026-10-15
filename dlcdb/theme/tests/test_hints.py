@@ -7,6 +7,8 @@ The sticky hint messages (theme.context_processors.hints) point to the frontend
 apps, not the legacy admin changelists.
 """
 
+import re
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import override_settings
@@ -148,6 +150,20 @@ class StickyHintsTests(BaseTest):
         self.assertNotContains(response, "without tenant!")
         self.assertNotContains(response, "No rooms defined yet.")
         self.assertNotContains(response, "No IT department contact email configured in Branding!")
+
+    def test_hints_cannot_be_dismissed_but_other_messages_can(self):
+        """A hint holds until its cause is fixed: closing it would only last until the next page."""
+        response = self.client.post(reverse("rooms:add"), {"number": "F1.01"}, follow=True)
+
+        alerts = re.findall(r'<div class="alert[^"]*">.*?</div>', response.text, re.DOTALL)
+        hint = next(alert for alert in alerts if "is_external" in alert)
+        created = next(alert for alert in alerts if "was created" in alert)
+        self.assertNotIn("alert-dismissible", hint)
+        self.assertNotIn("btn-close", hint)
+        self.assertIn("alert-warning", hint)
+        self.assertIn("alert-dismissible", created)
+        self.assertIn("btn-close", created)
+        self.assertIn("alert-success", created)
 
     def test_room_hints_link_to_the_rooms_frontend(self):
         # No rooms at all: the hint offers the frontend add form.

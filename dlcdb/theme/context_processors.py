@@ -146,7 +146,12 @@ def nav(request):
 
 
 def hints(request):
-    """Display some pre-defined messages as sticky messages"""
+    """
+    Display some pre-defined messages as sticky messages: hints about the data
+    that hold until their cause is fixed. They carry the extra tag "sticky",
+    so theme/_base.html renders them without a close button: a dismissed hint
+    would come back on the next page anyway.
+    """
 
     # Anonymous visitors (e.g. the login page) neither need the hints nor can
     # act on them; this also spares their requests the hint queries.
@@ -322,7 +327,7 @@ def hints(request):
         # Only add current message if not already exists in messages display
         current_messages_content = [msg.message for msg in list(messages.get_messages(request))]
         if message.get_formatted_msg() not in current_messages_content:
-            messages.add_message(request, message.level, message.get_formatted_msg())
+            messages.add_message(request, message.level, message.get_formatted_msg(), extra_tags="sticky")
 
     return {}  # empty dict to make context_processor happy
 

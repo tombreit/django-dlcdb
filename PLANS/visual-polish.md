@@ -829,3 +829,11 @@ last places that miss it, and it needs no new font source.
   - the slip for the Greek guest: serial number, IT ID and inventory number in Plex Mono, the
     name in Plex Sans. In the checklist heading, the Greek letters fall back to the system's
     monospace font (DejaVu Sans Mono), as decided.
+- **After batch 10, hints cannot be dismissed (user, 2026-10-15):** the hints of
+  `theme.context_processors.hints` hold until their cause is fixed, so a closed hint came back on
+  the next page. They carry the extra tag `sticky`, and `theme/_base.html` renders them without
+  `alert-dismissible` and close button. One-off messages stay dismissible. The alert colour now
+  comes from `message.level_tag`, since `message.tags` would include the extra tag.
+  - Not changed: a response that doesn't render the messages, e.g. an HTMX fragment, still runs
+    the hint queries and stores the hints for the next full page. Hints in their own context
+    variable instead of the message framework would end that.
