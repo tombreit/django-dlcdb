@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
-// Device and record pages: identity tile, form labels, read-only metadata
-// lists. Their sections are filled cards (_cards.scss). Extends the app shell
-// language (slate identity, indigo primary, --app-* tokens) rather than
-// introducing a new palette.
+// Device and record pages: identity tile, form labels, QR code. Their sections
+// are filled cards (_cards.scss), their side-column facts a fact list
+// (_fact-list.scss). Extends the app shell language (slate identity, indigo
+// primary, --app-* tokens) rather than introducing a new palette.
 //
 // The `device-` prefix is historical — these started on the device detail/add
 // surfaces. The record pages use the same components, which is why this lives
@@ -47,30 +47,6 @@
 
     @include media-breakpoint-down(lg) {
         position: static;
-    }
-}
-
-// Read-only record metadata (the admin "Informal" fields).
-.device-meta {
-    margin: 0;
-
-    > div + div {
-        margin-top: .6rem;
-        padding-top: .6rem;
-        border-top: 1px solid var(--bs-border-color-translucent);
-    }
-
-    dt {
-        font-size: .8125rem;
-        font-weight: 500;
-        color: var(--bs-secondary-color);
-        margin-bottom: .1rem;
-    }
-
-    dd {
-        margin: 0;
-        font-size: .875rem;
-        word-break: break-word;
     }
 }
 

@@ -1,0 +1,42 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+// Read-only facts about an object in a page's side column: the label above
+// the value, a hairline between two facts. At a third of the page, a label
+// beside its value would wrap ("Benutzer mit Zugriff auf diesen Mandanten"),
+// and UUIDs and e-mail addresses would break across lines. The main column
+// keeps Bootstrap's horizontal list (`row`, `col-sm-4` / `col-sm-8`).
+//
+//   <dl class="fact-list">
+//     <dt>…</dt>
+//     <dd>…</dd>
+//   </dl>
+//
+// A pair may also be grouped in a <div> (the device and record pages).
+
+.fact-list {
+  margin: 0;
+
+  > div + div,
+  > dd + dt {
+    padding-top: .6rem;
+    margin-top: .6rem;
+    border-top: 1px solid var(--#{$prefix}border-color-translucent);
+  }
+
+  dt {
+    margin-bottom: .1rem;
+    font-size: .8125rem;
+    font-weight: $font-weight-medium;
+    color: var(--#{$prefix}secondary-color);
+  }
+
+  dd {
+    margin: 0;
+    font-size: .875rem;
+    word-break: break-word;
+  }
+}

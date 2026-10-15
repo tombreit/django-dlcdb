@@ -14,15 +14,15 @@ Params:
     <h2 class="h6 mb-0">{{ title|default:_("Record data") }}</h2>
   </div>
   <div class="card-body">
-    <dl class="row mb-0 small">
+    <dl class="fact-list">
       {% if object.uuid %}
-        <dt class="col-sm-4 text-secondary fw-medium">UUID</dt>
-        <dd class="col-sm-8 font-monospace text-break">{{ object.uuid }}</dd>
+        <dt>UUID</dt>
+        <dd class="font-monospace">{{ object.uuid }}</dd>
       {% endif %}
-      <dt class="col-sm-4 text-secondary fw-medium">{% translate "Created" %}</dt>
-      <dd class="col-sm-8">{{ object.created_at|date:"Y-m-d H:i" }}</dd>
-      <dt class="col-sm-4 text-secondary fw-medium">{% translate "Modified" %}</dt>
-      <dd class="col-sm-8 mb-0">
+      <dt>{% translate "Created" %}</dt>
+      <dd>{{ object.created_at|date:"Y-m-d H:i" }}</dd>
+      <dt>{% translate "Modified" %}</dt>
+      <dd>
         {{ object.modified_at|date:"Y-m-d H:i" }}
         {% if object.user or object.username %}
           <span class="text-muted">· {{ object.user|default:object.username }}</span>

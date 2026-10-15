@@ -73,25 +73,25 @@
         <h2 class="h6 mb-0">{% translate "HR API data" %}</h2>
       </div>
       <div class="card-body">
-        <dl class="row mb-0 small">
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Name" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_person_last_name|default:"—" }}{% if person.udb_person_first_name %}, {{ person.udb_person_first_name }}{% endif %}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Business e-mail" %}</dt>
-          <dd class="col-sm-7 text-break">{{ person.udb_person_email_internal_business|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Private e-mail" %}</dt>
-          <dd class="col-sm-7 text-break">{{ person.udb_person_email_private|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Organization unit" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_contract_organization_unit|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Contract type" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_contract_contract_type|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Positions" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_contract_organizational_positions|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Planned check-in" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_contract_planned_checkin|date:"Y-m-d"|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Planned check-out" %}</dt>
-          <dd class="col-sm-7">{{ person.udb_contract_planned_checkout|date:"Y-m-d"|default:"—" }}</dd>
-          <dt class="col-sm-5 text-secondary fw-medium">{% translate "Last HR API update" %}</dt>
-          <dd class="col-sm-7 mb-0">{{ person.udb_data_updated_at|date:"Y-m-d H:i"|default:"—" }}</dd>
+        <dl class="fact-list">
+          <dt>{% translate "Name" %}</dt>
+          <dd>{{ person.udb_person_last_name|default:"—" }}{% if person.udb_person_first_name %}, {{ person.udb_person_first_name }}{% endif %}</dd>
+          <dt>{% translate "Business e-mail" %}</dt>
+          <dd>{{ person.udb_person_email_internal_business|default:"—" }}</dd>
+          <dt>{% translate "Private e-mail" %}</dt>
+          <dd>{{ person.udb_person_email_private|default:"—" }}</dd>
+          <dt>{% translate "Organization unit" %}</dt>
+          <dd>{{ person.udb_contract_organization_unit|default:"—" }}</dd>
+          <dt>{% translate "Contract type" %}</dt>
+          <dd>{{ person.udb_contract_contract_type|default:"—" }}</dd>
+          <dt>{% translate "Positions" %}</dt>
+          <dd>{{ person.udb_contract_organizational_positions|default:"—" }}</dd>
+          <dt>{% translate "Planned check-in" %}</dt>
+          <dd>{{ person.udb_contract_planned_checkin|date:"Y-m-d"|default:"—" }}</dd>
+          <dt>{% translate "Planned check-out" %}</dt>
+          <dd>{{ person.udb_contract_planned_checkout|date:"Y-m-d"|default:"—" }}</dd>
+          <dt>{% translate "Last HR API update" %}</dt>
+          <dd>{{ person.udb_data_updated_at|date:"Y-m-d H:i"|default:"—" }}</dd>
         </dl>
       </div>
     </section>

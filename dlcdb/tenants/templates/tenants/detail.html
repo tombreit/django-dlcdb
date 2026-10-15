@@ -40,13 +40,13 @@
       <h2 class="h6 mb-0">{% translate "Usage" %}</h2>
     </div>
     <div class="card-body">
-      <dl class="row mb-0 small">
-        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Devices" %}</dt>
-        <dd class="col-sm-6">{{ tenant.device_count }}</dd>
-        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Imports" %}</dt>
-        <dd class="col-sm-6">{{ import_count }}</dd>
-        <dt class="col-sm-6 text-secondary fw-medium">{% translate "Users who see this tenant" %}</dt>
-        <dd class="col-sm-6 mb-0">{{ tenant.user_count }}</dd>
+      <dl class="fact-list">
+        <dt>{% translate "Devices" %}</dt>
+        <dd>{{ tenant.device_count }}</dd>
+        <dt>{% translate "Imports" %}</dt>
+        <dd>{{ import_count }}</dd>
+        <dt>{% translate "Users who see this tenant" %}</dt>
+        <dd>{{ tenant.user_count }}</dd>
       </dl>
       {% if perms.tenants.delete_tenant and not delete_url %}
         <p class="small text-secondary mb-0 mt-3">{% translate "A tenant with devices or imports cannot be deleted." %}</p>

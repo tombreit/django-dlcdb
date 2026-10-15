@@ -408,7 +408,7 @@ batch (decision 16).
     `_dashboard.scss`.
   - Follow-up commit, after batch 4 had landed: the device type chart became the ranked list of
     the most deployed device types (decision 9).
-- [ ] **5. Read-only lists** (decision 11)
+- [x] **5. Read-only lists** (decision 11)
   - New `dlcdb/theme/assets/scss/_fact-list.scss` with `.fact-list`, moved from `.device-meta`
     in `_device-page.scss`.
     - The separator rule covers `> div + div` and `> dd + dt`.
@@ -798,3 +798,9 @@ last places that miss it, and it needs no new font source.
   - the two charts and the ranking with 23 types: cut at 15, "All 23 device types", removed
     and soft-deleted devices not counted, hover, the rows' links;
   - a search for "NTB" with two result groups.
+- **Batch 5, the journal entry page included:** its *Entry* list sits in the side column too, so
+  it became a fact list. The plan had missed it.
+- **Batch 5, checked in Chromium (2026-10-15)** on a scratch DB:
+  - person with HR API data, tenant, room with UUID, device, record, journal entry, import detail;
+  - the lending return flow, for the main-column list;
+  - light and dark, 1400px and 390px.

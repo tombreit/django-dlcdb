@@ -138,14 +138,14 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="collapse show" id="lending-details">
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-3">{% translate "Lent from" %}</dt>
-          <dd class="col-sm-9">{{ record.lent_start_date|default:"—" }}</dd>
+          <dt class="col-sm-4 text-secondary fw-medium">{% translate "Lent from" %}</dt>
+          <dd class="col-sm-8">{{ record.lent_start_date|default:"—" }}</dd>
 
-          <dt class="col-sm-3">{% translate "Desired return date" %}</dt>
-          <dd class="col-sm-9">{{ record.lent_desired_end_date|default:"—" }}</dd>
+          <dt class="col-sm-4 text-secondary fw-medium">{% translate "Desired return date" %}</dt>
+          <dd class="col-sm-8">{{ record.lent_desired_end_date|default:"—" }}</dd>
 
-          <dt class="col-sm-3">{% translate "Room / location" %}</dt>
-          <dd class="col-sm-9">{{ record.room|default:"—" }}</dd>
+          <dt class="col-sm-4 text-secondary fw-medium">{% translate "Room / location" %}</dt>
+          <dd class="col-sm-8 mb-0">{{ record.room|default:"—" }}</dd>
         </dl>
         <div class="form-text mt-3">
           {% blocktranslate %}To change these, cancel and open the lending via <a href="{{ edit_url }}">“Edit”</a>.{% endblocktranslate %}
