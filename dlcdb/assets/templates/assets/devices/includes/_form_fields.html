@@ -1,10 +1,10 @@
 {% load i18n %}
 {% include "theme/includes/_non_field_errors.html" with form=form %}
 
-<section class="card device-card mb-3">
+<section class="card card-filled mb-3">
   <div class="card-header">
     <i class="bi bi-upc-scan"></i>
-    <h2 class="device-card-title">{% translate "Identification" %}</h2>
+    <h2>{% translate "Identification" %}</h2>
   </div>
   <div class="card-body">
     <div class="row g-3">
@@ -22,10 +22,10 @@
   </div>
 </section>
 
-<section class="card device-card mb-3">
+<section class="card card-filled mb-3">
   <div class="card-header">
     <i class="bi bi-cpu"></i>
-    <h2 class="device-card-title">{% translate "Manufacturer and model" %}</h2>
+    <h2>{% translate "Manufacturer and model" %}</h2>
   </div>
   <div class="card-body">
     <div class="row g-3">
@@ -37,11 +37,11 @@
   </div>
 </section>
 
-<details class="card device-card mb-3"{% if form.supplier.errors or form.contact_person_internal.errors or form.order_number.errors or form.cost_centre.errors or form.purchase_date.errors or form.warranty_expiration_date.errors or form.contract_start_date.errors or form.contract_expiration_date.errors or form.contract_termination_date.errors or form.procurement_note.errors %} open{% endif %}>
+<details class="card card-filled mb-3"{% if form.supplier.errors or form.contact_person_internal.errors or form.order_number.errors or form.cost_centre.errors or form.purchase_date.errors or form.warranty_expiration_date.errors or form.contract_start_date.errors or form.contract_expiration_date.errors or form.contract_termination_date.errors or form.procurement_note.errors %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-receipt"></i>
-    <h2 class="device-card-title">{% translate "Procurement" %}</h2>
-    <i class="bi bi-chevron-down device-caret"></i>
+    <h2>{% translate "Procurement" %}</h2>
+    <i class="bi bi-chevron-down card-caret"></i>
   </summary>
   <div class="card-body">
     <div class="row g-3">
@@ -68,11 +68,11 @@
   </div>
 </details>
 
-<details class="card device-card mb-3"{% if form.url.errors or form.nick_name.errors or form.mac_address.errors or form.extra_mac_addresses.errors %} open{% endif %}>
+<details class="card card-filled mb-3"{% if form.url.errors or form.nick_name.errors or form.mac_address.errors or form.extra_mac_addresses.errors %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-ethernet"></i>
-    <h2 class="device-card-title">{% translate "Names and network" %}</h2>
-    <i class="bi bi-chevron-down device-caret"></i>
+    <h2>{% translate "Names and network" %}</h2>
+    <i class="bi bi-chevron-down card-caret"></i>
   </summary>
   <div class="card-body">
     <div class="row g-3">
@@ -84,11 +84,11 @@
   </div>
 </details>
 
-<details class="card device-card mb-3"{% if form.machine_encryption_key.errors or form.backup_encryption_key.errors %} open{% endif %}>
+<details class="card card-filled mb-3"{% if form.machine_encryption_key.errors or form.backup_encryption_key.errors %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-shield-lock"></i>
-    <h2 class="device-card-title">{% translate "Sensitive credentials" %}</h2>
-    <i class="bi bi-chevron-down device-caret"></i>
+    <h2>{% translate "Sensitive credentials" %}</h2>
+    <i class="bi bi-chevron-down card-caret"></i>
   </summary>
   <div class="card-body">
     <p class="text-muted small">{% translate "Only store credentials here when this is required by your operating procedure." %}</p>

@@ -7,117 +7,115 @@ and mirror the admin's read-only status.
 {% endcomment %}
 {% load i18n humanize %}
 
-<div class="device-sidebar">
-  {% comment %}
-  Record trail + field history, both frontend views scoped to this device. The
-  field history needs only view_device, which this page already requires.
-  {% endcomment %}
+{% comment %}
+Record trail + field history, both frontend views scoped to this device. The
+field history needs only view_device, which this page already requires.
+{% endcomment %}
 
-  <section class="card device-card mb-3">
-    <div class="card-header">
-      <i class="bi bi-activity"></i>
-      <h2 class="device-card-title">{% translate "Current state" %}</h2>
-    </div>
-    <div class="card-body">
-      {# lending_url turns the borrower into a link to the lending. Only this card passes it; the device list includes the same snippet without it. #}
-      {% include "assets/devices/includes/_state.html" with device=device lending_url=lending_url %}
-      {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
-    </div>
-  </section>
+<section class="card card-filled mb-3">
+  <div class="card-header">
+    <i class="bi bi-activity"></i>
+    <h2>{% translate "Current state" %}</h2>
+  </div>
+  <div class="card-body">
+    {# lending_url turns the borrower into a link to the lending. Only this card passes it; the device list includes the same snippet without it. #}
+    {% include "assets/devices/includes/_state.html" with device=device lending_url=lending_url %}
+    {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
+  </div>
+</section>
 
-  <section class="card device-card mb-3">
-    <div class="card-header">
-      <i class="bi bi-clock-history"></i>
-      <h2 class="device-card-title">{% translate "Trail" %}</h2>
-    </div>
-    <div class="list-group list-group-flush">
-      {% if perms.core.view_record %}
-        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-           href="{% url 'assets:record_index' %}?device={{ device.pk }}">
-          <i class="bi bi-list-ul text-primary"></i>
-          <span class="me-auto">{% translate "Records history" %}</span>
-        </a>
-      {% endif %}
+<section class="card card-filled mb-3">
+  <div class="card-header">
+    <i class="bi bi-clock-history"></i>
+    <h2>{% translate "Trail" %}</h2>
+  </div>
+  <div class="list-group list-group-flush">
+    {% if perms.core.view_record %}
       <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
-         href="{% url 'assets:device_history' device.pk %}">
-        <i class="bi bi-arrow-counterclockwise text-primary"></i>
-        <span class="me-auto">{% translate "Field history" %}</span>
+         href="{% url 'assets:record_index' %}?device={{ device.pk }}">
+        <i class="bi bi-list-ul text-primary"></i>
+        <span class="me-auto">{% translate "Records history" %}</span>
       </a>
-    </div>
-  </section>
+    {% endif %}
+    <a class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+       href="{% url 'assets:device_history' device.pk %}">
+      <i class="bi bi-arrow-counterclockwise text-primary"></i>
+      <span class="me-auto">{% translate "Field history" %}</span>
+    </a>
+  </div>
+</section>
 
-  <section class="card device-card mb-3">
-    <div class="card-header">
-      <i class="bi bi-info-circle"></i>
-      <h2 class="device-card-title">{% translate "Device details" %}</h2>
-    </div>
-    <div class="card-body">
-      <dl class="device-meta">
-        <div>
-          <dt>{% translate "Created" %}</dt>
-          <dd>
-            {{ device.created_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}
-            {% if device.user or device.username %}
-              <span class="text-muted">· {{ device.user|default:device.username }}</span>
-            {% endif %}
-          </dd>
-        </div>
-        <div>
-          <dt>{% translate "Last modified" %}</dt>
-          <dd>
-            {% if device.modified_at %}
-              <span title="{{ device.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ device.modified_at|naturaltime }}</span>
-            {% else %}—{% endif %}
-            {% if device.user or device.username %}
-              <span class="text-muted">· {{ device.user|default:device.username }}</span>
-            {% endif %}
-          </dd>
-        </div>
-        <div>
-          <dt>{% translate "Origin" %}</dt>
-          <dd>
-            {% if device.is_imported %}
-              {% if device.imported_by %}
-                <a class="badge text-bg-info" href="{% url 'dataexchange:importer_detail' device.imported_by.pk %}">
-                  {% translate "Imported" %} {{ device.imported_by.created_at }}
-                </a>
-              {% else %}
-                <span class="badge text-bg-info">{% translate "Imported" %}</span>
-              {% endif %}
-            {% else %}
-              <span class="badge text-bg-light border">{% translate "Manual entry" %}</span>
-            {% endif %}
-            {% if device.is_legacy %}<span class="badge text-bg-secondary">{% translate "Legacy" %}</span>{% endif %}
-          </dd>
-        </div>
-        <div>
-          <dt>{% translate "UUID" %}</dt>
-          <dd class="font-monospace small">{{ device.uuid }}</dd>
-        </div>
-        {% if device.deleted_at %}
-          <div>
-            <dt class="text-danger">{% translate "Deleted" %}</dt>
-            <dd>
-              {{ device.deleted_at|date:"SHORT_DATETIME_FORMAT" }}
-              {% if device.deleted_by %}<span class="text-muted">· {{ device.deleted_by }}</span>{% endif %}
-            </dd>
-          </div>
-        {% endif %}
-      </dl>
-    </div>
-  </section>
-
-  {% if device.qrcode %}
-    {# Collapsed by default (no `open`); native <details> — same mechanism as the Sensitive-credentials card, no id/JS needed. #}
-    <details class="card device-card mb-3 device-qr">
-      <summary class="card-header">
-        <i class="bi bi-qr-code"></i>
-        <h2 class="device-card-title">{% translate "QR code" %}</h2>
-        <i class="bi bi-chevron-down device-caret"></i>
-      </summary>
-      <div class="card-body text-center">
-        <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
+<section class="card card-filled mb-3">
+  <div class="card-header">
+    <i class="bi bi-info-circle"></i>
+    <h2>{% translate "Device details" %}</h2>
+  </div>
+  <div class="card-body">
+    <dl class="device-meta">
+      <div>
+        <dt>{% translate "Created" %}</dt>
+        <dd>
+          {{ device.created_at|date:"SHORT_DATETIME_FORMAT"|default:"—" }}
+          {% if device.user or device.username %}
+            <span class="text-muted">· {{ device.user|default:device.username }}</span>
+          {% endif %}
+        </dd>
       </div>
-    </details>
-  {% endif %}
-</div>
+      <div>
+        <dt>{% translate "Last modified" %}</dt>
+        <dd>
+          {% if device.modified_at %}
+            <span title="{{ device.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ device.modified_at|naturaltime }}</span>
+          {% else %}—{% endif %}
+          {% if device.user or device.username %}
+            <span class="text-muted">· {{ device.user|default:device.username }}</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>{% translate "Origin" %}</dt>
+        <dd>
+          {% if device.is_imported %}
+            {% if device.imported_by %}
+              <a class="badge text-bg-info" href="{% url 'dataexchange:importer_detail' device.imported_by.pk %}">
+                {% translate "Imported" %} {{ device.imported_by.created_at }}
+              </a>
+            {% else %}
+              <span class="badge text-bg-info">{% translate "Imported" %}</span>
+            {% endif %}
+          {% else %}
+            <span class="badge text-bg-light border">{% translate "Manual entry" %}</span>
+          {% endif %}
+          {% if device.is_legacy %}<span class="badge text-bg-secondary">{% translate "Legacy" %}</span>{% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>{% translate "UUID" %}</dt>
+        <dd class="font-monospace small">{{ device.uuid }}</dd>
+      </div>
+      {% if device.deleted_at %}
+        <div>
+          <dt class="text-danger">{% translate "Deleted" %}</dt>
+          <dd>
+            {{ device.deleted_at|date:"SHORT_DATETIME_FORMAT" }}
+            {% if device.deleted_by %}<span class="text-muted">· {{ device.deleted_by }}</span>{% endif %}
+          </dd>
+        </div>
+      {% endif %}
+    </dl>
+  </div>
+</section>
+
+{% if device.qrcode %}
+  {# Collapsed by default (no `open`); native <details> — same mechanism as the Sensitive-credentials card, no id/JS needed. #}
+  <details class="card card-filled mb-3 device-qr">
+    <summary class="card-header">
+      <i class="bi bi-qr-code"></i>
+      <h2>{% translate "QR code" %}</h2>
+      <i class="bi bi-chevron-down card-caret"></i>
+    </summary>
+    <div class="card-body text-center">
+      <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
+    </div>
+  </details>
+{% endif %}

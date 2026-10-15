@@ -48,10 +48,10 @@ hiding it would lose history.
       to. Same field set and labels as the read-only Device card on the device
       page, so the two read alike.
       {% endcomment %}
-      <section class="card device-card mb-3">
+      <section class="card card-filled mb-3">
         <div class="card-header">
           <i class="bi {{ record.device.device_type.icon_class|default:'bi-pc-display' }}"></i>
-          <h2 class="device-card-title">{% translate "Device" %}</h2>
+          <h2>{% translate "Device" %}</h2>
         </div>
         <div class="card-body">
           <dl class="row mb-0">
@@ -88,10 +88,10 @@ hiding it would lose history.
         {% endif %}
       </section>
 
-      <section class="card device-card mb-3">
+      <section class="card card-filled mb-3">
         <div class="card-header">
           <i class="bi bi-stack"></i>
-          <h2 class="device-card-title">{% translate "Record" %}</h2>
+          <h2>{% translate "Record" %}</h2>
         </div>
         <div class="card-body">
           <dl class="row mb-0">
@@ -113,10 +113,10 @@ hiding it would lose history.
         </div>
       </section>
 
-      <section class="card device-card mb-3">
+      <section class="card card-filled mb-3">
         <div class="card-header">
           <i class="bi bi-geo-alt"></i>
-          <h2 class="device-card-title">{% translate "Location" %}</h2>
+          <h2>{% translate "Location" %}</h2>
         </div>
         <div class="card-body">
           <dl class="row mb-0">
@@ -143,10 +143,10 @@ hiding it would lose history.
       </section>
 
       {% if record.person or record.lent_start_date %}
-        <section class="card device-card mb-3">
+        <section class="card card-filled mb-3">
           <div class="card-header">
             <i class="bi bi-person-badge"></i>
-            <h2 class="device-card-title">{% translate "Lending" %}</h2>
+            <h2>{% translate "Lending" %}</h2>
           </div>
           <div class="card-body">
             <dl class="row mb-0">
@@ -187,10 +187,10 @@ hiding it would lose history.
       {% endif %}
 
       {% if record.date_of_purchase %}
-        <section class="card device-card mb-3">
+        <section class="card card-filled mb-3">
           <div class="card-header">
             <i class="bi bi-bag-check"></i>
-            <h2 class="device-card-title">{% translate "Order" %}</h2>
+            <h2>{% translate "Order" %}</h2>
           </div>
           <div class="card-body">
             <dl class="row mb-0">
@@ -202,10 +202,10 @@ hiding it would lose history.
       {% endif %}
 
       {% if record.disposition_state or record.removed_date or record.removed_info %}
-        <section class="card device-card mb-3">
+        <section class="card card-filled mb-3">
           <div class="card-header">
             <i class="bi bi-trash3"></i>
-            <h2 class="device-card-title">{% translate "Removal" %}</h2>
+            <h2>{% translate "Removal" %}</h2>
           </div>
           <div class="card-body">
             <dl class="row mb-0">
@@ -221,10 +221,10 @@ hiding it would lose history.
       {% endif %}
 
       {% if record.attachments.all %}
-        <section class="card device-card mb-3">
+        <section class="card card-filled mb-3">
           <div class="card-header">
             <i class="bi bi-paperclip"></i>
-            <h2 class="device-card-title">{% translate "Attachments" %}</h2>
+            <h2>{% translate "Attachments" %}</h2>
           </div>
           <div class="list-group list-group-flush">
             {% for attachment in record.attachments.all %}
@@ -240,43 +240,45 @@ hiding it would lose history.
     </div>
 
     <div class="col-lg-4">
-      <section class="card device-card mb-3">
-        <div class="card-header">
-          <i class="bi bi-info-circle"></i>
-          <h2 class="device-card-title">{% translate "Record details" %}</h2>
-        </div>
-        <div class="card-body">
-          <dl class="device-meta">
-            <div>
-              <dt>{% translate "Created" %}</dt>
-              <dd>
-                {{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}
-                {% if record.user or record.username %}
-                  <span class="text-muted">· {{ record.user|default:record.username }}</span>
-                {% endif %}
-              </dd>
-            </div>
-            <div>
-              <dt>{% translate "Last modified" %}</dt>
-              <dd>
-                {% if record.modified_at %}
-                  <span title="{{ record.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ record.modified_at|naturaltime }}</span>
-                {% else %}—{% endif %}
-              </dd>
-            </div>
-            <div>
-              <dt>{% translate "ID" %}</dt>
-              <dd class="font-monospace small">{{ record.pk }}</dd>
-            </div>
-          </dl>
-        </div>
-        <div class="list-group list-group-flush">
-          <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{{ device_records_url }}">
-            <i class="bi bi-clock-history text-primary"></i>
-            <span class="me-auto">{% translate "All records for this device" %}</span>
-          </a>
-        </div>
-      </section>
+      <aside class="detail-aside">
+        <section class="card card-filled mb-3">
+          <div class="card-header">
+            <i class="bi bi-info-circle"></i>
+            <h2>{% translate "Record details" %}</h2>
+          </div>
+          <div class="card-body">
+            <dl class="device-meta">
+              <div>
+                <dt>{% translate "Created" %}</dt>
+                <dd>
+                  {{ record.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                  {% if record.user or record.username %}
+                    <span class="text-muted">· {{ record.user|default:record.username }}</span>
+                  {% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt>{% translate "Last modified" %}</dt>
+                <dd>
+                  {% if record.modified_at %}
+                    <span title="{{ record.modified_at|date:'SHORT_DATETIME_FORMAT' }}">{{ record.modified_at|naturaltime }}</span>
+                  {% else %}—{% endif %}
+                </dd>
+              </div>
+              <div>
+                <dt>{% translate "ID" %}</dt>
+                <dd class="font-monospace small">{{ record.pk }}</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="list-group list-group-flush">
+            <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{{ device_records_url }}">
+              <i class="bi bi-clock-history text-primary"></i>
+              <span class="me-auto">{% translate "All records for this device" %}</span>
+            </a>
+          </div>
+        </section>
+      </aside>
     </div>
   </div>
 </div>

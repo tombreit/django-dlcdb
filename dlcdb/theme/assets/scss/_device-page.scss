@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
-// Detail-page component set: identity tile, cards, read-only metadata lists.
-// Extends the app shell language (slate identity, indigo primary, --app-*
-// tokens) rather than introducing a new palette.
+// Device and record pages: identity tile, form labels, read-only metadata
+// lists. Their sections are filled cards (_cards.scss). Extends the app shell
+// language (slate identity, indigo primary, --app-* tokens) rather than
+// introducing a new palette.
 //
 // The `device-` prefix is historical — these started on the device detail/add
 // surfaces. The record pages use the same components, which is why this lives
@@ -29,49 +30,6 @@
     font-size: 1.4rem;
 }
 
-.device-card {
-    border-radius: var(--app-radius-lg);
-    box-shadow: var(--app-elevation-1);
-
-    > .card-header {
-        background: transparent;
-        border-bottom-color: var(--bs-border-color);
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-        padding-top: .85rem;
-        padding-bottom: .85rem;
-
-        .device-card-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .bi {
-            color: var(--bs-primary);
-        }
-    }
-}
-
-details.device-card > summary {
-    cursor: pointer;
-    list-style: none;
-
-    &::-webkit-details-marker {
-        display: none;
-    }
-
-    .device-caret {
-        margin-left: auto;
-        transition: transform var(--app-transition);
-    }
-}
-
-details.device-card[open] > summary .device-caret {
-    transform: rotate(180deg);
-}
-
 // Quieter, tighter field labels for a dense operational form.
 .device-form .form-label {
     font-weight: 500;
@@ -80,9 +38,12 @@ details.device-card[open] > summary .device-caret {
     color: var(--bs-secondary-color);
 }
 
-.device-sidebar {
+// The device page's side column stays in view while the form scrolls. Only
+// here: a taller side column would be cut off at the bottom. The offset
+// clears the sticky navbar (about 3.5rem) with 1rem to spare.
+.device-page .detail-aside {
     position: sticky;
-    top: 1rem;
+    top: 4.5rem;
 
     @include media-breakpoint-down(lg) {
         position: static;
@@ -100,10 +61,8 @@ details.device-card[open] > summary .device-caret {
     }
 
     dt {
-        font-size: .6875rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        font-weight: 600;
+        font-size: .8125rem;
+        font-weight: 500;
         color: var(--bs-secondary-color);
         margin-bottom: .1rem;
     }

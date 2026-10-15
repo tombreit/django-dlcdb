@@ -31,7 +31,10 @@ Blocks:
   detail_readonly        read-only rendering of the object
   detail_related         cards listing related objects, below the form or the
                          read-only card; rendered in both modes, outside the <form>
-  detail_sidebar         the col-lg-4 column
+  detail_sidebar         the col-lg-4 column's sections, inside
+                         <aside class="detail-aside">
+
+Sections are ``card card-filled`` (theme/assets/scss/_cards.scss).
 
 Read-only pages that are read-only *by design* (assets/records) do not use this
 frame: their header carries a breadcrumb band instead and there is no form.
@@ -75,7 +78,9 @@ frame: their header carries a breadcrumb band instead and there is no form.
     </div>
 
     <div class="col-lg-4">
-      {% block detail_sidebar %}{% endblock detail_sidebar %}
+      <aside class="detail-aside">
+        {% block detail_sidebar %}{% endblock detail_sidebar %}
+      </aside>
     </div>
   </div>
 

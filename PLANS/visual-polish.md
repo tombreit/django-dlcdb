@@ -6,7 +6,11 @@ SPDX-License-Identifier: CC0-1.0
 
 # Visual polish: typeface, lighter detail pages, dashboard
 
-**Status:** batch 1 (typeface) implemented 2026-10-15; batches 2–4 open. This is a living document.
+**Status:** implemented 2026-10-15:
+- batch 1, the typeface;
+- batch 2, `card-filled` sections on the device, record and lending pages.
+
+Batches 3 and 4 are open. This is a living document.
 
 ## Why
 
@@ -52,15 +56,17 @@ the template markup as it is.
   - The slate identity tile `#0f172a` stays.
 - **Surfaces**
   - Page: `--bs-body-bg`.
-  - Side column: `--bs-tertiary-bg` with `--app-radius-lg`.
-  - Section rule: a hairline in `--bs-border-color`.
+  - Section: a panel in `--bs-tertiary-bg` with `--app-radius-lg`. It has no border and no rule.
+  - Collapsed section on hover: `--bs-secondary-bg`.
+  - Section icon: a 2rem square in 10% primary (25% in dark mode), with the icon in primary
+    (`--bs-primary-text-emphasis` in dark mode).
 - **Layout:** unchanged. The top navbar, `.container` and the `col-lg-8` / `col-lg-4` split all
   stay.
 
 ### Principles
 
 1. **A border marks something you act on:** an input, a button, a picker item, a dashboard tile.
-   A group is a heading with a hairline, not a box.
+   A group is a tinted panel, not an outlined box.
 2. **Colour means state.** Primary is reserved for actions, links and section icons.
 3. **Bootstrap first.**
    - The `.card` component stays the blueprint for a section.
@@ -73,20 +79,21 @@ the template markup as it is.
      [▣] IT-04711                                  [← Back]
          Dell Latitude 7440   Laptop   ● In room
 
-     ▤ Identification                     ┌──────────────────┐
-     ───────────────────────────────────  │ Current state    │
-     IT ID             Inventory ID       │ ● In room        │
-     [IT-04711     ]   [5100023     ]     │   Room 1.12      │
-                                          │ [New state ▾]    │
-     ▤ Manufacturer and model             │                  │
-     ───────────────────────────────────  │ Trail            │
-     Manufacturer      Model name         │ Records history  │
-     [Dell         ]   [Latitude    ]     │ Field history    │
-                                          │                  │
-     ▸ Procurement                        │ Device details   │
-     ▸ Names and network                  │ Created  …       │
-                                          └──────────────────┘
-     [Save changes]  [Cancel]              one tinted block
+     ╭──────────────────────────────────╮ ╭──────────────────╮
+     │ [▤] Identification               │ │ [~] Current state│
+     │ IT ID            Inventory ID    │ │ ● In room        │
+     │ [IT-04711    ]   [5100023    ]   │ │ [New state ▾]    │
+     ╰──────────────────────────────────╯ ╰──────────────────╯
+     ╭──────────────────────────────────╮ ╭──────────────────╮
+     │ [▤] Manufacturer and model       │ │ [◷] Trail        │
+     │ [Dell  ]  [Latitude ]  [CN0O1]   │ │ Records history  │
+     ╰──────────────────────────────────╯ ╰──────────────────╯
+     ╭──────────────────────────────────╮
+     │ [▤] Procurement                ⌄ │   collapsed: a tinted bar
+     ╰──────────────────────────────────╯
+     [Save changes]  [Cancel]
+
+     Light grey panels on the white page, no borders; the inputs stay white and outlined.
 
 ### Dashboard
 
@@ -133,38 +140,53 @@ the template markup as it is.
    - `print.scss` imports the same `_fonts.scss`, with `$font-dir` pointing at the theme's fonts.
    - This follows the pattern of `$bootstrap-icons-font-dir` in
      `frontend/admin/scss/_variables.scss`.
-5. **`card-flush`: a modifier on Bootstrap's `.card`** (the user's direction). The name follows
-   Bootstrap's own `-flush` modifiers, `list-group-flush` and `accordion-flush`, which "remove
-   borders and rounded corners to render … edge-to-edge with their parent".
-   - **Markup:** a section card only gains the class (`class="card card-flush mb-3"`). Its
+5. **`card-filled`: a modifier on Bootstrap's `.card`** (the user's direction: keep the card
+   markup, add one class).
+   - **History:**
+     - The first version (`card-flush`, 2026-10-15) dropped the box entirely: a heading, a
+       hairline and a 1rem title.
+     - The user found the sections "barely recognizable" and the toggle icons too small.
+     - Two variants were rendered on the device and lending pages:
+       - V1 kept the hairline, with a bigger title;
+       - V2 made filled panels.
+     - The user chose V2 (Material 3's "filled card", Apple's grouped settings lists).
+     - The modifier was renamed with it: Bootstrap's `-flush` means "no borders, no rounded
+       corners, edge to edge with the parent", which a rounded, padded panel is not.
+   - **Markup:** a section card only gains the class (`class="card card-filled mb-3"`). Its
      `card-header`, icon, `h2` and `card-body` stay as they are.
-   - **Card variables:** in Sass, `.card-flush` sets the card's own custom properties:
-     - `--bs-card-bg` and `--bs-card-cap-bg`: transparent;
-     - `--bs-card-border-width`: 0;
-     - `--bs-card-spacer-x` and `--bs-card-cap-padding-x`: 0;
-     - `--bs-card-box-shadow`: none.
-   - **Header rules:**
-     - `.card-flush > .card-header` draws its own hairline and lays out icon and title (flex,
-       gap).
-     - `.card-flush > .card-header > h2` sets one title size.
-     - The first icon takes the primary colour.
+   - **Card variables:** in Sass, `.card-filled` sets the card's own custom properties:
+     - `--bs-card-bg: var(--bs-tertiary-bg)` and a transparent `--bs-card-cap-bg`;
+     - `--bs-card-spacer-x` and `--bs-card-cap-padding-x`: 1.25rem;
+     - `--bs-card-cap-padding-y`: .875rem;
+     - border radius `--app-radius-lg`.
 
-     So both header idioms render the same without touching them:
+     The card itself gets `border: 0`, and the header has no rule.
+   - **Header rules:**
+     - `.card-filled > .card-header` sets one title style: 1.125rem, semibold, icon and title
+       side by side.
+     - The first icon sits in a tinted 2rem square.
+
+     So the three header idioms render the same without touching them:
      - `h2.device-card-title`, on the device and record pages;
-     - `h2.h6 mb-0` with a `text-primary` icon, on 16 other templates.
+     - `h2.h6 mb-0` with a `text-primary` icon, on 16 other templates;
+     - plain text after an icon, on the lending page.
    - **Collapsible sections:**
-     - `details.card-flush > summary` hides the marker and gets a hover tint.
-     - `.card-caret` rotates when the section is `[open]`.
-     - `.card-caret` is the name `rooms/detail.html` already uses.
+     - These are `<details>` with `<summary class="card-header">`, or a Bootstrap collapse with
+       `<button class="btn card-header">` (lending).
+     - The trailing `.card-caret` is 1.25rem. It rotates on `details[open]` and on
+       `[aria-expanded="true"]`.
+     - Collapsed, the section is a tinted bar that darkens on hover.
    - **Nested object cards stay cards** (principle 1), because they are things you pick: the picker
      items in `_person_list_item.html` and `device_picker/_item.html`. The modifier only sets the
-     flush card's own custom properties. A nested `.card` resets them.
-   - **No global `$card-*` override:** that would also strip the dashboard tiles and picker items.
-6. **The side column is one tinted block.**
+     filled card's own custom properties. A nested `.card` resets them.
+   - **No global `$card-*` override:** that would also restyle the dashboard tiles and picker
+     items.
+6. **The side column is a stack of panels, like the main column.**
    - `_detail_base.html` wraps the sidebar block in `<aside class="detail-aside">`.
    - The read-only pages outside that frame wrap their side column the same way.
-   - Flush cards inside the aside have no hairline under their title. A hairline between cards
-     separates them.
+   - The aside has no style of its own; it is the hook for the device page's sticky column.
+   - Batch 2's first version tinted the aside as one block. That became redundant once every
+     section is a panel.
 7. **The primary colour stays indigo** (user decision, 2026-10-14).
 8. **`dl` lists keep their markup.**
    - The `.device-meta` labels lose their uppercase. This is a Sass change only.
@@ -188,7 +210,7 @@ the template markup as it is.
      work in light and dark mode.
      - Lost gets no tone. It counts every loss ever recorded, so it is rarely zero.
    - **Plurals:** every count except 1 gets the plural label. Today 0 gets the singular.
-   - **Flush cards:** the search result groups and the chart cards gain `card-flush`.
+   - **Filled cards:** the search result groups and the chart cards gain `card-filled`.
    - **Charts:**
      - Plex font.
      - Record-type colours from `STATE_COLORS`, as hex values of Bootstrap's palette, kept next to
@@ -224,10 +246,9 @@ After each batch, stop so the user can commit it.
     - replace `sans-serif` with the Plex stack.
   - Check Plex Sans's `tnum` feature, and how Plex Mono's zero looks next to an O. Done; see
     *Decided during implementation*.
-- [ ] **2. `card-flush` and the tinted aside; device and record pages** (decisions 5, 6 and 8)
-  - New `dlcdb/theme/assets/scss/_cards.scss` with `.card-flush`, `details.card-flush`,
-    `.card-caret` and `.detail-aside`. `theme.scss` gets its import line, the only line a second
-    batch touches there.
+- [x] **2. `card-filled`; device, record and lending pages** (decisions 5, 6 and 8)
+  - New `dlcdb/theme/assets/scss/_cards.scss` with `.card-filled`, `details.card-filled` and
+    `.card-caret`. `theme.scss` gets its import line, the only line a second batch touches there.
   - `_device-page.scss`:
     - drop `.device-card*` and `.device-caret`;
     - drop `.device-sidebar`; its sticky position moves to `.device-page .detail-aside`, so only
@@ -237,10 +258,20 @@ After each batch, stop so the user can commit it.
   - Class-only edits:
     - in `assets/devices/detail.html`, `devices/includes/_form_fields.html`,
       `devices/includes/_sidebar.html`, `devices/history.html` and `assets/records/detail.html`;
-    - `device-card` → `card-flush` and `device-caret` → `card-caret`;
+    - `device-card` → `card-filled` and `device-caret` → `card-caret`;
     - `device-card-title` and the `device-sidebar` wrapper go.
-- [ ] **3. The other detail pages and the lending page gain the modifier**
-  - These templates add `card-flush` to their section cards:
+  - Lending (`lending/lend.html`, all three flows), moved here from batch 3 at the user's request:
+    - `card-filled` on its six cards;
+    - `card-caret` on the two collapse chevrons;
+    - the collapse headers lose their `<span>` wrapper and `justify-content-between`, so the icon
+      is the header's first child;
+    - the variant-less `div.alert` around each date field renders only when the field has an
+      error (`class="alert alert-warning mb-0"`), so the fields line up with the section;
+    - the dead `border-success` on the return card goes; its `bg-success-subtle` header stays as
+      the flow's emphasis.
+  - The Bootstrap collapse markup stays, so the assertions in `lending/tests/test_views.py` hold.
+- [ ] **3. The other detail pages gain the modifier**
+  - These templates add `card-filled` to their section cards:
     - persons: `detail.html`, `includes/_form_fields.html`, `_lendings.html`, `_licences.html`,
       `_smallstuff.html`;
     - rooms: `detail.html`, `includes/_form_fields.html`, `_changes.html`;
@@ -248,15 +279,10 @@ After each batch, stop so the user can commit it.
     - tenants: `detail.html`, `includes/_form_fields.html`;
     - journal: `detail.html`, `cleanup.html`;
     - `dataexchange/importer_detail.html`;
-    - `theme/includes/_audit_data.html`;
-    - `lending/lend.html`.
-  - Rooms: `card-collapse` → `card-flush`, and the inline `<style>` goes.
+    - `theme/includes/_audit_data.html`.
+  - Rooms: `card-collapse` → `card-filled`, the caret gets `card-caret`, and the inline `<style>`
+    goes.
     - Test `rooms/tests/test_rooms.py` asserts `<details class="card mb-3 card-collapse">`.
-  - Lending:
-    - The Bootstrap collapse buttons (`button.btn.card-header`) stay. The existing collapse
-      assertions in `lending/tests/test_views.py` stay valid.
-    - Check the return card's `border-success` / `bg-success-subtle` header in all three flows:
-      lend (picker mode), edit and return.
   - The journal and importer detail pages wrap their side column in `.detail-aside`.
 - [ ] **4. Dashboard** (decision 9)
   - `dashboard/views.py`: the tile dicts get `value`, `caption`, `tone` and `group`.
@@ -293,7 +319,9 @@ Batch 1 additionally:
 | Div-grouped `property-list` for every `dl` | A markup rewrite of every read-only list, for little visual gain. |
 | Reviving the redesign branch's `theme-next` bundle and cookie switcher | It exists only for side-by-side previews. Small batches in the classic theme are just as easy to revert. |
 | Sidebar shell, 14px base, 32px controls, ink-black primary, borderless inputs | Layout experiments: the part of the branch that went too far. |
-| "Soft panels" (white cards on a tinted page) or "hairline cards" | The user chose sections without boxes. |
+| "Soft panels" (white cards on a tinted page) or "hairline cards" | Panels would tint the whole page background; hairline cards keep the outlines. |
+| Sections as a heading plus hairline (`card-flush`, batch 2's first version) | Rendered and rejected by the user: the sections were barely recognizable and the toggles too small. |
+| V1: hairline sections with a bigger title and an icon square (Stripe dashboard, GitHub's settings "Subhead") | Rendered next to V2. Better, but on dense forms the hairline still separates sections only weakly. |
 | Source Sans 3, Noto Sans, or Inter with all subsets | The user chose IBM Plex Sans. Noto and Inter would also stay generic. |
 | Self-hosting Plex Arabic, Hebrew, Devanagari, Thai and CJK now | Large files for names that are rare today. The OS fallback renders them. |
 | Google Fonts | Privacy, and installs without internet access. |
@@ -308,7 +336,6 @@ Batch 1 additionally:
 - **Read-only `dl` column ratios:** unify them.
 - **Lending page polish:**
   - align its header with `_detail_base` (back link right, `h1.h3`);
-  - replace the `div.alert` wrappers around the date fields;
   - drop the inline `.picker-option:hover` style, which duplicates `picker.css`.
 - **Out of scope for this round:** list pages (`_index_base.html`), the filterbar, and one page
   header for index, detail and lending pages.
@@ -341,14 +368,23 @@ Batch 1 additionally:
 - **Stale font files:** `dist/fonts` still holds files from the redesign build
   (`ibm-plex-sans-*`, `theme-next.css`). They can hide a missing copy step, so empty it before
   checking batch 1.
-- **Child selectors only:** style the modifier with `.card-flush > .card-header`, never with a
+- **Child selectors only:** style the modifier with `.card-filled > .card-header`, never with a
   descendant selector. Nested picker cards must keep their box.
-- **The header hairline must be drawn explicitly.** `.card-header`'s own rule uses
-  `--bs-card-border-width`, which is 0 on `.card-flush`.
-- **List groups inside a flush card:** `list-group-flush` items keep `--bs-list-group-bg` (the body
-  background) and their own horizontal padding.
-  - On the tinted aside they would show up as white rows.
-  - Inside a flush card, set them transparent and align their padding.
+- **List groups inside a filled card:** `list-group-flush` items keep `--bs-list-group-bg` (the
+  body background), and their default hover tint is the panel's own colour.
+  - Inside a filled card they are transparent, indented like the section text, and hover in
+    `--bs-secondary-bg`.
+- **Icon colours in dark mode:**
+  - `--bs-primary-bg-subtle` is almost black in dark mode, and plain indigo is too dark on the
+    dark panel.
+  - The icon square therefore uses `rgba(var(--bs-primary-rgb), …)`, with the icon in
+    `--bs-primary-text-emphasis` under `color-mode(dark)`.
+- **A collapse button as `.card-header`:**
+  - `.btn` brings its own font size, but the header rule (specificity 0,2,0) beats it.
+  - `.btn` also brings a 1px transparent border, which shifts the lending icon by 1px.
+- **Checking with `runserver --noreload`:** Django's cached template loader keeps the templates
+  it has loaded. After editing templates, restart the server, or the page renders the old
+  markup against the new CSS.
 - **Utilities win over the modifier.** `!important` utilities in existing markup override it,
   e.g. `bg-success-subtle` on the lending return header. Check them visually rather than fight
   them.
@@ -356,6 +392,8 @@ Batch 1 additionally:
   - An element inside the aside can't stick, because the aside is exactly as tall as it is.
     Sticky goes on the aside itself.
   - Only the device page gets it. A taller aside would be cut off at the bottom.
+  - The offset must clear the sticky navbar (57px). `top: 1rem` hid the aside's first section
+    under it.
 - **The wheel ships the collected static files** (`PLANS/pip-distribution.md`). New font files
   must land in `dist/fonts` through the npm build.
 - **Plotly figures are built in Python per request:**
@@ -385,3 +423,29 @@ Batch 1 additionally:
   - Arabic falls back to DejaVu Sans and Chinese to Droid Sans Fallback (decision 3);
   - the printed lending slip (PDF) renders "Żółkiewski, Łukasz" in Plex Sans from the theme's
     font files.
+- **Batch 2, redesigned within the batch** (decision 5): `card-flush` became `card-filled`
+  before the batch was committed.
+- **Batch 2, spacing:**
+  - The panels keep the `mb-3` / `my-4` from the markup; there are no margin rules of their own.
+  - Without a header rule, the body starts `.25rem` below the header.
+- **Batch 2, `.card-caret`** skips its rotation transition under `prefers-reduced-motion`.
+- **Batch 2, sticky offset fixed.** The old `.device-sidebar` rule used `top: 1rem`, which hid
+  the aside's first section under the 57px sticky navbar on scrolling. It is `4.5rem` now.
+- **Batch 2, template diffs.** The `device-sidebar` wrapper div is gone, and the record page's
+  side column got the aside wrapper. Both re-indent their blocks, so `git diff -w` shows the
+  real change: class swaps plus the wrapper.
+- **Batch 2, the device add page** (`devices/form.html`) gets filled sections too, through the
+  shared `_form_fields.html`.
+- **Between batches 2 and 3:** persons, rooms, master data and tenants are already on
+  `_detail_base`, but keep their outlined cards until batch 3.
+- **Batch 2, checked in Chromium (2026-10-15)** on a scratch DB, light and dark, 1400px and
+  390px:
+  - device edit, with all sections open (the picked contact person keeps its card);
+  - device read-only (user with `view_device` only);
+  - a lent device (borrower link in *Current state*);
+  - field history;
+  - record detail;
+  - the sticky aside after scrolling;
+  - lending in picker mode, edit and return (also at 390px);
+  - the hover on a collapsed bar, and a toggled collapse;
+  - an empty start date, which shows the warning box around the field.

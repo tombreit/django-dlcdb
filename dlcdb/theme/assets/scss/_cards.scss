@@ -1,0 +1,133 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+// Sections of detail and lending pages: Bootstrap's card as a filled panel.
+//
+// `card-filled` is a card variant in the sense of Material's filled card: a
+// softly tinted surface with rounded corners, no outline, no shadow and no
+// rule under the header. A section stands out from the page by its surface,
+// and the white, bordered inputs inside stay the only outlined things: a
+// border marks something you act on (an input, a picked person, a dashboard
+// tile), not a group.
+//
+//   <section class="card card-filled mb-3">
+//     <div class="card-header"><i class="bi …"></i><h2>…</h2></div>
+//     <div class="card-body">…</div>
+//   </section>
+//
+// Collapsible sections are <details class="card card-filled"> with a
+// <summary class="card-header">, or a Bootstrap collapse with a
+// <button class="btn card-header">; either ends in
+// `<i class="bi bi-chevron-down card-caret">`. Collapsed, a section is a
+// tinted bar.
+//
+// Only child selectors: a card nested inside a section (a picker's selected
+// person or device) keeps its box, and Bootstrap resets the --bs-card-*
+// properties on every .card anyway.
+
+.card-filled {
+  --#{$prefix}card-bg: var(--#{$prefix}tertiary-bg);
+  --#{$prefix}card-cap-bg: transparent;
+  --#{$prefix}card-spacer-x: 1.25rem;
+  --#{$prefix}card-cap-padding-x: 1.25rem;
+  --#{$prefix}card-cap-padding-y: .875rem;
+  --#{$prefix}card-border-radius: var(--app-radius-lg);
+  --#{$prefix}card-inner-border-radius: var(--app-radius-lg);
+
+  // The section icon: a small tinted square, an echo of the identity tile in
+  // the page header. Dark mode needs the lighter indigo, like the navbar.
+  --app-card-icon-color: var(--#{$prefix}primary);
+  --app-card-icon-bg: rgba(var(--#{$prefix}primary-rgb), .1);
+
+  border: 0;
+
+  // One heading style for every section header, whatever its markup: an
+  // `<h2>`, an `<h2 class="h6 mb-0">` or plain text in a collapse button.
+  > .card-header {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: 1.125rem;
+    font-weight: $headings-font-weight;
+    border-bottom: 0;
+
+    > h2 {
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    > .bi:first-child {
+      display: inline-grid;
+      flex: none;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      font-size: 1rem;
+      color: var(--app-card-icon-color);
+      background-color: var(--app-card-icon-bg);
+      border-radius: .5rem;
+    }
+  }
+
+  // Without a rule under the header, the body starts right below the title.
+  > .card-header + .card-body,
+  > .card-header + .collapse > .card-body,
+  > .card-header + .collapsing > .card-body {
+    padding-top: .25rem;
+  }
+
+  // Rows of links (trail, attachments): no fill of their own, indented like
+  // the section text, and a hover tint one step darker than the panel.
+  > .list-group {
+    --#{$prefix}list-group-bg: transparent;
+    --#{$prefix}list-group-item-padding-x: 1.25rem;
+    --#{$prefix}list-group-action-hover-bg: var(--#{$prefix}secondary-bg);
+    --#{$prefix}list-group-action-active-bg: var(--#{$prefix}secondary-bg);
+  }
+}
+
+@include color-mode(dark) {
+  .card-filled {
+    --app-card-icon-color: var(--#{$prefix}primary-text-emphasis);
+    --app-card-icon-bg: rgba(var(--#{$prefix}primary-rgb), .25);
+  }
+}
+
+details.card-filled > summary {
+  cursor: pointer;
+  list-style: none;
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+}
+
+// A collapsed section is a bar to click: it darkens a step on hover.
+details.card-filled:not([open]):hover,
+.card-filled:has(> .card-header.collapsed:hover) {
+  --#{$prefix}card-bg: var(--#{$prefix}secondary-bg);
+}
+
+.card-caret {
+  margin-left: auto;
+  font-size: 1.25rem;
+  color: var(--#{$prefix}secondary-color);
+  transition: transform var(--app-transition);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.card-header:hover > .card-caret {
+  color: var(--#{$prefix}body-color);
+}
+
+details[open] > summary > .card-caret,
+[aria-expanded="true"] > .card-caret {
+  transform: rotate(180deg);
+}

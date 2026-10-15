@@ -34,7 +34,7 @@ records history this page points to.
           {% blocktranslate with url=record_index_url pk=device.pk %}State changes such as moves and lendings are listed in the <a href="{{ url }}?device={{ pk }}">records history</a>.{% endblocktranslate %}
         </p>
       {% endif %}
-      <section class="card device-card">
+      <section class="card card-filled">
         <div class="card-body">
           {% include "theme/includes/_field_history.html" with entries=entries %}
         </div>
