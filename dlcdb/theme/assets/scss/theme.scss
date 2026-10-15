@@ -6,20 +6,18 @@
 
 @import "bootstrap/scss/_functions";
 
-// Self-hosted Inter (variable). The woff2 is copied into dist/fonts via the
-// `build:theme:fonts` npm script, mirroring the bootstrap-icons font copy.
-@font-face {
-  font-family: "InterVariable";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2");
-}
+// Self-hosted IBM Plex Sans and Mono, see _fonts.scss
+@import "_fonts";
 
 $primary: #4f46e5; // indigo-600
 $link-decoration: underline;
-$font-family-sans-serif: "InterVariable", system-ui, -apple-system, "Segoe UI",
-  Roboto, "Helvetica Neue", Arial, sans-serif;
+// Scripts Plex does not cover fall through to the system fonts; "Noto Sans"
+// is the broadest of them on Linux desktops.
+$font-family-sans-serif: "IBM Plex Sans Variable", system-ui, -apple-system,
+  "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+$font-family-monospace: "IBM Plex Mono", SFMono-Regular, Menlo, Monaco,
+  Consolas, "Liberation Mono", "Courier New", monospace;
+$headings-font-weight: 600;
 
 // Widen the container at large viewports to use more screen real estate.
 $container-max-widths: (

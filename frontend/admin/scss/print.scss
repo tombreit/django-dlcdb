@@ -1,5 +1,11 @@
 // Better without bootstrap print stylesheet....
 
+// IBM Plex Sans as in the frontend, so guests' names in Latin, Vietnamese,
+// Greek and Cyrillic script print in one typeface. The font files are the
+// theme's; this stylesheet ends up in dist/admin/css.
+$font-dir: "../../../theme/dist/fonts";
+@import "../../../dlcdb/theme/assets/scss/fonts";
+
 @media print, screen {
 
     @page {
@@ -8,7 +14,7 @@
     }
 
     body {
-      font-family: sans-serif;
+      font-family: "IBM Plex Sans Variable", system-ui, "Noto Sans", sans-serif;
       font-size: 9pt;
       -webkit-print-color-adjust: exact;
     }

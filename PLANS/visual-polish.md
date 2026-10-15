@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Visual polish: typeface, lighter detail pages, dashboard
 
-**Status:** planned 2026-10-14, nothing implemented yet. This is a living document.
+**Status:** batch 1 (typeface) implemented 2026-10-15; batches 2–4 open. This is a living document.
 
 ## Why
 
@@ -42,7 +42,8 @@ the template markup as it is.
   - IBM Plex Sans Variable for everything: 400 for text, 500 for labels, 600 for headings.
   - IBM Plex Mono 400/500 for identifiers (`.font-monospace`): device IDs, serial numbers,
     UUIDs.
-  - Tabular figures app-wide.
+  - Tabular figures app-wide: Plex Sans's default figures already are (see *Decided during
+    implementation*).
   - The base size stays at 16px, and Bootstrap's type scale stays as it is.
 - **Colour**
   - The primary stays indigo `#4f46e5`.
@@ -204,7 +205,7 @@ the template markup as it is.
 After each batch, stop so the user can commit it.
 
 - [x] **0. This document**
-- [ ] **1. Typeface** (decisions 2–4). No template changes.
+- [x] **1. Typeface** (decisions 2–4). No template changes.
   - Packages:
     - `npm install -D @fontsource-variable/ibm-plex-sans @fontsource/ibm-plex-mono`;
     - `npm uninstall @fontsource-variable/inter`.
@@ -213,8 +214,7 @@ After each batch, stop so the user can commit it.
   - New `dlcdb/theme/assets/scss/_fonts.scss`, starting from
     `git show redesign:dlcdb/theme/assets/scss/next/_fonts.scss`. Add to it:
     - the Plex Mono faces;
-    - `$font-dir: "../fonts" !default`;
-    - `body { font-variant-numeric: tabular-nums; }`.
+    - `$font-dir: "../fonts" !default`.
   - `theme.scss`:
     - the Inter `@font-face` becomes `@import "_fonts"`;
     - set `$font-family-sans-serif`, `$font-family-monospace` and `$headings-font-weight: 600`.
@@ -222,7 +222,8 @@ After each batch, stop so the user can commit it.
     - set `$font-dir: "../../../theme/dist/fonts"`;
     - `@import` `_fonts`;
     - replace `sans-serif` with the Plex stack.
-  - Check Plex Sans's `tnum` feature, and how Plex Mono's zero looks next to an O.
+  - Check Plex Sans's `tnum` feature, and how Plex Mono's zero looks next to an O. Done; see
+    *Decided during implementation*.
 - [ ] **2. `card-flush` and the tinted aside; device and record pages** (decisions 5, 6 and 8)
   - New `dlcdb/theme/assets/scss/_cards.scss` with `.card-flush`, `details.card-flush`,
     `.card-caret` and `.detail-aside`. `theme.scss` gets its import line, the only line a second
@@ -312,6 +313,14 @@ Batch 1 additionally:
 - **Out of scope for this round:** list pages (`_index_base.html`), the filterbar, and one page
   header for index, detail and lending pages.
 - **Device detail:** the state badge shows twice, in the header and under *Current state*.
+- **Identifiers set in Plex Sans:** Plex Sans's zero has no inner mark, so `0`/`O` and `1`/`I`/`l`
+  look alike there. Plex Mono's zero has one. These identifiers are still in Sans:
+  - serial number and ID form inputs;
+  - the device line of the lending slip.
+
+  `.font-monospace` on them would need template changes.
+- **Lending slip checklist:** `lending/includes/lent_checklist.html` sets `font-family: monospace`
+  inline, which uses the system monospace font, not Plex Mono.
 - **Icons:**
   - devices use `bi-upc` on the tiles but `bi-pc-display` in the navbar;
   - Lost reuses Records' `bi-stack`.
@@ -324,7 +333,11 @@ Batch 1 additionally:
   - `dist/admin/css/print.css` needs `../../../theme/dist/fonts`, set through `$font-dir`.
   - Fontsource's own CSS can't be imported for the same reason. Copy the `unicode-range`s from
     its `wght.css`.
-- **`build:theme:fonts`** has no `mkdir -p` today. It only works because `bs-icons` runs first.
+- **A quoted `unicode-range` is invalid CSS.** Sass emits a quoted string as is, and browsers
+  then drop the descriptor, so every subset claims every character. The redesign branch had
+  this bug; `_fonts.scss` uses `unquote()`.
+- **`build:theme:fonts`** had no `mkdir -p`. It only worked because `bs-icons` runs first (fixed in
+  batch 1).
 - **Stale font files:** `dist/fonts` still holds files from the redesign build
   (`ibm-plex-sans-*`, `theme-next.css`). They can hide a missing copy step, so empty it before
   checking batch 1.
@@ -353,4 +366,22 @@ Batch 1 additionally:
 
 ## Decided during implementation
 
-Nothing yet.
+- **Batch 1, no `font-variant-numeric` rule.** All ten digits in Plex Sans have the same advance
+  width (600 units), so its figures are tabular by default. Fontsource's subsets carry no `tnum`
+  or `zero` feature anyway, only `ccmp`, `dnom`, `frac`, `liga` and `numr`.
+- **Batch 1, Plex Mono's zero has an inner mark:** three contours, against two for `O`. Identifiers
+  in `.font-monospace` (device ID heading, inventory and serial numbers in lists, UUID) are
+  unambiguous.
+- **Batch 1, `"Noto Sans"` in the fallback stack,** before `Arial`. It is the broadest system font
+  on Linux desktops.
+- **Batch 1, one range map for both families.** The Plex Mono subsets use the same `unicode-range`s
+  as Plex Sans's latin and latin-ext.
+- **Batch 1, checked in Chromium (2026-10-15)** with `CSS.getPlatformFontsForNode` on a scratch DB:
+  - a page with German text only (device detail) loads `ibm-plex-sans-latin` plus the two Plex
+    Mono latin weights;
+  - the lending list with all seven guests loads the latin, latin-ext, vietnamese, greek and
+    cyrillic subsets, and renders every glyph of the Polish, Vietnamese, Greek, Russian and
+    Turkish/Czech names in Plex Sans;
+  - Arabic falls back to DejaVu Sans and Chinese to Droid Sans Fallback (decision 3);
+  - the printed lending slip (PDF) renders "Żółkiewski, Łukasz" in Plex Sans from the theme's
+    font files.

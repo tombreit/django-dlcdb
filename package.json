@@ -20,7 +20,8 @@
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "@mermaid-js/layout-elk": "^0.2.2",
     "@popperjs/core": "^2.11.8",
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -55,7 +56,7 @@
     "build:theme:scss": "sass --load-path=node_modules --stop-on-error --style compressed $npm_package_config_themeSrcDir/scss:$npm_package_config_themeDistDir/css",
     "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js --bundle --sourcemap --outfile=$npm_package_config_themeDistDir/js/theme.js",
     "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",
-    "build:theme:fonts": "cp node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2 $npm_package_config_themeDistDir/fonts/",
+    "build:theme:fonts": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-*-wght-normal.woff2 node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin*-[45]00-normal.woff2 $npm_package_config_themeDistDir/fonts/",
     "build:theme:copy-plotlyjs": "mkdir -p $npm_package_config_themeDistDir/vendor/plotlyjs && cp node_modules/plotly.js-basic-dist-min/plotly-basic.min.js $npm_package_config_themeDistDir/vendor/plotlyjs/",
     "build:theme": "npm run build:theme:scss && npm run build:theme:js && npm run build:theme:bs-icons && npm run build:theme:fonts && npm run build:theme:copy-plotlyjs",
     "docs:copy-mermaid": "mkdir -p $npm_package_config_docsDistDir/mermaid && cp node_modules/mermaid/dist/mermaid.min.js node_modules/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs node_modules/d3/dist/d3.min.js $npm_package_config_docsDistDir/mermaid/"
