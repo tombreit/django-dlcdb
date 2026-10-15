@@ -8,9 +8,14 @@ import datetime
 
 import pytest
 
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Record, Room
+from dlcdb.core.models import Device, DeviceType, InRoomRecord, LentRecord, LostRecord, Record, Room
 from dlcdb.core.tests.testingutils import establish_state
-from dlcdb.dashboard.stats import active_record_counts, devices_per_month
+from dlcdb.dashboard.stats import (
+    DEVICE_TYPE_MIN_COUNT,
+    active_record_counts,
+    devices_per_month,
+    get_device_type_html,
+)
 
 NOW = datetime.datetime(2026, 10, 15, 12, tzinfo=datetime.UTC)
 
@@ -86,3 +91,17 @@ def test_the_record_chart_counts_each_device_once_by_its_state(tenant):
     lentable("EDV-LOST", LostRecord)
 
     assert active_record_counts(tenants=[tenant]) == {"inroom": 1, "lent": 1, "lost": 1, "removed": 0}
+
+
+@pytest.mark.django_db
+def test_the_device_type_chart_shows_only_types_with_enough_devices(tenant):
+    """Below the minimum there is no chart at all, so the template shows its note instead."""
+    beamer = DeviceType.objects.create(name="Beamer", prefix="BMR")
+    for number in range(DEVICE_TYPE_MIN_COUNT - 1):
+        Device.objects.create(edv_id=f"BMR-{number}", device_type=beamer, tenant=tenant)
+
+    assert get_device_type_html(tenants=[tenant]) == ""
+
+    Device.objects.create(edv_id="BMR-LAST", device_type=beamer, tenant=tenant)
+
+    assert "Beamer" in get_device_type_html(tenants=[tenant])

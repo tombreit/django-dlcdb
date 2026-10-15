@@ -28,11 +28,10 @@ tiles and charts below as the landing page's content.
     {% if search_term %}{% include "theme/includes/_list_loading.html" %}{% endif %}
 
     {% for group in groups %}
-      <div class="card mb-3">
+      <section class="card card-filled mb-3">
         <div class="card-header d-flex flex-wrap align-items-center gap-2">
-          <span class="fw-semibold">
-            <i class="{{ group.source.icon }} me-1"></i>{{ group.source.label }}
-          </span>
+          <i class="{{ group.source.icon }}"></i>
+          <h2>{{ group.source.label }}</h2>
           {% comment %}
           Count and "open the full list" are one control, not two: the badge
           states how many matched and is itself the link to the list showing
@@ -49,7 +48,7 @@ tiles and charts below as the landing page's content.
             {% include group.source.row_template %}
           {% endfor %}
         </div>
-      </div>
+      </section>
     {% empty %}
       {% if search_term %}
         <p class="text-muted">
@@ -60,28 +59,63 @@ tiles and charts below as the landing page's content.
   </div>
 {% endpartialdef %}
 
-<div class="dashboard-tiles row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-  {% for tile in tiles %}
-    {% include "dashboard/includes/_tile.html" %}
-  {% endfor %}
-</div>
+{% comment %}
+What needs attention first, in wider tiles; then what is in stock, six to a row
+on wide screens.
+{% endcomment %}
+<section class="dashboard-group">
+  <h2 class="dashboard-group-title">{% translate "Needs attention" %}</h2>
+  <div class="dashboard-tiles row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
+    {% for tile in attention_tiles %}
+      {% include "dashboard/includes/_tile.html" %}
+    {% endfor %}
+  </div>
+</section>
 
-<div class="row g-4 mt-1">
+<section class="dashboard-group">
+  <h2 class="dashboard-group-title">{% translate "Stock" %}</h2>
+  <div class="dashboard-tiles row row-cols-2 row-cols-md-3 row-cols-xl-6 g-3">
+    {% for tile in stock_tiles %}
+      {% include "dashboard/includes/_tile.html" %}
+    {% endfor %}
+  </div>
+</section>
+
+<div class="dashboard-charts row g-3">
   <div class="col-lg-6">
-    <div class="card mb-4">
-      <div class="card-header">{% translate "Devices by location" %}</div>
-      <div class="card-body">{{ record_fraction_html|safe }}</div>
-    </div>
-    <div class="card">
-      <div class="card-header">{% translate "Device history" %}</div>
-      <div class="card-body">{{ record_timeline_html|safe }}</div>
-    </div>
+    <section class="card card-filled h-100">
+      <div class="card-header">
+        <i class="bi bi-bar-chart"></i>
+        <h2>{% translate "Devices by state" %}</h2>
+      </div>
+      <div class="card-body dashboard-chart">{{ record_fraction_html|safe }}</div>
+    </section>
   </div>
   <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header">{% translate "Devices by type" %}</div>
-      <div class="card-body">{{ device_type_html|safe }}</div>
-    </div>
+    <section class="card card-filled h-100">
+      <div class="card-header">
+        <i class="bi bi-bar-chart-steps"></i>
+        <h2>{% translate "Devices by type" %}</h2>
+      </div>
+      <div class="card-body dashboard-chart">
+        {% if device_type_html %}
+          {{ device_type_html|safe }}
+        {% else %}
+          <p class="text-body-secondary mb-0">
+            {% blocktranslate with count=device_type_min_count %}No device type has {{ count }} or more devices yet.{% endblocktranslate %}
+          </p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+  <div class="col-12">
+    <section class="card card-filled">
+      <div class="card-header">
+        <i class="bi bi-graph-up"></i>
+        <h2>{% translate "Device history" %}</h2>
+      </div>
+      <div class="card-body dashboard-chart">{{ record_timeline_html|safe }}</div>
+    </section>
   </div>
 </div>
 

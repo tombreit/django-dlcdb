@@ -61,9 +61,9 @@
     }
 
     // Anything else in a header, such as a count or a "Manage" link, is
-    // body text. (Sass 1.77 crashes on `:where(:not(h2, .bi))`, so the
-    // elements are named.)
-    > :where(a, span, small) {
+    // body text; a badge keeps its own size. (Sass 1.77 crashes on
+    // `:where(:not(h2, .bi))`, so the elements are named.)
+    > :where(a, span, small):not(.badge) {
       font-size: $font-size-base;
       font-weight: $font-weight-normal;
     }

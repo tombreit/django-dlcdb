@@ -182,8 +182,8 @@ class MultiTenantUserTests(BaseTest):
         foreign_licence.save()
         InRoomRecord.objects.create(device=foreign_licence, room=self.room)
 
-        tiles = self.client.get(reverse("dashboard:index")).context["tiles"]
-        device_count = next(tile["count"] for tile in tiles if tile["url"] == "assets:device_index")
+        tiles = self.client.get(reverse("dashboard:index")).context["stock_tiles"]
+        device_count = next(tile["value"] for tile in tiles if tile["url"] == "assets:device_index")
         self.assertEqual(device_count, Device.objects.filter(tenant__in=[self.tenant_a, self.tenant_b]).count())
 
         licences = self.client.get(reverse("licenses:index"))

@@ -8,30 +8,69 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
+from dlcdb.core import lifecycle
 from dlcdb.core.models import (
     DeviceType,
     Record,
 )
+from dlcdb.theme.lifecycle_display import state_color
 
 # Shared plotly config: hide modebar entirely
 PLOTLY_CONFIG = {"displayModeBar": False}
 
-# Shared layout defaults
+# Shared layout defaults: the theme's typeface on a transparent ground, so the
+# chart sits on its panel. Text colours are set per colour mode in
+# _dashboard.scss: a figure is rendered once for both modes.
 PLOTLY_LAYOUT = dict(
-    font=dict(family="Roboto, sans-serif"),
+    font=dict(family='"IBM Plex Sans Variable", system-ui, sans-serif', size=13),
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
 )
 
-# Color palette for bar charts
-COLORS = {
-    "primary": "#5b69bc",
-    "primary_light": "#8b96d4",
-    "accent": "#e8634a",
-    "accent_light": "#f09a88",
-    "muted": "#9e9e9e",
+# Gridlines: a hairline that reads on the light and on the dark panel.
+GRID_COLOR = "rgba(128,128,128,0.25)"
+
+# Mark colour per Bootstrap colour name, so a state wears the colour of its badge
+# (theme.lifecycle_display.STATE_COLORS). Bootstrap 5.3's palette, except for
+# warning: $yellow-600 instead of $yellow, which is too light for a mark on the
+# light panel. Checked with the dataviz palette validator on both panel colours:
+# lightness band, colour-blind and normal-vision separation pass; contrast stays
+# below 3:1 for some marks, so every chart labels its values or has a legend and
+# end labels. The grey of "removed" is the de-emphasised state on purpose.
+MARK_COLORS = {
+    "info": "#0dcaf0",
+    "success": "#198754",
+    "warning": "#cc9a06",
+    "danger": "#dc3545",
+    "secondary": "#6c757d",
 }
+
+# A single series (devices by type): the indigo one step lighter than the
+# theme's primary, which keeps about 3:1 on the light and the dark panel.
+SERIES_COLOR = "#6366f1"
+
+# Bars are 22px thick in a 36px slot: thin marks, the rest is air. A chart is
+# as tall as its bars need, so the bars keep that thickness.
+BAR_SLOT = 36
+BAR_GAP = 0.4
+
+# The device type chart leaves out types with fewer devices.
+DEVICE_TYPE_MIN_COUNT = 10
+
+
+def _state_color(state):
+    return MARK_COLORS[state_color(state)]
+
+
+def _state_label(state):
+    return str(lifecycle.STATES[state].label)
+
+
+def _hex_to_rgba(color, alpha):
+    red, green, blue = (int(color[i : i + 2], 16) for i in (1, 3, 5))
+    return f"rgba({red},{green},{blue},{alpha})"
 
 
 def _to_html(fig):
@@ -82,69 +121,75 @@ def active_record_counts(*, tenants):
 
 def get_record_fraction_html(*, tenants):
     """
-    Returns a plotly HTML div showing the fraction of active records by type.
+    Returns a plotly HTML div with the tenants' devices per state, counted by
+    their active record, in lifecycle order and in the colours of the state
+    badges.
     """
-    labels = ["Lokalisiert", "Verliehen", "Nicht auffindbar", "Entfernt"]
+    states = [Record.INROOM, Record.LENT, Record.LOST, Record.REMOVED]
     counts_map = active_record_counts(tenants=tenants)
-    counts = [counts_map["inroom"], counts_map["lent"], counts_map["lost"], counts_map["removed"]]
+    counts = [counts_map[state.lower()] for state in states]
 
-    colors = [COLORS["primary"], COLORS["accent"], COLORS["muted"], COLORS["accent_light"]]
     fig = go.Figure(
         go.Bar(
             x=counts,
-            y=labels,
+            y=[_state_label(state) for state in states],
             orientation="h",
-            marker=dict(color=colors, cornerradius=4),
+            marker=dict(color=[_state_color(state) for state in states], cornerradius=4),
             text=counts,
-            textposition="auto",
-            textfont=dict(color="white", size=13),
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}: %{x}<extra></extra>",
         )
     )
     fig.update_layout(
         **PLOTLY_LAYOUT,
-        height=250,
-        margin=dict(l=10, r=30, t=10, b=10),
+        height=len(states) * BAR_SLOT + 20,
+        margin=dict(l=10, r=40, t=10, b=10),
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
-        yaxis=dict(showgrid=False),
-        bargap=0.3,
+        # Lifecycle order top-down; a categorical axis starts at the bottom.
+        yaxis=dict(showgrid=False, autorange="reversed"),
+        bargap=BAR_GAP,
     )
     return _to_html(fig)
 
 
 def get_device_type_html(*, tenants):
     """
-    Returns a plotly HTML div showing device counts by type (>10 devices).
+    Returns a plotly HTML div showing device counts by type, for types with at
+    least ``DEVICE_TYPE_MIN_COUNT`` devices, or "" when there is none.
     """
     count_filter = Q(device__tenant__in=tenants)
     device_types_qs = (
-        DeviceType.objects.annotate(count=Count("device", filter=count_filter)).exclude(count__lt=10).order_by("count")
+        DeviceType.objects.annotate(count=Count("device", filter=count_filter))
+        .exclude(count__lt=DEVICE_TYPE_MIN_COUNT)
+        .order_by("count")
     )
 
     labels = [dt.name for dt in device_types_qs]
     counts = [dt.count for dt in device_types_qs]
+    if not labels:
+        return ""
 
+    # One series in one colour: bar length already shows the count.
     fig = go.Figure(
         go.Bar(
             x=counts,
             y=labels,
             orientation="h",
-            marker=dict(
-                color=counts,
-                colorscale=[[0, COLORS["primary_light"]], [1, COLORS["primary"]]],
-                cornerradius=4,
-            ),
+            marker=dict(color=SERIES_COLOR, cornerradius=4),
             text=counts,
             textposition="outside",
-            textfont=dict(size=11),
+            cliponaxis=False,
+            hovertemplate="%{y}: %{x}<extra></extra>",
         )
     )
     fig.update_layout(
         **PLOTLY_LAYOUT,
-        height=max(300, len(labels) * 28),
+        height=len(labels) * BAR_SLOT + 20,
         margin=dict(l=10, r=50, t=10, b=10),
         xaxis=dict(showgrid=False, showticklabels=False, zeroline=False),
-        yaxis=dict(showgrid=False, tickfont=dict(size=11)),
-        bargap=0.2,
+        yaxis=dict(showgrid=False),
+        bargap=BAR_GAP,
     )
     return _to_html(fig)
 
@@ -161,40 +206,44 @@ def get_record_timeline_html(*, tenants):
     )
     type_month_devices = devices_per_month(records, now=timezone.now())
 
-    type_labels = {
-        Record.LENT: "Verliehen",
-        Record.INROOM: "Lokalisiert",
-        Record.LOST: "Nicht auffindbar",
-        Record.REMOVED: "Entfernt",
-    }
-
-    trace_styles = {
-        Record.LENT: dict(line=dict(color=COLORS["accent"], width=2.5)),
-        Record.INROOM: dict(
-            line=dict(color=COLORS["primary"], width=2.5), fill="tozeroy", fillcolor="rgba(91,105,188,0.12)"
-        ),
-        Record.LOST: dict(line=dict(color=COLORS["accent_light"], width=2.5)),
-        Record.REMOVED: dict(marker=dict(color=COLORS["muted"], cornerradius=3, opacity=0.6)),
-    }
-
     fig = go.Figure()
     for rtype in chart_types:
         month_devices = type_month_devices[rtype]
         months = sorted(month_devices.keys())
         counts = [len(month_devices[m]) for m in months]
+        color = _state_color(rtype)
         if rtype == Record.REMOVED:
-            fig.add_trace(go.Bar(x=months, y=counts, name=type_labels[rtype], **trace_styles[rtype]))
-        else:
-            fig.add_trace(go.Scatter(x=months, y=counts, mode="lines", name=type_labels[rtype], **trace_styles[rtype]))
+            fig.add_trace(
+                go.Bar(x=months, y=counts, name=_state_label(rtype), marker=dict(color=color, cornerradius=4))
+            )
+            continue
+        # The devices in a room are most of the stock: their line gets a 10%
+        # wash underneath, the others stay plain lines.
+        area = dict(fill="tozeroy", fillcolor=_hex_to_rgba(color, 0.1)) if rtype == Record.INROOM else {}
+        fig.add_trace(
+            go.Scatter(
+                x=months,
+                y=counts,
+                mode="lines",
+                name=_state_label(rtype),
+                line=dict(color=color, width=2),
+                **area,
+            )
+        )
+        # The current value at the end of each line, in text colour.
+        if months:
+            fig.add_annotation(
+                x=months[-1], y=counts[-1], text=str(counts[-1]), showarrow=False, xanchor="left", xshift=6
+            )
 
     fig.update_layout(
         **PLOTLY_LAYOUT,
-        xaxis_title="Monat",
-        yaxis_title="Anzahl Geräte",
+        yaxis_title=_("Devices"),
         height=350,
-        margin=dict(l=50, r=20, t=10, b=40),
+        margin=dict(l=50, r=40, t=10, b=30),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        hovermode="x unified",
         xaxis=dict(showgrid=False),
-        yaxis=dict(gridcolor="rgba(0,0,0,0.06)", zeroline=False),
+        yaxis=dict(gridcolor=GRID_COLOR, gridwidth=1, zeroline=False),
     )
     return _to_html(fig)

@@ -1,39 +1,42 @@
 {% comment %}
 SPDX-FileCopyrightText: Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
+
+One tile: label, value, optional bar and caption, all from _tile() in views.py.
+A tile stays an outlined card, unlike the page's sections: it is a link.
 {% endcomment %}
 {% load i18n %}
 
 <div class="col">
   <a
     href="{% url tile.url %}{% if tile.query_params %}?{{ tile.query_params }}{% endif %}"
-    class="dashboard-tile card h-100 text-decoration-none text-reset text-center"
+    class="dashboard-tile card h-100 text-decoration-none text-reset{% if tile.tone %} dashboard-tile-{{ tile.tone }}{% endif %}"
   >
-    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+    <div class="card-body">
+      <div class="dashboard-tile-label">
+        <i class="dashboard-tile-icon {{ tile.icon }}"></i>
+        <span>{{ tile.label }}</span>
+      </div>
       {% if tile.level_counts %}
-        {# One count per journal level, colored like the journal's level badges once non-zero. #}
-        {# Wraps in the half-width tiles on phones, where three counts do not fit side by side. #}
-        <div class="dashboard-tile-levels d-flex flex-wrap justify-content-center column-gap-3 row-gap-2">
+        {# One count per journal level, coloured like the journal's level badges once non-zero. #}
+        <div class="dashboard-tile-levels">
           {% for level, count in tile.level_counts %}
             <div class="dashboard-tile-level">
-              <div class="dashboard-tile-count fs-3 fw-semibold lh-1 {% if not count %}text-body-secondary{% elif level.name == "WARNING" %}text-warning-emphasis{% else %}text-danger-emphasis{% endif %}">{{ count }}</div>
-              <div class="small text-body-secondary">{{ level.label }}</div>
+              <div class="dashboard-tile-count{% if not count %} text-body-secondary{% elif level.name == "WARNING" %} text-warning-emphasis{% else %} text-danger-emphasis{% endif %}">{{ count }}</div>
+              <div class="dashboard-tile-caption">{{ level.label }}</div>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <div class="dashboard-tile-count display-6 fw-semibold lh-1">{{ tile.count }}</div>
+        <div class="dashboard-tile-count">{{ tile.value }}{% if tile.unit %}<span class="dashboard-tile-unit">{{ tile.unit }}</span>{% endif %}</div>
       {% endif %}
-      <div class="dashboard-tile-label mt-2">
-        <i class="dashboard-tile-icon {{ tile.icon }} me-1"></i>{{ tile.label }}
-      </div>
-      {% if tile.show_badge %}
-        <span
-          class="dashboard-tile-badge badge text-bg-warning mt-2"
-          title="{% blocktranslate count counter=tile.note_count %}{{ counter }} with note{% plural %}{{ counter }} with notes{% endblocktranslate %}"
-        >
-          <i class="bi bi-chat"></i> {{ tile.note_count }}
-        </span>
+      {% if tile.progress is not None %}
+        <div class="progress dashboard-tile-progress" role="progressbar" aria-label="{{ tile.label }}" aria-valuenow="{{ tile.progress }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" style="width: {{ tile.progress }}%"></div>
+        </div>
+      {% endif %}
+      {% if tile.caption %}
+        <div class="dashboard-tile-caption">{{ tile.caption }}</div>
       {% endif %}
     </div>
   </a>

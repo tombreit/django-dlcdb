@@ -37,9 +37,9 @@ TENANT_FILTERS = {
 # Models that need .distinct() due to joins through intermediary tables.
 TENANT_DISTINCT = {"core.room", "core.devicetype"}
 
-# Tiles whose note badge is intentionally not shown (kept for parity with the
+# Tiles whose note count is intentionally not shown (kept for parity with the
 # admin dashboard, where these counts can be large/noisy).
-NO_BADGE_MODELS = {"core.device", "core.lentrecord", "core.licencerecord"}
+NO_NOTES_MODELS = {"core.device", "core.lentrecord", "core.licencerecord"}
 
 
 def _get_tenant_queryset(model_name, ModelClass, request):
@@ -53,12 +53,41 @@ def _get_tenant_queryset(model_name, ModelClass, request):
     return tenant_scoped_queryset(ModelClass.objects.all(), request, tenant_field=filter_field)
 
 
+def _tile(*, label, value, icon, url, query_params="", **extra):
+    """
+    The context dict of one tile. Every tile has the same keys, so the
+    template needs no ``default`` filters:
+
+    - ``value``: the number the tile shows, ``unit`` an optional suffix ("%");
+    - ``caption``: an optional line under it;
+    - ``tone``: an optional Bootstrap colour name that tints the tile;
+    - ``progress``: an optional percentage, drawn as a bar;
+    - ``level_counts``: the journal tile's counts per level, instead of a value;
+    - ``show_notes`` / ``note_count``: whether the caption reports notes.
+    """
+    return {
+        "label": label,
+        "value": value,
+        "icon": icon,
+        "url": url,
+        "query_params": query_params,
+        "unit": "",
+        "caption": "",
+        "tone": "",
+        "progress": None,
+        "level_counts": None,
+        "show_notes": False,
+        "note_count": 0,
+        **extra,
+    }
+
+
 def _build_tile(*, model_name, url, request, base_params=None):
-    """Build the context dict for a single dashboard tile.
+    """Build the context dict for a single model-count tile.
 
     ``base_params`` are the GET parameters the tile's target needs to show the
     same set the tile counts (e.g. the Lost tile scoping the record list to
-    LOST). The note filter is appended to them when the badge is shown.
+    LOST). The note filter is appended to them when the note count is shown.
     """
     ModelClass = apps.get_model(model_name)
     qs = _get_tenant_queryset(model_name, ModelClass, request)
@@ -73,40 +102,46 @@ def _build_tile(*, model_name, url, request, base_params=None):
         agg["lent"] = Count("pk", filter=Q(record_type=Record.LENT), distinct=distinct)
 
     counts = qs.aggregate(**agg)
-    raw_count = counts["total"]
+    total = counts["total"]
     note_count = counts.get("with_note", 0)
-    human_name = ModelClass._meta.verbose_name_plural if raw_count >= 2 else ModelClass._meta.verbose_name
 
-    count = raw_count
+    value = total
+    caption = ""
     if model_name == "core.lentrecord":
-        count = f"{counts['lent']} / {raw_count}"
-    elif model_name == "core.inventory":
-        count = ModelClass.objects.filter(is_active=True).first()
+        # Lent devices, out of all lendable ones.
+        value = counts["lent"]
+        caption = _("of %(total)s lendable") % {"total": total}
+    label = ModelClass._meta.verbose_name if value == 1 else ModelClass._meta.verbose_name_plural
 
-    show_badge = bool(note_count) and model_name not in NO_BADGE_MODELS
+    show_notes = bool(note_count) and model_name not in NO_NOTES_MODELS
+    if show_notes:
+        # Same msgid as the former badge's {% blocktranslate count %}.
+        caption = ngettext("%(counter)s with note", "%(counter)s with notes", note_count) % {"counter": note_count}
 
-    # Keyed off show_badge, not note_count: a tile whose badge is suppressed must
-    # not link to a note-filtered list either, or the link promises a filter the
-    # tile never advertised.
+    # Keyed off show_notes, not note_count: a tile whose note count is suppressed
+    # must not link to a note-filtered list either, or the link promises a filter
+    # the tile never advertised.
     params = dict(base_params or {})
-    if show_badge:
+    if show_notes:
         params["has_note"] = "has_note"
 
-    return {
-        "label": human_name,
-        "count": count,
-        "note_count": note_count,
-        "show_badge": show_badge,
-        "icon": get_icon_for_class(model_name),
-        "url": url,
-        "query_params": urlencode(params),
-    }
+    return _tile(
+        label=label,
+        value=value,
+        caption=caption,
+        icon=get_icon_for_class(model_name),
+        url=url,
+        query_params=urlencode(params),
+        show_notes=show_notes,
+        note_count=note_count,
+    )
 
 
 def index(request):
     """
-    Dashboard on the theme frontend: model tiles (counts + note badges) and
-    Plotly stats, scoped to the user's tenants, plus the global search.
+    Dashboard on the theme frontend: tiles in two groups (what needs attention,
+    what is in stock) and Plotly stats, scoped to the user's tenants, plus the
+    global search.
 
     Search results are served from this same URL so that ``hx-push-url`` puts
     ``/dashboard/?q=…`` in the address bar: a search is then shareable and
@@ -126,69 +161,75 @@ def index(request):
     if request.htmx:
         return TemplateResponse(request, "dashboard/index.html#search-results", search_context)
 
-    # (model, url name, GET params the target needs to show what the tile counts).
     # Every target is a frontend view: the tiles are the last place that linked
-    # into the admin changelists the frontend apps have since replaced.
-    tile_specs = [
-        ("core.device", "assets:device_index", {}),
-        ("core.lentrecord", "lending:index", {}),
-        ("core.room", "rooms:index", {}),
-        ("core.devicetype", "assets:device_type_index", {}),
-        ("core.licencerecord", "licenses:index", {}),
-        ("smallstuff.assignedthing", "smallstuff:person_search", {}),
+    # into the admin changelists the frontend apps have since replaced. Tiles are
+    # deliberately not permission-filtered: every tile renders, and a user who may
+    # not open its target gets the ordinary 403 on click.
+
+    # Overdue lendings: LentRecord.objects.overdue(), like the lending list's
+    # "state=overdue" filter it links to, so the count matches the list.
+    overdue = tenant_scoped_queryset(LentRecord.objects.overdue(), request, tenant_field="device__tenant").count()
+    attention_tiles = [
+        _tile(
+            label=_("Overdue lendings"),
+            value=overdue,
+            tone="warning" if overdue else "",
+            icon="bi bi-alarm",
+            url="lending:index",
+            query_params="state=overdue",
+        ),
         # LostRecord.objects is Record filtered to LOST with no is_active filter,
         # so the unfiltered-by-age record list under the same record_type matches
         # the count exactly.
-        ("core.lostrecord", "assets:record_index", {"record_type": Record.LOST}),
-    ]
-    if Inventory.objects.filter(is_active=True).exists():
-        tile_specs.append(("core.inventory", "inventory:inventorize-room-list", {}))
-
-    # Deliberately not permission-filtered: every tile renders, and a user who
-    # may not open its target gets the ordinary 403 on click.
-    tiles = [
-        _build_tile(model_name=name, url=url, request=request, base_params=params) for name, url, params in tile_specs
-    ]
-
-    # Overdue tile: LentRecord.objects.overdue(), like the lending list's
-    # "state=overdue" filter it links to, so the count matches the list.
-    overdue_qs = tenant_scoped_queryset(
-        LentRecord.objects.overdue(),
-        request,
-        tenant_field="device__tenant",
-    )
-    tiles.insert(
-        2,
-        {
-            "label": _("Overdue lendings"),
-            "count": overdue_qs.count(),
-            "note_count": 0,
-            "show_badge": False,
-            "icon": "bi bi-alarm",
-            "url": "lending:index",
-            "query_params": "state=overdue",
-        },
-    )
-
-    # Journal tile: one count per problem level instead of a single count. It
-    # links to the whole journal; the period only applies to the counts.
-    tiles.append(
-        {
-            "label": ngettext("Journal, last %(days)d day", "Journal, last %(days)d days", JOURNAL_TILE_DAYS)
+        _build_tile(
+            model_name="core.lostrecord",
+            url="assets:record_index",
+            request=request,
+            base_params={"record_type": Record.LOST},
+        ),
+        # One count per problem level instead of a single value. It links to the
+        # whole journal; the period only applies to the counts.
+        _tile(
+            label=ngettext("Journal, last %(days)d day", "Journal, last %(days)d days", JOURNAL_TILE_DAYS)
             % {"days": JOURNAL_TILE_DAYS},
-            "level_counts": JournalEntry.objects.problem_counts(tenants=request.tenants, days=JOURNAL_TILE_DAYS),
-            "note_count": 0,
-            "show_badge": False,
-            "icon": "bi bi-journal-text",
-            "url": "journal:index",
-            "query_params": "",
-        }
-    )
+            value=None,
+            level_counts=JournalEntry.objects.problem_counts(tenants=request.tenants, days=JOURNAL_TILE_DAYS),
+            icon="bi bi-journal-text",
+            url="journal:index",
+        ),
+    ]
+    inventory = Inventory.objects.filter(is_active=True).first()
+    if inventory:
+        progress = inventory.get_inventory_progress(tenants=request.tenants)
+        attention_tiles.append(
+            _tile(
+                label=str(inventory),
+                value=progress.done_percent,
+                unit="%",
+                progress=progress.done_percent,
+                caption=_("%(done)s of %(total)s devices")
+                % {"done": progress.inventorized_devices_count, "total": progress.all_devices_count},
+                icon=get_icon_for_class("core.inventory"),
+                url="inventory:inventorize-room-list",
+            )
+        )
+
+    stock_specs = [
+        ("core.device", "assets:device_index"),
+        ("core.lentrecord", "lending:index"),
+        ("core.room", "rooms:index"),
+        ("core.devicetype", "assets:device_type_index"),
+        ("core.licencerecord", "licenses:index"),
+        ("smallstuff.assignedthing", "smallstuff:person_search"),
+    ]
+    stock_tiles = [_build_tile(model_name=name, url=url, request=request) for name, url in stock_specs]
 
     context = {
-        "tiles": tiles,
+        "attention_tiles": attention_tiles,
+        "stock_tiles": stock_tiles,
         "record_fraction_html": stats.get_record_fraction_html(tenants=request.tenants),
         "device_type_html": stats.get_device_type_html(tenants=request.tenants),
+        "device_type_min_count": stats.DEVICE_TYPE_MIN_COUNT,
         "record_timeline_html": stats.get_record_timeline_html(tenants=request.tenants),
         **search_context,
     }

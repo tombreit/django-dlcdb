@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
+// Dashboard: two groups of tiles, then the charts as filled panels
+// (_cards.scss).
+
+.dashboard-group {
+  margin-bottom: 2rem;
+}
+
+// The size of a section title, so the page has one heading scale.
+.dashboard-group-title {
+  margin-bottom: .75rem;
+  font-size: 1.125rem;
+}
+
 /* Dashboard tiles.
 
    Each tile is a link wearing `.card`, and Bootstrap's card component has no
@@ -25,9 +38,89 @@
     background-color var(--app-transition),
     border-color var(--app-transition);
 
+  // Label, value, bar, caption: one column, left-aligned.
+  > .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+
   &:hover,
   &:focus-visible {
     background-color: var(--bs-tertiary-bg);
     border-color: var(--bs-primary);
+  }
+}
+
+.dashboard-tile-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: $font-size-sm;
+  color: var(--bs-secondary-color);
+}
+
+// The number is the loud thing on a tile.
+.dashboard-tile-count {
+  font-size: 2rem;
+  font-weight: $font-weight-semibold;
+  line-height: 1.15;
+}
+
+.dashboard-tile-unit {
+  margin-left: .125rem;
+  font-size: 1.25rem;
+}
+
+.dashboard-tile-caption {
+  font-size: $font-size-sm;
+  color: var(--bs-secondary-color);
+}
+
+// The journal tile: one smaller count per problem level.
+.dashboard-tile-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem 1.5rem;
+
+  .dashboard-tile-count {
+    font-size: 1.5rem;
+  }
+}
+
+.dashboard-tile-progress {
+  --bs-progress-height: .375rem;
+  margin-top: .25rem;
+}
+
+// A tile whose value asks for action (overdue lendings) takes Bootstrap's
+// subtle warning tokens, which are remapped per colour mode.
+.dashboard-tile-warning {
+  --bs-card-bg: var(--bs-warning-bg-subtle);
+  --bs-card-border-color: var(--bs-warning-border-subtle);
+
+  .dashboard-tile-count {
+    color: var(--bs-warning-text-emphasis);
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--bs-warning-bg-subtle);
+  }
+}
+
+// Plotly renders each chart once, on the server, for both colour modes, and
+// writes its text colour inline. Axis labels, values and the legend take the
+// theme's text colour instead, so they stay readable on the dark panel. Hover
+// labels keep Plotly's colours: they sit on their own background.
+.dashboard-chart .js-plotly-plot {
+  .xtick text,
+  .ytick text,
+  .xtitle,
+  .ytitle,
+  .legendtext,
+  .annotation-text,
+  .bartext {
+    fill: var(--bs-secondary-color) !important;
   }
 }

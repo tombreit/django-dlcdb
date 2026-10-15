@@ -215,7 +215,7 @@ class GlobalSearchTests(TestCase):
         self.assertNotIn("<html", body)
         self.assertIn('id="global-search-results"', body)
         self.assertIn(reverse("assets:device_detail", args=[self.device.pk]), body)
-        self.assertNotIn("tiles", response.context)
+        self.assertNotIn("stock_tiles", response.context)
         self.assertNotIn("plotly", body.lower())
 
     def test_a_shared_search_url_reloads_into_the_whole_dashboard(self):
@@ -228,7 +228,7 @@ class GlobalSearchTests(TestCase):
         self.assertIn("devices", self._group_keys(response))
         self.assertIn(reverse("assets:device_detail", args=[self.device.pk]), body)
         # ... and the dashboard's own content, still there below them.
-        self.assertTrue(response.context["tiles"])
+        self.assertTrue(response.context["stock_tiles"])
         self.assertIn("plotly", body.lower())
 
     def test_the_term_is_reflected_back_into_the_search_input(self):
@@ -266,7 +266,7 @@ class GlobalSearchTests(TestCase):
         self.assertContains(response, 'id="global-search-results"')
         self.assertEqual(response.context["groups"], [])
         # The landing page is still the landing page.
-        self.assertTrue(response.context["tiles"])
+        self.assertTrue(response.context["stock_tiles"])
 
     def test_the_search_box_is_wired_to_take_the_cursor_on_load(self):
         """`autofocus` for the no-JS case, plus the script that puts the caret at the end."""

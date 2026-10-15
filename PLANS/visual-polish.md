@@ -6,12 +6,13 @@ SPDX-License-Identifier: CC0-1.0
 
 # Visual polish: typeface, lighter detail pages, dashboard
 
-**Status:** implemented 2026-10-15:
+**Status:** all batches implemented 2026-10-15:
 - batch 1, the typeface;
 - batch 2, `card-filled` sections on the device, record and lending pages;
-- batch 3, the other detail pages.
+- batch 3, the other detail pages;
+- batch 4, the dashboard.
 
-Batch 4, the dashboard, is open. This is a living document.
+What is left is under *Open follow-ups*. This is a living document.
 
 ## Why
 
@@ -288,7 +289,7 @@ After each batch, stop so the user can commit it.
     `card-caret`.
     - Test `rooms/tests/test_rooms.py` asserts the `<details>` class string and is updated.
   - `_cards.scss`: secondary header content stays body text.
-- [ ] **4. Dashboard** (decision 9)
+- [x] **4. Dashboard** (decision 9)
   - `dashboard/views.py`: the tile dicts get `value`, `caption`, `tone` and `group`.
   - Also: `dashboard/includes/_tile.html`, `dashboard/index.html`,
     `theme/assets/scss/_dashboard.scss`, `dashboard/stats.py` and `dashboard/tests/test_tiles.py`.
@@ -350,6 +351,18 @@ Batch 1 additionally:
   other detail pages.
 - **Out of scope for this round:** list pages (`_index_base.html`), the filterbar, and one page
   header for index, detail and lending pages.
+- **New msgids to translate (batch 4):**
+  - "Needs attention" and "Stock";
+  - "of %(total)s lendable" and "%(done)s of %(total)s devices";
+  - "Devices by state";
+  - "No device type has %(count)s or more devices yet."
+
+  The chart's state labels reuse the lifecycle labels, and the notes caption reuses the old
+  badge's msgid.
+- **`Device` verbose names are untranslated:** the Devices tile reads "Devices" in the German UI.
+  This predates this work.
+- **Charts have no table view:** the dataviz method asks for one per chart. Values are reachable
+  through the labels, the hover tooltips and the linked lists.
 - **Device detail:** the state badge shows twice, in the header and under *Current state*.
 - **Identifiers set in Plex Sans:** Plex Sans's zero has no inner mark, so `0`/`O` and `1`/`I`/`l`
   look alike there. Plex Mono's zero has one. These identifiers are still in Sans:
@@ -482,3 +495,41 @@ Batch 1 additionally:
 
   Timelines pick up the panel colour by themselves: `_timeline.scss` falls back to
   `--bs-card-bg`.
+- **Batch 4, context:** `tiles` became `attention_tiles` and `stock_tiles`.
+  - `_tile()` gives every tile the same keys: `value`, `unit`, `caption`, `tone`, `progress`,
+    `level_counts`, `show_notes` and `note_count`.
+  - `count` became `value`, and `show_badge` became `show_notes`.
+  - The tests in `dashboard/tests/test_tiles.py`, `test_search.py` and
+    `tenants/tests/test_multi_tenant.py` follow.
+- **Batch 4, the inventory tile** is labelled with the inventory itself ("Inventory 2026"). It
+  shows the done percentage with a bar, and "N of M devices" as its caption.
+- **Batch 4, chart colours, checked with the dataviz validator** on both panel colours
+  (`#f8f9fa` and `#2b3035`):
+  - The states keep their badge colours. Lent takes Bootstrap's `$yellow-600` (`#cc9a06`)
+    instead of `$yellow`, which failed the lightness band and reached only 1.55:1 on the light
+    panel.
+  - Lightness band, colour-blind and normal-vision separation pass.
+  - Some marks stay under 3:1, so values sit at the bar ends, and the lines carry a legend and
+    end labels.
+  - "Removed" stays grey, the de-emphasised state, as on its badge.
+  - Devices by type is one series in one colour, `#6366f1`, one indigo step lighter than the
+    primary: 4.2:1 light, 3.0:1 dark.
+- **Batch 4, chart form:**
+  - Bars are 22px thick in a 36px slot, and each chart is as tall as its bars need.
+  - Lines are 2px; only "in room", the bulk of the stock, gets a 10% wash.
+  - Gridlines are hairlines that read on both panels.
+  - The history chart has a unified hover over x.
+  - The device type chart shows a note instead of an empty plot when no type reaches
+    `DEVICE_TYPE_MIN_COUNT` (10, formerly a bare literal).
+- **Batch 4, chart text in dark mode:** `_dashboard.scss` overrides Plotly's inline `fill` for
+  tick labels, axis titles, legend, annotations and bar text with `--bs-secondary-color`. Hover
+  labels keep Plotly's colours, since they bring their own background.
+- **Batch 4, search result groups:**
+  - The header shows its title as `<h2>` after the icon, so it gets the icon square.
+  - `_cards.scss` leaves badges out of the secondary-text rule
+    (`:where(a, span, small):not(.badge)`), so the count badge keeps its size.
+- **Batch 4, checked in Chromium (2026-10-15)** on a scratch DB with backdated records, light and
+  dark, 1400px and 390px:
+  - tiles, with the overdue tone and the inventory progress;
+  - the three charts;
+  - a search for "NTB" with two result groups.
