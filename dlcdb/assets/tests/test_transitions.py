@@ -148,6 +148,30 @@ class DeviceTransitionTests(BaseTest):
         device.refresh_from_db()
         self.assertEqual(device.active_record.record_type, Record.REMOVED)
 
+    def test_a_room_added_from_the_recover_form_comes_back_preselected(self):
+        user = self._login("recover")
+        user.user_permissions.add(Permission.objects.get(codename="add_room", content_type__app_label="core"))
+        device = self._create_device()
+        establish_state(RemovedRecord, device=device)
+        inventory_search = "/inventory/devices/?q=EDV"
+        form_url = with_next(self._url(device, "recover"), inventory_search)
+
+        # + opens the room add page, which returns to this form, ?next= and all.
+        add_url = with_next(f"{reverse('rooms:add')}?next_field=room", form_url)
+        self.assertContains(self.client.get(form_url), f'href="{escape(add_url)}"')
+        response = self.client.post(add_url, {"number": "Z9.99"})
+
+        new_room = Room.objects.get(number="Z9.99")
+        form_url_with_room = f"{form_url}&room={new_room.pk}"
+        self.assertRedirects(response, form_url_with_room, fetch_redirect_response=False)
+        self.assertEqual(self.client.get(form_url_with_room).context["form"]["room"].value(), str(new_room.pk))
+
+        # Recovering still returns to the inventory search.
+        response = self.client.post(form_url_with_room, {"room": new_room.pk, "note": "Back from repair"})
+        self.assertRedirects(response, inventory_search, fetch_redirect_response=False)
+        device.refresh_from_db()
+        self.assertEqual(device.active_record.room, new_room)
+
     def test_the_form_returns_to_the_next_url_of_the_screen_that_offered_it(self):
         self._login("lose")
         device = self._located_device()

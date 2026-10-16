@@ -1,0 +1,33 @@
+{% load i18n %}{% comment %}
+TomSelectWidget and TomSelectMultipleWidget: Django's own <select>, and with
+``widget.related`` (theme/related.py) the buttons attached on its right:
+✎ or 👁 opens the selected object, + adds one. ``border`` gives them the
+select's own border colour, so the group reads as one control. theme/assets/js/related-links.js
+points ✎ at the new selection and asks before a link drops unsaved input.
+{% endcomment %}{% if widget.related %}{% with related=widget.related %}
+<div class="input-group" data-related-links>
+  {% include "django/forms/widgets/select.html" %}
+  {% if related.detail_href_template %}
+    {% if related.can_change %}
+      {% blocktranslate asvar detail_label with name=related.verbose_name %}Edit {{ name }}{% endblocktranslate %}
+    {% else %}
+      {% blocktranslate asvar detail_label with name=related.verbose_name %}View {{ name }}{% endblocktranslate %}
+    {% endif %}
+    <a class="btn btn-outline-secondary border{% if not related.detail_href %} disabled{% endif %}"{% if related.detail_href %} href="{{ related.detail_href }}"{% else %} aria-disabled="true" tabindex="-1"{% endif %}
+       data-related-link data-href-template="{{ related.detail_href_template }}"
+       data-confirm="{% translate "Discard your unsaved changes and leave this form?" %}"{% if related.form_is_bound %} data-unsaved{% endif %}
+       title="{{ detail_label }}">
+      <i class="bi {% if related.can_change %}bi-pencil{% else %}bi-eye{% endif %}"></i><span class="visually-hidden">{{ detail_label }}</span>
+    </a>
+  {% endif %}
+  {% if related.add_href %}
+    {% blocktranslate asvar add_label with name=related.verbose_name %}Add {{ name }}{% endblocktranslate %}
+    <a class="btn btn-outline-secondary border" href="{{ related.add_href }}"
+       data-related-link
+       data-confirm="{% translate "Discard your unsaved changes and leave this form?" %}"{% if related.form_is_bound %} data-unsaved{% endif %}
+       title="{{ add_label }}">
+      <i class="bi bi-plus-lg"></i><span class="visually-hidden">{{ add_label }}</span>
+    </a>
+  {% endif %}
+</div>
+{% endwith %}{% else %}{% include "django/forms/widgets/select.html" %}{% endif %}

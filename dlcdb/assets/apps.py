@@ -16,3 +16,11 @@ class AssetsConfig(AppConfig):
         from . import pickers
 
         pickers.register()
+
+        # The master data pages, for the buttons next to the form selects.
+        from dlcdb.core.models import DeviceType, Manufacturer, Supplier
+        from dlcdb.theme.related import RelatedPages, register_related_pages
+
+        register_related_pages(RelatedPages(DeviceType, "assets:device_type_detail", "assets:device_type_add"))
+        register_related_pages(RelatedPages(Manufacturer, "assets:manufacturer_detail", "assets:manufacturer_add"))
+        register_related_pages(RelatedPages(Supplier, "assets:supplier_detail", "assets:supplier_add"))

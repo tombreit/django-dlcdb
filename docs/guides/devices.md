@@ -45,6 +45,16 @@ Das Formular ist in Sektionen gegliedert:
 - **Vertrauliche Daten** — z.B. Passwörter für Festplatten-/Backup-Verschlüsselung
   (nur eintragen, wenn betrieblich erforderlich)
 
+Neben den Auswahlfeldern *Geräteklasse*, *Hersteller* und *Distributor* stehen
+zwei Buttons: der Stift öffnet den gewählten Eintrag (ohne Änderungsrecht das
+Auge, nur zum Ansehen), das Plus legt einen neuen an. Speichern oder Abbrechen
+führt zurück zum Gerät; ein neu angelegter Eintrag ist dort schon ausgewählt
+und wird mit dem Gerät gespeichert. Ungespeicherte Eingaben im Geräteformular
+gehen auf dem Weg verloren, die DLCDB fragt vorher nach. Die Buttons erscheinen
+nur mit den Berechtigungen der jeweiligen Seite, z.B. *Can view manufacturer*
+und *Can add manufacturer*. Das Auswahlfeld *Raum* beim Wiedereingliedern eines
+ausgemusterten Geräts hat dieselben Buttons.
+
 Die Info-Spalte rechts zeigt:
 
 - **Aktueller Status** — der aktive Record (Zustand, Raum/Person) und der Button

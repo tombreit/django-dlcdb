@@ -23,13 +23,21 @@ class TomSelectWidget(forms.Select):
     per-tag ``remove_button``, and ``data-placeholder`` replaces the empty
     option's ``---------`` label with a greyed hint.
 
-    Intentionally ships NO ``Media`` and NO ``template_name`` — unlike the
-    picker widgets below. TomSelect's JS/CSS are bundled once into the global
-    theme bundle loaded by ``theme/_base.html`` on every page, and Django's
-    default ``<select>`` template renders fine (TomSelect enhances it in the
-    browser). Adding a per-widget ``Media`` here would double-load TomSelect,
-    so do not "fix" this by adding one.
+    Intentionally ships NO ``Media`` — unlike the picker widgets below.
+    TomSelect's JS/CSS are bundled once into the global theme bundle loaded by
+    ``theme/_base.html`` on every page, and Django's default ``<select>``
+    renders fine (TomSelect enhances it in the browser). Adding a per-widget
+    ``Media`` here would double-load TomSelect, so do not "fix" this by adding
+    one.
+
+    Its template renders Django's own ``<select>``; with ``related`` set (by
+    ``theme.related.add_related_links``), inside an input group with the
+    buttons that open the selected object or add a new one.
     """
+
+    template_name = "theme/widgets/tom_select.html"
+    # Set per request: a ``theme.related.RelatedLinks``, or None for no buttons.
+    related = None
 
     def __init__(self, attrs=None, *, placeholder=None):
         defaults = {
@@ -39,6 +47,9 @@ class TomSelectWidget(forms.Select):
         }
         super().__init__(_merge_tom_select_attrs(defaults, attrs))
 
+    def get_context(self, name, value, attrs):
+        return _add_related_context(self, super().get_context(name, value, attrs))
+
 
 class TomSelectMultipleWidget(forms.SelectMultiple):
     """
@@ -47,8 +58,11 @@ class TomSelectMultipleWidget(forms.SelectMultiple):
     Same ``is-tom-select`` contract, but no ``data-clear-button``: a
     multi-select reads better with the default per-tag ``remove_button``
     plugin. See :class:`TomSelectWidget` for why this widget carries no
-    ``Media``/``template_name``.
+    ``Media``, and for its template.
     """
+
+    template_name = "theme/widgets/tom_select.html"
+    related = None
 
     def __init__(self, attrs=None, *, placeholder=None):
         defaults = {
@@ -56,6 +70,26 @@ class TomSelectMultipleWidget(forms.SelectMultiple):
             "data-placeholder": placeholder or _("Type to search…"),
         }
         super().__init__(_merge_tom_select_attrs(defaults, attrs))
+
+    def get_context(self, name, value, attrs):
+        return _add_related_context(self, super().get_context(name, value, attrs))
+
+
+def _add_related_context(widget, context):
+    """Add the template's ``related``, if the widget has buttons (see ``theme.related``)."""
+    if widget.related:
+        # The options the select shows as selected: a submitted or stored value
+        # it does not offer (a soft-deleted object, say) selects nothing.
+        selected = [
+            str(option["value"])
+            for _group, options, _index in context["widget"]["optgroups"]
+            for option in options
+            if option["selected"] and option["value"] not in ("", None)
+        ]
+        context["widget"]["related"] = widget.related.context(
+            context["widget"]["name"], selected, multiple=widget.allow_multiple_selected
+        )
+    return context
 
 
 def _merge_tom_select_attrs(defaults, attrs):

@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.html import escape
 
 from dlcdb.assets.forms import DeviceForm
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Record, Room
+from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Record, Room, Supplier
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
@@ -506,6 +506,26 @@ class DeviceFrontendTests(BaseTest):
         form = response.context["form"]
         payload = {name: (form[name].value() or "") for name in form.fields}
         self.assertRedirects(self.client.post(detail_url, payload), lending_list, fetch_redirect_response=False)
+
+    def test_master_data_selects_have_buttons_the_tenant_select_has_none(self):
+        response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))
+
+        self.assertContains(response, "data-related-links", count=3)  # device type, manufacturer, supplier
+        self.assertIsNone(getattr(response.context["form"].fields["tenant"].widget, "related", None))
+
+    def test_a_new_manufacturer_or_supplier_comes_back_preselected(self):
+        manufacturer = Manufacturer.objects.create(name="Dell")
+        supplier = Supplier.objects.create(name="Acme")
+
+        for url in (reverse("assets:device_add"), reverse("assets:device_detail", args=[self.inroom_device.pk])):
+            with self.subTest(url=url):
+                response = self.client.get(url, {"manufacturer": manufacturer.pk, "supplier": supplier.pk})
+
+                form = response.context["form"]
+                self.assertEqual(form["manufacturer"].value(), str(manufacturer.pk))
+                self.assertEqual(form["supplier"].value(), str(supplier.pk))
+                # The collapsed Procurement section opens to show the supplier.
+                self.assertContains(response, '<details class="card card-filled mb-3" open>', count=1)
 
     def test_a_device_opened_directly_returns_to_the_device_list(self):
         response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))

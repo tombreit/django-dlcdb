@@ -37,7 +37,7 @@
   </div>
 </section>
 
-<details class="card card-filled mb-3"{% if form.supplier.errors or form.contact_person_internal.errors or form.order_number.errors or form.cost_centre.errors or form.purchase_date.errors or form.warranty_expiration_date.errors or form.contract_start_date.errors or form.contract_expiration_date.errors or form.contract_termination_date.errors or form.procurement_note.errors %} open{% endif %}>
+<details class="card card-filled mb-3"{% if form.supplier.errors or form.contact_person_internal.errors or form.order_number.errors or form.cost_centre.errors or form.purchase_date.errors or form.warranty_expiration_date.errors or form.contract_start_date.errors or form.contract_expiration_date.errors or form.contract_termination_date.errors or form.procurement_note.errors or request.GET.supplier %} open{% endif %}>
   <summary class="card-header">
     <i class="bi bi-receipt"></i>
     <h2>{% translate "Procurement" %}</h2>

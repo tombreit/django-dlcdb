@@ -6,9 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–2 done (one `?next=`, add
-pages return with the new object), the buttons themselves not yet. This is a living document:
-each batch ticks its box under *Progress* and updates this line in the same commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–3 done: one `?next=`, add
+pages return with the new object, and the device and recover forms have the buttons. Lending,
+licences and persons are next. This is a living document: each batch ticks its box under
+*Progress* and updates this line in the same commit.
 
 ## Why
 
@@ -382,7 +383,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **0. This document**
 - [x] **1. One `next` parameter, a local URL, as in Django**
 - [x] **2. Add pages return with the new object**
-- [ ] **3. The mechanism, the device form and the recover form**
+- [x] **3. The mechanism, the device form and the recover form**
 - [ ] **4. Lending**
 - [ ] **5. Licences and persons** (open question 1)
 
@@ -471,3 +472,20 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   planned. On a multi-select (the licence subscribers, batch 5), a second + therefore keeps only
   the newest unsaved pick; the earlier one is in the select and can be picked again. Appending
   instead would make a single select carry two values.
+- **Batch 3:**
+  - **`to_field_name`:** a model form's foreign key carries the pk's name there (`"id"`), so only
+    a select keyed by *another* field is skipped. It gets no buttons at all, not even +, because
+    the add page returns a pk.
+  - **The detail button opens the selected option,** not the raw value. A form re-rendered with a
+    value its select does not offer (a bogus pk, a soft-deleted object) selects nothing, so ✎ is
+    disabled. The screenshot check of the invalid state found this.
+  - **A form re-rendered after a failed save** marks its links `data-unsaved`. All its input is
+    unsaved, so the dialog always asks there; the snapshot would take it for the pristine state.
+  - **The buttons carry Bootstrap's `border` utility.** It gives them the select's border colour,
+    so the group reads as one control like the person picker next to it. Plain
+    `btn-outline-secondary` has a darker frame than the select in light mode.
+  - **The labels are `Edit {{ name }}`, `View {{ name }}` and `Add {{ name }}`** with the model's
+    `verbose_name`. They and the dialog text "Discard your unsaved changes and leave this form?"
+    still need translations.
+  - **The JS is not linted:** `eslint.config.mjs` imports the `globals` package, which is not
+    installed. This predates the batch.

@@ -27,6 +27,7 @@ from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls, get_redirect_url
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.pickers import picker_filter
+from dlcdb.theme.related import add_related_links
 
 from ..filters import DeviceFilter
 from ..forms import DeviceForm, RecoverForm, RemoveForm, TransitionNoteForm
@@ -241,6 +242,9 @@ def device_transition(request, pk, name):
     done_url = get_redirect_url(request) or reverse("assets:device_detail", args=[device.pk])
 
     form = form_class(request.POST or None)
+    # The recover form's room gets buttons to open or add a room. The form posts
+    # to this URL, so its ?next= and a room= the add page returns both survive.
+    add_related_links(form, request)
     try:
         lifecycle.check(device, name)
         if request.method == "POST" and form.is_valid():

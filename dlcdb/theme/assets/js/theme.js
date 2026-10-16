@@ -7,6 +7,7 @@ import htmx from "htmx.org";
 import TomSelect from 'tom-select';
 
 import './filterbar';
+import './related-links';
 
 // Expose Bootstrap for slim per-app bundles (e.g. inventory) that need
 // Modal/Toast programmatically without bundling Bootstrap a second time.

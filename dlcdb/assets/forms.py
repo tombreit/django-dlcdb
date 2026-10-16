@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from dlcdb.core.models import Device, DeviceType, Manufacturer, Record, Room, Supplier
 from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.forms import add_bootstrap_classes
+from dlcdb.theme.related import add_related_links
 from dlcdb.theme.widgets import DevicePickerMultiField, IconPickerWidget, TomSelectWidget
 
 
@@ -159,6 +160,8 @@ class DeviceForm(forms.ModelForm):
 
         limit_tenant_field(self.fields["tenant"], request.tenants)
 
+        # Device type, manufacturer and supplier get buttons to open or add one.
+        add_related_links(self, request)
         add_bootstrap_classes(self)
 
     def clean_is_lentable(self):
