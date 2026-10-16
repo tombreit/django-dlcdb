@@ -150,7 +150,8 @@ def add_related_links(form, request):
 def _preselect(form, name, field, request):
     """Make ``?<field>=<pk>`` the field's initial value, if the select offers that object."""
     pk = request.GET.get(form.add_prefix(name), "")
-    if not pk.isdigit() or not field.queryset.filter(pk=pk).exists():
+    # ASCII digits only: "²" passes isdigit() and fails the query.
+    if not (pk.isascii() and pk.isdigit()) or not field.queryset.filter(pk=pk).exists():
         return
     if isinstance(field, forms.ModelMultipleChoiceField):
         selected = [str(getattr(value, "pk", value)) for value in form.get_initial_for_field(field, name) or []]

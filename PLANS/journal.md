@@ -261,7 +261,7 @@ class JournalHandler(logging.Handler):
 - **`journal_detail`** (`/journal/<pk>/`), read-only and scoped like the list:
   - metadata and `<pre>` body;
   - the subject as a link if `content_object` has `get_absolute_url`, otherwise `object_repr`;
-  - back link via `theme.navigation.index_url`.
+  - back link via `theme.navigation.get_redirect_url`.
 - Templates extend `theme/_index_base.html` (with their own `partialdef`) and
   `theme/_detail_base.html`. Classes only, no template tags. `journal/includes/_level_badge.html`
   has the same structure as `dataexchange/includes/_status_badge.html`.

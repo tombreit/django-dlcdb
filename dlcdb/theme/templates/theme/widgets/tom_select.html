@@ -4,8 +4,10 @@ TomSelectWidget and TomSelectMultipleWidget: Django's own <select>, and with
 ✎ or 👁 opens the selected object, + adds one. ``border`` gives them the
 select's own border colour, so the group reads as one control. theme/assets/js/related-links.js
 points ✎ at the new selection and asks before a link drops unsaved input.
+The group repeats the select's is-invalid: an error message right after the
+group (crispy puts it there) shows only next to an .is-invalid element.
 {% endcomment %}{% if widget.related %}{% with related=widget.related %}
-<div class="input-group" data-related-links>
+<div class="input-group{% if "is-invalid" in widget.attrs.class %} is-invalid{% endif %}" data-related-links>
   {% include "django/forms/widgets/select.html" %}
   {% if related.detail_href_template %}
     {% if related.can_change %}

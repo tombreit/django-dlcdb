@@ -208,6 +208,14 @@ def test_detail_needs_the_view_permission(login, tenant, perms, status):
     assert login(*perms).get(reverse("tenants:detail", args=[tenant.pk])).status_code == status
 
 
+def test_detail_back_and_cancel_lead_to_the_tenant_list(login, tenant):
+    response = login("tenants.view_tenant", "tenants.change_tenant").get(reverse("tenants:detail", args=[tenant.pk]))
+
+    assert response.context["next_url"] == reverse("tenants:index")
+    # The shared detail frame renders an empty href when the view misses next_url.
+    assert 'href=""' not in response.content.decode()
+
+
 def test_detail_is_read_only_without_the_change_permission(login, tenant):
     client = login("tenants.view_tenant")
     url = reverse("tenants:detail", args=[tenant.pk])

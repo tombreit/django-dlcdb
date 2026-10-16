@@ -401,9 +401,6 @@ class LendingDetailViewTests(BaseTest):
         self.lent_record.refresh_from_db()
         self.assertEqual(self.lent_record.room, new_room)
 
-    def test_the_return_screen_has_no_room_select_and_no_buttons(self):
-        self.assertNotContains(self.client.get(self._return_url()), "data-related-links")
-
     def test_edit_flow_return_action_keeps_the_index_filters(self):
         # The filtered list travels as ?next=; the return link must carry it on,
         # so saving the return lands back on the filtered list.

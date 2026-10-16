@@ -127,6 +127,13 @@ class RoomFrontendTests(BaseTest):
 
         self.assertContains(response, "Room “F1.01 (Server room)” already exists.")
 
+    def test_add_room_whose_number_has_the_same_digits_elsewhere(self):
+        # F1.01 exists; F10.1 has the same letters and digits, but is another room.
+        response = self.client.post(reverse("rooms:add"), {"number": "F10.1"})
+
+        room = Room.objects.get(number="F10.1")
+        self.assertRedirects(response, reverse("rooms:detail", args=[room.pk]))
+
     def test_edit_room_returns_to_the_filtered_index(self):
         url = with_next(reverse("rooms:detail", args=[self.plain_room.pk]), f"{self.index_url}?search=F2")
         response = self.client.post(url, {"number": "F2.02", "nickname": "Renamed"})

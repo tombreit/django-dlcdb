@@ -127,6 +127,16 @@ class PersonFrontendTests(TestCase):
         self.assertContains(response, "Already there")
         self.assertContains(response, "Müller, Max")
 
+    def test_a_form_shown_again_for_another_error_lists_similar_persons(self):
+        Person.objects.create(first_name="Ada", last_name="Lovelace", email="ada@example.com")
+
+        response = self.client.post(
+            reverse("persons:add"), {"last_name": "Lovelac", "first_name": "Ada", "email": "not-an-address"}
+        )
+
+        self.assertContains(response, "Similar existing entries")
+        self.assertContains(response, "Lovelace, Ada")
+
     def test_duplicate_name_is_a_form_error_not_a_crash(self):
         response = self.client.post(
             reverse("persons:add"),

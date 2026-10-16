@@ -10,10 +10,10 @@ SPDX-License-Identifier: EUPL-1.2
 The existing entries a new one may duplicate, on an add page (theme/similar.py).
 Renders nothing without them.
 
-An identical entry blocks the save: it is listed in red. Similar ones are listed
-in yellow, with the "Create anyway" tick; its value names the entries listed, so
-a tick never covers a list the user has not seen. "Use this one" leads back to
-the form that opened the add page, with the entry preselected.
+An identical entry blocks the save: it is listed in red. Similar ones are a hint,
+listed in yellow; they do not stop the save. "Use this one" leads back to the
+form whose + opened the add page, with the entry preselected; on an add page
+opened from the list it opens the entry. A deactivated entry has no link.
 
 Params:
   similar  the context from theme.similar.similar_context, or None.
@@ -35,11 +35,5 @@ Params:
         </li>
       {% endfor %}
     </ul>
-    {% if similar.create_anyway %}
-      <div class="form-check mt-3">
-        <input class="form-check-input" type="checkbox" name="create_anyway" value="{{ similar.create_anyway }}" id="id_create_anyway">
-        <label class="form-check-label" for="id_create_anyway">{% translate "Create anyway: mine is another one" %}</label>
-      </div>
-    {% endif %}
   </div>
 {% endif %}

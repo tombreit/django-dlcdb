@@ -14,8 +14,8 @@ accents, punctuation and noise words such as "GmbH" do not count.
   offers the existing entry instead.
 - Similar (a typo: a ``difflib`` ratio of at least ``SIMILARITY``; all words of
   one name among the other's: "Pulse" and "Pulse Secure"; or the start of an
-  existing name: "Pro" and "Procom"): the add page warns, and saves once the
-  user ticks "Create anyway" for exactly the entries listed.
+  existing name: "Pro" and "Procom"): the add page lists them, but saves. A
+  similar name can be another entry, and the user is the judge.
 
 A form declares what to compare as ``similar_names`` and calls
 ``check_similar_names(self)`` from its ``clean()``; the add view renders the
@@ -85,11 +85,25 @@ def words(text, noise_words=frozenset()):
     """
     The words of ``text`` that count in a comparison: case-folded (ß → ss),
     ä/ö/ü → ae/oe/ue, other accents dropped, without punctuation and without
-    ``noise_words``.
+    ``noise_words``, unless the name has no other words ("AG").
     """
     text = unicodedata.normalize("NFC", text).casefold().translate(_UMLAUTS)
     text = "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
-    return [word for word in re.findall(r"[^\W_]+", text) if word not in noise_words]
+    found = re.findall(r"[^\W_]+", text)
+    return [word for word in found if word not in noise_words] or found
+
+
+def _joined(name_words):
+    """
+    The words as one string, so "pro-com" and "Procom" compare alike. Digits
+    that met across a separator stay apart: room F10.1 is not room F1.01.
+    """
+    name = ""
+    for word in name_words:
+        if name[-1:].isdigit() and word[:1].isdigit():
+            name += " "
+        name += word
+    return name
 
 
 def find_similar(model, similar_names, values):
@@ -100,7 +114,7 @@ def find_similar(model, similar_names, values):
     new_words = _name_words(values, similar_names)
     if not new_words:
         return Matches([], [])
-    new_name, new_word_set = "".join(new_words), set(new_words)
+    new_name, new_word_set = _joined(new_words), set(new_words)
 
     # One sequence against many: difflib caches the second one.
     matcher = difflib.SequenceMatcher(autojunk=False)
@@ -110,7 +124,7 @@ def find_similar(model, similar_names, values):
     manager = getattr(model, "with_softdeleted_objects", model._default_manager)
     for obj in manager.all():
         existing_words = _name_words({name: getattr(obj, name) for name in similar_names.fields}, similar_names)
-        existing_name = "".join(existing_words)
+        existing_name = _joined(existing_words)
         if not existing_name:
             continue
         if existing_name == new_name:
@@ -138,8 +152,8 @@ def find_similar(model, similar_names, values):
 def check_similar_names(form):
     """
     From a form's ``clean()``: refuse a new entry with the name of an existing
-    one, and one with a similar name unless the user ticked "Create anyway" for
-    the entries listed. Editing an entry is not checked.
+    one. Similar names do not stop the save; when the form comes back for
+    another error, it lists them. Editing an entry is not checked.
 
     The error goes on the first compared field. A field with an error makes
     Django skip its own unique checks of that field, and with them their
@@ -164,8 +178,6 @@ def check_similar_names(form):
         else:
             message = _("%(model)s “%(name)s” already exists.")
         form.add_error(field_name, message % {"model": model._meta.verbose_name, "name": existing})
-    elif matches.similar and form.data.get("create_anyway") != _create_anyway_value(matches.similar):
-        form.add_error(field_name, _("Similar entries exist, see below. Tick “Create anyway” if yours is another one."))
 
 
 def similar_context(request, matches):
@@ -190,7 +202,6 @@ def similar_context(request, matches):
             }
             for obj in entries
         ],
-        "create_anyway": None if blocked else _create_anyway_value(entries),
     }
 
 
@@ -220,8 +231,8 @@ def add_similar_suggestions(form, request):
 def similar_suggestions(request, form_class):
     """
     The add view's answer to the HTMX request of ``add_similar_suggestions``:
-    the list of the entries similar to the typed name, as a refused save shows
-    it, "Create anyway" included.
+    the entries identical or similar to the typed name, listed as on a refused
+    save.
     """
     similar_names = form_class.similar_names
     matches = None
@@ -234,11 +245,6 @@ def _name_words(values, similar_names):
     """The words of the compared fields in ``values``, a dict by field name."""
     text = " ".join(str(values.get(name) or "") for name in similar_names.fields)
     return words(text, similar_names.noise_words)
-
-
-def _create_anyway_value(entries):
-    """The "Create anyway" tick names the entries it was given for."""
-    return ",".join(sorted(str(obj.pk) for obj in entries))
 
 
 def _is_deactivated(obj):

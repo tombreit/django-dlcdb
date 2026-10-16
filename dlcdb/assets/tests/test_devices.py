@@ -525,7 +525,9 @@ class DeviceFrontendTests(BaseTest):
                 self.assertEqual(form["manufacturer"].value(), str(manufacturer.pk))
                 self.assertEqual(form["supplier"].value(), str(supplier.pk))
                 # The collapsed Procurement section opens to show the supplier.
-                self.assertContains(response, '<details class="card card-filled mb-3" open>', count=1)
+                html = response.content.decode()
+                procurement = html[html.rindex("<details", 0, html.index("bi-receipt")) :]
+                self.assertTrue(procurement[: procurement.index(">")].endswith(" open"))
 
     def test_a_device_opened_directly_returns_to_the_device_list(self):
         response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))

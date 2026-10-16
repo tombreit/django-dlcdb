@@ -8,8 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Adding a device type, manufacturer, supplier, room or person refuses a name that already exists in another spelling (procom, pro-com, Procom) and asks before adding a similar one (Pulse next to Pulse Secure); the matches show while typing
-* Device, recover, lending and licence forms: the device type, manufacturer, supplier, room and subscriber selects get buttons to open the selected entry or add a new one; both lead back to the form, a new entry preselected
+* Add pages refuse a name that already exists in another spelling (procom, pro-com, Procom) and list similar ones while typing
+* Form selects of master data, rooms and persons get buttons to open the selected entry or add a new one, which comes back preselected
 * Device QR codes, record attachments and import files are served only to users who see their tenant
 * Uploaded files require a permission of the pages that show them; person photos, for example, need a persons, device or lending permission
 * Uploaded files under `/media/` require a login (regulation files on lent sheets stay public); remove `Alias /media` and its `<Directory>` block from the Apache configuration, or Apache keeps serving them publicly

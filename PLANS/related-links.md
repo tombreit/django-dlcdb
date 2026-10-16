@@ -6,11 +6,11 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done: the device, recover,
-lending and licence forms have the buttons, and the add pages refuse identical and warn about
-similar entries, on save and while typing. *Open follow-ups* lists what could come next. This is
-a living document: each batch ticks its box under *Progress* and updates this line in the same
-commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done, including the fixes of
+the merge request review (batch 8): the device, recover, lending and licence forms have the
+buttons, and the add pages refuse identical entries and list similar ones while typing. *Open
+follow-ups* lists what could come next. This is a living document: each batch ticks its box under
+*Progress* and updates this line in the same commit.
 
 ## Why
 
@@ -170,7 +170,8 @@ What the admin has, in Django 6.1.1 (`.venv`, `django/contrib/admin/`):
 13. **The add pages check for an existing entry** (user, 2026-10-16). The + makes adding easy,
     and with it adding an entry twice under another spelling. So:
     - a check on save and live suggestions while typing share one matcher;
-    - a name identical after normalization is refused; a similar one needs "Create anyway";
+    - a name identical after normalization is refused; a similar one needs "Create anyway"
+      (dropped in batch 8, user: start small; similar names are only listed);
     - the standard library only (`unicodedata`, `difflib`), no new dependency;
     - all five add pages: manufacturer, supplier, device type, room and person.
 
@@ -485,6 +486,29 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   - short input gives no list.
 - Screenshot check (`/verify`), light and dark: the live list, the warning, the block.
 
+### Batch 8: fixes from the merge request review
+
+The review (2026-10-16) found, and this batch fixes:
+1. **The tenant detail page's Back and Cancel were empty links:** `_detail_base.html` reads
+   `next_url` since batch 1, and `tenants/views.py` still passed `index_url`.
+2. **Other room numbers counted as identical:** joining the words dropped the dot between digits,
+   so F10.1 was F1.01 and 21.1 was 2.11, without an override. Digits that met across a separator
+   now stay apart (`_joined`); "F 1.01", "f1.01", "pro-com" still match.
+3. **`?manufacturer=²` was a 500:** `"²".isdigit()` is true; the preselection now takes ASCII
+   digits only.
+4. **The licence form hid its select errors:** crispy puts the message after the button group,
+   and Bootstrap shows it only next to an `.is-invalid` element. The group repeats the select's
+   `is-invalid`.
+5. **A name of noise words only ("AG") skipped the check,** and Django's technical message came
+   back: `words` keeps the noise words when nothing else is left.
+6. **"Create anyway" is dropped** (user: start small). Similar names no longer stop the save; the
+   add page lists them while typing, and when the form comes back for another error. That also
+   removes the review's finding that a tick was lost after an unrelated error.
+
+Also: AGENTS.md names `register_related_pages`; NEWS lines shortened; the device guide says when
+"Use this one" fills the form; `PLANS/journal.md` no longer names `index_url`; tests that passed
+regardless of the feature are tightened or dropped, and two exact-markup assertions loosened.
+
 ## Progress
 
 - [x] **0. This document**
@@ -495,6 +519,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **5. Licences and persons** (open question 1: (a))
 - [x] **6. The add pages refuse identical and warn about similar entries on save**
 - [x] **7. The add pages suggest similar entries while typing**
+- [x] **8. Fixes from the merge request review**
 
 ## Open questions
 
@@ -541,6 +566,10 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - **"Add “<typed text>”" in TomSelect's empty search result,** opening the add page with the name
   prefilled. Considered for batch 6, not chosen for now.
 - **Reactivating a deactivated match from the frontend.**
+- **Who may see the match lists** (review, 2026-10-16, left open): a user with only the add
+  permission sees the names of existing entries, deactivated persons included, and the "start of
+  a name" rule with a two-letter minimum lets them walk the list. Proposal: the list while typing
+  only with the view permission; deactivated entries count only when identical.
 
 ## Pitfalls
 
@@ -586,8 +615,6 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   there makes Django skip its constraint check and its technical message.
 - **Soft-deleted rows:** the duplicate check queries `with_softdeleted_objects`, because the
   database constraints see them.
-- **The `create_anyway` value is the pks of the listed entries,** so a tick never covers a list
-  the user has not seen.
 
 ## Decided during implementation
 
@@ -647,11 +674,12 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   - **"Use this one" on an add page opened without `next_field`** (from the list) opens the
     entry's detail page, if the user may view it.
   - **The person name is compared as last name, then first name,** the order `str(person)` shows.
-  - **The similar warning names no model** ("Similar entries exist, see below."): the verbose
-    names are capitalized ("Device Type"), which reads oddly in the middle of a sentence.
+  - **`similar_context(request, matches)`** takes no model: it comes from the matched entries.
+  - **The deactivated message reads "%(model)s “%(name)s” exists, but is deactivated."**: the
+    model's verbose name is capitalized ("Device Type"), so it starts the sentence.
   - **New strings to translate:** "%(model)s “%(name)s” already exists.", "%(model)s “%(name)s”
-    exists, but is deactivated.", the similar warning, "Already there:", "Similar existing
-    entries:", "deactivated", "Use this one" and "Create anyway: mine is another one".
+    exists, but is deactivated.", "Already there:", "Similar existing entries:", "deactivated" and
+    "Use this one". The similar warning and the "Create anyway" label went with batch 8.
 - **Batch 7:**
   - **The matcher also counts the start of an existing name as similar** ("Pro" and "Procom").
     Without it, typing lists nothing until a name is nearly complete: "Pro" is neither a typo of
@@ -661,5 +689,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
     (`similar_suggestions`). The inputs ask the page's own URL, which keeps `next` and
     `next_field` for "Use this one", and `hx-sync="this:replace"` drops an answer that a later key
     makes stale.
-  - **The tick goes with the list:** typing on swaps the list and its unticked box in. A tick can
-    therefore only cover the entries on screen; the save check compares its value anyway.
+  - **The tick goes with the list:** typing on swaps the list and its unticked box in. (The tick
+    is gone since batch 8.)
+- **Batch 3, recorded at the review:** the widget template does not carry the select's id; the JS
+  finds the select through `closest('[data-related-links]')`.

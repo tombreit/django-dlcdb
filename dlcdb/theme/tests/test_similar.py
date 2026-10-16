@@ -19,8 +19,10 @@ def test_words_ignore_case_umlauts_accents_punctuation_and_noise_words():
     assert words("Straße") == ["strasse"]
     assert words("Café-Bar") == ["cafe", "bar"]
     assert words("Dell Inc.", COMPANY_NOISE_WORDS) == ["dell"]
-    # Decomposed and composed umlauts are the same letter.
-    assert words("Müller") == words("Müller")
+    # A name of noise words only is still a name.
+    assert words("AG", COMPANY_NOISE_WORDS) == ["ag"]
+    # A decomposed umlaut (u + combining diaeresis) is the composed one.
+    assert words("Mu\u0308ller") == words("M\u00fcller")
 
 
 @pytest.mark.django_db
@@ -72,6 +74,15 @@ def test_room_numbers_match_only_when_identical():
     # being typed.
     assert not find_similar(Room, ROOMS, {"number": "F1.02"})
     assert not find_similar(Room, ROOMS, {"number": "F1.0"})
+    # The same letters and digits in other places make another number.
+    assert not find_similar(Room, ROOMS, {"number": "F10.1"})
+
+
+@pytest.mark.django_db
+def test_digits_that_met_across_a_separator_stay_apart():
+    Manufacturer.objects.create(name="USB 3.0 Hub")
+
+    assert not find_similar(Manufacturer, COMPANIES, {"name": "USB 30 Hub"}).identical
 
 
 @pytest.mark.django_db

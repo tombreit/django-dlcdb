@@ -310,8 +310,8 @@ class LicenseFormRelatedLinksTests(BaseTest):
 
         self.assertContains(response, "<html")
         self.assertContains(response, "data-related-links", count=4)
-        # Cancel is a plain link: the page has no list to swap back in.
-        self.assertContains(response, f'<a class="my-4 btn btn-secondary ms-2" href="{reverse("licenses:index")}">')
+        # Cancel is a plain link: the page has no list to swap an hx-get back into.
+        self.assertNotContains(response, f'hx-get="{reverse("licenses:index")}"')
 
     def test_a_licence_saved_from_its_page_returns_to_the_list(self):
         response = self.client.post(
@@ -341,6 +341,15 @@ class LicenseFormRelatedLinksTests(BaseTest):
         self.assertEqual(
             [str(pk) for pk in form["subscribers"].value()], [str(self.default_subscriber.pk), str(person.pk)]
         )
+
+    def test_an_error_under_a_select_shows(self):
+        response = self.client.post(
+            reverse("licenses:new"), {"series": "Suite", "manufacturer": "999999", "tenant": self._default_tenant().pk}
+        )
+
+        # Crispy puts the message after the button group, which therefore repeats
+        # the select's is-invalid: Bootstrap shows it only next to one.
+        self.assertContains(response, 'class="input-group is-invalid"')
 
     def test_the_edit_form_has_the_buttons_too(self):
         licence = self._create_device(sap_id="LIC-1")

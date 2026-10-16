@@ -134,7 +134,8 @@ def detail(request, pk):
             "import_count": import_count,
             "form": form,
             "can_change": can_change,
-            "index_url": index_url,
+            # Back and Cancel of theme/_detail_base.html.
+            "next_url": index_url,
             "form_action": reverse("tenants:detail", args=[tenant.pk]),
             # PROTECT refuses a tenant with devices or imports, so only offer
             # Delete without them.

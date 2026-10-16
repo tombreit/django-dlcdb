@@ -58,10 +58,11 @@ ausgemusterten Geräts hat dieselben Buttons.
 Beim Anlegen vergleicht die DLCDB den Namen mit den vorhandenen Einträgen, auch
 den deaktivierten, und zeigt die gefundenen schon während des Tippens an. Groß-
 und Kleinschreibung, Umlaute, Satzzeichen und Zusätze wie *GmbH* zählen dabei
-nicht: *pro-com* wird neben *Procom* nicht angelegt. Ein ähnlicher Name (*Pulse*
-neben *Pulse Secure*, ein Tippfehler) wird erst nach Bestätigung angelegt. Ein
-Button neben jedem gefundenen Eintrag übernimmt ihn stattdessen ins
-Geräteformular. Dasselbe gilt für Räume (nur gleiche Nummern) und Personen.
+nicht: *pro-com* wird neben *Procom* nicht angelegt. Ähnliche Namen (*Pulse*
+neben *Pulse Secure*, ein Tippfehler) sind nur ein Hinweis. Kam die Seite über
+das Plus des Geräteformulars, übernimmt ein Button neben jedem gefundenen
+Eintrag ihn stattdessen dorthin; sonst öffnet er den Eintrag. Dasselbe gilt für
+Räume (nur gleiche Nummern) und Personen.
 
 Die Info-Spalte rechts zeigt:
 

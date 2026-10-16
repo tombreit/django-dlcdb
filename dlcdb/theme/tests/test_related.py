@@ -133,7 +133,7 @@ def test_a_multi_select_adds_the_new_object_to_its_selection(superuser, room_1, 
     assert form["rooms"].value() == [str(room_1.pk), str(room_2.pk)]
 
 
-@pytest.mark.parametrize("value", ["999999", "Dell", ""])
+@pytest.mark.parametrize("value", ["999999", "Dell", "", "²"])
 def test_a_pk_the_select_does_not_offer_is_ignored(superuser, dell, value):
     assert _form(superuser, initial={"manufacturer": dell.pk}, manufacturer=value)["manufacturer"].value() == dell.pk
 

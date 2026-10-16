@@ -168,20 +168,20 @@ class MasterdataFrontendTests(BaseTest):
                 self.assertNotContains(response, "Constraint")
                 self.assertContains(response, "alert-danger")
 
-    def test_add_warns_about_a_similar_name_until_the_user_ticks_create_anyway(self):
-        url = reverse("assets:supplier_add")
+    def test_a_similar_name_does_not_stop_the_save(self):
+        # "Example" starts "Example Distribution": a hint while typing, no obstacle.
+        response = self.client.post(reverse("assets:supplier_add"), {"name": "Example"})
 
-        response = self.client.post(url, {"name": "Example"})
-        self.assertContains(response, "Similar existing entries")
-        self.assertContains(response, f'name="create_anyway" value="{self.supplier.pk}"')
-
-        # A tick given for another list of entries does not count.
-        self.client.post(url, {"name": "Example", "create_anyway": "999999"})
-        self.assertFalse(Supplier.objects.filter(name="Example").exists())
-
-        response = self.client.post(url, {"name": "Example", "create_anyway": str(self.supplier.pk)})
         supplier = Supplier.objects.get(name="Example")
         self.assertRedirects(response, reverse("assets:supplier_detail", args=[supplier.pk]))
+
+    def test_a_name_of_noise_words_only_is_compared_too(self):
+        Manufacturer.objects.create(name="AG")
+
+        response = self.client.post(reverse("assets:manufacturer_add"), {"name": "ag"})
+
+        self.assertContains(response, "Manufacturer “AG” already exists.")
+        self.assertNotContains(response, "Constraint")
 
     def test_use_this_one_returns_to_the_form_with_the_existing_entry(self):
         response = self.client.post(self._add_url("assets:manufacturer_add"), {"name": "example computers"})
@@ -201,7 +201,6 @@ class MasterdataFrontendTests(BaseTest):
 
         self.assertNotContains(response, "<html")
         self.assertContains(response, "Similar existing entries")
-        self.assertContains(response, f'name="create_anyway" value="{self.supplier.pk}"')
         # "Use this one" returns to the device form with this supplier instead.
         use_url = f"/assets/devices/7/?next=/assets/devices/&supplier={self.supplier.pk}"
         self.assertContains(response, f'href="{escape(use_url)}"')
@@ -209,6 +208,9 @@ class MasterdataFrontendTests(BaseTest):
     def test_typing_lists_nothing_below_two_letters(self):
         response = self.client.get(f"{reverse('assets:supplier_add')}?name=E", headers={"HX-Request": "true"})
 
+        # The answer to the typing, not the page, and empty.
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "<html")
         self.assertNotContains(response, "alert")
 
     def test_the_name_input_asks_its_own_page_for_suggestions(self):
