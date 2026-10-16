@@ -73,8 +73,6 @@ def person_index(request):
 @htmx_permission_required("core.add_person")
 def person_add(request):
     """Create a DLCDB-owned person and attach the audit information."""
-    # The page that opened this one (a form's + button, say) comes as ?next=:
-    # saving returns there with the new person, Cancel without them.
     if request.htmx:
         # The name being typed: list the similar existing persons.
         return similar_suggestions(request, PersonForm)
@@ -85,6 +83,8 @@ def person_add(request):
         person.stamp_user(request.user)
         person.save()
         messages.success(request, _("Person “%(person)s” was created.") % {"person": person})
+        # The page that opened this one (a form's + button, say) comes as ?next=:
+        # return there with the new person. Cancel leads there without them.
         return redirect(get_redirect_url_after_add(request, person.pk) or reverse("persons:detail", args=[person.pk]))
 
     return TemplateResponse(

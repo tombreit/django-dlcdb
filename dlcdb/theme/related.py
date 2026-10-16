@@ -153,8 +153,9 @@ def _preselect(form, name, field, request):
     # ASCII digits only: "²" passes isdigit() and fails the query.
     if not (pk.isascii() and pk.isdigit()) or not field.queryset.filter(pk=pk).exists():
         return
+    value = pk
     if isinstance(field, forms.ModelMultipleChoiceField):
-        selected = [str(getattr(value, "pk", value)) for value in form.get_initial_for_field(field, name) or []]
-        pk = selected if pk in selected else [*selected, pk]
+        selected = [str(getattr(initial, "pk", initial)) for initial in form.get_initial_for_field(field, name) or []]
+        value = selected if pk in selected else [*selected, pk]
     # A new dict: ``form.initial`` may be the caller's own.
-    form.initial = {**form.initial, name: pk}
+    form.initial = {**form.initial, name: value}

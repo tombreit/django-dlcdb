@@ -23,6 +23,7 @@ Name and meaning are Django's own: ``next`` is what the login and
 Pure functions, no template tag — the same convention as ``theme.pagination``.
 """
 
+import re
 from urllib.parse import urlsplit, urlunsplit
 
 from django.http import HttpRequest, QueryDict
@@ -56,12 +57,13 @@ def get_redirect_url_after_add(request: HttpRequest, pk) -> str:
     ``<next_field>=<pk>``, replacing an earlier value of that parameter.
 
     ``next_field`` is the HTML name of the select whose + button opened the add
-    page. Without one, or with one that is not a plain field name, this is just
-    ``get_redirect_url(request)``; without a safe ``next`` it is ``""`` too.
+    page, prefix included (``p-room``). Without one, or with one that is no HTML
+    field name, this is just ``get_redirect_url(request)``; without a safe
+    ``next`` it is ``""`` too.
     """
     redirect_to = get_redirect_url(request)
     field_name = request.POST.get("next_field", request.GET.get("next_field", ""))
-    if not redirect_to or not field_name.isidentifier():
+    if not redirect_to or not re.fullmatch(r"[A-Za-z0-9_-]+", field_name):
         return redirect_to
     return _with_parameter(redirect_to, field_name, str(pk))
 

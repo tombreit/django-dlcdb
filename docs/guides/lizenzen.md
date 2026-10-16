@@ -21,11 +21,12 @@
 Abonnenten sind [Personen](erste_schritte.md#7-personen-anlegen) mit Email-Adresse. Sie werden über Zustände der Lizenz – z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* – per Email benachrichtigt (siehe [Notifications](notifications.md)). Standard-Abonnenten für alle neuen Lizenzen stehen in der *Lizenzmodul Konfiguration*.
 
 Fehlt eine Person, legt das Plus neben dem Feld sie an; zurück im
-Lizenz-Formular ist sie den übrigen Abonnenten hinzugefügt. Ebenso haben
-*Hersteller*, *Distributor* und *Typ* Buttons zum Öffnen oder Anlegen eines
-Eintrags, wie auf der [Geräte-Detailseite](devices.md). Ein
-neuer Typ erscheint nur dann zur Auswahl, wenn sein Name mit `Lizenz::`,
-`License::` oder `Licence::` beginnt.
+Lizenz-Formular ist sie zu den gespeicherten Abonnenten hinzugefügt (bei einer
+neuen Lizenz: zu den Standard-Abonnenten). Vor dem nächsten Plus speichern:
+sonst ersetzt die nächste neue Person die vorige. Ebenso haben *Hersteller*,
+*Distributor* und *Typ* Buttons zum Öffnen oder Anlegen eines Eintrags, wie auf
+der [Geräte-Detailseite](devices.md). Ein neuer Typ erscheint nur dann zur
+Auswahl, wenn sein Name mit `Lizenz::`, `License::` oder `Licence::` beginnt.
 
 ## Definitionen
 

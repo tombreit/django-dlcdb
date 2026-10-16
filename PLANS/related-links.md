@@ -7,7 +7,7 @@ SPDX-License-Identifier: CC0-1.0
 # Related links: open or add the object a select points to
 
 **Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done, including the fixes of
-the merge request review (batch 8): the device, recover, lending and licence forms have the
+the merge request review (batches 8–9): the device, recover, lending and licence forms have the
 buttons, and the add pages refuse identical entries and list similar ones while typing. *Open
 follow-ups* lists what could come next. This is a living document: each batch ticks its box under
 *Progress* and updates this line in the same commit.
@@ -509,6 +509,18 @@ Also: AGENTS.md names `register_related_pages`; NEWS lines shortened; the device
 "Use this one" fills the form; `PLANS/journal.md` no longer names `index_url`; tests that passed
 regardless of the feature are tightened or dropped, and two exact-markup assertions loosened.
 
+### Batch 9: the review's nits
+
+- The "?next=" comment of the add views sits at the redirect it describes, not above the HTMX
+  branch.
+- Clearer names: `partial` in the matcher (it also covers the start of a name), `value` for the
+  preselected value of `_preselect`.
+- The licence guide says when a new subscriber is kept: saved and default subscribers stay, an
+  unsaved earlier pick is replaced.
+- Prefixed forms keep the new object on the way back: `next_field` takes any HTML field name
+  (`p-room`), not only identifiers. The live suggestions read unprefixed names, since the add
+  forms have none; `add_similar_suggestions` no longer pretends otherwise.
+
 ## Progress
 
 - [x] **0. This document**
@@ -520,6 +532,7 @@ regardless of the feature are tightened or dropped, and two exact-markup asserti
 - [x] **6. The add pages refuse identical and warn about similar entries on save**
 - [x] **7. The add pages suggest similar entries while typing**
 - [x] **8. Fixes from the merge request review**
+- [x] **9. The review's nits**
 
 ## Open questions
 

@@ -147,8 +147,6 @@ def _masterdata_index(request, spec):
 
 
 def _masterdata_add(request, spec):
-    # The page that opened this one (a form's + button, say) comes as ?next=:
-    # saving returns there with the new object, Cancel without it.
     if request.htmx:
         # The name being typed: list the similar existing entries.
         return similar_suggestions(request, spec.form_class)
@@ -163,6 +161,8 @@ def _masterdata_add(request, spec):
             request,
             _("%(model)s “%(obj)s” was created.") % {"model": spec.model._meta.verbose_name, "obj": obj},
         )
+        # The page that opened this one (a form's + button, say) comes as ?next=:
+        # return there with the new object. Cancel leads there without it.
         return redirect(get_redirect_url_after_add(request, obj.pk) or reverse(spec.detail_url, args=[obj.pk]))
 
     return TemplateResponse(

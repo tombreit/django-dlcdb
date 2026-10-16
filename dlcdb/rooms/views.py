@@ -117,8 +117,6 @@ def room_index(request):
 @htmx_permission_required("core.add_room")
 def room_add(request):
     """Create a room and attach its audit information to the current user."""
-    # The page that opened this one (a form's + button, say) comes as ?next=:
-    # saving returns there with the new room, Cancel without it.
     if request.htmx:
         # The number being typed: list the existing room with that number.
         return similar_suggestions(request, RoomForm)
@@ -131,6 +129,8 @@ def room_add(request):
         # auto-return/external room invariants.
         room.save()
         messages.success(request, _("Room “%(room)s” was created.") % {"room": room})
+        # The page that opened this one (a form's + button, say) comes as ?next=:
+        # return there with the new room. Cancel leads there without it.
         return redirect(get_redirect_url_after_add(request, room.pk) or reverse("rooms:detail", args=[room.pk]))
 
     return TemplateResponse(

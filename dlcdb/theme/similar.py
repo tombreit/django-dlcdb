@@ -136,13 +136,13 @@ def find_similar(model, similar_names, values):
         existing_word_set = set(existing_words)
         # All words of one among the other's, or the start of an existing name:
         # what a name being typed looks like.
-        contained = (
+        partial = (
             new_word_set <= existing_word_set or existing_word_set <= new_word_set or existing_name.startswith(new_name)
         )
         # The quick ratios are upper bounds of the real one, as in difflib.get_close_matches.
-        if contained or (matcher.real_quick_ratio() >= SIMILARITY and matcher.quick_ratio() >= SIMILARITY):
+        if partial or (matcher.real_quick_ratio() >= SIMILARITY and matcher.quick_ratio() >= SIMILARITY):
             ratio = matcher.ratio()
-            if contained or ratio >= SIMILARITY:
+            if partial or ratio >= SIMILARITY:
                 similar.append((ratio, obj))
 
     similar.sort(key=lambda match: match[0], reverse=True)
@@ -210,11 +210,11 @@ def add_similar_suggestions(form, request):
     Let the add page list the similar entries while the user types: each
     compared field asks this page for them, a moment after the last key, and
     sends the other compared fields along. The add view answers with
-    ``similar_suggestions``; the list goes where a refused save shows it
-    (``#similar-names``).
+    ``similar_suggestions``, which reads them by field name: the add forms have
+    no prefix. The list goes where a refused save shows it (``#similar-names``).
     """
-    names = [form.add_prefix(name) for name in form.similar_names.fields]
-    for name, field_name in zip(names, form.similar_names.fields, strict=True):
+    names = form.similar_names.fields
+    for name in names:
         attrs = {
             # The page's own URL: it keeps ?next= and ?next_field= for "Use this one".
             "hx-get": request.get_full_path(),
@@ -225,7 +225,7 @@ def add_similar_suggestions(form, request):
         others = [f"[name='{other}']" for other in names if other != name]
         if others:
             attrs["hx-include"] = ", ".join(others)
-        form.fields[field_name].widget.attrs.update(attrs)
+        form.fields[name].widget.attrs.update(attrs)
 
 
 def similar_suggestions(request, form_class):

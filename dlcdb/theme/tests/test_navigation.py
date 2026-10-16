@@ -51,9 +51,15 @@ def test_after_an_add_next_gets_the_new_pk_under_next_field():
     )
 
 
-@pytest.mark.parametrize("next_field", ["", "manu facturer", "1st", "next-field"])
+@pytest.mark.parametrize("next_field", ["", "manu facturer", "a&b", "x=y"])
 def test_after_an_add_a_missing_or_odd_next_field_leaves_next_alone(next_field):
     assert get_redirect_url_after_add(_get(next=LIST_URL, next_field=next_field), 42) == LIST_URL
+
+
+def test_after_an_add_the_field_of_a_prefixed_form_gets_the_new_pk():
+    request = _get(next="/assets/devices/7/state/recover/", next_field="p-room")
+
+    assert get_redirect_url_after_add(request, 42) == "/assets/devices/7/state/recover/?p-room=42"
 
 
 def test_after_an_add_without_a_safe_next_there_is_no_url():
