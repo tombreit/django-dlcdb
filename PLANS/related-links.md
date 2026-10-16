@@ -6,10 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done. The device, recover,
-lending and licence forms have the buttons; *Open follow-ups* lists what could come next. This is a
-living document: each batch ticks its box under *Progress* and updates this line in the same
-commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–5 done: the device, recover,
+lending and licence forms have the buttons. Batches 6–7 (a duplicate check on the add pages) were
+planned 2026-10-16. This is a living document: each batch ticks its box under *Progress* and
+updates this line in the same commit.
 
 ## Why
 
@@ -166,6 +166,12 @@ What the admin has, in Django 6.1.1 (`.venv`, `django/contrib/admin/`):
     selects. Their cards already link to the detail page.
 12. **One return parameter, `next`** (user, 2026-10-16): always a local URL, as in Django;
     `?back=` and the query-string `?next=` go (batch 1).
+13. **The add pages check for an existing entry** (user, 2026-10-16). The + makes adding easy,
+    and with it adding an entry twice under another spelling. So:
+    - a check on save and live suggestions while typing share one matcher;
+    - a name identical after normalization is refused; a similar one needs "Create anyway";
+    - the standard library only (`unicodedata`, `difflib`), no new dependency;
+    - all five add pages: manufacturer, supplier, device type, room and person.
 
 ## Plan
 
@@ -378,6 +384,106 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - `licenses:new` answers only HTMX requests (`NotImplementedError` otherwise), so the way back
   would land on the licence list instead of the form. See open question 1.
 
+### Batch 6: the add pages refuse identical and warn about similar entries on save
+
+**Findings** (2026-10-16):
+- **Only exact or case-insensitive checks, inconsistently:**
+  - Manufacturer: a `Lower("name")` constraint, whose violation shows Django's technical
+    "Constraint … is violated";
+  - Supplier: exact `unique` only, so procom ≠ Procom;
+  - DeviceType: nothing;
+  - Room: exact `number`;
+  - Person: a `Lower(first_name, last_name)` constraint, with the same technical message.
+- **Two bugs:**
+  - soft-deleted rows pass the form check, because Django checks through the default manager,
+    and then crash at the database: a 500 (room number, person name);
+  - SQLite's `LOWER()` and `LIKE` fold ASCII only, so Kärcher ≠ KÄRCHER.
+- **The data is small:** in production 281 manufacturers, 86 suppliers, 74 device types, 300 rooms
+  and 928 persons. SQLite only, so no trigram search, but comparing in Python against every row is
+  cheap.
+- **Production already has duplicates:** Procom / procom / pro-com, Pulse / Pulse Secure,
+  Ibm / Ibm Spss.
+
+**Steps:**
+- **`theme/similar.py`,** one module for both layers. It is frontend form behaviour, not a model
+  rule, so it lives in `theme`, like `theme/forms.py`.
+- **`SimilarNames(fields, noise_words=frozenset(), fuzzy=True)`,** a frozen dataclass declared as
+  `similar_names` on each add form; the model comes from `form._meta.model`:
+  - `ManufacturerForm`, `SupplierForm`: `("name",)` with `COMPANY_NOISE_WORDS` (gmbh, ag, kg, co,
+    inc, ltd, llc, corp, corporation, se, sa, bv, plc, group);
+  - `DeviceTypeForm`: `("name",)`. The prefix is not checked: `LIC` is shared by five licence
+    types;
+  - `RoomForm`: `("number",)`, `fuzzy=False`, because neighbouring rooms (F1.01, F1.02) look
+    alike. Nicknames repeat legitimately (Flur ×5) and are not checked;
+  - `PersonForm`: `("first_name", "last_name")`. UDB-synced persons fill these too
+    (`udb_sync.py:483`). E-mail stays Django's exact `unique` check.
+- **`find_similar(model, similar_names, values) -> Matches(identical, similar)`** checks every row
+  of `with_softdeleted_objects` (else `_default_manager`), compared in Python:
+  - **normalization:** `casefold()` (ß → ss), then ä/ö/ü → ae/oe/ue, NFKD with combining marks
+    dropped (é → e); words are `[^\W_]+`, minus the noise words;
+  - **identical:** the joined words are equal. pro-com = Procom, KÄRCHER = Kärcher,
+    Mueller = Müller, F 1.01 = f1.01;
+  - **similar** (only with `fuzzy`): the `difflib.SequenceMatcher` ratio of the joined words is
+    ≥ 0.8 (Lenvoo / Lenovo, Meier / Maier), prefiltered with `real_quick_ratio()` and
+    `quick_ratio()` as `difflib.get_close_matches` does; or all words of one name are among the
+    other's (Pulse / Pulse Secure, Max Meier / Max Peter Meier);
+  - at most 5, identical first, then by ratio.
+- **`check_similar_names(form)`,** called from each form's `clean()`, on add only
+  (`form.instance.pk is None`):
+  - **identical:** an error on the first configured field, "Manufacturer “Procom” already
+    exists." or "A deactivated room “F1.01” exists." Because that field has an error, Django skips
+    its own constraint check, so the technical message is gone. Soft-deleted rows count, so the
+    500 is gone too;
+  - **similar:** an error "Similar manufacturers exist, see below." unless `create_anyway` in the
+    form data equals the similar entries' pks, comma-joined. A tick given for an older list asks
+    again;
+  - stores `form.similar_matches`.
+- **`similar_context(request, model, matches)`** prepares the template's entries: label
+  (`str(obj)`), deactivated or not, and the "Use this one" URL:
+  - with `next_field` (the add page was opened by a select's +):
+    `get_redirect_url_after_add(request, pk)`, back to that form with this entry preselected;
+  - otherwise the detail page from the related-pages registry, if the user may view it;
+  - a deactivated entry gets no link: neither the select nor the detail page shows it.
+- **`theme/templates/theme/includes/_similar.html`:** identical entries in an `alert-danger`,
+  similar ones in an `alert-warning` with the `create_anyway` checkbox, each with "Use this one".
+- **The add templates** (`assets/masterdata/form.html`, `rooms/form.html`, `persons/form.html`)
+  get `<div id="similar-names">` with that template above the action bar. The add views
+  (`_masterdata_add`, `room_add`, `person_add`) pass `similar`.
+- **Docs:** one NEWS line, and one sentence in `docs/guides/devices.md` after the + paragraph.
+- **Tests:**
+  - `theme/tests/test_similar.py`, on the production-like examples:
+    - identical: Procom / procom / pro-com, KÄRCHER / Kärcher, Müller / Mueller, F1.01 / F 1.01,
+      Dell Inc. / Dell;
+    - similar: Pulse / Pulse Secure, Lenovo / Lenvoo;
+    - unrelated: Dell / Apple; rooms with fuzzy off: F1.01 / F1.02;
+    - a soft-deleted identical row counts;
+  - the add pages (`assets/tests/test_masterdata.py`, `rooms/tests/test_rooms.py`,
+    `persons/tests/test_persons.py`):
+    - procom is refused with a field error, and no "Constraint" text appears;
+    - Pulse warns; the matching tick saves; a stale tick warns again;
+    - a deactivated room number gives a form error, not a 500;
+    - a Müller / Mueller person is refused;
+  - "Use this one", opened from the device form's +, returns to the device form with the
+    existing manufacturer preselected.
+
+### Batch 7: the add pages suggest similar entries while typing
+
+- The add views answer an HTMX GET with batch 6's template: `find_similar` over the typed values
+  from `request.GET`. One matcher, one template, for both layers.
+- `add_similar_suggestions(form, request)`, called by the add views, sets on the configured
+  fields' widgets:
+  - `hx-get` = `request.get_full_path()`, which keeps `next` and `next_field`;
+  - `hx-trigger="input changed delay:300ms"`;
+  - `hx-target="#similar-names"`;
+  - `hx-include` for the other configured fields (persons).
+- There are no suggestions below 2 normalized characters.
+- The checkbox renders in the live list too, so ticking it before saving works.
+- Tests:
+  - an HTMX GET on an add page returns the list, and "Use this one" carries `next_field` and the
+    pk;
+  - short input gives no list.
+- Screenshot check (`/verify`), light and dark: the live list, the warning, the block.
+
 ## Progress
 
 - [x] **0. This document**
@@ -386,6 +492,8 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **3. The mechanism, the device form and the recover form**
 - [x] **4. Lending**
 - [x] **5. Licences and persons** (open question 1: (a))
+- [ ] **6. The add pages refuse identical and warn about similar entries on save**
+- [ ] **7. The add pages suggest similar entries while typing**
 
 ## Open questions
 
@@ -425,6 +533,13 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - **Every link that opens a detail page passes `next`.** This covers the dashboard search, the
   related lists on the room and person pages, and the device page's state-change links, so that
   a state change returns to the device page with its own `next`.
+- **The duplicate check on renames** on the detail pages (batch 6 checks adds only): only when the
+  name changes, and excluding the entry itself.
+- **A merge tool for existing duplicates** (Procom / procom / pro-com).
+  `udb_sync._merge_duplicate` shows how: it moves the reverse relations, then deletes.
+- **"Add “<typed text>”" in TomSelect's empty search result,** opening the add page with the name
+  prefilled. Considered for batch 6, not chosen for now.
+- **Reactivating a deactivated match from the frontend.**
 
 ## Pitfalls
 
@@ -464,6 +579,14 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   `overflow: hidden` box, or the dropdown gets clipped.
 - **Translations:** button titles use `blocktranslate` with the model's `verbose_name`, which is
   lazy-translated since the visual polish. Don't run `makemessages`.
+- **Duplicate check: no `iexact` or `Lower()` on SQLite.** They fold ASCII only; compare in
+  Python.
+- **The duplicate check runs in `clean()`, not after `is_valid()`.** Only a field error raised
+  there makes Django skip its constraint check and its technical message.
+- **Soft-deleted rows:** the duplicate check queries `with_softdeleted_objects`, because the
+  database constraints see them.
+- **The `create_anyway` value is the pks of the listed entries,** so a tick never covers a list
+  the user has not seen.
 
 ## Decided during implementation
 
