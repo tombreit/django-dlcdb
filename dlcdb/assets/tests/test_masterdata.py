@@ -7,6 +7,7 @@
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
+from django.utils.html import escape
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.tests.basetest import BaseTest
@@ -109,6 +110,47 @@ class MasterdataFrontendTests(BaseTest):
         )
         self.assertContains(response, "EDV-1")
         self.assertNotContains(response, "EDV-NO-SUPPLIER")
+
+    # The device form that opened the add page, with its own way back and an
+    # earlier pick in another select.
+    OPENER = "/assets/devices/7/?next=/assets/devices/&supplier=3"
+
+    def _add_url(self, url_name, next_url=OPENER, next_field="manufacturer"):
+        return f"{with_next(reverse(url_name), next_url)}&next_field={next_field}"
+
+    def test_add_returns_to_the_form_that_opened_it_with_the_new_object(self):
+        response = self.client.post(self._add_url("assets:manufacturer_add"), {"name": "Dell"})
+
+        manufacturer = Manufacturer.objects.get(name="Dell")
+        self.assertRedirects(response, f"{self.OPENER}&manufacturer={manufacturer.pk}", fetch_redirect_response=False)
+
+    def test_add_replaces_an_earlier_pick_of_the_same_select(self):
+        response = self.client.post(self._add_url("assets:supplier_add", next_field="supplier"), {"name": "Acme"})
+
+        supplier = Supplier.objects.get(name="Acme")
+        self.assertRedirects(
+            response, f"/assets/devices/7/?next=/assets/devices/&supplier={supplier.pk}", fetch_redirect_response=False
+        )
+
+    def test_add_page_cancels_to_the_form_that_opened_it(self):
+        response = self.client.get(self._add_url("assets:device_type_add"))
+
+        self.assertContains(response, f'href="{escape(self.OPENER)}"', count=2)  # header and action bar
+
+    def test_add_without_a_safe_next_opens_the_new_object(self):
+        response = self.client.post(
+            self._add_url("assets:manufacturer_add", next_url="https://evil.example/"), {"name": "Dell"}
+        )
+
+        manufacturer = Manufacturer.objects.get(name="Dell")
+        self.assertRedirects(response, reverse("assets:manufacturer_detail", args=[manufacturer.pk]))
+
+    def test_add_with_an_odd_next_field_returns_without_the_new_object(self):
+        response = self.client.post(
+            self._add_url("assets:manufacturer_add", next_field="manu%20facturer"), {"name": "Dell"}
+        )
+
+        self.assertRedirects(response, self.OPENER, fetch_redirect_response=False)
 
     def test_create_manufacturer_requires_a_name(self):
         response = self.client.post(reverse("assets:manufacturer_add"), {"name": "", "note": "nameless"})

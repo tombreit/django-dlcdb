@@ -6,9 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batch 1 done (one `?next=`), the
-buttons themselves not yet. This is a living document: each batch ticks its box under *Progress*
-and updates this line in the same commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–2 done (one `?next=`, add
+pages return with the new object), the buttons themselves not yet. This is a living document:
+each batch ticks its box under *Progress* and updates this line in the same commit.
 
 ## Why
 
@@ -269,7 +269,7 @@ afterwards", and the older one uses Django's name for something else:
 
 Detail pages already return to `next` (batch 1). Add pages don't yet.
 
-- `theme/navigation.py`: a new `with_next_value(request, pk)` (name tbd):
+- `theme/navigation.py`: a new `get_redirect_url_after_add(request, pk)`:
   - it returns `get_redirect_url(request)` with `<next_field>=<pk>` set, replacing an earlier
     value of that parameter;
   - without a safe `next` it returns `""`, so callers write `… or reverse(…)`;
@@ -381,7 +381,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 
 - [x] **0. This document**
 - [x] **1. One `next` parameter, a local URL, as in Django**
-- [ ] **2. Add pages return with the new object**
+- [x] **2. Add pages return with the new object**
 - [ ] **3. The mechanism, the device form and the recover form**
 - [ ] **4. Lending**
 - [ ] **5. Licences and persons** (open question 1)
@@ -466,4 +466,8 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 
 ## Decided during implementation
 
-Nothing yet.
+- **Batch 2:** the helper is `get_redirect_url_after_add(request, pk)`. Like `next`, it reads
+  `next_field` from POST before GET. The new pk *replaces* an earlier value of `<next_field>`, as
+  planned. On a multi-select (the licence subscribers, batch 5), a second + therefore keeps only
+  the newest unsaved pick; the earlier one is in the select and can be picked again. Appending
+  instead would make a single select carry two values.

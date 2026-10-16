@@ -23,7 +23,7 @@ from django.utils.translation import gettext_lazy
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
-from dlcdb.theme.navigation import detail_urls
+from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
 
 from ..filters import DeviceTypeFilter, ManufacturerFilter, SupplierFilter
@@ -146,6 +146,8 @@ def _masterdata_index(request, spec):
 
 
 def _masterdata_add(request, spec):
+    # The page that opened this one (a form's + button, say) comes as ?next=:
+    # saving returns there with the new object, Cancel without it.
     form = spec.form_class(request.POST or None)
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
@@ -156,7 +158,7 @@ def _masterdata_add(request, spec):
             request,
             _("%(model)s “%(obj)s” was created.") % {"model": spec.model._meta.verbose_name, "obj": obj},
         )
-        return redirect(spec.detail_url, pk=obj.pk)
+        return redirect(get_redirect_url_after_add(request, obj.pk) or reverse(spec.detail_url, args=[obj.pk]))
 
     return TemplateResponse(
         request,
@@ -167,7 +169,7 @@ def _masterdata_add(request, spec):
             "submit_label": spec.submit_label,
             "heading": spec.heading,
             "icon": spec.icon,
-            "index_url": reverse(spec.index_url),
+            "next_url": get_redirect_url(request) or reverse(spec.index_url),
         },
     )
 

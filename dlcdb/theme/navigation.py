@@ -11,6 +11,10 @@ detail page return to exactly that list; the inventory search passes itself to
 a device's state change. In a template:
 ``?next={{ request.get_full_path|urlencode }}``.
 
+An add page can also hand the new object back: with ``?next_field=<name>``,
+saving returns to ``next`` with ``<name>=<new pk>`` set, for the form there to
+preselect (``get_redirect_url_after_add``).
+
 Name and meaning are Django's own: ``next`` is what the login and
 ``set_language`` read (``django.contrib.auth.REDIRECT_FIELD_NAME``), and
 ``get_redirect_url`` is the function form of Django's
@@ -46,17 +50,38 @@ def get_redirect_url(request: HttpRequest) -> str:
     return redirect_to if url_is_safe else ""
 
 
+def get_redirect_url_after_add(request: HttpRequest, pk) -> str:
+    """
+    Return ``get_redirect_url(request)`` with the new object's pk set as
+    ``<next_field>=<pk>``, replacing an earlier value of that parameter.
+
+    ``next_field`` is the HTML name of the select whose + button opened the add
+    page. Without one, or with one that is not a plain field name, this is just
+    ``get_redirect_url(request)``; without a safe ``next`` it is ``""`` too.
+    """
+    redirect_to = get_redirect_url(request)
+    field_name = request.POST.get("next_field", request.GET.get("next_field", ""))
+    if not redirect_to or not field_name.isidentifier():
+        return redirect_to
+    return _with_parameter(redirect_to, field_name, str(pk))
+
+
 def with_next(url: str, redirect_to: str | None) -> str:
     """
     Return ``url`` with ``next=<redirect_to>`` added to its query string, or
-    unchanged without ``redirect_to``. Encoded like Django's
-    ``redirect_to_login``, which keeps the slashes readable.
+    unchanged without ``redirect_to``.
     """
-    if not redirect_to:
-        return url
+    return _with_parameter(url, "next", redirect_to) if redirect_to else url
+
+
+def _with_parameter(url: str, name: str, value: str) -> str:
+    """
+    Return ``url`` with ``name=value`` set in its query string. Encoded like
+    Django's ``redirect_to_login``, which keeps the slashes readable.
+    """
     parts = urlsplit(url)
     query = QueryDict(parts.query, mutable=True)
-    query["next"] = redirect_to
+    query[name] = value
     return urlunsplit(parts._replace(query=query.urlencode(safe="/")))
 
 

@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
+from django.utils.html import escape
 
 from dlcdb.core.models import InRoomRecord, LentRecord, LostRecord, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
@@ -99,6 +100,16 @@ class RoomFrontendTests(BaseTest):
         self.assertRedirects(response, reverse("rooms:detail", args=[room.pk]))
         self.assertEqual(room.user, self.user)
         self.assertTrue(room.qrcode)
+
+    def test_add_room_returns_to_the_form_that_opened_it_with_the_new_room(self):
+        opener = "/assets/devices/7/state/recover/?next=/inventory/devices/"
+        url = f"{with_next(reverse('rooms:add'), opener)}&next_field=room"
+
+        self.assertContains(self.client.get(url), f'href="{escape(opener)}"', count=2)  # Cancel, twice
+        response = self.client.post(url, {"number": "F3.04"})
+
+        room = Room.objects.get(number="F3.04")
+        self.assertRedirects(response, f"{opener}&room={room.pk}", fetch_redirect_response=False)
 
     def test_edit_room_returns_to_the_filtered_index(self):
         url = with_next(reverse("rooms:detail", args=[self.plain_room.pk]), f"{self.index_url}?search=F2")

@@ -8,7 +8,7 @@ import pytest
 from django.test import RequestFactory
 from django.urls import reverse
 
-from dlcdb.theme.navigation import detail_urls, get_redirect_url, with_next
+from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add, with_next
 
 LIST_URL = "/rooms/?search=F2&page=2"
 
@@ -40,6 +40,24 @@ def test_get_redirect_url_prefers_post_over_get_as_django_does():
 )
 def test_get_redirect_url_ignores_anything_but_a_path_on_this_host(value):
     assert get_redirect_url(_get(next=value)) == ""
+
+
+def test_after_an_add_next_gets_the_new_pk_under_next_field():
+    request = _get(next="/assets/devices/7/?next=/assets/devices/&manufacturer=1&supplier=3", next_field="manufacturer")
+
+    # The new pk replaces the earlier one in place; the rest stays.
+    assert (
+        get_redirect_url_after_add(request, 42) == "/assets/devices/7/?next=/assets/devices/&manufacturer=42&supplier=3"
+    )
+
+
+@pytest.mark.parametrize("next_field", ["", "manu facturer", "1st", "next-field"])
+def test_after_an_add_a_missing_or_odd_next_field_leaves_next_alone(next_field):
+    assert get_redirect_url_after_add(_get(next=LIST_URL, next_field=next_field), 42) == LIST_URL
+
+
+def test_after_an_add_without_a_safe_next_there_is_no_url():
+    assert get_redirect_url_after_add(_get(next="https://evil.example/", next_field="room"), 42) == ""
 
 
 def test_with_next_keeps_slashes_readable_and_encodes_the_query():

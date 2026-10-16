@@ -12,6 +12,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
@@ -22,7 +23,7 @@ from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_m
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
-from dlcdb.theme.navigation import detail_urls
+from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
 
 from .filters import RoomFilter
@@ -115,6 +116,8 @@ def room_index(request):
 @htmx_permission_required("core.add_room")
 def room_add(request):
     """Create a room and attach its audit information to the current user."""
+    # The page that opened this one (a form's + button, say) comes as ?next=:
+    # saving returns there with the new room, Cancel without it.
     form = RoomForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         room = form.save(commit=False)
@@ -123,12 +126,17 @@ def room_add(request):
         # auto-return/external room invariants.
         room.save()
         messages.success(request, _("Room “%(room)s” was created.") % {"room": room})
-        return redirect("rooms:detail", pk=room.pk)
+        return redirect(get_redirect_url_after_add(request, room.pk) or reverse("rooms:detail", args=[room.pk]))
 
     return TemplateResponse(
         request,
         "rooms/form.html",
-        {"form": form, "title": _("Add room"), "submit_label": _("Create room")},
+        {
+            "form": form,
+            "title": _("Add room"),
+            "submit_label": _("Create room"),
+            "next_url": get_redirect_url(request) or reverse("rooms:index"),
+        },
     )
 
 
