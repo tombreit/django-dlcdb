@@ -31,6 +31,7 @@ from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.theme.navigation import get_redirect_url, with_next
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.related import add_related_links
 
 from .filters import (
     STATE_AVAILABLE,
@@ -310,6 +311,12 @@ def lend(request, pk=None):
             return redirect(next_url)
     else:
         form = form_class(instance=record)
+
+    # The room select gets buttons to open or add a room, but not in picker mode:
+    # there the picked device and person live only in the browser, so the round
+    # trip would lose them, and picking the device again resets the room anyway.
+    if not picker_mode:
+        add_related_links(form, request)
 
     # Keep the visually selected person card in sync after a failed POST, where
     # the picked person lives only in the submitted (hidden) person field. In

@@ -9,12 +9,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
+from django.utils.html import escape
 
 from dlcdb.core.models import DeviceType, InRoomRecord, LentRecord, Person, Record, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingProfile
 from dlcdb.lending.starter import get_starter_lent_sheet_template
+from dlcdb.theme.navigation import with_next
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -377,6 +379,30 @@ class LendingDetailViewTests(BaseTest):
         self.assertEqual(response.context["return_url"], self._return_url())
         self.assertContains(response, f'href="{self._return_url()}"')
         self.assertContains(response, 'id="lend-form-return"')
+
+    def test_a_room_added_from_the_lending_comes_back_preselected(self):
+        list_url = reverse("lending:index") + "?search=EDV-LENT"
+        detail_url = with_next(reverse("lending:detail", args=[self.lent_record.pk]), list_url)
+
+        # + opens the room add page, which returns to this lending, ?next= and all.
+        add_url = with_next(f"{reverse('rooms:add')}?next_field=room", detail_url)
+        self.assertContains(self.client.get(detail_url), f'href="{escape(add_url)}"')
+        response = self.client.post(add_url, {"number": "B2.02"})
+
+        new_room = Room.objects.get(number="B2.02")
+        detail_url_with_room = f"{detail_url}&room={new_room.pk}"
+        self.assertRedirects(response, detail_url_with_room, fetch_redirect_response=False)
+        response = self.client.get(detail_url_with_room)
+        self.assertEqual(response.context["form"]["room"].value(), str(new_room.pk))
+
+        # Saving the lending stores the room and still returns to the filtered list.
+        response = self.client.post(response.context["form_action"], self._lend_payload(room=new_room.pk))
+        self.assertRedirects(response, list_url, fetch_redirect_response=False)
+        self.lent_record.refresh_from_db()
+        self.assertEqual(self.lent_record.room, new_room)
+
+    def test_the_return_screen_has_no_room_select_and_no_buttons(self):
+        self.assertNotContains(self.client.get(self._return_url()), "data-related-links")
 
     def test_edit_flow_return_action_keeps_the_index_filters(self):
         # The filtered list travels as ?next=; the return link must carry it on,
@@ -841,6 +867,10 @@ class LendingPickerModeViewTests(BaseTest):
     def setUp(self):
         self.client.force_login(self.user)
         self.url = reverse("lending:lend")
+
+    def test_picker_mode_offers_no_room_buttons(self):
+        """The picked device and person live in the browser only: a round trip would lose them."""
+        self.assertNotContains(self.client.get(self.url), "data-related-links")
 
     def _payload(self, **overrides):
         payload = {

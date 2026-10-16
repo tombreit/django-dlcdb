@@ -6,9 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–3 done: one `?next=`, add
-pages return with the new object, and the device and recover forms have the buttons. Lending,
-licences and persons are next. This is a living document: each batch ticks its box under
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–4 done: one `?next=`, add
+pages return with the new object, and the device, recover and lending forms have the buttons.
+Licences and persons are next. This is a living document: each batch ticks its box under
 *Progress* and updates this line in the same commit.
 
 ## Why
@@ -384,7 +384,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **1. One `next` parameter, a local URL, as in Django**
 - [x] **2. Add pages return with the new object**
 - [x] **3. The mechanism, the device form and the recover form**
-- [ ] **4. Lending**
+- [x] **4. Lending**
 - [ ] **5. Licences and persons** (open question 1)
 
 ## Open questions
@@ -488,4 +488,13 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
     `verbose_name`. They and the dialog text "Discard your unsaved changes and leave this form?"
     still need translations.
   - **The JS is not linted:** `eslint.config.mjs` imports the `globals` package, which is not
-    installed. This predates the batch.
+    installed. This predates the batch. Fixed in batch 4.
+- **Batch 4:**
+  - **No buttons in picker mode at all,** instead of `exclude=("room",)`: the lend view calls
+    `add_related_links` in record mode only. The reason covers every field, not just the room:
+    the picked device and person live only in the browser. `add_related_links` loses its
+    `exclude` parameter, which nothing else needed.
+  - **ESLint runs again:** `globals` is a dev dependency now (ESLint 9 and later no longer bring
+    it along). `related-links.js` follows the config's style: 2-space indent, no semicolons, like
+    the inventory JS. `theme.js` and `filterbar.js` predate the config and still fail it; making
+    them pass would be a separate style change.

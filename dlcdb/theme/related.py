@@ -100,7 +100,7 @@ def get_related_pages(model) -> RelatedPages | None:
     return _REGISTRY.get(model._meta.label_lower)
 
 
-def add_related_links(form, request, *, exclude=()):
+def add_related_links(form, request):
     """
     Give the searchable selects of ``form`` their buttons, and preselect an
     object passed in the query string.
@@ -108,16 +108,16 @@ def add_related_links(form, request, *, exclude=()):
     A field gets buttons if it is a model choice field rendered by a TomSelect
     widget, its model has registered pages, and the user may open at least one
     of them: ✎ needs the view and change permissions, 👁 the view permission, +
-    the add permission. Fields named in ``exclude`` are left alone.
+    the add permission.
 
     On an unbound form, ``?<field>=<pk>`` (the HTML name, as an add page returns
     it) preselects that object, if it is one the select offers. A multi-select
     adds it to its selection.
     """
     for name, field in form.fields.items():
-        if name in exclude or not isinstance(field.widget, (TomSelectWidget, TomSelectMultipleWidget)):
-            continue
         if not isinstance(field, forms.ModelChoiceField):
+            continue
+        if not isinstance(field.widget, (TomSelectWidget, TomSelectMultipleWidget)):
             continue
         model = field.queryset.model
         # Our pages take a pk; a select keyed by another field cannot use them.
