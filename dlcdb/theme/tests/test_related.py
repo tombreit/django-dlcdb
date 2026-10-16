@@ -171,7 +171,11 @@ def test_every_registered_model_has_an_object_here(db):
 
 @pytest.mark.parametrize("label", sorted(OBJECTS))
 def test_the_registered_pages_need_exactly_the_permissions_the_buttons_check(client, plain_static, make_user, label):
-    """The view permission opens the detail page, the add permission the add page."""
+    """
+    The view permission opens the detail page (👁), the change permission saves
+    it (✎), the add permission opens and saves the add page (+). Without them
+    the pages refuse, as the buttons are not shown.
+    """
     pages = _REGISTRY[label]
     obj = OBJECTS[label]()
     detail_url = reverse(pages.detail_url, args=[obj.pk])
@@ -180,9 +184,15 @@ def test_the_registered_pages_need_exactly_the_permissions_the_buttons_check(cli
     client.force_login(make_user())
     assert client.get(detail_url).status_code == 403
     assert client.get(add_url).status_code == 403
+    assert client.post(add_url, {}).status_code == 403
 
     client.force_login(make_user(pages.permission("view"), email="viewer@example.com"))
     assert client.get(detail_url).status_code == 200
+    assert client.post(detail_url, {}).status_code == 403
+
+    client.force_login(make_user(pages.permission("view"), pages.permission("change"), email="editor@example.com"))
+    # An empty form is invalid, but the page takes it: no 403.
+    assert client.post(detail_url, {}).status_code == 200
 
     client.force_login(make_user(pages.permission("add"), email="adder@example.com"))
     assert client.get(add_url).status_code == 200
