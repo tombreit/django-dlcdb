@@ -54,7 +54,7 @@
                   {% endcomment %}
                   <div class="position-relative d-flex flex-column align-items-start gap-1">
                     <div class="d-flex align-items-center gap-1">
-                      <a href="{% url 'assets:record_detail' record.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                      <a href="{% url 'assets:record_detail' record.pk %}?next={{ request.get_full_path|urlencode }}"
                          class="stretched-link text-reset link-underline link-underline-opacity-0">
                         <span class="badge text-bg-{{ record.state_color|default:"secondary" }}">{{ record.get_record_type_display }}</span>
                       </a>

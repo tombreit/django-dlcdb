@@ -27,6 +27,7 @@ from django.views.decorators.http import require_GET, require_POST
 from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
+from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
 
 from .csv_template import build_import_template_csv
@@ -220,15 +221,10 @@ def importer_detail(request, pk):
     """One import with its stored log. Read-only: there is nothing to change after the fact."""
     importer_list = get_object_or_404(_importer_list_queryset(request), pk=pk)
 
-    # The index threads its active search/filter/sort here as ?next=.
-    next_query = request.GET.get("next", "")
-    index_url = reverse("dataexchange:importer_index")
-    if next_query:
-        index_url = f"{index_url}?{next_query}"
-
     context = {
         "importer_list": importer_list,
-        "index_url": index_url,
+        # The page that opened this one (the filtered list, say) comes as ?next=.
+        "next_url": get_redirect_url(request) or reverse("dataexchange:importer_index"),
         "devices_url": f"{reverse('assets:device_index')}?imported_by={importer_list.pk}",
     }
     return TemplateResponse(request, "dataexchange/importer_detail.html", context)

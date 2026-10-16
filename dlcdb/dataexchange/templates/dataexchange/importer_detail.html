@@ -9,7 +9,7 @@
       <h1 class="h3 mb-1">{{ importer_list.file_name|default:_("Import without file") }}</h1>
       <div class="text-muted">{% translate "Import" %}</div>
     </div>
-    {% include "theme/includes/_back_link.html" with url=index_url %}
+    {% include "theme/includes/_back_link.html" with url=next_url %}
   </div>
 
   <div class="row g-4">

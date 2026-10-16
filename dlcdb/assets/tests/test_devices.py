@@ -11,6 +11,7 @@ from django.contrib.auth.models import Group, Permission
 from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import escape
 
 from dlcdb.assets.forms import DeviceForm
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Record, Room
@@ -18,6 +19,7 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 from dlcdb.tenants.shortcuts import get_user_tenants
+from dlcdb.theme.navigation import with_next
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -487,7 +489,29 @@ class DeviceFrontendTests(BaseTest):
 
         self.assertNotContains(response, "bi-pencil")
         self.assertNotContains(response, "Open device")
-        self.assertContains(response, f'href="{reverse("assets:device_detail", args=[self.inroom_device.pk])}"')
+        detail_url = reverse("assets:device_detail", args=[self.inroom_device.pk])
+        self.assertContains(response, f'href="{with_next(detail_url, self.index_url)}"')
+
+    def test_a_device_opened_from_the_lending_list_returns_there(self):
+        """The device teaser sits in three lists; Back, Cancel and Save lead to the one it was opened from."""
+        lending_list = reverse("lending:index") + "?search=EDV-AVAILABLE"
+        detail_url = with_next(reverse("assets:device_detail", args=[self.inroom_device.pk]), lending_list)
+
+        self.assertContains(self.client.get(lending_list), f'href="{detail_url}"')
+
+        response = self.client.get(detail_url)
+        self.assertContains(response, f'href="{escape(lending_list)}"', count=2)  # Back and Cancel
+        self.assertNotContains(response, "Back to devices")
+
+        form = response.context["form"]
+        payload = {name: (form[name].value() or "") for name in form.fields}
+        self.assertRedirects(self.client.post(detail_url, payload), lending_list, fetch_redirect_response=False)
+
+    def test_a_device_opened_directly_returns_to_the_device_list(self):
+        response = self.client.get(reverse("assets:device_detail", args=[self.inroom_device.pk]))
+
+        self.assertEqual(response.context["next_url"], self.index_url)
+        self.assertContains(response, "Back to devices")
 
     def test_tenant_column_is_shown_only_with_several_tenants(self):
         # The Tenant header's sort link is the unambiguous marker for the column

@@ -32,7 +32,7 @@ SPDX-License-Identifier: EUPL-1.2
       <i class="bi bi-box-arrow-up-right"></i> {% translate "Admin view" %}
     </a>
   {% endif %}
-  {% include "theme/includes/_back_link.html" with url=index_url label=_("Back to overview") %}
+  {% include "theme/includes/_back_link.html" with url=next_url label=_("Back to overview") %}
 </div>
 
 {% include "theme/includes/_non_field_errors.html" with form=form %}
@@ -277,7 +277,7 @@ SPDX-License-Identifier: EUPL-1.2
       </a>
     {% endif %}
 
-    <a href="{{ index_url }}" class="btn btn-outline-secondary{% if not return_url %} ms-auto{% endif %}">
+    <a href="{{ next_url }}" class="btn btn-outline-secondary{% if not return_url %} ms-auto{% endif %}">
       <i class="bi bi-x-lg"></i> {% translate "Cancel" %}
     </a>
   </div>

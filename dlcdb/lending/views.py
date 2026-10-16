@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import datetime
-from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -30,6 +29,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.export import export_href
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import STATE_COLORS
+from dlcdb.theme.navigation import get_redirect_url, with_next
 from dlcdb.theme.pagination import paginate
 
 from .filters import (
@@ -261,15 +261,11 @@ def lend(request, pk=None):
     picker_mode = pk is None
     device_form = LendableDeviceSelectForm(request.POST or None, request=request) if picker_mode else None
 
-    # Filters/search on the index live in its querystring; the row links carry it
-    # here as ?next=. Thread it back into the post-save redirect and the
-    # back/cancel links so the user returns to the exact filtered view. Read from
-    # request.GET so it works on both the GET render and the POST (form_action
-    # carries it in its querystring).
-    index_query = request.GET.get("next", "")
-    index_url = reverse("lending:index")
-    if index_query:
-        index_url = f"{index_url}?{index_query}"
+    # The page that opened this one (the filtered list, say) comes as ?next=.
+    # The save, Back and Cancel return there, and the links and the form action
+    # below carry it on.
+    redirect_to = get_redirect_url(request)
+    next_url = redirect_to or reverse("lending:index")
 
     if picker_mode:
         record = device = None
@@ -282,7 +278,7 @@ def lend(request, pk=None):
             record.check_lending()
         except lifecycle.IllegalTransition as error:
             messages.error(request, " ".join(error.messages))
-            return redirect(index_url)
+            return redirect(next_url)
 
     # The three flows of this screen, resolved once. A LENT record is "returned"
     # only when the user asked for it via ?flow=return (the Return button in the
@@ -311,7 +307,7 @@ def lend(request, pk=None):
 
         form = form_class(request.POST, instance=record)
         if form.is_valid() and _save_lending(request, record, form):
-            return redirect(index_url)
+            return redirect(next_url)
     else:
         form = form_class(instance=record)
 
@@ -334,33 +330,24 @@ def lend(request, pk=None):
         LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
     )
 
-    # Carry the flow and the index filters through the POST (and any failed-POST
+    # Carry the flow and the way back through the POST (and any failed-POST
     # re-render) by appending them to the form action: ?flow= decides which form
     # the POST is bound to, ?next= where the save redirects to.
     form_action = reverse("lending:lend") if picker_mode else reverse("lending:detail", args=[record.pk])
-    form_action_query = {}
     if is_return_flow:
-        form_action_query["flow"] = "return"
-    if index_query:
-        form_action_query["next"] = index_query
-    if form_action_query:
-        form_action += "?" + urlencode(form_action_query)
+        form_action += "?flow=return"
+    form_action = with_next(form_action, redirect_to)
 
     # Same route without the flow marker: where the return screen sends a user
     # who wants to change the lending itself rather than end it.
-    edit_url = None if picker_mode else reverse("lending:detail", args=[record.pk])
-    if edit_url and index_query:
-        edit_url += "?" + urlencode({"next": index_query})
+    edit_url = None if picker_mode else with_next(reverse("lending:detail", args=[record.pk]), redirect_to)
 
     # Target of the "Return device" button on the edit screen: this same record
     # with ?flow=return. Only an active lending can be returned, so it stays None
     # in the other flows and the button is not rendered there.
     return_url = None
     if is_edit_flow:
-        return_query = {"flow": "return"}
-        if index_query:
-            return_query["next"] = index_query
-        return_url = f"{reverse('lending:detail', args=[record.pk])}?{urlencode(return_query)}"
+        return_url = with_next(f"{reverse('lending:detail', args=[record.pk])}?flow=return", redirect_to)
 
     context = {
         "form": form,
@@ -382,7 +369,7 @@ def lend(request, pk=None):
         "form_action": form_action,
         "edit_url": edit_url,
         "return_url": return_url,
-        "index_url": index_url,
+        "next_url": next_url,
     }
     return TemplateResponse(request, "lending/lend.html", context)
 

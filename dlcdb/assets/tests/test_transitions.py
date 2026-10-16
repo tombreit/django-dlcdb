@@ -19,7 +19,7 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.device_state import RELOCATE_TRANSITIONS
-from dlcdb.theme.navigation import with_back
+from dlcdb.theme.navigation import with_next
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -148,35 +148,35 @@ class DeviceTransitionTests(BaseTest):
         device.refresh_from_db()
         self.assertEqual(device.active_record.record_type, Record.REMOVED)
 
-    def test_the_form_returns_to_the_back_url_of_the_screen_that_offered_it(self):
+    def test_the_form_returns_to_the_next_url_of_the_screen_that_offered_it(self):
         self._login("lose")
         device = self._located_device()
-        back = "/inventory/devices/?q=EDV"
-        url = with_back(self._url(device, "lose"), back)
+        next_url = "/inventory/devices/?q=EDV"
+        url = with_next(self._url(device, "lose"), next_url)
 
-        self.assertContains(self.client.get(url), f'href="{escape(back)}"')
+        self.assertContains(self.client.get(url), f'href="{escape(next_url)}"')
         response = self.client.post(url, {"note": "Not in its room"})
 
-        self.assertRedirects(response, back, fetch_redirect_response=False)
+        self.assertRedirects(response, next_url, fetch_redirect_response=False)
         device.refresh_from_db()
         self.assertEqual(device.active_record.record_type, Record.LOST)
 
-    def test_order_returns_to_the_back_url(self):
+    def test_order_returns_to_the_next_url(self):
         self._login("order")
         device = self._create_device()
-        back = "/inventory/devices/"
+        next_url = "/inventory/devices/"
 
-        response = self.client.post(with_back(reverse("assets:device_order", args=[device.pk]), back))
+        response = self.client.post(with_next(reverse("assets:device_order", args=[device.pk]), next_url))
 
-        self.assertRedirects(response, back, fetch_redirect_response=False)
+        self.assertRedirects(response, next_url, fetch_redirect_response=False)
         device.refresh_from_db()
         self.assertEqual(device.active_record.record_type, Record.ORDERED)
 
-    def test_a_back_url_off_this_site_is_ignored(self):
+    def test_a_next_url_off_this_site_is_ignored(self):
         self._login("lose")
         device = self._located_device()
 
-        response = self.client.post(with_back(self._url(device, "lose"), "https://evil.example/"), {"note": "?"})
+        response = self.client.post(with_next(self._url(device, "lose"), "https://evil.example/"), {"note": "?"})
 
         self.assertRedirects(response, reverse("assets:device_detail", args=[device.pk]))
 

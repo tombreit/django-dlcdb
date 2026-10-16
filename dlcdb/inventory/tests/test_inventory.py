@@ -17,7 +17,7 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.inventory.inventorize import inventorize_uuids_for_room
 from dlcdb.inventory.utils import update_inventory_note
 from dlcdb.tenants.models import Tenant
-from dlcdb.theme.navigation import with_back
+from dlcdb.theme.navigation import with_next
 
 
 @pytest.mark.django_db
@@ -250,9 +250,9 @@ def test_device_search_offers_frontend_state_changes_to_non_staff_users(
     html = client.get(search_url, headers={"HX-Request": "true"}).content.decode()
 
     remove_url = reverse("assets:device_transition", args=[device_1.pk, "remove"])
-    assert f'href="{with_back(remove_url, search_url)}"' in html
+    assert f'href="{with_next(remove_url, search_url)}"' in html
     # device_2 has no record yet, so it may be ordered: a POST form with its CSRF token
-    assert f'action="{with_back(reverse("assets:device_order", args=[device_2.pk]), search_url)}"' in html
+    assert f'action="{with_next(reverse("assets:device_order", args=[device_2.pk]), search_url)}"' in html
     assert "csrfmiddlewaretoken" in html
     assert reverse("admin:core_removedrecord_add") not in html
     assert reverse("admin:core_orderedrecord_add") not in html
@@ -273,7 +273,7 @@ def test_inventory_users_without_view_device_change_states_and_return_to_the_sea
     InRoomRecord.objects.create(device=device_1, room=room_1)
     establish_state(LostRecord, device=device_2)
     search_url = reverse("inventory:search-devices")
-    remove_url = with_back(reverse("assets:device_transition", args=[device_1.pk, "remove"]), search_url)
+    remove_url = with_next(reverse("assets:device_transition", args=[device_1.pk, "remove"]), search_url)
 
     html = client.get(search_url, headers={"HX-Request": "true"}).content.decode()
     assert f'href="{remove_url}"' in html

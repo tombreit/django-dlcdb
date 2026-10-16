@@ -32,7 +32,7 @@ from dlcdb.core.models import (
 )
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.theme.device_state import RELOCATE_TRANSITIONS, get_device_state_data
-from dlcdb.theme.navigation import with_back
+from dlcdb.theme.navigation import with_next
 
 ALL_LIFECYCLE_PERMISSIONS = [
     "transition_can_order_device",
@@ -483,16 +483,16 @@ def test_inventory_offers_the_same_frontend_screens_as_the_device_page(lentable_
 
 
 @pytest.mark.django_db
-def test_the_device_page_forms_and_order_return_to_the_back_url(plain_device, superuser):
+def test_the_device_page_forms_and_order_return_to_the_next_url(plain_device, superuser):
     """The inventory search passes its own URL; Move keeps its own landing page."""
-    back = "/inventory/devices/?q=EDV"
+    next_url = "/inventory/devices/?q=EDV"
 
-    actions = get_device_state_data(plain_device, user=superuser, app_name="inventory", back=back).actions
+    actions = get_device_state_data(plain_device, user=superuser, app_name="inventory", redirect_to=next_url).actions
     urls = {action["label"]: action["url"] for action in actions}
 
-    assert urls["Order"] == with_back(reverse("assets:device_order", args=[plain_device.pk]), back)
-    assert urls["Remove"] == with_back(reverse("assets:device_transition", args=[plain_device.pk, "remove"]), back)
-    assert "back=" not in urls["Locate"]
+    assert urls["Order"] == with_next(reverse("assets:device_order", args=[plain_device.pk]), next_url)
+    assert urls["Remove"] == with_next(reverse("assets:device_transition", args=[plain_device.pk, "remove"]), next_url)
+    assert "next=" not in urls["Locate"]
 
 
 @pytest.mark.django_db

@@ -16,7 +16,7 @@ from django.views.decorators.http import require_GET
 
 from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
-from dlcdb.theme.navigation import index_url
+from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
 
 from . import cleanup
@@ -72,7 +72,7 @@ def journal_detail(request, pk):
     context = {
         "entry": entry,
         "subject_url": _subject_url(entry),
-        "index_url": index_url(request, "journal:index"),
+        "next_url": get_redirect_url(request) or reverse("journal:index"),
     }
     return TemplateResponse(request, "journal/detail.html", context)
 

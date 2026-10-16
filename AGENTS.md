@@ -46,6 +46,7 @@ Device Lifecycle Database
 - The Django admin is being phased out: new UI goes into the frontend apps, not the admin
 - Presentation (CSS classes, labels, per-screen URLs) lives in templates or `theme`, not in core models; models return data
 - Shared UI helpers live in `theme` (filterbar, pagination, pickers, device state buttons); reuse them
+- A page that returns to where it was opened from reads `?next=<local URL>` (Django's `next`) with `theme.navigation.get_redirect_url`; links pass `?next={{ request.get_full_path|urlencode }}`
 - No Django signals: call explicitly (journal entries, notifications). If really needed: let me know.
 - Tenant scoping: every view that loads an object by pk or uuid goes through `tenant_scoped_queryset`; on a multi-valued relation keep the tenant condition in the same `filter()` as the others
 

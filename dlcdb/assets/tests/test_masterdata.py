@@ -10,6 +10,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.tests.basetest import BaseTest
+from dlcdb.theme.navigation import with_next
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -117,7 +118,10 @@ class MasterdataFrontendTests(BaseTest):
         self.assertFalse(Manufacturer.objects.filter(note="nameless").exists())
 
     def test_edit_supplier_returns_to_the_filtered_index(self):
-        url = reverse("assets:supplier_detail", args=[self.supplier.pk]) + "?next=search%3DExample"
+        url = with_next(
+            reverse("assets:supplier_detail", args=[self.supplier.pk]),
+            reverse("assets:supplier_index") + "?search=Example",
+        )
         response = self.client.post(
             url,
             {"name": "Example Distribution", "contact": "hotline@example.com", "note": ""},

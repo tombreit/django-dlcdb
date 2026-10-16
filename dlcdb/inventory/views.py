@@ -233,7 +233,7 @@ def search_devices(request):
             "theme/device/state_btn_group.html",
             {
                 "state_data": get_device_state_data(
-                    device, user=request.user, app_name="inventory", back=request.get_full_path()
+                    device, user=request.user, app_name="inventory", redirect_to=request.get_full_path()
                 ),
                 "size": "sm",
             },

@@ -4,14 +4,14 @@
 <div class="fw-semibold">
     <i class="bi {{ device.device_type.icon_class|default:'bi-pc-display' }} text-muted me-1"></i>
     {% if link == "stretched" %}
-    <a href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+    <a href="{% url 'assets:device_detail' device.pk %}?next={{ request.get_full_path|urlencode }}"
         class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
         {{ device.edv_id|default:device.sap_id|default:"—" }}
     </a>
     {% elif link == "icon" %}
        {{ device.edv_id|default:device.sap_id|default:"—" }}
        <a
-        href="{% url 'assets:device_detail' device.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+        href="{% url 'assets:device_detail' device.pk %}?next={{ request.get_full_path|urlencode }}"
         title="{% translate 'View device details' %}"
        >
         <i class="bi bi-box-arrow-up-right text-muted ms-3"></i>

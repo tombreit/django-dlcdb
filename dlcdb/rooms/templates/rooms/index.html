@@ -47,7 +47,7 @@
               <tr>
                 <td class="position-relative">
                   <div class="fw-semibold">
-                    <a href="{% url 'rooms:detail' room.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                    <a href="{% url 'rooms:detail' room.pk %}?next={{ request.get_full_path|urlencode }}"
                        class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover font-monospace">
                       {{ room.number }}
                     </a>

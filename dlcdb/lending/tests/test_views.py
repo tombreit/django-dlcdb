@@ -379,17 +379,17 @@ class LendingDetailViewTests(BaseTest):
         self.assertContains(response, 'id="lend-form-return"')
 
     def test_edit_flow_return_action_keeps_the_index_filters(self):
-        # The index filters travel as ?next=; the return link must carry them on,
+        # The filtered list travels as ?next=; the return link must carry it on,
         # so saving the return lands back on the filtered list.
-        index_query = "search=EDV-LENT&ordering=-modified"
+        next_url = reverse("lending:index") + "?search=EDV-LENT&ordering=-modified"
         response = self.client.get(
             reverse("lending:detail", args=[self.lent_record.pk]),
-            {"next": index_query},
+            {"next": next_url},
         )
         return_url = response.context["return_url"]
         query = parse_qs(urlparse(return_url).query)
         self.assertEqual(query["flow"], ["return"])
-        self.assertEqual(query["next"], [index_query])
+        self.assertEqual(query["next"], [next_url])
 
     def test_return_and_lend_flows_offer_no_return_action(self):
         # Nothing to return on the return screen itself, on an available device,

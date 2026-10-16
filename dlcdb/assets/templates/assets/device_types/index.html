@@ -35,7 +35,7 @@
               <tr>
                 <td class="position-relative">
                   <i class="bi {{ device_type.icon_class }} text-muted me-1"></i>
-                  <a href="{% url 'assets:device_type_detail' device_type.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                  <a href="{% url 'assets:device_type_detail' device_type.pk %}?next={{ request.get_full_path|urlencode }}"
                      class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
                     {{ device_type.name }}
                   </a>

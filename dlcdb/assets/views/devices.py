@@ -24,7 +24,7 @@ from dlcdb.theme.export import export_href
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
-from dlcdb.theme.navigation import back_url, detail_urls
+from dlcdb.theme.navigation import detail_urls, get_redirect_url
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.pickers import picker_filter
 
@@ -148,10 +148,9 @@ def device_detail(request, pk):
     device = _get_device(request, pk)
     can_change = request.user.has_perm("core.change_device")
 
-    # The index threads its active search/filter/sort here as ?next= so Save,
-    # Back and Cancel return to the exact filtered list. Read from GET so it
-    # survives both the render and the POST (form_action carries it forward).
-    index_url, form_action = detail_urls(request, "assets:device_index", "assets:device_detail", device.pk)
+    # The page that opened this one (the filtered list, say) comes as ?next=, so
+    # Save, Back and Cancel return there; form_action carries it through the POST.
+    next_url, form_action = detail_urls(request, "assets:device_index", "assets:device_detail", device.pk)
 
     if request.method == "POST":
         if not can_change:
@@ -162,7 +161,7 @@ def device_detail(request, pk):
             saved_device.stamp_user(request.user)
             saved_device.save()
             messages.success(request, _("Device “%(device)s” was updated.") % {"device": saved_device})
-            return redirect(index_url)
+            return redirect(next_url)
     else:
         form = DeviceForm(instance=device, request=request)
 
@@ -173,7 +172,7 @@ def device_detail(request, pk):
             "device": device,
             "form": form,
             "can_change": can_change,
-            "index_url": index_url,
+            "next_url": next_url,
             "form_action": form_action,
             # "Save as new" re-posts this form to the add view (see _form_action_bar.html).
             "save_as_new_url": reverse("assets:device_add") if request.user.has_perm("core.add_device") else None,
@@ -197,7 +196,7 @@ def device_history(request, pk):
 @htmx_permission_required(lifecycle.BY_NAME["order"].permission)
 def device_order(request, pk):
     """Record a device as ordered (None -> ORDERED) and return to its detail page,
-    or to the ``?back=`` URL of the screen that offered it.
+    or to the ``?next=`` URL of the screen that offered it.
 
     The frontend counterpart of the admin OrderedRecord add-view, offered from
     the device's "New state" menu. Gated on the transition's own permission only;
@@ -210,7 +209,7 @@ def device_order(request, pk):
         messages.error(request, " ".join(error.messages))
     else:
         messages.success(request, _("Device “%(device)s” was marked as ordered.") % {"device": device})
-    return redirect(back_url(request, reverse("assets:device_detail", args=[device.pk])))
+    return redirect(get_redirect_url(request) or reverse("assets:device_detail", args=[device.pk]))
 
 
 # The state changes the device page performs in a form of its own, each with the
@@ -229,7 +228,7 @@ def device_transition(request, pk, name):
 
     The frontend counterpart of the admin add-forms for these records, gated on
     the transition's own permission only. Afterwards, and on Cancel, the user
-    returns to the device page or to the ``?back=`` URL of the screen that
+    returns to the device page or to the ``?next=`` URL of the screen that
     offered the change.
     """
     if name not in TRANSITION_FORMS:
@@ -239,7 +238,7 @@ def device_transition(request, pk, name):
     if not request.user.has_perm(transition.permission):
         raise PermissionDenied(missing_permission_message(transition.permission))
     device = _get_device(request, pk)
-    done_url = back_url(request, reverse("assets:device_detail", args=[device.pk]))
+    done_url = get_redirect_url(request) or reverse("assets:device_detail", args=[device.pk])
 
     form = form_class(request.POST or None)
     try:

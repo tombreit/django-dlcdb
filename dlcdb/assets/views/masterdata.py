@@ -176,9 +176,9 @@ def _masterdata_detail(request, spec, pk):
     obj = get_object_or_404(_masterdata_queryset(spec), pk=pk)
     can_change = request.user.has_perm(spec.change_permission)
 
-    # The index threads its active search/filter/sort here as ?next= so Save,
-    # Back and Cancel return to the exact filtered list.
-    index_url, form_action = detail_urls(request, spec.index_url, spec.detail_url, obj.pk)
+    # The page that opened this one (the filtered list, say) comes as ?next=, so
+    # Save, Back and Cancel return there; form_action carries it through the POST.
+    next_url, form_action = detail_urls(request, spec.index_url, spec.detail_url, obj.pk)
 
     if request.method == "POST":
         if not can_change:
@@ -193,7 +193,7 @@ def _masterdata_detail(request, spec, pk):
                 request,
                 _("%(model)s “%(obj)s” was updated.") % {"model": spec.model._meta.verbose_name, "obj": saved_obj},
             )
-            return redirect(index_url)
+            return redirect(next_url)
     else:
         form = spec.form_class(instance=obj)
 
@@ -207,7 +207,7 @@ def _masterdata_detail(request, spec, pk):
             "heading": spec.heading,
             "icon": spec.icon,
             "has_audit_fields": spec.has_audit_fields,
-            "index_url": index_url,
+            "next_url": next_url,
             "form_action": form_action,
             "devices_url": f"{reverse('assets:device_index')}?{spec.device_filter_param}={obj.pk}",
         },

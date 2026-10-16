@@ -10,12 +10,15 @@ SPDX-License-Identifier: EUPL-1.2
 "Back to the list" button closing a detail page header band.
 
 Params:
-  url          href to return to (usually ``index_url``).
-  label        (optional) button text; defaults to "Back to list".
+  url          href to return to (usually ``next_url``).
+  label        (optional) button text; defaults to "Back to list". A page
+               opened with ?next= reads just "Back": the link leads to the
+               page it was opened from, which need not be the list the label
+               names (see theme/navigation.py).
   extra_class  (optional) extra classes on the <a> (e.g. "ms-auto" where the
                header band has no spacer of its own).
 {% endcomment %}
 
 <a href="{{ url }}" class="btn btn-outline-secondary {{ extra_class }}">
-  <i class="bi bi-arrow-left"></i> {{ label|default:_("Back to list") }}
+  <i class="bi bi-arrow-left"></i> {% if request.GET.next %}{% translate "Back" %}{% else %}{{ label|default:_("Back to list") }}{% endif %}
 </a>

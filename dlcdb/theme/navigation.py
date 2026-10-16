@@ -3,61 +3,69 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-List-to-detail navigation for the custom frontend.
+Where a page returns to: the ``?next=<local URL>`` parameter.
 
-The index pages thread their active search/filter/sort state to a detail page as
-``?next=<querystring>``. The detail page has to hand that state back in three
-places — Back, Cancel and the form's own action — so that saving returns to the
-exact filtered list instead of a bare index.
+A link that opens a page passes the page it is on as ``next``. A list passes
+itself, with its search, filters, sort and page, so Back, Cancel and Save on the
+detail page return to exactly that list; the inventory search passes itself to
+a device's state change. In a template:
+``?next={{ request.get_full_path|urlencode }}``.
 
-``?back=<URL>`` is the other direction: a screen that sends users to a shared
-form, e.g. the inventory search to a device's state change, passes its own URL
-so the form returns there instead of to its default page.
+Name and meaning are Django's own: ``next`` is what the login and
+``set_language`` read (``django.contrib.auth.REDIRECT_FIELD_NAME``), and
+``get_redirect_url`` is the function form of Django's
+``RedirectURLMixin.get_redirect_url``.
 
 Pure functions, no template tag — the same convention as ``theme.pagination``.
 """
 
-from django.http import HttpRequest
+from urllib.parse import urlsplit, urlunsplit
+
+from django.http import HttpRequest, QueryDict
 from django.urls import reverse
-from django.utils.http import url_has_allowed_host_and_scheme, urlencode
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
-def index_url(request: HttpRequest, route: str) -> str:
+def get_redirect_url(request: HttpRequest) -> str:
     """
-    Return the index URL for ``route``, carrying ``?next=`` back as the actual
-    query string. ``next`` already *is* a querystring, so it is appended raw
-    rather than re-encoded as a parameter.
+    Return the request's ``next`` URL if it is safe, otherwise ``""``. As in
+    Django, POST wins over GET and only URLs on this host are safe; callers
+    write ``get_redirect_url(request) or <default URL>``.
+
+    Unlike Django, ``next`` must also be a path: the lists used to send their
+    bare query string as ``next``, which Django's check accepts as a relative
+    URL. An old link with ``next=search%3D…`` falls back to the default instead
+    of leading to ``<detail page>/search=…``.
     """
-    url = reverse(route)
-    next_query = request.GET.get("next", "")
-    return f"{url}?{next_query}" if next_query else url
+    redirect_to = request.POST.get("next", request.GET.get("next", ""))
+    url_is_safe = redirect_to.startswith("/") and url_has_allowed_host_and_scheme(
+        url=redirect_to,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    )
+    return redirect_to if url_is_safe else ""
+
+
+def with_next(url: str, redirect_to: str | None) -> str:
+    """
+    Return ``url`` with ``next=<redirect_to>`` added to its query string, or
+    unchanged without ``redirect_to``. Encoded like Django's
+    ``redirect_to_login``, which keeps the slashes readable.
+    """
+    if not redirect_to:
+        return url
+    parts = urlsplit(url)
+    query = QueryDict(parts.query, mutable=True)
+    query["next"] = redirect_to
+    return urlunsplit(parts._replace(query=query.urlencode(safe="/")))
 
 
 def detail_urls(request: HttpRequest, index_route: str, detail_route: str, pk) -> tuple[str, str]:
     """
-    Return ``(index_url, form_action)`` for a detail page.
-
-    Unlike the index link, ``form_action`` keeps ``next`` as a *parameter*: the
-    POST lands back on the detail view, which reads it from GET again to rebuild
-    both URLs after the save.
+    Return ``(next_url, form_action)`` for a detail page: where Back, Cancel and
+    Save lead (the safe ``next``, otherwise the index), and the form's action,
+    which carries ``next`` through the POST.
     """
-    form_action = reverse(detail_route, args=[pk])
-    next_query = request.GET.get("next", "")
-    if next_query:
-        form_action += "?" + urlencode({"next": next_query})
-    return index_url(request, index_route), form_action
-
-
-def back_url(request: HttpRequest, default: str) -> str:
-    """Return the request's ``?back=`` URL, or ``default`` if it has none or it leads off this site."""
-    back = request.GET.get("back", "")
-    if back and url_has_allowed_host_and_scheme(
-        back, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-    ):
-        return back
-    return default
-
-
-def with_back(url: str, back: str | None) -> str:
-    """Return ``url`` with ``?back=<back>`` for ``back_url``, or unchanged without ``back``."""
-    return f"{url}?{urlencode({'back': back})}" if back else url
+    redirect_to = get_redirect_url(request)
+    form_action = with_next(reverse(detail_route, args=[pk]), redirect_to)
+    return redirect_to or reverse(index_route), form_action

@@ -6,9 +6,9 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; nothing implemented yet. This is a
-living document: each batch ticks its box under *Progress* and updates this line in the same
-commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batch 1 done (one `?next=`), the
+buttons themselves not yet. This is a living document: each batch ticks its box under *Progress*
+and updates this line in the same commit.
 
 ## Why
 
@@ -380,7 +380,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 ## Progress
 
 - [x] **0. This document**
-- [ ] **1. One `next` parameter, a local URL, as in Django**
+- [x] **1. One `next` parameter, a local URL, as in Django**
 - [ ] **2. Add pages return with the new object**
 - [ ] **3. The mechanism, the device form and the recover form**
 - [ ] **4. Lending**

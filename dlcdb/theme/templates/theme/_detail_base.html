@@ -11,7 +11,7 @@ only supplies what is actually its own. Extension points are blocks with
 defaults, the way the Django admin exposes ``object-tools`` — override a block,
 or extend it with {{ block.super }}.
 
-Expects from the view: ``can_change``, ``form``, ``form_action``, ``index_url``.
+Expects from the view: ``can_change``, ``form``, ``form_action``, ``next_url``.
 Optional: ``save_as_new_url`` and ``delete_url`` (see _form_action_bar.html).
 
 Blocks:
@@ -53,7 +53,7 @@ frame: their header carries a breadcrumb band instead and there is no form.
         </div>
       </div>
       {% block object_tools %}
-        {% include "theme/includes/_back_link.html" with url=index_url %}
+        {% include "theme/includes/_back_link.html" with url=next_url %}
       {% endblock object_tools %}
     </div>
   {% endblock detail_header %}
@@ -65,7 +65,7 @@ frame: their header carries a breadcrumb band instead and there is no form.
           <form{% block detail_form_class %}{% endblock %} method="post" action="{{ form_action }}" novalidate>
             {% csrf_token %}
             {% block detail_form_fields %}{% endblock detail_form_fields %}
-            {% include "theme/includes/_form_action_bar.html" with cancel_url=index_url save_as_new_url=save_as_new_url delete_url=delete_url %}
+            {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url save_as_new_url=save_as_new_url delete_url=delete_url %}
           </form>
         {% else %}
           {% block detail_readonly_notice %}

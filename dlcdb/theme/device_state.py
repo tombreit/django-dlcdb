@@ -19,7 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Record
 
-from .navigation import with_back
+from .navigation import with_next
 
 # The transitions the assets frontend serves with its own "Move" module rather
 # than the device page's forms. The module works out which one applies from the
@@ -53,7 +53,7 @@ class DeviceStateData:
     actions: list
 
 
-def get_device_state_data(device, *, user=None, app_name=None, back=None):
+def get_device_state_data(device, *, user=None, app_name=None, redirect_to=None):
     """
     Return a data structure with the current information about the device and
     currently possible actions that can be performed on it.
@@ -74,8 +74,9 @@ def get_device_state_data(device, *, user=None, app_name=None, back=None):
     ``dlcdb.core.lifecycle`` (via ``lifecycle.available``); this function only
     presents them for the requesting app.
 
-    ``back`` is the URL the device page's forms and Order return to afterwards
-    (see ``theme.navigation.back_url``); the inventory search passes its own.
+    ``redirect_to`` is the URL the device page's forms and Order return to
+    afterwards, passed as ``?next=`` (see ``theme.navigation``); the inventory
+    search passes its own.
     """
 
     active_record = device.active_record
@@ -132,7 +133,7 @@ def get_device_state_data(device, *, user=None, app_name=None, back=None):
     actions = []
     for transition in lifecycle.available(device, user=user):
         # Default target: the device page's own form for this state change.
-        action_url = with_back(reverse("assets:device_transition", args=[device.pk, transition.name]), back)
+        action_url = with_next(reverse("assets:device_transition", args=[device.pk, transition.name]), redirect_to)
         # How the dropdown submits the action: a plain link, or a POST form for
         # Order, which changes state directly without a form page.
         method = "get"
@@ -149,7 +150,7 @@ def get_device_state_data(device, *, user=None, app_name=None, back=None):
         elif transition.name == "order":
             if frontend:
                 # A POST that writes the ORDERED record and returns to the device page.
-                action_url = with_back(reverse("assets:device_order", args=[device.pk]), back)
+                action_url = with_next(reverse("assets:device_order", args=[device.pk]), redirect_to)
                 method = "post"
             else:
                 # The admin's device list renders these buttons inside its own

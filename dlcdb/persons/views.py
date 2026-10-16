@@ -97,9 +97,9 @@ def person_detail(request, pk):
     is_udb_synced = bool(person.udb_person_uuid)
     can_change = request.user.has_perm("core.change_person") and not is_udb_synced
 
-    # The index threads its active search/filter/sort here as ?next= so Save,
-    # Back and Cancel return to the exact filtered list.
-    index_url, form_action = detail_urls(request, "persons:index", "persons:detail", person.pk)
+    # The page that opened this one (the filtered list, say) comes as ?next=, so
+    # Save, Back and Cancel return there; form_action carries it through the POST.
+    next_url, form_action = detail_urls(request, "persons:index", "persons:detail", person.pk)
 
     if request.method == "POST":
         if is_udb_synced:
@@ -112,7 +112,7 @@ def person_detail(request, pk):
             saved_person.stamp_user(request.user)
             saved_person.save()
             messages.success(request, _("Person “%(person)s” was updated.") % {"person": saved_person})
-            return redirect(index_url)
+            return redirect(next_url)
     else:
         form = PersonForm(instance=person)
 
@@ -135,7 +135,7 @@ def person_detail(request, pk):
             "form": form,
             "can_change": can_change,
             "is_udb_synced": is_udb_synced,
-            "index_url": index_url,
+            "next_url": next_url,
             "form_action": form_action,
             "lendings": lendings,
             "licences": licences,

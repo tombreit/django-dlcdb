@@ -138,9 +138,9 @@ def room_detail(request, pk):
     room = get_object_or_404(_room_queryset(), pk=pk)
     can_change = request.user.has_perm("core.change_room")
 
-    # The index threads its active search/filter/sort here as ?next= so Save,
-    # Back and Cancel return to the exact filtered list.
-    index_url, form_action = detail_urls(request, "rooms:index", "rooms:detail", room.pk)
+    # The page that opened this one (the filtered list, say) comes as ?next=, so
+    # Save, Back and Cancel return there; form_action carries it through the POST.
+    next_url, form_action = detail_urls(request, "rooms:index", "rooms:detail", room.pk)
 
     if request.method == "POST":
         if not can_change:
@@ -151,7 +151,7 @@ def room_detail(request, pk):
             saved_room.stamp_user(request.user)
             saved_room.save()
             messages.success(request, _("Room “%(room)s” was updated.") % {"room": saved_room})
-            return redirect(index_url)
+            return redirect(next_url)
     else:
         form = RoomForm(instance=room)
 
@@ -171,7 +171,7 @@ def room_detail(request, pk):
             "room": room,
             "form": form,
             "can_change": can_change,
-            "index_url": index_url,
+            "next_url": next_url,
             "form_action": form_action,
             "changes": changes,
         },

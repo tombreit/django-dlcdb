@@ -15,6 +15,7 @@ from dlcdb.core.models import InRoomRecord, LentRecord, LostRecord, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
+from dlcdb.theme.navigation import with_next
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -100,7 +101,7 @@ class RoomFrontendTests(BaseTest):
         self.assertTrue(room.qrcode)
 
     def test_edit_room_returns_to_the_filtered_index(self):
-        url = reverse("rooms:detail", args=[self.plain_room.pk]) + "?next=search%3DF2"
+        url = with_next(reverse("rooms:detail", args=[self.plain_room.pk]), f"{self.index_url}?search=F2")
         response = self.client.post(url, {"number": "F2.02", "nickname": "Renamed"})
 
         self.assertRedirects(response, f"{self.index_url}?search=F2")

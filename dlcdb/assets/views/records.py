@@ -24,7 +24,7 @@ from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
-from dlcdb.theme.navigation import index_url as build_index_url
+from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
 
 from ..filters import RecordFilter
@@ -117,16 +117,16 @@ def record_detail(request, pk):
         pk=pk,
     )
 
-    # The index threads its active search/filter/sort here as ?next= so Back
-    # returns to the exact filtered list. Same idiom as device_detail.
-    index_url = build_index_url(request, "assets:record_index")
+    # The page that opened this one (the filtered list, say) comes as ?next=, so
+    # Back returns there. Same idiom as device_detail.
+    next_url = get_redirect_url(request) or reverse("assets:record_index")
 
     return TemplateResponse(
         request,
         "assets/records/detail.html",
         {
             "record": record,
-            "index_url": index_url,
+            "next_url": next_url,
             # Closes the loop device -> trail -> one record -> that device's trail.
             "device_records_url": f"{reverse('assets:record_index')}?device={record.device_id}",
         },

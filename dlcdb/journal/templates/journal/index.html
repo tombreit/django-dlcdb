@@ -42,7 +42,7 @@
                   <div class="text-muted">{{ entry.event }}</div>
                 </td>
                 <td class="position-relative">
-                  <a href="{% url 'journal:detail' entry.pk %}{% if request.GET %}?next={{ request.GET.urlencode|urlencode }}{% endif %}"
+                  <a href="{% url 'journal:detail' entry.pk %}?next={{ request.get_full_path|urlencode }}"
                      class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover">
                     {{ entry.summary|default:entry.event }}
                   </a>
