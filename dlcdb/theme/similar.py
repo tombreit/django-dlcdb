@@ -12,14 +12,17 @@ accents, punctuation and noise words such as "GmbH" do not count.
 
 - Identical after that ("pro-com" and "Procom"): the add page refuses, and
   offers the existing entry instead.
-- Similar (a typo: a ``difflib`` ratio of at least ``SIMILARITY``; or all words
-  of one name among the other's: "Pulse" and "Pulse Secure"): the add page
-  warns, and saves once the user ticks "Create anyway" for exactly the entries
-  listed.
+- Similar (a typo: a ``difflib`` ratio of at least ``SIMILARITY``; all words of
+  one name among the other's: "Pulse" and "Pulse Secure"; or the start of an
+  existing name: "Pro" and "Procom"): the add page warns, and saves once the
+  user ticks "Create anyway" for exactly the entries listed.
 
 A form declares what to compare as ``similar_names`` and calls
 ``check_similar_names(self)`` from its ``clean()``; the add view renders the
-result with ``similar_context`` and ``theme/includes/_similar.html``.
+result with ``similar_context`` and ``theme/includes/_similar.html``. While the
+user types, the same matcher lists the entries early: the add view calls
+``add_similar_suggestions`` on its form and answers the inputs' HTMX requests
+with ``similar_suggestions``.
 
 Compared in Python, not with ``iexact``: SQLite folds the case of ASCII letters
 only. The tables are small (hundreds of rows), so every check reads them all.
@@ -30,6 +33,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -47,6 +51,10 @@ SIMILARITY = 0.8
 
 # The most entries the add page lists, best first.
 MAX_MATCHES = 5
+
+# Below this many letters and digits, typing lists nothing yet: "P" starts too
+# many names.
+MIN_SUGGESTION_LENGTH = 2
 
 _UMLAUTS = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue"})
 
@@ -112,7 +120,11 @@ def find_similar(model, similar_names, values):
             continue
         matcher.set_seq1(existing_name)
         existing_word_set = set(existing_words)
-        contained = new_word_set <= existing_word_set or existing_word_set <= new_word_set
+        # All words of one among the other's, or the start of an existing name:
+        # what a name being typed looks like.
+        contained = (
+            new_word_set <= existing_word_set or existing_word_set <= new_word_set or existing_name.startswith(new_name)
+        )
         # The quick ratios are upper bounds of the real one, as in difflib.get_close_matches.
         if contained or (matcher.real_quick_ratio() >= SIMILARITY and matcher.quick_ratio() >= SIMILARITY):
             ratio = matcher.ratio()
@@ -180,6 +192,42 @@ def similar_context(request, matches):
         ],
         "create_anyway": None if blocked else _create_anyway_value(entries),
     }
+
+
+def add_similar_suggestions(form, request):
+    """
+    Let the add page list the similar entries while the user types: each
+    compared field asks this page for them, a moment after the last key, and
+    sends the other compared fields along. The add view answers with
+    ``similar_suggestions``; the list goes where a refused save shows it
+    (``#similar-names``).
+    """
+    names = [form.add_prefix(name) for name in form.similar_names.fields]
+    for name, field_name in zip(names, form.similar_names.fields, strict=True):
+        attrs = {
+            # The page's own URL: it keeps ?next= and ?next_field= for "Use this one".
+            "hx-get": request.get_full_path(),
+            "hx-trigger": "input changed delay:300ms",
+            "hx-target": "#similar-names",
+            "hx-sync": "this:replace",
+        }
+        others = [f"[name='{other}']" for other in names if other != name]
+        if others:
+            attrs["hx-include"] = ", ".join(others)
+        form.fields[field_name].widget.attrs.update(attrs)
+
+
+def similar_suggestions(request, form_class):
+    """
+    The add view's answer to the HTMX request of ``add_similar_suggestions``:
+    the list of the entries similar to the typed name, as a refused save shows
+    it, "Create anyway" included.
+    """
+    similar_names = form_class.similar_names
+    matches = None
+    if len("".join(_name_words(request.GET, similar_names))) >= MIN_SUGGESTION_LENGTH:
+        matches = find_similar(form_class._meta.model, similar_names, request.GET)
+    return TemplateResponse(request, "theme/includes/_similar.html", {"similar": similar_context(request, matches)})
 
 
 def _name_words(values, similar_names):

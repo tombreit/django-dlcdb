@@ -194,6 +194,31 @@ class MasterdataFrontendTests(BaseTest):
 
         self.assertContains(response, f'href="{reverse("assets:manufacturer_detail", args=[self.manufacturer.pk])}"')
 
+    def test_typing_a_name_lists_similar_entries(self):
+        url = self._add_url("assets:supplier_add", next_field="supplier")
+
+        response = self.client.get(f"{url}&name=Example+Distr", headers={"HX-Request": "true"})
+
+        self.assertNotContains(response, "<html")
+        self.assertContains(response, "Similar existing entries")
+        self.assertContains(response, f'name="create_anyway" value="{self.supplier.pk}"')
+        # "Use this one" returns to the device form with this supplier instead.
+        use_url = f"/assets/devices/7/?next=/assets/devices/&supplier={self.supplier.pk}"
+        self.assertContains(response, f'href="{escape(use_url)}"')
+
+    def test_typing_lists_nothing_below_two_letters(self):
+        response = self.client.get(f"{reverse('assets:supplier_add')}?name=E", headers={"HX-Request": "true"})
+
+        self.assertNotContains(response, "alert")
+
+    def test_the_name_input_asks_its_own_page_for_suggestions(self):
+        url = self._add_url("assets:manufacturer_add")
+
+        response = self.client.get(url)
+
+        self.assertContains(response, f'hx-get="{escape(url)}"')
+        self.assertContains(response, 'hx-target="#similar-names"')
+
     def test_create_manufacturer_requires_a_name(self):
         response = self.client.post(reverse("assets:manufacturer_add"), {"name": "", "note": "nameless"})
 

@@ -25,7 +25,7 @@ from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
-from dlcdb.theme.similar import similar_context
+from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
 from .filters import RoomFilter
 from .forms import RoomForm
@@ -119,7 +119,11 @@ def room_add(request):
     """Create a room and attach its audit information to the current user."""
     # The page that opened this one (a form's + button, say) comes as ?next=:
     # saving returns there with the new room, Cancel without it.
+    if request.htmx:
+        # The number being typed: list the existing room with that number.
+        return similar_suggestions(request, RoomForm)
     form = RoomForm(request.POST or None)
+    add_similar_suggestions(form, request)
     if request.method == "POST" and form.is_valid():
         room = form.save(commit=False)
         room.stamp_user(request.user)

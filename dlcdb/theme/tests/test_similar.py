@@ -44,6 +44,7 @@ def test_umlaut_and_its_transcription_are_identical():
     [
         ("Pulse Secure", "Pulse"),  # the words of one are among the other's
         ("Lenovo", "Lenvoo"),  # a typo
+        ("Procom", "Pro"),  # the start of an existing name, as while typing
     ],
 )
 def test_similar_names_are_similar_not_identical(existing, new):
@@ -67,8 +68,10 @@ def test_room_numbers_match_only_when_identical():
     room = Room.objects.create(number="F1.01")
 
     assert find_similar(Room, ROOMS, {"number": "f 1.01"}).identical == [room]
-    # The room next door looks alike, but is another room.
+    # The room next door looks alike, but is another room; so does a number
+    # being typed.
     assert not find_similar(Room, ROOMS, {"number": "F1.02"})
+    assert not find_similar(Room, ROOMS, {"number": "F1.0"})
 
 
 @pytest.mark.django_db

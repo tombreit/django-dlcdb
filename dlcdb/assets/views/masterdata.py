@@ -25,7 +25,7 @@ from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_m
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
-from dlcdb.theme.similar import similar_context
+from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
 from ..filters import DeviceTypeFilter, ManufacturerFilter, SupplierFilter
 from ..forms import DeviceTypeForm, ManufacturerForm, SupplierForm
@@ -149,7 +149,11 @@ def _masterdata_index(request, spec):
 def _masterdata_add(request, spec):
     # The page that opened this one (a form's + button, say) comes as ?next=:
     # saving returns there with the new object, Cancel without it.
+    if request.htmx:
+        # The name being typed: list the similar existing entries.
+        return similar_suggestions(request, spec.form_class)
     form = spec.form_class(request.POST or None)
+    add_similar_suggestions(form, request)
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
         if spec.has_audit_fields:

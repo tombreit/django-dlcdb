@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.html import escape
 from django.utils.timezone import localtime
 
 from dlcdb.core import lifecycle
@@ -108,6 +109,23 @@ class PersonFrontendTests(TestCase):
 
         self.assertContains(response, "Person “Müller, Max” already exists.")
         self.assertFalse(Person.objects.filter(email="max.m@example.com").exists())
+
+    def test_typing_one_name_sends_the_other_along(self):
+        response = self.client.get(reverse("persons:add"))
+
+        for other in ("first_name", "last_name"):
+            selector = escape(f"[name='{other}']")
+            self.assertContains(response, f'hx-include="{selector}"')
+
+    def test_typing_a_name_lists_the_person_of_another_spelling(self):
+        Person.objects.create(first_name="Max", last_name="Müller", email="mueller@example.com")
+
+        response = self.client.get(
+            reverse("persons:add"), {"last_name": "Mueller", "first_name": "Max"}, headers={"HX-Request": "true"}
+        )
+
+        self.assertContains(response, "Already there")
+        self.assertContains(response, "Müller, Max")
 
     def test_duplicate_name_is_a_form_error_not_a_crash(self):
         response = self.client.post(

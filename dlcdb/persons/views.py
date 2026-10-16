@@ -18,7 +18,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
-from dlcdb.theme.similar import similar_context
+from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
 from .assignments import group_assignments
 from .filters import PersonFilter
@@ -75,7 +75,11 @@ def person_add(request):
     """Create a DLCDB-owned person and attach the audit information."""
     # The page that opened this one (a form's + button, say) comes as ?next=:
     # saving returns there with the new person, Cancel without them.
+    if request.htmx:
+        # The name being typed: list the similar existing persons.
+        return similar_suggestions(request, PersonForm)
     form = PersonForm(request.POST or None)
+    add_similar_suggestions(form, request)
     if request.method == "POST" and form.is_valid():
         person = form.save(commit=False)
         person.stamp_user(request.user)

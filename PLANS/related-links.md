@@ -6,10 +6,11 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–6 done: the device, recover,
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done: the device, recover,
 lending and licence forms have the buttons, and the add pages refuse identical and warn about
-similar entries on save. Batch 7 (suggestions while typing) is next. This is a living document:
-each batch ticks its box under *Progress* and updates this line in the same commit.
+similar entries, on save and while typing. *Open follow-ups* lists what could come next. This is
+a living document: each batch ticks its box under *Progress* and updates this line in the same
+commit.
 
 ## Why
 
@@ -493,7 +494,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **4. Lending**
 - [x] **5. Licences and persons** (open question 1: (a))
 - [x] **6. The add pages refuse identical and warn about similar entries on save**
-- [ ] **7. The add pages suggest similar entries while typing**
+- [x] **7. The add pages suggest similar entries while typing**
 
 ## Open questions
 
@@ -651,3 +652,14 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
   - **New strings to translate:** "%(model)s “%(name)s” already exists.", "%(model)s “%(name)s”
     exists, but is deactivated.", the similar warning, "Already there:", "Similar existing
     entries:", "deactivated", "Use this one" and "Create anyway: mine is another one".
+- **Batch 7:**
+  - **The matcher also counts the start of an existing name as similar** ("Pro" and "Procom").
+    Without it, typing lists nothing until a name is nearly complete: "Pro" is neither a typo of
+    "Procom" nor one of its words. Save and typing share the matcher, so on save "Pro" next to
+    "Procom" now warns too. Rooms keep identical-only: "F1.0" lists nothing.
+  - **No new URL:** each add view answers the HTMX request of its own inputs
+    (`similar_suggestions`). The inputs ask the page's own URL, which keeps `next` and
+    `next_field` for "Use this one", and `hx-sync="this:replace"` drops an answer that a later key
+    makes stale.
+  - **The tick goes with the list:** typing on swaps the list and its unticked box in. A tick can
+    therefore only cover the entries on screen; the save check compares its value anyway.
