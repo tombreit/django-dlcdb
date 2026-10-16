@@ -17,6 +17,7 @@ from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, Orga
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.smallstuff.models import AssignedThing, Thing
 from dlcdb.tenants.models import Tenant
+from dlcdb.theme.navigation import with_next
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -87,6 +88,16 @@ class PersonFrontendTests(TestCase):
         person = Person.objects.get(email="nelly@example.com")
         self.assertRedirects(response, reverse("persons:detail", args=[person.pk]))
         self.assertEqual(person.user, self.user)
+
+    def test_add_person_returns_to_the_form_that_opened_it_with_the_new_person(self):
+        opener = "/licenses/7/edit/"
+        url = f"{with_next(reverse('persons:add'), opener)}&next_field=subscribers"
+
+        self.assertContains(self.client.get(url), f'href="{opener}"', count=2)  # Cancel, twice
+        response = self.client.post(url, {"last_name": "New", "first_name": "Nelly", "email": "nelly@example.com"})
+
+        person = Person.objects.get(email="nelly@example.com")
+        self.assertRedirects(response, f"{opener}?subscribers={person.pk}", fetch_redirect_response=False)
 
     def test_duplicate_name_is_a_form_error_not_a_crash(self):
         response = self.client.post(

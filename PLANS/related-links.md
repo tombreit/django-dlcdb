@@ -6,10 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–4 done: one `?next=`, add
-pages return with the new object, and the device, recover and lending forms have the buttons.
-Licences and persons are next. This is a living document: each batch ticks its box under
-*Progress* and updates this line in the same commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; all batches done. The device, recover,
+lending and licence forms have the buttons; *Open follow-ups* lists what could come next. This is a
+living document: each batch ticks its box under *Progress* and updates this line in the same
+commit.
 
 ## Why
 
@@ -385,7 +385,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **2. Add pages return with the new object**
 - [x] **3. The mechanism, the device form and the recover form**
 - [x] **4. Lending**
-- [ ] **5. Licences and persons** (open question 1)
+- [x] **5. Licences and persons** (open question 1: (a))
 
 ## Open questions
 
@@ -393,7 +393,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
    - (a) give it a full page, like `edit`; `licenses/form.html` already exists;
    - (b) buttons only on the edit form.
 
-   Recommendation: (a).
+   Recommendation: (a). Decided (a) in batch 5, see *Decided during implementation*.
 
 ## Alternatives considered and rejected
 
@@ -498,3 +498,20 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
     it along). `related-links.js` follows the config's style: 2-space indent, no semicolons, like
     the inventory JS. `theme.js` and `filterbar.js` predate the config and still fail it; making
     them pass would be a separate style change.
+- **Batch 5:**
+  - **Open question 1, decided (a):** `licenses:new` answers a plain request with a page of its
+    own (`licenses/form.html`, like `edit`), and a plain POST with a redirect to the list. The
+    list's add button still swaps the form in by HTMX. Its buttons pass `/licenses/new/` (the
+    fragment's URL) as `next`, which is now a page, so the round trip works from there too.
+  - **The licence form's Cancel is a plain link to the list.** It was an `hx-get` into
+    `#licenses-content-wrapper`, which only the list has, so on the edit page (and now on the new
+    page) Cancel did nothing.
+  - **Name, order number and book value lose their floating label too,** like the three selects
+    next to them, so each row stays level. The dates and notes keep theirs.
+  - **A new person always qualifies as a subscriber:** `Person.email` is required in forms
+    (`blank=False`), so a person added via + has an address and is in the subscriber select. The
+    worry in batch 5's plan does not apply.
+  - **A new device type comes back preselected only if it is a licence type,** that is, if its
+    name starts with `Lizenz::`, `License::` or `Licence::` (`license_device_types`). Otherwise
+    the select does not offer it and the preselection ignores it (decision 3). The licence guide
+    says so.

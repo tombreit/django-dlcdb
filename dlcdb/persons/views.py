@@ -9,13 +9,14 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Person, Record
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
-from dlcdb.theme.navigation import detail_urls
+from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
 
 from .assignments import group_assignments
@@ -71,18 +72,25 @@ def person_index(request):
 @htmx_permission_required("core.add_person")
 def person_add(request):
     """Create a DLCDB-owned person and attach the audit information."""
+    # The page that opened this one (a form's + button, say) comes as ?next=:
+    # saving returns there with the new person, Cancel without them.
     form = PersonForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         person = form.save(commit=False)
         person.stamp_user(request.user)
         person.save()
         messages.success(request, _("Person “%(person)s” was created.") % {"person": person})
-        return redirect("persons:detail", pk=person.pk)
+        return redirect(get_redirect_url_after_add(request, person.pk) or reverse("persons:detail", args=[person.pk]))
 
     return TemplateResponse(
         request,
         "persons/form.html",
-        {"form": form, "title": _("Add person"), "submit_label": _("Create person")},
+        {
+            "form": form,
+            "title": _("Add person"),
+            "submit_label": _("Create person"),
+            "next_url": get_redirect_url(request) or reverse("persons:index"),
+        },
     )
 
 

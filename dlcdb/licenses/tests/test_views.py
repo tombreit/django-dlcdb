@@ -10,13 +10,16 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.messages import get_messages
 from django.test import override_settings
 from django.urls import reverse
+from django.utils.html import escape
 from simple_history.utils import update_change_reason
 
-from dlcdb.core.models import Device, InRoomRecord, Person, Room
+from dlcdb.core.models import Device, InRoomRecord, Manufacturer, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.journal.models import JournalEntry
+from dlcdb.licenses.models import LicensesConfiguration
 from dlcdb.notifications.models import Subscription
 from dlcdb.tenants.models import Tenant
+from dlcdb.theme.navigation import with_next
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
 _PLAIN_STATIC_STORAGE = {
@@ -164,9 +167,9 @@ class LicensesPermissionTests(BaseTest):
 
     def test_reading_does_not_allow_creating(self):
         self.client.force_login(self._make_user("view_licencerecord"))
-        # licenses:new is an HTMX-only form. Over HTMX a refused request comes
-        # back as a client refresh so no 403 page lands in the modal; a plain
-        # navigation gets the ordinary 403.
+        # licenses:new is a page and, from the list, an HTMX fragment. Over HTMX
+        # a refused request comes back as a client refresh so no 403 page lands
+        # in the list; a plain navigation gets the ordinary 403.
         self.assertEqual(self.client.get(reverse("licenses:new")).status_code, 403)
 
         response = self.client.get(reverse("licenses:new"), headers={"HX-Request": "true"})
@@ -283,3 +286,67 @@ class LicensesTenantScopingTests(BaseTest):
         self.assertEqual(entry.user, self.user)
         # The atomic block rolled the half-created licence back.
         self.assertFalse(Device.objects.filter(series="Broken Suite").exists())
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class LicenseFormRelatedLinksTests(BaseTest):
+    """Manufacturer, supplier, type and subscribers have buttons to open or add an entry."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser(email="licences@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
+        Room.objects.create(number="LIC.01", is_default_license_room=True)
+        cls.default_subscriber = Person.objects.create(
+            first_name="Default", last_name="Subscriber", email="default@example.com"
+        )
+        LicensesConfiguration.load().default_subscribers.add(cls.default_subscriber)
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_the_new_licence_form_is_a_page_of_its_own(self):
+        response = self.client.get(reverse("licenses:new"))
+
+        self.assertContains(response, "<html")
+        self.assertContains(response, "data-related-links", count=4)
+        # Cancel is a plain link: the page has no list to swap back in.
+        self.assertContains(response, f'<a class="my-4 btn btn-secondary ms-2" href="{reverse("licenses:index")}">')
+
+    def test_a_licence_saved_from_its_page_returns_to_the_list(self):
+        response = self.client.post(
+            reverse("licenses:new"), {"series": "Page Suite", "tenant": self._default_tenant().pk}
+        )
+
+        self.assertRedirects(response, reverse("licenses:index"), fetch_redirect_response=False)
+        self.assertTrue(Device.objects.filter(series="Page Suite", is_licence=True).exists())
+
+    def test_a_manufacturer_added_from_the_new_licence_form_comes_back_preselected(self):
+        form_url = reverse("licenses:new")
+        add_url = with_next(f"{reverse('assets:manufacturer_add')}?next_field=manufacturer", form_url)
+        self.assertContains(self.client.get(form_url), f'href="{escape(add_url)}"')
+
+        response = self.client.post(add_url, {"name": "Adobe"})
+
+        manufacturer = Manufacturer.objects.get(name="Adobe")
+        self.assertRedirects(response, f"{form_url}?manufacturer={manufacturer.pk}", fetch_redirect_response=False)
+        form = self.client.get(form_url, {"manufacturer": manufacturer.pk}).context["form"]
+        self.assertEqual(form["manufacturer"].value(), str(manufacturer.pk))
+
+    def test_a_new_subscriber_joins_the_default_subscribers(self):
+        person = Person.objects.create(first_name="New", last_name="Subscriber", email="new@example.com")
+
+        form = self.client.get(reverse("licenses:new"), {"subscribers": person.pk}).context["form"]
+
+        self.assertEqual(
+            [str(pk) for pk in form["subscribers"].value()], [str(self.default_subscriber.pk), str(person.pk)]
+        )
+
+    def test_the_edit_form_has_the_buttons_too(self):
+        licence = self._create_device(sap_id="LIC-1")
+        licence.is_licence = True
+        licence.save()
+
+        response = self.client.get(reverse("licenses:edit", args=[licence.pk]))
+
+        self.assertContains(response, "data-related-links", count=4)

@@ -6,7 +6,7 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
     <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
-    <a href="{% url 'persons:index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    <a href="{{ next_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
   </div>
 
   <div class="row g-4">
@@ -14,8 +14,7 @@
       <form method="post" novalidate>
         {% csrf_token %}
         {% include "persons/includes/_form_fields.html" with form=form %}
-        {% url 'persons:index' as cancel_url %}
-        {% include "theme/includes/_form_action_bar.html" with cancel_url=cancel_url submit_label=submit_label %}
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url submit_label=submit_label %}
       </form>
     </div>
   </div>

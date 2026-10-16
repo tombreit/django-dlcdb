@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, Person
 from dlcdb.tenants.shortcuts import limit_tenant_field
-from dlcdb.theme.widgets import TomSelectMultipleWidget
+from dlcdb.theme.widgets import TomSelectMultipleWidget, TomSelectWidget
 
 from .models import license_device_types
 from .subscribers import manage_subscribers
@@ -67,15 +67,19 @@ class LicenseForm(forms.ModelForm):
                 # Column("contact_person_internal", css_class="col-md-4"),
             ),
             Div(HTML("<hr>")),
+            # Manufacturer, supplier and type are searchable selects with buttons
+            # to open or add an entry (theme.related): a floating label cannot
+            # hold the input group, so they take their label above, and so do
+            # their neighbours, to keep each row level.
             Row(
-                Column(FloatingField("manufacturer"), css_class="col-md-4"),
-                Column(FloatingField("series"), css_class="col-md-6"),
+                Column("manufacturer", css_class="col-md-4"),
+                Column("series", css_class="col-md-6"),
             ),
             Row(
-                Column(FloatingField("supplier"), css_class="col-md-3"),
-                Column(FloatingField("order_number"), css_class="col-md-3"),
-                Column(FloatingField("book_value"), css_class="col-md-2"),
-                Column(FloatingField("device_type"), css_class="col-md-3"),
+                Column("supplier", css_class="col-md-3"),
+                Column("order_number", css_class="col-md-3"),
+                Column("book_value", css_class="col-md-2"),
+                Column("device_type", css_class="col-md-3"),
             ),
             Div(
                 Row(
@@ -148,6 +152,9 @@ class LicenseForm(forms.ModelForm):
             # `format` it renders empty and saves empty (test_native_date_widgets).
             "contract_expiration_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
             "contract_start_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+            "manufacturer": TomSelectWidget(),
+            "supplier": TomSelectWidget(),
+            "device_type": TomSelectWidget(),
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
         }

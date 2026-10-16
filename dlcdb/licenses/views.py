@@ -22,6 +22,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.related import add_related_links
 
 from .filters import LicenceRecordFilter
 from .forms import LicenseForm
@@ -122,6 +123,9 @@ def edit(request, license_id):
             tenants=request.tenants,
         )
 
+    # Manufacturer, supplier, type and subscribers get buttons to open or add one.
+    add_related_links(form, request)
+
     # Determine if calendar URL should be shown (check for relevant dates)
     calendar_url = False
     if device.contract_start_date or device.contract_expiration_date:
@@ -143,10 +147,9 @@ def edit(request, license_id):
 
 @htmx_permission_required("core.add_licencerecord")
 def new(request):
-    if request.htmx:
-        template = "licenses/form_partial.html"
-    else:
-        raise NotImplementedError("Non HTMX requests not implemented")
+    # The list swaps the form in by HTMX; a plain request gets a page of its
+    # own, which is where a select's + button returns to (theme.related).
+    template = "licenses/form_partial.html" if request.htmx else "licenses/form.html"
 
     if request.method == "POST":
         form = LicenseForm(
@@ -200,11 +203,14 @@ def new(request):
                 )
 
             redirect_url = reverse("licenses:index")
-            return HttpResponseClientRedirect(redirect_url)
+            return HttpResponseClientRedirect(redirect_url) if request.htmx else redirect(redirect_url)
     else:
         # Set default subscribers
         default_subscribers = LicensesConfiguration.load().default_subscribers.all()
         form = LicenseForm(initial={"subscribers": default_subscribers}, tenants=request.tenants)
+
+    # Manufacturer, supplier, type and subscribers get buttons to open or add one.
+    add_related_links(form, request)
 
     return TemplateResponse(
         request,

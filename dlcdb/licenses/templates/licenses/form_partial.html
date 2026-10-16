@@ -73,11 +73,8 @@
     >
         {% translate "Save" %}
     </button>
-    <span
-        class="my-4 btn btn-secondary ms-2"
-        hx-get="{% url 'licenses:index' %}"
-        hx-target="#licenses-content-wrapper"
-    >
+    {# A plain link: the form is also a page of its own, without the list's #licenses-content-wrapper to swap into. #}
+    <a class="my-4 btn btn-secondary ms-2" href="{% url 'licenses:index' %}">
         {% translate "Cancel" %}
-    </span>
+    </a>
 </form>
