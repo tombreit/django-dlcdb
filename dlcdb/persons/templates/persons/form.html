@@ -14,6 +14,7 @@
       <form method="post" novalidate>
         {% csrf_token %}
         {% include "persons/includes/_form_fields.html" with form=form %}
+        <div id="similar-names">{% include "theme/includes/_similar.html" %}</div>
         {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url submit_label=submit_label %}
       </form>
     </div>

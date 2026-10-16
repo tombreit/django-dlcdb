@@ -55,6 +55,14 @@ nur mit den Berechtigungen der jeweiligen Seite, z.B. *Can view manufacturer*
 und *Can add manufacturer*. Das Auswahlfeld *Raum* beim Wiedereingliedern eines
 ausgemusterten Geräts hat dieselben Buttons.
 
+Beim Anlegen vergleicht die DLCDB den Namen mit den vorhandenen Einträgen, auch
+den deaktivierten. Groß- und Kleinschreibung, Umlaute, Satzzeichen und Zusätze
+wie *GmbH* zählen dabei nicht: *pro-com* wird neben *Procom* nicht angelegt. Ein
+ähnlicher Name (*Pulse* neben *Pulse Secure*, ein Tippfehler) wird erst nach
+Bestätigung angelegt. Ein Button neben jedem gefundenen Eintrag übernimmt ihn
+stattdessen ins Geräteformular. Dasselbe gilt für Räume (nur gleiche Nummern)
+und Personen.
+
 Die Info-Spalte rechts zeigt:
 
 - **Aktueller Status** — der aktive Record (Zustand, Raum/Person) und der Button

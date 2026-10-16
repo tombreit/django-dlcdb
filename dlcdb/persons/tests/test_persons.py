@@ -99,6 +99,16 @@ class PersonFrontendTests(TestCase):
         person = Person.objects.get(email="nelly@example.com")
         self.assertRedirects(response, f"{opener}?subscribers={person.pk}", fetch_redirect_response=False)
 
+    def test_add_refuses_another_spelling_of_an_existing_person(self):
+        Person.objects.create(first_name="Max", last_name="Müller", email="mueller@example.com")
+
+        response = self.client.post(
+            reverse("persons:add"), {"last_name": "Mueller", "first_name": "max", "email": "max.m@example.com"}
+        )
+
+        self.assertContains(response, "Person “Müller, Max” already exists.")
+        self.assertFalse(Person.objects.filter(email="max.m@example.com").exists())
+
     def test_duplicate_name_is_a_form_error_not_a_crash(self):
         response = self.client.post(
             reverse("persons:add"),

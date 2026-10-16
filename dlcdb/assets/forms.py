@@ -10,6 +10,7 @@ from dlcdb.core.models import Device, DeviceType, Manufacturer, Record, Room, Su
 from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.related import add_related_links
+from dlcdb.theme.similar import COMPANY_NOISE_WORDS, SimilarNames, check_similar_names
 from dlcdb.theme.widgets import DevicePickerMultiField, IconPickerWidget, TomSelectWidget
 
 
@@ -178,6 +179,10 @@ class DeviceForm(forms.ModelForm):
 
 
 class DeviceTypeForm(forms.ModelForm):
+    # Compared with the existing device types on add (theme.similar). Not the
+    # prefix: licence types share theirs.
+    similar_names = SimilarNames(fields=("name",))
+
     class Meta:
         model = DeviceType
         fields = ["name", "prefix", "icon", "note"]
@@ -191,8 +196,16 @@ class DeviceTypeForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         add_bootstrap_classes(self)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data
+
 
 class ManufacturerForm(forms.ModelForm):
+    # Compared with the existing manufacturers on add (theme.similar).
+    similar_names = SimilarNames(fields=("name",), noise_words=COMPANY_NOISE_WORDS)
+
     class Meta:
         model = Manufacturer
         fields = ["name", "note"]
@@ -207,8 +220,16 @@ class ManufacturerForm(forms.ModelForm):
         self.fields["name"].required = True
         add_bootstrap_classes(self)
 
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data
+
 
 class SupplierForm(forms.ModelForm):
+    # Compared with the existing suppliers on add (theme.similar).
+    similar_names = SimilarNames(fields=("name",), noise_words=COMPANY_NOISE_WORDS)
+
     class Meta:
         model = Supplier
         fields = ["name", "contact", "note"]
@@ -222,3 +243,8 @@ class SupplierForm(forms.ModelForm):
         # Same reasoning as ManufacturerForm: no nameless suppliers.
         self.fields["name"].required = True
         add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data

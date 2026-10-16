@@ -25,6 +25,7 @@ from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_m
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.similar import similar_context
 
 from ..filters import DeviceTypeFilter, ManufacturerFilter, SupplierFilter
 from ..forms import DeviceTypeForm, ManufacturerForm, SupplierForm
@@ -170,6 +171,8 @@ def _masterdata_add(request, spec):
             "heading": spec.heading,
             "icon": spec.icon,
             "next_url": get_redirect_url(request) or reverse(spec.index_url),
+            # Existing entries the new one may duplicate, after a refused save.
+            "similar": similar_context(request, getattr(form, "similar_matches", None)),
         },
     )
 

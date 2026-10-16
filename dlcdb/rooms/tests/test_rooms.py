@@ -111,6 +111,22 @@ class RoomFrontendTests(BaseTest):
         room = Room.objects.get(number="F3.04")
         self.assertRedirects(response, f"{opener}&room={room.pk}", fetch_redirect_response=False)
 
+    def test_add_room_with_the_number_of_a_deactivated_room_is_a_form_error(self):
+        # Django checks unique numbers among active rooms only; the database
+        # sees the deactivated one too, and the save used to end in a 500.
+        deactivated = Room.objects.create(number="F9.99")
+        deactivated.delete()
+
+        response = self.client.post(reverse("rooms:add"), {"number": "F9.99"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Room “F9.99” exists, but is deactivated.")
+
+    def test_add_room_refuses_another_spelling_of_a_number(self):
+        response = self.client.post(reverse("rooms:add"), {"number": "f 1.01"})
+
+        self.assertContains(response, "Room “F1.01 (Server room)” already exists.")
+
     def test_edit_room_returns_to_the_filtered_index(self):
         url = with_next(reverse("rooms:detail", args=[self.plain_room.pk]), f"{self.index_url}?search=F2")
         response = self.client.post(url, {"number": "F2.02", "nickname": "Renamed"})

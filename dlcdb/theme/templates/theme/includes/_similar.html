@@ -1,0 +1,45 @@
+<!--
+SPDX-FileCopyrightText: Thomas Breitner
+
+SPDX-License-Identifier: EUPL-1.2
+-->
+
+{% load i18n %}
+
+{% comment %}
+The existing entries a new one may duplicate, on an add page (theme/similar.py).
+Renders nothing without them.
+
+An identical entry blocks the save: it is listed in red. Similar ones are listed
+in yellow, with the "Create anyway" tick; its value names the entries listed, so
+a tick never covers a list the user has not seen. "Use this one" leads back to
+the form that opened the add page, with the entry preselected.
+
+Params:
+  similar  the context from theme.similar.similar_context, or None.
+{% endcomment %}
+
+{% if similar %}
+  <div class="alert {% if similar.blocked %}alert-danger{% else %}alert-warning{% endif %}">
+    <div class="fw-semibold mb-2">
+      {% if similar.blocked %}{% translate "Already there:" %}{% else %}{% translate "Similar existing entries:" %}{% endif %}
+    </div>
+    <ul class="list-unstyled d-grid gap-2 mb-0">
+      {% for entry in similar.entries %}
+        <li class="d-flex flex-wrap align-items-center gap-2">
+          <span>{{ entry.label }}</span>
+          {% if entry.deactivated %}<span class="badge text-bg-secondary">{% translate "deactivated" %}</span>{% endif %}
+          {% if entry.use_url %}
+            <a class="btn btn-sm btn-outline-secondary ms-auto" href="{{ entry.use_url }}">{% translate "Use this one" %}</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if similar.create_anyway %}
+      <div class="form-check mt-3">
+        <input class="form-check-input" type="checkbox" name="create_anyway" value="{{ similar.create_anyway }}" id="id_create_anyway">
+        <label class="form-check-label" for="id_create_anyway">{% translate "Create anyway: mine is another one" %}</label>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

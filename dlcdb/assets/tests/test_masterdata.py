@@ -152,6 +152,48 @@ class MasterdataFrontendTests(BaseTest):
 
         self.assertRedirects(response, self.OPENER, fetch_redirect_response=False)
 
+    def test_add_refuses_another_spelling_of_an_existing_name(self):
+        for url_name, name, message in [
+            ("assets:device_type_add", "NOTE-BOOK", "Device Type “Notebook” already exists."),
+            # A case variant used to reach the database constraint and its
+            # technical "Constraint … is violated" message.
+            ("assets:manufacturer_add", "example computers", "Manufacturer “Example Computers” already exists."),
+            ("assets:supplier_add", "Example Distribution GmbH", "Supplier “Example Distribution” already exists."),
+        ]:
+            with self.subTest(url_name=url_name):
+                response = self.client.post(reverse(url_name), {"name": name, "prefix": ""})
+
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, message)
+                self.assertNotContains(response, "Constraint")
+                self.assertContains(response, "alert-danger")
+
+    def test_add_warns_about_a_similar_name_until_the_user_ticks_create_anyway(self):
+        url = reverse("assets:supplier_add")
+
+        response = self.client.post(url, {"name": "Example"})
+        self.assertContains(response, "Similar existing entries")
+        self.assertContains(response, f'name="create_anyway" value="{self.supplier.pk}"')
+
+        # A tick given for another list of entries does not count.
+        self.client.post(url, {"name": "Example", "create_anyway": "999999"})
+        self.assertFalse(Supplier.objects.filter(name="Example").exists())
+
+        response = self.client.post(url, {"name": "Example", "create_anyway": str(self.supplier.pk)})
+        supplier = Supplier.objects.get(name="Example")
+        self.assertRedirects(response, reverse("assets:supplier_detail", args=[supplier.pk]))
+
+    def test_use_this_one_returns_to_the_form_with_the_existing_entry(self):
+        response = self.client.post(self._add_url("assets:manufacturer_add"), {"name": "example computers"})
+
+        use_url = f"{self.OPENER}&manufacturer={self.manufacturer.pk}"
+        self.assertContains(response, f'href="{escape(use_url)}"')
+
+    def test_use_this_one_opens_the_existing_entry_on_an_add_page_opened_from_the_list(self):
+        response = self.client.post(reverse("assets:manufacturer_add"), {"name": "example computers"})
+
+        self.assertContains(response, f'href="{reverse("assets:manufacturer_detail", args=[self.manufacturer.pk])}"')
+
     def test_create_manufacturer_requires_a_name(self):
         response = self.client.post(reverse("assets:manufacturer_add"), {"name": "", "note": "nameless"})
 

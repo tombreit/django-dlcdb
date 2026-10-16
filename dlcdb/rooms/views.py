@@ -25,6 +25,7 @@ from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.similar import similar_context
 
 from .filters import RoomFilter
 from .forms import RoomForm
@@ -136,6 +137,8 @@ def room_add(request):
             "title": _("Add room"),
             "submit_label": _("Create room"),
             "next_url": get_redirect_url(request) or reverse("rooms:index"),
+            # Existing rooms the new one may duplicate, after a refused save.
+            "similar": similar_context(request, getattr(form, "similar_matches", None)),
         },
     )
 

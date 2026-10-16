@@ -18,6 +18,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.similar import similar_context
 
 from .assignments import group_assignments
 from .filters import PersonFilter
@@ -90,6 +91,8 @@ def person_add(request):
             "title": _("Add person"),
             "submit_label": _("Create person"),
             "next_url": get_redirect_url(request) or reverse("persons:index"),
+            # Existing persons the new one may duplicate, after a refused save.
+            "similar": similar_context(request, getattr(form, "similar_matches", None)),
         },
     )
 

@@ -6,10 +6,10 @@ SPDX-License-Identifier: CC0-1.0
 
 # Related links: open or add the object a select points to
 
-**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–5 done: the device, recover,
-lending and licence forms have the buttons. Batches 6–7 (a duplicate check on the add pages) were
-planned 2026-10-16. This is a living document: each batch ticks its box under *Progress* and
-updates this line in the same commit.
+**Status:** planned 2026-10-15, batch 1 added 2026-10-16; batches 1–6 done: the device, recover,
+lending and licence forms have the buttons, and the add pages refuse identical and warn about
+similar entries on save. Batch 7 (suggestions while typing) is next. This is a living document:
+each batch ticks its box under *Progress* and updates this line in the same commit.
 
 ## Why
 
@@ -492,7 +492,7 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
 - [x] **3. The mechanism, the device form and the recover form**
 - [x] **4. Lending**
 - [x] **5. Licences and persons** (open question 1: (a))
-- [ ] **6. The add pages refuse identical and warn about similar entries on save**
+- [x] **6. The add pages refuse identical and warn about similar entries on save**
 - [ ] **7. The add pages suggest similar entries while typing**
 
 ## Open questions
@@ -638,3 +638,16 @@ Detail pages already return to `next` (batch 1). Add pages don't yet.
     name starts with `Lizenz::`, `License::` or `Licence::` (`license_device_types`). Otherwise
     the select does not offer it and the preselection ignores it (decision 3). The licence guide
     says so.
+- **Batch 6:**
+  - **A compared field that failed already skips the check.** Otherwise a person whose last name
+    is missing would be compared by first name alone, and every Max would count as similar.
+  - **With an identical entry, the page lists only that one:** it blocks anyway, so a similar
+    list and its tick would be noise.
+  - **"Use this one" on an add page opened without `next_field`** (from the list) opens the
+    entry's detail page, if the user may view it.
+  - **The person name is compared as last name, then first name,** the order `str(person)` shows.
+  - **The similar warning names no model** ("Similar entries exist, see below."): the verbose
+    names are capitalized ("Device Type"), which reads oddly in the middle of a sentence.
+  - **New strings to translate:** "%(model)s “%(name)s” already exists.", "%(model)s “%(name)s”
+    exists, but is deactivated.", the similar warning, "Already there:", "Similar existing
+    entries:", "deactivated", "Use this one" and "Create anyway: mine is another one".
