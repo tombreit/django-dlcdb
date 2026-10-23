@@ -22,10 +22,10 @@ help:
 requirements:
 	mkdir -p requirements
 	python3 -m pip install --upgrade pip-tools pip wheel setuptools
-	python3 -m piptools compile --upgrade --strip-extras --extra docs              -o requirements/prod.txt pyproject.toml
-	python3 -m piptools compile --upgrade --strip-extras --extra docs --extra ldap -o requirements/prod-ldap.txt pyproject.toml
-	python3 -m piptools compile --upgrade --strip-extras --extra docs --extra dev  -o requirements/dev.txt pyproject.toml
-	python3 -m piptools compile --upgrade --strip-extras --extra docs --extra ldap --extra container -o requirements/container.txt pyproject.toml
+	python3 -m piptools compile --upgrade --generate-hashes --allow-unsafe --strip-extras --extra docs              -o requirements/prod.txt pyproject.toml
+	python3 -m piptools compile --upgrade --generate-hashes --allow-unsafe --strip-extras --extra docs --extra ldap -o requirements/prod-ldap.txt pyproject.toml
+	python3 -m piptools compile --upgrade --generate-hashes --allow-unsafe --strip-extras --extra docs --extra dev  -o requirements/dev.txt pyproject.toml
+	python3 -m piptools compile --upgrade --generate-hashes --allow-unsafe --strip-extras --extra docs --extra ldap --extra container -o requirements/container.txt pyproject.toml
 	ln -s --force  $(default_requirements_file) requirements.txt
 
 tests:

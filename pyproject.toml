@@ -21,7 +21,7 @@ classifiers = [
 # (Django's admin, DRF, django-htmx): a newer version could reference static
 # files the wheel lacks. Bump them deliberately, then run `make requirements`.
 dependencies = [
-    "Django==6.1.1",
+    "Django==6.1.2",
     "django-environ",
     "django-crispy-forms",
     "crispy-bootstrap5",
