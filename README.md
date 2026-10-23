@@ -25,23 +25,21 @@ The DLCDB manages the life cycle of IT assets: a device collects append-only rec
 
 ## 👉 Getting started
 
-The DLCDB is a Django project, works with [Python 3.12+](https://www.python.org/downloads/) and [nodejs](https://nodejs.org/en/download/) on Debian Linux.
-
-To get started using the DLCDB, run the following in a virtual python environment (development setup, not to be used in production):
+The DLCDB is a Django project and needs [Python 3.12+](https://www.python.org/downloads/) on Debian Linux. Each [GitHub release](https://github.com/tombreit/django-dlcdb/releases) carries a wheel with the frontend assets and the handbook built in, so trying it needs neither npm nor a source checkout:
 
 ```bash
-npm install
-npm run build
-pip install -r requirements/dev.txt
-python manage.py dlcdb_init  # writes .env; set DJANGO_DEBUG=true there for development
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
+mkdir dlcdb && cd dlcdb  # instance directory: .env and data/ live here
+python3 -m venv venv
+venv/bin/pip install "dlcdb @ https://github.com/tombreit/django-dlcdb/releases/download/vX.Y.Z/dlcdb-X.Y.Z-py3-none-any.whl"
+venv/bin/python -m dlcdb dlcdb_init  # writes .env, manage.py and wsgi.py
+./manage.py migrate
+./manage.py createsuperuser
+./manage.py runserver
 ```
 
-Then log in as that superuser and follow [Erste Schritte](https://tombreit.github.io/django-dlcdb/guides/erste_schritte.html) to set up groups, permissions, a tenant and rooms.
+Then open <http://127.0.0.1:8000> (the generated `.env` allows `127.0.0.1`, not `localhost`), log in as that superuser and follow [Erste Schritte](https://tombreit.github.io/django-dlcdb/guides/erste_schritte.html) to set up groups, permissions, a tenant and rooms.
 
-[Detailed setup and installation docs](https://tombreit.github.io/django-dlcdb/betrieb/setup.html)
+[Setup](https://tombreit.github.io/django-dlcdb/betrieb/setup.html) describes every way to run the DLCDB: as a [container image](https://tombreit.github.io/django-dlcdb/betrieb/setup.html#container-podman), as a [pip installation](https://tombreit.github.io/django-dlcdb/betrieb/setup.html#pip-installation) including production, or [from source](https://tombreit.github.io/django-dlcdb/betrieb/setup.html#from-source) for development.
 
 ## 📖 Documentation
 
