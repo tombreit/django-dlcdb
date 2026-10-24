@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 // Bootstrap is provided as window.bootstrap by the theme bundle (theme.js),
-// which is loaded before this bundle. htmx (also bundled in theme.js) dispatches
-// real bubbling DOM events, so plain addEventListener on body is sufficient here.
+// which is loaded before this bundle. htmx ({% htmx_script %} in theme/_base.html)
+// dispatches real bubbling DOM events, so plain addEventListener on body is sufficient here.
 
 export function getJsVars() {
   const el = document.getElementById('js_vars')

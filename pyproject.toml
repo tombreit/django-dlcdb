@@ -19,7 +19,8 @@ classifiers = [
 
 # Exact pins for the packages whose static files the wheel ships pre-collected
 # (Django's admin, DRF, django-htmx): a newer version could reference static
-# files the wheel lacks. `make requirements` keeps them, so every package bump
+# files the wheel lacks. django-htmx also vendors htmx itself, so bumping it
+# bumps htmx. `make requirements` keeps them, so every package bump
 # checks all three for new releases by hand, then runs `make requirements`.
 dependencies = [
     "Django==6.1.2",

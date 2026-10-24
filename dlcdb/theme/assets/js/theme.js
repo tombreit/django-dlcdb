@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 import * as bootstrap from 'bootstrap'
-import htmx from "htmx.org";
 import TomSelect from 'tom-select';
 
 import './filterbar';

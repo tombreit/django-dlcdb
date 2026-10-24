@@ -31,7 +31,6 @@
     "esbuild": "^0.28.1",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
-    "htmx.org": "^2.0.10",
     "jquery": "^3.7.1",
     "mermaid": "^11.16.0",
     "plotly.js-basic-dist-min": "^3.7.0",
