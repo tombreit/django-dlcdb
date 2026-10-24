@@ -5,7 +5,7 @@
 [project]
 name = "dlcdb"
 dynamic = ["version"]
-description = "Device Live Cycle Database"
+description = "Device Life Cycle Database: tracks IT devices from purchase to disposal - rooms, lending, QR-code stocktaking and licenses, with a complete audit trail. Django web app."
 authors = [{name = "Thomas Breitner", email = "t.breitner@csl.mpg.de"},]
 license = "EUPL-1.2"
 license-files = ["LICENSE", "LICENSES/*.txt"]
