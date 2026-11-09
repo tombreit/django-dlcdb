@@ -46,7 +46,15 @@
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "E-mail" %}</dt>
         <dd class="col-sm-8">{{ person.email|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Organizational unit" %}</dt>
-        <dd class="col-sm-8 mb-0">{{ person.organizational_unit|default:"—" }}</dd>
+        <dd class="col-sm-8">{{ person.organizational_unit|default:"—" }}</dd>
+        <dt class="col-sm-4 text-secondary fw-medium">{% translate "Room" %}</dt>
+        <dd class="col-sm-8 mb-0">
+          {% if person.room and perms.core.view_room %}
+            <a href="{% url 'rooms:detail' person.room.pk %}">{{ person.room }}</a>
+          {% else %}
+            {{ person.room|default:"—" }}
+          {% endif %}
+        </dd>
       </dl>
     </div>
   </section>

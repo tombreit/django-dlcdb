@@ -10,6 +10,7 @@ from operator import itemgetter
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -19,7 +20,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import TemplateView
 
-from dlcdb.core.models import Record, Room
+from dlcdb.core.models import Person, Record, Room
 from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
@@ -45,9 +46,17 @@ def _room_queryset():
     """
     Rooms visible in the frontend (the default manager already excludes
     soft-deleted rooms), each annotated with the count of devices currently in
-    the room — the same count the admin's DeviceCountMixin shows.
+    the room — the same count the admin's DeviceCountMixin shows — and the count
+    of persons assigned to it.
+
+    The persons are counted in a subquery: joined next to the records, every
+    person would repeat all of the room's record rows.
     """
-    return Room.objects.annotate(assets_count=Count("record", distinct=True, filter=Q(record__is_active=True)))
+    persons = Person.objects.filter(room=OuterRef("pk")).order_by().values("room").annotate(count=Count("pk"))
+    return Room.objects.annotate(
+        assets_count=Count("record", distinct=True, filter=Q(record__is_active=True)),
+        persons_count=Coalesce(Subquery(persons.values("count")), 0),
+    )
 
 
 def _room_changes(request, room):
@@ -182,6 +191,9 @@ def room_detail(request, pk):
         if request.htmx:
             return TemplateResponse(request, "rooms/includes/_changes.html", {"room": room, "changes": changes})
 
+    # The persons assigned to the room, for a user who may see persons.
+    persons = room.persons.all() if request.user.has_perm("core.view_person") else None
+
     return TemplateResponse(
         request,
         "rooms/detail.html",
@@ -192,6 +204,7 @@ def room_detail(request, pk):
             "next_url": next_url,
             "form_action": form_action,
             "changes": changes,
+            "persons": persons,
         },
     )
 

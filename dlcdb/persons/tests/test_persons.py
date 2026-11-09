@@ -80,6 +80,23 @@ class PersonFrontendTests(TestCase):
         self.assertContains(response, "Musterfrau")
         self.assertNotContains(response, "Mustermann")
 
+    def test_index_shows_the_room_and_sorts_by_it(self):
+        room = Room.objects.create(number="G235")
+        self.synced_person.room = room
+        self.synced_person.save()
+        # Both with a room: databases differ in where they sort an empty one.
+        self.local_person.room = Room.objects.create(number="G100")
+        self.local_person.save()
+
+        response = self.client.get(self.index_url, {"ordering": "-room"}, headers={"HX-Request": "true"})
+
+        self.assertContains(
+            response,
+            f'<a href="{reverse("rooms:detail", args=[room.pk])}" class="link-secondary">G235</a>',
+            html=True,
+        )
+        self.assertEqual(list(response.context["page_obj"]), [self.synced_person, self.local_person])
+
     def test_create_person_sets_audit_user(self):
         response = self.client.post(
             reverse("persons:add"),
@@ -158,6 +175,49 @@ class PersonFrontendTests(TestCase):
         self.local_person.refresh_from_db()
         self.assertEqual(self.local_person.email, "erika.m@example.com")
         self.assertEqual(self.local_person.user, self.user)
+
+    def test_edit_unsynced_person_sets_a_room(self):
+        room = Room.objects.create(number="G235")
+        url = reverse("persons:detail", args=[self.local_person.pk])
+
+        response = self.client.post(
+            url, {"last_name": "Musterfrau", "first_name": "Erika", "email": "erika@example.com", "room": room.pk}
+        )
+
+        self.assertRedirects(response, self.index_url)
+        self.local_person.refresh_from_db()
+        self.assertEqual(self.local_person.room, room)
+
+    def test_a_deactivated_room_cannot_be_chosen(self):
+        room = Room.objects.create(number="G236")
+        room.delete()
+        url = reverse("persons:detail", args=[self.local_person.pk])
+
+        response = self.client.post(
+            url, {"last_name": "Musterfrau", "first_name": "Erika", "email": "erika@example.com", "room": room.pk}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Select a valid choice")
+        self.local_person.refresh_from_db()
+        self.assertIsNone(self.local_person.room)
+
+    def test_room_select_can_add_a_room_and_comes_back_with_it(self):
+        room = Room.objects.create(number="G237")
+        url = reverse("persons:detail", args=[self.local_person.pk])
+
+        self.assertContains(self.client.get(url), reverse("rooms:add"))
+        response = self.client.get(f"{url}?room={room.pk}")
+        self.assertEqual(response.context["form"]["room"].value(), str(room.pk))
+
+    def test_synced_person_shows_its_room(self):
+        room = Room.objects.create(number="G238")
+        self.synced_person.room = room
+        self.synced_person.save()
+
+        response = self.client.get(reverse("persons:detail", args=[self.synced_person.pk]))
+
+        self.assertContains(response, f'<a href="{reverse("rooms:detail", args=[room.pk])}">G238</a>', html=True)
 
     def test_udb_synced_person_is_readonly_even_for_superusers(self):
         url = reverse("persons:detail", args=[self.synced_person.pk])

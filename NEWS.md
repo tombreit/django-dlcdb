@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* A person can be assigned to a room on the person page; the person list shows it, the room list counts a room's persons, the room page lists them
 * Rooms: *Rename rooms* gives many rooms a new number with one regular expression (e.g. `235` → `G235`), after a preview
 * Add pages refuse a name that already exists in another spelling (procom, pro-com, Procom) and list similar ones while typing
 * Form selects of master data, rooms and persons get buttons to open the selected entry or add a new one, which comes back preselected

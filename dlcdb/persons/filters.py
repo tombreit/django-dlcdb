@@ -26,6 +26,7 @@ class PersonFilter(django_filters.FilterSet):
             ("last_name", "name"),
             ("email", "email"),
             ("organizational_unit__name", "unit"),
+            ("room__number", "room"),
             ("modified_at", "modified"),
             ("created_at", "created"),
         ),

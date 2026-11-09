@@ -18,6 +18,7 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.related import add_related_links
 from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
 from .assignments import group_assignments
@@ -29,7 +30,7 @@ PERSONS_PER_PAGE = 25
 
 def _person_queryset():
     """Persons visible in the frontend (the default manager excludes soft-deleted)."""
-    return Person.objects.select_related("organizational_unit")
+    return Person.objects.select_related("organizational_unit", "room")
 
 
 def _person_records(request, person):
@@ -78,6 +79,7 @@ def person_add(request):
         return similar_suggestions(request, PersonForm)
     form = PersonForm(request.POST or None)
     add_similar_suggestions(form, request)
+    add_related_links(form, request)
     if request.method == "POST" and form.is_valid():
         person = form.save(commit=False)
         person.stamp_user(request.user)
@@ -130,6 +132,7 @@ def person_detail(request, pk):
             return redirect(next_url)
     else:
         form = PersonForm(instance=person)
+    add_related_links(form, request)
 
     # What is or was assigned to the person, current first. The template shows
     # each card only with the matching view permission.

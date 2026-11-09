@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Person rooms: a person's room from the HR API
 
-**Status:** in progress (2026-11-09). Batches 0–1 are done. This is a living document:
+**Status:** in progress (2026-11-09). Batches 0–2 are done. This is a living document:
 each batch ticks its box in *Progress* in the same commit.
 
 ## Why
@@ -42,8 +42,8 @@ HR sync can match them.
    `related_name="persons"`, `limit_choices_to={"deleted_at__isnull": True}` like `Record.room`).
    A room has 0..n persons. Lending needs exactly one room per person, and a plain FK is native
    Django.
-2. **The raw HR value is kept:** `Person.udb_contract_workplace` (`Gü-235-02`), next to the other
-   `udb_contract_*` mirror fields. It shows what HR says when no room matches.
+2. **Only the room is stored:** the HR workplace (`Gü-235-02`) only yields the room; the person
+   does not keep it. The run log names the workplace of a room it cannot find.
 3. **The workplace → room rule is configuration:** a regex pattern and a replacement on the
    existing `UdbSyncConfiguration`, applied with `re.sub`.
    - CSL: `^(\w)\w*-(\d+)-\d+$` → `\1\2`.
@@ -85,6 +85,7 @@ HR sync can match them.
 | A hard-coded CSL helper | Not usable by other institutes on the same HR API. |
 | The sync creates unknown rooms (`dataexchange/fields.py:create_fk_obj`) | HR would decide which rooms exist; typos and values like "Homeoffice" would become rooms. |
 | A separate `PersonRoom` model or an M2M | Lending needs one room per person; the HR workplace is one value per contract. |
+| Keeping the raw workplace (`Person.udb_contract_workplace`) | Nothing uses it: lending needs the room, and the run log names the workplace of an unknown room (decided 2026-11-09). |
 | A website entered by hand wins over HR | HR link changes would never arrive. |
 
 ## Plan
@@ -120,15 +121,22 @@ HR sync can match them.
 
 ### Batch 2 – Person ↔ room
 
-- **Model:** `Person.room` and `Person.udb_contract_workplace`, with a core migration.
-- **Person form:** `PersonForm` gets `room` (`TomSelectWidget`).
-- **Person detail:** shows the room linked to its page, and, for HR persons, the workplace.
-- **Room detail:** a *Persons* card listing the persons in the room.
+- **Model:** `Person.room`, migration `core/0080_person_room`.
+- **Person form:** `PersonForm` gets `room` (`TomSelectWidget`), with the open/add buttons of
+  `theme.related` on the add and detail pages.
+- **Person detail:** shows the room linked to its page.
+- **Person list:** a sortable *Room* column (`select_related`, no extra query).
+- **Room detail:** a *Persons* card in the sidebar listing the persons in the room (with
+  `core.view_person`).
+- **Room list:** a sortable *Persons* column next to *Assets*, counted in a correlated subquery
+  (a join next to the records would repeat every record row per person).
 - **Docs:** `docs/betrieb/model.md`, the ER diagram and *Person*.
 - **Tests:**
-  - a manual person saves a room;
-  - the person detail shows the room and the workplace;
-  - the room detail lists its persons.
+  - a manual person saves a room; a deactivated room is refused;
+  - the room select adds a room and comes back with it;
+  - the person detail shows the room; the person list shows it and sorts by it;
+  - the room detail lists its persons, not deactivated ones, only with `core.view_person`;
+  - the room list counts persons without changing the assets count, and sorts by them.
 
 ### Batch 3 – Workplace rule in the HR sync configuration
 
@@ -147,10 +155,10 @@ HR sync can match them.
   `UDB_WORKPLACE_RESOURCE_TYPE`.
 - **Parsing:** `_workplace(contract)` returns `(workplace, plan_url)`.
 - **`_process_contract`:**
-  - sets `udb_contract_workplace` and `room`;
+  - sets `room`;
   - overwrites `Room.website` with an admin `LogEntry`;
   - returns the unknown-room problem, which the loop records as an extra SKIPPED row.
-- **Change detection:** `COMPARED_PERSON_FIELDS` gains `room` and `udb_contract_workplace`.
+- **Change detection:** `COMPARED_PERSON_FIELDS` gains `room`.
 - **Tests:** `_contract(…, workplace=…, plan_url=…)`, covering:
   - the room is mapped;
   - an unknown room is SKIPPED;
@@ -195,6 +203,6 @@ Planned when batches 1–4 have landed:
 
 - [x] **0. This document**
 - [x] **1. Batch rename of rooms**
-- [ ] **2. Person ↔ room**
+- [x] **2. Person ↔ room**
 - [ ] **3. Workplace rule in the HR sync configuration**
 - [ ] **4. The HR sync assigns rooms**

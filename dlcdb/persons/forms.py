@@ -30,9 +30,11 @@ class PersonForm(forms.ModelForm):
             "first_name",
             "email",
             "organizational_unit",
+            "room",
         ]
         widgets = {
             "organizational_unit": TomSelectWidget(),
+            "room": TomSelectWidget(),
         }
 
     def __init__(self, *args, **kwargs):

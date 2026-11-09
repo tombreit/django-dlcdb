@@ -187,6 +187,8 @@ def _license_page():
 
 def _person_page():
     person = _person("person.page@example.com", last_name="Noether")
+    person.room = Room.objects.create(number="G235")
+    person.save()
     return reverse("persons:detail", args=[person.pk]), person
 
 

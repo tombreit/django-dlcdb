@@ -28,6 +28,7 @@
               {% include "theme/filterbar/_sort_th.html" with label=_("Name") asc="name" desc="-name" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("E-mail") asc="email" desc="-email" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Organizational unit") asc="unit" desc="-unit" th_class="d-none d-lg-table-cell" %}
+              {% include "theme/filterbar/_sort_th.html" with label=_("Room") asc="room" desc="-room" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
             </tr>
           </thead>
@@ -54,11 +55,18 @@
                 </td>
                 <td class="d-none d-md-table-cell text-muted">{{ person.get_email|default:"—" }}</td>
                 <td class="d-none d-lg-table-cell text-muted">{{ person.organizational_unit|default:"—" }}</td>
+                <td class="d-none d-md-table-cell text-muted font-monospace">
+                  {% if person.room and perms.core.view_room %}
+                    <a href="{% url 'rooms:detail' person.room.pk %}" class="link-secondary">{{ person.room.number }}</a>
+                  {% else %}
+                    {{ person.room.number|default:"—" }}
+                  {% endif %}
+                </td>
                 <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">{{ person.modified_at|date:"Y-m-d" }}</td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="4" class="text-center text-muted py-4">
+                <td colspan="5" class="text-center text-muted py-4">
                   <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                   {% translate "No persons match these filters." %}
                   {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}

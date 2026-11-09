@@ -93,6 +93,17 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         null=True,
         on_delete=models.SET_NULL,
     )
+    # The room the person is assigned to. For a person matched with the HR
+    # system, the HR sync sets it from the workplace; other persons get it by hand.
+    room = models.ForeignKey(
+        "core.Room",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="persons",
+        limit_choices_to={"deleted_at__isnull": True},
+        verbose_name=_("Room"),
+    )
 
     # Additional UDB mirrored fields, all optional, updated by a cron task:
     udb_data_updated_at = models.DateTimeField(

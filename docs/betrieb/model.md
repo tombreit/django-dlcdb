@@ -16,6 +16,7 @@ relations (hand-maintained; source of truth: `dlcdb/core/models/`):
       DEVICE }o--o| TENANT : "tenant"
       RECORD }o--o| ROOM : "room"
       RECORD }o--o| PERSON : "person (lent)"
+      PERSON }o--o| ROOM : "room"
       RECORD }o--o| INVENTORY : "inventory"
       NOTE }o--o| DEVICE : ""
       NOTE }o--o| ROOM : ""
@@ -79,6 +80,8 @@ which is especially useful for the sap list comparison.
 Represents a person. Used by the LentRecord in order to relate the record to the person
 that lents the related device.
 Person data is enriched with contract data from the HR system.
+A person is assigned to at most one room (`Person.room`); a room can have any
+number of persons (`Room.persons`).
 
 ## Room
 

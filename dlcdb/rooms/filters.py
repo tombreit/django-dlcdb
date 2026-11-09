@@ -40,6 +40,7 @@ class RoomFilter(django_filters.FilterSet):
             ("number", "number"),
             ("nickname", "nickname"),
             ("assets_count", "assets"),
+            ("persons_count", "persons"),
             ("modified_at", "modified"),
             ("created_at", "created"),
         ),

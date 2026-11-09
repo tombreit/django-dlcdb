@@ -93,6 +93,24 @@ class RoomFrontendTests(BaseTest):
         response = self.client.get(self.index_url, {"search": "F1.01"}, headers={"HX-Request": "true"})
         self.assertContains(response, '<span class="badge text-bg-light border">1</span>', html=False)
 
+    def test_index_counts_persons_without_multiplying_the_assets(self):
+        device = self._create_device(edv_id="EDV-COUNTED", sap_id="1-2")
+        InRoomRecord.objects.create(device=device, room=self.server_room)
+        for name in ("Erika", "Max"):
+            Person.objects.create(
+                first_name=name, last_name="Muster", email=f"{name}@example.com", room=self.server_room
+            )
+        Person.objects.create(
+            first_name="Gone", last_name="Muster", email="gone@example.com", room=self.server_room
+        ).delete()
+
+        response = self.client.get(self.index_url, {"ordering": "-persons"}, headers={"HX-Request": "true"})
+
+        rooms = list(response.context["page_obj"])
+        self.assertEqual(rooms[0], self.server_room)
+        self.assertEqual((rooms[0].assets_count, rooms[0].persons_count), (1, 2))
+        self.assertEqual((rooms[1].assets_count, rooms[1].persons_count), (0, 0))
+
     def test_create_room_sets_audit_user_and_qrcode(self):
         response = self.client.post(reverse("rooms:add"), {"number": "F3.03", "nickname": "New room"})
 
@@ -169,6 +187,38 @@ class RoomFrontendTests(BaseTest):
         # The QR card is a native <details> without `open` (collapsed) and last.
         self.assertContains(response, '<details class="card card-filled mb-3">')
         self.assertNotContains(response, "<details open")
+
+    def test_detail_lists_the_persons_in_the_room(self):
+        Person.objects.create(
+            first_name="Erika", last_name="Musterfrau", email="erika@example.com", room=self.server_room
+        )
+        Person.objects.create(
+            first_name="Max", last_name="Gone", email="gone@example.com", room=self.server_room
+        ).delete()
+        Person.objects.create(first_name="Eva", last_name="Elsewhere", email="eva@example.com", room=self.plain_room)
+
+        response = self.client.get(reverse("rooms:detail", args=[self.server_room.pk]))
+
+        self.assertContains(response, "Musterfrau, Erika")
+        self.assertNotContains(response, "Gone, Max")
+        self.assertNotContains(response, "Elsewhere, Eva")
+
+        empty = self.client.get(reverse("rooms:detail", args=[self.plain_room.pk]))
+        self.assertNotContains(empty, "No person is assigned to this room.")
+        self.assertContains(
+            self.client.get(reverse("rooms:detail", args=[Room.objects.create(number="F4.04").pk])),
+            "No person is assigned to this room.",
+        )
+
+    def test_persons_card_needs_the_person_view_permission(self):
+        Person.objects.create(
+            first_name="Erika", last_name="Musterfrau", email="erika@example.com", room=self.server_room
+        )
+        self.client.force_login(self._core_perm_user("view_room"))
+
+        response = self.client.get(reverse("rooms:detail", args=[self.server_room.pk]))
+
+        self.assertNotContains(response, "Musterfrau, Erika")
 
     def test_view_only_user_gets_readonly_detail_and_cannot_post(self):
         self.client.force_login(self._core_perm_user("view_room"))
