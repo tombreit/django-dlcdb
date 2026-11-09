@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Person rooms: a person's room from the HR API
 
-**Status:** planned (2026-11-09). Batch 0 (this document) is done. This is a living document:
+**Status:** in progress (2026-11-09). Batches 0–1 are done. This is a living document:
 each batch ticks its box in *Progress* in the same commit.
 
 ## Why
@@ -96,8 +96,9 @@ HR sync can match them.
     room whose number `re.sub` changes. `problem` is set when the new number:
     - is empty;
     - is longer than `Room.number`'s `max_length`;
-    - is held by another room, case-insensitively, soft-deleted ones included, unless that room is
-      renamed away in the same batch;
+    - is held by another room in any spelling the add page counts as the same
+      (`theme.similar.comparable_name`: "g-235" is "G235"), soft-deleted ones included, even when
+      that room is renamed away in the same batch (no swaps or chains);
     - is the target of two renames.
   - `apply_renames(pattern, replacement, *, user)` recomputes the plan and renames the rows without
     a problem in one transaction (`stamp_user`, `save`). It writes one journal entry and returns
@@ -105,8 +106,9 @@ HR sync can match them.
 - **Form, view and URL:** `RoomRenameForm`, the view `room_rename`
   (`@htmx_permission_required("core.change_room")`) and `rooms:rename`.
   - GET with `?pattern=&replacement=` renders the preview.
-  - POST applies it and returns to the list.
-- **Templates:** `rooms/rename.html`, and a "Batch rename" button on the rooms list.
+  - POST applies it and returns to the list, or to the preview when rooms kept their number:
+    the preview then lists them with the reason.
+- **Templates:** `rooms/rename.html`, and a "Rename rooms" button on the rooms list.
 - **Tests:**
   - no matches: nothing to rename;
   - the CSL case;
@@ -114,7 +116,7 @@ HR sync can match them.
   - apply renames and journals;
   - a bad pattern or group reference is a form error;
   - 403 without `core.change_room`.
-- **Docs:** `docs/guides/erste_schritte.md` §6, Räume.
+- **Docs:** `docs/guides/erste_schritte.md` §6, Räume; a `NEWS.md` line.
 
 ### Batch 2 – Person ↔ room
 
@@ -192,7 +194,7 @@ Planned when batches 1–4 have landed:
 ## Progress
 
 - [x] **0. This document**
-- [ ] **1. Batch rename of rooms**
+- [x] **1. Batch rename of rooms**
 - [ ] **2. Person ↔ room**
 - [ ] **3. Workplace rule in the HR sync configuration**
 - [ ] **4. The HR sync assigns rooms**

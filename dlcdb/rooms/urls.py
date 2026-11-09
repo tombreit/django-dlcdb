@@ -11,6 +11,7 @@ app_name = "rooms"
 urlpatterns = [
     path("", views.room_index, name="index"),
     path("add/", views.room_add, name="add"),
+    path("rename/", views.room_rename, name="rename"),
     path("<int:pk>/", views.room_detail, name="detail"),
     path("reconcile/<int:reconcile_id>/", views.ReconcileRoomsView.as_view(), name="reconcile"),
 ]

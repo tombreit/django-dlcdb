@@ -40,6 +40,16 @@ Es muss mindestens ein Raum als *Extern/Verliehen-Raum* und ein Raum als *„Aut
 Sollen Räume mehrerer Standorte oder Gebäude verwaltet werden, oder werden kleinteiligere Einheiten als ein Raum benötigt, so kann dies über ein Bezeichnungsschema erfolgen. Beispiel: Eine Storage-Einheit im `Rack 32` in Raum `456` am Standort `Berlin Mitte` könnte folgende Raumnummer ergeben: `BM-456-R32`.
 :::
 
+### Räume umbenennen
+
+Ändert sich das Bezeichnungsschema, benennt *Räume umbenennen* (Button in der Raumübersicht, Berechtigung `core.change_room`) viele Räume auf einmal um. Ein regulärer Ausdruck (Python-Syntax) wird auf jede Raumnummer angewandt. Beispiel: Muster `^(\d+)$` und Ersetzung `G\1` stellen allen reinen Ziffernnummern das Gebäude voran, aus `235` wird `G235`.
+
+Die Vorschau zeigt, welcher Raum welche Nummer bekommt; umbenannt wird erst nach der Bestätigung. Ein Raum behält seine Nummer, wenn die neue leer, zu lang oder schon vergeben ist, auch in anderer Schreibweise oder an einen deaktivierten Raum. Tauschen oder verketten (`1` → `G1`, während `G1` → `GG1`) geht nicht in einem Schritt. Deaktivierte Räume werden nicht umbenannt. Jede Umbenennung steht im Journal.
+
+:::{note}
+Ein späterer CSV-[Import](import.md) muss die neuen Nummern verwenden: Eine alte Nummer wie `235` legt sonst wieder einen eigenen Raum an.
+:::
+
 ## 7. Personen anlegen
 
 Via Menü *Datenhaltung › Personen*. *Personen* sind „Kunden“ der DLCDB (z.B. Entleihende), keine Benutzerkonten – siehe [Benutzer und Personen](berechtigungen.md#benutzer-und-personen). Bei angebundenem HR-System werden Personen automatisch abgeglichen (siehe [HR-Sync](../betrieb/hr-sync.md)).

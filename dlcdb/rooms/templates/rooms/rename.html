@@ -1,0 +1,90 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Rename rooms" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Rename rooms" %}</h1>
+    <a href="{% url 'rooms:index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <p class="text-body-secondary">
+        {% blocktranslate trimmed %}
+          One regular expression gives many rooms a new number, such as the building in front of bare numbers:
+          pattern <code>^(\d+)$</code> and replacement <code>G\1</code> turn 235 into G235.
+          Rooms whose number does not match keep it. Nothing is renamed before you confirm the preview.
+        {% endblocktranslate %}
+      </p>
+
+      <form method="get" novalidate>
+        <section class="card card-filled mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-regex text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Expression" %}</h2>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              {% include "theme/includes/_field.html" with field=form.pattern col="col-md-6" %}
+              {% include "theme/includes/_field.html" with field=form.replacement col="col-md-6" %}
+            </div>
+          </div>
+        </section>
+        <button class="btn btn-outline-primary" type="submit">
+          <i class="bi bi-eye"></i> {% translate "Preview" %}
+        </button>
+      </form>
+
+      {% if renames is not None %}
+        <h2 class="h5 mt-5 mb-3">{% translate "Preview" %}</h2>
+        {% if renames %}
+          <div class="table-responsive mb-4">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th scope="col">{% translate "Room" %}</th>
+                  <th scope="col">{% translate "New number" %}</th>
+                  <th scope="col">{% translate "Note" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rename in renames %}
+                  <tr{% if rename.problem %} class="table-warning"{% endif %}>
+                    <td class="font-monospace">
+                      <a href="{% url 'rooms:detail' rename.room.pk %}">{{ rename.old_number }}</a>
+                    </td>
+                    <td class="font-monospace">
+                      {% if rename.problem %}<s class="text-body-secondary">{{ rename.new_number }}</s>{% else %}{{ rename.new_number }}{% endif %}
+                    </td>
+                    <td>
+                      {% if rename.problem %}{% translate "Keeps its number:" %} {{ rename.problem }}{% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <form method="post" class="d-flex flex-wrap align-items-center gap-2 mb-5">
+            {% csrf_token %}
+            <input type="hidden" name="pattern" value="{{ form.cleaned_data.pattern }}">
+            <input type="hidden" name="replacement" value="{{ form.cleaned_data.replacement }}">
+            <button class="btn btn-primary" type="submit"{% if not renamed_count %} disabled{% endif %}>
+              <i class="bi bi-check-lg"></i>
+              {% blocktranslate count counter=renamed_count trimmed %}
+                Rename {{ counter }} room
+              {% plural %}
+                Rename {{ counter }} rooms
+              {% endblocktranslate %}
+            </button>
+            <a class="btn btn-outline-secondary" href="{% url 'rooms:index' %}">{% translate "Cancel" %}</a>
+          </form>
+        {% else %}
+          <div class="alert alert-info">{% translate "No room number matches the pattern." %}</div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+{% endblock body %}

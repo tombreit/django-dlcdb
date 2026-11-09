@@ -16,6 +16,11 @@
           <i class="bi bi-ui-checks-grid"></i> {% translate "Room reconcile" %}
         </a>
       {% endif %}
+      {% if perms.core.change_room %}
+        <a href="{% url 'rooms:rename' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-input-cursor-text"></i> {% translate "Rename rooms" %}
+        </a>
+      {% endif %}
       {% if perms.core.add_room %}
         <a href="{% url 'rooms:add' %}" class="btn btn-primary">
           <i class="bi bi-plus-lg"></i> {% translate "Add room" %}

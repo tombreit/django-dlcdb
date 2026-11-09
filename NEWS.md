@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Rooms: *Rename rooms* gives many rooms a new number with one regular expression (e.g. `235` → `G235`), after a preview
 * Add pages refuse a name that already exists in another spelling (procom, pro-com, Procom) and list similar ones while typing
 * Form selects of master data, rooms and persons get buttons to open the selected entry or add a new one, which comes back preselected
 * Device QR codes, record attachments and import files are served only to users who see their tenant

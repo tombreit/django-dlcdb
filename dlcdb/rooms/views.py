@@ -14,7 +14,9 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.http import urlencode
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 from django.views.generic import TemplateView
 
 from dlcdb.core.models import Record, Room
@@ -28,7 +30,8 @@ from dlcdb.theme.pagination import paginate
 from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
 from .filters import RoomFilter
-from .forms import RoomForm
+from .forms import RoomForm, RoomRenameForm
+from .rename import apply_renames, plan_renames
 
 ROOMS_PER_PAGE = 25
 CHANGES_PER_PAGE = 25
@@ -189,6 +192,48 @@ def room_detail(request, pk):
             "next_url": next_url,
             "form_action": form_action,
             "changes": changes,
+        },
+    )
+
+
+@htmx_permission_required("core.change_room")
+def room_rename(request):
+    """
+    Rename many rooms with one regular expression (``rooms.rename``). The form
+    is sent by GET and shows which room gets which number; the confirmation
+    posts the same expression and renames. Rooms that kept their number are
+    shown again, with the reason.
+    """
+    if request.method == "POST":
+        form = RoomRenameForm(request.POST)
+        if form.is_valid():
+            pattern, replacement = form.cleaned_data["pattern"], form.cleaned_data["replacement"]
+            renames = apply_renames(pattern, replacement, user=request.user)
+            renamed = sum(1 for rename in renames if not rename.problem)
+            if renamed:
+                messages.success(
+                    request,
+                    ngettext("%(count)d room was renamed.", "%(count)d rooms were renamed.", renamed)
+                    % {"count": renamed},
+                )
+            if renamed < len(renames):
+                query = urlencode({"pattern": pattern, "replacement": replacement})
+                return redirect(f"{reverse('rooms:rename')}?{query}")
+            return redirect("rooms:index")
+    else:
+        form = RoomRenameForm(request.GET or None)
+
+    renames = None
+    if form.is_bound and form.is_valid():
+        renames = plan_renames(form.cleaned_data["pattern"], form.cleaned_data["replacement"])
+
+    return TemplateResponse(
+        request,
+        "rooms/rename.html",
+        {
+            "form": form,
+            "renames": renames,
+            "renamed_count": sum(1 for rename in renames if not rename.problem) if renames else 0,
         },
     )
 

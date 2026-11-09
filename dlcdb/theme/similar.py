@@ -106,6 +106,15 @@ def _joined(name_words):
     return name
 
 
+def comparable_name(text):
+    """
+    ``text`` the way the add pages compare names: "f 1.01" and "F1.01" are the
+    same room number. For checks of many names at once, where ``find_similar``
+    would read the whole table for every single name.
+    """
+    return _joined(words(text))
+
+
 def find_similar(model, similar_names, values):
     """
     The entries of ``model``, deactivated ones too, whose name is identical or

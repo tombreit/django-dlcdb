@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import re
+
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Room
 from dlcdb.theme.forms import add_bootstrap_classes
@@ -47,4 +50,41 @@ class RoomForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         check_similar_names(self)
+        return cleaned_data
+
+
+class RoomRenameForm(forms.Form):
+    """The regular expression of a batch rename (``rooms.rename``)."""
+
+    pattern = forms.CharField(
+        label=_("Pattern"),
+        help_text=_("A regular expression in Python syntax, matched against every room number."),
+        widget=forms.TextInput(attrs={"class": "font-monospace", "placeholder": r"^(\d+)$"}),
+    )
+    replacement = forms.CharField(
+        label=_("Replacement"),
+        required=False,
+        help_text=_("The new room number. \\1, \\2, … insert the pattern's groups."),
+        widget=forms.TextInput(attrs={"class": "font-monospace", "placeholder": r"G\1"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if "pattern" not in cleaned_data:
+            return cleaned_data
+        try:
+            regex = re.compile(cleaned_data["pattern"])
+        except re.error as error:
+            self.add_error("pattern", _("Invalid regular expression: %(error)s") % {"error": error})
+            return cleaned_data
+        # sub() checks the replacement's group references even when nothing
+        # matches; an unknown group name raises IndexError.
+        try:
+            regex.sub(cleaned_data["replacement"], "")
+        except (re.error, IndexError) as error:
+            self.add_error("replacement", _("Invalid replacement: %(error)s") % {"error": error})
         return cleaned_data
