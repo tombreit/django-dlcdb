@@ -199,6 +199,7 @@ class RoomFrontendTests(BaseTest):
 
         response = self.client.get(reverse("rooms:detail", args=[self.server_room.pk]))
 
+        self.assertContains(response, '<ol class="mb-0 ps-3">')
         self.assertContains(response, "Musterfrau, Erika")
         self.assertNotContains(response, "Gone, Max")
         self.assertNotContains(response, "Elsewhere, Eva")

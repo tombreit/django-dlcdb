@@ -80,11 +80,11 @@
       </div>
       <div class="card-body">
         {% if persons %}
-          <ul class="list-unstyled mb-0">
+          <ol class="mb-0 ps-3">
             {% for person in persons %}
               <li><a href="{% url 'persons:detail' person.pk %}">{{ person }}</a></li>
             {% endfor %}
-          </ul>
+          </ol>
         {% else %}
           <span class="text-body-secondary">{% translate "No person is assigned to this room." %}</span>
         {% endif %}
