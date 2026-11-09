@@ -17,6 +17,7 @@ pk and the meta line always carries organizational unit, e-mail and contract end
 unconditionally; a consumer's picker config reads only what it needs:
   data-contract-end   the person's planned checkout date (lending prefills the
                       desired lending end date from it via fill_date_target).
+  data-room-id        the person's room (lending prefills the room from it).
 
 Params:
   person (core.Person)  the person to render.
@@ -30,6 +31,7 @@ Params:
   data-option-id="{{ person.pk }}"
   data-option-label="{{ person.last_name }}, {{ person.first_name }}"
   data-contract-end="{{ person.udb_contract_planned_checkout|date:'Y-m-d' }}"
+  data-room-id="{{ person.room_id|default:'' }}"
 >
   <div class="card-body d-flex align-items-center gap-3 py-2">
     {% if person.udb_person_image %}

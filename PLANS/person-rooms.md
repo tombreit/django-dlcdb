@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Person rooms: a person's room from the HR API
 
-**Status:** batches 0–4 are done (2026-11-09); the lending step (*Later*) is still open. This is a living document:
+**Status:** done (2026-11-09), batches 0–5. This is a living document:
 each batch ticks its box in *Progress* in the same commit.
 
 ## Why
@@ -179,14 +179,22 @@ HR sync can match them.
 - **Docs:** `docs/betrieb/hr-sync.md`, section *Raum*.
 - **NEWS:** the batch 2 line in `NEWS.md` is extended, not a second line.
 
-### Later – Lending starts in the borrower's room
+### Batch 5 – A new lending starts in the borrower's room
 
-Planned when batches 1–4 have landed:
-- `LendingForm` and `lend.html` preset the room from `person.room`.
-- **Record mode:** server-side initial.
-- **Picker mode:** `data-room-id` on `_person_list_item.html` plus a `picker:selected` listener on
-  `#person-picker`. It fills the room only when it is empty, like `maybeFillDate`, and must settle
-  its precedence against the device-room prefill in `lend.html`.
+The person is picked in the browser in both modes of the lend page, so the default is set there.
+A server-side initial cannot know the person on GET. The simplest rule, chosen over a version that
+tracked a room chosen by hand:
+- **Person:** picking a person with a room sets the room to it; a person without one leaves it.
+- **Device (picker mode):** picking a device sets its room unless the picked person has one, so the
+  order of picking does not matter.
+
+Changes:
+- `_person_list_item.html` carries `data-room-id` (no query).
+- In `lend.html`, the inline script runs for the lend flow of both modes: `setRoom()` (sets nothing
+  for a room the select does not offer, as TomSelect would clear it) and a `picker:selected`
+  listener on `#person-picker`. The device listener uses the selected person card's room first.
+- The help text names the rule. A test covers `data-room-id` on the person search results; the
+  behaviour was checked in the browser.
 
 ## Rollout on an instance
 
@@ -224,3 +232,4 @@ Planned when batches 1–4 have landed:
 - [x] **2. Person ↔ room**
 - [x] **3. Room number rule in the HR sync configuration**
 - [x] **4. The HR sync assigns rooms**
+- [x] **5. A new lending starts in the borrower's room**

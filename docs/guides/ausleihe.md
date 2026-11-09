@@ -19,7 +19,7 @@ In der Verleihansicht werden nur Geräte aufgeführt, für die die Markierung *I
 ## Gerät wird ausgeliehen
 
 :::{note}
-Auch ein verliehenes Gerät hat einen Raum: den, in dem es voraussichtlich zu finden ist. Ist das unklar (z.B. Homeoffice), den [Extern-Raum](erste_schritte.md#6-räume-anlegen) angeben.
+Auch ein verliehenes Gerät hat einen Raum: den, in dem es voraussichtlich zu finden ist. Ist das unklar (z.B. Homeoffice), den [Extern-Raum](erste_schritte.md#6-räume-anlegen) angeben. Vorbelegt ist der Raum der ausleihenden Person (von Hand oder per [HR-Sync](../betrieb/hr-sync.md#raum) gesetzt), sonst der aktuelle Raum des Geräts.
 :::
 
 - Gerät-Ausleihe wird in DLCDB geöffnet

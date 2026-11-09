@@ -85,8 +85,8 @@ SPDX-License-Identifier: EUPL-1.2
                 </label>
                 {{ form.room }}
                 {{ form.room.errors }}
-                {% if picker_mode %}
-                  <div class="form-text">{% translate "Prefilled from the device's current location." %}</div>
+                {% if is_lend_flow %}
+                  <div class="form-text">{% translate "Prefilled from the person's room, otherwise from the device's current location." %}</div>
                 {% endif %}
               </div>
             </div>
@@ -292,15 +292,41 @@ SPDX-License-Identifier: EUPL-1.2
    it double-binds its document-level listeners.
    {% endcomment %}
 <script src="{% static 'theme/js/picker.js' %}"></script>
-{% if picker_mode %}
+{% if is_lend_flow %}
 <script>
   (function () {
     "use strict";
+    // The room starts as the borrower's room, otherwise the device's current one.
+    const roomSelect = document.getElementById("{{ form.room.id_for_label }}");
+
+    function setRoom(roomId) {
+      if (!roomSelect || !roomId) {
+        return;
+      }
+      if (roomSelect.tomselect) {
+        // A room the select does not offer (deactivated) would clear it.
+        if (roomSelect.tomselect.options[roomId]) {
+          roomSelect.tomselect.setValue(roomId);
+        }
+      } else if (roomSelect.querySelector('option[value="' + CSS.escape(roomId) + '"]')) {
+        roomSelect.value = roomId;
+        roomSelect.dispatchEvent(new Event("change"));
+      }
+    }
+
+    function personRoomId() {
+      const personCard = document.querySelector("#person-selected [data-room-id]");
+      return personCard ? personCard.dataset.roomId : "";
+    }
+
+    document.getElementById("person-picker").addEventListener("picker:selected", function (event) {
+      setRoom(event.detail.option.dataset.roomId);
+    });
+{% if picker_mode %}
     const deviceInput = document.getElementById("id_device");
     const personInput = document.getElementById("id_person");
     const submitBtn = document.getElementById("lend-form-submit");
     const printBtn = document.getElementById("lend-form-print");
-    const roomSelect = document.getElementById("{{ form.room.id_for_label }}");
     const devicePicker = document.getElementById("device-picker");
 
     function sync() {
@@ -317,16 +343,8 @@ SPDX-License-Identifier: EUPL-1.2
       devicePicker.addEventListener("picker:selected", function (event) {
         const option = event.detail.option;
 
-        // Prefill the room from the chosen device's current location.
-        const roomId = option.dataset.roomId;
-        if (roomSelect && roomId) {
-          if (roomSelect.tomselect) {
-            roomSelect.tomselect.setValue(roomId);
-          } else {
-            roomSelect.value = roomId;
-            roomSelect.dispatchEvent(new Event("change"));
-          }
-        }
+        // The device's room, unless the person picked first has a room.
+        setRoom(personRoomId() || option.dataset.roomId);
 
         // Point the print button at this device's print endpoint.
         if (printBtn) {
@@ -340,6 +358,7 @@ SPDX-License-Identifier: EUPL-1.2
     document.addEventListener("picker:changed", sync);
     document.addEventListener("DOMContentLoaded", sync);
     sync();
+{% endif %}
   })();
 </script>
 {% endif %}

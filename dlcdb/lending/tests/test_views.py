@@ -694,6 +694,16 @@ class LendingPersonSearchTests(BaseTest):
         self.assertContains(response, "Mustermann")
         self.assertNotContains(response, "Beispiel")
 
+    def test_a_result_carries_the_persons_room_for_the_room_default(self):
+        room = Room.objects.create(number="G235")
+        self.person.room = room
+        self.person.save()
+
+        response = self.client.post(self.url, {"search": "*"})
+
+        self.assertContains(response, f'data-room-id="{room.pk}"')
+        self.assertContains(response, 'data-room-id=""')  # Erika has no room
+
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingPrintSheetTests(BaseTest):
