@@ -113,6 +113,53 @@ def test_clean_rejects_query_in_url():
     assert "url" in exc.value.message_dict
 
 
+# --- HR room → DLCDB room number -----------------------------------------------
+
+# At CSL, HR names a workplace in a room: Gü-235-02 is in room G235.
+CSL_ROOM_NUMBER_RULE = {"room_number_pattern": r"^(\w)\w*-(\d+)-\d+$", "room_number_replacement": r"\1\2"}
+
+
+def test_room_number_rule_maps_the_hr_room_to_a_room_number():
+    config = UdbSyncConfiguration(**CSL_ROOM_NUMBER_RULE)
+
+    assert udb_sync.map_room_number("Gü-235-02", config) == "G235"
+    assert udb_sync.map_room_number(" Gü-012-01 ", config) == "G012"
+
+
+def test_without_a_pattern_the_hr_room_is_the_room_number():
+    assert udb_sync.map_room_number(" G235 ", UdbSyncConfiguration()) == "G235"
+
+
+def test_an_hr_room_the_pattern_does_not_match_comes_back_unchanged():
+    config = UdbSyncConfiguration(**CSL_ROOM_NUMBER_RULE)
+
+    assert udb_sync.map_room_number("Homeoffice", config) == "Homeoffice"
+
+
+@pytest.mark.django_db
+def test_clean_accepts_a_room_number_rule():
+    UdbSyncConfiguration(**CSL_ROOM_NUMBER_RULE).clean()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("fields", "field_in_error"),
+    [
+        ({"room_number_pattern": "("}, "room_number_pattern"),
+        ({"room_number_pattern": r"^(\w)-(\d+)$", "room_number_replacement": r"\3"}, "room_number_replacement"),
+        (
+            {"room_number_pattern": r"^(\w)-(\d+)$", "room_number_replacement": r"\g<building>"},
+            "room_number_replacement",
+        ),
+        ({"room_number_pattern": "", "room_number_replacement": r"\1"}, "room_number_pattern"),
+    ],
+)
+def test_clean_rejects_an_invalid_room_number_rule(fields, field_in_error):
+    with pytest.raises(ValidationError) as exc:
+        UdbSyncConfiguration(**fields).clean()
+    assert list(exc.value.message_dict) == [field_in_error]
+
+
 # --- sync behaviour -----------------------------------------------------------
 
 

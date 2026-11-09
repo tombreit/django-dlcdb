@@ -19,6 +19,7 @@ aborting the whole run.
 import hashlib
 import json
 import logging
+import re
 import urllib.error
 import urllib.request
 
@@ -100,6 +101,20 @@ def build_request_url(config):
         f"person-fields={UDB_SYNC_PERSON_FIELDS}",
     ]
     return f"{config.url}?{'&'.join(p for p in params if p)}"
+
+
+def map_room_number(hr_room, config):
+    """
+    The DLCDB room number for a room as HR names it, by the rule in ``config``:
+    ``re.sub(room_number_pattern, room_number_replacement, hr_room)``. At CSL,
+    where HR names a workplace in a room, ``^(\\w)\\w*-(\\d+)-\\d+$`` and
+    ``\\1\\2`` turn Gü-235-02 into G235. Without a pattern the value is used as
+    it is; a value the pattern does not match comes back unchanged.
+    """
+    hr_room = hr_room.strip()
+    if not config.room_number_pattern:
+        return hr_room
+    return re.sub(config.room_number_pattern, config.room_number_replacement, hr_room).strip()
 
 
 def import_udb_persons():

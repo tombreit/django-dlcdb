@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import re
 from pathlib import Path
 
 from django.core.exceptions import ValidationError
@@ -213,6 +214,12 @@ class UdbSyncConfiguration(SingletonBaseModel):
     sync code reads a fixed set of keys, so both live in code (see
     ``udb_sync.UDB_SYNC_FILTERS`` / ``UDB_SYNC_CONTRACT_FIELDS`` / ``UDB_SYNC_PERSON_FIELDS``). ``clean()``
     keeps the admin-owned ``url`` from colliding with that code-owned query.
+
+    The room HR names for a person is not always a DLCDB room number as it is
+    (at CSL it names a workplace in a room: Gü-235-02 for room G235). How to map
+    it differs per institute, so the rule is configured here:
+    ``room_number_pattern`` and ``room_number_replacement`` (see
+    ``udb_sync.map_room_number``).
     """
 
     enabled = models.BooleanField(
@@ -235,6 +242,26 @@ class UdbSyncConfiguration(SingletonBaseModel):
         verbose_name="HR API token",
         help_text="Sent as the <code>X-API-KEY</code> header. Stored in plaintext in the database.",
     )
+    room_number_pattern = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Room number pattern"),
+        help_text=_(
+            "A regular expression (Python syntax) matched against the room HR names for a person, "
+            "e.g. <code>^(\\w)\\w*-(\\d+)-\\d+$</code>. "
+            "Leave empty if HR names the DLCDB room numbers as they are."
+        ),
+    )
+    room_number_replacement = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name=_("Room number replacement"),
+        help_text=_(
+            "The DLCDB room number for a room the pattern matches; <code>\\1</code>, <code>\\2</code>, … "
+            "insert the pattern's groups. With <code>\\1\\2</code> and the pattern above, "
+            "Gü-235-02 from HR becomes room G235."
+        ),
+    )
 
     class Meta:
         verbose_name = "HR API Sync Configuration"
@@ -249,6 +276,27 @@ class UdbSyncConfiguration(SingletonBaseModel):
             raise ValidationError(
                 {"url": "Provide the URL without a query string ('?...'). The query is appended by the code."}
             )
+        self._clean_room_number_rule()
+
+    def _clean_room_number_rule(self):
+        if not self.room_number_pattern:
+            if self.room_number_replacement:
+                raise ValidationError({"room_number_pattern": _("The replacement needs a pattern.")})
+            return
+        try:
+            regex = re.compile(self.room_number_pattern)
+        except re.error as error:
+            raise ValidationError(
+                {"room_number_pattern": _("Invalid regular expression: %(error)s") % {"error": error}}
+            ) from error
+        # sub() checks the replacement's group references even when nothing
+        # matches; an unknown group name raises IndexError.
+        try:
+            regex.sub(self.room_number_replacement, "")
+        except (re.error, IndexError) as error:
+            raise ValidationError(
+                {"room_number_replacement": _("Invalid replacement: %(error)s") % {"error": error}}
+            ) from error
 
 
 class UdbSyncRun(OperationLogBase):

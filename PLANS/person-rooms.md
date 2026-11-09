@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Person rooms: a person's room from the HR API
 
-**Status:** in progress (2026-11-09). Batches 0–2 are done. This is a living document:
+**Status:** in progress (2026-11-09). Batches 0–3 are done. This is a living document:
 each batch ticks its box in *Progress* in the same commit.
 
 ## Why
@@ -30,7 +30,7 @@ contracts carry `resources`. The workplace resource names a *workplace in a room
 ```
 
 `Gü-235-02` is workplace 02 in room 235 of the building `Gü`; the DLCDB room is `G235`. Other
-institutes on the same HR API name their workplaces differently.
+institutes on the same HR API name their rooms differently.
 
 The DLCDB rooms are a problem of their own: they are numbered without the building (`235`, not
 `G235`), on the development and the production instance alike. They are renamed once, before the
@@ -42,27 +42,30 @@ HR sync can match them.
    `related_name="persons"`, `limit_choices_to={"deleted_at__isnull": True}` like `Record.room`).
    A room has 0..n persons. Lending needs exactly one room per person, and a plain FK is native
    Django.
-2. **Only the room is stored:** the HR workplace (`Gü-235-02`) only yields the room; the person
-   does not keep it. The run log names the workplace of a room it cannot find.
-3. **The workplace → room rule is configuration:** a regex pattern and a replacement on the
-   existing `UdbSyncConfiguration`, applied with `re.sub`.
+2. **Only the room is stored:** the room as HR names it (`Gü-235-02`) only yields the DLCDB room;
+   the person does not keep it. The run log names the HR value of a room it cannot find.
+3. **A room number rule maps the HR value, configured:** a regex pattern and a replacement on the
+   existing `UdbSyncConfiguration` (`room_number_pattern`, `room_number_replacement`), applied with
+   `re.sub`. The rule and its names are general; that CSL's HR value is a workplace in a room is
+   CSL's data, not the mechanism (wording decided 2026-11-09).
    - CSL: `^(\w)\w*-(\d+)-\d+$` → `\1\2`.
-   - An empty pattern takes the workplace as the room number.
+   - An empty pattern takes the HR value as the room number.
    - No code is needed per institute.
-4. **Room-plan URL:** the first `resource_info[].value` of the workplace resource that passes
+4. **Room-plan URL:** the first `resource_info[].value` of the room resource that passes
    `URLValidator`. It is not keyed on `Mapongo-URL`, which is CSL's key. HR overwrites
    `Room.website` ("e.g. a URL to a room plan"), so a changed link propagates.
 5. **Unknown room number:** the person gets no room, and the run log gets a SKIPPED row
-   ("workplace Gü-235-02 → room G235 not in DLCDB"). The sync creates no rooms; the room list is
+   ("Gü-235-02 from HR → room G235 not in DLCDB"). The sync creates no rooms; the room list is
    curated by hand. A soft-deleted room counts as unknown.
 6. **Code-owned, like the existing request filters and fields:**
-   - the workplace resource type `UDB_WORKPLACE_RESOURCE_TYPE = "arbeitsplatz"`;
+   - the resource type that names a person's room, `UDB_ROOM_RESOURCE_TYPE = "arbeitsplatz"`
+     (at CSL a workplace in a room);
    - `resources` in `UDB_SYNC_CONTRACT_FIELDS`.
 
    Either one becomes a config field when another institute needs a different value.
 7. **Who owns the room:**
    - HR-synced persons are read-only in the frontend (`persons/views.py`), so HR owns their room.
-     A person without a workplace in HR has no room.
+     A person without a room in HR has no room.
    - Persons without an HR link (guests) get a `room` field in `PersonForm`.
 8. **Rooms are renamed in the rooms frontend:** a batch rename with the same `re.sub` syntax
    (`^(\d+)$` → `G\1`), a preview first, then apply. Details:
@@ -84,7 +87,7 @@ HR sync can match them.
 | A Python adapter selected by a setting (`DLCDB_WORKPLACE_TO_ROOM = "dotted.path"`) | Every other institute would have to deploy code. A regex covers the naming schemes seen so far; the setting can be added when one does not fit. |
 | A hard-coded CSL helper | Not usable by other institutes on the same HR API. |
 | The sync creates unknown rooms (`dataexchange/fields.py:create_fk_obj`) | HR would decide which rooms exist; typos and values like "Homeoffice" would become rooms. |
-| A separate `PersonRoom` model or an M2M | Lending needs one room per person; the HR workplace is one value per contract. |
+| A separate `PersonRoom` model or an M2M | Lending needs one room per person; HR names one room per contract. |
 | Keeping the raw workplace (`Person.udb_contract_workplace`) | Nothing uses it: lending needs the room, and the run log names the workplace of an unknown room (decided 2026-11-09). |
 | A website entered by hand wins over HR | HR link changes would never arrive. |
 
@@ -138,34 +141,35 @@ HR sync can match them.
   - the room detail lists its persons, not deactivated ones, only with `core.view_person`;
   - the room list counts persons without changing the assets count, and sorts by them.
 
-### Batch 3 – Workplace rule in the HR sync configuration
+### Batch 3 – Room number rule in the HR sync configuration
 
-- **Config fields:** `UdbSyncConfiguration.workplace_pattern` and `room_number_replacement`, with a
-  dataexchange migration. `clean()` validates the pair.
-- **Rule function:** `udb_sync.workplace_room_number(workplace, config)` is a pure function.
+- **Config fields:** `UdbSyncConfiguration.room_number_pattern` and `room_number_replacement`, with
+  a migration `dataexchange/0012_udbsyncconfiguration_room_number_rule`. `clean()` validates the pair
+  and refuses a replacement without a pattern.
+- **Rule function:** `udb_sync.map_room_number(hr_room, config)` is a pure function.
 - **Tests:**
   - `Gü-235-02` → `G235`;
   - an empty pattern returns the value verbatim;
   - a non-matching value comes back unchanged;
-  - `clean()` rejects a bad pattern and a bad group reference.
+  - `clean()` rejects a bad pattern, a bad group reference and a replacement without a pattern.
 
 ### Batch 4 – The HR sync assigns rooms
 
 - **Request:** `resources` in `UDB_SYNC_CONTRACT_FIELDS`, and the constant
-  `UDB_WORKPLACE_RESOURCE_TYPE`.
-- **Parsing:** `_workplace(contract)` returns `(workplace, plan_url)`.
+  `UDB_ROOM_RESOURCE_TYPE`.
+- **Parsing:** `_hr_room(contract)` returns `(hr_room, plan_url)`.
 - **`_process_contract`:**
   - sets `room`;
   - overwrites `Room.website` with an admin `LogEntry`;
   - returns the unknown-room problem, which the loop records as an extra SKIPPED row.
 - **Change detection:** `COMPARED_PERSON_FIELDS` gains `room`.
-- **Tests:** `_contract(…, workplace=…, plan_url=…)`, covering:
+- **Tests:** `_contract(…, room=…, plan_url=…)`, covering:
   - the room is mapped;
   - an unknown room is SKIPPED;
-  - no workplace means no room;
+  - no room in HR means no room;
   - the website is overwritten, then UNCHANGED on the next run;
   - the request URL asks for `resources`.
-- **Docs:** `docs/betrieb/hr-sync.md`, section *Raum und Arbeitsplatz*.
+- **Docs:** `docs/betrieb/hr-sync.md`, section *Raum*.
 - **NEWS:** `NEWS.md`.
 
 ### Later – Lending starts in the borrower's room
@@ -180,7 +184,7 @@ Planned when batches 1–4 have landed:
 ## Rollout on an instance
 
 1. Rename the rooms (`^(\d+)$` → `G\1` at CSL); check the preview first.
-2. Set the workplace rule in *Settings › HR API sync configuration*.
+2. Set the room number rule in *Settings › HR API sync configuration*.
 3. Watch the next HR sync runs for SKIPPED rooms; create or rename those rooms.
 
 ## Pitfalls
@@ -204,5 +208,5 @@ Planned when batches 1–4 have landed:
 - [x] **0. This document**
 - [x] **1. Batch rename of rooms**
 - [x] **2. Person ↔ room**
-- [ ] **3. Workplace rule in the HR sync configuration**
+- [x] **3. Room number rule in the HR sync configuration**
 - [ ] **4. The HR sync assigns rooms**
