@@ -42,7 +42,7 @@ Request-Filter (nur aktive Verträge, keine Testdaten) und abgefragte Felder sin
 
 Das HR-System nennt den Raum einer Person in den Ressourcen des Vertrags, als Ressource vom Typ `arbeitsplatz`. Am CSL ist das ein Arbeitsplatz in einem Raum: `Gü-235-02` ist Arbeitsplatz 02 in Raum G235.
 
-Eine Regel macht daraus die DLCDB-Raumnummer: ein regulärer Ausdruck (Python-Syntax) und eine Ersetzung, angewandt wie bei [Räume umbenennen](../guides/erste_schritte.md#räume-umbenennen). Am CSL: Muster `^(\w)\w*-(\d+)-\d+$`, Ersetzung `\1\2`. Ohne Muster gilt der Wert aus dem HR-System unverändert als Raumnummer.
+Eine Regel macht daraus die DLCDB-Raumnummer: ein regulärer Ausdruck (Python-Syntax) und eine Ersetzung, angewandt wie bei [Räume umbenennen](../guides/erste_schritte.md#räume-umbenennen). Am CSL: Muster `^(\w)\w*-(\d+[a-z]?)(?:-\d+)?$`, Ersetzung `\1\2`. Das Muster deckt auch Werte ohne Arbeitsplatznummer (`Gü-324` → `G324`) und Räume mit Buchstaben (`Gü-223a-01` → `G223a`) ab. Ohne Muster gilt der Wert aus dem HR-System unverändert als Raumnummer.
 
 - Der Sync setzt den Raum jeder Person, die er abgleicht; Groß-/Kleinschreibung der Raumnummer ist egal. Nennt das HR-System keinen Raum, verliert die Person ihren Raum. Personen ohne HR-Verknüpfung behalten den Raum, der ihnen von Hand zugewiesen ist.
 - Der Sync legt keine Räume an. Gibt es den Raum in der DLCDB nicht (oder ist er deaktiviert), bekommt die Person keinen Raum, und das Protokoll des Sync-Laufs meldet ihn, etwa `HR room Gü-999-01 → G999: no such room in DLCDB`. Dann den Raum anlegen oder [umbenennen](../guides/erste_schritte.md#räume-umbenennen).

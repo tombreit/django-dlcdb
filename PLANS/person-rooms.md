@@ -48,7 +48,9 @@ HR sync can match them.
    existing `UdbSyncConfiguration` (`room_number_pattern`, `room_number_replacement`), applied with
    `re.sub`. The rule and its names are general; that CSL's HR value is a workplace in a room is
    CSL's data, not the mechanism (wording decided 2026-11-09).
-   - CSL: `^(\w)\w*-(\d+)-\d+$` → `\1\2`.
+   - CSL: `^(\w)\w*-(\d+[a-z]?)(?:-\d+)?$` → `\1\2`. The first idea, `^(\w)\w*-(\d+)-\d+$`,
+     missed HR values without a workplace number (`Gü-324`, 15 at CSL) and with a letter
+     (`Gü-223a-01`, 2): 140 of 160 matched a room in the dev data, the broader rule 155.
    - An empty pattern takes the HR value as the room number.
    - No code is needed per institute.
 4. **Room-plan URL:** the first `resource_info[].value` of the room resource that passes
@@ -188,12 +190,19 @@ Planned when batches 1–4 have landed:
 
 ## Rollout on an instance
 
-1. Rename the rooms (`^(\d+)$` → `G\1` at CSL); check the preview first.
-2. Set the room number rule in *Settings › HR API sync configuration*.
+1. Rename the rooms (`^(\d+)$` → `G\1` at CSL, then `^(\d+[a-zA-Z])$` → `G\1` for rooms with a
+   letter); check the preview first.
+2. Set the room number rule in *Settings › HR API sync configuration*
+   (`^(\w)\w*-(\d+[a-z]?)(?:-\d+)?$` → `\1\2` at CSL).
 3. Watch the next HR sync runs for SKIPPED rooms; create or rename those rooms.
 
 ## Pitfalls
 
+- **An empty rule matches nothing at CSL:** the HR value is then taken verbatim, and every contract
+  naming a room is SKIPPED (dev instance, 2026-11-09: `246 unchanged, 160 skipped`).
+- **A deactivated room blocks a rename in another spelling:** at CSL, a deactivated `G 141` kept
+  the active `141` from becoming `G141`. Give the deactivated room another number in the admin
+  first.
 - **Device CSV imports use room numbers:** a CSV that still says `235` creates a new room `235`
   after the rename (`dataexchange/fields.py:create_fk_obj`).
 - **Room reconcile prefixes:** the room reconcile maps Archibus buildings to number prefixes
