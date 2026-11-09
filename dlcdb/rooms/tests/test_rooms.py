@@ -111,6 +111,17 @@ class RoomFrontendTests(BaseTest):
         self.assertEqual((rooms[0].assets_count, rooms[0].persons_count), (1, 2))
         self.assertEqual((rooms[1].assets_count, rooms[1].persons_count), (0, 0))
 
+    def test_the_persons_column_needs_the_person_view_permission(self):
+        self.client.force_login(self._core_perm_user("view_room"))
+
+        response = self.client.get(self.index_url)
+
+        self.assertContains(response, "Assets")
+        self.assertNotContains(response, "Persons")  # neither the column nor the sort option
+        # A sort by persons in the URL is not applied either.
+        sorted_by_persons = self.client.get(self.index_url, {"ordering": "-persons"}, headers={"HX-Request": "true"})
+        self.assertEqual(sorted_by_persons.status_code, 200)
+
     def test_create_room_sets_audit_user_and_qrcode(self):
         response = self.client.post(reverse("rooms:add"), {"number": "F3.03", "nickname": "New room"})
 

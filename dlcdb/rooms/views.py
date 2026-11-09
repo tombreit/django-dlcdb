@@ -52,10 +52,12 @@ def _room_queryset():
     person would repeat all of the room's record rows.
     """
     persons = Person.objects.filter(room=OuterRef("pk")).order_by().values("room").annotate(count=Count("pk"))
+    # Ordered explicitly: with the GROUP BY of the count, Django drops
+    # Meta.ordering, and a sort the filter refuses would leave the list unordered.
     return Room.objects.annotate(
         assets_count=Count("record", distinct=True, filter=Q(record__is_active=True)),
         persons_count=Coalesce(Subquery(persons.values("count")), 0),
-    )
+    ).order_by("number")
 
 
 def _room_changes(request, room):

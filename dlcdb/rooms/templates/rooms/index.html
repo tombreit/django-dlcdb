@@ -44,7 +44,9 @@
               <th scope="col" class="d-none d-md-table-cell">{% translate "Description" %}</th>
               <th scope="col" class="d-none d-lg-table-cell">{% translate "Properties" %}</th>
               {% include "theme/filterbar/_sort_th.html" with label=_("Assets") asc="assets" desc="-assets" th_class="text-end" %}
-              {% include "theme/filterbar/_sort_th.html" with label=_("Persons") asc="persons" desc="-persons" th_class="text-end" %}
+              {% if perms.core.view_person %}
+                {% include "theme/filterbar/_sort_th.html" with label=_("Persons") asc="persons" desc="-persons" th_class="text-end" %}
+              {% endif %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
             </tr>
           </thead>
@@ -77,14 +79,16 @@
                 <td class="text-end">
                   <span class="badge text-bg-light border">{{ room.assets_count }}</span>
                 </td>
-                <td class="text-end">
-                  <span class="badge text-bg-light border">{{ room.persons_count }}</span>
-                </td>
+                {% if perms.core.view_person %}
+                  <td class="text-end">
+                    <span class="badge text-bg-light border">{{ room.persons_count }}</span>
+                  </td>
+                {% endif %}
                 <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">{{ room.modified_at|date:"Y-m-d" }}</td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="6" class="text-center text-muted py-4">
+                <td colspan="{% if perms.core.view_person %}6{% else %}5{% endif %}" class="text-center text-muted py-4">
                   <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                   {% translate "No rooms match these filters." %}
                   {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}

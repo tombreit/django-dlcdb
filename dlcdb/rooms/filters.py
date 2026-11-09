@@ -58,6 +58,16 @@ class RoomFilter(django_filters.FilterSet):
             "ordering",
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The persons count is for who may see persons (rooms/index.html), and so
+        # is sorting by it.
+        if self.request is None or not self.request.user.has_perm("core.view_person"):
+            ordering = self.filters["ordering"]
+            ordering.extra["choices"] = [
+                (value, label) for value, label in ordering.extra["choices"] if value.lstrip("-") != "persons"
+            ]
+
     def search_filter(self, queryset, name, value):
         return queryset.filter(
             Q(number__icontains=value)
