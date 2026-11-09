@@ -39,8 +39,9 @@ HR sync can match them.
 ## Decisions taken
 
 1. **One room per person:** `Person.room`, a nullable FK to `core.Room` (`SET_NULL`,
-   `related_name="persons"`, `limit_choices_to={"deleted_at__isnull": True}` like `Record.room`).
-   A room has 0..n persons. Lending needs exactly one room per person, and a plain FK is native
+   `related_name="persons"`). A room has 0..n persons. No `limit_choices_to` (dropped in
+   `core/0081`, review fix): forms offer active rooms through `Room.objects` anyway, and a room
+   deactivated later must stay valid for its person, which model validation would refuse. Lending needs exactly one room per person, and a plain FK is native
    Django.
 2. **Only the room is stored:** the room as HR names it (`Gü-235-02`) only yields the DLCDB room;
    the person does not keep it. The run log names the HR value of a room it cannot find.
@@ -56,8 +57,10 @@ HR sync can match them.
 4. **Room-plan URL:** the first `resource_info[].value` of the room resource that passes
    `URLValidator`. It is not keyed on `Mapongo-URL`, which is CSL's key. HR overwrites
    `Room.website` ("e.g. a URL to a room plan"), so a changed link propagates.
-5. **Unknown room number:** the person gets no room, and the run log gets a SKIPPED row
-   ("Gü-235-02 from HR → room G235 not in DLCDB"). The sync creates no rooms; the room list is
+5. **Unknown room number:** the person gets no room, and the contract's row in the run log notes
+   it ("HR room Gü-235-02 → G235: no such room in DLCDB"). No extra SKIPPED row (review fix): one
+   row per contract, the run is no warning and is not journaled; the non-verbose log lists an
+   UNCHANGED row when it carries such a note. The sync creates no rooms; the room list is
    curated by hand. A soft-deleted room counts as unknown.
 6. **Code-owned, like the existing request filters and fields:**
    - the resource type that names a person's room, `UDB_ROOM_RESOURCE_TYPE = "arbeitsplatz"`
@@ -222,8 +225,29 @@ Changes:
   field.
 - **Website flip-flop:** two workplaces in the same room with different plan URLs would flip
   `Room.website` on every run (UPDATED each time).
-- **Unknown rooms are journaled:** an unknown room is reported with every run (every 10 minutes);
-  `journal/cleanup.py` already collapses repeated HR sync entries.
+
+## Review fixes (2026-11-10)
+
+A code review of the whole branch found 10 issues; 8 were fixed in one commit:
+- **Rename:** confirming returns to the room list and names the rooms that kept their number in a
+  message. The preview after a partial rename used to re-plan the renamed rooms (a pattern
+  matching its own output offered `G235 → GG235`). Only rooms the pattern matches are planned.
+- **HR sync:**
+  - rooms are matched like on the add page (`comparable_name`, read once per run, no query per
+    contract);
+  - the website is saved with `update_fields`, and a plan URL over 200 characters is ignored;
+  - a missing room is a note on the contract's row (decision 5).
+- **Lending:** a person without a room falls back to the device's room.
+- **Deactivated room on a person:**
+  - the person form also offers the person's own deactivated room, so saving keeps it;
+  - the person pages show it without a link (decision 1).
+- **Room list:**
+  - the *Persons* column and its sort option need `core.view_person`;
+  - the list is ordered explicitly, so a refused sort no longer leaves it unordered (the
+    paginator warned).
+
+Not fixed: the website flipping between workplaces of one room with different plan URLs; at CSL
+the plan URL belongs to the room.
 
 ## Progress
 
