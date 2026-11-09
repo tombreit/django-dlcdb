@@ -95,13 +95,14 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
     )
     # The room the person is assigned to. For a person matched with the HR
     # system, the HR sync sets it from the workplace; other persons get it by hand.
+    # Forms offer active rooms only (Room.objects); no limit_choices_to, so a room
+    # deactivated later stays valid for the person until someone picks another.
     room = models.ForeignKey(
         "core.Room",
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name="persons",
-        limit_choices_to={"deleted_at__isnull": True},
         verbose_name=_("Room"),
     )
 

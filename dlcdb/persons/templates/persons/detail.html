@@ -49,7 +49,7 @@
         <dd class="col-sm-8">{{ person.organizational_unit|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Room" %}</dt>
         <dd class="col-sm-8 mb-0">
-          {% if person.room and perms.core.view_room %}
+          {% if person.room and not person.room.deleted_at and perms.core.view_room %}
             <a href="{% url 'rooms:detail' person.room.pk %}">{{ person.room }}</a>
           {% else %}
             {{ person.room|default:"—" }}

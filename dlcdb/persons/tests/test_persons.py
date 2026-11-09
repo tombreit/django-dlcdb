@@ -202,6 +202,29 @@ class PersonFrontendTests(TestCase):
         self.local_person.refresh_from_db()
         self.assertIsNone(self.local_person.room)
 
+    def test_a_deactivated_room_stays_with_its_person(self):
+        room = Room.objects.create(number="G239")
+        self.local_person.room = room
+        self.local_person.save()
+        room.delete()
+        url = reverse("persons:detail", args=[self.local_person.pk])
+
+        response = self.client.post(
+            url, {"last_name": "Musterfrau", "first_name": "Erika", "email": "erika@example.com", "room": room.pk}
+        )
+
+        self.assertRedirects(response, self.index_url)
+        self.local_person.refresh_from_db()
+        self.assertEqual(self.local_person.room_id, room.pk)
+        # Shown, but not linked: a deactivated room has no page.
+        viewer = get_user_model().objects.create_user(username="viewer", email="viewer@example.com", password="x")
+        for codename in ("view_person", "view_room"):
+            viewer.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+        self.client.force_login(viewer)
+        readonly = self.client.get(url)
+        self.assertContains(readonly, "G239")
+        self.assertNotContains(readonly, reverse("rooms:detail", args=[room.pk]))
+
     def test_room_select_can_add_a_room_and_comes_back_with_it(self):
         room = Room.objects.create(number="G237")
         url = reverse("persons:detail", args=[self.local_person.pk])

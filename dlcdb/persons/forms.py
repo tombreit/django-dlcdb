@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.db.models import Q
 
-from dlcdb.core.models import Person
+from dlcdb.core.models import Person, Room
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.similar import SimilarNames, check_similar_names
 from dlcdb.theme.widgets import TomSelectWidget
@@ -39,6 +40,13 @@ class PersonForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Active rooms, and the person's own room even when it was deactivated
+        # since: otherwise the select would show none, and saving would drop it.
+        # Before add_bootstrap_classes, which validates a bound form.
+        if self.instance.room_id:
+            self.fields["room"].queryset = Room.with_softdeleted_objects.filter(
+                Q(deleted_at__isnull=True) | Q(pk=self.instance.room_id)
+            )
         add_bootstrap_classes(self)
 
     def clean(self):

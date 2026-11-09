@@ -56,7 +56,7 @@
                 <td class="d-none d-md-table-cell text-muted">{{ person.get_email|default:"—" }}</td>
                 <td class="d-none d-lg-table-cell text-muted">{{ person.organizational_unit|default:"—" }}</td>
                 <td class="d-none d-md-table-cell text-muted font-monospace">
-                  {% if person.room and perms.core.view_room %}
+                  {% if person.room and not person.room.deleted_at and perms.core.view_room %}
                     <a href="{% url 'rooms:detail' person.room.pk %}" class="link-secondary">{{ person.room.number }}</a>
                   {% else %}
                     {{ person.room.number|default:"—" }}
