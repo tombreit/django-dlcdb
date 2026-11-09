@@ -338,6 +338,13 @@ Its queue lives in `data/db/huey_task_queue.sqlite3` and holds only transient
 data (tasks waiting to run and locks; results are not stored), so the file stays
 at a few MB.
 
+A lock keeps a periodic task, such as the HR sync, from running twice at once. A
+run that is interrupted (a hard stop, a crash) leaves its lock behind, and the
+lock never expires. So the task runner clears all locks when it starts
+(`HUEY["consumer"]["flush_locks"]` in the settings); otherwise such a lock would
+skip its task for good. This is also why only one task runner may run per
+instance.
+
 ### Error mails
 
 With `DJANGO_DEBUG=false`, Django mails unhandled errors to the `ADMINS` in

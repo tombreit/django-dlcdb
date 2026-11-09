@@ -8,7 +8,6 @@ from pathlib import Path
 import environ
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
-from huey import SqliteHuey
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -480,14 +479,26 @@ SIMPLE_HISTORY_REVERT_DISABLED = True
 SIMPLE_HISTORY_FILEFIELD_TO_CHARFIELD = True
 
 
-# results=False: nothing reads task results, and the SQLite backend keeps them
-# forever (no expiry). Storing them grew the queue file to 7 GB in production.
-# Failures still reach the log and the journal (dlcdb/journal/signals.py).
-HUEY = SqliteHuey(
-    name="dlcdb_huey",
-    filename=str(DB_DIR / "huey_task_queue.sqlite3"),
-    results=False,
-)
+# The dict form, not a SqliteHuey instance: only with it does `run_huey` read the
+# consumer options below.
+HUEY = {
+    "huey_class": "huey.SqliteHuey",
+    "name": "dlcdb_huey",
+    "filename": str(DB_DIR / "huey_task_queue.sqlite3"),
+    # Nothing reads task results, and the SQLite backend keeps them forever (no
+    # expiry). Storing them grew the queue file to 7 GB in production. Failures
+    # still reach the log and the journal (dlcdb/journal/signals.py).
+    "results": False,
+    # The dict form would default to immediate=DEBUG: tasks would run inside the
+    # web request in development.
+    "immediate": False,
+    "consumer": {
+        # A task lock present when the one task runner starts was left by an
+        # interrupted run (SIGTERM, crash). Huey's SQLite storage cannot let locks
+        # expire, so such a lock would skip its periodic task for good.
+        "flush_locks": True,
+    },
+}
 
 if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
