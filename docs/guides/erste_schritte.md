@@ -42,7 +42,7 @@ Sollen Räume mehrerer Standorte oder Gebäude verwaltet werden, oder werden kle
 
 ### Räume umbenennen
 
-Ändert sich das Bezeichnungsschema, benennt *Räume umbenennen* (Button in der Raumübersicht, Berechtigung `core.change_room`) viele Räume auf einmal um. Ein regulärer Ausdruck (Python-Syntax) wird auf jede Raumnummer angewandt. Beispiel: Muster `^(\d+)$` und Ersetzung `G\1` stellen allen reinen Ziffernnummern das Gebäude voran, aus `235` wird `G235`.
+Ändert sich das Bezeichnungsschema, benennt *Räume umbenennen* (Button in der Raumübersicht, Berechtigung `core.change_room`) viele Räume auf einmal um. Ein regulärer Ausdruck (Python-Syntax) wird auf jede Raumnummer angewandt; umbenannt werden nur Räume, deren Nummer das Muster trifft. Beispiel: Muster `^(\d+)$` und Ersetzung `G\1` stellen allen reinen Ziffernnummern das Gebäude voran, aus `235` wird `G235`.
 
 Die Vorschau zeigt, welcher Raum welche Nummer bekommt; umbenannt wird erst nach der Bestätigung. Ein Raum behält seine Nummer, wenn die neue leer, zu lang oder schon vergeben ist, auch in anderer Schreibweise oder an einen deaktivierten Raum. Tauschen oder verketten (`1` → `G1`, während `G1` → `GG1`) geht nicht in einem Schritt. Deaktivierte Räume werden nicht umbenannt. Jede Umbenennung steht im Journal.
 

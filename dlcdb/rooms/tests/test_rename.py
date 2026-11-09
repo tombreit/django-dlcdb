@@ -74,6 +74,12 @@ class PlanRenamesTests(BaseTest):
 
         self.assertEqual(_problems(r"^(G?\d+)$", r"G\1")["1"], ("G1", "Room “G1” already exists."))
 
+    def test_a_room_the_pattern_does_not_match_is_left_alone(self):
+        # Not even trimmed: the stray space is no reason to rename it.
+        Room.objects.create(number="235 ")
+
+        self.assertEqual(_problems(**ADD_BUILDING), {})
+
     def test_an_empty_or_too_long_number_is_kept(self):
         Room.objects.create(number="235")
 

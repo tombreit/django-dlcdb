@@ -42,8 +42,8 @@ class Rename:
 
 def plan_renames(pattern, replacement):
     """
-    A ``Rename`` for every active room whose number ``re.sub(pattern,
-    replacement, number)`` changes, by number.
+    A ``Rename`` for every active room whose number the pattern matches and
+    ``re.sub(pattern, replacement, number)`` changes, by number.
 
     An invalid expression raises ``re.error``, an unknown group name
     ``IndexError``; ``RoomRenameForm`` checks for both.
@@ -51,6 +51,9 @@ def plan_renames(pattern, replacement):
     regex = re.compile(pattern)
     changed = []
     for room in Room.objects.order_by("number"):
+        # Rooms the pattern does not match are not touched, not even trimmed.
+        if not regex.search(room.number):
+            continue
         new_number = regex.sub(replacement, room.number).strip()
         if new_number != room.number:
             changed.append((room, new_number))
