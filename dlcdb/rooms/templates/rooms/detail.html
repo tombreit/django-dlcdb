@@ -3,8 +3,7 @@
 
 {% block title %}{{ room }}{% endblock title %}
 
-{% block detail_title_class %} font-monospace{% endblock %}
-{% block detail_title %}{{ room.number }}{% endblock detail_title %}
+{% block detail_title %}{% translate "Room" %} <span class="font-monospace">{{ room.number }}</span>{% endblock detail_title %}
 
 {% block detail_meta %}
   {% if room.nickname %}<span>{{ room.nickname }}</span>{% endif %}
