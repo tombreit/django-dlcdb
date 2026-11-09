@@ -53,7 +53,7 @@ SPDX-License-Identifier: EUPL-1.2
         <div class="card-header fw-semibold">
           <i class="bi bi-pc-display"></i> {% translate "Device" %}
         </div>
-        <div class="card-body">
+        <div class="card-body" id="lend-device">
           {% if device_form %}
             {{ device_form.device }}
           {% else %}
@@ -319,8 +319,15 @@ SPDX-License-Identifier: EUPL-1.2
       return personCard ? personCard.dataset.roomId : "";
     }
 
+    // The device's card: fixed in record mode, the selected one in picker mode
+    // (search results carry .picker-option, the selected card does not).
+    function deviceRoomId() {
+      const deviceCard = document.querySelector("#lend-device [data-room-id]:not(.picker-option)");
+      return deviceCard ? deviceCard.dataset.roomId : "";
+    }
+
     document.getElementById("person-picker").addEventListener("picker:selected", function (event) {
-      setRoom(event.detail.option.dataset.roomId);
+      setRoom(event.detail.option.dataset.roomId || deviceRoomId());
     });
 {% if picker_mode %}
     const deviceInput = document.getElementById("id_device");
