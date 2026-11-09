@@ -46,7 +46,7 @@ Eine Regel macht daraus die DLCDB-Raumnummer: ein regulärer Ausdruck (Python-Sy
 
 - Der Sync setzt den Raum jeder Person, die er abgleicht. Die Raumnummer vergleicht er wie das Anlegen von Räumen: Groß-/Kleinschreibung, Leer- und Satzzeichen zählen nicht (`G 235` ist `G235`). Nennt das HR-System keinen Raum, verliert die Person ihren Raum. Personen ohne HR-Verknüpfung behalten den Raum, der ihnen von Hand zugewiesen ist.
 - Der Sync legt keine Räume an. Gibt es den Raum in der DLCDB nicht (oder ist er deaktiviert), bekommt die Person keinen Raum, und das Protokoll des Sync-Laufs meldet ihn, etwa `HR room Gü-999-01 → G999: no such room in DLCDB`. Dann den Raum anlegen oder [umbenennen](../guides/erste_schritte.md#räume-umbenennen).
-- Den ersten Link der Ressource (am CSL der Mapongo-Raumplan) übernimmt der Sync als *Website* des Raums und überschreibt dabei eine von Hand eingetragene. Die Änderung steht in der Admin-Historie des Raums und im Protokoll des Sync-Laufs.
+- Den ersten Link der Ressource (am CSL der Mapongo-Raumplan, höchstens 200 Zeichen) übernimmt der Sync als *Website* des Raums und überschreibt dabei eine von Hand eingetragene. Die Änderung steht in der Admin-Historie des Raums und im Protokoll des Sync-Laufs.
 
 Reihenfolge beim Einrichten: zuerst die Räume so benennen, wie die Regel sie erzeugt, dann die Regel eintragen, dann die nächsten Sync-Läufe auf gemeldete Räume prüfen.
 

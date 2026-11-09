@@ -148,11 +148,12 @@ _validate_url = URLValidator(schemes=["http", "https"])
 
 
 def _is_url(value):
+    """A http(s) URL that fits ``Room.website``."""
     try:
         _validate_url(value)
     except ValidationError:
         return False
-    return True
+    return len(value) <= Room._meta.get_field("website").max_length
 
 
 def _rooms_by_number():
@@ -458,7 +459,9 @@ def _sync_room_website(room, plan_url, *, log_user_id):
     old_website = room.website
     room.website = plan_url
     room.stamp_user(get_user_model().objects.get(pk=log_user_id))
-    room.save()
+    # Only what the sync changed: an edit of the room's other fields made
+    # meanwhile stays.
+    room.save(update_fields=["website", "user", "username", "modified_at"])
     _log_admin_history(
         room,
         log_user_id=log_user_id,
