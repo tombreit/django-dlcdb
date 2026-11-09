@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
-from django.utils.http import urlencode
 
 from dlcdb.core.models import Room
 from dlcdb.core.tests.basetest import BaseTest
@@ -132,21 +131,19 @@ class RoomRenameViewTests(BaseTest):
         self.assertIn("235 → G235\n236 → G236", entry.body)
         self.assertEqual(entry.user, self.user)
 
-    def test_rooms_that_kept_their_number_are_shown_again(self):
+    def test_rooms_that_kept_their_number_are_named_on_the_room_list(self):
         Room.objects.create(number="G236")
 
-        response = self.client.post(self.url, ADD_BUILDING)
+        response = self.client.post(self.url, ADD_BUILDING, follow=True)
 
-        self.assertRedirects(response, f"{self.url}?{urlencode(ADD_BUILDING)}")
+        # Not back to the preview: it would plan the renamed rooms once more.
+        self.assertRedirects(response, reverse("rooms:index"))
+        self.assertContains(response, "1 room kept its number: 236 → G236 (Room “G236” already exists.)")
         self.room_235.refresh_from_db()
         self.room_236.refresh_from_db()
         self.assertEqual(self.room_235.number, "G235")
         self.assertEqual(self.room_236.number, "236")
         self.assertIn("236 (not G236)", JournalEntry.objects.get(source="rooms.rename").body)
-
-        preview = self.client.get(response.url)
-        self.assertContains(preview, "Room “G236” already exists.")
-        self.assertContains(preview, "Rename 0 rooms")
 
     def test_nothing_to_rename_writes_no_journal_entry(self):
         response = self.client.post(self.url, {"pattern": "^nomatch$", "replacement": "x"})

@@ -15,7 +15,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import TemplateView
@@ -214,14 +213,14 @@ def room_rename(request):
     """
     Rename many rooms with one regular expression (``rooms.rename``). The form
     is sent by GET and shows which room gets which number; the confirmation
-    posts the same expression and renames. Rooms that kept their number are
-    shown again, with the reason.
+    posts the same expression and renames, then returns to the room list. The
+    rooms that kept their number are named there, with the reason: a preview of
+    the same expression would plan the renamed rooms once more.
     """
     if request.method == "POST":
         form = RoomRenameForm(request.POST)
         if form.is_valid():
-            pattern, replacement = form.cleaned_data["pattern"], form.cleaned_data["replacement"]
-            renames = apply_renames(pattern, replacement, user=request.user)
+            renames = apply_renames(form.cleaned_data["pattern"], form.cleaned_data["replacement"], user=request.user)
             renamed = sum(1 for rename in renames if not rename.problem)
             if renamed:
                 messages.success(
@@ -229,9 +228,22 @@ def room_rename(request):
                     ngettext("%(count)d room was renamed.", "%(count)d rooms were renamed.", renamed)
                     % {"count": renamed},
                 )
-            if renamed < len(renames):
-                query = urlencode({"pattern": pattern, "replacement": replacement})
-                return redirect(f"{reverse('rooms:rename')}?{query}")
+            kept = [rename for rename in renames if rename.problem]
+            if kept:
+                messages.warning(
+                    request,
+                    ngettext(
+                        "%(count)d room kept its number: %(rooms)s",
+                        "%(count)d rooms kept their number: %(rooms)s",
+                        len(kept),
+                    )
+                    % {
+                        "count": len(kept),
+                        "rooms": "; ".join(
+                            f"{rename.old_number} → {rename.new_number} ({rename.problem})" for rename in kept
+                        ),
+                    },
+                )
             return redirect("rooms:index")
     else:
         form = RoomRenameForm(request.GET or None)
