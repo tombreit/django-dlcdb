@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* A person can be assigned to a room on the person page; the person list shows it, the room list counts a room's persons, the room page lists them
+* A person can be assigned to a room, by hand on the person page or by the HR sync; the person list shows the room, the room list counts a room's persons, the room page lists them. The HR sync maps the room HR names by a rule set under *HR API sync configuration* (e.g. `Gü-235-02` → `G235`), reports rooms DLCDB lacks, and keeps the room plan link as the room's website
 * Rooms: *Rename rooms* gives many rooms a new number with one regular expression (e.g. `235` → `G235`), after a preview
 * Add pages refuse a name that already exists in another spelling (procom, pro-com, Procom) and list similar ones while typing
 * Form selects of master data, rooms and persons get buttons to open the selected entry or add a new one, which comes back preselected

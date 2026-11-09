@@ -54,7 +54,17 @@ def _fake_urlopen(payload):
 
 
 def _contract(
-    uuid, first, last, *, email=..., checkin="2024-01-01", checkout="2024-12-31", drop_checkin=False, image=None
+    uuid,
+    first,
+    last,
+    *,
+    email=...,
+    checkin="2024-01-01",
+    checkout="2024-12-31",
+    drop_checkin=False,
+    image=None,
+    room=None,
+    plan_url=None,
 ):
     person = {
         "id": uuid,
@@ -74,7 +84,21 @@ def _contract(
     }
     if not drop_checkin:
         contract["contract_planned_checkin"] = checkin
+    if room is not None:
+        contract["resources"] = [_room_resource(room, plan_url)]
     return contract
+
+
+def _room_resource(room, plan_url=None):
+    """A contract resource naming the person's room, as the CSL HR API sends it."""
+    resource_info = []
+    if plan_url is not None:
+        resource_info.append({"key": "Mapongo-URL", "slug_name": "RaumMapongoUrl", "value": plan_url})
+    return {
+        "resource_type": {"name": "Arbeitsplatz", "name_en": "Workplace", "slug_id": "arbeitsplatz"},
+        "resource": room,
+        "resource_info": resource_info,
+    }
 
 
 # --- validation / URL assembly ------------------------------------------------
@@ -201,6 +225,111 @@ def test_sync_is_resilient_per_contract():
     assert grace.udb_person_email_internal_business in ("", None)
     # The malformed contract did not create a person.
     assert not Person.with_softdeleted_objects.filter(udb_person_uuid="uuid-3").exists()
+
+
+# --- the person's room ---------------------------------------------------------
+
+PLAN_URL = "https://mpicsl.mapongo.de/viewer?l=1977&p=1"
+
+
+def _enable_sync_with_room_number_rule():
+    config = _enable_sync()
+    for field, value in CSL_ROOM_NUMBER_RULE.items():
+        setattr(config, field, value)
+    config.save()
+    return config
+
+
+def _payload(*contracts):
+    return {"results": {"contracts": list(contracts)}}
+
+
+def test_the_request_asks_for_the_resources():
+    assert "resources" in udb_sync.UDB_SYNC_CONTRACT_FIELDS.split(",")
+
+
+@pytest.mark.django_db
+def test_the_person_gets_the_room_hr_names_by_the_room_number_rule():
+    _enable_sync_with_room_number_rule()
+    room = Room.objects.create(number="G235")
+
+    report = _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-235-02")))
+
+    assert report.counts[Outcome.CREATED] == 1
+    assert Person.objects.get(udb_person_uuid="uuid-1").room == room
+
+
+@pytest.mark.django_db
+def test_without_a_rule_the_room_hr_names_is_the_room_number():
+    _enable_sync()
+    room = Room.objects.create(number="G235")
+
+    _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="g235")))
+
+    assert Person.objects.get(udb_person_uuid="uuid-1").room == room
+
+
+@pytest.mark.django_db
+def test_a_room_dlcdb_does_not_have_is_reported_and_the_person_gets_none():
+    _enable_sync_with_room_number_rule()
+    Room.objects.create(number="G999").delete()  # a deactivated room counts as missing
+
+    report = _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-999-01")))
+
+    assert report.counts[Outcome.CREATED] == 1
+    assert report.counts[Outcome.SKIPPED] == 1
+    assert report.level == "warning"
+    skipped = next(row for row in report.rows if row.outcome == Outcome.SKIPPED)
+    assert skipped.detail == "HR room Gü-999-01 → G999: no such room in DLCDB"
+    assert Person.objects.get(udb_person_uuid="uuid-1").room is None
+
+
+@pytest.mark.django_db
+def test_a_person_without_a_room_in_hr_loses_the_old_one():
+    _enable_sync_with_room_number_rule()
+    Room.objects.create(number="G235")
+    _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-235-02")))
+
+    report = _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace")))
+
+    assert report.counts[Outcome.UPDATED] == 1
+    assert Person.objects.get(udb_person_uuid="uuid-1").room is None
+
+
+@pytest.mark.django_db
+def test_other_resources_and_values_that_are_no_url_are_ignored():
+    _enable_sync_with_room_number_rule()
+    room = Room.objects.create(number="G235")
+    resource = _room_resource("Gü-235-02")
+    resource["resource_info"] = [{"key": "Note", "value": "window seat"}, {"key": "Mapongo-URL", "value": PLAN_URL}]
+    contract = _contract("uuid-1", "Ada", "Lovelace")
+    contract["resources"] = [{"resource_type": {"slug_id": "key"}, "resource": "Gü-999-01"}, resource]
+
+    _run_with_payload(_payload(contract))
+
+    assert Person.objects.get(udb_person_uuid="uuid-1").room == room
+    room.refresh_from_db()
+    assert room.website == PLAN_URL
+
+
+@pytest.mark.django_db
+def test_the_room_plan_from_hr_overwrites_the_room_website():
+    _enable_sync_with_room_number_rule()
+    room = Room.objects.create(number="G235", website="https://example.org/old-plan")
+    _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-235-02")))
+
+    with_plan = _payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-235-02", plan_url=PLAN_URL))
+    report = _run_with_payload(with_plan)
+
+    assert report.counts[Outcome.UPDATED] == 1
+    assert report.rows[0].detail == f"room G235: website https://example.org/old-plan → {PLAN_URL}"
+    room.refresh_from_db()
+    assert room.website == PLAN_URL
+    assert room.user.email == "udb-sync@dlcdb.invalid"
+    history = LogEntry.objects.get(content_type=ContentType.objects.get_for_model(Room), object_id=str(room.pk))
+    assert "website" in history.change_message
+
+    assert _run_with_payload(with_plan).counts[Outcome.UNCHANGED] == 1
 
 
 # --- change detection: CREATED / UNCHANGED / UPDATED --------------------------

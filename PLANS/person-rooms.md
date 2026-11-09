@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Person rooms: a person's room from the HR API
 
-**Status:** in progress (2026-11-09). Batches 0–3 are done. This is a living document:
+**Status:** batches 0–4 are done (2026-11-09); the lending step (*Later*) is still open. This is a living document:
 each batch ticks its box in *Progress* in the same commit.
 
 ## Why
@@ -157,20 +157,25 @@ HR sync can match them.
 
 - **Request:** `resources` in `UDB_SYNC_CONTRACT_FIELDS`, and the constant
   `UDB_ROOM_RESOURCE_TYPE`.
-- **Parsing:** `_hr_room(contract)` returns `(hr_room, plan_url)`.
+- **Parsing:** `_hr_room(contract)` returns `(hr_room, plan_url)`; `_resolve_room(contract, config)`
+  maps it with `map_room_number` and looks the room up (`number__iexact`, active rooms only). It
+  returns `(room, plan_url, problem)`, inside the contract's savepoint.
+- **The loop** passes `room` and `plan_url` to `_process_contract` and records a problem as an extra
+  SKIPPED row for the same contract: "HR room Gü-999-01 → G999: no such room in DLCDB".
 - **`_process_contract`:**
-  - sets `room`;
-  - overwrites `Room.website` with an admin `LogEntry`;
-  - returns the unknown-room problem, which the loop records as an extra SKIPPED row.
+  - sets `room` (None when HR names none or DLCDB lacks it);
+  - `_sync_room_website` overwrites `Room.website`, stamped by the sync user, with an admin
+    `LogEntry`; the change makes the row UPDATED and is always in its detail.
 - **Change detection:** `COMPARED_PERSON_FIELDS` gains `room`.
 - **Tests:** `_contract(…, room=…, plan_url=…)`, covering:
-  - the room is mapped;
-  - an unknown room is SKIPPED;
-  - no room in HR means no room;
-  - the website is overwritten, then UNCHANGED on the next run;
-  - the request URL asks for `resources`.
+  - the room is mapped by the rule; without a rule the HR value is used, case-insensitively;
+  - an unknown or deactivated room is SKIPPED and the run a warning;
+  - no room in HR clears the room;
+  - other resource types and `resource_info` values that are no URL are ignored;
+  - the website is overwritten (history entry, sync user), then UNCHANGED on the next run;
+  - the request asks for `resources`.
 - **Docs:** `docs/betrieb/hr-sync.md`, section *Raum*.
-- **NEWS:** `NEWS.md`.
+- **NEWS:** the batch 2 line in `NEWS.md` is extended, not a second line.
 
 ### Later – Lending starts in the borrower's room
 
@@ -209,4 +214,4 @@ Planned when batches 1–4 have landed:
 - [x] **1. Batch rename of rooms**
 - [x] **2. Person ↔ room**
 - [x] **3. Room number rule in the HR sync configuration**
-- [ ] **4. The HR sync assigns rooms**
+- [x] **4. The HR sync assigns rooms**

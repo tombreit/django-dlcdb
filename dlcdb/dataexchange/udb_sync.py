@@ -26,10 +26,12 @@ import urllib.request
 from django.conf import settings
 from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import IntegrityError, transaction
 from django.utils.timezone import now
 
-from dlcdb.core.models import OrganizationalUnit, Person, Record
+from dlcdb.core.models import OrganizationalUnit, Person, Record, Room
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
 
 from .models import UdbSyncConfiguration, UdbSyncRun
@@ -56,11 +58,16 @@ UDB_SYNC_FILTERS = "present=True&person__person_is_test_data=False"
 # in the admin (see UdbSyncConfiguration docstring).
 UDB_SYNC_CONTRACT_FIELDS = (
     "person,contract_planned_checkin,contract_planned_checkout,"
-    "contract_organization_unit,contract_contract_type,contract_organizational_positions"
+    "contract_organization_unit,contract_contract_type,contract_organizational_positions,resources"
 )
 UDB_SYNC_PERSON_FIELDS = (
     "person_first_name,person_last_name,person_email_internal_business,person_email_private,id,person_image"
 )
+
+# The type of the contract resource that names the person's room. At CSL it is
+# a workplace in a room ("Gü-235-02"); the room number rule of the
+# UdbSyncConfiguration maps it to a DLCDB room number (`map_room_number`).
+UDB_ROOM_RESOURCE_TYPE = "arbeitsplatz"
 
 # Person fields a contract can change. Compared before/after the upsert to tell a
 # real UPDATED from an UNCHANGED row. `udb_data_updated_at` is deliberately absent:
@@ -81,6 +88,7 @@ COMPARED_PERSON_FIELDS = (
     "udb_person_image",
     "udb_person_image_hash",
     "organizational_unit",
+    "room",
     "deleted_at",
     "deleted_by",
 )
@@ -115,6 +123,52 @@ def map_room_number(hr_room, config):
     if not config.room_number_pattern:
         return hr_room
     return re.sub(config.room_number_pattern, config.room_number_replacement, hr_room).strip()
+
+
+def _hr_room(contract):
+    """
+    The room HR names for the contract and the URL of its room plan, from the
+    first resource of type ``UDB_ROOM_RESOURCE_TYPE``; empty strings when HR
+    names none. The plan URL is the first ``resource_info`` value that is a URL:
+    CSL's key for it ("Mapongo-URL") is CSL's own.
+    """
+    for resource in contract.get("resources") or []:
+        if (resource.get("resource_type") or {}).get("slug_id") != UDB_ROOM_RESOURCE_TYPE:
+            continue
+        hr_room = (resource.get("resource") or "").strip()
+        if not hr_room:
+            continue
+        values = (info.get("value") for info in resource.get("resource_info") or [])
+        return hr_room, next((value for value in values if _is_url(value)), "")
+    return "", ""
+
+
+_validate_url = URLValidator(schemes=["http", "https"])
+
+
+def _is_url(value):
+    try:
+        _validate_url(value)
+    except ValidationError:
+        return False
+    return True
+
+
+def _resolve_room(contract, config):
+    """
+    The DLCDB room HR names for the contract, the URL of its room plan, and,
+    when HR names a room DLCDB does not have, why the person gets none. The sync
+    creates no rooms, and a deactivated room counts as missing.
+    """
+    hr_room, plan_url = _hr_room(contract)
+    if not hr_room:
+        return None, "", ""
+    room_number = map_room_number(hr_room, config)
+    room = Room.objects.filter(number__iexact=room_number).first()
+    if room is None:
+        mapped = f" → {room_number}" if room_number != hr_room else ""
+        return None, "", f"HR room {hr_room}{mapped}: no such room in DLCDB"
+    return room, plan_url, ""
 
 
 def import_udb_persons():
@@ -159,13 +213,20 @@ def import_udb_persons():
                 # name-uniqueness collision) is rolled back in isolation so it does
                 # not poison the transaction for the contracts that follow.
                 with transaction.atomic():
+                    room, plan_url, room_problem = _resolve_room(contract, config)
                     outcome, detail = _process_contract(
                         contract,
+                        room=room,
+                        plan_url=plan_url,
                         person_images_dir=person_images_dir,
                         thumbnail_size=thumbnail_size,
                         log_user_id=log_user.pk,
                     )
                 report.add(row=index, identifier=identifier, outcome=outcome, detail=detail)
+                # The person is saved, without a room: a row of its own, so the
+                # run is a warning and someone creates or renames the room.
+                if room_problem:
+                    report.add(row=index, identifier=identifier, outcome=Outcome.SKIPPED, detail=room_problem)
             except Exception as exc:
                 # One bad contract must not abort the whole run. Not journaled:
                 # the run's journal entry lists the contract.
@@ -365,14 +426,34 @@ def _unique_value_holders(values, *, exclude):
     return "; ".join(found)
 
 
-def _log_admin_history(person, *, log_user_id, action_flag, message):
+def _log_admin_history(obj, *, log_user_id, action_flag, message):
     """Record a row in the admin History (LogEntry) for a sync-driven change.
 
     The admin History tab normally only reflects changes made through the admin;
     writing a LogEntry here makes UDB sync edits visible there too, attributed to
     the background "udb-sync" actor.
     """
-    LogEntry.objects.log_actions(log_user_id, [person], action_flag, change_message=message, single_object=True)
+    LogEntry.objects.log_actions(log_user_id, [obj], action_flag, change_message=message, single_object=True)
+
+
+def _sync_room_website(room, plan_url, *, log_user_id):
+    """
+    Keep the room's website on the room plan HR links, overwriting another one.
+    Returns a note for the report, or "" when nothing changed.
+    """
+    if room is None or not plan_url or room.website == plan_url:
+        return ""
+    old_website = room.website
+    room.website = plan_url
+    room.stamp_user(get_user_model().objects.get(pk=log_user_id))
+    room.save()
+    _log_admin_history(
+        room,
+        log_user_id=log_user_id,
+        action_flag=CHANGE,
+        message=f"Changed by UDB sync: website: {old_website!r} -> {plan_url!r}",
+    )
+    return f"room {room.number}: website {old_website or '(empty)'} → {plan_url}"
 
 
 def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
@@ -423,11 +504,14 @@ def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
         )
 
 
-def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_id):
+def _process_contract(contract, *, room, plan_url, person_images_dir, thumbnail_size, log_user_id):
     """Upsert a single Person from one UDB contract.
 
     Required keys are accessed by subscript (a missing one raises and is reported
     as an ERROR row by the caller). Genuinely optional keys use ``.get()``.
+
+    ``room`` and ``plan_url`` come from ``_resolve_room``: the person's room
+    follows HR, and so does the room's website.
     """
     person = contract["person"]
 
@@ -510,6 +594,7 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
         udb_person_image=udb_person_image_path_relative,
         udb_person_image_hash=udb_person_image_hash,
         organizational_unit=udb_organizational_unit,
+        room=room,
         deleted_at=None,
         deleted_by=None,
     )
@@ -562,9 +647,11 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
             + (f". {holders}" if holders else "")
         ) from integrity_error
 
+    website_note = _sync_room_website(room, plan_url, log_user_id=log_user_id)
+
     if created:
         _log_admin_history(existing, log_user_id=log_user_id, action_flag=ADDITION, message="Added by UDB sync.")
-        return Outcome.CREATED, ""
+        return Outcome.CREATED, website_note
 
     values_after = Person.with_softdeleted_objects.filter(pk=existing.pk).values(*COMPARED_PERSON_FIELDS).first()
     changes = [
@@ -579,21 +666,23 @@ def _process_contract(contract, *, person_images_dir, thumbnail_size, log_user_i
     if any(field == "udb_contract_planned_checkout" for field, _old, _new in changes):
         _sync_lent_end_dates(existing, values_after["udb_contract_planned_checkout"], log_user_id=log_user_id)
 
-    if not changes:
+    if not changes and not website_note:
         return Outcome.UNCHANGED, ""
 
-    # Build an `old -> new` summary so the admin History tab shows what actually
-    # changed, not just which fields. repr() keeps empty/None vs a value
-    # unambiguous (e.g. `email: '' -> 'ada@example.org'`).
-    change_summary = ", ".join(f"{field}: {old!r} -> {new!r}" for field, old, new in changes)
-    _log_admin_history(
-        existing,
-        log_user_id=log_user_id,
-        action_flag=CHANGE,
-        message=f"Changed by UDB sync: {change_summary}",
-    )
+    change_summary = ""
+    if changes:
+        # Build an `old -> new` summary so the admin History tab shows what actually
+        # changed, not just which fields. repr() keeps empty/None vs a value
+        # unambiguous (e.g. `email: '' -> 'ada@example.org'`).
+        change_summary = ", ".join(f"{field}: {old!r} -> {new!r}" for field, old, new in changes)
+        _log_admin_history(
+            existing,
+            log_user_id=log_user_id,
+            action_flag=CHANGE,
+            message=f"Changed by UDB sync: {change_summary}",
+        )
 
     # The detailed diff is only useful for debugging, so keep it out of routine
-    # logs; a merge is always worth reading.
-    detail = "; ".join(part for part in (merge_note, change_summary if settings.DEBUG else "") if part)
+    # logs; a merge and a changed room website are always worth reading.
+    detail = "; ".join(part for part in (merge_note, change_summary if settings.DEBUG else "", website_note) if part)
     return Outcome.UPDATED, detail
