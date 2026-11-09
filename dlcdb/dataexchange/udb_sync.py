@@ -33,6 +33,7 @@ from django.utils.timezone import now
 
 from dlcdb.core.models import OrganizationalUnit, Person, Record, Room
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
+from dlcdb.theme.similar import comparable_name
 
 from .models import UdbSyncConfiguration, UdbSyncRun
 from .reporting import OperationReport, Outcome
@@ -154,17 +155,26 @@ def _is_url(value):
     return True
 
 
-def _resolve_room(contract, config):
+def _rooms_by_number():
+    """
+    The active rooms, keyed by their number the way the add pages compare
+    numbers (``theme.similar.comparable_name``): HR's G235 finds room "G 235".
+    Read once per run; the sync creates no rooms.
+    """
+    return {comparable_name(room.number): room for room in Room.objects.order_by("number")}
+
+
+def _resolve_room(contract, config, rooms):
     """
     The DLCDB room HR names for the contract, the URL of its room plan, and,
-    when HR names a room DLCDB does not have, why the person gets none. The sync
-    creates no rooms, and a deactivated room counts as missing.
+    when HR names a room DLCDB does not have, why the person gets none. ``rooms``
+    is ``_rooms_by_number()``; a deactivated room counts as missing.
     """
     hr_room, plan_url = _hr_room(contract)
     if not hr_room:
         return None, "", ""
     room_number = map_room_number(hr_room, config)
-    room = Room.objects.filter(number__iexact=room_number).first()
+    room = rooms.get(comparable_name(room_number))
     if room is None:
         mapped = f" → {room_number}" if room_number != hr_room else ""
         return None, "", f"HR room {hr_room}{mapped}: no such room in DLCDB"
@@ -206,6 +216,8 @@ def import_udb_persons():
             defaults={"username": "udb-sync", "is_active": False},
         )
 
+        rooms = _rooms_by_number()
+
         for index, contract in enumerate(contracts, start=1):
             identifier = _contract_identifier(contract)
             try:
@@ -213,7 +225,7 @@ def import_udb_persons():
                 # name-uniqueness collision) is rolled back in isolation so it does
                 # not poison the transaction for the contracts that follow.
                 with transaction.atomic():
-                    room, plan_url, room_problem = _resolve_room(contract, config)
+                    room, plan_url, room_problem = _resolve_room(contract, config, rooms)
                     outcome, detail = _process_contract(
                         contract,
                         room=room,

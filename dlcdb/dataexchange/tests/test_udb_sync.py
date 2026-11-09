@@ -285,6 +285,16 @@ def test_a_room_dlcdb_does_not_have_is_reported_and_the_person_gets_none():
 
 
 @pytest.mark.django_db
+def test_the_room_is_found_in_another_spelling_like_on_the_add_page():
+    _enable_sync_with_room_number_rule()
+    room = Room.objects.create(number="G 235")
+
+    _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-235-02")))
+
+    assert Person.objects.get(udb_person_uuid="uuid-1").room == room
+
+
+@pytest.mark.django_db
 def test_a_person_without_a_room_in_hr_loses_the_old_one():
     _enable_sync_with_room_number_rule()
     Room.objects.create(number="G235")

@@ -44,7 +44,7 @@ Das HR-System nennt den Raum einer Person in den Ressourcen des Vertrags, als Re
 
 Eine Regel macht daraus die DLCDB-Raumnummer: ein regulärer Ausdruck (Python-Syntax) und eine Ersetzung, angewandt wie bei [Räume umbenennen](../guides/erste_schritte.md#räume-umbenennen). Am CSL: Muster `^(\w)\w*-(\d+[a-z]?)(?:-\d+)?$`, Ersetzung `\1\2`. Das Muster deckt auch Werte ohne Arbeitsplatznummer (`Gü-324` → `G324`) und Räume mit Buchstaben (`Gü-223a-01` → `G223a`) ab. Ohne Muster gilt der Wert aus dem HR-System unverändert als Raumnummer.
 
-- Der Sync setzt den Raum jeder Person, die er abgleicht; Groß-/Kleinschreibung der Raumnummer ist egal. Nennt das HR-System keinen Raum, verliert die Person ihren Raum. Personen ohne HR-Verknüpfung behalten den Raum, der ihnen von Hand zugewiesen ist.
+- Der Sync setzt den Raum jeder Person, die er abgleicht. Die Raumnummer vergleicht er wie das Anlegen von Räumen: Groß-/Kleinschreibung, Leer- und Satzzeichen zählen nicht (`G 235` ist `G235`). Nennt das HR-System keinen Raum, verliert die Person ihren Raum. Personen ohne HR-Verknüpfung behalten den Raum, der ihnen von Hand zugewiesen ist.
 - Der Sync legt keine Räume an. Gibt es den Raum in der DLCDB nicht (oder ist er deaktiviert), bekommt die Person keinen Raum, und das Protokoll des Sync-Laufs meldet ihn, etwa `HR room Gü-999-01 → G999: no such room in DLCDB`. Dann den Raum anlegen oder [umbenennen](../guides/erste_schritte.md#räume-umbenennen).
 - Den ersten Link der Ressource (am CSL der Mapongo-Raumplan) übernimmt der Sync als *Website* des Raums und überschreibt dabei eine von Hand eingetragene. Die Änderung steht in der Admin-Historie des Raums und im Protokoll des Sync-Laufs.
 
