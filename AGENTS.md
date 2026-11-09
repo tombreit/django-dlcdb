@@ -36,6 +36,8 @@ Device Lifecycle Database
 - Do not run `manage.py makemessages` and do not modify the po translation files. I will take care of the translation stuff. Just ensure that the user facing strings in the codebase are marked as "translateable".
 - Add a `NEWS.md` entry for every significant change, not for every commit or fix
 - Never use the dev database for checks or experiments: `DATABASE_URL=sqlite://:memory:`
+- Try to write as little code as possible, while still producing code that's easy to read.
+- Create commits that are easy to understand and follow.
 
 ## Architecture
 
