@@ -90,7 +90,8 @@ class OperationReport:
 
         The counts line always reflects every row (so totals stay honest). When
         ``verbose`` is False, UNCHANGED rows are left out of the per-row listing
-        to keep routine runs readable — the changed/created/error rows still show.
+        to keep routine runs readable — the changed/created/error rows still show,
+        and so does an UNCHANGED row with a note (the HR sync's missing room).
         """
         header = f"{self.operation}{' (dry run)' if self.dry_run else ''} {datetime.now():%Y-%m-%d %H:%M}"
         if self.context:
@@ -99,7 +100,7 @@ class OperationReport:
 
         lines = [header, counts_line or "no rows", ""]
         for row in self.rows_in_file_order:
-            if not verbose and row.outcome is Outcome.UNCHANGED:
+            if not verbose and row.outcome is Outcome.UNCHANGED and not row.detail:
                 continue
             detail = f" ({row.detail})" if row.detail else ""
             lines.append(f"[row {row.row}] {row.identifier}  {row.outcome.value}{detail}")

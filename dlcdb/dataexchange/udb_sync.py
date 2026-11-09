@@ -235,11 +235,9 @@ def import_udb_persons():
                         thumbnail_size=thumbnail_size,
                         log_user_id=log_user.pk,
                     )
+                # The person is saved, without a room: the contract's row notes it.
+                detail = "; ".join(part for part in (detail, room_problem) if part)
                 report.add(row=index, identifier=identifier, outcome=outcome, detail=detail)
-                # The person is saved, without a room: a row of its own, so the
-                # run is a warning and someone creates or renames the room.
-                if room_problem:
-                    report.add(row=index, identifier=identifier, outcome=Outcome.SKIPPED, detail=room_problem)
             except Exception as exc:
                 # One bad contract must not abort the whole run. Not journaled:
                 # the run's journal entry lists the contract.

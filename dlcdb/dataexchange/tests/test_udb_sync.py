@@ -270,18 +270,23 @@ def test_without_a_rule_the_room_hr_names_is_the_room_number():
 
 
 @pytest.mark.django_db
-def test_a_room_dlcdb_does_not_have_is_reported_and_the_person_gets_none():
+def test_a_room_dlcdb_does_not_have_is_noted_and_the_person_gets_none():
     _enable_sync_with_room_number_rule()
     Room.objects.create(number="G999").delete()  # a deactivated room counts as missing
+    payload = _payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-999-01"))
 
-    report = _run_with_payload(_payload(_contract("uuid-1", "Ada", "Lovelace", room="Gü-999-01")))
+    report = _run_with_payload(payload)
 
-    assert report.counts[Outcome.CREATED] == 1
-    assert report.counts[Outcome.SKIPPED] == 1
-    assert report.level == "warning"
-    skipped = next(row for row in report.rows if row.outcome == Outcome.SKIPPED)
-    assert skipped.detail == "HR room Gü-999-01 → G999: no such room in DLCDB"
+    # One row per contract: the note is on the contract's own row.
+    assert len(report.rows) == 1
+    assert report.rows[0].outcome == Outcome.CREATED
+    assert report.rows[0].detail == "HR room Gü-999-01 → G999: no such room in DLCDB"
+    assert report.level == "success"
     assert Person.objects.get(udb_person_uuid="uuid-1").room is None
+
+    # An unchanged run still names the missing room in its stored log.
+    assert _run_with_payload(payload).counts[Outcome.UNCHANGED] == 1
+    assert "HR room Gü-999-01 → G999: no such room in DLCDB" in UdbSyncRun.objects.first().messages
 
 
 @pytest.mark.django_db
