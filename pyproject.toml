@@ -23,7 +23,7 @@ classifiers = [
 # bumps htmx. `make requirements` keeps them, so every package bump
 # checks all three for new releases by hand, then runs `make requirements`.
 dependencies = [
-    "Django==6.1.2",
+    "Django==6.1.3",
     "django-environ",
     "django-crispy-forms",
     "crispy-bootstrap5",
