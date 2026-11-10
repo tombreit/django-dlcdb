@@ -64,7 +64,7 @@
   "author": "Thomas Breitner",
   "license": "ISC",
   "allowScripts": {
-    "esbuild@0.28.2": true,
-    "@parcel/watcher": false
+    "@parcel/watcher": false,
+    "esbuild": false
   }
 }
