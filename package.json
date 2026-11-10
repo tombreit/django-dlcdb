@@ -31,7 +31,7 @@
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "mermaid": "^12.3.0",
-    "plotly.js-basic-dist-min": "^3.7.0",
+    "plotly.js-basic-dist-min": "^4.2.0",
     "qr-scanner": "^1.4.2",
     "sass": "1.77.6",
     "tom-select": "^2.6.2"
