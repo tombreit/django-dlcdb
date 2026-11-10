@@ -30,7 +30,8 @@ Device Lifecycle Database
 - Write the code for human inspection, favour readability
 - If in doubt: ask me
 - `dlcdb/core` is the contract the other apps rely on; its rules are the module docstring of `dlcdb/core/__init__.py`. Read it before changing core or how an app uses it
-- `PLANS/` holds living design documents for work that is planned but not yet implemented
+- `PLANS/` holds living design documents for work in progress. A plan's last batch moves what still holds into `DECISIONS.md` (decisions someone might revisit, pitfalls, open follow-ups; nothing the code already shows), then deletes the plan
+- `DECISIONS.md`: read the section of the area you change; a decision that reverses a bullet replaces it
 - You may suggest commit messages, but do not commit on your own
 - If adding SPDX license headers: omit the year
 - Do not run `manage.py makemessages` and do not modify the po translation files. I will take care of the translation stuff. Just ensure that the user facing strings in the codebase are marked as "translateable".
