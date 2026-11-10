@@ -31,10 +31,13 @@ jobs:
             3.12
             3.13
 
-      # The same target builds and tries a release locally (Makefile, `make wheel`)
+      # The same target builds and tries a release locally (Makefile, `make wheel`).
+      # requirements/prod.txt is hashed, which puts the whole pip call into
+      # --require-hashes mode: the unpinned build gets a call of its own.
       - name: Wheel, built from the tag and tried on Python 3.12
         run: |
-          pip install -r requirements/prod.txt build
+          pip install -r requirements/prod.txt
+          pip install build
           make wheel TAG="$GITHUB_REF_NAME" SMOKE_PYTHON=python3.12
 
       - name: GitHub release
