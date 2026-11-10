@@ -176,8 +176,9 @@ the wheel.
 Then try the published release: [Setup › Try a release](setup.md#try-a-release).
 
 **If the workflow fails**, there is a tag but no release. For a transient
-failure, rerun the workflow on GitHub. Otherwise remove the tag, fix, and start
-again at step 1:
+failure, rerun the workflow on GitHub. A rerun uses the workflow file of the
+tagged commit, so it cannot pick up a fix to `release.yml` itself. Otherwise
+remove the tag, fix, and start again at step 1:
 
 ```bash
 git push <github-remote> --delete vX.Y.Z
