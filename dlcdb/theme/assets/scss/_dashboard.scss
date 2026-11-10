@@ -166,13 +166,15 @@
 // Plotly renders each chart once, on the server, for both colour modes, and
 // writes its text colour inline. Axis labels, values and the legend take the
 // theme's text colour instead, so they stay readable on the dark panel. Hover
-// labels keep Plotly's colours: they sit on their own background.
+// labels keep Plotly's colours: they sit on their own background. That includes
+// the unified hover box, which Plotly draws as a second legend in .hoverlayer;
+// the chart's own legend sits in .infolayer.
 .dashboard-chart .js-plotly-plot {
   .xtick text,
   .ytick text,
   .xtitle,
   .ytitle,
-  .legendtext,
+  .infolayer .legendtext,
   .annotation-text,
   .bartext {
     fill: var(--bs-secondary-color) !important;
