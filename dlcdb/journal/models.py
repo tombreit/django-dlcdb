@@ -195,4 +195,4 @@ class JournalEntry(models.Model):
         verbose_name_plural = _("Journal entries")
 
     def __str__(self):
-        return f"{self.timestamp:%Y-%m-%d %H:%M} {self.source}: {self.summary}"
+        return f"{timezone.localtime(self.timestamp):%Y-%m-%d %H:%M} {self.source}: {self.summary}"

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .abstracts import AuditBaseModel
@@ -23,7 +24,7 @@ class Attachment(AuditBaseModel):
 
     def __str__(self):
         if self.created_at:
-            selfstring = f"Attachment: '{self.title}' / Created: '{self.created_at:%Y-%m-%d}'"
+            selfstring = f"Attachment: '{self.title}' / Created: '{timezone.localtime(self.created_at):%Y-%m-%d}'"
         else:
             selfstring = f"Attachment: '{self.title}'"
 

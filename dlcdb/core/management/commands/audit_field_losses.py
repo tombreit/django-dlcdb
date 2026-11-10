@@ -30,6 +30,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import models, transaction
+from django.utils import timezone
 from simple_history.utils import update_change_reason
 
 from dlcdb.core.models import Device
@@ -209,7 +210,7 @@ class Command(BaseCommand):
                 reported_pk = loss.device_pk
                 self.stdout.write(f"device {loss.device_pk} ({loss.label})")
             self.stdout.write(
-                f"    {loss.field:26} {_format(loss.old_value):32} lost {loss.lost_at:%Y-%m-%d %H:%M}"
+                f"    {loss.field:26} {_format(loss.old_value):32} lost {timezone.localtime(loss.lost_at):%Y-%m-%d %H:%M}"
                 f"  user {loss.history_user_id or '-'}"
                 f"  {'still empty' if loss.still_empty else 're-entered since'}"
             )

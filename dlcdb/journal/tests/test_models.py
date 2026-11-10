@@ -7,7 +7,7 @@ JournalEntry.objects: the defaults every emitter relies on in log(), and the
 problem counts the dashboard shows.
 """
 
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from django.utils import timezone, translation
@@ -137,3 +137,12 @@ def test_problem_counts_leave_out_older_entries(tenant):
     counts = dict(JournalEntry.objects.problem_counts(tenants=[tenant], days=30))
 
     assert counts[JournalEntry.Level.ERROR] == 1
+
+
+def test_an_entry_reads_in_local_time(settings):
+    settings.TIME_ZONE = "Europe/Berlin"
+    entry = JournalEntry(
+        timestamp=datetime(2026, 11, 9, 23, 15, tzinfo=UTC), source="dataexchange.hr_sync", summary="1 unchanged"
+    )
+
+    assert str(entry) == "2026-11-10 00:15 dataexchange.hr_sync: 1 unchanged"

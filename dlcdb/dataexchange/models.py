@@ -8,6 +8,7 @@ from pathlib import Path
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.journal.models import JournalEntry
@@ -316,4 +317,4 @@ class UdbSyncRun(OperationLogBase):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"HR API Sync Run {self.created_at:%Y-%m-%d %H:%M} ({self.status or 'pending'})"
+        return f"HR API Sync Run {timezone.localtime(self.created_at):%Y-%m-%d %H:%M} ({self.status or 'pending'})"

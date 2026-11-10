@@ -8,6 +8,7 @@ import os
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
 from .utils import unique_seq
 
@@ -162,11 +163,11 @@ def compare_sap(sap_list_obj):
                             # The stable record-type key, not the display label:
                             # this column must not change with the UI language.
                             "TYPE": record_for_sap.record_type,
-                            "LAST_FOUND": f"{last_found:%Y-%m-%d}",
+                            "LAST_FOUND": f"{timezone.localtime(last_found):%Y-%m-%d}" if last_found else "",
                             "OLD ROOM": old_room,
                             "NEW ROOM": new_room,
                             "ROOM NEQ": old_room != new_room,
-                            "REC CREATED_AT": f"{record_for_sap.created_at:%Y-%m-%d}",
+                            "REC CREATED_AT": f"{timezone.localtime(record_for_sap.created_at):%Y-%m-%d}",
                             "REC CREATED BY": record_for_sap.username,
                         }
                     )

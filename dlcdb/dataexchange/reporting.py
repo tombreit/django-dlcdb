@@ -11,10 +11,10 @@ detailed plaintext log for the stored ``messages`` field (``detailed``).
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 
 from django.conf import settings
+from django.utils import timezone
 from django.utils.html import format_html
 
 
@@ -93,7 +93,7 @@ class OperationReport:
         to keep routine runs readable — the changed/created/error rows still show,
         and so does an UNCHANGED row with a note (the HR sync's missing room).
         """
-        header = f"{self.operation}{' (dry run)' if self.dry_run else ''} {datetime.now():%Y-%m-%d %H:%M}"
+        header = f"{self.operation}{' (dry run)' if self.dry_run else ''} {timezone.localtime():%Y-%m-%d %H:%M}"
         if self.context:
             header = f"{header} — {self.context}"
         counts_line = "  ".join(f"{outcome.value.title()}: {count}" for outcome, count in self.counts.items() if count)

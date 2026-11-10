@@ -29,7 +29,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import IntegrityError, transaction
-from django.utils.timezone import now
+from django.utils.timezone import localtime, now
 
 from dlcdb.core.models import OrganizationalUnit, Person, Record, Room
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
@@ -356,7 +356,7 @@ def _describe(person):
     """One person, the way a human needs it to resolve a conflict."""
     link = f"HR uuid {person.udb_person_uuid}" if person.udb_person_uuid else "no HR link"
     state = "deactivated" if person.deleted_at else "active"
-    return f'#{person.pk} "{person}" ({link}, {state}, created {person.created_at:%Y-%m-%d})'
+    return f'#{person.pk} "{person}" ({link}, {state}, created {localtime(person.created_at):%Y-%m-%d})'
 
 
 def _email_holder(email, *, exclude):

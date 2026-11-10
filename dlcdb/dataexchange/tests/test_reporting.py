@@ -10,8 +10,10 @@ Tests for the unified import/decommission reporting:
   the remover (removed), exercised against the database.
 """
 
+import datetime
 import io
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -215,3 +217,13 @@ def test_validate_column_headers_allows_superset():
         current_col_headers=["EDV_ID", "SAP_ID", "EXTRA"],
         expected_col_headers=["EDV_ID", "SAP_ID"],
     )
+
+
+def test_the_log_header_is_in_local_time(settings):
+    settings.TIME_ZONE = "Europe/Berlin"
+    utc = datetime.datetime(2026, 11, 9, 23, 15, tzinfo=datetime.UTC)
+
+    with mock.patch("django.utils.timezone.now", return_value=utc):
+        header = OperationReport(operation="UDB person sync").detailed().splitlines()[0]
+
+    assert header == "UDB person sync 2026-11-10 00:15"

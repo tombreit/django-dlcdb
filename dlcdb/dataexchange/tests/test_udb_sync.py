@@ -605,6 +605,13 @@ def test_runs_are_pruned_to_the_limit(settings):
     assert UdbSyncRun.objects.count() == udb_sync.MAX_STORED_SYNC_RUNS
 
 
+def test_a_run_is_titled_in_local_time(settings):
+    settings.TIME_ZONE = "Europe/Berlin"
+    run = UdbSyncRun(status="success", created_at=datetime.datetime(2026, 11, 9, 23, 15, tzinfo=datetime.UTC))
+
+    assert str(run) == "HR API Sync Run 2026-11-10 00:15 (success)"
+
+
 # --- image change detection ---------------------------------------------------
 
 
