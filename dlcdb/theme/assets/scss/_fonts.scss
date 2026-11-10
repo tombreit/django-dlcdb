@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: EUPL-1.2
  */
 
+@use "sass:map";
+@use "sass:string";
+
 // IBM Plex Sans (variable weight) for all text, IBM Plex Mono for identifiers.
 // Self-hosted from @fontsource-variable/ibm-plex-sans and @fontsource/ibm-plex-mono;
 // the `build:theme:fonts` npm script copies the woff2 files into dist/fonts.
@@ -31,7 +34,7 @@ $font-subset-ranges: (
   "cyrillic-ext": "U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F",
 );
 
-// unquote(): a quoted unicode-range is invalid CSS, and a browser that drops
+// string.unquote(): a quoted unicode-range is invalid CSS, and a browser that drops
 // it treats every subset as covering everything.
 @each $subset, $range in $font-subset-ranges {
   @font-face {
@@ -40,7 +43,7 @@ $font-subset-ranges: (
     font-weight: 100 700;
     font-display: swap;
     src: url("#{$font-dir}/ibm-plex-sans-#{$subset}-wght-normal.woff2") format("woff2-variations");
-    unicode-range: unquote($range);
+    unicode-range: string.unquote($range);
   }
 }
 
@@ -54,7 +57,7 @@ $font-subset-ranges: (
       font-weight: $weight;
       font-display: swap;
       src: url("#{$font-dir}/ibm-plex-mono-#{$subset}-#{$weight}-normal.woff2") format("woff2");
-      unicode-range: unquote(map-get($font-subset-ranges, $subset));
+      unicode-range: string.unquote(map.get($font-subset-ranges, $subset));
     }
   }
 }
