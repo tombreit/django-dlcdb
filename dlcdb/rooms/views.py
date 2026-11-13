@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.html import format_html_join
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import TemplateView
@@ -22,6 +23,7 @@ from django.views.generic import TemplateView
 from dlcdb.core.models import Person, Record, Room
 from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
+from dlcdb.core.utils.links import linked_message, obj_link
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.lifecycle_display import active_record_color_case
@@ -178,7 +180,7 @@ def room_detail(request, pk):
             saved_room = form.save(commit=False)
             saved_room.stamp_user(request.user)
             saved_room.save()
-            messages.success(request, _("Room “%(room)s” was updated.") % {"room": saved_room})
+            messages.success(request, linked_message(_("Room “{room}” was updated."), room=saved_room))
             return redirect(next_url)
     else:
         form = RoomForm(instance=room)
@@ -232,19 +234,25 @@ def room_rename(request):
                 )
             kept = [rename for rename in renames if rename.problem]
             if kept:
+                rooms = format_html_join(
+                    "; ",
+                    "{} → {} ({})",
+                    (
+                        (obj_link(rename.room, label=rename.old_number), rename.new_number, rename.problem)
+                        for rename in kept
+                    ),
+                )
                 messages.warning(
                     request,
-                    ngettext(
-                        "%(count)d room kept its number: %(rooms)s",
-                        "%(count)d rooms kept their number: %(rooms)s",
-                        len(kept),
-                    )
-                    % {
-                        "count": len(kept),
-                        "rooms": "; ".join(
-                            f"{rename.old_number} → {rename.new_number} ({rename.problem})" for rename in kept
+                    linked_message(
+                        ngettext(
+                            "{count} room kept its number: {rooms}",
+                            "{count} rooms kept their number: {rooms}",
+                            len(kept),
                         ),
-                    },
+                        count=len(kept),
+                        rooms=rooms,
+                    ),
                 )
             return redirect("rooms:index")
     else:

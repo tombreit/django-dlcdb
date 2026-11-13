@@ -138,7 +138,8 @@ class RoomRenameViewTests(BaseTest):
 
         # Not back to the preview: it would plan the renamed rooms once more.
         self.assertRedirects(response, reverse("rooms:index"))
-        self.assertContains(response, "1 room kept its number: 236 → G236 (Room “G236” already exists.)")
+        room_link = f'<a href="{reverse("rooms:detail", args=[self.room_236.pk])}">236</a>'
+        self.assertContains(response, f"1 room kept its number: {room_link} → G236 (Room “G236” already exists.)")
         self.room_235.refresh_from_db()
         self.room_236.refresh_from_db()
         self.assertEqual(self.room_235.number, "G235")

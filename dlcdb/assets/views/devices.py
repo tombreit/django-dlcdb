@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, Person, Record
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
+from dlcdb.core.utils.links import linked_message
 from dlcdb.dataexchange.csv_export import csv_response
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.device_state import get_device_state_data
@@ -161,7 +162,7 @@ def device_detail(request, pk):
             saved_device = form.save(commit=False)
             saved_device.stamp_user(request.user)
             saved_device.save()
-            messages.success(request, _("Device “%(device)s” was updated.") % {"device": saved_device})
+            messages.success(request, linked_message(_("Device “{device}” was updated."), device=saved_device))
             return redirect(next_url)
     else:
         form = DeviceForm(instance=device, request=request)

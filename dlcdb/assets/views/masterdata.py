@@ -22,6 +22,7 @@ from django.utils.translation import gettext_lazy
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
+from dlcdb.core.utils.links import linked_message
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from dlcdb.theme.pagination import paginate
@@ -200,7 +201,7 @@ def _masterdata_detail(request, spec, pk):
             saved_obj.save()
             messages.success(
                 request,
-                _("%(model)s “%(obj)s” was updated.") % {"model": spec.model._meta.verbose_name, "obj": saved_obj},
+                linked_message(_("{model} “{obj}” was updated."), model=spec.model._meta.verbose_name, obj=saved_obj),
             )
             return redirect(next_url)
     else:

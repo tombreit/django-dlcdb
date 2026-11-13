@@ -172,6 +172,16 @@ class RoomFrontendTests(BaseTest):
         self.assertEqual(self.plain_room.nickname, "Renamed")
         self.assertEqual(self.plain_room.user, self.user)
 
+    def test_the_updated_message_links_the_room(self):
+        response = self.client.post(
+            reverse("rooms:detail", args=[self.plain_room.pk]), {"number": "F2.02", "nickname": "Renamed"}, follow=True
+        )
+
+        self.assertContains(
+            response,
+            f'Room “<a href="{reverse("rooms:detail", args=[self.plain_room.pk])}">F2.02 (Renamed)</a>” was updated.',
+        )
+
     def test_auto_return_room_stays_unique_after_frontend_edit(self):
         self.server_room.is_auto_return_room = True
         self.server_room.save()

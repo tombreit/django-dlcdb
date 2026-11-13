@@ -18,6 +18,7 @@ from django_htmx.http import HttpResponseClientRedirect
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, LicenceRecord, Room
 from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.core.utils.links import linked_message, obj_link
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
@@ -102,7 +103,7 @@ def edit(request, license_id):
 
             messages.success(
                 request,
-                f"License {device.human_title} saved.",
+                linked_message(_("License “{license}” saved."), license=obj_link(device, label=device.human_title)),
             )
 
             # The plain return redirect() behaves differently than the HX-Redirect header
@@ -197,10 +198,7 @@ def new(request):
                 for error in errors:
                     messages.error(request, error)
             else:
-                messages.success(
-                    request,
-                    f"License {device.sap_id} added.",
-                )
+                messages.success(request, linked_message(_("License “{license}” added."), license=device))
 
             redirect_url = reverse("licenses:index")
             return HttpResponseClientRedirect(redirect_url) if request.htmx else redirect(redirect_url)

@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 
 from dlcdb.core.models import Person, Record
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
+from dlcdb.core.utils.links import linked_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
@@ -128,7 +129,7 @@ def person_detail(request, pk):
             saved_person = form.save(commit=False)
             saved_person.stamp_user(request.user)
             saved_person.save()
-            messages.success(request, _("Person “%(person)s” was updated.") % {"person": saved_person})
+            messages.success(request, linked_message(_("Person “{person}” was updated."), person=saved_person))
             return redirect(next_url)
     else:
         form = PersonForm(instance=person)

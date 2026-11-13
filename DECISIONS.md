@@ -19,6 +19,9 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The journal is no audit-log package**: auditlog, reversion and simple-history record field changes, not events; error tracking (Sentry) is out of scope. `log()` fails loudly, only the logging handler never breaks its caller; not buffering, a second database, a queue thread or `on_commit`.
 - **Polish stays in the classic theme and Bootstrap 5.3**; the `redesign` branches are a quarry only. Colour means state, primary is for actions and links.
 - **Related objects open in the same tab**, back via `?next=`; no popup or modal (fragment views plus JS).
+- **A named object links to its page where a reader would go next**: templates through `theme/includes/_object_link.html`, messages through `core/utils/links.py`. Plain inside another link or a stretched row, in print and slips, where leaving drops unsaved input (the lending return flow), and for master data in list columns (it classifies the row; the filterbar filters by it). Not a template tag, not `get_absolute_url` on more core models, not `theme.related` for messages (core may not import theme).
+- **A message links its object only when the redirect leaves the object's page**: "… was updated", "tenant created", licences, rooms a rename skipped; messages that land on the object's page or on a form stay plain.
+- **The device state card's title is the state, on a solid tile in its colour**: a tinted tile vanishes in dark mode, a "Current state" title over a large badge says nothing. The header's state badge shows only below `lg`, where the card sits below the form.
 - **HR room names map through a configurable regex**, not per-institute code. HR owns `Room.website`; the sync never creates rooms (typos, "Homeoffice").
 - **A pure-Python wheel on GitHub Releases**, with the built docs and the collected static files; no sdist (it can't rebuild the frontend). PyPI later, via trusted publishing.
 - **The raw `static/**` stays in the wheel**: the favicon view and the icon picker read it, and without it a stray `collectstatic` would break every page.
@@ -34,15 +37,18 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - `request.htmx.current_url_abs_path` is None behind the TLS proxy; `next` must survive a form's POST.
 - The DB-stored slip templates include `lent_sheet.html`: a change there reaches every lending profile.
 - With warnings as errors, a leaked file or connection fails whichever test runs at garbage collection.
+- Splitting a translated sentence around a link changes its msgid: split only where the word order allows (`rooms/includes/_changes.html`).
+- A link inside a stretched-link area can't be clicked; `_object_link.html` passes the current request as `next`, which is wrong for a fragment with a URL of its own.
 
 ## Open follow-ups
 
 - Tenants: `Device.tenant` and `ImporterList.tenant` NOT NULL (then drop the hints and the assign action); `created_by` on `AuditBaseModel`; create the LDAP mirror groups on `post_migrate`.
 - Journal: phase out the legacy logs (`UdbSyncRun` still holds the HR sync's missing-room notes; the `ImporterList`/`RemoverList` messages); a per-object journal on detail pages; journal lifecycle transitions, inventory notes and logins; log the silent handlers in `base_admin.get_queryset`, `verify_lendings` and `notifications/tasks.py`.
 - The similar-name lists need only `add_*`, so names can be walked by prefix: without `view_*`, list nothing.
-- Related links: duplicate check on renames, a merge tool, links on read-only pages, `next` on every detail link (dashboard search, room and person pages).
+- Related links: duplicate check on renames, a merge tool, links on read-only pages, `next` on every detail link (dashboard search, room and person pages, messages).
+- Links: admin links in frontend templates, which the inventory device search shows to non-staff users too (also `inventorize_room_detail.html`, `room_qrcodes_detail.html`, `notifications/index.html`, `lending/lend.html`, `licenses/form_partial.html`); named objects on the inventory screens (their rows are duplicated in `inventorize.js`); the device on the notifications list; the import summary's "saved log"; `obj_link` checks no permission (the room in a relocate message can lead to a 403).
 - Lists: the tenant sort is offered to single-tenant users; a tenant column exists only on devices; the lending list runs an extra COUNT.
-- UI: the state badge appears twice on the device page; HTMX fragments still compute the hints; charts have no table view; German plurals ("Gerät nach Status", "Geräten").
+- UI: HTMX fragments still compute the hints; charts have no table view; German plurals ("Gerät nach Status", "Geräten").
 - Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring and help text still show the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
 - Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants and lending profiles, ESLint for `theme.js` and `filterbar.js`.

@@ -6,9 +6,9 @@
 Turning the objects named in a Django message into links to their detail views.
 
 A transition message like "Device “SON60000895” moved to room “235”." is more
-useful when the device and the room are clickable. ``linked_message`` does the
-``%``-substitution for such a message, running every value through ``obj_link``,
-so the message text (the translatable msgid) stays exactly as it was.
+useful when the device and the room are clickable. ``linked_message`` fills the
+``{…}`` placeholders of such a message (``str.format``), running every value
+through ``obj_link``.
 
 Putting HTML into a Django message is an established pattern in this project:
 ``StickyMessage.get_formatted_msg`` in ``dlcdb.theme.context_processors.hints``
@@ -20,36 +20,50 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import SafeString
 
+# The pages of the models without get_absolute_url, by ``_meta.label_lower``.
+# URL names, not imports: core imports no other app.
+DETAIL_URLS = {
+    "core.room": "rooms:detail",
+    "core.person": "persons:detail",
+    "core.devicetype": "assets:device_type_detail",
+    "core.manufacturer": "assets:manufacturer_detail",
+    "core.supplier": "assets:supplier_detail",
+    "tenants.tenant": "tenants:detail",
+}
+
+
+def detail_url(obj):
+    """
+    The frontend page of ``obj``: its ``get_absolute_url()`` (a device, a
+    licence, an import), else its entry in ``DETAIL_URLS``.
+
+    None for anything without a page: a plain value, an unsaved object, a
+    soft-deleted one (its page answers 404).
+    """
+    if getattr(obj, "pk", None) is None or getattr(obj, "deleted_at", None):
+        return None
+    try:
+        if hasattr(obj, "get_absolute_url"):
+            return obj.get_absolute_url()
+        url_name = DETAIL_URLS.get(obj._meta.label_lower)
+        return reverse(url_name, args=[obj.pk]) if url_name else None
+    except NoReverseMatch:
+        return None
+
 
 def obj_link(obj, label=None) -> SafeString:
     """
-    Render ``obj`` as a link to its frontend detail view.
+    Render ``obj`` as a link to its frontend page (``detail_url``).
 
-    Linkable are ``Device`` (licences go to their licence form, everything else
-    to the device detail), ``Room`` and ``Person``. Anything else — a plain
-    string, a tenant, ``None`` — is returned as escaped text, so callers can pass
-    every part of a message through here without checking its type first.
+    Anything without a page — a plain string, ``None``, a soft-deleted room — is
+    returned as escaped text, so callers can pass every part of a message
+    through here without checking its type first.
 
     ``label`` overrides the anchor text, which would otherwise be ``str(obj)``.
     """
-    # Imported here (not at module level) to keep core.utils importable without
-    # pulling in core.models, which imports from core.utils itself.
-    from ..models import Device, Person, Room
-
-    url = None
-    try:
-        if isinstance(obj, Device):
-            # A licence links to its own edit form; get_absolute_url() knows which.
-            url = obj.get_absolute_url()
-        elif isinstance(obj, Room):
-            url = reverse("rooms:detail", args=[obj.pk])
-        elif isinstance(obj, Person):
-            url = reverse("persons:detail", args=[obj.pk])
-    except NoReverseMatch:
-        url = None
-
+    url = detail_url(obj)
     text = obj if label is None else label
-    if url is None or getattr(obj, "pk", None) is None:
+    if url is None:
         # conditional_escape, not escape: an already-safe value (a pre-built
         # anchor from a caller that needed a custom label) passes through.
         return conditional_escape(text)

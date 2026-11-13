@@ -17,6 +17,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
+from dlcdb.core.utils.links import linked_message
 
 from .forms import TenantForm
 from .models import Tenant
@@ -94,7 +95,7 @@ def add(request):
         tenant.save()
         messages.success(
             request,
-            _("Tenant “%(tenant)s” was created. Tick the groups that should see it.") % {"tenant": tenant},
+            linked_message(_("Tenant “{tenant}” was created. Tick the groups that should see it."), tenant=tenant),
         )
         return redirect("tenants:index")
 
@@ -120,7 +121,7 @@ def detail(request, pk):
             tenant = form.save(commit=False)
             tenant.stamp_user(request.user)
             tenant.save()
-            messages.success(request, _("Tenant “%(tenant)s” was updated.") % {"tenant": tenant})
+            messages.success(request, linked_message(_("Tenant “{tenant}” was updated."), tenant=tenant))
             return redirect(index_url)
     else:
         form = TenantForm(instance=tenant)

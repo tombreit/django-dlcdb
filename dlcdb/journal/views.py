@@ -15,6 +15,7 @@ from django.utils.translation import ngettext
 from django.views.decorators.http import require_GET
 
 from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.core.utils.links import detail_url
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
@@ -32,9 +33,7 @@ def _subject_url(entry):
     # A subject whose model is gone (a retired log table) has no model class.
     if entry.content_type is None or entry.content_type.model_class() is None:
         return ""
-    # Only models with a page of their own define get_absolute_url.
-    get_absolute_url = getattr(entry.content_object, "get_absolute_url", None)
-    return get_absolute_url() if get_absolute_url else ""
+    return detail_url(entry.content_object) or ""
 
 
 @htmx_permission_required("journal.view_journalentry")

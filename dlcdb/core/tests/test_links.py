@@ -8,8 +8,9 @@ import pytest
 from django.urls import reverse
 from django.utils.safestring import SafeString
 
-from dlcdb.core.models import Device, Person, Room
+from dlcdb.core.models import Device, DeviceType, Manufacturer, Person, Room, Supplier
 from dlcdb.core.utils.links import linked_message, obj_link
+from dlcdb.tenants.models import Tenant
 
 
 @pytest.mark.django_db
@@ -34,6 +35,29 @@ def test_obj_link_room_and_person():
 
     assert obj_link(room) == f'<a href="{reverse("rooms:detail", args=[room.pk])}">235 (Breitner, Gies)</a>'
     assert obj_link(person) == f'<a href="{reverse("persons:detail", args=[person.pk])}">Breitner, Thomas</a>'
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("model", "url_name"),
+    [
+        (DeviceType, "assets:device_type_detail"),
+        (Manufacturer, "assets:manufacturer_detail"),
+        (Supplier, "assets:supplier_detail"),
+        (Tenant, "tenants:detail"),
+    ],
+)
+def test_obj_link_master_data_and_tenant(model, url_name):
+    obj = model.objects.create(name="Acme")
+    assert obj_link(obj) == f'<a href="{reverse(url_name, args=[obj.pk])}">{obj}</a>'
+
+
+@pytest.mark.django_db
+def test_obj_link_of_a_soft_deleted_object_is_text():
+    """Its page answers 404."""
+    room = Room.objects.create(number="A1.01")
+    room.delete()
+    assert obj_link(room) == "A1.01"
 
 
 @pytest.mark.django_db
