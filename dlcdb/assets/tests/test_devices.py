@@ -645,11 +645,11 @@ class DeviceFrontendTests(BaseTest):
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceDetailLendingLinkTests(BaseTest):
-    """The "Current state" card links a lent device to the lending it is out on.
+    """The "Current state" card links a lent device to the lending it is out on,
+    and the room and person to their pages.
 
-    The same state snippet renders in the device list, where the link would be
-    noise, so the URL is passed in by the detail view rather than derived in the
-    template -- and only for a viewer who may actually open the lending page.
+    The detail view passes the lending URL only for a viewer who may actually open
+    the lending page; the device list never links the lending.
     """
 
     @classmethod
@@ -721,14 +721,28 @@ class DeviceDetailLendingLinkTests(BaseTest):
 
         self.assertIsNone(response.context["lending_url"])
 
-    def test_the_device_list_does_not_link_the_borrower(self):
-        """The shared state snippet stays a plain badge in list rows."""
+    def test_the_device_list_does_not_link_the_lending(self):
         self._login("transition_can_lend_device")
 
         response = self.client.get(reverse("assets:device_index"))
 
         self.assertContains(response, str(self.person))
         self.assertNotContains(response, reverse("lending:detail", args=[self.record.pk]))
+
+    def test_the_room_links_to_its_page_for_room_viewers(self):
+        self._login("view_room")
+        room_link = f'href="{reverse("rooms:detail", args=[self.room.pk])}?next='
+
+        self.assertContains(self._detail(self.inroom_device), room_link)
+        self.assertContains(self.client.get(reverse("assets:device_index")), room_link)
+
+    def test_the_room_stays_plain_text_without_view_room(self):
+        self._login()
+
+        response = self._detail(self.inroom_device)
+
+        self.assertContains(response, str(self.room))
+        self.assertNotContains(response, reverse("rooms:detail", args=[self.room.pk]))
 
 
 @override_settings(STORAGES=_PLAIN_STATIC_STORAGE)

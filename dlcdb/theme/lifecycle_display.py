@@ -4,11 +4,11 @@
 
 """
 Presentation for the device lifecycle: the Bootstrap contextual colour of each
-state's badge.
+state's badge, and the icon of the device page's state card.
 
 This is the deliberately "decorative" half of the lifecycle. The states,
 transitions and their keys live in ``dlcdb.core.lifecycle`` (the source of
-truth); only the colours -- a pure view concern -- live here, in the theme app.
+truth); only the colours and icons -- a pure view concern -- live here, in the theme app.
 Keyed by the same state keys so the two cannot drift.
 
 Views attach a colour to their querysets with ``active_record_color_case()`` (a
@@ -29,13 +29,28 @@ STATE_COLORS = {
     lifecycle.REMOVED: "secondary",
 }
 
-# Fallback for an unknown/empty state.
+# Bootstrap icon per state key.
+STATE_ICONS = {
+    lifecycle.ORDERED: "bi-cart3",
+    lifecycle.INROOM: "bi-door-open",
+    lifecycle.LENT: "bi-person-check",
+    lifecycle.LOST: "bi-question-circle",
+    lifecycle.REMOVED: "bi-archive",
+}
+
+# Fallbacks for an unknown/empty state.
 DEFAULT_COLOR = "secondary"
+DEFAULT_ICON = "bi-activity"
 
 
 def state_color(record_type):
     """The badge colour for a state key (scalar helper, e.g. for a single object)."""
     return STATE_COLORS.get(record_type, DEFAULT_COLOR)
+
+
+def state_icon(record_type):
+    """The icon for a state key."""
+    return STATE_ICONS.get(record_type, DEFAULT_ICON)
 
 
 def active_record_color_case(field="active_record__record_type"):

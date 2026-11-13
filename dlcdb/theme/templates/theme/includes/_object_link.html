@@ -1,0 +1,12 @@
+{% comment %}
+A named object as a link to its page, or as plain text where that page would
+refuse the viewer: without the page's view permission, or for a soft-deleted
+object (404). The link passes the current page as ?next=.
+
+Caller passes:
+  obj       the object (a Room, a Person, …); none renders "—"
+  url_name  its page, taking the pk ("rooms:detail")
+  perm      that page's view permission ("core.view_room")
+  label     (optional) the text instead of str(obj)
+{% endcomment %}
+{% if obj and perm in perms and not obj.deleted_at %}<a href="{% url url_name obj.pk %}?next={{ request.get_full_path|urlencode }}">{{ label|default:obj }}</a>{% else %}{{ label|default:obj|default:"—" }}{% endif %}

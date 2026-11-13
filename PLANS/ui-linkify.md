@@ -6,7 +6,8 @@ SPDX-License-Identifier: CC0-1.0
 
 # UI linkify: link the objects the frontend names; a clearer device state card
 
-**Status:** batch 0 (this plan), branch `ui-linkify`, 2026-11-13. This is a living document.
+**Status:** batch 1 done (the state card, variant B′), branch `ui-linkify`, 2026-11-13. This is a living
+document.
 
 ## Why
 
@@ -61,29 +62,21 @@ Redesign the state card in the existing `card-filled` / `fact-list` language.
 
 ## Batch 1: the state card
 
-Before building, render 2–3 variants as screenshots, with the markup and CSS injected through
-Playwright and the repo untouched:
-- light and dark, desktop and 390px wide;
-- for INROOM, LENT and LOST.
-
-The user picks one.
-
-- **A:** the header's icon square tinted in the state colour (`bg-{c}-subtle text-{c}-emphasis`), and
-  the `<h2>` is the state name, with "Current state:" as visually-hidden text.
-- **B:** like A, but a solid tile (`text-bg-{c}`) with an icon per state (`STATE_ICONS` next to
-  `STATE_COLORS` in `theme/lifecycle_display.py`).
-- **C:** the title "Current state" stays, and the state is a large badge as the body's first line.
-
-The structure is shared by all three variants:
+Three variants were rendered as screenshots (light and dark, desktop and 390px wide, INROOM, LENT
+and LOST); the user picked B, built in its refined form B′:
+- **Rejected:** A, the icon square tinted in the state colour, which almost disappears in dark mode;
+  C, the title "Current state" over a large state badge, which says nothing new and is loud.
+- **B′:** the header's icon square is a solid tile (`text-bg-{c}`) with an icon per state
+  (`STATE_ICONS` next to `STATE_COLORS` in `theme/lifecycle_display.py`). The `<h2>` is the state
+  name, with "Current state:" as visually-hidden text.
 - **The card body.** The card gets its own markup instead of the list snippet `_state.html`: a
   `fact-list` with these rows:
+  - Lender (link to the person page; "Person" outside LENT);
   - Room (link);
-  - Borrower (link to the person page; LENT only);
-  - Return by (LENT only);
-  - Since (the active record's `created_at`, or `lent_start_date` for LENT);
+  - Lending: the period, linked to the lending (`lending_url`); LENT only. B's separate "Show this
+    lending" line read as an external link;
+  - Since (the active record's `created_at`; not for LENT);
   - Note (if the active record has one).
-
-  A lent device also gets "Open lending" (the existing `lending_url`).
 - **"New state"** becomes a full-width `btn btn-primary` of regular size: `dropdown d-grid`, menu
   `w-100`.
 - **`_state.html`** becomes the device list's snippet only. Its `lending_url` branch goes; room and
@@ -91,6 +84,14 @@ The structure is shared by all three variants:
 - **The device list's mobile copy** of the state moves out of the stretched-link wrapper, so its
   links can be clicked.
 - **The header badge** gets `d-lg-none` (decision 1).
+
+### Decided during implementation
+
+- **An INROOM record can carry a person** (a relocate keeps a licence's person), so the row is
+  labelled "Person" there and "Lender" only for LENT.
+- **Dates are ISO** (`SHORT_DATE_FORMAT`), like the rest of the frontend.
+- **Icons:** ORDERED `bi-cart3`, INROOM `bi-door-open`, LENT `bi-person-check`, LOST
+  `bi-question-circle`, REMOVED `bi-archive`; no active record `bi-activity`.
 
 ## Batch 2: links in templates
 
@@ -168,6 +169,6 @@ The include from batch 1, used for:
 ## Progress
 
 - [x] Batch 0: this plan
-- [ ] Batch 1: the state card (variants rendered and picked first)
+- [x] Batch 1: the state card (variant B′)
 - [ ] Batch 2: links in templates
 - [ ] Batch 3: links in messages; retire the plan into DECISIONS.md

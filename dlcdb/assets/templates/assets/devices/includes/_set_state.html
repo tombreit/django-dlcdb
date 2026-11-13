@@ -9,8 +9,8 @@ directly, so it is a form button rather than a link.
 {% endcomment %}
 {% load i18n %}
 {% if state_data.actions %}
-  <div class="btn-group mt-3 w-100" role="group">
-    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+  <div class="dropdown d-grid mt-3">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
       <i class="bi bi-plus-lg"></i> {% translate "New state" %}
     </button>
     <ul class="dropdown-menu w-100">

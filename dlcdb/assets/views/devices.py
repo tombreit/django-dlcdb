@@ -23,7 +23,7 @@ from dlcdb.theme.device_state import get_device_state_data
 from dlcdb.theme.export import export_href
 from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
-from dlcdb.theme.lifecycle_display import active_record_color_case
+from dlcdb.theme.lifecycle_display import active_record_color_case, state_icon
 from dlcdb.theme.navigation import detail_urls, get_redirect_url
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.pickers import picker_filter
@@ -181,6 +181,7 @@ def device_detail(request, pk):
             # "assets" surface swaps in native frontend URLs for Move/Lend.
             "state_data": get_device_state_data(device, user=request.user, app_name="assets"),
             "lending_url": _lending_url(request.user, device),
+            "state_icon": state_icon(device.active_record.record_type if device.active_record else None),
         },
     )
 
@@ -270,8 +271,8 @@ def _lending_url(user, device):
     """The lending this device is currently out on, or None.
 
     Gated on the same permission the lending view itself requires, so the link
-    never leads somewhere the user is refused. The device state card renders the
-    borrower as a link when this is set.
+    never leads somewhere the user is refused. The device state card links the
+    lending period when this is set.
     """
     record = device.active_record
     if not record or record.record_type != Record.LENT:

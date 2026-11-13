@@ -12,17 +12,57 @@ Record trail + field history, both frontend views scoped to this device. The
 field history needs only view_device, which this page already requires.
 {% endcomment %}
 
-<section class="card card-filled mb-3">
-  <div class="card-header">
-    <i class="bi bi-activity"></i>
-    <h2>{% translate "Current state" %}</h2>
-  </div>
-  <div class="card-body">
-    {# lending_url turns the borrower into a link to the lending. Only this card passes it; the device list includes the same snippet without it. #}
-    {% include "assets/devices/includes/_state.html" with device=device lending_url=lending_url %}
-    {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
-  </div>
-</section>
+{% comment %}
+The page's main component: the state is the title, on a tile in the state's
+colour, then where the device is and since when, then "New state".
+lending_url is set only for a viewer who may open the lending.
+{% endcomment %}
+{% with record=device.active_record %}
+  <section class="card card-filled mb-3">
+    <div class="card-header">
+      <i class="bi {{ state_icon }} text-bg-{{ device.state_color|default:"secondary" }}"></i>
+      <h2><span class="visually-hidden">{% translate "Current state" %}: </span>{% if record %}{{ record.get_record_type_display }}{% else %}{% translate "No active record" %}{% endif %}</h2>
+    </div>
+    <div class="card-body">
+      {% if record %}
+        <dl class="fact-list">
+          {% if record.person %}
+            <div>
+              <dt>{% if record.record_type == "LENT" %}{% translate "Lender" %}{% else %}{% translate "Person" %}{% endif %}</dt>
+              <dd>{% include "theme/includes/_object_link.html" with obj=record.person url_name="persons:detail" perm="core.view_person" %}</dd>
+            </div>
+          {% endif %}
+          {% if record.room %}
+            <div>
+              <dt>{% translate "Room" %}</dt>
+              <dd>{% include "theme/includes/_object_link.html" with obj=record.room url_name="rooms:detail" perm="core.view_room" %}</dd>
+            </div>
+          {% endif %}
+          {% if record.record_type == "LENT" %}
+            <div>
+              <dt>{% translate "Lending" %}</dt>
+              <dd>
+                {% if lending_url %}<a href="{{ lending_url }}" title="{% translate 'Show this lending' %}">{% endif %}{{ record.lent_start_date|date:"SHORT_DATE_FORMAT" }}{% if record.lent_desired_end_date %} – {{ record.lent_desired_end_date|date:"SHORT_DATE_FORMAT" }}{% endif %}{% if lending_url %}</a>{% endif %}
+              </dd>
+            </div>
+          {% else %}
+            <div>
+              <dt>{% translate "Since" %}</dt>
+              <dd>{{ record.created_at|date:"SHORT_DATE_FORMAT" }}</dd>
+            </div>
+          {% endif %}
+          {% if record.note %}
+            <div>
+              <dt>{% translate "Note" %}</dt>
+              <dd style="white-space: pre-line;">{{ record.note }}</dd>
+            </div>
+          {% endif %}
+        </dl>
+      {% endif %}
+      {% include "assets/devices/includes/_set_state.html" with state_data=state_data %}
+    </div>
+  </section>
+{% endwith %}
 
 <section class="card card-filled mb-3">
   <div class="card-header">
