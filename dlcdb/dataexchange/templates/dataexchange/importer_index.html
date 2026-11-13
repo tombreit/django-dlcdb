@@ -44,7 +44,7 @@
                 </td>
                 <td>{% include "dataexchange/includes/_status_badge.html" %}</td>
                 <td class="d-none d-md-table-cell text-muted">{{ importer_list.get_import_format_display }}</td>
-                <td class="d-none d-md-table-cell text-muted">{{ importer_list.tenant|default:"—" }}</td>
+                <td class="d-none d-md-table-cell text-muted">{% include "theme/includes/_object_link.html" with obj=importer_list.tenant url_name="tenants:detail" perm="tenants.view_tenant" %}</td>
                 <td class="text-end">
                   <span class="badge text-bg-light border">{{ importer_list.devices_count }}</span>
                 </td>

@@ -69,7 +69,7 @@ may open the device.
               <div class="timeline-text">
                 {% if change.room_id == room.pk %}
                   {% if change.is_type_lent %}
-                    {% blocktranslate with person=change.person|default:"—" context "room change" %}Lent to {{ person }}{% endblocktranslate %}
+                    {% translate "Lent to" context "room change" %} {% include "theme/includes/_object_link.html" with obj=change.person url_name="persons:detail" perm="core.view_person" %}
                   {% else %}
                     {% translate "Arrived" context "room change" %}
                   {% endif %}
@@ -77,7 +77,7 @@ may open the device.
                     {% translate "from" context "room change" %} <a href="{% url 'rooms:detail' change.previous_room %}">{{ change.previous_room_number }}</a>
                   {% endif %}
                 {% elif change.is_type_lent %}
-                  {% blocktranslate with person=change.person|default:"—" context "room change" %}Lent to {{ person }}{% endblocktranslate %}
+                  {% translate "Lent to" context "room change" %} {% include "theme/includes/_object_link.html" with obj=change.person url_name="persons:detail" perm="core.view_person" %}
                   {# Old lendings may have no room. #}
                   {% if change.room %}
                     {% translate "in" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>

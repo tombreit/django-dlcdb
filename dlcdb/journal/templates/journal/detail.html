@@ -55,7 +55,7 @@ this page does not use theme/_detail_base.html, which is built around a form.
             <dt>{% translate "User" %}</dt>
             <dd>{{ entry.username|default:"—" }}</dd>
             <dt>{% translate "Tenant" %}</dt>
-            <dd>{{ entry.tenant|default:"—" }}</dd>
+            <dd>{% include "theme/includes/_object_link.html" with obj=entry.tenant url_name="tenants:detail" perm="tenants.view_tenant" %}</dd>
             <dt>{% translate "Subject" %}</dt>
             <dd>
               {% if subject_url %}

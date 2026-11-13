@@ -60,7 +60,7 @@
                 {% include "licenses/traffic_light.html" %}
               </td>
             <td>
-              {{ license.device_human_title }}
+              {% include "theme/includes/_object_link.html" with obj=license.device url_name="licenses:edit" perm="core.change_licencerecord" label=license.device_human_title %}
               <a
                   href="{% url 'licenses:history' license.device.id %}"
                   title="{% translate 'Show history' %}"

@@ -68,9 +68,9 @@ hiding it would lose history.
               {% else %}{{ record.device.sap_id|default:"—" }}{% endif %}
             </dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Device type" %}</dt>
-            <dd class="col-sm-8">{{ record.device.device_type|default:"—" }}</dd>
+            <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=record.device.device_type url_name="assets:device_type_detail" perm="core.view_devicetype" %}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Manufacturer" %}</dt>
-            <dd class="col-sm-8">{{ record.device.manufacturer|default:"—" }}</dd>
+            <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=record.device.manufacturer url_name="assets:manufacturer_detail" perm="core.view_manufacturer" %}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Model name" %}</dt>
             <dd class="col-sm-8">{{ record.device.series|default:"—" }}</dd>
             <dt class="col-sm-4 text-secondary fw-medium">{% translate "Serial number" %}</dt>

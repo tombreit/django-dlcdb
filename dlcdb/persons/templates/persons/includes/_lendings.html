@@ -39,13 +39,11 @@ Links appear only for a user who may open the target, so none leads to a refusal
                 </div>
                 <div class="timeline-text">
                   {% if record.is_active and record.lent_desired_end_date %}
-                    {% if record.room %}
-                      {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" room=record.room.number %}Due {{ due }}, in room {{ room }}{% endblocktranslate %}
-                    {% else %}
-                      {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" %}Due {{ due }}{% endblocktranslate %}
+                    {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" %}Due {{ due }}{% endblocktranslate %}{% if record.room %},
+                      {% translate "in room" context "person lending" %} {% include "theme/includes/_object_link.html" with obj=record.room url_name="rooms:detail" perm="core.view_room" label=record.room.number %}
                     {% endif %}
                   {% elif record.room %}
-                    {% blocktranslate with room=record.room.number %}In room {{ room }}{% endblocktranslate %}
+                    {% translate "In room" context "person lending" %} {% include "theme/includes/_object_link.html" with obj=record.room url_name="rooms:detail" perm="core.view_room" label=record.room.number %}
                   {% endif %}
                   {% if record.is_active and perms.core.transition_can_lend_device %}
                     <a class="ms-2" href="{% url 'lending:detail' record.pk %}">{% translate "Lending" %}</a>

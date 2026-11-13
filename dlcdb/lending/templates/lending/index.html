@@ -50,11 +50,11 @@
                   {% else %}{% translate "Unknown" %}{% endif %}
                 </span>
                 {% if record.person %}
-                  <span class="ms-1">{{ record.person }}</span>
+                  <span class="ms-1">{% include "theme/includes/_object_link.html" with obj=record.person url_name="persons:detail" perm="core.view_person" %}</span>
                 {% endif %}
               </div>
               <div class="">
-                <i class="bi bi-door-open"></i> {{ record.room|default:"—" }}
+                <i class="bi bi-door-open"></i> {% include "theme/includes/_object_link.html" with obj=record.room url_name="rooms:detail" perm="core.view_room" %}
               </div>
             </td>
             <td class="{% if record.is_overdue %}text-danger fw-semibold{% endif %}">

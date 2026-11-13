@@ -6,8 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # UI linkify: link the objects the frontend names; a clearer device state card
 
-**Status:** batch 1 done (the state card, variant B′), branch `ui-linkify`, 2026-11-13. This is a living
-document.
+**Status:** batch 2 done (links in templates), branch `ui-linkify`, 2026-11-13. This is a living document.
 
 ## Why
 
@@ -107,6 +106,12 @@ The include from batch 1, used for:
 - the licence list: the licence name, to its form;
 - the import list, the import page and the journal entry: tenant.
 
+### New msgids from batch 2 (for the po files)
+
+- `"in room"` and `"In room"`, context `"person lending"`; they replace `"Due {{ due }}, in room
+  {{ room }}"` and `"In room {{ room }}"`. `"Due {{ due }}"` stays.
+- `"Lent to"`, context `"room change"`; it replaces `"Lent to {{ person }}"` in that context.
+
 ## Batch 3: links in messages; retire the plan
 
 - **`core/utils/links.py`:**
@@ -170,5 +175,5 @@ The include from batch 1, used for:
 
 - [x] Batch 0: this plan
 - [x] Batch 1: the state card (variant B′)
-- [ ] Batch 2: links in templates
+- [x] Batch 2: links in templates
 - [ ] Batch 3: links in messages; retire the plan into DECISIONS.md

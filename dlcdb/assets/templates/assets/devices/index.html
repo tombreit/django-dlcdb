@@ -77,7 +77,7 @@
                   {% include "theme/includes/_timestamps.html" with obj=device %}
                 </td>
                 {% if request.tenants|length > 1 %}
-                  <td class="d-none d-xl-table-cell text-muted">{{ device.tenant|default:"—" }}</td>
+                  <td class="d-none d-xl-table-cell text-muted">{% include "theme/includes/_object_link.html" with obj=device.tenant url_name="tenants:detail" perm="tenants.view_tenant" %}</td>
                 {% endif %}
               </tr>
             {% empty %}
