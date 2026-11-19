@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.journal.models import JournalEntry
@@ -231,10 +232,12 @@ class UdbSyncConfiguration(SingletonBaseModel):
     url = models.URLField(
         blank=True,
         verbose_name=_("HR API URL"),
-        help_text=_(
-            "The complete URL of the HR contracts endpoint or of a JSON dump, without a query string, "
-            "e.g. https://hr.example.org/api/external_interface/contracts/. The code appends filters "
-            "and fields; a static JSON file ignores them."
+        help_text=format_lazy(
+            _(
+                "The complete URL of the HR contracts endpoint or of a JSON dump, without a query string, "
+                "e.g. {url}. The code appends filters and fields; a static JSON file ignores them."
+            ),
+            url="https://hr.example.org/api/external_interface/contracts/",
         ),
     )
     api_token = models.CharField(
