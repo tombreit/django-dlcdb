@@ -4184,6 +4184,219 @@ msgstr "Hinzugefügt %(name)s"
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
 
+msgid "Remove token"
+msgstr "Token entfernen"
+
+msgid "A token is stored; leave the field empty to keep it."
+msgstr "Ein Token ist gespeichert; lassen Sie das Feld leer, um ihn zu behalten."
+
+msgid "Enabled"
+msgstr "Aktiviert"
+
+msgid "Off: the periodic sync and the management command exit at once."
+msgstr "Aus: Der regelmäßige Sync und das Management-Command beenden sich sofort."
+
+msgid "HR API URL"
+msgstr "HR-API-URL"
+
+msgid "The complete URL of the HR contracts endpoint or of a JSON dump, without a query string, e.g. https://hr.example.org/api/external_interface/contracts/. The code appends filters and fields; a static JSON file ignores them."
+msgstr "Die vollständige URL des HR-Endpunkts für Verträge oder einer JSON-Datei, ohne Query-String, z. B. https://hr.example.org/api/external_interface/contracts/. Filter und Felder hängt der Code an; eine statische JSON-Datei ignoriert sie."
+
+msgid "HR API token"
+msgstr "HR-API-Token"
+
+msgid "Sent as the X-API-KEY header; stored in plain text in the database."
+msgstr "Wird als X-API-KEY-Header gesendet und im Klartext in der Datenbank gespeichert."
+
+msgid "A regular expression (Python syntax) matched against the room HR names for a person, e.g. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leave empty if HR names the DLCDB room numbers as they are."
+msgstr "Ein regulärer Ausdruck (Python-Syntax), angewandt auf den Raum, den das HR-System für eine Person nennt, z. B. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leer lassen, wenn das HR-System die DLCDB-Raumnummern unverändert nennt."
+
+msgid "The DLCDB room number for a room the pattern matches; \\1, \\2, … insert the pattern's groups. With \\1\\2 and the pattern above, Gü-235-02 from HR becomes room G235."
+msgstr "Die DLCDB-Raumnummer für einen Raum, auf den das Muster passt; \\1, \\2, … fügen die Gruppen des Musters ein. Mit \\1\\2 und dem Muster oben wird aus Gü-235-02 im HR-System der Raum G235."
+
+msgid "Provide the URL without a query string (“?…”): the code appends the query."
+msgstr "Geben Sie die URL ohne Query-String (“?…”) an: Den hängt der Code an."
+
+msgid "The HR sync is switched off."
+msgstr "Der HR-Sync ist ausgeschaltet."
+
+msgid "Sync now"
+msgstr "Jetzt synchronisieren"
+
+msgid "Latest runs"
+msgstr "Letzte Läufe"
+
+msgid "No runs yet."
+msgstr "Noch keine Läufe."
+
+msgid "HR sync entries in the journal"
+msgstr "HR-Sync-Einträge im Journal"
+
+msgid "The HR sync was started. Its result shows under “Latest runs” once it is done."
+msgstr "Der HR-Sync wurde gestartet. Sein Ergebnis erscheint unter “Letzte Läufe”, sobald er fertig ist."
+
+#, python-format
+msgid "“%(field)s” was empty and holds the starter content again."
+msgstr "“%(field)s” war leer und enthält wieder den Startinhalt."
+
+msgid "Nobody — no overdue mails"
+msgstr "Niemand – keine Mails zu überfälligen Ausleihen"
+
+msgid "Lender, IT in CC"
+msgstr "Ausleiher, IT in Kopie"
+
+msgid "IT only (testdrive: lender mails rerouted to IT)"
+msgstr "Nur IT (zum Testen: die Mails an Ausleiher gehen an die IT)"
+
+msgid "Overdue reminders to"
+msgstr "Erinnerungen an überfällige Ausleihen gehen an"
+
+msgid "Who receives the weekly overdue-lending reminder mails. The IT address is resolved per tenant: tenant contact email → Branding IT dept email → DEFAULT_FROM_EMAIL."
+msgstr "Wer die wöchentlichen Erinnerungen an überfällige Ausleihen erhält. Die IT-Adresse gilt je Mandant: Kontakt-Email des Mandanten → IT-Email aus dem Branding → DEFAULT_FROM_EMAIL."
+
+msgid "Preparation checklist"
+msgstr "Vorbereitungs-Checkliste"
+
+msgid "Printed with the lending slip. Basic Markdown; “[ ]” becomes a checkbox. Clear the field and save to get the starter content back."
+msgstr "Wird mit dem Ausleihzettel gedruckt. Einfaches Markdown; “[ ]” wird zum Ankreuzfeld. Leeren Sie das Feld und speichern Sie, um den Startinhalt zurückzubekommen."
+
+msgid "Mandatory regulations"
+msgstr "Verbindliche Ordnungen"
+
+msgid "On the lending slip, the borrower confirms having read them."
+msgstr "Auf dem Ausleihzettel bestätigt der Ausleiher, sie zur Kenntnis genommen zu haben."
+
+msgid "Lending slip template"
+msgstr "Vorlage des Ausleihzettels"
+
+msgid "Django template code; it should extend lending/printout_base.html. Context: record, lending_profile. The slip body and the checklist are included from lending/includes/, with sheet_for and pagebreak. Clear the field and save to get the starter content back."
+msgstr "Django-Template-Code; er sollte lending/printout_base.html erweitern. Kontext: record, lending_profile. Der Zettel und die Checkliste werden aus lending/includes/ eingebunden, mit sheet_for und pagebreak. Leeren Sie das Feld und speichern Sie, um den Startinhalt zurückzubekommen."
+
+msgid "Lending profile"
+msgstr "Ausleih-Profil"
+
+msgid "Add lending profile"
+msgstr "Ausleih-Profil hinzufügen"
+
+msgid "One per device type: the lending slip template, the preparation checklist and the regulations the borrower confirms."
+msgstr "Eines je Geräteklasse: die Vorlage des Ausleihzettels, die Vorbereitungs-Checkliste und die Ordnungen, die der Ausleiher bestätigt."
+
+msgid "Slip template"
+msgstr "Zettel-Vorlage"
+
+msgid "Checklist"
+msgstr "Checkliste"
+
+msgid "No lending profiles yet: lending slips cannot be printed."
+msgstr "Noch keine Ausleih-Profile: Ausleihzettel können nicht gedruckt werden."
+
+msgid "Lending slip"
+msgstr "Ausleihzettel"
+
+msgid "Delete lending profile"
+msgstr "Ausleih-Profil löschen"
+
+#, python-format
+msgid "Delete the lending profile for “%(type)s”? Lending slips for this device type cannot be printed until it has a profile again; the deletion is kept in the profile history."
+msgstr "Das Ausleih-Profil für “%(type)s” löschen? Ausleihzettel für diese Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil hat; die Löschung bleibt in der Historie des Profils erhalten."
+
+msgid "You may view this lending profile but do not have permission to edit it."
+msgstr "Sie dürfen dieses Ausleih-Profil ansehen, aber nicht bearbeiten."
+
+msgid "Create lending profile"
+msgstr "Ausleih-Profil hinzufügen"
+
+msgid "Back to lending profile"
+msgstr "Zurück zum Ausleih-Profil"
+
+#, python-format
+msgid "Lending profile for “%(type)s” was created."
+msgstr "Ausleih-Profil für “%(type)s” wurde angelegt."
+
+#, python-brace-format
+msgid "Lending profile for “{type}” was updated."
+msgstr "Ausleih-Profil für “{type}” wurde geändert."
+
+#, python-format
+msgid "Lending profile for “%(type)s” was deleted."
+msgstr "Ausleih-Profil für “%(type)s” wurde gelöscht."
+
+msgid "Default subscribers"
+msgstr "Standard-Abonnenten"
+
+msgid "Organization name (English)"
+msgstr "Name der Organisation (Englisch)"
+
+msgid "Organization name (German)"
+msgstr "Name der Organisation (Deutsch)"
+
+msgid "Abbreviation"
+msgstr "Abkürzung"
+
+msgid "Street"
+msgstr "Straße"
+
+msgid "Street and house number. Used in printouts."
+msgstr "Straße und Hausnummer. Erscheint in Ausdrucken."
+
+msgid "ZIP code"
+msgstr "Postleitzahl"
+
+msgid "Used in printouts."
+msgstr "Erscheint in Ausdrucken."
+
+msgid "City"
+msgstr "Ort"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Figurative mark"
+msgstr "Bildmarke"
+
+msgid "The logo without its lettering. SVG. Used in printouts."
+msgstr "Das Logo ohne Schriftzug. SVG. Erscheint in Ausdrucken."
+
+msgid "IT department name"
+msgstr "Name der IT-Abteilung"
+
+msgid "Wording for the IT department. Used in printouts."
+msgstr "Bezeichnung der IT-Abteilung. Erscheint in Ausdrucken."
+
+msgid "IT department phone"
+msgstr "Telefon der IT-Abteilung"
+
+msgid "IT department email"
+msgstr "Email der IT-Abteilung"
+
+msgid "Used in printouts and mails, and for overdue reminders of tenants without a contact email."
+msgstr "Erscheint in Ausdrucken und Mails und gilt für Erinnerungen an überfällige Ausleihen bei Mandanten ohne Kontakt-Email."
+
+msgid "Room plan"
+msgstr "Raumplan"
+
+msgid "A file, e.g. a PDF, linked from the room lists."
+msgstr "Eine Datei, z. B. ein PDF, verlinkt aus den Raumlisten."
+
+msgid "Documentation URL"
+msgstr "URL der Dokumentation"
+
+msgid "If you host the documentation on your own, provide the URL here."
+msgstr "Wenn Sie die Dokumentation selbst hosten, tragen Sie hier ihre URL ein."
+
+msgid "IT department"
+msgstr "IT-Abteilung"
+
+msgid "Files and links"
+msgstr "Dateien und Links"
+
+#, python-format
+msgid "%(settings)s saved."
+msgstr "%(settings)s gespeichert."
+
+msgid "You may view these settings but do not have permission to change them."
+msgstr "Sie dürfen diese Einstellungen ansehen, aber nicht ändern."
+
 #~ msgid "Not locatable"
 #~ msgstr "Nicht auffindbar"
 
@@ -4349,6 +4562,3 @@ msgstr "Suchbegriff eingeben..."
 
 #~ msgid "Purchase date"
 #~ msgstr "Kaufdatum"
-
-#~ msgid "Checklist"
-#~ msgstr "Checklist"
