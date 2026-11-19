@@ -129,7 +129,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [x] 3. Positions as master data
 - [x] 4. Drop `udb_contract_organization_unit`
 - [x] 5. Persons list filters
-- [ ] 6. Person cards
+- [x] 6. Person cards
 - [ ] 7. Settings › Branding becomes Settings › Organization
 - [ ] 8. Organization page: collapsible cards and a table of contents
 - [ ] 9. Units and positions on the Organization page
@@ -153,3 +153,4 @@ One commit each; the user commits in between. Re-check each step against the cod
 - 2026-11-20 (batch 3): the data copy drops blank and repeated names and keeps HR's order; going back joins them again. A name containing ", " is split (see *Pitfalls*).
 - 2026-11-20 (batch 3): the form round-trip guard compares many-to-many fields too, and its person holds a position.
 - 2026-11-20 (batch 4): without the pre-flight's answer the migration keeps what it can: a person with the HR unit name but no unit gets the unit by name; where both are set, the unit stays (the pages show that one). Going back writes the unit names of HR-linked persons into the text again.
+- 2026-11-20 (batch 6): positions sit under the name in the person list (the unit column hides below `lg`), after the unit elsewhere ("unit · positions"). The two person pickers now also load the unit with the person, which their cards showed with one query each.

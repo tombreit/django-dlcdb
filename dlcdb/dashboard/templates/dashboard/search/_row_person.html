@@ -11,9 +11,11 @@ One person result row. Expects: row (core.Person).
     <span class="fw-semibold">
       <i class="bi bi-person text-muted me-1"></i>{{ row }}
     </span>
-    {% if row.organizational_unit %}
-      <span class="small text-muted ms-auto">{{ row.organizational_unit }}</span>
-    {% endif %}
+    {% with positions=row.organizational_positions.all|join:", " %}
+      {% if row.organizational_unit or positions %}
+        <span class="small text-muted ms-auto">{{ row.organizational_unit|default:"" }}{% if row.organizational_unit and positions %} · {% endif %}{{ positions }}</span>
+      {% endif %}
+    {% endwith %}
   </div>
   {% if row.email %}
     <div class="small text-muted">{{ row.email }}</div>

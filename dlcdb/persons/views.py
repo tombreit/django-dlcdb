@@ -31,7 +31,7 @@ PERSONS_PER_PAGE = 25
 
 def _person_queryset():
     """Persons visible in the frontend (the default manager excludes soft-deleted)."""
-    return Person.objects.select_related("organizational_unit", "room")
+    return Person.objects.select_related("organizational_unit", "room").prefetch_related("organizational_positions")
 
 
 def _person_records(request, person):

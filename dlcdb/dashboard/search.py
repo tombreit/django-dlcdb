@@ -127,7 +127,7 @@ def _licence_queryset(request):
 
 
 def _person_queryset(request):
-    return Person.objects.select_related("organizational_unit")
+    return Person.objects.select_related("organizational_unit").prefetch_related("organizational_positions")
 
 
 def _room_queryset(request):

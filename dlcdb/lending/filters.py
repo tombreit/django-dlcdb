@@ -120,4 +120,5 @@ class LendingPersonFilter(django_filters.FilterSet):
         fields = ["search"]
 
     def search_method(self, queryset, name, value):
-        return picker_filter(Person.objects.order_by("last_name", "first_name"), value, Person.search_q(value))
+        people = Person.objects.select_related("organizational_unit").prefetch_related("organizational_positions")
+        return picker_filter(people.order_by("last_name", "first_name"), value, Person.search_q(value))

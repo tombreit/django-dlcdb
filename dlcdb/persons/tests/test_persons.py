@@ -10,8 +10,10 @@ from io import BytesIO
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 from django.db.models import ProtectedError
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.timezone import localtime
@@ -108,6 +110,22 @@ class PersonFrontendTests(TestCase):
             with self.subTest(query):
                 response = self.client.get(self.index_url, query, headers={"HX-Request": "true"})
                 self.assertEqual(list(response.context["page_obj"]), [expected])
+
+    def test_the_list_shows_positions_without_a_query_per_person(self):
+        researcher = OrganizationalPosition.objects.create(name="Researcher")
+        self.local_person.organizational_positions.add(researcher)
+        self.client.get(self.index_url)  # The first request creates the Branding row.
+        with CaptureQueriesContext(connection) as two_persons:
+            self.client.get(self.index_url, headers={"HX-Request": "true"})
+        for number in range(3):
+            extra = Person.objects.create(first_name=f"P{number}", last_name="Extra", email=f"p{number}@example.com")
+            extra.organizational_positions.add(researcher)
+
+        with CaptureQueriesContext(connection) as five_persons:
+            response = self.client.get(self.index_url, headers={"HX-Request": "true"})
+
+        self.assertContains(response, '<div class="small text-muted">Researcher</div>', count=4, html=True)
+        self.assertEqual(len(five_persons), len(two_persons))
 
     def test_index_shows_the_room_and_sorts_by_it(self):
         room = Room.objects.create(number="G235")

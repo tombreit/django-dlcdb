@@ -292,7 +292,8 @@ def person_search(request):
     (capped). Mirrors ``relocate.room_search``.
     """
     value = (request.POST.get(PERSON_SEARCH_PARAM) or "").strip()
-    people = picker_filter(Person.objects.all(), value, Person.search_q(value))
+    people = Person.objects.select_related("organizational_unit").prefetch_related("organizational_positions")
+    people = picker_filter(people, value, Person.search_q(value))
     people = people.order_by("last_name", "first_name")[:PERSON_SEARCH_LIMIT]
     return TemplateResponse(
         request,
