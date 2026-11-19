@@ -29,10 +29,11 @@ from dlcdb.tenants.shortcuts import tenant_scoped_queryset
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
+from dlcdb.theme.settings_page import settings_page
 
 from .csv_template import build_import_template_csv
 from .filters import ImporterListFilter
-from .forms import DeviceImportForm
+from .forms import DeviceImportForm, HrSyncConfigurationForm
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
 from .models import ImporterList
 from .reporting import Outcome
@@ -228,3 +229,9 @@ def importer_detail(request, pk):
         "devices_url": f"{reverse('assets:device_index')}?imported_by={importer_list.pk}",
     }
     return TemplateResponse(request, "dataexchange/importer_detail.html", context)
+
+
+@htmx_permission_required("dataexchange.view_udbsyncconfiguration")
+def hr_sync(request):
+    """Settings › HR API sync configuration: where the HR sync fetches from, and the room number rule."""
+    return settings_page(request, HrSyncConfigurationForm, icon="bi-arrow-clockwise")

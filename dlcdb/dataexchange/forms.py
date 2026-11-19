@@ -7,9 +7,10 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.tenants.shortcuts import limit_tenant_field
+from dlcdb.theme.forms import add_bootstrap_classes
 
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
-from .models import ImporterList
+from .models import ImporterList, UdbSyncConfiguration
 from .remover import set_removed_record
 
 
@@ -100,3 +101,44 @@ class RemoverListAdminForm(forms.ModelForm):
         # Fail loudly: any error raised by set_removed_record propagates.
         report_dryrun = set_removed_record(file, tenants=self.request.tenants, username=username, write=False)
         _show_report(self.request, report_dryrun)
+
+
+class HrSyncConfigurationForm(forms.ModelForm):
+    """
+    Settings › HR API sync configuration. The token is never sent to the browser:
+    a typed token replaces the stored one, an empty field keeps it, and "Remove
+    token" clears it.
+    """
+
+    remove_api_token = forms.BooleanField(label=_("Remove token"), required=False)
+
+    field_order = ["enabled", "url", "api_token", "remove_api_token"]
+
+    class Meta:
+        model = UdbSyncConfiguration
+        fields = ["enabled", "url", "api_token", "room_number_pattern", "room_number_replacement"]
+        widgets = {
+            "api_token": forms.PasswordInput(attrs={"autocomplete": "off"}),
+            "room_number_pattern": forms.TextInput(attrs={"class": "font-monospace"}),
+            "room_number_replacement": forms.TextInput(attrs={"class": "font-monospace"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # An empty token field means "keep", so it starts empty and only a typed
+        # token counts as a change (for the journal entry too).
+        self.initial["api_token"] = ""
+        token = self.fields["api_token"]
+        if self.instance.api_token:
+            token.help_text = f"{token.help_text} {_('A token is stored; leave the field empty to keep it.')}"
+        else:
+            del self.fields["remove_api_token"]
+        add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("remove_api_token"):
+            cleaned_data["api_token"] = ""
+        elif not cleaned_data.get("api_token"):
+            cleaned_data["api_token"] = self.instance.api_token
+        return cleaned_data

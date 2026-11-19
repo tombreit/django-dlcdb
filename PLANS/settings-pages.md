@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 6 done (the Branding page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 7 done (the HR API sync configuration page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -204,17 +204,16 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 
 ## Batch 7: HR API sync configuration
 
-- **Model:** translatable labels and help texts, with a migration.
-- `dataexchange/forms.py`: `HrSyncConfigurationForm`, with the token and the "Remove token" checkbox as in decision 9.
-- `dataexchange/views.py`: the `hr_sync` view and its URL.
-- `dataexchange/hr_sync.html`: extends `_settings_base.html` so batch 8 can add the button and the sidebar.
+- **Model:** translatable labels and help texts, with a migration. The help texts lose their `<code>` tags: frontend help texts are plain text (`_field.html` escapes them; the import form replaces its HTML help text the same way). The room rule example becomes the current CSL pattern from `docs/betrieb/hr-sync.md`.
+- `dataexchange/forms.py`: `HrSyncConfigurationForm`, with the token and the "Remove token" checkbox as in decision 9. The token field's initial value is empty, so leaving it empty is no change (and no journal mention).
+- `dataexchange/views.py`: the `hr_sync` view and its URL, on the shared template; batch 8 adds `dataexchange/hr_sync.html` for the button and the sidebar.
 - **Navigation:** the entry points to the page; "Bulk import" gets `active_url_names`.
 - **Docs:** the "Konfiguration" section of `docs/betrieb/hr-sync.md:31`.
 - **Tests:**
   - an empty token field keeps the stored token, and the token never appears in the HTML;
-  - a typed token replaces it, and "Remove token" clears it;
-  - a URL with `?` is refused;
-  - errors in the room rule show on their field.
+  - a typed token replaces it, and "Remove token" clears it.
+
+  Not the URL and room rule validation: that is the model's `clean()`, tested in `test_udb_sync.py`.
 
 ## Batch 8: HR sync: run now, latest runs
 
@@ -246,7 +245,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - [x] 4. Lending profiles on Settings › Lending configuration
 - [x] 5. Lending profiles: history
 - [x] 6. Branding
-- [ ] 7. HR API sync configuration
+- [x] 7. HR API sync configuration
 - [ ] 8. HR sync: run now, latest runs
 - [ ] 9. Retire the plan
 
@@ -287,6 +286,8 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - **Batch 4: the profiles' labels became translatable** (`lending/0013`), like the configuration's (decision 8).
 - **Batch 4: "No lending slip template found" links only for users who may open the target** (`view_lendingprofile` for an existing profile, `add_lendingprofile` to add one); before, everyone got an admin link that answered 403 without the permission.
 - **Batch 4: `core/utils/links.py` `DETAIL_URLS` knows `lending.lendingprofile`**, so the "updated" message (and a journal subject) links the profile.
+- **Batch 7 fixes a batch 2 bug: settings journal entries were in the user's language** ("HR-API-Sync-Konfiguration changed: …"): `capfirst()` keeps a lazy verbose name lazy, so it was rendered outside `translation.override(None)`. A test now posts with `Accept-Language: de`.
+- **Batch 7: the room rule's help text shows the current CSL pattern.** The DECISIONS follow-up "the `map_room_number` docstring and help text still show the narrow CSL regex" keeps only the docstring (retire batch).
 
 ## Open questions
 

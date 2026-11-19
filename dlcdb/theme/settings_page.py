@@ -79,8 +79,9 @@ def settings_page(request, form_class, *, icon, template="theme/_settings_base.h
 def _journal_changes(form, config, *, user):
     """One journal entry naming the changed fields: never their values, the HR token is one."""
     # Journal text is data, in English, like the other journal entries.
+    # capfirst() keeps a lazy name lazy: render it here, not in the f-string below.
     with translation.override(None):
-        settings_name = capfirst(config._meta.verbose_name)
+        settings_name = str(capfirst(config._meta.verbose_name))
         fields = ", ".join(str(form.fields[name].label) for name in form.changed_data)
     JournalEntry.objects.log(
         source=f"{config._meta.app_label}.settings",

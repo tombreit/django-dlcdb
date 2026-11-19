@@ -63,6 +63,11 @@ def test_a_save_returns_to_the_page_and_is_journaled(login, person):
     assert response.redirect_chain == [(URL, 302)]
     assert "Licenses configuration saved." in [str(message) for message in response.context["messages"]]
     assert list(LicensesConfiguration.load().default_subscribers.all()) == [person]
+
+
+def test_the_journal_entry_is_in_english_whatever_the_users_language(login, person):
+    login(VIEW, CHANGE).post(URL, {"default_subscribers": [person.pk]}, HTTP_ACCEPT_LANGUAGE="de")
+
     entry = JournalEntry.objects.get(source="licenses.settings")
     assert entry.summary == "Licenses configuration changed: Default subscribers"
 

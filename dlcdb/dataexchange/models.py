@@ -225,23 +225,23 @@ class UdbSyncConfiguration(SingletonBaseModel):
 
     enabled = models.BooleanField(
         default=False,
-        help_text="If unchecked, the periodic sync and the management command exit immediately.",
+        verbose_name=_("Enabled"),
+        help_text=_("Off: the periodic sync and the management command exit at once."),
     )
     url = models.URLField(
         blank=True,
-        verbose_name="HR API URL",
-        help_text=(
-            "Complete URL of the HR contracts API endpoint or a ready-made JSON dump, "
-            "without a query string — e.g. "
-            "<code>https://hr.example.org/api/external_interface/contracts/</code>. "
-            "Filters and requested fields are appended by the code (a static JSON file simply ignores them)."
+        verbose_name=_("HR API URL"),
+        help_text=_(
+            "The complete URL of the HR contracts endpoint or of a JSON dump, without a query string, "
+            "e.g. https://hr.example.org/api/external_interface/contracts/. The code appends filters "
+            "and fields; a static JSON file ignores them."
         ),
     )
     api_token = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="HR API token",
-        help_text="Sent as the <code>X-API-KEY</code> header. Stored in plaintext in the database.",
+        verbose_name=_("HR API token"),
+        help_text=_("Sent as the X-API-KEY header; stored in plain text in the database."),
     )
     room_number_pattern = models.CharField(
         max_length=255,
@@ -249,8 +249,7 @@ class UdbSyncConfiguration(SingletonBaseModel):
         verbose_name=_("Room number pattern"),
         help_text=_(
             "A regular expression (Python syntax) matched against the room HR names for a person, "
-            "e.g. <code>^(\\w)\\w*-(\\d+)-\\d+$</code>. "
-            "Leave empty if HR names the DLCDB room numbers as they are."
+            "e.g. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leave empty if HR names the DLCDB room numbers as they are."
         ),
     )
     room_number_replacement = models.CharField(
@@ -258,15 +257,14 @@ class UdbSyncConfiguration(SingletonBaseModel):
         blank=True,
         verbose_name=_("Room number replacement"),
         help_text=_(
-            "The DLCDB room number for a room the pattern matches; <code>\\1</code>, <code>\\2</code>, … "
-            "insert the pattern's groups. With <code>\\1\\2</code> and the pattern above, "
-            "Gü-235-02 from HR becomes room G235."
+            "The DLCDB room number for a room the pattern matches; \\1, \\2, … insert the pattern's "
+            "groups. With \\1\\2 and the pattern above, Gü-235-02 from HR becomes room G235."
         ),
     )
 
     class Meta:
-        verbose_name = "HR API Sync Configuration"
-        verbose_name_plural = "HR API Sync Configuration"
+        verbose_name = _("HR API sync configuration")
+        verbose_name_plural = _("HR API sync configuration")
 
     def __str__(self):
         return "HR API Sync Configuration"
@@ -275,7 +273,7 @@ class UdbSyncConfiguration(SingletonBaseModel):
         super().clean()
         if "?" in self.url:
             raise ValidationError(
-                {"url": "Provide the URL without a query string ('?...'). The query is appended by the code."}
+                {"url": _("Provide the URL without a query string (“?…”): the code appends the query.")}
             )
         self._clean_room_number_rule()
 

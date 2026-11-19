@@ -28,11 +28,11 @@ Ist die andere Person selbst mit einem anderen HR-Datensatz verknüpft, führt d
 
 ## Konfiguration
 
-Die HR-Integration wird im Django-Admin konfiguriert: *Einstellungen › HR-API-Sync-Konfiguration* (Singleton).
+Die HR-Integration wird unter *Einstellungen › HR-API-Sync-Konfiguration* konfiguriert; ändern darf sie, wer `dataexchange.change_udbsyncconfiguration` hat.
 
 - **enabled** – aktiviert den periodischen Sync und das Management-Command.
 - **url** – die vollständige URL ohne Query-String: entweder der HR-API-Endpunkt (z.B. `https://hr.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei, etwa wenn die HR-API aus dem Netz der DLCDB nicht erreichbar ist. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
-- **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert).
+- **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert). Die Seite zeigt ihn nie an: Ein leeres Feld behält den gespeicherten Token, *Token entfernen* löscht ihn.
 
 - **room_number_pattern**, **room_number_replacement** – die Regel, die aus dem Raum des HR-Systems eine DLCDB-Raumnummer macht (siehe [Raum](#raum)).
 

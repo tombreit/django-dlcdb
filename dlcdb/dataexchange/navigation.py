@@ -12,6 +12,13 @@ nav_entries = [
         "icon": "",
         "url": "dataexchange:importer_index",
         "required_permission": "dataexchange.view_importerlist",
+        "active_url_names": {
+            "importer_index",
+            "importer_detail",
+            "device_import",
+            "device_import_confirm",
+            "device_import_template",
+        },
     },
     {
         "slot": "nav_processes",
@@ -26,7 +33,8 @@ nav_entries = [
         "order": 40,
         "label": _("HR API sync configuration"),
         "icon": "bi bi-arrow-clockwise",
-        "url": "admin:dataexchange_udbsyncconfiguration_changelist",
+        "url": "dataexchange:hr_sync",
         "required_permission": "dataexchange.view_udbsyncconfiguration",
+        "active_url_names": {"hr_sync"},
     },
 ]
