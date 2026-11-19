@@ -244,8 +244,11 @@ def _payload(*contracts):
     return {"results": {"contracts": list(contracts)}}
 
 
-def test_the_request_asks_for_the_resources():
-    assert "resources" in udb_sync.UDB_SYNC_CONTRACT_FIELDS.split(",")
+@pytest.mark.django_db
+def test_the_request_asks_for_the_workplace_resources():
+    # The HR API rejects `resources` as a contract field.
+    assert "resources" not in udb_sync.UDB_SYNC_CONTRACT_FIELDS.split(",")
+    assert "assigned-resources=arbeitsplatz" in udb_sync.build_request_url(UdbSyncConfiguration.load())
 
 
 @pytest.mark.django_db

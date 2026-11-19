@@ -59,7 +59,7 @@ UDB_SYNC_FILTERS = "present=True&person__person_is_test_data=False"
 # in the admin (see UdbSyncConfiguration docstring).
 UDB_SYNC_CONTRACT_FIELDS = (
     "person,contract_planned_checkin,contract_planned_checkout,"
-    "contract_organization_unit,contract_contract_type,contract_organizational_positions,resources"
+    "contract_organization_unit,contract_contract_type,contract_organizational_positions"
 )
 UDB_SYNC_PERSON_FIELDS = (
     "person_first_name,person_last_name,person_email_internal_business,person_email_private,id,person_image"
@@ -68,6 +68,8 @@ UDB_SYNC_PERSON_FIELDS = (
 # The type of the contract resource that names the person's room. At CSL it is
 # a workplace in a room ("Gü-235-02"); the room number rule of the
 # UdbSyncConfiguration maps it to a DLCDB room number (`map_room_number`).
+# The request asks the HR API for resources of this type (`assigned-resources`);
+# a JSON dump ignores the query, so `_hr_room()` checks the type again.
 UDB_ROOM_RESOURCE_TYPE = "arbeitsplatz"
 
 # Person fields a contract can change. Compared before/after the upsert to tell a
@@ -108,6 +110,7 @@ def build_request_url(config):
         UDB_SYNC_FILTERS,
         f"contract-fields={UDB_SYNC_CONTRACT_FIELDS}",
         f"person-fields={UDB_SYNC_PERSON_FIELDS}",
+        f"assigned-resources={UDB_ROOM_RESOURCE_TYPE}",
     ]
     return f"{config.url}?{'&'.join(p for p in params if p)}"
 
