@@ -118,11 +118,12 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         verbose_name=_("E-mail"),
         help_text=_("ALWAYS provide an email address, otherwise we won't be able to contact the borrowers."),
     )
+    # PROTECT: a unit somebody holds, deactivated persons included, can't be deleted.
     organizational_unit = models.ForeignKey(
         "core.OrganizationalUnit",
         blank=True,
         null=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
     )
     organizational_positions = models.ManyToManyField(
         OrganizationalPosition,
@@ -188,9 +189,6 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
     # please-return notifications if a follow up contract exists.
     udb_person_uuid = models.CharField(
         verbose_name="HR person UUID", max_length=255, blank=True, null=True, unique=True
-    )
-    udb_contract_organization_unit = models.CharField(
-        verbose_name="HR contract organization unit", max_length=255, blank=True
     )
     udb_contract_planned_checkin = models.DateField(verbose_name="HR contract planned check-in", blank=True, null=True)
     udb_contract_planned_checkout = models.DateField(

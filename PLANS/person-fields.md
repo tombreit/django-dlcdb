@@ -127,7 +127,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [x] 1. Rename `udb_person_image` to `photo`
 - [x] 2. Photo on the person form
 - [x] 3. Positions as master data
-- [ ] 4. Drop `udb_contract_organization_unit`
+- [x] 4. Drop `udb_contract_organization_unit`
 - [ ] 5. Persons list filters
 - [ ] 6. Person cards
 - [ ] 7. Settings › Branding becomes Settings › Organization
@@ -152,3 +152,4 @@ One commit each; the user commits in between. Re-check each step against the cod
 - 2026-11-20 (batch 3): the through model is `PersonPosition`; both its keys are hidden (`related_name="+"`), the position key too, as nothing reads it. The sync test of the duplicate merge gives both persons the same position: with a visible person key the merge fails on the unique pair (checked).
 - 2026-11-20 (batch 3): the data copy drops blank and repeated names and keeps HR's order; going back joins them again. A name containing ", " is split (see *Pitfalls*).
 - 2026-11-20 (batch 3): the form round-trip guard compares many-to-many fields too, and its person holds a position.
+- 2026-11-20 (batch 4): without the pre-flight's answer the migration keeps what it can: a person with the HR unit name but no unit gets the unit by name; where both are set, the unit stays (the pages show that one). Going back writes the unit names of HR-linked persons into the text again.

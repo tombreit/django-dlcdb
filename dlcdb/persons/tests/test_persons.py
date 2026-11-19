@@ -218,6 +218,12 @@ class PersonFrontendTests(TestCase):
         with self.assertRaises(ProtectedError):
             researcher.delete()
 
+    def test_a_unit_only_a_deactivated_person_holds_cant_be_deleted_either(self):
+        self.local_person.delete()
+
+        with self.assertRaises(ProtectedError):
+            self.unit.delete()
+
     def test_an_uploaded_photo_is_stored_upright_shrunk_and_without_exif(self):
         # A phone photo: landscape pixels the camera marks as "rotate 90°", with a GPS position.
         exif = Image.Exif()
