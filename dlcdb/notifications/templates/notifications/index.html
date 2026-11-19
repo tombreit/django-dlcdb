@@ -97,8 +97,9 @@
                 </button>
               </form>
               <br>
+              {% translate "Delete this subscription?" as delete_question %}
               <form method="post" action="{% url 'notifications:delete' subscription.pk %}" class="d-inline"
-                    onsubmit="return confirm('{% translate "Delete this subscription?" %}'')">
+                    onsubmit="return confirm('{{ delete_question|escapejs }}')">
                 {% csrf_token %}
                 <button type="submit" class="text-nowrap m-1 btn btn-sm btn-outline-danger">
                   <i class="bi bi-trash"></i> {% translate "Delete" %}
