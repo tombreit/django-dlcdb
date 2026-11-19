@@ -1,0 +1,51 @@
+{% extends "theme/_settings_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+Settings › HR API sync configuration: the shared settings form, "Sync now" in the
+header (outside the form, a POST of its own), and the latest runs with their notes.
+A run's notes list the changed and failed contracts and the rooms DLCDB lacks; a
+run with only missing rooms is not journaled, so this is where they show.
+{% endcomment %}
+
+{% block object_tools %}
+  {% if perms.dataexchange.change_udbsyncconfiguration %}
+    <form method="post" action="{% url 'dataexchange:hr_sync_run' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary"{% if not form.instance.enabled %} disabled title="{% translate "The HR sync is switched off." %}"{% endif %}>
+        <i class="bi bi-arrow-clockwise"></i> {% translate "Sync now" %}
+      </button>
+    </form>
+  {% endif %}
+  {{ block.super }}
+{% endblock object_tools %}
+
+{% block detail_sidebar %}
+  {% if perms.dataexchange.view_udbsyncrun %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-clock-history text-primary"></i>
+        <h2 class="h6 mb-0">{% translate "Latest runs" %}</h2>
+      </div>
+      <div class="card-body">
+        {% for run in runs %}
+          <details class="mb-2">
+            <summary>
+              <span class="badge text-bg-{% if run.status == "error" %}danger{% elif run.status == "warning" %}warning{% else %}success{% endif %}">{{ run.get_status_display }}</span>
+              <span class="small text-muted">{{ run.created_at|date:"Y-m-d H:i" }}</span>
+              <div class="small">{{ run.summary|default:"—" }}</div>
+            </summary>
+            <div class="small font-monospace mt-1 text-break" style="white-space: pre-line;">{{ run.messages|default:"—" }}</div>
+          </details>
+        {% empty %}
+          <p class="text-muted mb-0">{% translate "No runs yet." %}</p>
+        {% endfor %}
+        {% if perms.journal.view_journalentry %}
+          <a class="small" href="{% url 'journal:index' %}?source=dataexchange.hr_sync">{% translate "HR sync entries in the journal" %}</a>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock detail_sidebar %}

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 7 done (the HR API sync configuration page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 8 done (HR sync: run now, latest runs), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -220,8 +220,8 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - **The run view:** `dataexchange/views.py: hr_sync_run`, with `@require_POST` and `htmx_permission_required("dataexchange.change_udbsyncconfiguration")`. It refuses while the sync is off, enqueues `task_import_udb_persons()`, sets a message and redirects to `dataexchange:hr_sync`.
 - **`hr_sync.html`:**
   - the button in `object_tools`;
-  - a sidebar card "Latest runs" with the last 5 `UdbSyncRun`s, each with its status colour and summary, and its stored notes in a `<details>`;
-  - a link to the HR sync entries in the journal.
+  - a sidebar card "Latest runs" with the last 5 `UdbSyncRun`s, each with its status colour and summary, and its stored notes in a `<details>`; only with `dataexchange.view_udbsyncrun`, the runs' own permission (the notes name persons);
+  - a link to the HR sync entries in the journal, with `journal.view_journalentry`.
 - **Admin action:** "Run HR API sync now" gets `permissions=["change"]`, because today a user with only the view permission can start it.
 - **Docs:** `docs/betrieb/hr-sync.md:55`, starting a sync by hand.
 - **Tests:**
@@ -246,7 +246,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - [x] 5. Lending profiles: history
 - [x] 6. Branding
 - [x] 7. HR API sync configuration
-- [ ] 8. HR sync: run now, latest runs
+- [x] 8. HR sync: run now, latest runs
 - [ ] 9. Retire the plan
 
 ## Pitfalls

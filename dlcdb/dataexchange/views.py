@@ -35,8 +35,9 @@ from .csv_template import build_import_template_csv
 from .filters import ImporterListFilter
 from .forms import DeviceImportForm, HrSyncConfigurationForm
 from .importer import IMPORT_ERRORS, import_error_message, run_device_import
-from .models import ImporterList
+from .models import ImporterList, UdbSyncConfiguration, UdbSyncRun
 from .reporting import Outcome
+from .tasks import task_import_udb_persons
 
 OUTCOME_BADGES = {
     Outcome.CREATED: "text-bg-success",
@@ -231,7 +232,32 @@ def importer_detail(request, pk):
     return TemplateResponse(request, "dataexchange/importer_detail.html", context)
 
 
+# How many HR sync runs the settings page lists; the sync stores 50 (udb_sync.MAX_STORED_SYNC_RUNS).
+LATEST_SYNC_RUNS = 5
+
+
 @htmx_permission_required("dataexchange.view_udbsyncconfiguration")
 def hr_sync(request):
-    """Settings › HR API sync configuration: where the HR sync fetches from, and the room number rule."""
-    return settings_page(request, HrSyncConfigurationForm, icon="bi-arrow-clockwise")
+    """
+    Settings › HR API sync configuration: where the HR sync fetches from, the room
+    number rule, a button to sync now and the latest runs with their notes.
+    """
+    return settings_page(
+        request,
+        HrSyncConfigurationForm,
+        icon="bi-arrow-clockwise",
+        template="dataexchange/hr_sync.html",
+        context={"runs": UdbSyncRun.objects.all()[:LATEST_SYNC_RUNS]},
+    )
+
+
+@require_POST
+@htmx_permission_required("dataexchange.change_udbsyncconfiguration")
+def hr_sync_run(request):
+    """Queue one HR sync now, besides the periodic ones; its result shows under the latest runs."""
+    if UdbSyncConfiguration.load().enabled:
+        task_import_udb_persons()
+        messages.info(request, _("The HR sync was started. Its result shows under “Latest runs” once it is done."))
+    else:
+        messages.warning(request, _("The HR sync is switched off."))
+    return redirect("dataexchange:hr_sync")

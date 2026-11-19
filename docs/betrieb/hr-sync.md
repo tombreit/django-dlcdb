@@ -52,4 +52,4 @@ Reihenfolge beim Einrichten: zuerst die Räume so benennen, wie die Regel sie er
 
 ## Scheduler
 
-Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen. Manueller Anstoß per `./manage.py udb_sync_persons` oder im Admin über die Aktion „Run HR API sync now“.
+Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen. Manueller Anstoß per `./manage.py udb_sync_persons` oder mit *Sync now* auf *Einstellungen › HR-API-Sync-Konfiguration* (beides braucht `dataexchange.change_udbsyncconfiguration`, auch die Admin-Aktion „Run HR API sync now“); der Lauf startet, sobald der Task Runner ihn aufnimmt. Die Seite listet die letzten Läufe mit ihren Notizen, etwa Räume, die der DLCDB fehlen; dafür braucht es `dataexchange.view_udbsyncrun`.

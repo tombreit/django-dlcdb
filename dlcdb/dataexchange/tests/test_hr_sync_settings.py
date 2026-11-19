@@ -3,20 +3,26 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Settings › HR API sync configuration: the token handling and the menu. The URL
-and room rule validation is the model's (test_udb_sync.py), the shared settings
-page is tested in licenses/tests/test_configuration.py.
+Settings › HR API sync configuration: the token handling, the menu, "Sync now"
+and the latest runs. The URL and room rule validation is the model's
+(test_udb_sync.py), the shared settings page is tested in
+licenses/tests/test_configuration.py.
 """
 
+from unittest import mock
+
 import pytest
+from django.contrib.admin.sites import site
+from django.test import RequestFactory
 from django.urls import reverse
 
-from dlcdb.dataexchange.models import UdbSyncConfiguration
+from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.journal.models import JournalEntry
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
 
 URL = reverse("dataexchange:hr_sync")
+RUN_URL = reverse("dataexchange:hr_sync_run")
 VIEW = "dataexchange.view_udbsyncconfiguration"
 CHANGE = "dataexchange.change_udbsyncconfiguration"
 TOKEN = "s3cret-token"
@@ -84,3 +90,54 @@ def test_only_the_settings_entry_of_the_menu_is_active(login):
         if item["active"]
     ]
     assert active == ["dataexchange:hr_sync"]
+
+
+@pytest.fixture
+def enabled():
+    config = UdbSyncConfiguration.load()
+    config.enabled = True
+    config.save()
+
+
+@pytest.fixture
+def task():
+    with mock.patch("dlcdb.dataexchange.views.task_import_udb_persons") as task:
+        yield task
+
+
+@pytest.mark.usefixtures("enabled")
+def test_sync_now_needs_the_change_permission(login, task):
+    assert login(VIEW).post(RUN_URL).status_code == 403
+    task.assert_not_called()
+
+
+@pytest.mark.usefixtures("enabled")
+def test_sync_now_queues_the_sync(login, task):
+    response = login(VIEW, CHANGE).post(RUN_URL)
+
+    assert response.url == URL
+    task.assert_called_once_with()
+
+
+def test_sync_now_queues_nothing_while_the_sync_is_off(login, task):
+    login(VIEW, CHANGE).post(RUN_URL)
+
+    task.assert_not_called()
+
+
+@pytest.mark.parametrize(("perms", "listed"), [((VIEW,), False), ((VIEW, "dataexchange.view_udbsyncrun"), True)])
+def test_the_latest_runs_show_their_notes_with_the_run_view_permission(login, perms, listed):
+    UdbSyncRun.objects.create(
+        status="success", summary="1 unchanged", messages="HR room Gü-999-01 → G999: no such room"
+    )
+
+    content = login(*perms).get(URL).content.decode()
+
+    assert ("no such room" in content) == listed
+
+
+def test_the_admin_action_needs_the_change_permission(make_user):
+    request = RequestFactory().get("/")
+    request.user = make_user(VIEW, is_staff=True)
+
+    assert "sync_now" not in site.get_model_admin(UdbSyncConfiguration).get_actions(request)

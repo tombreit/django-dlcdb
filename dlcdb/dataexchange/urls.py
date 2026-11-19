@@ -15,4 +15,5 @@ urlpatterns = [
     path("imports/<int:pk>/", views.importer_detail, name="importer_detail"),
     path("import/template/", views.device_import_template, name="device_import_template"),
     path("hr-sync/", views.hr_sync, name="hr_sync"),
+    path("hr-sync/run/", views.hr_sync_run, name="hr_sync_run"),
 ]

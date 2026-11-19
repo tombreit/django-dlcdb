@@ -166,7 +166,8 @@ class UdbSyncConfigurationAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    @admin.action(description="Run HR API sync now")
+    # The same permission as the frontend's "Sync now".
+    @admin.action(description="Run HR API sync now", permissions=["change"])
     def sync_now(self, request, queryset):
         # Enqueue the relocated huey task; imported lazily to avoid loading the
         # task module (and huey) at admin import time.
