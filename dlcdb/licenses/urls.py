@@ -15,5 +15,6 @@ urlpatterns = [
     path("<int:license_id>/history/", views.history, name="history"),
     path("<int:license_id>/edit/", views.edit, name="edit"),
     path("new/", views.new, name="new"),
+    path("configuration/", views.configuration, name="configuration"),
     path("", views.index, name="index"),
 ]

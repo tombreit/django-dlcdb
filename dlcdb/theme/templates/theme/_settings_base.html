@@ -1,0 +1,41 @@
+{% extends "theme/_detail_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+Frame of a settings page (dlcdb/theme/settings_page.py): one form on the one row
+of a singleton model. Without the change permission the same fields render
+disabled, under the read-only notice and without the save bar.
+
+Expects from settings_page: form, title, icon, can_change, next_url, form_action.
+
+A page that groups its fields in several cards overrides detail_form_fields and
+detail_readonly with the same include; a page with more than the form uses
+object_tools (header-right actions) and detail_sidebar.
+{% endcomment %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block extra_css %}{{ form.media.css }}{% endblock extra_css %}
+
+{% block detail_title %}{{ title }}{% endblock detail_title %}
+{% block detail_meta %}{% translate "Settings" %}{% endblock detail_meta %}
+
+{# Opened from the gear menu there is nothing to go back to; with ?next= there is. #}
+{% block object_tools %}{% if request.GET.next %}{{ block.super }}{% endif %}{% endblock object_tools %}
+
+{% block detail_form_fields %}
+  {% include "theme/includes/_settings_fields.html" %}
+{% endblock detail_form_fields %}
+
+{# icon set explicitly: the page's own icon (the card's) would leak into the include #}
+{% block detail_readonly_notice %}
+  {% include "theme/includes/_readonly_notice.html" with icon="bi-eye" message=_("You may view these settings but do not have permission to change them.") %}
+{% endblock detail_readonly_notice %}
+
+{% block detail_readonly %}
+  {% include "theme/includes/_settings_fields.html" %}
+{% endblock detail_readonly %}
+
+{% block extra_js %}{{ form.media.js }}{% endblock extra_js %}

@@ -12,14 +12,16 @@ nav_entries = [
         "icon": "bi bi-bank2",
         "url": "licenses:index",
         "required_permission": "core.view_licencerecord",
+        "active_url_names": {"index", "new", "edit", "history"},
     },
     {
         "slot": "nav_settings",
         "order": 30,
         "label": _("Licenses configuration"),
         "icon": "bi bi-bank2",
-        "url": "admin:licenses_licensesconfiguration_changelist",
+        "url": "licenses:configuration",
         "required_permission": "licenses.view_licensesconfiguration",
+        "active_url_names": {"configuration"},
     },
 ]
 

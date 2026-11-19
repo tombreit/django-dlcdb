@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 1 done (unused configuration fields dropped), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 2 done (the settings frame and the Licences configuration page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -54,21 +54,17 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
    ```python
    @htmx_permission_required("licenses.view_licensesconfiguration")
    def configuration(request):
-       return settings_page(
-           request,
-           LicensesConfigurationForm,
-           title=_("Licenses configuration"),
-           icon="bi-bank2",
-           change_permission="licenses.change_licensesconfiguration",
-       )
+       return settings_page(request, LicensesConfigurationForm, icon="bi-bank2")
    ```
 
-   `settings_page(request, form_class, *, title, icon, change_permission, template="theme/_settings_base.html", context=None)` does five things:
+   `settings_page(request, form_class, *, icon, template="theme/_settings_base.html", context=None)` does five things:
    - loads `form_class._meta.model.load()`;
-   - refuses a POST without `change_permission` (`PermissionDenied(missing_permission_message(...))`);
+   - refuses a POST without the model's change permission (`get_permission_codename`, as the admin does), raising `PermissionDenied(missing_permission_message(...))`;
    - binds `request.POST` and `request.FILES`;
    - on save: writes the journal entry (decision 5), sets the message, and redirects (decision 4);
-   - otherwise renders the template with `form`, `can_change`, `form_action`, `next_url`, `title`, `icon` and `readonly_message`.
+   - otherwise renders the template with `form`, `title`, `icon`, `can_change`, `next_url` and `form_action`.
+
+   The title is the model's `verbose_name`, so it must read like the menu entry (decision 8). The read-only notice lives in `_settings_base.html`.
 2. **Each page lives in the app that owns its model**, under a URL without arguments, because the navbar renders `{% url item.url %}`:
 
    | Setting | URL name | Path |
@@ -87,7 +83,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 7. **Unused fields are dropped, in a batch of their own:**
    - LendingConfiguration's `mandatory_regulations` (with `LendingConfigurationRegulation`) and `lending_preparation_checklist`. Migration 0006 copied both into the profiles, and nothing has read them since.
    - Branding's `licenses_logo` and `organization_logo_white`, which nothing reads.
-8. **Labels become translatable on the model.** Branding, LendingConfiguration and UdbSyncConfiguration have English-only, partly German verbose names, help texts and choice labels. In each page's batch they get `gettext_lazy` on the model. That means an AlterField migration, which runs no SQL. The model is the right place because the field history and the admin read the labels from it too.
+8. **Labels become translatable on the model.** Branding, LendingConfiguration and UdbSyncConfiguration have English-only, partly German verbose names, help texts and choice labels. In each page's batch they get `gettext_lazy` on the model. That means an AlterField or AlterModelOptions migration, which runs no SQL. The model is the right place because the field history and the admin read the labels from it too. The model's `verbose_name` is the page title, so it takes the menu entry's msgid: `_("Lending configuration")`, `_("HR API sync configuration")`, `_("Branding")`.
 9. **The HR token is never sent to the browser.**
    - The field is a `PasswordInput()` without `render_value`.
    - A typed token replaces the stored one; an empty field keeps it (`clean_api_token`).
@@ -140,6 +136,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - **The Licences configuration page:**
   - `licenses/forms.py`: `LicensesConfigurationForm` with `default_subscribers` as a `TomSelectMultipleWidget`, listing persons with an email, like `LicenseForm`.
   - `licenses/views.py`: the `configuration` view and its URL.
+  - `LicensesConfiguration.default_subscribers` gets `verbose_name=_("Default subscribers")`, with a migration: the label had been derived from the field name, untranslated.
 - **Navigation:** the menu entry points to the new page with `active_url_names={"configuration"}`. The "Licenses" main entry gets `active_url_names` for its own pages, otherwise it would light up on the settings page too.
 - **Docs:**
   - `docs/guides/lizenzen.md:21`: "Lizenzmodul Konfiguration" becomes *Einstellungen › Lizenzmodul Konfiguration*.
@@ -237,7 +234,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 
 - [x] 0. This plan
 - [x] 1. Drop the unused configuration fields
-- [ ] 2. The settings frame and the Licences configuration
+- [x] 2. The settings frame and the Licences configuration
 - [ ] 3. Lending configuration
 - [ ] 4. Branding
 - [ ] 5. HR API sync configuration

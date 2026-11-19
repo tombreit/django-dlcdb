@@ -16,7 +16,7 @@ from dlcdb.core.models import Device, Person
 from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.widgets import TomSelectMultipleWidget, TomSelectWidget
 
-from .models import license_device_types
+from .models import LicensesConfiguration, license_device_types
 from .subscribers import manage_subscribers
 
 
@@ -158,3 +158,15 @@ class LicenseForm(forms.ModelForm):
             "note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
             "procurement_note": forms.Textarea(attrs={"rows": 6, "style": "resize: vertical; height: 10em;"}),
         }
+
+
+class LicensesConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = LicensesConfiguration
+        fields = ["default_subscribers"]
+        widgets = {"default_subscribers": TomSelectMultipleWidget()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The same choice as the licence form's subscribers: only persons with an email.
+        self.fields["default_subscribers"].queryset = Person.objects.filter(email__isnull=False)

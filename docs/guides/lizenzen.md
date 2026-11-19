@@ -18,7 +18,7 @@
 (subscribers)=
 ### Subscribers / Abonnenten
 
-Abonnenten sind [Personen](erste_schritte.md#7-personen-anlegen) mit Email-Adresse. Sie werden über Zustände der Lizenz – z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* – per Email benachrichtigt (siehe [Notifications](notifications.md)). Standard-Abonnenten für alle neuen Lizenzen stehen in der *Lizenzmodul Konfiguration*.
+Abonnenten sind [Personen](erste_schritte.md#7-personen-anlegen) mit Email-Adresse. Sie werden über Zustände der Lizenz – z.B. *Lizenz eingetragen*, *Lizenz läuft bald ab*, *Lizenz ist abgelaufen* – per Email benachrichtigt (siehe [Notifications](notifications.md)). Standard-Abonnenten für alle neuen Lizenzen legt *Einstellungen › Lizenzmodul Konfiguration* fest; ändern darf sie, wer `licenses.change_licensesconfiguration` hat.
 
 Fehlt eine Person, legt das Plus neben dem Feld sie an; zurück im
 Lizenz-Formular ist sie zu den gespeicherten Abonnenten hinzugefügt (bei einer

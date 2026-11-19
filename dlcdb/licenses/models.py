@@ -42,6 +42,7 @@ class LicensesConfiguration(SingletonBaseModel):
         "core.Person",
         related_name="+",
         blank=True,
+        verbose_name=_("Default subscribers"),
         help_text=_("These subscribers will be added to all new licenses by default."),
     )
 

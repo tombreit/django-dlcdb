@@ -1,0 +1,25 @@
+{% comment %}
+The fields of a settings page in one card, in the form's order: checkboxes as
+switches, every other field in the standard field markup.
+
+Params: form, title, icon (bi icon class of the card header).
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi {{ icon }} text-primary"></i>
+    <h2 class="h6 mb-0">{{ title }}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% for field in form.visible_fields %}
+        {% if field.widget_type == "checkbox" %}
+          <div class="col-12">{% include "theme/includes/_switch_field.html" %}</div>
+        {% else %}
+          {% include "theme/includes/_field.html" %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

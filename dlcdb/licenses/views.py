@@ -24,9 +24,10 @@ from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.filterbar import bind_filterset, build_filterbar
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.related import add_related_links
+from dlcdb.theme.settings_page import settings_page
 
 from .filters import LicenceRecordFilter
-from .forms import LicenseForm
+from .forms import LicenseForm, LicensesConfigurationForm
 from .models import LicenseAsset, LicensesConfiguration
 from .subscribers import subscriber_emails
 
@@ -233,3 +234,9 @@ def history(request, license_id):
     )
     entries = build_field_history(device, exclude=Device.FIELD_HISTORY_EXCLUDE, secret=Device.FIELD_HISTORY_SECRET)
     return TemplateResponse(request, "licenses/history.html", {"license": device, "entries": entries})
+
+
+@htmx_permission_required("licenses.view_licensesconfiguration")
+def configuration(request):
+    """Settings › Licenses configuration: the default subscribers of new licences."""
+    return settings_page(request, LicensesConfigurationForm, icon="bi-bank2")
