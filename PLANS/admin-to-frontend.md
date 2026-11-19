@@ -58,7 +58,6 @@ This list is also in `DECISIONS.md › Open follow-ups › Links`.
 - [x] `notifications/index.html`: a subscribed device's Edit opens its frontend page (2026-11-19).
 - [x] `inventory/room_qrcodes_detail.html`: the room's QR printout lists its devices plain (2026-11-19).
 - [x] `theme/device_state.py`: nothing to do. The frontend surfaces (device page, inventory search) link frontend pages; only the admin's own device list links the record admin.
-
 - [x] `licenses/form_partial.html`: the licence page's staff-only "Admin view" became "View asset", the frontend device page (with `core.view_device`) (2026-11-19).
 
 Kept on purpose while the admins exist: the staff-only "Admin view" button on the lending page (`obj_admin_url`), and the navbar's "Django admin" entry.

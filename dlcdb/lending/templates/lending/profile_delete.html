@@ -13,7 +13,7 @@
   <div class="row g-4">
     <div class="col-lg-9 col-xl-8">
       <p>
-        {% blocktranslate with type=profile.device_type %}Delete the lending profile for “{{ type }}”? Lending slips for this device type cannot be printed until it has a profile again; the deletion is kept in the profile history.{% endblocktranslate %}
+        {% blocktranslate with type=profile.device_type %}Delete the lending profile for “{{ type }}”? Lending slips for this device type cannot be printed until it has a profile again.{% endblocktranslate %}
       </p>
       <form method="post" class="d-flex flex-wrap gap-2">
         {% csrf_token %}
