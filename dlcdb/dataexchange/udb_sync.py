@@ -40,6 +40,11 @@ from .reporting import OperationReport, Outcome
 
 logger = logging.getLogger(__name__)
 
+
+class UdbSyncError(Exception):
+    """The HR source could not be read; the message says why."""
+
+
 # Seconds to wait for the UDB server to respond before giving up. Prevents a
 # hung UDB instance from blocking the periodic huey task indefinitely.
 UDB_REQUEST_TIMEOUT = 30
@@ -199,7 +204,7 @@ def import_udb_persons():
     report = OperationReport(operation="UDB person sync", context=config.url)
     try:
         if not config.url:
-            raise ValueError("UDB integration is enabled but `url` is not set in UdbSyncConfiguration.")
+            raise UdbSyncError("UDB integration is enabled but `url` is not set in UdbSyncConfiguration.")
 
         request_url = build_request_url(config)
         headers = {"X-API-KEY": config.api_token} if config.api_token else {}
@@ -277,46 +282,48 @@ def _store_run(report, *, event):
 
 
 def _fetch_contracts(url_request):
-    """Fetch and parse the UDB response, returning the list of contracts."""
+    """
+    Fetch and parse the UDB response, returning the list of contracts.
+
+    A source that cannot be read raises ``UdbSyncError``, whose message says
+    why: the sync run stores it, so nobody needs the traceback.
+    """
+    url = url_request.full_url
     try:
-        logger.debug(f"Requesting {url_request.full_url}")
+        logger.debug(f"Requesting {url}")
         with urllib.request.urlopen(url_request, timeout=UDB_REQUEST_TIMEOUT) as response:
             data = response.read()
     except urllib.error.HTTPError as http_error:
         # The server's response body usually explains *why* the request was
         # rejected (e.g. invalid/missing API key, malformed query). Surface it.
-        body = http_error.read().decode("utf-8", errors="replace")
-        logger.error(
-            f"UDB request to {url_request.full_url} failed: "
-            f"HTTP {http_error.code} {http_error.reason}. Server response: {body}"
-        )
-        raise
+        with http_error:
+            body = http_error.read().decode("utf-8", errors="replace")
+        raise UdbSyncError(
+            f"UDB request to {url} failed: HTTP {http_error.code} {http_error.reason}. Server response: {body}"
+        ) from http_error
     except urllib.error.URLError as url_error:
         # DNS failure, connection refused, SSL errors, etc.
-        logger.error(
-            f"Could not reach UDB at {url_request.full_url}: {url_error.reason}. "
+        raise UdbSyncError(
+            f"Could not reach UDB at {url}: {url_error.reason}. "
             "Check the UDB Sync Configuration `url` and network connectivity."
-        )
-        raise
-    except TimeoutError:
-        logger.error(f"UDB server at {url_request.full_url} did not respond within {UDB_REQUEST_TIMEOUT} seconds.")
-        raise
+        ) from url_error
+    except TimeoutError as timeout_error:
+        raise UdbSyncError(
+            f"UDB server at {url} did not respond within {UDB_REQUEST_TIMEOUT} seconds."
+        ) from timeout_error
 
     try:
         udb_obj = json.loads(data.decode("utf-8"))
         return udb_obj["results"]["contracts"]
     except json.JSONDecodeError as decode_error:
         snippet = data.decode("utf-8", errors="replace")[:500]
-        logger.error(
-            f"UDB response from {url_request.full_url} is not valid JSON: {decode_error}. "
-            f"Response starts with: {snippet}"
-        )
-        raise
+        raise UdbSyncError(
+            f"UDB response from {url} is not valid JSON: {decode_error}. Response starts with: {snippet}"
+        ) from decode_error
     except KeyError as key_error:
-        logger.error(
+        raise UdbSyncError(
             f"Unexpected UDB JSON structure: missing key {key_error}. Top-level keys present: {list(udb_obj.keys())}"
-        )
-        raise
+        ) from key_error
 
 
 def _contract_identifier(contract):

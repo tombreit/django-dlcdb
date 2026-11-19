@@ -13,7 +13,9 @@ Tests for the UDB person sync:
 """
 
 import datetime
+import io
 import json
+import urllib.error
 from contextlib import contextmanager
 from unittest import mock
 
@@ -25,7 +27,7 @@ from django.core.exceptions import ValidationError
 
 from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
 from dlcdb.core.tests.testingutils import establish_state
-from dlcdb.dataexchange import udb_sync
+from dlcdb.dataexchange import tasks, udb_sync
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.dataexchange.reporting import Outcome
 from dlcdb.licenses.models import LicensesConfiguration
@@ -595,6 +597,32 @@ def test_failed_run_is_persisted_with_reason_and_reraises():
     run = UdbSyncRun.objects.latest("created_at")
     assert run.status == "error"
     assert "UDB unreachable" in run.messages
+
+
+@pytest.mark.django_db
+def test_a_rejected_request_fails_the_run_with_the_server_reason():
+    _enable_sync()
+    reason = b'["configuration error: no field object configured for resources"]'
+    rejection = urllib.error.HTTPError("https://udb.example.org/", 400, "Bad Request", {}, io.BytesIO(reason))
+    with (
+        mock.patch.object(udb_sync.urllib.request, "urlopen", side_effect=rejection),
+        pytest.raises(udb_sync.UdbSyncError),
+    ):
+        udb_sync.import_udb_persons()
+
+    run = UdbSyncRun.objects.latest("created_at")
+    assert run.status == "error"
+    assert "HTTP 400 Bad Request" in run.messages
+    assert "no field object configured for resources" in run.messages
+
+
+@pytest.mark.django_db
+def test_the_task_records_a_failing_hr_source_without_raising():
+    _enable_sync()
+    with mock.patch.object(udb_sync, "_fetch_contracts", side_effect=udb_sync.UdbSyncError("UDB unreachable")):
+        tasks.task_import_udb_persons.call_local()
+
+    assert UdbSyncRun.objects.latest("created_at").status == "error"
 
 
 @pytest.mark.django_db
