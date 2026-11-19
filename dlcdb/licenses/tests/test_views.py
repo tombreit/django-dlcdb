@@ -359,3 +359,16 @@ class LicenseFormRelatedLinksTests(BaseTest):
         response = self.client.get(reverse("licenses:edit", args=[licence.pk]))
 
         self.assertContains(response, "data-related-links", count=4)
+
+    def test_the_edit_page_links_the_asset_page_not_the_admin(self):
+        licence = self._create_device(sap_id="LIC-1")
+        licence.is_licence = True
+        licence.save()
+        edit_url = reverse("licenses:edit", args=[licence.pk])
+
+        response = self.client.get(edit_url)
+
+        self.assertContains(
+            response, f'href="{escape(with_next(reverse("assets:device_detail", args=[licence.pk]), edit_url))}"'
+        )
+        self.assertNotContains(response, reverse("admin:core_device_change", args=[licence.pk]))

@@ -9,13 +9,13 @@
     </div>
     <div>
         {% if license %}
-            {% if request.user.is_staff %}
+            {% if perms.core.view_device %}
             <a
-                href="{{ obj_admin_url }}"
+                href="{% url 'assets:device_detail' license.id %}?next={{ request.get_full_path|urlencode }}"
                 class="btn text-bg-warning btn-sm"
             >
-                <i class="bi bi-box-arrow-up-right"></i>
-                {% translate 'Admin view' %}
+                <i class="bi bi-pc-display"></i>
+                {% translate 'View asset' %}
             </a>
             {% endif %}
 

@@ -141,7 +141,6 @@ def edit(request, license_id):
             "license": device,
             "template": template,
             "title": _("Edit license"),
-            "obj_admin_url": reverse("admin:core_device_change", args=[device.id]),
             "calendar_url": calendar_url,
         },
     )
