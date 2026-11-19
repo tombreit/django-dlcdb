@@ -81,8 +81,31 @@ def profile_detail(request, pk):
     return TemplateResponse(
         request,
         "lending/profile_detail.html",
-        {"profile": profile, "form": form, "can_change": can_change, "next_url": next_url, "form_action": form_action},
+        {
+            "profile": profile,
+            "form": form,
+            "can_change": can_change,
+            "next_url": next_url,
+            "form_action": form_action,
+            # The Delete link of theme/_form_action_bar.html.
+            "delete_url": (
+                reverse("lending:profile_delete", args=[profile.pk])
+                if request.user.has_perm("lending.delete_lendingprofile")
+                else None
+            ),
+        },
     )
+
+
+@htmx_permission_required("lending.delete_lendingprofile")
+def profile_delete(request, pk):
+    """Confirm, then delete; the profile history keeps the deletion."""
+    profile = get_object_or_404(LendingProfile.objects.select_related("device_type"), pk=pk)
+    if request.method == "POST":
+        profile.delete()
+        messages.success(request, _("Lending profile for “%(type)s” was deleted.") % {"type": profile.device_type})
+        return redirect("lending:configuration")
+    return TemplateResponse(request, "lending/profile_delete.html", {"profile": profile})
 
 
 @htmx_permission_required("lending.view_lendingprofile")

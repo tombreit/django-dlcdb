@@ -17,6 +17,7 @@ CONFIG = "lending.view_lendingconfiguration"
 VIEW = "lending.view_lendingprofile"
 ADD = "lending.add_lendingprofile"
 CHANGE = "lending.change_lendingprofile"
+DELETE = "lending.delete_lendingprofile"
 
 
 @pytest.fixture
@@ -121,3 +122,22 @@ def test_the_field_history_shows_who_changed_the_slip_template(login, profile):
 
 def test_the_field_history_needs_the_view_permission(login, profile):
     assert login(CONFIG).get(reverse("lending:profile_history", args=[profile.pk])).status_code == 403
+
+
+@pytest.mark.parametrize(("perms", "status"), [((VIEW, CHANGE), 403), ((DELETE,), 200)])
+def test_deleting_needs_the_delete_permission(login, profile, perms, status):
+    assert login(*perms).get(reverse("lending:profile_delete", args=[profile.pk])).status_code == status
+
+
+@pytest.mark.parametrize(("perms", "shown"), [((VIEW, CHANGE), False), ((VIEW, CHANGE, DELETE), True)])
+def test_the_delete_link_shows_with_the_delete_permission(login, profile, perms, shown):
+    content = login(*perms).get(reverse("lending:profile_detail", args=[profile.pk])).content.decode()
+
+    assert (reverse("lending:profile_delete", args=[profile.pk]) in content) == shown
+
+
+def test_a_deleted_profile_is_gone_and_the_page_returns_to_the_configuration(login, profile):
+    response = login(DELETE).post(reverse("lending:profile_delete", args=[profile.pk]))
+
+    assert response.url == reverse("lending:configuration")
+    assert not LendingProfile.objects.exists()

@@ -1,0 +1,27 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Delete lending profile" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Delete lending profile" %}</h1>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <p>
+        {% blocktranslate with type=profile.device_type %}Delete the lending profile for “{{ type }}”? Lending slips for this device type cannot be printed until it has a profile again; the deletion is kept in the profile history.{% endblocktranslate %}
+      </p>
+      <form method="post" class="d-flex flex-wrap gap-2">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">
+          <i class="bi bi-trash"></i> {% translate "Yes, delete" %}
+        </button>
+        <a class="btn btn-outline-secondary" href="{% url 'lending:profile_detail' profile.pk %}">{% translate "Cancel" %}</a>
+      </form>
+    </div>
+  </div>
+{% endblock body %}

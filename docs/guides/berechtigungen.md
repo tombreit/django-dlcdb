@@ -103,7 +103,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 
-Die Ausleih-Profile stehen auf *Einstellungen › Ausleihe Konfiguration* und brauchen zusätzlich `lending.view_lendingprofile`, zum Anlegen und Ändern `lending.add_lendingprofile` und `lending.change_lendingprofile`. Die Vorlage des Ausleihzettels ist Django-Template-Code, der alles lesen kann, was von der Ausleihe aus erreichbar ist: Diese Berechtigungen gehören wie `tenants.change_tenant` zu den Administrations-Berechtigungen, ebenso `dataexchange.change_udbsyncconfiguration`: Wer die URL der HR-API ändert, schickt den HR-Token dorthin.
+Die Ausleih-Profile stehen auf *Einstellungen › Ausleihe Konfiguration* und brauchen zusätzlich `lending.view_lendingprofile`, zum Anlegen, Ändern und Löschen `lending.add_lendingprofile`, `lending.change_lendingprofile` und `lending.delete_lendingprofile`. Die Vorlage des Ausleihzettels ist Django-Template-Code, der alles lesen kann, was von der Ausleihe aus erreichbar ist: Diese Berechtigungen gehören wie `tenants.change_tenant` zu den Administrations-Berechtigungen, ebenso `dataexchange.change_udbsyncconfiguration`: Wer die URL der HR-API ändert, schickt den HR-Token dorthin.
 
 ## Statuswechsel
 
