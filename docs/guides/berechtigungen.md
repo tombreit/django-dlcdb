@@ -103,6 +103,8 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 
+Die Seiten unter *Einstellungen* zeigen ihre Werte mit der *view*-Berechtigung schreibgeschützt; speichern darf, wer die *change*-Berechtigung hat: `organization.change_branding`, `lending.change_lendingconfiguration`, `licenses.change_licensesconfiguration` bzw. `dataexchange.change_udbsyncconfiguration`. Die letzten HR-Sync-Läufe zeigt *HR-API-Sync-Konfiguration* mit `dataexchange.view_udbsyncrun`; *Journal › Aufräumen* braucht `journal.delete_journalentry`.
+
 Die Ausleih-Profile stehen auf *Einstellungen › Ausleihe Konfiguration* und brauchen zusätzlich `lending.view_lendingprofile`, zum Anlegen, Ändern und Löschen `lending.add_lendingprofile`, `lending.change_lendingprofile` und `lending.delete_lendingprofile`. Die Vorlage des Ausleihzettels ist Django-Template-Code, der alles lesen kann, was von der Ausleihe aus erreichbar ist: Diese Berechtigungen gehören wie `tenants.change_tenant` zu den Administrations-Berechtigungen, ebenso `dataexchange.change_udbsyncconfiguration`: Wer die URL der HR-API ändert, schickt den HR-Token dorthin.
 
 ## Statuswechsel
@@ -204,7 +206,9 @@ Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltu
 - Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die mit *(Admin)* markierten [Menüpunkte](#navigation),
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
-- die Änderungshistorie eines Mandanten, erzeugte Reports und den SAP-Import.
+- die Änderungshistorie eines Mandanten, erzeugte Reports und den SAP-Import,
+- Links (die Ordnungen der Ausleih-Profile), den Kleinkram-Katalog, Organisationseinheiten und Anhänge von Records,
+- Benachrichtigungen (Status, Vorschau, *Send Now*), den Upload für den Raumabgleich und die vollständige Liste der HR-Sync-Läufe.
 
 Nur Superuser dürfen, unabhängig von Berechtigungen:
 
@@ -213,10 +217,11 @@ Nur Superuser dürfen, unabhängig von Berechtigungen:
 
 ## Beispiel-Gruppen
 
-Drei Gruppen als Ausgangspunkt; jede wird zusätzlich dem passenden Mandanten zugeordnet, damit ihre Mitglieder Geräte sehen.
+Vier Gruppen als Ausgangspunkt; jede wird zusätzlich dem passenden Mandanten zugeordnet, damit ihre Mitglieder Geräte sehen.
 
 | Gruppe | Berechtigungen | Ergebnis |
 |---|---|---|
 | Helpdesk / Ausleihe | `core.view_device`, `core.view_person`, `core.view_lentrecord`, `core.transition_can_lend_device`, `core.transition_can_relocate_device` | Sieht Geräte, Personen und Ausleihen; kann Geräte ausleihen, zurücknehmen und umziehen. |
 | Inventur | `core.view_device`, `core.can_inventorize`, `core.change_inventory` | Sieht Geräte, führt die aktive Inventur durch, erreicht Inventuren und SAP-Abgleich (beides *(Admin)*, also mit Staff-Flag). |
 | Stammdaten / IT-Beschaffung | `core.view_device`, `core.add_device`, `core.change_device`, `core.view_room`, `core.add_room`, `core.change_room`, `core.view_devicetype`, `core.view_manufacturer`, `core.view_supplier`, `core.transition_can_order_device`, `core.transition_can_locate_device`, `core.transition_can_relocate_device` | Legt Geräte und Räume an, pflegt sie, setzt Geräte auf *Bestellt* bzw. *Lokalisiert* und zieht sie um. |
+| Administration | `organization.view_branding`, `organization.change_branding`, `lending.view_lendingconfiguration`, `lending.change_lendingconfiguration`, `lending.view_lendingprofile`, `lending.add_lendingprofile`, `lending.change_lendingprofile`, `lending.delete_lendingprofile`, `licenses.view_licensesconfiguration`, `licenses.change_licensesconfiguration`, `dataexchange.view_udbsyncconfiguration`, `dataexchange.change_udbsyncconfiguration`, `dataexchange.view_udbsyncrun`, `tenants.view_tenant`, `tenants.add_tenant`, `tenants.change_tenant`, `tenants.delete_tenant`, `journal.view_journalentry`, `journal.delete_journalentry` | Pflegt die Einstellungen, die Ausleih-Profile und die Mandanten und räumt das Journal auf; wird jedem Mandanten zugeordnet. Benutzer, Gruppen und Berechtigungen bleiben Sache des Django-Admins (Staff-Flag). |
