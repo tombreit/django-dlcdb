@@ -36,6 +36,7 @@ from dlcdb.core.models import (
     DeviceType,
     LentRecord,
     Manufacturer,
+    OrganizationalPosition,
     OrganizationalUnit,
     Person,
     Room,
@@ -65,9 +66,11 @@ class EditPage:
 
 
 def _snapshot(obj, exclude):
-    """Every stored value of ``obj``, as plain comparable data."""
+    """Every stored value of ``obj``, many-to-many fields included, as plain comparable data."""
     obj.refresh_from_db()
-    return {f.name: f.value_from_object(obj) for f in obj._meta.fields if f.name not in exclude}
+    values = {f.name: f.value_from_object(obj) for f in obj._meta.fields if f.name not in exclude}
+    values |= {f.name: sorted(o.pk for o in f.value_from_object(obj)) for f in obj._meta.many_to_many}
+    return values
 
 
 def _person(email="ada.lovelace@example.com", last_name="Lovelace"):
@@ -191,6 +194,7 @@ def _person_page():
     person.room = Room.objects.create(number="G235")
     person.photo = "person_images/noether.jpg"
     person.save()
+    person.organizational_positions.add(OrganizationalPosition.objects.create(name="Professor"))
     return reverse("persons:detail", args=[person.pk]), person
 
 

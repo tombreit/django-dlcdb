@@ -10,6 +10,7 @@ from io import BytesIO
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import ProtectedError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.html import escape
@@ -17,7 +18,17 @@ from django.utils.timezone import localtime
 from PIL import ExifTags, Image
 
 from dlcdb.core import lifecycle
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, OrganizationalUnit, Person, Record, Room
+from dlcdb.core.models import (
+    Device,
+    InRoomRecord,
+    LentRecord,
+    LostRecord,
+    OrganizationalPosition,
+    OrganizationalUnit,
+    Person,
+    Record,
+    Room,
+)
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.smallstuff.models import AssignedThing, Thing
 from dlcdb.tenants.models import Tenant
@@ -190,6 +201,22 @@ class PersonFrontendTests(TestCase):
         self.assertRedirects(response, self.index_url)
         self.local_person.refresh_from_db()
         self.assertEqual(self.local_person.room, room)
+
+    def test_positions_are_saved_on_add_and_edit_and_protect_themselves(self):
+        researcher = OrganizationalPosition.objects.create(name="Researcher")
+        head = OrganizationalPosition.objects.create(name="Head of IT")
+        fields = {"last_name": "New", "first_name": "Nelly", "email": "nelly@example.com"}
+
+        self.client.post(reverse("persons:add"), {**fields, "organizational_positions": [researcher.pk]})
+        person = Person.objects.get(email="nelly@example.com")
+        self.assertEqual(list(person.organizational_positions.all()), [researcher])
+
+        url = reverse("persons:detail", args=[person.pk])
+        self.client.post(url, {**fields, "organizational_positions": [researcher.pk, head.pk]})
+        self.assertEqual(list(person.organizational_positions.all()), [head, researcher])
+
+        with self.assertRaises(ProtectedError):
+            researcher.delete()
 
     def test_an_uploaded_photo_is_stored_upright_shrunk_and_without_exif(self):
         # A phone photo: landscape pixels the camera marks as "rotate 90°", with a GPS position.

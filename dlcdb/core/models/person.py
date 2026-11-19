@@ -30,6 +30,37 @@ class OrganizationalUnit(AuditBaseModel):
         return self.name
 
 
+class OrganizationalPosition(AuditBaseModel):
+    """A position a person holds in the organization; the HR sync finds it by name."""
+
+    name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("Position")
+        verbose_name_plural = _("Positions")
+
+    def __str__(self):
+        return self.name
+
+
+class PersonPosition(models.Model):
+    """
+    A position a person holds. Explicit, not Django's automatic table, so that a
+    position somebody holds can't be deleted: a many-to-many field has no
+    ``on_delete``. The person key is hidden (``related_name="+"``): the HR
+    sync's duplicate merge moves the relations in ``Person._meta.related_objects``,
+    and a moved row could clash with the kept person's own. The position key
+    is hidden too, as nothing reads it.
+    """
+
+    person = models.ForeignKey("core.Person", on_delete=models.CASCADE, related_name="+")
+    position = models.ForeignKey(OrganizationalPosition, on_delete=models.PROTECT, related_name="+")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["person", "position"], name="unique_person_position")]
+
+
 class PersonQuerySet(models.QuerySet):
     def smallstuff_person_objects(self):
         """
@@ -92,6 +123,13 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+    )
+    organizational_positions = models.ManyToManyField(
+        OrganizationalPosition,
+        through=PersonPosition,
+        blank=True,
+        related_name="persons",
+        verbose_name=_("Positions"),
     )
     # The room the person is assigned to. For a person matched with the HR
     # system, the HR sync sets it from the workplace; other persons get it by hand.
@@ -159,9 +197,6 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         verbose_name="HR contract planned check-out", blank=True, null=True
     )
     udb_contract_contract_type = models.CharField(verbose_name="HR contract type", max_length=255, blank=True)
-    udb_contract_organizational_positions = models.CharField(
-        verbose_name="HR contract organizational positions", max_length=255, blank=True
-    )
 
     class Meta:
         ordering = ["last_name", "first_name"]

@@ -13,7 +13,7 @@ from dlcdb.core.models import Person, Room
 from dlcdb.core.utils.helpers import shrink_photo
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.similar import SimilarNames, check_similar_names
-from dlcdb.theme.widgets import TomSelectWidget
+from dlcdb.theme.widgets import TomSelectMultipleWidget, TomSelectWidget
 
 
 class PersonForm(forms.ModelForm):
@@ -36,11 +36,13 @@ class PersonForm(forms.ModelForm):
             "first_name",
             "email",
             "organizational_unit",
+            "organizational_positions",
             "room",
             "photo",
         ]
         widgets = {
             "organizational_unit": TomSelectWidget(),
+            "organizational_positions": TomSelectMultipleWidget(),
             "room": TomSelectWidget(),
             "photo": forms.ClearableFileInput(attrs={"accept": "image/*"}),
         }

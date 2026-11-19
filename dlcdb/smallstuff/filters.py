@@ -24,5 +24,7 @@ class PersonFilter(django_filters.FilterSet):
         Only allow current contracts to get some things.
         """
 
-        qs = Person.smallstuff_person_objects.order_by("-assigned_things_count")
+        qs = Person.smallstuff_person_objects.order_by("-assigned_things_count").prefetch_related(
+            "organizational_positions"
+        )
         return picker_filter(qs, value, Person.search_q(value))

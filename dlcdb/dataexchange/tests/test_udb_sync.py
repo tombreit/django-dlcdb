@@ -25,7 +25,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
-from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
+from dlcdb.core.models import Device, DeviceType, LentRecord, OrganizationalPosition, Person, Room
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dataexchange import tasks, udb_sync
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
@@ -396,6 +396,30 @@ def test_changed_field_reports_updated(settings):
     assert report.counts[Outcome.UPDATED] == 1
     updated_row = next(row for row in report.rows if row.outcome == Outcome.UPDATED)
     assert "udb_person_email_internal_business" in updated_row.detail
+
+
+@pytest.mark.django_db
+def test_positions_follow_hr():
+    _enable_sync()
+    contract = _contract("uuid-1", "Ada", "Lovelace", email="ada@example.org")
+    contract["contract_organizational_positions"] = [{"name": "Researcher"}, {"name": "PhD student"}]
+    _run_with_payload({"results": {"contracts": [contract]}})
+    person = Person.objects.get(udb_person_uuid="uuid-1")
+    assert sorted(person.organizational_positions.values_list("name", flat=True)) == ["PhD student", "Researcher"]
+
+    contract["contract_organizational_positions"] = [{"name": "Researcher"}]
+    report = _run_with_payload({"results": {"contracts": [contract]}})
+    assert report.counts[Outcome.UPDATED] == 1
+    assert LogEntry.objects.filter(
+        object_id=str(person.pk),
+        change_message__contains="organizational_positions: ['PhD student', 'Researcher'] -> ['Researcher']",
+    ).exists()
+
+    contract["contract_organizational_positions"] = []
+    _run_with_payload({"results": {"contracts": [contract]}})
+    assert not person.organizational_positions.exists()
+    # A position nobody holds any more stays, like an organizational unit.
+    assert OrganizationalPosition.objects.filter(name="PhD student").exists()
 
 
 # --- matching: uuid-first, claim by email/name --------------------------------
@@ -810,6 +834,10 @@ def test_local_duplicate_with_the_hr_email_is_merged_into_the_hr_person():
     _enable_sync()
     hr_person = _hr_person("uuid-lang", "Gabriele", "Lang")
     duplicate = Person.objects.create(first_name="Gabi", last_name="Lang", email="g.lang@example.org")
+    # Both hold the position: moving the duplicate's to the HR person would clash.
+    position = OrganizationalPosition.objects.create(name="Pos-1")
+    hr_person.organizational_positions.add(position)
+    duplicate.organizational_positions.add(position)
     lending = _make_lending(duplicate, sync=False, desired_end=datetime.date(2024, 6, 30))
     subscription = Subscription.objects.create(
         event=Subscription.NotificationEventChoices.CONTRACT_EXPIRED, subscriber=duplicate, device=lending.device
@@ -828,6 +856,7 @@ def test_local_duplicate_with_the_hr_email_is_merged_into_the_hr_person():
     assert lending.person == hr_person
     assert subscription.subscriber == hr_person
     assert list(LicensesConfiguration.load().default_subscribers.all()) == [hr_person]
+    assert list(hr_person.organizational_positions.all()) == [position]
 
     [row] = report.rows
     assert row.outcome is Outcome.UPDATED

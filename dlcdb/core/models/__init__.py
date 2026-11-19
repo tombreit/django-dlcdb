@@ -6,7 +6,7 @@ from .device_type import DeviceType  # noqa
 from .device import Device  # noqa
 from .inventory import Inventory  # noqa
 from .note import Note  # noqa
-from .person import Person, OrganizationalUnit  # noqa
+from .person import Person, OrganizationalPosition, OrganizationalUnit, PersonPosition  # noqa
 from .record import Record  # noqa
 from .room import Room  # noqa
 from .supplier import Supplier  # noqa

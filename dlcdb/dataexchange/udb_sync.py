@@ -31,7 +31,7 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError, transaction
 from django.utils.timezone import localtime, now
 
-from dlcdb.core.models import OrganizationalUnit, Person, Record, Room
+from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person, Record, Room
 from dlcdb.core.utils.helpers import save_base64img_as_fileimg
 from dlcdb.theme.similar import comparable_name
 
@@ -79,7 +79,8 @@ UDB_ROOM_RESOURCE_TYPE = "arbeitsplatz"
 
 # Person fields a contract can change. Compared before/after the upsert to tell a
 # real UPDATED from an UNCHANGED row. `udb_data_updated_at` is deliberately absent:
-# it is stamped on every run and would make every row look changed.
+# it is stamped on every run and would make every row look changed. The positions,
+# a many-to-many, are compared by name in `_process_contract`.
 COMPARED_PERSON_FIELDS = (
     "first_name",
     "last_name",
@@ -92,7 +93,6 @@ COMPARED_PERSON_FIELDS = (
     "udb_contract_planned_checkout",
     "udb_contract_contract_type",
     "udb_contract_organization_unit",
-    "udb_contract_organizational_positions",
     "photo",
     "udb_person_image_hash",
     "organizational_unit",
@@ -549,8 +549,11 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
     udb_contract_organization_unit = (contract.get("contract_organization_unit") or {}).get("name", "")
     udb_contract_contract_type = (contract.get("contract_contract_type") or {}).get("name", "")
 
-    positions = contract.get("contract_organizational_positions") or []
-    positions = ", ".join(p.get("name", "") for p in positions)
+    # In HR's order, once each, without blank names.
+    position_names = (
+        (position.get("name") or "").strip() for position in contract.get("contract_organizational_positions") or []
+    )
+    position_names = list(dict.fromkeys(name for name in position_names if name))
 
     logger.debug(
         f"Processing UDB person uuid={udb_person_uuid}, "
@@ -560,6 +563,7 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
     udb_organizational_unit = None
     if udb_contract_organization_unit:
         udb_organizational_unit, _ = OrganizationalUnit.objects.get_or_create(name=udb_contract_organization_unit)
+    positions = [OrganizationalPosition.objects.get_or_create(name=name)[0] for name in position_names]
 
     # Match by stable remote id first, then claim an un-synced local person by
     # email, then by name (empty emails are dropped so they never match a
@@ -574,6 +578,9 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
         Person.with_softdeleted_objects.filter(pk=existing.pk).values(*COMPARED_PERSON_FIELDS).first()
         if existing
         else None
+    )
+    position_names_before = (
+        sorted(existing.organizational_positions.values_list("name", flat=True)) if existing else None
     )
 
     # The image file path is deterministic (`{uuid}.jpg`), so it never reflects a
@@ -609,7 +616,6 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
         udb_contract_planned_checkout=udb_contract_planned_checkout,
         udb_contract_contract_type=udb_contract_contract_type,
         udb_contract_organization_unit=udb_contract_organization_unit,
-        udb_contract_organizational_positions=positions,
         udb_data_updated_at=now(),
         photo=udb_person_image_path_relative,
         udb_person_image_hash=udb_person_image_hash,
@@ -666,6 +672,7 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
             f"Integrity error for {udb_person_last_name}/{udb_person_first_name}: {integrity_error}"
             + (f". {holders}" if holders else "")
         ) from integrity_error
+    existing.organizational_positions.set(positions)
 
     website_note = _sync_room_website(room, plan_url, log_user_id=log_user_id)
 
@@ -679,6 +686,8 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
         for field in COMPARED_PERSON_FIELDS
         if values_before[field] != values_after[field]
     ]
+    if sorted(position_names) != position_names_before:
+        changes.append(("organizational_positions", position_names_before, sorted(position_names)))
 
     # When the contract end date moved, push it onto the person's opted-in open
     # lendings (a brand-new person, handled above, has none). Use the post-save,

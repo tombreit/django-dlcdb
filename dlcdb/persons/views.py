@@ -85,6 +85,7 @@ def person_add(request):
         person = form.save(commit=False)
         person.stamp_user(request.user)
         person.save()
+        form.save_m2m()
         messages.success(request, _("Person “%(person)s” was created.") % {"person": person})
         # The page that opened this one (a form's + button, say) comes as ?next=:
         # return there with the new person. Cancel leads there without them.
@@ -129,6 +130,7 @@ def person_detail(request, pk):
             saved_person = form.save(commit=False)
             saved_person.stamp_user(request.user)
             saved_person.save()
+            form.save_m2m()
             messages.success(request, linked_message(_("Person “{person}” was updated."), person=saved_person))
             return redirect(next_url)
     else:

@@ -126,7 +126,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [ ] Pre-flight on the production instances
 - [x] 1. Rename `udb_person_image` to `photo`
 - [x] 2. Photo on the person form
-- [ ] 3. Positions as master data
+- [x] 3. Positions as master data
 - [ ] 4. Drop `udb_contract_organization_unit`
 - [ ] 5. Persons list filters
 - [ ] 6. Person cards
@@ -149,3 +149,6 @@ One commit each; the user commits in between. Re-check each step against the cod
 - 2026-11-20 (batch 2): the read-only person page gets no photo row: the page header shows the photo already.
 - 2026-11-20 (batch 2): `shrink_photo` also turns a photo upright by its EXIF orientation before dropping the EXIF data (a phone photo would otherwise lie on its side); HR photos go through it too.
 - 2026-11-20 (batch 2): no tests of what Django does itself (refusing a non-image, "Clear"). The form round-trip guard (`core/tests/test_form_round_trip.py`) leaves file inputs out of its payload, as a browser does, and its person has a stored photo.
+- 2026-11-20 (batch 3): the through model is `PersonPosition`; both its keys are hidden (`related_name="+"`), the position key too, as nothing reads it. The sync test of the duplicate merge gives both persons the same position: with a visible person key the merge fails on the unique pair (checked).
+- 2026-11-20 (batch 3): the data copy drops blank and repeated names and keeps HR's order; going back joins them again. A name containing ", " is split (see *Pitfalls*).
+- 2026-11-20 (batch 3): the form round-trip guard compares many-to-many fields too, and its person holds a position.

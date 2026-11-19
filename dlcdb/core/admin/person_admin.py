@@ -31,7 +31,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         "udb_contract_planned_checkout",
         "udb_contract_organization_unit",
         "udb_contract_contract_type",
-        "udb_contract_organizational_positions",
+        "organizational_positions",
         "photo",
         "udb_person_uuid",
         "udb_data_updated_at",

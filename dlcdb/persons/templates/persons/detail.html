@@ -47,6 +47,8 @@
         <dd class="col-sm-8">{{ person.email|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Organizational unit" %}</dt>
         <dd class="col-sm-8">{{ person.organizational_unit|default:"—" }}</dd>
+        <dt class="col-sm-4 text-secondary fw-medium">{% translate "Positions" %}</dt>
+        <dd class="col-sm-8">{{ person.organizational_positions.all|join:", "|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Room" %}</dt>
         <dd class="col-sm-8 mb-0">
           {% if person.room and not person.room.deleted_at and perms.core.view_room %}
@@ -92,8 +94,6 @@
           <dd>{{ person.udb_contract_organization_unit|default:"—" }}</dd>
           <dt>{% translate "Contract type" %}</dt>
           <dd>{{ person.udb_contract_contract_type|default:"—" }}</dd>
-          <dt>{% translate "Positions" %}</dt>
-          <dd>{{ person.udb_contract_organizational_positions|default:"—" }}</dd>
           <dt>{% translate "Planned check-in" %}</dt>
           <dd>{{ person.udb_contract_planned_checkin|date:"Y-m-d"|default:"—" }}</dd>
           <dt>{% translate "Planned check-out" %}</dt>
