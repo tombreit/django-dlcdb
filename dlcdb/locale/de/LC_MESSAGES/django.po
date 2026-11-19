@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 22:13+0100\n"
+"POT-Creation-Date: 2026-11-20 00:52+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -119,7 +119,7 @@ msgstr "Doppelter Nickname"
 #: dlcdb/assets/filters.py:339
 #: dlcdb/dashboard/templates/dashboard/includes/_search_bar.html:38
 #: dlcdb/dataexchange/filters.py:19 dlcdb/journal/filters.py:22
-#: dlcdb/lending/filters.py:116 dlcdb/persons/filters.py:17
+#: dlcdb/lending/filters.py:148 dlcdb/persons/filters.py:17
 #: dlcdb/rooms/filters.py:18 dlcdb/theme/filterbar.py:189
 #: dlcdb/theme/templates/theme/filterbar/filterbar.html:56
 msgid "Search"
@@ -127,7 +127,7 @@ msgstr "Suche"
 
 #: dlcdb/assets/filters.py:48
 #: dlcdb/assets/templates/assets/devices/index.html:40
-#: dlcdb/lending/filters.py:55 dlcdb/licenses/forms.py:145
+#: dlcdb/lending/filters.py:65 dlcdb/licenses/forms.py:145
 msgid "Type"
 msgstr "Typ"
 
@@ -135,11 +135,11 @@ msgstr "Typ"
 msgid "Any device type..."
 msgstr "Alle Geräteklassen..."
 
-#: dlcdb/assets/filters.py:54 dlcdb/lending/filters.py:49
+#: dlcdb/assets/filters.py:54 dlcdb/lending/filters.py:59
 msgid "State"
 msgstr "Status"
 
-#: dlcdb/assets/filters.py:55 dlcdb/lending/filters.py:50
+#: dlcdb/assets/filters.py:55 dlcdb/lending/filters.py:60
 msgid "Any state..."
 msgstr "Status..."
 
@@ -161,8 +161,9 @@ msgstr "Jede Verfügbarkeit..."
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:37
 #: dlcdb/assets/templates/assets/records/detail.html:125
 #: dlcdb/assets/templates/assets/records/index.html:39
-#: dlcdb/core/models/person.py:106 dlcdb/core/models/record.py:167
-#: dlcdb/core/models/room.py:73 dlcdb/persons/templates/persons/detail.html:50
+#: dlcdb/core/models/person.py:154 dlcdb/core/models/record.py:167
+#: dlcdb/core/models/room.py:73 dlcdb/persons/filters.py:31
+#: dlcdb/persons/templates/persons/detail.html:53
 #: dlcdb/persons/templates/persons/index.html:31
 #: dlcdb/rooms/templates/rooms/detail.html:6
 #: dlcdb/rooms/templates/rooms/detail.html:27
@@ -173,6 +174,7 @@ msgid "Room"
 msgstr "Raum"
 
 #: dlcdb/assets/filters.py:66 dlcdb/assets/filters.py:218
+#: dlcdb/persons/filters.py:32
 msgid "Any room..."
 msgstr "Alle Räume..."
 
@@ -195,7 +197,7 @@ msgstr "Alle Hersteller..."
 #: dlcdb/dataexchange/templates/dataexchange/importer_detail.html:36
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:29
 #: dlcdb/inventory/filters.py:76 dlcdb/journal/models.py:166
-#: dlcdb/journal/templates/journal/detail.html:57 dlcdb/lending/filters.py:67
+#: dlcdb/journal/templates/journal/detail.html:57 dlcdb/lending/filters.py:90
 #: dlcdb/licenses/filters.py:58 dlcdb/tenants/templates/tenants/detail.html:9
 #: dlcdb/tenants/templates/tenants/detail.html:23
 #: dlcdb/tenants/templates/tenants/includes/_form_fields.html:7
@@ -203,7 +205,7 @@ msgid "Tenant"
 msgstr "Mandant"
 
 #: dlcdb/assets/filters.py:77 dlcdb/assets/filters.py:223
-#: dlcdb/dataexchange/filters.py:35 dlcdb/lending/filters.py:68
+#: dlcdb/dataexchange/filters.py:35 dlcdb/lending/filters.py:91
 #: dlcdb/licenses/filters.py:59
 msgid "Any tenant..."
 msgstr "Tenant..."
@@ -290,8 +292,8 @@ msgstr "Inventarnummer"
 #: dlcdb/assets/templates/assets/records/detail.html:254
 #: dlcdb/assets/templates/assets/records/index.html:42
 #: dlcdb/core/models/abstracts.py:37 dlcdb/dataexchange/filters.py:44
-#: dlcdb/lending/filters.py:81 dlcdb/lending/templates/lending/index.html:35
-#: dlcdb/licenses/filters.py:72 dlcdb/persons/filters.py:34
+#: dlcdb/lending/filters.py:104 dlcdb/lending/templates/lending/index.html:35
+#: dlcdb/licenses/filters.py:72 dlcdb/persons/filters.py:44
 #: dlcdb/rooms/filters.py:48
 #: dlcdb/tenants/templates/tenants/actions/assign.html:71
 #: dlcdb/theme/templates/theme/includes/_audit_data.html:22
@@ -354,7 +356,7 @@ msgstr "Aktuell und abgelöst..."
 #: dlcdb/assets/templates/assets/devices/detail.html:59
 #: dlcdb/assets/templates/assets/records/detail.html:72
 #: dlcdb/assets/views/masterdata.py:71 dlcdb/core/models/device.py:119
-#: dlcdb/lending/models.py:57
+#: dlcdb/lending/models.py:58
 #: dlcdb/lending/templates/lending/configuration.html:30
 #: dlcdb/tenants/templates/tenants/actions/assign.html:43
 msgid "Device type"
@@ -466,7 +468,10 @@ msgstr[1] "%(counter)s von %(total)s Gerätetypen"
 #: dlcdb/assets/templates/assets/manufacturers/index.html:28
 #: dlcdb/assets/templates/assets/suppliers/index.html:28
 #: dlcdb/core/models/device_type.py:18 dlcdb/core/models/manufacturer.py:16
-#: dlcdb/licenses/forms.py:146 dlcdb/persons/templates/persons/detail.html:85
+#: dlcdb/core/models/person.py:23 dlcdb/core/models/person.py:44
+#: dlcdb/licenses/forms.py:146
+#: dlcdb/organization/templates/organization/includes/_names_card.html:20
+#: dlcdb/persons/templates/persons/detail.html:88
 #: dlcdb/persons/templates/persons/index.html:28 dlcdb/tenants/models.py:17
 msgid "Name"
 msgstr "Name"
@@ -523,6 +528,8 @@ msgstr "URL"
 #: dlcdb/lending/templates/lending/profile_delete.html:23
 #: dlcdb/lending/templates/lending/profile_form.html:11
 #: dlcdb/licenses/templates/licenses/form_partial.html:78
+#: dlcdb/organization/templates/organization/name_delete.html:48
+#: dlcdb/organization/templates/organization/name_form.html:13
 #: dlcdb/persons/templates/persons/form.html:9
 #: dlcdb/rooms/templates/rooms/form.html:9
 #: dlcdb/rooms/templates/rooms/rename.html:9
@@ -609,9 +616,9 @@ msgid "Current state"
 msgstr "Aktueller Status"
 
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:31
-#: dlcdb/core/models/person.py:169 dlcdb/lending/filters.py:61
+#: dlcdb/core/models/person.py:210 dlcdb/lending/filters.py:71
 #: dlcdb/lending/templates/lending/lend.html:79
-#: dlcdb/persons/templates/persons/detail.html:38
+#: dlcdb/persons/templates/persons/detail.html:39
 #: dlcdb/persons/templates/persons/includes/_form_fields.html:7
 msgid "Person"
 msgstr "Person"
@@ -719,7 +726,7 @@ msgstr "Änderungen"
 #: dlcdb/core/models/abstracts.py:41
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:31
 #: dlcdb/lending/templates/lending/index.html:35
-#: dlcdb/persons/templates/persons/index.html:32
+#: dlcdb/persons/templates/persons/index.html:46
 #: dlcdb/rooms/templates/rooms/index.html:51
 #: dlcdb/theme/templates/theme/includes/_audit_data.html:24
 #: dlcdb/theme/templates/theme/includes/_timestamps.html:21
@@ -732,7 +739,7 @@ msgid "No devices match these filters."
 msgstr "Keine Geräte gefunden, die diesen Filtern entsprechen."
 
 #: dlcdb/assets/templates/assets/includes/_room_list_item.html:40
-#: dlcdb/theme/templates/theme/includes/_person_list_item.html:72
+#: dlcdb/theme/templates/theme/includes/_person_list_item.html:73
 #: dlcdb/theme/templates/theme/includes/_picker.html:57
 #: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:93
 #: dlcdb/theme/templates/theme/widgets/device_picker/_item.html:94
@@ -766,6 +773,7 @@ msgid "No manufacturers match these filters."
 msgstr "Keine Hersteller gefunden, die diesen Filtern entsprechen."
 
 #: dlcdb/assets/templates/assets/masterdata/detail.html:16
+#: dlcdb/organization/templates/organization/name_detail.html:18
 msgid "You may view this entry but do not have permission to edit it."
 msgstr ""
 "Sie können diesen Eintrag anzeigen, haben jedoch keine Berechtigung ihn zu "
@@ -1020,11 +1028,13 @@ msgid "Create supplier"
 msgstr "Distributor hinzufügen"
 
 #: dlcdb/assets/views/masterdata.py:163
+#: dlcdb/organization/views_masterdata.py:117
 #, python-format
 msgid "%(model)s “%(obj)s” was created."
 msgstr "%(model)s “%(obj)s” erstellt."
 
 #: dlcdb/assets/views/masterdata.py:204
+#: dlcdb/organization/views_masterdata.py:149
 #, python-brace-format
 msgid "{model} “{obj}” was updated."
 msgstr "{model} “{obj}” geändert."
@@ -1370,23 +1380,48 @@ msgstr "Link"
 msgid "Links"
 msgstr "Links"
 
-#: dlcdb/core/models/person.py:81
-#: dlcdb/persons/templates/persons/detail.html:44
+#: dlcdb/core/models/person.py:34 dlcdb/core/models/person.py:135
+#: dlcdb/lending/filters.py:84 dlcdb/persons/filters.py:21
+#: dlcdb/persons/templates/persons/detail.html:49
+#: dlcdb/persons/templates/persons/index.html:30
+msgid "Organizational unit"
+msgstr "Organisationseinheit"
+
+#: dlcdb/core/models/person.py:35
+#: dlcdb/organization/templates/organization/branding.html:23
+#: dlcdb/organization/templates/organization/branding.html:41
+msgid "Organizational units"
+msgstr "Organisationseinheiten"
+
+#: dlcdb/core/models/person.py:48 dlcdb/lending/filters.py:78
+#: dlcdb/persons/filters.py:26
+msgid "Position"
+msgstr "Position"
+
+#: dlcdb/core/models/person.py:49 dlcdb/core/models/person.py:142
+#: dlcdb/organization/templates/organization/branding.html:26
+#: dlcdb/organization/templates/organization/branding.html:44
+#: dlcdb/persons/templates/persons/detail.html:51
+msgid "Positions"
+msgstr "Positionen"
+
+#: dlcdb/core/models/person.py:120
+#: dlcdb/persons/templates/persons/detail.html:45
 msgid "First name"
 msgstr "Vorname"
 
-#: dlcdb/core/models/person.py:82
-#: dlcdb/persons/templates/persons/detail.html:42
+#: dlcdb/core/models/person.py:121
+#: dlcdb/persons/templates/persons/detail.html:43
 msgid "Last name"
 msgstr "Nachname"
 
-#: dlcdb/core/models/person.py:87
-#: dlcdb/persons/templates/persons/detail.html:46
+#: dlcdb/core/models/person.py:126
+#: dlcdb/persons/templates/persons/detail.html:47
 #: dlcdb/persons/templates/persons/index.html:29
 msgid "E-mail"
 msgstr "Email"
 
-#: dlcdb/core/models/person.py:88
+#: dlcdb/core/models/person.py:127
 msgid ""
 "ALWAYS provide an email address, otherwise we won't be able to contact the "
 "borrowers."
@@ -1394,7 +1429,13 @@ msgstr ""
 "IMMER eine Email-Adresse angeben, da wir sonst die Ausleiher nicht "
 "anschreiben können."
 
-#: dlcdb/core/models/person.py:170 dlcdb/dashboard/search.py:197
+#: dlcdb/core/models/person.py:157
+msgid "Photo"
+msgstr "Foto"
+
+#: dlcdb/core/models/person.py:211 dlcdb/dashboard/search.py:197
+#: dlcdb/organization/templates/organization/includes/_names_card.html:21
+#: dlcdb/organization/templates/organization/name_detail.html:29
 #: dlcdb/persons/apps.py:12 dlcdb/rooms/templates/rooms/detail.html:78
 #: dlcdb/rooms/templates/rooms/index.html:49
 msgid "Persons"
@@ -1462,6 +1503,8 @@ msgstr "Kein Standard-Rückgaberaum definiert! \"%(error)s\""
 
 #: dlcdb/core/models/prx_lentrecord.py:191 dlcdb/dashboard/search.py:165
 #: dlcdb/persons/templates/persons/includes/_lendings.html:19
+#: dlcdb/persons/templates/persons/index.html:39
+#: dlcdb/persons/templates/persons/index.html:42
 msgid "Lendings"
 msgstr "Ausleihen"
 
@@ -1627,7 +1670,7 @@ msgid "Not yet inventorized"
 msgstr "Noch nicht inventorisiert"
 
 #: dlcdb/core/templates/core/lentrecord/change_list.html:16
-#: dlcdb/lending/models.py:37 dlcdb/lending/models.py:38
+#: dlcdb/lending/models.py:38 dlcdb/lending/models.py:39
 #: dlcdb/lending/navigation.py:20
 msgid "Lending configuration"
 msgstr "Ausleihe Konfiguration"
@@ -1880,7 +1923,7 @@ msgstr "Alle Formate..."
 msgid "CSV file in the internal format (UTF-8)."
 msgstr "CSV-Datei im internen Format (UTF-8)."
 
-#: dlcdb/dataexchange/forms.py:113
+#: dlcdb/dataexchange/forms.py:116
 msgid "Remove token"
 msgstr "Token entfernen"
 
@@ -2086,24 +2129,24 @@ msgstr ""
 "RECORD_TYPE: Unbekannter Wert '%(value)s'. Erwartet wird einer von: "
 "%(expected)s (oder leer bei gesetztem ROOM)."
 
-#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:17
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:25
 #: dlcdb/dataexchange/views.py:262
 msgid "The HR sync is switched off."
 msgstr "Der HR-Sync ist ausgeschaltet."
 
-#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:18
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:26
 msgid "Sync now"
 msgstr "Jetzt synchronisieren"
 
-#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:30
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:38
 msgid "Latest runs"
 msgstr "Letzte Läufe"
 
-#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:43
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:51
 msgid "No runs yet."
 msgstr "Noch keine Läufe."
 
-#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:46
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:54
 msgid "HR sync entries in the journal"
 msgstr "HR-Sync-Einträge im Journal"
 
@@ -2534,13 +2577,21 @@ msgstr "Überfällig"
 msgid "Available"
 msgstr "Verfügbar"
 
-#: dlcdb/lending/filters.py:56
+#: dlcdb/lending/filters.py:66
 msgid "Device type..."
 msgstr "Geräteklasse..."
 
-#: dlcdb/lending/filters.py:62
+#: dlcdb/lending/filters.py:72
 msgid "Person..."
 msgstr "Person..."
+
+#: dlcdb/lending/filters.py:79 dlcdb/persons/filters.py:27
+msgid "Any position..."
+msgstr "Jede Position..."
+
+#: dlcdb/lending/filters.py:85 dlcdb/persons/filters.py:22
+msgid "Any organizational unit..."
+msgstr "Jede Organisationseinheit..."
 
 #: dlcdb/lending/forms.py:30
 msgid "Available device"
@@ -2573,18 +2624,18 @@ msgstr "Erinnerungen an überfällige Ausleihen gehen an"
 #: dlcdb/lending/models.py:28
 msgid ""
 "Who receives the weekly overdue-lending reminder mails. The IT address is "
-"resolved per tenant: tenant contact email → Branding IT dept email → "
-"DEFAULT_FROM_EMAIL."
+"resolved per tenant: tenant contact email → the IT department email under "
+"Settings › Organization → DEFAULT_FROM_EMAIL."
 msgstr ""
 "Wer die wöchentlichen Erinnerungen an überfällige Ausleihen erhält. Die IT-"
-"Adresse gilt je Mandant: Kontakt-Email des Mandanten → IT-Email aus dem "
-"Branding → DEFAULT_FROM_EMAIL."
+"Adresse gilt je Mandant: Kontakt-Email des Mandanten → IT-Email unter "
+"Einstellungen › Organisation → DEFAULT_FROM_EMAIL."
 
-#: dlcdb/lending/models.py:62
+#: dlcdb/lending/models.py:63
 msgid "Preparation checklist"
 msgstr "Vorbereitungs-Checkliste"
 
-#: dlcdb/lending/models.py:64
+#: dlcdb/lending/models.py:65
 msgid ""
 "Printed with the lending slip. Basic Markdown; “[ ]” becomes a checkbox. "
 "Clear the field and save to get the starter content back."
@@ -2593,21 +2644,21 @@ msgstr ""
 "Ankreuzfeld. Leeren Sie das Feld und speichern Sie, um den Startinhalt "
 "zurückzubekommen."
 
-#: dlcdb/lending/models.py:73
+#: dlcdb/lending/models.py:74
 msgid "Mandatory regulations"
 msgstr "Verbindliche Ordnungen"
 
-#: dlcdb/lending/models.py:74
+#: dlcdb/lending/models.py:75
 msgid "On the lending slip, the borrower confirms having read them."
 msgstr ""
 "Auf dem Ausleihzettel bestätigt der Ausleiher, sie zur Kenntnis genommen zu "
 "haben."
 
-#: dlcdb/lending/models.py:79
+#: dlcdb/lending/models.py:80
 msgid "Lending slip template"
 msgstr "Vorlage des Ausleihzettels"
 
-#: dlcdb/lending/models.py:81
+#: dlcdb/lending/models.py:82
 msgid ""
 "Django template code; it should extend lending/printout_base.html. Context: "
 "record, lending_profile. The slip body and the checklist are included from "
@@ -2619,7 +2670,7 @@ msgstr ""
 "lending/includes/ eingebunden, mit sheet_for und pagebreak. Leeren Sie das "
 "Feld und speichern Sie, um den Startinhalt zurückzubekommen."
 
-#: dlcdb/lending/models.py:90
+#: dlcdb/lending/models.py:91
 #: dlcdb/lending/templates/lending/includes/_profile_fields.html:11
 #: dlcdb/lending/templates/lending/profile_detail.html:6
 #: dlcdb/lending/templates/lending/profile_detail.html:9
@@ -2627,7 +2678,7 @@ msgstr ""
 msgid "Lending profile"
 msgstr "Ausleih-Profil"
 
-#: dlcdb/lending/models.py:91
+#: dlcdb/lending/models.py:92
 #: dlcdb/lending/templates/lending/configuration.html:16
 msgid "Lending profiles"
 msgstr "Ausleih-Profile"
@@ -2816,10 +2867,10 @@ msgid ""
 "type cannot be printed until it has a profile again."
 msgstr ""
 "Das Ausleih-Profil für “%(type)s” löschen? Ausleihzettel für diese "
-"Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil "
-"hat."
+"Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil hat."
 
 #: dlcdb/lending/templates/lending/profile_delete.html:21
+#: dlcdb/organization/templates/organization/name_delete.html:46
 #: dlcdb/tenants/templates/tenants/delete.html:21
 msgid "Yes, delete"
 msgstr "Ja, löschen"
@@ -3193,6 +3244,8 @@ msgid "Delete this subscription?"
 msgstr "Abonnement löschen?"
 
 #: dlcdb/notifications/templates/notifications/index.html:105
+#: dlcdb/organization/templates/organization/name_delete.html:11
+#: dlcdb/organization/templates/organization/name_delete.html:15
 #: dlcdb/theme/templates/theme/includes/_form_action_bar.html:44
 msgid "Delete"
 msgstr "Löschen"
@@ -3236,10 +3289,18 @@ msgstr "Abonnement aktiviert."
 msgid "Subscription deactivated."
 msgstr "Abonnement deaktiviert."
 
-#: dlcdb/organization/apps.py:12
-#: dlcdb/organization/templates/organization/includes/_branding_fields.html:11
+#: dlcdb/organization/apps.py:12 dlcdb/organization/models.py:111
+#: dlcdb/organization/models.py:112 dlcdb/organization/navigation.py:11
 msgid "Organization"
 msgstr "Organisation"
+
+#: dlcdb/organization/forms.py:58
+msgid ""
+"The HR API sync finds the entries it fills by their name: after a rename, "
+"its next run adds the old name again."
+msgstr ""
+"Der HR-API-Sync findet die Einträge, die er befüllt, über ihren Namen: Nach "
+"einer Umbenennung legt sein nächster Lauf den alten Namen wieder an."
 
 #: dlcdb/organization/models.py:27
 msgid "Organization name (English)"
@@ -3357,87 +3418,146 @@ msgid "If you host the documentation on your own, provide the URL here."
 msgstr ""
 "Wenn Sie die Dokumentation selbst hosten, tragen Sie hier ihre URL ein."
 
-#: dlcdb/organization/models.py:111 dlcdb/organization/models.py:112
-#: dlcdb/organization/navigation.py:11
-msgid "Branding"
-msgstr "Branding"
+#: dlcdb/organization/templates/organization/branding.html:23
+msgid "No organizational units yet."
+msgstr "Noch keine Organisationseinheiten."
 
-#: dlcdb/organization/templates/organization/includes/_branding_fields.html:29
+#: dlcdb/organization/templates/organization/branding.html:26
+msgid "No positions yet."
+msgstr "Noch keine Positionen."
+
+#: dlcdb/organization/templates/organization/branding.html:34
+msgid "Contents"
+msgstr "Inhalt"
+
+#: dlcdb/organization/templates/organization/branding.html:37
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:14
+msgid "Name and address"
+msgstr "Name und Adresse"
+
+#: dlcdb/organization/templates/organization/branding.html:38
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:33
 msgid "IT department"
 msgstr "IT-Abteilung"
 
-#: dlcdb/organization/templates/organization/includes/_branding_fields.html:43
+#: dlcdb/organization/templates/organization/branding.html:39
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:48
 msgid "Files and links"
 msgstr "Dateien und Links"
 
-#: dlcdb/persons/filters.py:21 dlcdb/persons/templates/persons/detail.html:48
-#: dlcdb/persons/templates/persons/index.html:30
-msgid "Organizational unit"
-msgstr "Organisationseinheit"
+#: dlcdb/organization/templates/organization/name_delete.html:22
+#, python-format
+msgid "%(model)s “%(object)s” can't be deleted while persons hold it:"
+msgstr ""
+"%(model)s “%(object)s” kann nicht gelöscht werden, solange sie Personen "
+"zugeordnet ist:"
 
-#: dlcdb/persons/filters.py:22
-msgid "Any organizational unit..."
-msgstr "Jede Organisationseinheit..."
+#: dlcdb/organization/templates/organization/name_delete.html:25
+#, python-format
+msgid "%(counter)s active person"
+msgid_plural "%(counter)s active persons"
+msgstr[0] "%(counter)s aktive Person"
+msgstr[1] "%(counter)s aktive Personen"
+
+#: dlcdb/organization/templates/organization/name_delete.html:30
+#, python-format
+msgid "%(counter)s deactivated person."
+msgid_plural "%(counter)s deactivated persons."
+msgstr[0] "%(counter)s deaktivierte Person."
+msgstr[1] "%(counter)s deaktivierte Personen."
+
+#: dlcdb/organization/templates/organization/name_delete.html:36
+#: dlcdb/tenants/templates/tenants/actions/assign.html:100
+#: dlcdb/theme/templates/theme/includes/_back_link.html:23
+msgid "Back"
+msgstr "Zurück"
+
+#: dlcdb/organization/templates/organization/name_delete.html:39
+#, python-format
+msgid "Delete %(model)s “%(object)s”?"
+msgstr "%(model)s “%(object)s” löschen?"
+
+#: dlcdb/organization/templates/organization/name_detail.html:34
+#: dlcdb/organization/templates/organization/name_detail.html:37
+#, python-format
+msgid "%(counter)s person"
+msgid_plural "%(counter)s persons"
+msgstr[0] "%(counter)s Person"
+msgstr[1] "%(counter)s Personen"
+
+#: dlcdb/organization/views_masterdata.py:88
+msgid "Add organizational unit"
+msgstr "Organisationseinheit hinzufügen"
+
+#: dlcdb/organization/views_masterdata.py:89
+msgid "Create organizational unit"
+msgstr "Organisationseinheit hinzufügen"
+
+#: dlcdb/organization/views_masterdata.py:102
+msgid "Add position"
+msgstr "Position hinzufügen"
+
+#: dlcdb/organization/views_masterdata.py:103
+msgid "Create position"
+msgstr "Position hinzufügen"
+
+#: dlcdb/organization/views_masterdata.py:191
+#, python-format
+msgid "%(model)s “%(obj)s” was deleted."
+msgstr "%(model)s “%(obj)s” gelöscht."
 
 #: dlcdb/persons/navigation.py:11 dlcdb/persons/templates/persons/index.html:4
 #: dlcdb/persons/templates/persons/index.html:5
 msgid "People"
 msgstr "Personen"
 
-#: dlcdb/persons/templates/persons/detail.html:17
-#: dlcdb/persons/templates/persons/index.html:51
+#: dlcdb/persons/templates/persons/detail.html:18
+#: dlcdb/persons/templates/persons/index.html:65
 msgid "Managed by HR API sync"
 msgstr "Verwaltet per HR-API-Sync"
 
-#: dlcdb/persons/templates/persons/detail.html:28
+#: dlcdb/persons/templates/persons/detail.html:29
 msgid "This person is managed by the HR API sync and cannot be edited here."
 msgstr ""
 "Diese Person wird per HR-API-Sync verwaltet und kann hier nicht bearbeitet "
 "werden."
 
-#: dlcdb/persons/templates/persons/detail.html:30
+#: dlcdb/persons/templates/persons/detail.html:31
 msgid "You may view this person but do not have permission to edit them."
 msgstr ""
 "Sie können dieses Person anzeigen, haben jedoch keine Berechtigung, sie zu "
 "bearbeiten."
 
-#: dlcdb/persons/templates/persons/detail.html:81
+#: dlcdb/persons/templates/persons/detail.html:84
 msgid "HR API data"
 msgstr "HR-API-Daten"
 
-#: dlcdb/persons/templates/persons/detail.html:87
+#: dlcdb/persons/templates/persons/detail.html:90
 msgid "Business e-mail"
 msgstr "Berufliche Email"
 
-#: dlcdb/persons/templates/persons/detail.html:89
+#: dlcdb/persons/templates/persons/detail.html:92
 msgid "Private e-mail"
 msgstr "Private Email"
 
-#: dlcdb/persons/templates/persons/detail.html:91
-msgid "Organization unit"
-msgstr "Organisationseinheit"
-
-#: dlcdb/persons/templates/persons/detail.html:93
+#: dlcdb/persons/templates/persons/detail.html:94
 msgid "Contract type"
 msgstr "Vertragstyp"
 
-#: dlcdb/persons/templates/persons/detail.html:95
-msgid "Positions"
-msgstr "Position/Funktion"
-
-#: dlcdb/persons/templates/persons/detail.html:97
+#: dlcdb/persons/templates/persons/detail.html:96
 msgid "Planned check-in"
 msgstr "Voraussichtlicher Check-In"
 
-#: dlcdb/persons/templates/persons/detail.html:99
+#: dlcdb/persons/templates/persons/detail.html:98
 msgid "Planned check-out"
 msgstr "Voraussichtlicher Check-Out"
 
-#: dlcdb/persons/templates/persons/detail.html:101
+#: dlcdb/persons/templates/persons/detail.html:100
 msgid "Last HR API update"
 msgstr "Letztes HR-API-Update"
 
 #: dlcdb/persons/templates/persons/includes/_lendings.html:42
+#: dlcdb/persons/templates/persons/index.html:115
 #, python-format
 msgid "Due %(due)s"
 msgstr "Fällig am %(due)s"
@@ -3486,7 +3606,7 @@ msgstr "Verwalten"
 msgid "No smallstuff."
 msgstr "Kein Kleinkram."
 
-#: dlcdb/persons/templates/persons/index.html:11 dlcdb/persons/views.py:98
+#: dlcdb/persons/templates/persons/index.html:11 dlcdb/persons/views.py:126
 msgid "Add person"
 msgstr "Person hinzufügen"
 
@@ -3497,24 +3617,32 @@ msgid_plural "%(counter)s of %(total)s persons"
 msgstr[0] "%(counter)s von %(total)s Person"
 msgstr[1] "%(counter)s von %(total)s Personen"
 
-#: dlcdb/persons/templates/persons/index.html:71
+#: dlcdb/persons/templates/persons/index.html:38
+msgid "Show or hide all current lendings"
+msgstr "Alle aktuellen Ausleihen ein- oder ausblenden"
+
+#: dlcdb/persons/templates/persons/index.html:88
+msgid "Show current lendings"
+msgstr "Aktuelle Ausleihen anzeigen"
+
+#: dlcdb/persons/templates/persons/index.html:128
 msgid "No persons match these filters."
 msgstr "Keine Personen gefunden die diesem Filter entsprechen."
 
-#: dlcdb/persons/views.py:66
-msgid "Search name or e-mail..."
-msgstr "Suche Name oder Email..."
+#: dlcdb/persons/views.py:91
+msgid "Search name, e-mail or room..."
+msgstr "Suche Name, Email oder Raum..."
 
-#: dlcdb/persons/views.py:88
+#: dlcdb/persons/views.py:116
 #, python-format
 msgid "Person “%(person)s” was created."
 msgstr "Person “%(person)s” hinzugefügt."
 
-#: dlcdb/persons/views.py:99
+#: dlcdb/persons/views.py:127
 msgid "Create person"
 msgstr "Person hinzufügen"
 
-#: dlcdb/persons/views.py:132
+#: dlcdb/persons/views.py:161
 #, python-brace-format
 msgid "Person “{person}” was updated."
 msgstr "Person “{person}” wurde geändert."
@@ -3678,7 +3806,7 @@ msgstr "Umgezogen nach"
 #: dlcdb/rooms/templates/rooms/includes/_changes.html:88
 msgctxt "room change"
 msgid "Marked as missing"
-msgstr ""
+msgstr "Als nicht auffindbar markiert"
 
 #: dlcdb/rooms/templates/rooms/includes/_changes.html:90
 msgctxt "room change"
@@ -3788,8 +3916,8 @@ msgstr[1] "%(count)d Räume umbenannt."
 #, python-brace-format
 msgid "{count} room kept its number: {rooms}"
 msgid_plural "{count} rooms kept their number: {rooms}"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{count} Raum behielt seine Nummer: {rooms}"
+msgstr[1] "{count} Räume behielten ihre Nummer: {rooms}"
 
 #: dlcdb/smallstuff/models.py:93
 msgid "Can not be unassigned without being assigned first!"
@@ -3996,12 +4124,13 @@ msgstr "Kontakt-Email"
 msgid ""
 "Receives the overdue-lending reminders for this tenant's devices, as a copy "
 "or instead of the borrower (see the lending configuration), and is shown in "
-"email footers. Falls back to the IT department email in Branding."
+"email footers. Falls back to the IT department email under Settings › "
+"Organization."
 msgstr ""
 "Erhält die Erinnerungen zu überfälligen Ausleihen von Geräten dieses "
 "Mandanten, als Kopie oder anstelle des Ausleihers (siehe Ausleihe "
 "Konfiguration), und erscheint in der Email-Fußzeile. Ohne Angabe gilt die "
-"Email der IT-Abteilung aus dem Branding."
+"Email der IT-Abteilung unter Einstellungen › Organisation."
 
 #: dlcdb/tenants/templates/tenants/actions/assign.html:22
 #, python-format
@@ -4045,11 +4174,6 @@ msgstr "Hochgeladen von"
 #, python-format
 msgid "Assign to “%(tenant)s”"
 msgstr "Zu “%(tenant)s” zuordnen"
-
-#: dlcdb/tenants/templates/tenants/actions/assign.html:100
-#: dlcdb/theme/templates/theme/includes/_back_link.html:23
-msgid "Back"
-msgstr "Zurück"
 
 #: dlcdb/tenants/templates/tenants/delete.html:6
 #: dlcdb/tenants/templates/tenants/delete.html:10
@@ -4249,8 +4373,11 @@ msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
 #: dlcdb/theme/context_processors.py:320
-msgid "No IT department contact email configured in Branding!"
-msgstr "Keine Kontakt-Email der IT-Abteilung im Branding konfiguriert!"
+msgid ""
+"No IT department contact email configured under Settings › Organization!"
+msgstr ""
+"Keine Kontakt-Email der IT-Abteilung unter Einstellungen › Organisation "
+"konfiguriert!"
 
 #: dlcdb/theme/context_processors.py:322
 msgid "Configure it?"
@@ -4398,7 +4525,7 @@ msgstr[1] "Zeige alle %(counter)s Einträge"
 msgid "Open person detail"
 msgstr "Personen-Details"
 
-#: dlcdb/theme/templates/theme/includes/_person_list_item.html:63
+#: dlcdb/theme/templates/theme/includes/_person_list_item.html:64
 msgid "Contract until"
 msgstr "Vertrag bis"
 
@@ -4412,7 +4539,7 @@ msgstr "Existiert schon:"
 
 #: dlcdb/theme/templates/theme/includes/_similar.html:25
 msgid "Similar existing entries:"
-msgstr ""
+msgstr "Ähnliche vorhandene Einträge:"
 
 #: dlcdb/theme/templates/theme/includes/_similar.html:31
 msgid "deactivated"
@@ -4420,7 +4547,7 @@ msgstr "deaktiviert"
 
 #: dlcdb/theme/templates/theme/includes/_similar.html:33
 msgid "Use this one"
-msgstr ""
+msgstr "Diesen verwenden"
 
 #: dlcdb/theme/templates/theme/includes/_timestamps.html:24
 #, python-format
@@ -4535,6 +4662,12 @@ msgstr "Hinzugefügt %(name)s"
 #: dlcdb/theme/widgets.py:45 dlcdb/theme/widgets.py:70
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
+
+#~ msgid "Branding"
+#~ msgstr "Branding"
+
+#~ msgid "Organization unit"
+#~ msgstr "Organisationseinheit"
 
 #~ msgid "Restore devices from REMOVED to LOST"
 #~ msgstr "Wiederherstellung von REMOVED auf LOST"
