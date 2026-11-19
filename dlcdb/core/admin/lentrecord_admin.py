@@ -11,7 +11,6 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.dataexchange.admin import ExportCsvMixin
-from dlcdb.lending.models import LendingConfiguration
 from dlcdb.tenants.admin import TenantScopedRecordAdmin
 
 from ..forms.lentrecordadmin_form import LentRecordAdminForm
@@ -117,20 +116,13 @@ class LentRecordAdmin(TenantScopedRecordAdmin, ExportCsvMixin, CustomBaseModelAd
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        lending_configuration = LendingConfiguration.load()
-        admin_mark_overdue = lending_configuration.admin_mark_overdue
 
         # see: https://docs.djangoproject.com/en/3.0/ref/models/conditional-expressions/#django.db.models.expressions.Case
-        when_clauses = []
-        if admin_mark_overdue:
-            when_clauses.append(When(LentRecord.overdue_q(), then=Value("20-overdue")))
-
-        when_clauses.extend(
-            [
-                When(record_type=Record.INROOM, then=Value("30-available")),
-                When(record_type=Record.LENT, then=Value("40-lent")),
-            ]
-        )
+        when_clauses = [
+            When(LentRecord.overdue_q(), then=Value("20-overdue")),
+            When(record_type=Record.INROOM, then=Value("30-available")),
+            When(record_type=Record.LENT, then=Value("40-lent")),
+        ]
 
         queryset = queryset.annotate(
             lent_state=Case(

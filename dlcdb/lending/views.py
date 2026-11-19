@@ -32,6 +32,7 @@ from dlcdb.theme.lifecycle_display import STATE_COLORS
 from dlcdb.theme.navigation import get_redirect_url, with_next
 from dlcdb.theme.pagination import paginate
 from dlcdb.theme.related import add_related_links
+from dlcdb.theme.settings_page import settings_page
 
 from .filters import (
     STATE_AVAILABLE,
@@ -40,8 +41,8 @@ from .filters import (
     LendingPersonFilter,
     LentRecordFilter,
 )
-from .forms import LendableDeviceSelectForm, LendingForm, LendingReturnForm
-from .models import LendingConfiguration, LendingProfile
+from .forms import LendableDeviceSelectForm, LendingConfigurationForm, LendingForm, LendingReturnForm
+from .models import LendingProfile
 
 # Applied when the request names no ordering; an explicit ?ordering= still wins.
 DEFAULT_ORDERING = "-modified"
@@ -59,31 +60,25 @@ def _tenant_scoped(queryset, request):
 def _annotate_lent_state(queryset):
     """
     Annotate each record with a display state, a matching Bootstrap contextual
-    color and a sort weight (most urgent first). Whether overdue lendings are
-    highlighted is controlled by LendingConfiguration.admin_mark_overdue.
+    color and a sort weight (most urgent first).
     """
-    mark_overdue = LendingConfiguration.load().admin_mark_overdue
     overdue = LentRecord.overdue_q()
 
-    state_whens, color_whens, sort_whens = [], [], []
-
-    if mark_overdue:
-        state_whens.append(When(overdue, then=Value(STATE_OVERDUE)))
-        color_whens.append(When(overdue, then=Value("danger")))
-        # Available first, then overdue at the top of the lent group, then lent.
-        sort_whens.append(When(overdue, then=Value(2)))
-
-    state_whens += [
+    state_whens = [
+        When(overdue, then=Value(STATE_OVERDUE)),
         When(record_type=Record.LENT, then=Value(STATE_LENT)),
         When(record_type=Record.INROOM, then=Value(STATE_AVAILABLE)),
     ]
     # Derive badge colours from the single state→colour map (theme.lifecycle_display)
     # so the lending list and the asset card cannot disagree.
-    color_whens += [
+    color_whens = [
+        When(overdue, then=Value("danger")),
         When(record_type=Record.LENT, then=Value(STATE_COLORS[Record.LENT])),
         When(record_type=Record.INROOM, then=Value(STATE_COLORS[Record.INROOM])),
     ]
-    sort_whens += [
+    # Available first, then overdue at the top of the lent group, then lent.
+    sort_whens = [
+        When(overdue, then=Value(2)),
         When(record_type=Record.INROOM, then=Value(1)),
         When(record_type=Record.LENT, then=Value(3)),
     ]
@@ -92,8 +87,8 @@ def _annotate_lent_state(queryset):
         lent_state=Case(*state_whens, default=Value("unknown"), output_field=CharField()),
         lent_state_color=Case(*color_whens, default=Value("secondary"), output_field=CharField()),
         lent_state_sort=Case(*sort_whens, default=Value(9), output_field=IntegerField()),
-        # Always computed, independent of admin_mark_overdue, so the due-date
-        # column can flag genuinely overdue lendings.
+        # The same as lent_state == "overdue", as a boolean for the due-date
+        # column and the CSV export.
         is_overdue=Case(When(overdue, then=Value(True)), default=Value(False), output_field=BooleanField()),
     ).order_by("lent_state_sort", "device__edv_id")
 
@@ -466,3 +461,9 @@ def print_sheet(request, pk):
         f"lending/db/{profile.pk}.html",
         {"record": unsaved_record, "lending_profile": profile},
     )
+
+
+@htmx_permission_required("lending.view_lendingconfiguration")
+def configuration(request):
+    """Settings › Lending configuration: who receives the overdue reminder mails."""
+    return settings_page(request, LendingConfigurationForm, icon="bi-arrow-left-right")

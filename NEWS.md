@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Settings › Licenses configuration opens a page of its own instead of the Django admin, read-only without the change permission; every save there is journaled
+* Overdue lendings are always highlighted in the lending list; the setting to turn that off is gone
 * Lists, detail pages and save messages link the rooms, persons, tenants and master data they name; the device page's state card shows the state as its title and "New state" as a full-width button
 * A new lending starts in the borrower's room, otherwise in the device's current room
 * A person can be assigned to a room, by hand on the person page or by the HR sync; the person list shows the room, the room list counts a room's persons, the room page lists them. The HR sync maps the room HR names by a rule set under *HR API sync configuration* (e.g. `Gü-235-02` → `G235`), reports rooms DLCDB lacks, and keeps the room plan link as the room's website

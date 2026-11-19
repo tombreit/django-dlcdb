@@ -5,6 +5,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.template import Template, TemplateSyntaxError
+from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
 from ..core.models.abstracts import SingletonBaseModel
@@ -13,20 +14,17 @@ from .starter import get_starter_lending_preparation_checklist, get_starter_lent
 
 class LendingConfiguration(SingletonBaseModel):
     class OverdueNotificationRecipient(models.TextChoices):
-        NONE = "none", "Nobody — no overdue mails"
-        LENDER = "lender", "Lender"
-        LENDER_AND_IT = "lender_and_it", "Lender, IT in CC"
-        IT = "it", "IT only (testdrive: lender mails rerouted to IT)"
+        NONE = "none", _("Nobody — no overdue mails")
+        LENDER = "lender", _("Lender")
+        LENDER_AND_IT = "lender_and_it", _("Lender, IT in CC")
+        IT = "it", _("IT only (testdrive: lender mails rerouted to IT)")
 
-    admin_mark_overdue = models.BooleanField(
-        default=True,
-        help_text="If checked, the admin listing highlights overdue devices.",
-    )
     overdue_notifications_recipient = models.CharField(
         max_length=20,
         choices=OverdueNotificationRecipient.choices,
         default=OverdueNotificationRecipient.LENDER,
-        help_text=(
+        verbose_name=_("Overdue reminders to"),
+        help_text=_(
             "Who receives the weekly overdue-lending reminder mails. The IT address is "
             "resolved per tenant: tenant contact email → Branding IT dept email → DEFAULT_FROM_EMAIL."
         ),
@@ -36,8 +34,8 @@ class LendingConfiguration(SingletonBaseModel):
         return "Lending Configuration"
 
     class Meta:
-        verbose_name = "Lending Configuration"
-        verbose_name_plural = "Lending Configuration"
+        verbose_name = _("Lending configuration")
+        verbose_name_plural = _("Lending configuration")
 
 
 class LendingProfileRegulation(models.Model):

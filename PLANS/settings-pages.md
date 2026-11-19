@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 2 done (the settings frame and the Licences configuration page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 3 done (the Lending configuration page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -102,6 +102,9 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
     - The device type stays editable after creation, as in the admin. The form's uniqueness check refuses a type that already has a profile.
     - The regulation order is the selection order in a TomSelect multi-select. To reorder, remove a regulation and add it again.
     - The "restore the starter content when a field is emptied" logic moves from `LendingProfileAdmin.save_model` into `lending/starter.py`, so both the admin and the frontend call it.
+12. **Overdue lendings are always highlighted; the toggle `LendingConfiguration.admin_mark_overdue` is dropped** (user's choice, batch 3).
+    - It was a half switch: off, the badge read "Lent" and the sort changed, but the due date stayed red, and the "Overdue" filter, the CSV and the dashboard were unaffected.
+    - It fits DECISIONS: business rules are code, not settings, until a deployment needs otherwise.
 
 ## Alternatives rejected
 
@@ -141,7 +144,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - **Docs:**
   - `docs/guides/lizenzen.md:21`: "Lizenzmodul Konfiguration" becomes *Einstellungen › Lizenzmodul Konfiguration*.
   - `docs/guides/berechtigungen.md`: the row loses *(Admin)*.
-- **NEWS:** one line, which each later page batch extends.
+- **NEWS:** none. A frontend page for an admin screen is no notable feature (user, 2026-11-19): NEWS gets breaking changes, notable features and settings that are not obvious only.
 - **Tests** cover the helper through its first consumer:
   - 403 without the view permission;
   - view-only: the fields are disabled and there is no Save;
@@ -152,9 +155,9 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 ## Batch 3: Lending configuration
 
 - **Model** (`LendingConfiguration`), with a migration:
-  - `admin_mark_overdue` gets the label "Highlight overdue lendings" and a help text saying that the lending list highlights them. The frontend list reads this flag too.
-  - The choice labels and the help text become translatable.
-- `lending/forms.py`: `LendingConfigurationForm` with both fields.
+  - `admin_mark_overdue` is dropped (decision 12): the lending list and the admin lent-record list always highlight overdue lendings.
+  - The verbose name, the choice labels and the help text become translatable.
+- `lending/forms.py`: `LendingConfigurationForm` with the reminder recipients only.
 - `lending/views.py`: the `configuration` view and its URL.
 - **Navigation:** the entry points to the page; the "Lending" main entry gets `active_url_names`.
 - **Docs:** `docs/guides/notifications.md:28` and the row in `berechtigungen.md`.
@@ -235,7 +238,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - [x] 0. This plan
 - [x] 1. Drop the unused configuration fields
 - [x] 2. The settings frame and the Licences configuration
-- [ ] 3. Lending configuration
+- [x] 3. Lending configuration
 - [ ] 4. Branding
 - [ ] 5. HR API sync configuration
 - [ ] 6. HR sync: run now, latest runs

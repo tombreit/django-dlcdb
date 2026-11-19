@@ -7,8 +7,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Device, LentRecord, Person, Room
+from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
 
+from .models import LendingConfiguration
 from .pickers import lend_queryset
 
 
@@ -136,3 +138,13 @@ class LendingReturnForm(forms.ModelForm):
             "lent_accessories": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
             "lent_note": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
         }
+
+
+class LendingConfigurationForm(forms.ModelForm):
+    class Meta:
+        model = LendingConfiguration
+        fields = ["overdue_notifications_recipient"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)

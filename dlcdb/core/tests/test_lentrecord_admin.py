@@ -21,7 +21,6 @@ from django.utils import timezone
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Room
 from dlcdb.core.tests.testingutils import establish_state
-from dlcdb.lending.models import LendingConfiguration
 
 
 @pytest.fixture
@@ -153,9 +152,6 @@ def test_overdue_filter_lists_only_the_overdue_lendings(client, plain_static, he
 
 @pytest.mark.django_db
 def test_only_the_overdue_lendings_are_highlighted(client, plain_static, helpdesk, lendings):
-    configuration = LendingConfiguration.load()
-    configuration.admin_mark_overdue = True
-    configuration.save()
     client.force_login(helpdesk)
 
     states = {edv_id: record.lent_state for edv_id, record in _changelist(client).items()}

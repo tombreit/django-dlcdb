@@ -97,7 +97,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Prozesse › Inventarisieren (nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
 | Prozesse › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
-| Einstellungen › Ausleihe Konfiguration *(Admin)* | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
+| Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
 | Einstellungen › Ausleih-Profile *(Admin)* | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
 | Einstellungen › Branding *(Admin)* | Organization \| branding \| Can view branding | `organization.view_branding` |

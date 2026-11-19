@@ -12,14 +12,16 @@ nav_entries = [
         "icon": "bi bi-arrow-left-right",
         "url": "lending:index",
         "required_permission": "core.view_lentrecord",
+        "active_url_names": {"index", "lend", "detail", "person_search"},
     },
     {
         "slot": "nav_settings",
         "order": 20,
         "label": _("Lending configuration"),
         "icon": "bi bi-arrow-left-right",
-        "url": "admin:lending_lendingconfiguration_changelist",
+        "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",
+        "active_url_names": {"configuration"},
     },
     {
         "slot": "nav_settings",

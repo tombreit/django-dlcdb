@@ -13,6 +13,7 @@ urlpatterns = [
     path("export.csv", views.lending_export_csv, name="export_csv"),
     path("lend/", views.lend, name="lend"),
     path("person-search/", views.person_search, name="person_search"),
+    path("configuration/", views.configuration, name="configuration"),
     path("<int:pk>/", views.lend, name="detail"),
     path("<int:pk>/print/", views.print_sheet, name="print_sheet"),
 ]

@@ -16,14 +16,6 @@ from .starter import get_starter_lending_preparation_checklist, get_starter_lent
 
 @admin.register(LendingConfiguration)
 class LendingConfigurationAdmin(admin.ModelAdmin):
-    fieldsets = (
-        (None, {"fields": ("admin_mark_overdue",)}),
-        (
-            "Overdue lender notifications",
-            {"fields": ("overdue_notifications_recipient",)},
-        ),
-    )
-
     def has_add_permission(self, request):
         return not LendingConfiguration.objects.exists()
 
