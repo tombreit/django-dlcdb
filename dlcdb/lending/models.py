@@ -11,19 +11,6 @@ from ..core.models.abstracts import SingletonBaseModel
 from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
 
 
-class LendingConfigurationRegulation(models.Model):
-    lending_configuration = models.ForeignKey("lending.LendingConfiguration", on_delete=models.CASCADE)
-    regulation = models.ForeignKey("core.Link", on_delete=models.CASCADE)
-    order = models.PositiveIntegerField(default=0)
-
-    class Meta:
-        ordering = ["order"]
-        unique_together = ("lending_configuration", "regulation")
-
-    def __str__(self):
-        return f"LendingConfiguration - {self.regulation.linktext}"
-
-
 class LendingConfiguration(SingletonBaseModel):
     class OverdueNotificationRecipient(models.TextChoices):
         NONE = "none", "Nobody — no overdue mails"
@@ -31,14 +18,6 @@ class LendingConfiguration(SingletonBaseModel):
         LENDER_AND_IT = "lender_and_it", "Lender, IT in CC"
         IT = "it", "IT only (testdrive: lender mails rerouted to IT)"
 
-    lending_preparation_checklist = models.TextField(
-        blank=True, help_text="Basic Markdown supported. '[ ]' converted to checkbox input."
-    )
-    mandatory_regulations = models.ManyToManyField(
-        "core.Link",
-        through="lending.LendingConfigurationRegulation",
-        related_name="+",
-    )
     admin_mark_overdue = models.BooleanField(
         default=True,
         help_text="If checked, the admin listing highlights overdue devices.",

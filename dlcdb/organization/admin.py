@@ -38,10 +38,8 @@ class BrandingAdmin(admin.ModelAdmin):
             {
                 "classes": ("collapse",),
                 "fields": (
-                    "organization_logo_white",
                     "organization_logo_black",
                     "organization_figurative_mark",
-                    "licenses_logo",
                 ),
             },
         ),

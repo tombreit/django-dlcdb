@@ -50,16 +50,6 @@ class Branding(SingletonBaseModel):
     )
     organization_city = models.CharField(max_length=255, blank=True, help_text="Used in printouts etc.")
     organization_url = models.URLField(blank=True, verbose_name="Organization URL", help_text="Used in printouts etc.")
-    organization_logo_white = models.FileField(
-        null=True,
-        blank=True,
-        upload_to="branding/",
-        validators=[validate_logo_image_file_extension],
-        verbose_name="Logo file (white)",
-        help_text=_(
-            "Logo file. SVG, white foreground, transparent background. Used in the main navigation bar/site header."
-        ),
-    )
     organization_logo_black = models.FileField(
         null=True,
         blank=True,
@@ -91,14 +81,6 @@ class Branding(SingletonBaseModel):
     organization_it_dept_email = models.EmailField(
         blank=True,
         verbose_name="IT Department Email",
-    )
-
-    licenses_logo = models.FileField(
-        null=True,
-        blank=True,
-        upload_to="branding/",
-        validators=[validate_logo_image_file_extension],
-        verbose_name="Logo file for Licenses component",
     )
 
     room_plan = models.FileField(

@@ -10,18 +10,8 @@ from django.utils.safestring import mark_safe
 from simple_history.admin import SimpleHistoryAdmin
 from simple_history.template_utils import HistoricalRecordContextHelper
 
-from .models import (
-    LendingConfiguration,
-    LendingConfigurationRegulation,
-    LendingProfile,
-    LendingProfileRegulation,
-)
+from .models import LendingConfiguration, LendingProfile, LendingProfileRegulation
 from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
-
-
-class RegulationInline(admin.TabularInline):
-    model = LendingConfigurationRegulation
-    extra = 1
 
 
 @admin.register(LendingConfiguration)
@@ -34,19 +24,11 @@ class LendingConfigurationAdmin(admin.ModelAdmin):
         ),
     )
 
-    inlines = [
-        RegulationInline,
-    ]
-    exclude = ["mandatory_regulations", "lending_preparation_checklist"]
-
     def has_add_permission(self, request):
         return not LendingConfiguration.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
-
-    class Media:
-        css = {"all": ("lending/admin/lending_admin.css",)}
 
 
 class ProfileRegulationInline(admin.TabularInline):
