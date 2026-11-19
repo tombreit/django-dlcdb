@@ -34,6 +34,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The settings admins stay registered**, like the tenant admin; the frontend links only the frontend pages.
 - **The lending profiles live on Settings › Lending configuration**, with no menu entry or index page of their own; the page needs `view_lendingconfiguration`, the card `view_lendingprofile`. Not "either permission opens the page" (`settings_page` would need a form-less mode).
 - **Overdue lendings are always highlighted**: the toggle was a half switch (the due date stayed red).
+- **A lending slip lists the regulations by link creation date**: the never-read `LendingProfileRegulation.order` is gone; an order of its own would need the slip to sort by it.
 - **The HR token never reaches the browser**: an empty field keeps it, "Remove token" clears it.
 - **Admin error mails use Django's plain handler**: a 500 while the mail server is down is accepted; a handler that swallowed mail errors was tried and removed.
 
@@ -51,7 +52,6 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - `capfirst()` keeps a lazy string lazy: render journal text inside `translation.override(None)`.
 - "Sync now" only queues: without the task runner nothing runs, and while a periodic run holds the lock the manual one is dropped.
 - `_field.html` escapes help texts: frontend help texts are plain text.
-- `LendingProfileRegulation.order` is never read: the slip lists the regulations by link creation date.
 - A link inside a stretched-link area can't be clicked; `_object_link.html` passes the current request as `next`, which is wrong for a fragment with a URL of its own.
 
 ## Open follow-ups
@@ -66,5 +66,5 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring still shows the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
 - Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants, ESLint for `theme.js` and `filterbar.js`.
-- Settings: make the regulation order effective or drop it; a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; delete lending profiles in the frontend; try the HR room rule on a sample.
+- Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; delete lending profiles in the frontend; try the HR room rule on a sample.
 - Publish on PyPI.

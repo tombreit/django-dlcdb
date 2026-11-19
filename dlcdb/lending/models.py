@@ -41,10 +41,8 @@ class LendingConfiguration(SingletonBaseModel):
 class LendingProfileRegulation(models.Model):
     lending_profile = models.ForeignKey("lending.LendingProfile", on_delete=models.CASCADE)
     regulation = models.ForeignKey("core.Link", on_delete=models.CASCADE)
-    order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ["order"]
         unique_together = ("lending_profile", "regulation")
 
     def __str__(self):
