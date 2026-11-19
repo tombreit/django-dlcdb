@@ -8,6 +8,11 @@ from django.http import FileResponse, HttpRequest
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 
+from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.theme.settings_page import settings_page
+
+from .forms import BrandingForm
+
 
 @login_not_required  # the login page shows it too
 @require_GET
@@ -16,3 +21,9 @@ def favicon(request: HttpRequest) -> FileResponse:
     file = settings.BASE_DIR / "dlcdb" / "theme" / "static" / "theme" / "branding" / "favicon.ico"
 
     return FileResponse(file.open("rb"))
+
+
+@htmx_permission_required("organization.view_branding")
+def branding(request):
+    """Settings › Branding: the organisation's names, address, IT contact, logos and room plan."""
+    return settings_page(request, BrandingForm, icon="bi-palette", template="organization/branding.html")

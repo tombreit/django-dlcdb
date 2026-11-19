@@ -38,6 +38,7 @@ urlpatterns = [
     path("persons/", include("dlcdb.persons.urls")),
     path("dataexchange/", include("dlcdb.dataexchange.urls")),
     path("journal/", include("dlcdb.journal.urls")),
+    path("organization/", include("dlcdb.organization.urls")),
     path("theme/", include("dlcdb.theme.urls")),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("api/v2/", include("dlcdb.api.urls")),

@@ -62,7 +62,7 @@ frame: their header carries a breadcrumb band instead and there is no form.
     <div class="col-lg-8">
       {% block detail_main %}
         {% if can_change %}
-          <form{% block detail_form_class %}{% endblock %} method="post" action="{{ form_action }}" novalidate>
+          <form{% block detail_form_class %}{% endblock %} method="post" action="{{ form_action }}"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>
             {% csrf_token %}
             {% block detail_form_fields %}{% endblock detail_form_fields %}
             {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url save_as_new_url=save_as_new_url delete_url=delete_url %}

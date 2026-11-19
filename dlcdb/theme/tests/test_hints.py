@@ -183,7 +183,7 @@ class StickyHintsTests(BaseTest):
         # Unconfigured Branding IT dept email: the hint nags with a CTA.
         response = self.client.get(self.dashboard_url)
         self.assertContains(response, "No IT department contact email configured in Branding!")
-        self.assertContains(response, reverse("admin:organization_branding_changelist"))
+        self.assertContains(response, reverse("organization:branding"))
 
         # Once set, the nag disappears.
         branding = Branding.load()

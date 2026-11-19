@@ -1,0 +1,53 @@
+{% load i18n %}
+{% comment %}
+The Branding form's fields (organization/forms.py) in cards, on the editable and
+the read-only page. Params: form.
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-building text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Organization" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.organization_name_en col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_name_de col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_abbr col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_url col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_street col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_zip_code col="col-md-2" %}
+      {% include "theme/includes/_field.html" with field=form.organization_city col="col-md-4" %}
+    </div>
+  </div>
+</section>
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-headset text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "IT department" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.organization_it_dept_name %}
+      {% include "theme/includes/_field.html" with field=form.organization_it_dept_phone col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_it_dept_email col="col-md-6" %}
+    </div>
+  </div>
+</section>
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-file-earmark-image text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Files and links" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.organization_logo_black col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.organization_figurative_mark col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.room_plan col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.documentation_url col="col-md-6" %}
+    </div>
+  </div>
+</section>

@@ -10,7 +10,7 @@ nav_entries = [
         "order": 10,
         "label": _("Branding"),
         "icon": "bi bi-palette",
-        "url": "admin:organization_branding_changelist",
+        "url": "organization:branding",
         "required_permission": "organization.view_branding",
     },
 ]

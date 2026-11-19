@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 5 done (the lending profile history), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 6 done (the Branding page), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -196,11 +196,11 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
   - a new `urls.py` with `app_name = "organization"`, included in `dlcdb/urls.py`;
   - `forms.py`: `BrandingForm`;
   - `views.py`: the `branding` view;
-  - `organization/branding.html`: extends `_settings_base.html` and groups the fields in cards like the admin's fieldsets: Organization, Address, IT department, Logos and room plan, Documentation.
+  - `organization/branding.html`: extends `_settings_base.html` and groups the fields in three cards: Organization (names, website, address), IT department, Files and links (logos, room plan, documentation URL).
 - **Model:** translatable labels and help texts, with a migration.
 - **The sticky hint "No IT department contact email configured in Branding!":** its button links to `organization:branding` instead of the admin (`theme/context_processors.py:321`, `theme/tests/test_hints.py`).
 - **Docs:** `docs/guides/erste_schritte.md:11` and the row in `berechtigungen.md`.
-- **Tests:** an SVG upload is saved, another extension is refused, and "clear" removes the file.
+- **Tests:** the form is multipart, an SVG upload is saved, another extension is refused. Not "clear": that is Django's `ClearableFileInput`.
 
 ## Batch 7: HR API sync configuration
 
@@ -245,7 +245,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - [x] 3. Lending configuration
 - [x] 4. Lending profiles on Settings › Lending configuration
 - [x] 5. Lending profiles: history
-- [ ] 6. Branding
+- [x] 6. Branding
 - [ ] 7. HR API sync configuration
 - [ ] 8. HR sync: run now, latest runs
 - [ ] 9. Retire the plan
@@ -298,7 +298,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
   - try the room number rule on a sample HR room name (`map_room_number`, like the rename preview);
   - show the request URL the sync builds (`build_request_url`);
   - "Test connection" without writing anything.
-- **Branding:** preview the uploaded SVGs.
+- **Branding:** preview the uploaded SVGs; a Bootstrap template for `ClearableFileInput` in `theme/widgets.py` (the file fields render Django's default "Currently: … ☐ Clear / Change:" in one cramped line; the first clearable upload in the frontend).
 - **Lending profiles:** print a sample slip from the profile page; delete in the frontend.
 - **The admins:** unregister them once the pages have proven themselves.
 

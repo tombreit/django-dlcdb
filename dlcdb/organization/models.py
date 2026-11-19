@@ -24,38 +24,43 @@ class Branding(SingletonBaseModel):
     organization_name_en = models.CharField(
         max_length=255,
         blank=False,
-        verbose_name="Organization Name (EN)",
+        verbose_name=_("Organization name (English)"),
         default=_("A Company that Makes Everything"),
         help_text=_("Company, institute, site name (english version)."),
     )
     organization_name_de = models.CharField(
         max_length=255,
         blank=False,
-        verbose_name="Organization Name (DE)",
+        verbose_name=_("Organization name (German)"),
         default=_("A Company that Makes Everything"),
         help_text=_("Company, institute, site name (german version)."),
     )
     organization_abbr = models.CharField(
         max_length=255,
         blank=False,
-        verbose_name="Abbreviation",
+        verbose_name=_("Abbreviation"),
         default="DLCDB",
         help_text=_("Company, institute, site abbreviation."),
     )
     organization_street = models.CharField(
-        max_length=255, blank=True, help_text="Street and house number. Used in printouts etc."
+        max_length=255,
+        blank=True,
+        verbose_name=_("Street"),
+        help_text=_("Street and house number. Used in printouts."),
     )
     organization_zip_code = models.CharField(
-        max_length=255, blank=True, verbose_name="Organization ZIP Code", help_text="Used in printouts etc."
+        max_length=255, blank=True, verbose_name=_("ZIP code"), help_text=_("Used in printouts.")
     )
-    organization_city = models.CharField(max_length=255, blank=True, help_text="Used in printouts etc.")
-    organization_url = models.URLField(blank=True, verbose_name="Organization URL", help_text="Used in printouts etc.")
+    organization_city = models.CharField(
+        max_length=255, blank=True, verbose_name=_("City"), help_text=_("Used in printouts.")
+    )
+    organization_url = models.URLField(blank=True, verbose_name=_("Website"), help_text=_("Used in printouts."))
     organization_logo_black = models.FileField(
         null=True,
         blank=True,
         upload_to="branding/",
         validators=[validate_logo_image_file_extension],
-        verbose_name="Logo file (black)",
+        verbose_name=_("Logo"),
         help_text=_("Logo file. SVG, black foreground, transparent background. Used in PDF printouts."),
     )
     organization_figurative_mark = models.FileField(
@@ -63,41 +68,45 @@ class Branding(SingletonBaseModel):
         blank=True,
         upload_to="branding/",
         validators=[validate_logo_image_file_extension],
-        verbose_name="Figurative Mark/Bildmarke",
-        help_text="Bildmarke, quasi Logo ohne Wortmarke.",
+        verbose_name=_("Figurative mark"),
+        help_text=_("The logo without its lettering. SVG. Used in printouts."),
     )
 
     organization_it_dept_name = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="IT Department Name",
-        help_text="Wording for the IT department. Used in printouts etc.",
+        verbose_name=_("IT department name"),
+        help_text=_("Wording for the IT department. Used in printouts."),
     )
     organization_it_dept_phone = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name="IT Department Phone",
+        verbose_name=_("IT department phone"),
     )
     organization_it_dept_email = models.EmailField(
         blank=True,
-        verbose_name="IT Department Email",
+        verbose_name=_("IT department email"),
+        help_text=_("Used in printouts and mails, and for overdue reminders of tenants without a contact email."),
     )
 
     room_plan = models.FileField(
         blank=True,
         null=True,
         upload_to="branding/",
+        verbose_name=_("Room plan"),
+        help_text=_("A file, e.g. a PDF, linked from the room lists."),
     )
 
     documentation_url = models.URLField(
         blank=True,
         default="https://tombreit.github.io/django-dlcdb/",
-        help_text="If you host the documentation on your own, provide the URL here.",
+        verbose_name=_("Documentation URL"),
+        help_text=_("If you host the documentation on your own, provide the URL here."),
     )
 
     def __str__(self):
         return f"Branding for {self.organization_name_en or 'n/a'}"
 
     class Meta:
-        verbose_name = "Branding"
-        verbose_name_plural = "Branding"
+        verbose_name = _("Branding")
+        verbose_name_plural = _("Branding")

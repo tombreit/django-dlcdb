@@ -1,0 +1,13 @@
+{% extends "theme/_settings_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+
+{# Settings › Branding: the shared settings frame, its fields grouped in cards. #}
+
+{% block detail_form_fields %}
+  {% include "organization/includes/_branding_fields.html" %}
+{% endblock detail_form_fields %}
+
+{% block detail_readonly %}
+  {% include "organization/includes/_branding_fields.html" %}
+{% endblock detail_readonly %}
