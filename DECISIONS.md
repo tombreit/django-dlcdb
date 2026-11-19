@@ -37,6 +37,10 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **A lending slip lists the regulations by link creation date**: the never-read `LendingProfileRegulation.order` is gone; an order of its own would need the slip to sort by it.
 - **The HR token never reaches the browser**: a stored token shows as placeholder dots, an empty field keeps it, "Remove token" clears it. Not a fake value in the field (the save would have to tell it from a typed token).
 - **Admin error mails use Django's plain handler**: a 500 while the mail server is down is accepted; a handler that swallowed mail errors was tried and removed.
+- **A person's photo, organizational unit and positions are plain person fields that the HR sync fills**, not HR mirror fields with local overrides. For a synced person HR owns them and clears what it doesn't deliver: the person is read-only, so a kept local value could never be changed. Named `photo`, not `image`, and `organizational_positions`: a bare "position" reads as a place here, "title" as the academic one, "role" as a permission.
+- **Positions are master data with a many-to-many**, not HR's joined text (no filter) or a foreign key (HR delivers a list). The explicit through model `PersonPosition` exists only for `PROTECT`.
+- **A unit or position that a person holds can't be deleted**, deactivated persons included: `PROTECT`, not a check in the delete view, which the admin and the shell would skip.
+- **Units and positions live on Settings › Organization** (formerly Branding) as cards, like the lending profiles: no menu entries or index pages, so the settings menu doesn't grow; every entry listed, no paging. The page's cards start closed, with a table of contents; any form error opens all of them.
 
 ## Pitfalls
 
@@ -53,6 +57,8 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - "Sync now" only queues: without the task runner nothing runs, and while a periodic run holds the lock the manual one is dropped.
 - `_field.html` escapes help texts: frontend help texts are plain text.
 - A link inside a stretched-link area can't be clicked; `_object_link.html` passes the current request as `next`, which is wrong for a fragment with a URL of its own.
+- The HR sync finds units and positions by name: a local rename of one it fills brings the old name back with its next run.
+- A renamed person or record field empties the DB-stored slip templates that use it, silently: NEWS has to name it.
 
 ## Open follow-ups
 
@@ -68,3 +74,4 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants, ESLint for `theme.js` and `filterbar.js`.
 - Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; try the HR room rule on a sample.
 - Publish on PyPI.
+- Persons: a DLCDB field for the contract end, which lending, notifications and smallstuff read from `udb_contract_planned_checkout`; the contract type as master data; a phone number; positions and photo in the bulk import and the lending CSV export, unit and positions in the API; delete replaced or cleared photo files and those of hard-deleted persons; let users set what HR leaves empty on a synced person.

@@ -8,6 +8,8 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Persons get a photo, positions and an organizational unit without an HR system: set on the person page, units and positions managed under *Settings › Organization* (formerly *Branding*); the person list filters by position and room. The HR sync fills the same fields
+* Lending slip templates: `person.udb_person_image`, `person.udb_contract_organizational_positions` and `person.udb_contract_organization_unit` are gone; use `person.photo`, `person.organizational_positions.all|join:", "` and `person.organizational_unit`
 * Lending profiles (under Settings › Lending configuration) and the HR API sync configuration are edited without the Staff flag: give `lending.add_lendingprofile`, `lending.change_lendingprofile` and `dataexchange.change_udbsyncconfiguration` to administrators only; slip templates are template code, and the HR token goes to whatever URL is set
 * Overdue lendings are always highlighted in the lending list; the setting to turn that off is gone
 * Lists, detail pages and save messages link the rooms, persons, tenants and master data they name; the device page's state card shows the state as its title and "New state" as a full-width button

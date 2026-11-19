@@ -52,7 +52,7 @@ Ein späterer CSV-[Import](import.md) muss die neuen Nummern verwenden: Eine alt
 
 ## 7. Personen anlegen
 
-Via Menü *Datenhaltung › Personen*. *Personen* sind „Kunden“ der DLCDB (z.B. Entleihende), keine Benutzerkonten – siehe [Benutzer und Personen](berechtigungen.md#benutzer-und-personen). Bei angebundenem HR-System werden Personen automatisch abgeglichen (siehe [HR-Sync](../betrieb/hr-sync.md)).
+Via Menü *Datenhaltung › Personen*. *Personen* sind „Kunden“ der DLCDB (z.B. Entleihende), keine Benutzerkonten – siehe [Benutzer und Personen](berechtigungen.md#benutzer-und-personen). Bei angebundenem HR-System werden Personen automatisch abgeglichen (siehe [HR-Sync](../betrieb/hr-sync.md)). Organisationseinheiten und Positionen der Personen stehen unter *Einstellungen › Organisation*.
 
 ## 8. Devices anlegen
 

@@ -10,6 +10,8 @@ Aus jedem aktiven Vertrag (ohne Testdaten):
 - Vertragsbeginn und -ende, Vertragstyp, Organisationseinheit, Position(en)
 - der Raum der Person und der Link auf seinen Raumplan (siehe [Raum](#raum))
 
+Foto, Organisationseinheit, Positionen und Raum sind gewöhnliche Felder der Person, die sich ohne HR-System von Hand pflegen lassen. Bei einer mit dem HR-System verknüpften Person überschreibt der Sync sie bei jedem Lauf und leert, was das HR-System nicht liefert; die Person ist im Frontend schreibgeschützt. Organisationseinheiten und Positionen findet der Sync über ihren Namen und legt fehlende an: Wer eine davon unter *Einstellungen › Organisation* umbenennt, bekommt beim nächsten Lauf den alten Namen wieder dazu.
+
 Das Vertragsende nutzt die [Ausleihe](../guides/ausleihe.md): Sie warnt, wenn ein Vertrag vor dem Rückgabedatum endet oder kein Vertragsende bekannt ist. Ist bei einer Ausleihe *Synchronisiere mit Vertragsenddatum* gesetzt, übernimmt der Sync jedes geänderte Vertragsende als Rückgabedatum.
 
 Der Sync deaktiviert niemanden; eine deaktivierte Person, die wieder im HR-System auftaucht, wird reaktiviert. Welche Geräte eine Person ausgeliehen hat, kann das HR-System über die [API](api.md) abfragen.
