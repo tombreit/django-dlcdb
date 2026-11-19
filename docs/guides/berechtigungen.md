@@ -99,7 +99,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
 | Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
-| Einstellungen › Branding | Organization \| branding \| Can view branding | `organization.view_branding` |
+| Einstellungen › Organisation | Organization \| Organization \| Can view Organization | `organization.view_branding` |
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 

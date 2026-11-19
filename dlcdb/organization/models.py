@@ -108,5 +108,5 @@ class Branding(SingletonBaseModel):
         return f"Branding for {self.organization_name_en or 'n/a'}"
 
     class Meta:
-        verbose_name = _("Branding")
-        verbose_name_plural = _("Branding")
+        verbose_name = _("Organization")
+        verbose_name_plural = _("Organization")

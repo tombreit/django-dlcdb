@@ -149,7 +149,7 @@ class StickyHintsTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "without tenant!")
         self.assertNotContains(response, "No rooms defined yet.")
-        self.assertNotContains(response, "No IT department contact email configured in Branding!")
+        self.assertNotContains(response, "No IT department contact email configured under Settings › Organization!")
 
     def test_hints_cannot_be_dismissed_but_other_messages_can(self):
         """A hint holds until its cause is fixed: closing it would only last until the next page."""
@@ -182,7 +182,7 @@ class StickyHintsTests(BaseTest):
     def test_branding_it_email_hint_nags_until_configured(self):
         # Unconfigured Branding IT dept email: the hint nags with a CTA.
         response = self.client.get(self.dashboard_url)
-        self.assertContains(response, "No IT department contact email configured in Branding!")
+        self.assertContains(response, "No IT department contact email configured under Settings › Organization!")
         self.assertContains(response, reverse("organization:branding"))
 
         # Once set, the nag disappears.
@@ -190,4 +190,4 @@ class StickyHintsTests(BaseTest):
         branding.organization_it_dept_email = "it-dept@example.org"
         branding.save()
         response = self.client.get(self.dashboard_url)
-        self.assertNotContains(response, "No IT department contact email configured in Branding!")
+        self.assertNotContains(response, "No IT department contact email configured under Settings › Organization!")

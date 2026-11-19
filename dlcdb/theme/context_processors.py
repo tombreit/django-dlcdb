@@ -317,7 +317,7 @@ def hints(request):
             sticky_messages.append(
                 StickyMessage(
                     level=messages.WARNING,
-                    msg=_("No IT department contact email configured in Branding!"),
+                    msg=_("No IT department contact email configured under Settings › Organization!"),
                     cta_link=reverse("organization:branding"),
                     cta_text=_("Configure it?"),
                 )

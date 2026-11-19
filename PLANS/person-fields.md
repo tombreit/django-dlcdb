@@ -130,7 +130,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [x] 4. Drop `udb_contract_organization_unit`
 - [x] 5. Persons list filters
 - [x] 6. Person cards
-- [ ] 7. Settings › Branding becomes Settings › Organization
+- [x] 7. Settings › Branding becomes Settings › Organization
 - [ ] 8. Organization page: collapsible cards and a table of contents
 - [ ] 9. Units and positions on the Organization page
 - [ ] 10. Retire the plan
@@ -154,3 +154,4 @@ One commit each; the user commits in between. Re-check each step against the cod
 - 2026-11-20 (batch 3): the form round-trip guard compares many-to-many fields too, and its person holds a position.
 - 2026-11-20 (batch 4): without the pre-flight's answer the migration keeps what it can: a person with the HR unit name but no unit gets the unit by name; where both are set, the unit stays (the pages show that one). Going back writes the unit names of HR-linked persons into the text again.
 - 2026-11-20 (batch 6): positions sit under the name in the person list (the unit column hides below `lg`), after the unit elsewhere ("unit · positions"). The two person pickers now also load the unit with the person, which their cards showed with one query each.
+- 2026-11-20 (batch 7): unlike the batch's text, the stored permission names do change ("Can view Organization"), in the migration, as core 0082 did for the transitions: otherwise a fresh installation and an updated one would name them differently. The menu entry and the page get the building icon; the palette stood for "branding". The help texts of the tenant contact e-mail and the overdue-reminder recipient name the page, hence a migration in `tenants` and `lending` each.

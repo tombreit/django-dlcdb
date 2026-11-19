@@ -25,5 +25,5 @@ def favicon(request: HttpRequest) -> FileResponse:
 
 @htmx_permission_required("organization.view_branding")
 def branding(request):
-    """Settings › Branding: the organisation's names, address, IT contact, logos and room plan."""
-    return settings_page(request, BrandingForm, icon="bi-palette", template="organization/branding.html")
+    """Settings › Organization: the organisation's names, address, IT contact, logos and room plan."""
+    return settings_page(request, BrandingForm, icon="bi-building", template="organization/branding.html")

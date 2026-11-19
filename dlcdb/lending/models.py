@@ -26,7 +26,8 @@ class LendingConfiguration(SingletonBaseModel):
         verbose_name=_("Overdue reminders to"),
         help_text=_(
             "Who receives the weekly overdue-lending reminder mails. The IT address is "
-            "resolved per tenant: tenant contact email → Branding IT dept email → DEFAULT_FROM_EMAIL."
+            "resolved per tenant: tenant contact email → the IT department email under Settings › Organization "
+            "→ DEFAULT_FROM_EMAIL."
         ),
     )
 

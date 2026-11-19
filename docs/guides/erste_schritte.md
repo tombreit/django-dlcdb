@@ -6,9 +6,9 @@ Die DLCDB ist [installiert](../betrieb/setup.md) und ein Superuser ist mit `./ma
 
 Der Superuser dient der Einrichtung. Für die tägliche Arbeit werden Benutzerkonten ohne Sonderrechte verwendet (siehe [Drei Stufen](berechtigungen.md#drei-stufen-benutzer-staff-superuser)).
 
-## 2. Branding
+## 2. Organisation
 
-Logo und Organisationsname unter *Einstellungen › Branding* eintragen.
+Logo und Organisationsname unter *Einstellungen › Organisation* eintragen.
 
 ## 3. Gruppen anlegen und Berechtigungen vergeben
 

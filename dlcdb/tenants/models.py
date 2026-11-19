@@ -29,7 +29,7 @@ class Tenant(AuditBaseModel):
         help_text=_(
             "Receives the overdue-lending reminders for this tenant's devices, as a copy or instead of "
             "the borrower (see the lending configuration), and is shown in email footers. Falls back "
-            "to the IT department email in Branding."
+            "to the IT department email under Settings › Organization."
         ),
     )
 
