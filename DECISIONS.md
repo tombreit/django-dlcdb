@@ -14,7 +14,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The admin gets no new code paths.** Lending slips print only from the tenant-scoped lending screen, and the record admins offer no "Add": the old admin paths let a user print other tenants' slips, or recover a removed device with just `add_*record`.
 - **Tenants grant no permissions; visibility comes only from `Tenant.groups`, with no superuser exception.** Not django-guardian/rules, django-organizations or django-tenants, not a bypass permission, a super-tenant flag or a session "current tenant". Should "all tenants" be needed: one line in `get_user_tenants`.
 - **Empty tenants are hard-deleted**, not soft-deleted: an UPDATE bypasses PROTECT, so a "deleted" tenant would hide its devices.
-- **Not tenant-scoped on purpose**, besides those in `docs/guides/berechtigungen.md`: the device counts on the room pages and the notification reports.
+- **Not tenant-scoped on purpose**, besides those in `docs/guides/berechtigungen.md`: the device counts on the room pages and the notification reports, the settings pages and the lending profiles (global, like device types).
 - **Django serves `/media/`**, not X-Sendfile (needs a server module; the files are few and small). No `max-age` (a shared PC would show cached files after logout), no CSP on PDFs (it breaks the browser's viewer).
 - **The journal is no audit-log package**: auditlog, reversion and simple-history record field changes, not events; error tracking (Sentry) is out of scope. `log()` fails loudly, only the logging handler never breaks its caller; not buffering, a second database, a queue thread or `on_commit`.
 - **Polish stays in the classic theme and Bootstrap 5.3**; the `redesign` branches are a quarry only. Colour means state, primary is for actions and links.
@@ -28,6 +28,13 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The raw `static/**` stays in the wheel**: the favicon view and the icon picker read it, and without it a stray `collectstatic` would break every page.
 - **The version lives in `dlcdb.__version__`**, not in git tags via setuptools-scm (a checkout would lose it). The release logic is two shell scripts, not nox, invoke or a bump tool.
 - **`dlcdb_init` writes the instance's `wsgi.py`**: Apache's `SetEnv` doesn't reach `os.environ`.
+- **The singleton settings pages share one view function, `theme.settings_page`, and `theme/_settings_base.html`**: the title is the model's `verbose_name`, saving needs the model's change permission. Not a spec dataclass like master data (only the form differs), not django-solo.
+- **Without the change permission a settings page shows the same form, disabled**, not the label/value list of Tenants (raw values for choices, people and files).
+- **A settings save writes one journal entry naming the changed fields, never their values** (the HR token); not simple-history on the singletons.
+- **The settings admins stay registered**, like the tenant admin; the frontend links only the frontend pages.
+- **The lending profiles live on Settings › Lending configuration**, with no menu entry or index page of their own; the page needs `view_lendingconfiguration`, the card `view_lendingprofile`. Not "either permission opens the page" (`settings_page` would need a form-less mode).
+- **Overdue lendings are always highlighted**: the toggle was a half switch (the due date stayed red).
+- **The HR token never reaches the browser**: an empty field keeps it, "Remove token" clears it.
 - **Admin error mails use Django's plain handler**: a 500 while the mail server is down is accepted; a handler that swallowed mail errors was tried and removed.
 
 ## Pitfalls
@@ -39,6 +46,12 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - The DB-stored slip templates include `lent_sheet.html`: a change there reaches every lending profile.
 - With warnings as errors, a leaked file or connection fails whichever test runs at garbage collection.
 - Splitting a translated sentence around a link changes its msgid: split only where the word order allows (`rooms/includes/_changes.html`).
+- A namespace with several menu entries lights up all of them: each needs `active_url_names`.
+- The settings pages need no Staff flag: `change_lendingprofile` writes template code that reaches `record.user.password`, `change_udbsyncconfiguration` sends the HR token to any URL. Administrators only, as the docs say.
+- `capfirst()` keeps a lazy string lazy: render journal text inside `translation.override(None)`.
+- "Sync now" only queues: without the task runner nothing runs, and while a periodic run holds the lock the manual one is dropped.
+- `_field.html` escapes help texts: frontend help texts are plain text.
+- `LendingProfileRegulation.order` is never read: the slip lists the regulations by link creation date.
 - A link inside a stretched-link area can't be clicked; `_object_link.html` passes the current request as `next`, which is wrong for a fragment with a URL of its own.
 
 ## Open follow-ups
@@ -50,7 +63,8 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Links: admin links in frontend templates, which the inventory device search shows to non-staff users too (also `inventorize_room_detail.html`, `room_qrcodes_detail.html`, `notifications/index.html`, `lending/lend.html`, `licenses/form_partial.html`); named objects on the inventory screens (their rows are duplicated in `inventorize.js`); the device on the notifications list; the import summary's "saved log"; `obj_link` checks no permission (the room in a relocate message can lead to a 403).
 - Lists: the tenant sort is offered to single-tenant users; a tenant column exists only on devices; the lending list runs an extra COUNT.
 - UI: HTMX fragments still compute the hints; charts have no table view; German plurals ("Gerät nach Status", "Geräten").
-- Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring and help text still show the narrow CSL regex.
+- Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring still shows the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
-- Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants and lending profiles, ESLint for `theme.js` and `filterbar.js`.
+- Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants, ESLint for `theme.js` and `filterbar.js`.
+- Settings: make the regulation order effective or drop it; a Bootstrap template for `ClearableFileInput` (Branding's file fields); master data's read-only notice shows the model icon (the page's `icon` leaks into `_readonly_notice.html`); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; delete lending profiles in the frontend; try the HR room rule on a sample.
 - Publish on PyPI.
