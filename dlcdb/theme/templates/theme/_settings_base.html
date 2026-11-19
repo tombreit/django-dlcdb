@@ -29,9 +29,8 @@ object_tools (header-right actions) and detail_sidebar.
   {% include "theme/includes/_settings_fields.html" %}
 {% endblock detail_form_fields %}
 
-{# icon set explicitly: the page's own icon (the card's) would leak into the include #}
 {% block detail_readonly_notice %}
-  {% include "theme/includes/_readonly_notice.html" with icon="bi-eye" message=_("You may view these settings but do not have permission to change them.") %}
+  {% include "theme/includes/_readonly_notice.html" with message=_("You may view these settings but do not have permission to change them.") %}
 {% endblock detail_readonly_notice %}
 
 {% block detail_readonly %}

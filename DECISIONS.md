@@ -66,5 +66,5 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring still shows the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
 - Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants, ESLint for `theme.js` and `filterbar.js`.
-- Settings: make the regulation order effective or drop it; a Bootstrap template for `ClearableFileInput` (Branding's file fields); master data's read-only notice shows the model icon (the page's `icon` leaks into `_readonly_notice.html`); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; delete lending profiles in the frontend; try the HR room rule on a sample.
+- Settings: make the regulation order effective or drop it; a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; delete lending profiles in the frontend; try the HR room rule on a sample.
 - Publish on PyPI.

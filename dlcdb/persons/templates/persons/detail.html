@@ -25,7 +25,7 @@
 {% block detail_readonly_notice %}
   {# Two reasons this page can be read-only, and they read very differently. #}
   {% if is_udb_synced %}
-    {% include "theme/includes/_readonly_notice.html" with icon="bi-arrow-repeat" message=_("This person is managed by the HR API sync and cannot be edited here.") %}
+    {% include "theme/includes/_readonly_notice.html" with notice_icon="bi-arrow-repeat" message=_("This person is managed by the HR API sync and cannot be edited here.") %}
   {% else %}
     {% include "theme/includes/_readonly_notice.html" with message=_("You may view this person but do not have permission to edit them.") %}
   {% endif %}

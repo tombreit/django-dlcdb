@@ -11,12 +11,14 @@ an edit form.
 Params:
   message  the explanation to show (already translated by the caller, so each
            page can name its own object type).
-  icon     (optional) bi icon class; defaults to "bi-eye" (view-only). Pages
+  notice_icon
+           (optional) bi icon class; defaults to "bi-eye" (view-only). Pages
            with a different reason pass their own, e.g. "bi-arrow-repeat" for
-           records owned by the HR sync.
+           records owned by the HR sync. Not "icon": pages that have an icon of
+           their own in the context (master data, settings) would leak it here.
 {% endcomment %}
 
 <div class="alert alert-secondary d-flex align-items-center gap-2">
-  <i class="bi {{ icon|default:'bi-eye' }}"></i>
+  <i class="bi {{ notice_icon|default:'bi-eye' }}"></i>
   {{ message }}
 </div>
