@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Settings pages: Branding, lending, licence and HR sync configuration, and lending profiles in the frontend
 
-**Status:** batch 4 done (the lending profiles on Settings › Lending configuration), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
+**Status:** batch 5 done (the lending profile history), branch `more-frontend-settings-modules`, 2026-11-19. This is a living document.
 
 ## Why
 
@@ -186,7 +186,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 
 ## Batch 5: lending profiles: history
 
-- `profile_detail` shows `build_field_history(profile)` through `_field_history.html`. Long templates show in full (pre-line), as the admin's history helper did.
+- A page of its own, `lending:profile_history`, like the device and licence field histories, linked from a "Changes" card in the profile page's sidebar: a changed slip template shows in full twice (pre-line, as the admin's history helper did), which would bury the edit form.
 - This settles half of the DECISIONS follow-up "field history for tenants and lending profiles".
 
 ## Batch 6: Branding
@@ -244,7 +244,7 @@ Goal: each entry gets a frontend page in the app that owns its model, aligned wi
 - [x] 2. The settings frame and the Licences configuration
 - [x] 3. Lending configuration
 - [x] 4. Lending profiles on Settings › Lending configuration
-- [ ] 5. Lending profiles: history
+- [x] 5. Lending profiles: history
 - [ ] 6. Branding
 - [ ] 7. HR API sync configuration
 - [ ] 8. HR sync: run now, latest runs

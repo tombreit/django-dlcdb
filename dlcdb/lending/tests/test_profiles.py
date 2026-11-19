@@ -102,3 +102,22 @@ def test_on_a_profile_page_the_lending_configuration_entry_is_active(login, prof
         if item["active"]
     ]
     assert active == ["lending:configuration"]
+
+
+def test_the_field_history_shows_who_changed_the_slip_template(login, profile):
+    client = login(VIEW, CHANGE)
+    client.post(
+        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="v2")
+    )
+
+    entries = client.get(reverse("lending:profile_history", args=[profile.pk])).context["entries"]
+
+    latest = entries[0]
+    assert latest.user.email == "user@example.com"
+    assert [(change.field, change.old, change.new) for change in latest.changes] == [
+        ("Lending slip template", "slip", "v2")
+    ]
+
+
+def test_the_field_history_needs_the_view_permission(login, profile):
+    assert login(CONFIG).get(reverse("lending:profile_history", args=[profile.pk])).status_code == 403

@@ -16,6 +16,7 @@ urlpatterns = [
     path("configuration/", views.configuration, name="configuration"),
     path("profiles/add/", views_profiles.profile_add, name="profile_add"),
     path("profiles/<int:pk>/", views_profiles.profile_detail, name="profile_detail"),
+    path("profiles/<int:pk>/history/", views_profiles.profile_history, name="profile_history"),
     path("<int:pk>/", views.lend, name="detail"),
     path("<int:pk>/print/", views.print_sheet, name="print_sheet"),
 ]

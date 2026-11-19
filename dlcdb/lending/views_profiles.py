@@ -18,6 +18,7 @@ from django.utils.translation import gettext as _
 
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message, obj_link
+from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.navigation import detail_urls, get_redirect_url
 
 from .forms import LendingProfileForm
@@ -81,4 +82,13 @@ def profile_detail(request, pk):
         request,
         "lending/profile_detail.html",
         {"profile": profile, "form": form, "can_change": can_change, "next_url": next_url, "form_action": form_action},
+    )
+
+
+@htmx_permission_required("lending.view_lendingprofile")
+def profile_history(request, pk):
+    """When who changed which field of one profile (django-simple-history); the regulations are not tracked."""
+    profile = get_object_or_404(LendingProfile.objects.select_related("device_type"), pk=pk)
+    return TemplateResponse(
+        request, "lending/profile_history.html", {"profile": profile, "entries": build_field_history(profile)}
     )

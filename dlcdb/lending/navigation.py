@@ -22,7 +22,7 @@ nav_entries = [
         "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",
         # The lending profiles are listed on the configuration page.
-        "active_url_names": {"configuration", "profile_add", "profile_detail"},
+        "active_url_names": {"configuration", "profile_add", "profile_detail", "profile_history"},
     },
 ]
 
