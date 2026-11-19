@@ -8,7 +8,7 @@ import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import OrganizationalUnit, Person
+from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person, Room
 
 
 class PersonFilter(django_filters.FilterSet):
@@ -20,6 +20,16 @@ class PersonFilter(django_filters.FilterSet):
         queryset=OrganizationalUnit.objects.all(),
         label=_("Organizational unit"),
         empty_label=_("Any organizational unit..."),
+    )
+    organizational_positions = django_filters.ModelChoiceFilter(
+        queryset=OrganizationalPosition.objects.all(),
+        label=_("Position"),
+        empty_label=_("Any position..."),
+    )
+    room = django_filters.ModelChoiceFilter(
+        queryset=Room.objects.all(),
+        label=_("Room"),
+        empty_label=_("Any room..."),
     )
     ordering = django_filters.OrderingFilter(
         fields=(
@@ -39,13 +49,17 @@ class PersonFilter(django_filters.FilterSet):
         fields = [
             "search",
             "organizational_unit",
+            "organizational_positions",
+            "room",
             "ordering",
         ]
 
     def search_filter(self, queryset, name, value):
-        # Mirrors the admin's search_fields, including the UDB-mirrored names.
+        # The admin's search_fields, including the UDB-mirrored names, and the
+        # room number. Not in Person.search_q: the person pickers share that.
         return queryset.filter(
             Person.search_q(value)
+            | Q(room__number__icontains=value)
             | Q(udb_person_last_name__icontains=value)
             | Q(udb_person_first_name__icontains=value)
             | Q(udb_person_email_internal_business__icontains=value)

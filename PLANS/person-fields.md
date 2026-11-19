@@ -128,7 +128,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [x] 2. Photo on the person form
 - [x] 3. Positions as master data
 - [x] 4. Drop `udb_contract_organization_unit`
-- [ ] 5. Persons list filters
+- [x] 5. Persons list filters
 - [ ] 6. Person cards
 - [ ] 7. Settings › Branding becomes Settings › Organization
 - [ ] 8. Organization page: collapsible cards and a table of contents

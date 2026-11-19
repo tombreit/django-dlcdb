@@ -94,6 +94,21 @@ class PersonFrontendTests(TestCase):
         self.assertContains(response, "Musterfrau")
         self.assertNotContains(response, "Mustermann")
 
+    def test_position_and_room_filters(self):
+        researcher = OrganizationalPosition.objects.create(name="Researcher")
+        self.local_person.organizational_positions.add(researcher)
+        self.synced_person.room = Room.objects.create(number="G235")
+        self.synced_person.save()
+
+        for query, expected in (
+            ({"organizational_positions": researcher.pk}, self.local_person),
+            ({"room": self.synced_person.room.pk}, self.synced_person),
+            ({"search": "g23"}, self.synced_person),
+        ):
+            with self.subTest(query):
+                response = self.client.get(self.index_url, query, headers={"HX-Request": "true"})
+                self.assertEqual(list(response.context["page_obj"]), [expected])
+
     def test_index_shows_the_room_and_sorts_by_it(self):
         room = Room.objects.create(number="G235")
         self.synced_person.room = room

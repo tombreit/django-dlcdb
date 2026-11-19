@@ -63,7 +63,7 @@ def person_index(request):
             person_filter,
             request,
             target="#person-list",
-            search_placeholder=_("Search name or e-mail..."),
+            search_placeholder=_("Search name, e-mail or room..."),
         ),
         "current_ordering": person_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
