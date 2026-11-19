@@ -6,7 +6,7 @@ import django_filters
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import DeviceType, LentRecord, Person, Record
+from dlcdb.core.models import DeviceType, LentRecord, OrganizationalPosition, OrganizationalUnit, Person, Record
 from dlcdb.tenants.shortcuts import filterable_tenants
 from dlcdb.theme.pickers import picker_filter
 
@@ -40,6 +40,16 @@ def current_borrowers(request):
     return qs.distinct().order_by("last_name", "first_name")
 
 
+def borrower_positions(request):
+    """The positions current borrowers hold: the person filter's compact choice, by position."""
+    return OrganizationalPosition.objects.filter(persons__in=current_borrowers(request)).distinct()
+
+
+def borrower_units(request):
+    """The organizational units of current borrowers, like ``borrower_positions``."""
+    return OrganizationalUnit.objects.filter(person__in=current_borrowers(request)).distinct()
+
+
 class LentRecordFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="search_filter_method")
 
@@ -60,6 +70,19 @@ class LentRecordFilter(django_filters.FilterSet):
         queryset=current_borrowers,
         label=_("Person"),
         empty_label=_("Person..."),
+    )
+
+    # What devices the holders of a position, or the members of a unit, have now.
+    person__organizational_positions = django_filters.ModelChoiceFilter(
+        queryset=borrower_positions,
+        label=_("Position"),
+        empty_label=_("Any position..."),
+    )
+
+    person__organizational_unit = django_filters.ModelChoiceFilter(
+        queryset=borrower_units,
+        label=_("Organizational unit"),
+        empty_label=_("Any organizational unit..."),
     )
 
     device__tenant = django_filters.ModelChoiceFilter(
@@ -83,7 +106,16 @@ class LentRecordFilter(django_filters.FilterSet):
 
     class Meta:
         model = LentRecord
-        fields = ["search", "state", "device__device_type", "person", "device__tenant", "ordering"]
+        fields = [
+            "search",
+            "state",
+            "device__device_type",
+            "person",
+            "person__organizational_positions",
+            "person__organizational_unit",
+            "device__tenant",
+            "ordering",
+        ]
 
     def search_filter_method(self, queryset, name, value):
         return queryset.filter(

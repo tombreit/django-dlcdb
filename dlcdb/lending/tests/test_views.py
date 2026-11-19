@@ -11,7 +11,16 @@ from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 
-from dlcdb.core.models import DeviceType, InRoomRecord, LentRecord, Person, Record, Room
+from dlcdb.core.models import (
+    DeviceType,
+    InRoomRecord,
+    LentRecord,
+    OrganizationalPosition,
+    OrganizationalUnit,
+    Person,
+    Record,
+    Room,
+)
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingProfile
@@ -122,6 +131,37 @@ class LendingIndexViewTests(BaseTest):
 
         person_qs = self.client.get(self.url).context["filter"].form.fields["person"].queryset
         self.assertNotIn(self.person, person_qs)
+
+    def test_position_and_unit_filters_list_what_their_holders_have(self):
+        chief = OrganizationalPosition.objects.create(name="Chief")
+        OrganizationalPosition.objects.create(name="Janitor")  # held by nobody who borrows
+        unit = OrganizationalUnit.objects.create(name="Physics")
+        self.person.organizational_positions.add(chief)
+        self.person.organizational_unit = unit
+        self.person.save()
+        # Another borrower, with neither.
+        device = self._create_device(edv_id="EDV-ERIKA", sap_id="4-4")
+        device.is_lentable = True
+        device.save()
+        establish_state(
+            LentRecord,
+            device=device,
+            person=self.other_person,
+            room=self.room,
+            lent_start_date=datetime.date(2026, 1, 1),
+            lent_desired_end_date=datetime.date(2099, 1, 1),
+        )
+
+        for param, value in (("person__organizational_positions", chief.pk), ("person__organizational_unit", unit.pk)):
+            with self.subTest(param):
+                response = self.client.get(self.url, {param: value}, headers={"HX-Request": "true"})
+                self.assertContains(response, "EDV-LENT")
+                self.assertContains(response, "EDV-OVERDUE")
+                self.assertNotContains(response, "EDV-ERIKA")
+                self.assertNotContains(response, "EDV-AVAIL")
+
+        choices = self.client.get(self.url).context["filter"].form.fields["person__organizational_positions"].queryset
+        self.assertEqual(list(choices), [chief])
 
     def test_ordering_by_device_is_reversible(self):
         asc = self.client.get(self.url, {"ordering": "device"}, headers={"HX-Request": "true"}).content.decode()
