@@ -33,6 +33,9 @@ class BrandingForm(forms.ModelForm):
         ]
         widgets = {"organization_logo_black": SVG_ONLY, "organization_figurative_mark": SVG_ONLY}
 
+    class Media:
+        js = ["organization/js/contents.js"]
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_bootstrap_classes(self)

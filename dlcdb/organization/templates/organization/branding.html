@@ -1,8 +1,13 @@
 {% extends "theme/_settings_base.html" %}
 {# SPDX-FileCopyrightText: Thomas Breitner #}
 {# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
 
-{# Settings › Organization: the shared settings frame, its fields grouped in cards. #}
+{% comment %}
+Settings › Organization: the shared settings frame, its fields grouped in closed
+cards, and a table of contents beside them from lg up (below lg the sidebar sits
+under the cards). A link opens its card: organization/js/contents.js.
+{% endcomment %}
 
 {% block detail_form_fields %}
   {% include "organization/includes/_branding_fields.html" %}
@@ -11,3 +16,17 @@
 {% block detail_readonly %}
   {% include "organization/includes/_branding_fields.html" %}
 {% endblock detail_readonly %}
+
+{% block detail_sidebar %}
+  <nav class="card card-filled d-none d-lg-block sticky-lg-top" style="top: 4.5rem" aria-labelledby="contents-title" data-contents>
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-list-ul text-primary"></i>
+      <h2 class="h6 mb-0" id="contents-title">{% translate "Contents" %}</h2>
+    </div>
+    <div class="list-group list-group-flush">
+      <a class="list-group-item list-group-item-action" href="#name-and-address">{% translate "Name and address" %}</a>
+      <a class="list-group-item list-group-item-action" href="#it-department">{% translate "IT department" %}</a>
+      <a class="list-group-item list-group-item-action" href="#files-and-links">{% translate "Files and links" %}</a>
+    </div>
+  </nav>
+{% endblock detail_sidebar %}
