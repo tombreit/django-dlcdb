@@ -12,7 +12,7 @@ from io import BytesIO
 
 from django.conf import settings
 from django.db.transaction import atomic
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
 
@@ -64,17 +64,33 @@ def get_contact_email(tenant=None):
     )
 
 
-def save_base64img_as_fileimg(*, base64string, to_filepath, thumbnail_size):
+# Person photos, uploaded or from the HR sync, are stored as JPEGs of at most this size.
+PERSON_PHOTO_SIZE = (400, 300)
+
+
+def shrink_photo(source):
+    """
+    The image in the file object ``source`` as JPEG bytes of at most
+    ``PERSON_PHOTO_SIZE``, turned upright. No metadata is copied: a phone
+    photo's EXIF data, its GPS position for one, is dropped.
+    """
+    with Image.open(source) as img:
+        upright = ImageOps.exif_transpose(img)
+        upright.thumbnail(PERSON_PHOTO_SIZE)
+        output = BytesIO()
+        upright.convert("RGB").save(output, "JPEG")
+    return output.getvalue()
+
+
+def save_base64img_as_fileimg(*, base64string, to_filepath):
     try:
         image_string = re.sub("^data:.+;base64,", "", base64string)
-
-        with Image.open(BytesIO(base64.urlsafe_b64decode(image_string))) as img:
-            img.load()
-            img.thumbnail(thumbnail_size)
-            img = img.convert("RGB")
-            img.save(to_filepath, "JPEG")
+        photo = shrink_photo(BytesIO(base64.urlsafe_b64decode(image_string)))
     except UnidentifiedImageError as unidentified_image_error:
         logger.warning(f"Unidentified Image Error for `{to_filepath}`: {unidentified_image_error}")
+        return
+    with open(to_filepath, "wb") as file:
+        file.write(photo)
 
 
 class DoRollback(Exception):

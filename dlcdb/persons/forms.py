@@ -2,10 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from pathlib import Path
+
 from django import forms
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 
 from dlcdb.core.models import Person, Room
+from dlcdb.core.utils.helpers import shrink_photo
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.similar import SimilarNames, check_similar_names
 from dlcdb.theme.widgets import TomSelectWidget
@@ -32,10 +37,12 @@ class PersonForm(forms.ModelForm):
             "email",
             "organizational_unit",
             "room",
+            "photo",
         ]
         widgets = {
             "organizational_unit": TomSelectWidget(),
             "room": TomSelectWidget(),
+            "photo": forms.ClearableFileInput(attrs={"accept": "image/*"}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -48,6 +55,14 @@ class PersonForm(forms.ModelForm):
                 Q(deleted_at__isnull=True) | Q(pk=self.instance.room_id)
             )
         add_bootstrap_classes(self)
+
+    def clean_photo(self):
+        photo = self.cleaned_data["photo"]
+        # A new upload is stored shrunk, like the HR sync's photos. The stored
+        # file (no upload) and False ("Clear") pass as they are.
+        if isinstance(photo, UploadedFile):
+            photo = ContentFile(shrink_photo(photo), name=f"{Path(photo.name).stem}.jpg")
+        return photo
 
     def clean(self):
         cleaned_data = super().clean()

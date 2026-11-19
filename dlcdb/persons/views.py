@@ -78,7 +78,7 @@ def person_add(request):
     if request.htmx:
         # The name being typed: list the similar existing persons.
         return similar_suggestions(request, PersonForm)
-    form = PersonForm(request.POST or None)
+    form = PersonForm(request.POST or None, request.FILES or None)
     add_similar_suggestions(form, request)
     add_related_links(form, request)
     if request.method == "POST" and form.is_valid():
@@ -124,7 +124,7 @@ def person_detail(request, pk):
             raise PermissionDenied  # read-only here, the page offers no form
         if not can_change:
             raise PermissionDenied(missing_permission_message("core.change_person"))
-        form = PersonForm(request.POST, instance=person)
+        form = PersonForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             saved_person = form.save(commit=False)
             saved_person.stamp_user(request.user)

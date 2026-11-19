@@ -210,7 +210,6 @@ def import_udb_persons():
         headers = {"X-API-KEY": config.api_token} if config.api_token else {}
         url_request = urllib.request.Request(request_url, headers=headers)
 
-        thumbnail_size = 400, 300
         person_images_dir = settings.MEDIA_DIR / settings.PERSON_IMAGE_UPLOAD_DIR
         person_images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -240,7 +239,6 @@ def import_udb_persons():
                         room=room,
                         plan_url=plan_url,
                         person_images_dir=person_images_dir,
-                        thumbnail_size=thumbnail_size,
                         log_user_id=log_user.pk,
                     )
                 # The person is saved, without a room: the contract's row notes it.
@@ -527,7 +525,7 @@ def _sync_lent_end_dates(person, new_checkout, *, log_user_id):
         )
 
 
-def _process_contract(contract, *, room, plan_url, person_images_dir, thumbnail_size, log_user_id):
+def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_id):
     """Upsert a single Person from one UDB contract.
 
     Required keys are accessed by subscript (a missing one raises and is reported
@@ -597,7 +595,6 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, thumbnail_
         save_base64img_as_fileimg(
             base64string=udb_person_image,
             to_filepath=f"{person_images_dir}/{udb_person_uuid}.jpg",
-            thumbnail_size=thumbnail_size,
         )
 
     defaults = dict(

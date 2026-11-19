@@ -26,6 +26,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from django import forms
 from django.contrib.auth.models import Group
 from django.urls import reverse
 
@@ -188,6 +189,7 @@ def _license_page():
 def _person_page():
     person = _person("person.page@example.com", last_name="Noether")
     person.room = Room.objects.create(number="G235")
+    person.photo = "person_images/noether.jpg"
     person.save()
     return reverse("persons:detail", args=[person.pk]), person
 
@@ -261,8 +263,14 @@ def test_edit_page_renders_and_round_trips_every_field(page, editor_client, plai
     # (c) Saving the page as it was rendered must not change anything. The payload
     # is restricted to what the page actually carries, which is what makes this a
     # round trip rather than a replay of the form object.
+    # A file input never carries the stored file: the browser sends none, and
+    # the form keeps the stored one.
     rendered = rendered_input_names(html)
-    payload = {name: form[name].value() for name in form.fields if name in rendered}
+    payload = {
+        name: form[name].value()
+        for name, field in form.fields.items()
+        if name in rendered and not isinstance(field, forms.FileField)
+    }
     post_response = editor_client.post(url, payload, headers=GERMAN)
     # A rejected save would leave the row untouched and make (c) pass for the
     # wrong reason, so insist the page actually saved and redirected.

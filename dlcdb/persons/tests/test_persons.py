@@ -5,13 +5,16 @@
 """Integration tests for the standalone Person frontend."""
 
 import datetime
+from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.timezone import localtime
+from PIL import ExifTags, Image
 
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, LostRecord, OrganizationalUnit, Person, Record, Room
@@ -187,6 +190,49 @@ class PersonFrontendTests(TestCase):
         self.assertRedirects(response, self.index_url)
         self.local_person.refresh_from_db()
         self.assertEqual(self.local_person.room, room)
+
+    def test_an_uploaded_photo_is_stored_upright_shrunk_and_without_exif(self):
+        # A phone photo: landscape pixels the camera marks as "rotate 90°", with a GPS position.
+        exif = Image.Exif()
+        exif[ExifTags.Base.Orientation] = 6
+        exif[ExifTags.Base.GPSInfo] = {ExifTags.GPS.GPSLatitude: (48.0, 1.0, 2.0)}
+        upload = BytesIO()
+        Image.new("RGB", (1200, 600), "red").save(upload, "JPEG", exif=exif)
+        url = reverse("persons:detail", args=[self.local_person.pk])
+
+        response = self.client.post(
+            url,
+            {
+                "last_name": "Musterfrau",
+                "first_name": "Erika",
+                "email": "erika@example.com",
+                "photo": SimpleUploadedFile("erika.jpeg", upload.getvalue(), content_type="image/jpeg"),
+            },
+        )
+
+        self.assertRedirects(response, self.index_url)
+        self.local_person.refresh_from_db()
+        self.assertTrue(self.local_person.photo.name.endswith(".jpg"))
+        with self.local_person.photo.open() as file, Image.open(file) as stored:
+            self.assertEqual(stored.size, (150, 300))
+            self.assertEqual(stored.getexif(), {})
+
+    def test_the_add_page_takes_a_photo(self):
+        upload = BytesIO()
+        Image.new("RGB", (40, 30), "blue").save(upload, "PNG")
+
+        self.assertContains(self.client.get(reverse("persons:add")), 'enctype="multipart/form-data"')
+        self.client.post(
+            reverse("persons:add"),
+            {
+                "last_name": "New",
+                "first_name": "Nelly",
+                "email": "nelly@example.com",
+                "photo": SimpleUploadedFile("nelly.png", upload.getvalue(), content_type="image/png"),
+            },
+        )
+
+        self.assertTrue(Person.objects.get(email="nelly@example.com").photo.name.endswith("nelly.jpg"))
 
     def test_a_deactivated_room_cannot_be_chosen(self):
         room = Room.objects.create(number="G236")
