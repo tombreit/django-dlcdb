@@ -1,0 +1,52 @@
+{% extends "theme/_settings_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+Settings › Lending configuration: the shared settings form, and below it the
+lending profiles (lending/views_profiles.py), which have no menu entry of their own.
+{% endcomment %}
+
+{% block detail_related %}
+  {% if perms.lending.view_lendingprofile %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-card-checklist text-primary"></i>
+        <h2 class="h6 mb-0 me-auto">{% translate "Lending profiles" %}</h2>
+        {% if perms.lending.add_lendingprofile %}
+          <a class="btn btn-sm btn-outline-primary text-nowrap" href="{% url 'lending:profile_add' %}?next={{ request.get_full_path|urlencode }}">
+            <i class="bi bi-plus-lg"></i> {% translate "Add lending profile" %}
+          </a>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <p class="form-text mt-0">{% translate "One per device type: the lending slip template, the preparation checklist and the regulations the borrower confirms." %}</p>
+        {% if profiles %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">{% translate "Device type" %}</th>
+                  <th scope="col" class="text-center">{% translate "Slip template" %}</th>
+                  <th scope="col" class="text-center">{% translate "Checklist" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for profile in profiles %}
+                  <tr>
+                    <td><a href="{% url 'lending:profile_detail' profile.pk %}?next={{ request.get_full_path|urlencode }}">{{ profile.device_type }}</a></td>
+                    <td class="text-center">{% if profile.lent_sheet_template %}<i class="bi bi-check-lg text-success" aria-label="{% translate "Yes" %}"></i>{% else %}<span class="text-muted" aria-label="{% translate "No" %}">—</span>{% endif %}</td>
+                    <td class="text-center">{% if profile.lending_preparation_checklist %}<i class="bi bi-check-lg text-success" aria-label="{% translate "Yes" %}"></i>{% else %}<span class="text-muted" aria-label="{% translate "No" %}">—</span>{% endif %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">{% translate "No lending profiles yet: lending slips cannot be printed." %}</p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+{% endblock detail_related %}

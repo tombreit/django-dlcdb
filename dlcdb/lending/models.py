@@ -56,34 +56,41 @@ class LendingProfile(models.Model):
         "core.DeviceType",
         on_delete=models.CASCADE,
         related_name="lending_profile",
-        verbose_name="Device Type",
+        verbose_name=_("Device type"),
     )
     lending_preparation_checklist = models.TextField(
         blank=True,
         default=get_starter_lending_preparation_checklist,
-        help_text="Basic Markdown supported. '[ ]' converted to checkbox input.",
+        verbose_name=_("Preparation checklist"),
+        help_text=_(
+            "Printed with the lending slip. Basic Markdown; “[ ]” becomes a checkbox. "
+            "Clear the field and save to get the starter content back."
+        ),
     )
     mandatory_regulations = models.ManyToManyField(
         "core.Link",
         through="lending.LendingProfileRegulation",
         related_name="+",
         blank=True,
+        verbose_name=_("Mandatory regulations"),
+        help_text=_("On the lending slip, the borrower confirms having read them."),
     )
     lent_sheet_template = models.TextField(
         blank=True,
         default=get_starter_lent_sheet_template,
-        help_text=(
-            "Django template syntax. Should {% extends 'lending/printout_base.html' %}. "
-            "Available context: record, lending_profile. The sheet body and the checklist "
-            "are {% include %}d from 'lending/includes/', parameterized with sheet_for and pagebreak."
+        verbose_name=_("Lending slip template"),
+        help_text=_(
+            "Django template code; it should extend lending/printout_base.html. Context: record, "
+            "lending_profile. The slip body and the checklist are included from lending/includes/, "
+            "with sheet_for and pagebreak. Clear the field and save to get the starter content back."
         ),
     )
 
     history = HistoricalRecords()
 
     class Meta:
-        verbose_name = "Lending Profile"
-        verbose_name_plural = "Lending Profiles"
+        verbose_name = _("Lending profile")
+        verbose_name_plural = _("Lending profiles")
 
     def __str__(self):
         return f"Lending Profile: {self.device_type}"

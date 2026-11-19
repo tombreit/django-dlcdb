@@ -7,11 +7,12 @@ from django.db import models
 from django.forms import Textarea
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 from simple_history.admin import SimpleHistoryAdmin
 from simple_history.template_utils import HistoricalRecordContextHelper
 
 from .models import LendingConfiguration, LendingProfile, LendingProfileRegulation
-from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
+from .starter import restore_empty
 
 
 @admin.register(LendingConfiguration)
@@ -96,29 +97,9 @@ class LendingProfileAdmin(SimpleHistoryAdmin):
     inlines = [ProfileRegulationInline]
     exclude = ["mandatory_regulations"]
 
-    # Both fields default to shipped starter content, but a `default` only fires
-    # on instantiation — clearing the textarea would otherwise persist "" forever,
-    # which for lent_sheet_template is precisely the unprintable state. Treat a
-    # cleared field as "reset me".
-    starter_fields = {
-        "lent_sheet_template": get_starter_lent_sheet_template,
-        "lending_preparation_checklist": get_starter_lending_preparation_checklist,
-    }
-
     def save_model(self, request, obj, form, change):
-        for field_name, get_starter in self.starter_fields.items():
-            if getattr(obj, field_name):
-                continue
-            starter = get_starter()
-            if not starter:
-                # Starter file unreadable (see starter._read) — leave the field
-                # empty rather than claiming a restore that did not happen.
-                continue
-            setattr(obj, field_name, starter)
-            messages.info(
-                request,
-                f'"{obj._meta.get_field(field_name).verbose_name}" was empty — restored the starter content.',
-            )
+        for field in restore_empty(obj):
+            messages.info(request, _("“%(field)s” was empty and holds the starter content again.") % {"field": field})
         super().save_model(request, obj, form, change)
 
     @admin.display(boolean=True, description="Has template")

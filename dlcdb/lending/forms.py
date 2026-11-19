@@ -3,14 +3,15 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, LentRecord, Person, Room
+from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
 from dlcdb.theme.forms import add_bootstrap_classes
-from dlcdb.theme.widgets import DevicePickerField, TomSelectWidget
+from dlcdb.theme.widgets import DevicePickerField, TomSelectMultipleWidget, TomSelectWidget
 
-from .models import LendingConfiguration
+from .models import LendingConfiguration, LendingProfile
 from .pickers import lend_queryset
 
 
@@ -147,4 +148,26 @@ class LendingConfigurationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+
+class LendingProfileForm(forms.ModelForm):
+    class Meta:
+        model = LendingProfile
+        fields = ["device_type", "mandatory_regulations", "lent_sheet_template", "lending_preparation_checklist"]
+        widgets = {
+            "device_type": TomSelectWidget(),
+            "mandatory_regulations": TomSelectMultipleWidget(),
+            "lent_sheet_template": forms.Textarea(attrs={"rows": 25, "class": "font-monospace"}),
+            "lending_preparation_checklist": forms.Textarea(attrs={"rows": 10, "class": "font-monospace"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # One profile per device type: the types without one, and this profile's own.
+        self.fields["device_type"].queryset = DeviceType.objects.filter(
+            Q(lending_profile__isnull=True) | Q(pk=self.instance.device_type_id)
+        )
+        # The link text, as on the slip; Link's str() prefixes "Link: ".
+        self.fields["mandatory_regulations"].label_from_instance = lambda link: link.linktext
         add_bootstrap_classes(self)

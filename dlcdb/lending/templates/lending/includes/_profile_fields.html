@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}
+The lending profile form's fields (lending/forms.py: LendingProfileForm), on the
+add and the edit page. Params: form.
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-card-checklist text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Lending profile" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.device_type col="col-md-6" %}
+      {% include "theme/includes/_field.html" with field=form.mandatory_regulations col="col-md-6" %}
+    </div>
+  </div>
+</section>
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-printer text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Lending slip" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.lent_sheet_template %}
+      {% include "theme/includes/_field.html" with field=form.lending_preparation_checklist %}
+    </div>
+  </div>
+</section>

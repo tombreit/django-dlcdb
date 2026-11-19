@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Lending profiles are edited under Settings › Lending configuration, without the Staff flag: give `lending.add_lendingprofile` and `lending.change_lendingprofile` to administrators only, slip templates are template code
 * Overdue lendings are always highlighted in the lending list; the setting to turn that off is gone
 * Lists, detail pages and save messages link the rooms, persons, tenants and master data they name; the device page's state card shows the state as its title and "New state" as a full-width button
 * A new lending starts in the borrower's room, otherwise in the device's current room

@@ -5,8 +5,8 @@
 """
 Starter content for the editable :class:`~dlcdb.lending.models.LendingProfile` fields.
 
-Both fields are plain ``TextField``s the user edits in the admin, but they should
-not start out empty: an empty ``lent_sheet_template`` makes the print views fail
+Both fields are plain ``TextField``s the user edits, but they should not start
+out empty: an empty ``lent_sheet_template`` makes the print views fail
 (see :class:`dlcdb.lending.loader.DatabaseLoader`). The shipped starter content
 therefore lives in real files next to the other lending templates, and the
 functions below are used as the fields' ``default``. Django serialises callable
@@ -47,3 +47,27 @@ def get_starter_lent_sheet_template():
 def get_starter_lending_preparation_checklist():
     """Default for ``LendingProfile.lending_preparation_checklist``."""
     return _read(_CHECKLIST)
+
+
+def restore_empty(profile):
+    """
+    Refill the profile's emptied slip template and checklist with the starter
+    content; return the verbose names of the refilled fields.
+
+    A ``default`` only fires on instantiation: a cleared field would otherwise
+    stay "" for good, which for the slip template is the unprintable state.
+    """
+    starters = {
+        "lent_sheet_template": get_starter_lent_sheet_template,
+        "lending_preparation_checklist": get_starter_lending_preparation_checklist,
+    }
+    restored = []
+    for field_name, get_starter in starters.items():
+        if getattr(profile, field_name):
+            continue
+        # An unreadable starter file (see _read) leaves the field empty rather
+        # than claiming a restore that did not happen.
+        if starter := get_starter():
+            setattr(profile, field_name, starter)
+            restored.append(profile._meta.get_field(field_name).verbose_name)
+    return restored

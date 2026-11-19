@@ -21,15 +21,8 @@ nav_entries = [
         "icon": "bi bi-arrow-left-right",
         "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",
-        "active_url_names": {"configuration"},
-    },
-    {
-        "slot": "nav_settings",
-        "order": 25,
-        "label": _("Lending profiles"),
-        "icon": "bi bi-card-checklist",
-        "url": "admin:lending_lendingprofile_changelist",
-        "required_permission": "lending.view_lendingprofile",
+        # The lending profiles are listed on the configuration page.
+        "active_url_names": {"configuration", "profile_add", "profile_detail"},
     },
 ]
 

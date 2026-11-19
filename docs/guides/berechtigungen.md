@@ -98,11 +98,12 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Prozesse › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
 | Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
-| Einstellungen › Ausleih-Profile *(Admin)* | Lending \| lending profile \| Can view lending profile | `lending.view_lendingprofile` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
 | Einstellungen › Branding *(Admin)* | Organization \| branding \| Can view branding | `organization.view_branding` |
 | Einstellungen › HR-API-Sync-Konfiguration *(Admin)* | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
+
+Die Ausleih-Profile stehen auf *Einstellungen › Ausleihe Konfiguration* und brauchen zusätzlich `lending.view_lendingprofile`, zum Anlegen und Ändern `lending.add_lendingprofile` und `lending.change_lendingprofile`. Die Vorlage des Ausleihzettels ist Django-Template-Code, der alles lesen kann, was von der Ausleihe aus erreichbar ist: Diese Berechtigungen gehören wie `tenants.change_tenant` zu den Administrations-Berechtigungen.
 
 ## Statuswechsel
 

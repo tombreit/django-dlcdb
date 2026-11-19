@@ -442,14 +442,21 @@ class LendingDetailViewTests(BaseTest):
         # The slip endpoint is keyed on the device pk, not the record pk.
         self.assertContains(response, reverse("lending:print_sheet", args=[self.available_device.pk]))
 
-    def test_lend_flow_without_slip_template_offers_profile_admin(self):
+    def test_lend_flow_without_slip_template_offers_the_profile(self):
         # A profile row with an empty template cannot render a slip (the database
         # template loader rejects it), so offer to fix the profile instead of a
         # print button that would 404.
-        LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="")
-        response = self.client.get(reverse("lending:detail", args=[self.available_record.pk]))
+        profile = LendingProfile.objects.create(device_type=self.available_device.device_type, lent_sheet_template="")
+        url = reverse("lending:detail", args=[self.available_record.pk])
+        response = self.client.get(url)
         self.assertNotContains(response, 'id="lend-form-print"')
-        self.assertContains(response, reverse("admin:lending_lendingprofile_add"))
+        self.assertContains(response, escape(with_next(reverse("lending:profile_detail", args=[profile.pk]), url)))
+
+    def test_lend_flow_without_profile_offers_to_add_one_for_the_device_type(self):
+        url = reverse("lending:detail", args=[self.available_record.pk])
+        response = self.client.get(url)
+        add_url = f"{reverse('lending:profile_add')}?device_type={self.available_device.device_type_id}"
+        self.assertContains(response, escape(with_next(add_url, url)))
 
     def test_lend_creates_new_lent_record(self):
         response = self.client.post(

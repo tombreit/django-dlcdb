@@ -29,6 +29,7 @@ DETAIL_URLS = {
     "core.manufacturer": "assets:manufacturer_detail",
     "core.supplier": "assets:supplier_detail",
     "tenants.tenant": "tenants:detail",
+    "lending.lendingprofile": "lending:profile_detail",
 }
 
 

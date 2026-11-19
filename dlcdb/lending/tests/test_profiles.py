@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+"""The lending profiles: listed on Settings › Lending configuration, added and edited on pages of their own."""
+
+import pytest
+from django.urls import reverse
+
+from dlcdb.core.models import DeviceType, Link
+from dlcdb.lending.models import LendingProfile
+from dlcdb.lending.starter import get_starter_lent_sheet_template
+
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+
+CONFIG = "lending.view_lendingconfiguration"
+VIEW = "lending.view_lendingprofile"
+ADD = "lending.add_lendingprofile"
+CHANGE = "lending.change_lendingprofile"
+
+
+@pytest.fixture
+def login(client, make_user):
+    def _login(*perms):
+        client.force_login(make_user(*perms))
+        return client
+
+    return _login
+
+
+@pytest.fixture
+def laptop():
+    return DeviceType.objects.create(name="Laptop")
+
+
+@pytest.fixture
+def profile(laptop):
+    return LendingProfile.objects.create(device_type=laptop, lent_sheet_template="slip")
+
+
+def _post_data(device_type, **fields):
+    return {"device_type": device_type.pk, "lent_sheet_template": "slip", "lending_preparation_checklist": "", **fields}
+
+
+@pytest.mark.parametrize(("perms", "listed"), [((CONFIG,), False), ((CONFIG, VIEW), True)])
+def test_the_configuration_page_lists_the_profiles_with_their_view_permission(login, profile, perms, listed):
+    response = login(*perms).get(reverse("lending:configuration"))
+
+    assert (reverse("lending:profile_detail", args=[profile.pk]) in response.content.decode()) == listed
+
+
+def test_a_profile_is_added_for_the_preselected_device_type(login, laptop):
+    client = login(ADD)
+    rules = Link.objects.create(linktext="IT rules", url="https://example.org/rules")
+
+    form = client.get(reverse("lending:profile_add"), {"device_type": laptop.pk}).context["form"]
+    response = client.post(
+        f"{reverse('lending:profile_add')}?device_type={laptop.pk}",
+        _post_data(laptop, mandatory_regulations=[rules.pk]),
+    )
+
+    assert form["device_type"].value() == str(laptop.pk)
+    profile = LendingProfile.objects.get(device_type=laptop)
+    assert response.url == reverse("lending:profile_detail", args=[profile.pk])
+    assert list(profile.mandatory_regulations.all()) == [rules]
+
+
+def test_only_device_types_without_a_profile_are_offered(login, profile):
+    tablet = DeviceType.objects.create(name="Tablet")
+    DeviceType.objects.create(name="Phone")
+    LendingProfile.objects.create(device_type=DeviceType.objects.get(name="Phone"))
+
+    response = login(VIEW, CHANGE).get(reverse("lending:profile_detail", args=[profile.pk]))
+
+    assert set(response.context["form"].fields["device_type"].queryset) == {profile.device_type, tablet}
+
+
+def test_an_emptied_slip_template_gets_the_starter_content_again(login, profile):
+    response = login(VIEW, CHANGE).post(
+        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="")
+    )
+
+    assert response.status_code == 302
+    profile.refresh_from_db()
+    assert profile.lent_sheet_template == get_starter_lent_sheet_template()
+
+
+def test_without_the_change_permission_the_profile_is_read_only(login, profile):
+    client = login(VIEW)
+    url = reverse("lending:profile_detail", args=[profile.pk])
+
+    assert all(field.disabled for field in client.get(url).context["form"].fields.values())
+    assert client.post(url, _post_data(profile.device_type, lent_sheet_template="changed")).status_code == 403
+
+
+def test_on_a_profile_page_the_lending_configuration_entry_is_active(login, profile):
+    response = login(CONFIG, VIEW, "core.view_lentrecord").get(reverse("lending:profile_detail", args=[profile.pk]))
+
+    active = [
+        item["url"]
+        for item in response.context["nav_items_main"] + response.context["nav_items_settings"]
+        if item["active"]
+    ]
+    assert active == ["lending:configuration"]

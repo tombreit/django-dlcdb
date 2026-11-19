@@ -328,9 +328,16 @@ def lend(request, pk=None):
     # available device and for an active lending alike. In picker mode the device
     # is chosen client-side, so the button renders disabled and the inline JS
     # enables it once a device is set.
-    can_print_slip = picker_mode or (
-        LendingProfile.objects.exclude(lent_sheet_template="").filter(device_type=device.device_type).exists()
-    )
+    profile = None if picker_mode else LendingProfile.objects.filter(device_type_id=device.device_type_id).first()
+    can_print_slip = picker_mode or bool(profile and profile.lent_sheet_template)
+    # Without a slip template: a link to the type's profile, or to add one.
+    slip_profile_url = None
+    if not can_print_slip:
+        if profile and request.user.has_perm("lending.view_lendingprofile"):
+            slip_profile_url = with_next(reverse("lending:profile_detail", args=[profile.pk]), request.get_full_path())
+        elif not profile and request.user.has_perm("lending.add_lendingprofile"):
+            add_url = f"{reverse('lending:profile_add')}?device_type={device.device_type_id or ''}"
+            slip_profile_url = with_next(add_url, request.get_full_path())
 
     # Carry the flow and the way back through the POST (and any failed-POST
     # re-render) by appending them to the form action: ?flow= decides which form
@@ -368,6 +375,7 @@ def lend(request, pk=None):
         ),
         "obj_admin_url": None if picker_mode else reverse("admin:core_lentrecord_change", args=[record.pk]),
         "can_print_slip": can_print_slip,
+        "slip_profile_url": slip_profile_url,
         "form_action": form_action,
         "edit_url": edit_url,
         "return_url": return_url,
@@ -465,5 +473,15 @@ def print_sheet(request, pk):
 
 @htmx_permission_required("lending.view_lendingconfiguration")
 def configuration(request):
-    """Settings › Lending configuration: who receives the overdue reminder mails."""
-    return settings_page(request, LendingConfigurationForm, icon="bi-arrow-left-right")
+    """
+    Settings › Lending configuration: who receives the overdue reminder mails,
+    and the list of lending profiles (lending/views_profiles.py).
+    """
+    profiles = LendingProfile.objects.select_related("device_type").order_by("device_type__name")
+    return settings_page(
+        request,
+        LendingConfigurationForm,
+        icon="bi-arrow-left-right",
+        template="lending/configuration.html",
+        context={"profiles": profiles},
+    )

@@ -255,8 +255,8 @@ SPDX-License-Identifier: EUPL-1.2
       >
         <i class="bi bi-printer"></i> {% translate "Print lending slip" %}
       </button>
-    {% elif not picker_mode %}
-      <a href="{% url 'admin:lending_lendingprofile_add' %}?device_type={{ device.device_type_id }}" class="btn btn-secondary">
+    {% elif slip_profile_url %}
+      <a href="{{ slip_profile_url }}" class="btn btn-secondary">
         <i class="bi bi-printer"></i> {% translate "No lending slip template found. Add one?" %}
       </a>
     {% endif %}

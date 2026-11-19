@@ -1,0 +1,22 @@
+{% extends "theme/_detail_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Lending profile" %}: {{ profile.device_type }}{% endblock title %}
+
+{% block detail_title %}{{ profile.device_type }}{% endblock detail_title %}
+{% block detail_meta %}{% translate "Lending profile" %}{% endblock detail_meta %}
+
+{% block detail_form_fields %}
+  {% include "lending/includes/_profile_fields.html" %}
+{% endblock detail_form_fields %}
+
+{% block detail_readonly_notice %}
+  {% include "theme/includes/_readonly_notice.html" with message=_("You may view this lending profile but do not have permission to edit it.") %}
+{% endblock detail_readonly_notice %}
+
+{# Without the change permission: the same fields, disabled (views_profiles.profile_detail). #}
+{% block detail_readonly %}
+  {% include "lending/includes/_profile_fields.html" %}
+{% endblock detail_readonly %}
