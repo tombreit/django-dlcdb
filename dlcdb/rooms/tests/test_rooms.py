@@ -319,7 +319,7 @@ class RoomChangesTests(BaseTest):
         lost = self._record(LostRecord, device)
 
         response = self.client.get(self.url)
-        self.assertContains(response, "Marked as not locatable")
+        self.assertContains(response, "Marked as missing")
         self.assertContains(response, reverse("assets:record_detail", args=[lost.pk]))
 
     def test_device_lent_elsewhere_names_the_borrower(self):

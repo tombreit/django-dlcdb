@@ -66,7 +66,7 @@ def get_device_state_data(device, *, user=None, app_name=None, redirect_to=None)
         "css_classes": "btn btn-success",
         "actions": [
             {"url": "/assets/relocate/?device=123", "label": "Move", "method": "get"},
-            {"url": "/assets/devices/123/state/lose/", "label": "Not locatable", "method": "get"},
+            {"url": "/assets/devices/123/state/lose/", "label": "Missing", "method": "get"},
         ]
     }
 

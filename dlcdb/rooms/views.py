@@ -72,7 +72,7 @@ def _room_changes(request, room):
 
     - arrived: the record is in the room, the previous one elsewhere or absent;
     - left: the previous record is in the room, this one elsewhere or nowhere
-      (not locatable, removed). The superseding record is the event: when the
+      (missing, removed). The superseding record is the event: when the
       device left, who moved it and where it went.
 
     Consecutive records in the same room (copies left by inventories, a lending

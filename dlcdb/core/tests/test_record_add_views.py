@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-The admin adds no ordered, room-assignment, not-locatable or removed records.
+The admin adds no ordered, room-assignment, missing or removed records.
 
 Its add-forms checked only "Can add <record>", not the transition permission, so a
 staff user could e.g. recover a decommissioned device without being allowed to.

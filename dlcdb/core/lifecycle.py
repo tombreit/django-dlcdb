@@ -89,7 +89,7 @@ STATES = {
     ORDERED: State(key=ORDERED, label=_("Ordered"), proxy="core.OrderedRecord"),
     INROOM: State(key=INROOM, label=_("In room"), proxy="core.InRoomRecord"),
     LENT: State(key=LENT, label=_("Lent"), proxy="core.LentRecord"),
-    LOST: State(key=LOST, label=_("Not locatable"), proxy="core.LostRecord"),
+    LOST: State(key=LOST, label=_("Missing"), proxy="core.LostRecord"),
     REMOVED: State(key=REMOVED, label=_("Removed"), proxy="core.RemovedRecord"),
 }
 
@@ -156,7 +156,7 @@ TRANSITIONS = (
         name="lose",
         sources=(INROOM, LENT, LOST),
         target=LOST,
-        label=_("Not locatable"),
+        label=_("Missing"),
         permission="core.transition_can_lose_device",
     ),
     Transition(

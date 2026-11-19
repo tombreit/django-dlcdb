@@ -227,7 +227,7 @@ class DashboardTileTargetTests(TestCase):
         cls.device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
         cls.tenant = _tenant_of(cls.user, "Targets")
 
-        # A lost record carrying a note, so the Lost tile shows its notes caption.
+        # A lost record carrying a note, so the Missing tile shows its notes caption.
         device = Device.objects.create(
             edv_id="TILE-LOST", sap_id="7002-1", device_type=cls.device_type, tenant=cls.tenant
         )
@@ -279,7 +279,7 @@ class DashboardTileTargetTests(TestCase):
     def test_every_tile_link_is_accepted_by_its_target(self):
         """Follow each tile's href for real.
 
-        The Lost tile's old admin link was already broken: it appended
+        The Missing tile's old admin link was already broken: it appended
         has_note=has_note, which LostRecordAdmin does not register as a list
         filter, so the admin bounced it to ?e=1.
         """

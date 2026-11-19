@@ -5,7 +5,7 @@
 """The record trail's note filter.
 
 ``has_note`` mirrors the room and device-type list views (and the admin's
-HasNoteFilter). The dashboard's "Lost" tile links here with
+HasNoteFilter). The dashboard's "Missing" tile links here with
 ``?record_type=LOST&is_active=true``, so that pair must show what the tile counts.
 
 Exercised against the FilterSet rather than the rendered list: a row shows its

@@ -56,7 +56,7 @@ class RelocateForm(forms.Form):
 
 
 class TransitionNoteForm(forms.Form):
-    """A state change that records just a note: Not locatable, Restore."""
+    """A state change that records just a note: Missing, Restore."""
 
     note = Record._meta.get_field("note").formfield(widget=forms.Textarea(attrs={"rows": 3}))
 

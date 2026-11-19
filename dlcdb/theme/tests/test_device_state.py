@@ -204,7 +204,7 @@ def test_inroom_offers_move_lend_lost_and_removed(lentable_device, room, superus
     assert _urls(state_data) == {
         "Move": f"{reverse('assets:relocate')}?device={lentable_device.pk}",
         "Lend": reverse("lending:detail", args=[record.pk]),
-        "Not locatable": _form(lentable_device, "lose"),
+        "Missing": _form(lentable_device, "lose"),
         "Remove": _form(lentable_device, "remove"),
     }
 
@@ -230,7 +230,7 @@ def test_lent_offers_return_loss_and_removal(lentable_device, room, superuser):
 
     assert _urls(state_data) == {
         "Return": f"{reverse('lending:detail', args=[record.pk])}?flow=return",
-        "Not locatable": _form(lentable_device, "lose"),
+        "Missing": _form(lentable_device, "lose"),
         "Remove": _form(lentable_device, "remove"),
     }
 
@@ -420,7 +420,7 @@ def test_recovery_does_not_route_into_the_move_module(lentable_device, superuser
 
 @pytest.mark.django_db
 def test_assets_routes_the_other_state_changes_to_the_device_page_forms(lentable_device, room, superuser):
-    """Not locatable and Remove have no screen of their own; the device page's
+    """Missing and Remove have no screen of their own; the device page's
     forms serve them, so no assets action leads into the admin."""
     InRoomRecord.objects.create(device=lentable_device, room=room)
     lentable_device.refresh_from_db()

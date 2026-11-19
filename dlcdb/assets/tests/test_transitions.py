@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""The device page's own forms for Not locatable, Remove, Restore and Recover."""
+"""The device page's own forms for Missing, Remove, Restore and Recover."""
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -82,7 +82,7 @@ class DeviceTransitionTests(BaseTest):
         self.assertEqual(record.removed_info, "Recycling yard")
         self.assertEqual(record.user, user)
 
-    def test_not_locatable_restore_and_recover_need_only_their_own_permission(self):
+    def test_missing_restore_and_recover_need_only_their_own_permission(self):
         cases = [
             ("lose", InRoomRecord, {"note": "Not in its room"}, Record.LOST),
             ("restore", RemovedRecord, {"note": "Removed by mistake"}, Record.LOST),

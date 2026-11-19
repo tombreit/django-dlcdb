@@ -319,7 +319,7 @@ class LendReturnParityTests(BaseTest):
 
 
 # The lifecycle's refusals (``lifecycle.check``), as the lending screens show them.
-LOST_REFUSAL = "“Lend” is not allowed for a device in state “Not locatable”."
+LOST_REFUSAL = "“Lend” is not allowed for a device in state “Missing”."
 ORDERED_REFUSAL = "“Lend” is not allowed for a device in state “Ordered”."
 
 

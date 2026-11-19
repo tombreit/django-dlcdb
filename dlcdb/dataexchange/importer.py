@@ -95,7 +95,7 @@ def _describe_records(records):
         return template % {"lender": record.person.email, "room": record.room.number}
 
     if record.record_type == Record.LOST:
-        return _("new device, not locatable")
+        return _("new device, missing")
 
     # RemovedRecord.save() always stamps a removed_date, so a saved removal has one.
     if record.record_type == Record.REMOVED and record.removed_date:

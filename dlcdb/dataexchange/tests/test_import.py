@@ -545,7 +545,7 @@ def test_import_report_details_describe_the_records(tenant, import_user):
             "new device, lent to ada.lovelace@example.com (room 102)",
             "new device, lent to ada.lovelace@example.com (room 103), returned",
             "new device, removed on 2024-05-01",
-            "new device, not locatable",
+            "new device, missing",
             "new device, no record",
         ]
 

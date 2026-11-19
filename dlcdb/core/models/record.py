@@ -206,10 +206,10 @@ class Record(AuditBaseModel):
             ("transition_can_locate_device", "Transition: Can localise a device for the first time"),
             ("transition_can_relocate_device", "Transition: Can move a device to another room"),
             ("transition_can_lend_device", "Transition: Can lend a device and take it back"),
-            ("transition_can_lose_device", "Transition: Can mark a device as not locatable"),
-            ("transition_can_find_device", "Transition: Can mark a lost device as found"),
+            ("transition_can_lose_device", "Transition: Can mark a device as missing"),
+            ("transition_can_find_device", "Transition: Can mark a missing device as found"),
             ("transition_can_remove_device", "Transition: Can remove (decommission) a device"),
-            ("transition_can_restore_device", "Transition: Can restore a removed device to not-locatable"),
+            ("transition_can_restore_device", "Transition: Can restore a removed device to missing"),
             ("transition_can_recover_device", "Transition: Can recover a removed device into a room"),
         ]
         constraints = [

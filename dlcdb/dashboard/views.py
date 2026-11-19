@@ -86,7 +86,7 @@ def _build_tile(*, model_name, url, request, filters=None, base_params=None):
     """Build the context dict for a single model-count tile.
 
     ``filters`` narrow the counted set; ``base_params`` are the GET parameters
-    the tile's target needs to show that same set (e.g. the Lost tile scoping
+    the tile's target needs to show that same set (e.g. the Missing tile scoping
     the record list to the current LOST records). The notes caption is
     information only: the tile opens its list without a note filter.
     """

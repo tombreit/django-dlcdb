@@ -85,7 +85,7 @@ may open the device.
                 {% elif change.room %}
                   {% translate "Moved to" context "room change" %} <a href="{% url 'rooms:detail' change.room_id %}">{{ change.room.number }}</a>
                 {% elif change.record_type == "LOST" %}
-                  {% translate "Marked as not locatable" context "room change" %}
+                  {% translate "Marked as missing" context "room change" %}
                 {% elif change.record_type == "REMOVED" %}
                   {% translate "Decommissioned" context "room change" %}
                 {% else %}

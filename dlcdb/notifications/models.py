@@ -47,7 +47,7 @@ class Subscription(models.Model):
         ORDERED = lifecycle.ORDERED, "Report: Ordered devices"
         INROOM = lifecycle.INROOM, "Report: Located devices"
         LENT = lifecycle.LENT, "Report: Lent devices"
-        LOST = lifecycle.LOST, "Report: Lost devices"
+        LOST = lifecycle.LOST, "Report: Missing devices"
         REMOVED = lifecycle.REMOVED, "Report: Removed devices"
 
     LICENSE_EVENTS = [

@@ -114,10 +114,10 @@ Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine
 | Lokalisieren | *(kein Record)*/Bestellt → Lokalisiert | Core \| record \| Transition: Can localise a device for the first time | `core.transition_can_locate_device` |
 | Umziehen | Lokalisiert → Lokalisiert | Core \| record \| Transition: Can move a device to another room | `core.transition_can_relocate_device` |
 | Ausleihen und Zurückgeben | Lokalisiert ↔ Verliehen | Core \| record \| Transition: Can lend a device and take it back | `core.transition_can_lend_device` |
-| Nicht auffindbar | Lokalisiert/Verliehen → Nicht auffindbar | Core \| record \| Transition: Can mark a device as not locatable | `core.transition_can_lose_device` |
-| Gefunden | Nicht auffindbar → Lokalisiert | Core \| record \| Transition: Can mark a lost device as found | `core.transition_can_find_device` |
+| Nicht auffindbar | Lokalisiert/Verliehen → Nicht auffindbar | Core \| record \| Transition: Can mark a device as missing | `core.transition_can_lose_device` |
+| Gefunden | Nicht auffindbar → Lokalisiert | Core \| record \| Transition: Can mark a missing device as found | `core.transition_can_find_device` |
 | Entfernen | *(kein Record)*/Bestellt/Lokalisiert/Verliehen/Nicht auffindbar → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
-| Wiederherstellen | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to not-locatable | `core.transition_can_restore_device` |
+| Wiederherstellen | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to missing | `core.transition_can_restore_device` |
 | Wiedereingliedern | Entfernt → Lokalisiert | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
 
 ### Frontend oder Django-Admin?
