@@ -82,16 +82,16 @@ def _tile(*, label, value, icon, url, query_params="", **extra):
     }
 
 
-def _build_tile(*, model_name, url, request, base_params=None):
+def _build_tile(*, model_name, url, request, filters=None, base_params=None):
     """Build the context dict for a single model-count tile.
 
-    ``base_params`` are the GET parameters the tile's target needs to show the
-    same set the tile counts (e.g. the Lost tile scoping the record list to
-    LOST). The notes caption is information only: the tile opens its list
-    without a note filter.
+    ``filters`` narrow the counted set; ``base_params`` are the GET parameters
+    the tile's target needs to show that same set (e.g. the Lost tile scoping
+    the record list to the current LOST records). The notes caption is
+    information only: the tile opens its list without a note filter.
     """
     ModelClass = apps.get_model(model_name)
-    qs = _get_tenant_queryset(model_name, ModelClass, request)
+    qs = _get_tenant_queryset(model_name, ModelClass, request).filter(**(filters or {}))
 
     # Collapse the per-tile counts (total, note badge, lent) into a single
     # aggregate query instead of 2-3 separate .count() scans over the same rows.
@@ -172,14 +172,15 @@ def index(request):
             url="lending:index",
             query_params="state=overdue",
         ),
-        # LostRecord.objects is Record filtered to LOST with no is_active filter,
-        # so the unfiltered-by-age record list under the same record_type matches
-        # the count exactly.
+        # The devices lost right now: the active LOST records, like the record
+        # list it links to and the "Devices by state" chart, so all three agree.
+        # LostRecord.objects alone would also count the superseded ones.
         _build_tile(
             model_name="core.lostrecord",
             url="assets:record_index",
             request=request,
-            base_params={"record_type": Record.LOST},
+            filters={"is_active": True},
+            base_params={"record_type": Record.LOST, "is_active": "true"},
         ),
         # One count per problem level instead of a single value. It links to the
         # whole journal; the period only applies to the counts.

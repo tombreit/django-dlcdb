@@ -6,8 +6,7 @@
 
 ``has_note`` mirrors the room and device-type list views (and the admin's
 HasNoteFilter). The dashboard's "Lost" tile links here with
-``?record_type=LOST``, adding ``has_note=has_note`` when it shows its note badge,
-so both parameters have to bite together.
+``?record_type=LOST&is_active=true``, so that pair must show what the tile counts.
 
 Exercised against the FilterSet rather than the rendered list: a row shows its
 *device*, and a device usually owns several records, so asserting on markup
@@ -65,18 +64,22 @@ class RecordNoteFilterTests(BaseTest, TestCase):
         self.assertEqual(self._filtered().count(), Record.objects.count())
 
     def test_the_note_filter_combines_with_record_type(self):
-        """The exact pair the dashboard's Lost tile links with."""
         self.assertEqual(
             list(self._filtered(record_type=Record.LOST, has_note="has_note")),
             [self.noted_lost],
         )
 
-    def test_record_type_alone_matches_what_the_lost_tile_counts(self):
-        """The tile counts LostRecord.objects; the link must not show a different set."""
-        self.assertEqual(
-            set(self._filtered(record_type=Record.LOST)),
-            set(LostRecord.objects.all()),
-        )
+    def test_the_lost_tiles_link_matches_what_it_counts(self):
+        """The tile counts the current LOST records; a device found again drops out of both."""
+        found_device = self._create_device(edv_id="REC-FOUND", sap_id="8003")
+        InRoomRecord.objects.create(device=found_device, room=self.room)
+        found_lost = LostRecord.objects.create(device=found_device)
+        InRoomRecord.objects.create(device=found_device, room=self.room)
+
+        shown = set(self._filtered(record_type=Record.LOST, is_active="true"))
+
+        self.assertEqual(shown, set(LostRecord.objects.filter(is_active=True)))
+        self.assertNotIn(found_lost, shown)
 
 
 class RecordSearchTests(BaseTest, TestCase):

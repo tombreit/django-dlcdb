@@ -225,11 +225,11 @@ class DashboardTileTargetTests(TestCase):
         cls.user = get_user_model().objects.create_superuser(email="targets@example.com", password="secret")
         cls.room = Room.objects.create(number="T2.01")
         cls.device_type = DeviceType.objects.create(name="Beamer", prefix="BMR")
+        cls.tenant = _tenant_of(cls.user, "Targets")
 
-        # A lost record carrying a note, so the Lost tile shows its badge and
-        # therefore appends the note filter to its link.
+        # A lost record carrying a note, so the Lost tile shows its notes caption.
         device = Device.objects.create(
-            edv_id="TILE-LOST", sap_id="7002-1", device_type=cls.device_type, tenant=_tenant_of(cls.user, "Targets")
+            edv_id="TILE-LOST", sap_id="7002-1", device_type=cls.device_type, tenant=cls.tenant
         )
         InRoomRecord.objects.create(device=device, room=cls.room)
         LostRecord.objects.create(device=device, note="Not at its desk")
@@ -249,17 +249,29 @@ class DashboardTileTargetTests(TestCase):
         self.assertIn("rooms:index", urls)
         self.assertIn("assets:device_type_index", urls)
 
-    def test_the_lost_tile_scopes_the_record_list_to_lost_records(self):
+    def test_the_lost_tile_scopes_the_record_list_to_current_lost_records(self):
         lost = next(tile for tile in self._tiles() if tile["url"] == "assets:record_index")
 
         self.assertIn(f"record_type={Record.LOST}", lost["query_params"])
+        self.assertIn("is_active=true", lost["query_params"])
+
+    def test_the_lost_tile_counts_only_devices_lost_right_now(self):
+        """A device found again is no longer lost: the tile matches the "Devices by state" bar."""
+        found = Device.objects.create(edv_id="TILE-FOUND", device_type=self.device_type, tenant=self.tenant)
+        establish_state(LostRecord, device=found)
+        establish_state(InRoomRecord, device=found, room=self.room)
+
+        lost = next(tile for tile in self._tiles() if tile["url"] == "assets:record_index")
+
+        self.assertEqual(lost["value"], 1)
+        self.assertEqual(lost["value"], stats.active_record_counts(tenants=[self.tenant])["lost"])
 
     def test_a_tile_links_to_its_list_without_the_note_filter(self):
         """The notes caption is information only; the tile opens the whole list."""
         lost = next(tile for tile in self._tiles() if tile["url"] == "assets:record_index")
 
         self.assertTrue(lost["show_notes"])
-        self.assertEqual(lost["query_params"], f"record_type={Record.LOST}")
+        self.assertEqual(lost["query_params"], f"record_type={Record.LOST}&is_active=true")
         for tile in self._tiles():
             with self.subTest(tile["url"]):
                 self.assertNotIn("has_note", tile["query_params"])
