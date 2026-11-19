@@ -1884,10 +1884,11 @@ msgstr "CSV-Datei im internen Format (UTF-8)."
 msgid "Remove token"
 msgstr "Token entfernen"
 
-#: dlcdb/dataexchange/forms.py:133
-msgid "A token is stored; leave the field empty to keep it."
+#: dlcdb/dataexchange/forms.py:135
+msgid "A token is stored; leave the field as it is to keep it."
 msgstr ""
-"Ein Token ist gespeichert; lassen Sie das Feld leer, um ihn zu behalten."
+"Ein Token ist gespeichert; lassen Sie das Feld unverändert, um ihn zu "
+"behalten."
 
 #: dlcdb/dataexchange/importer.py:65
 #, python-format
@@ -2812,12 +2813,11 @@ msgstr "Ausleih-Profil löschen"
 #, python-format
 msgid ""
 "Delete the lending profile for “%(type)s”? Lending slips for this device "
-"type cannot be printed until it has a profile again; the deletion is kept in "
-"the profile history."
+"type cannot be printed until it has a profile again."
 msgstr ""
 "Das Ausleih-Profil für “%(type)s” löschen? Ausleihzettel für diese "
 "Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil "
-"hat; die Löschung bleibt in der Historie des Profils erhalten."
+"hat."
 
 #: dlcdb/lending/templates/lending/profile_delete.html:21
 #: dlcdb/tenants/templates/tenants/delete.html:21
