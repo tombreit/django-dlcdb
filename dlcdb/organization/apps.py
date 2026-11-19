@@ -10,3 +10,13 @@ class OrganizationConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "dlcdb.organization"
     verbose_name = _("Organization")
+
+    def ready(self):
+        # The unit and position pages, for the buttons next to the person form's selects.
+        from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit
+        from dlcdb.theme.related import RelatedPages, register_related_pages
+
+        register_related_pages(RelatedPages(OrganizationalUnit, "organization:unit_detail", "organization:unit_add"))
+        register_related_pages(
+            RelatedPages(OrganizationalPosition, "organization:position_detail", "organization:position_add")
+        )

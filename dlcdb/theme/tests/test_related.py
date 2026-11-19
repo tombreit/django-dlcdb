@@ -10,7 +10,15 @@ from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.urls import reverse
 
-from dlcdb.core.models import DeviceType, Manufacturer, Person, Room, Supplier
+from dlcdb.core.models import (
+    DeviceType,
+    Manufacturer,
+    OrganizationalPosition,
+    OrganizationalUnit,
+    Person,
+    Room,
+    Supplier,
+)
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.navigation import with_next
 from dlcdb.theme.related import _REGISTRY, add_related_links
@@ -162,6 +170,8 @@ OBJECTS = {
     "core.supplier": lambda: Supplier.objects.create(name="Acme"),
     "core.room": lambda: Room.objects.create(number="F1.01"),
     "core.person": lambda: Person.objects.create(first_name="Ada", last_name="Lovelace"),
+    "core.organizationalunit": lambda: OrganizationalUnit.objects.create(name="Physics"),
+    "core.organizationalposition": lambda: OrganizationalPosition.objects.create(name="Researcher"),
 }
 
 

@@ -14,10 +14,13 @@ from .abstracts import AuditBaseModel, SoftDeleteAuditBaseModel
 
 
 class OrganizationalUnit(AuditBaseModel):
+    """The unit of the organization a person belongs to; the HR sync finds it by name."""
+
     name = models.CharField(
         max_length=255,
         blank=False,
         unique=True,
+        verbose_name=_("Name"),
     )
     slug = models.SlugField(
         max_length=255,
@@ -25,6 +28,11 @@ class OrganizationalUnit(AuditBaseModel):
         null=True,
         unique=True,
     )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = _("Organizational unit")
+        verbose_name_plural = _("Organizational units")
 
     def __str__(self):
         return self.name
@@ -124,6 +132,7 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         blank=True,
         null=True,
         on_delete=models.PROTECT,
+        verbose_name=_("Organizational unit"),
     )
     organizational_positions = models.ManyToManyField(
         OrganizationalPosition,

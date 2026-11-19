@@ -12,6 +12,7 @@ from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.settings_page import settings_page
 
 from .forms import BrandingForm
+from .views_masterdata import POSITION, UNIT
 
 
 @login_not_required  # the login page shows it too
@@ -25,5 +26,14 @@ def favicon(request: HttpRequest) -> FileResponse:
 
 @htmx_permission_required("organization.view_branding")
 def branding(request):
-    """Settings › Organization: the organisation's names, address, IT contact, logos and room plan."""
-    return settings_page(request, BrandingForm, icon="bi-building", template="organization/branding.html")
+    """
+    Settings › Organization: the organisation's names, address, IT contact, logos
+    and room plan, and below them its units and positions (views_masterdata.py).
+    """
+    return settings_page(
+        request,
+        BrandingForm,
+        icon="bi-building",
+        template="organization/branding.html",
+        context={"unit_kind": UNIT, "units": UNIT.rows(), "position_kind": POSITION, "positions": POSITION.rows()},
+    )

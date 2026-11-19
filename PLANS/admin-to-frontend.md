@@ -32,7 +32,6 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 - [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete (`accounts.CustomUser`, `auth.Group`). Needs the Staff flag.
 - [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button.
 - [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons.
-- [ ] **Organisational units (`core.OrganizationalUnit`):** filled by the HR sync.
 - [ ] **Record attachments (`core.Attachment`).**
 - [ ] **Notification messages and reports (`notifications.Message`, `notifications.Report`):** status, preview, "Send now". Subscriptions have a frontend page.
 - [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). The rooms list links the admin; the result page is in the frontend (`rooms:reconcile`).
@@ -64,6 +63,7 @@ Kept on purpose while the admins exist: the staff-only "Admin view" button on th
 
 ## Done
 
+- [x] **Organisational units:** on Settings › Organization, with the new positions (`person-fields`, step 9, 2026-11-20). Their admin stays registered.
 - [x] **Settings › Branding, Lending configuration (with the lending profiles), Licenses configuration, HR API sync configuration:** `settings-pages`, steps 1 to 9, 2026-11-19. Their admins stay registered.
 - [x] **Settings › Tenants and Settings › Journal:** earlier.
 - [x] **Master data, rooms, persons, devices, lending, licences, bulk import:** earlier.

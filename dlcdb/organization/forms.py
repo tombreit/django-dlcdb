@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
+from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit
 from dlcdb.theme.forms import add_bootstrap_classes
+from dlcdb.theme.similar import SimilarNames, check_similar_names
 
 from .models import Branding
 
@@ -39,3 +42,29 @@ class BrandingForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_bootstrap_classes(self)
+
+
+class NameForm(forms.ModelForm):
+    """
+    An organizational unit or a position: a name only, compared with the
+    existing ones on add (theme.similar). Built per model below.
+    """
+
+    similar_names = SimilarNames(fields=("name",))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].help_text = _(
+            "The HR API sync finds the entries it fills by their name: after a rename, its next run adds the old "
+            "name again."
+        )
+        add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data
+
+
+OrganizationalUnitForm = forms.modelform_factory(OrganizationalUnit, form=NameForm, fields=["name"])
+OrganizationalPositionForm = forms.modelform_factory(OrganizationalPosition, form=NameForm, fields=["name"])

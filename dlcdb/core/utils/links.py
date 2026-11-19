@@ -28,6 +28,8 @@ DETAIL_URLS = {
     "core.devicetype": "assets:device_type_detail",
     "core.manufacturer": "assets:manufacturer_detail",
     "core.supplier": "assets:supplier_detail",
+    "core.organizationalunit": "organization:unit_detail",
+    "core.organizationalposition": "organization:position_detail",
     "tenants.tenant": "tenants:detail",
     "lending.lendingprofile": "lending:profile_detail",
 }

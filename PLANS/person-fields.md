@@ -132,7 +132,7 @@ One commit each; the user commits in between. Re-check each step against the cod
 - [x] 6. Person cards
 - [x] 7. Settings › Branding becomes Settings › Organization
 - [x] 8. Organization page: collapsible cards and a table of contents
-- [ ] 9. Units and positions on the Organization page
+- [x] 9. Units and positions on the Organization page
 - [ ] 10. Retire the plan
 
 ## Decided on the way
@@ -156,3 +156,5 @@ One commit each; the user commits in between. Re-check each step against the cod
 - 2026-11-20 (batch 6): positions sit under the name in the person list (the unit column hides below `lg`), after the unit elsewhere ("unit · positions"). The two person pickers now also load the unit with the person, which their cards showed with one query each.
 - 2026-11-20 (batch 7): unlike the batch's text, the stored permission names do change ("Can view Organization"), in the migration, as core 0082 did for the transitions: otherwise a fresh installation and an updated one would name them differently. The menu entry and the page get the building icon; the palette stood for "branding". The help texts of the tenant contact e-mail and the overdue-reminder recipient name the page, hence a migration in `tenants` and `lending` each.
 - 2026-11-20 (batch 8): any form error opens all cards, instead of each card listing its fields' errors like the device form: shorter, and no error hides. The links point at the `<details>` themselves, which browsers don't open on their own (they reveal only content inside a closed one), so `organization/js/contents.js` opens them. The first card, "Organization" like the page now, is "Name and address".
+- 2026-11-20 (batch 9): one views module for both (`organization/views_masterdata.py`, a `Kind` per model) and one name form built per model (`modelform_factory`), not a generalised `assets` `MasterdataSpec`: those pages count devices and have index pages. Add, save and delete return to the card (`#units`, `#positions`), which `contents.js` opens; the cards' links pass no `next`, as that default is where they come from.
+- 2026-11-20 (batch 9): `OrganizationalUnit` got translated names, an ordering and a translated label on `Person.organizational_unit` (one core migration, no SQL; stored permission names renamed as in batch 7): the messages and the person form showed the English field name. The unit and position permissions are documented with this batch, not in batch 10, so the commit is complete.
