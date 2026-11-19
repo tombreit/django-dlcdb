@@ -4,14 +4,12 @@
 
 from urllib.parse import urlencode
 
-from django.contrib import admin, messages
-from django.contrib.admin.options import ActionLocation
+from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.html import format_html, format_html_join
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -19,7 +17,6 @@ from dlcdb.dataexchange.admin import ExportCsvMixin
 from dlcdb.tenants.admin import TenantScopedAdmin
 from dlcdb.theme.device_state import get_device_state_data
 
-from .. import lifecycle
 from ..models import Device, Record
 from .base_admin import CustomBaseModelAdmin, SoftDeleteModelAdmin, get_has_note_badge
 from .filters.duplicates_filter import DuplicateFilter
@@ -108,15 +105,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "relocate",
         "export_as_csv",
         "hard_delete_action",
-        "restore_removed_to_lost",
     ]
-
-    def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
-        actions = super().get_actions(request, action_location)
-        if not request.user.is_superuser:
-            # Remove the restore_to_inroom action for non-superusers
-            actions.pop("restore_removed_to_lost", None)
-        return actions
 
     # form = DeviceAdminForm
     list_max_show_all = 5000
@@ -322,46 +311,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         ct = ContentType.objects.get_for_model(queryset.model, for_concrete_model=False)
         query = urlencode({"ct": ct.pk, "ids": ",".join(str(pk) for pk in selected)})
         return HttpResponseRedirect(f"{reverse('core:core_devices_relocate')}?{query}")
-
-    @admin.action(description=_("Restore devices from REMOVED to LOST"))
-    def restore_removed_to_lost(self, request, queryset):
-        """
-        Restore devices from REMOVED to LOST. Only for superusers.
-        LOST was choosen as the target state because it is has the fewest attributes.
-        The user should then be able to add the desiered record.
-        """
-        if not request.user.is_superuser:
-            self.message_user(request, "Only superusers may restore removed devices.", level=messages.ERROR)
-            return
-
-        restored_devices = []
-        with transaction.atomic():
-            for device in queryset.select_for_update():
-                if lifecycle.state_of(device) == Record.REMOVED:
-                    lifecycle.transition_restore(
-                        device,
-                        user=request.user,
-                        note=f"Restored from REMOVED by {request.user.username}",
-                    )
-                    restored_devices.append(device)
-
-        if restored_devices:
-            links = format_html_join(
-                ", ",
-                '<a href="{}">{}</a>',
-                ((reverse("admin:core_device_change", args=(d.pk,)), str(d)) for d in restored_devices),
-            )
-            self.message_user(
-                request,
-                format_html(
-                    "Restored {} device(s) to LOST: {}.",
-                    len(restored_devices),
-                    links,
-                ),
-                level=messages.SUCCESS,
-            )
-        else:
-            self.message_user(request, "No selected devices were in REMOVED state.", level=messages.INFO)
 
     # django-simple-history
     # https://django-simple-history.readthedocs.io/en/latest/admin.html

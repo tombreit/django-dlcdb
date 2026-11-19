@@ -45,7 +45,7 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 ## Superuser only, in the admin
 
 - [ ] **Master data:** hard-delete it, and activate or deactivate it (soft delete).
-- [ ] **Devices:** the device admin's action "restore from REMOVED to LOST". The frontend's *Restore* covers the same move with its transition permission; check whether the admin action can go.
+- [x] **Devices:** the device admin's action "restore from REMOVED to LOST" is gone (2026-11-19). The frontend's *Restore* does the same move, one device at a time, with its transition permission.
 
 ## Frontend pages that still link into the admin
 

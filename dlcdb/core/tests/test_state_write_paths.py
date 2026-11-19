@@ -6,7 +6,6 @@
 Characterization tests for the state changes made outside the lending flow:
 
 * ``inventory/inventorize.py::inventorize_uuids_for_room`` (found / not found / unknown)
-* ``core/admin/device_admin.py::restore_removed_to_lost`` (REMOVED -> LOST)
 * ``dataexchange/remover.py::set_removed_record`` (the CSV bulk remover)
 * ``dataexchange/records.py::create_record`` (the records a CSV import row yields)
 
@@ -20,11 +19,8 @@ import json
 from io import BytesIO
 
 import pytest
-from django.contrib.admin.sites import site as admin_site
 from django.contrib.auth import get_user_model
-from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.exceptions import ValidationError
-from django.test import RequestFactory
 
 from dlcdb.core.models import (
     Device,
@@ -175,65 +171,6 @@ def test_inventory_not_found_preserves_a_lending(inventory_1, inventory_rooms, i
     assert record.record_type == Record.LENT
     assert record.person == person
     assert record.room == inventory_rooms["external"]
-
-
-# --- Admin: restore from REMOVED ----------------------------------------
-
-
-def _run_admin_action(action_name, user, queryset):
-    """Invoke a ModelAdmin action the way the changelist does."""
-    request = RequestFactory().post("/")
-    request.user = user
-    request.session = {}
-    request._messages = FallbackStorage(request)
-
-    model_admin = admin_site._registry[Device]
-    getattr(model_admin, action_name)(request, queryset)
-
-
-@pytest.mark.django_db
-def test_restore_removed_to_lost_moves_the_device_out_of_removed():
-    """
-    ``device_admin.restore_removed_to_lost`` performs REMOVED -> LOST, the
-    lifecycle's ``restore`` transition.
-    """
-    superuser = get_user_model().objects.create_superuser(email="root@example.com", password="secret")
-    device = Device.objects.create(edv_id="EDV-RESTORE")
-    RemovedRecord.objects.create(device=device)
-    device.refresh_from_db()
-    assert device.active_record.record_type == Record.REMOVED
-
-    _run_admin_action("restore_removed_to_lost", superuser, Device.objects.filter(pk=device.pk))
-
-    device.refresh_from_db()
-    assert device.active_record.record_type == Record.LOST
-    # The removal stays in the history.
-    assert device.record_set.filter(record_type=Record.REMOVED).exists()
-
-
-@pytest.mark.django_db
-def test_restore_removed_to_lost_is_superuser_only():
-    staff = get_user_model().objects.create_user(email="staff@example.com", password="secret", is_staff=True)
-    device = Device.objects.create(edv_id="EDV-RESTORE-DENIED")
-    RemovedRecord.objects.create(device=device)
-
-    _run_admin_action("restore_removed_to_lost", staff, Device.objects.filter(pk=device.pk))
-
-    device.refresh_from_db()
-    assert device.active_record.record_type == Record.REMOVED
-
-
-@pytest.mark.django_db
-def test_restore_removed_to_lost_ignores_devices_in_other_states(room):
-    """The action must only act on REMOVED devices, never on live ones."""
-    superuser = get_user_model().objects.create_superuser(email="root2@example.com", password="secret")
-    device = Device.objects.create(edv_id="EDV-RESTORE-INROOM")
-    InRoomRecord.objects.create(device=device, room=room)
-
-    _run_admin_action("restore_removed_to_lost", superuser, Device.objects.filter(pk=device.pk))
-
-    device.refresh_from_db()
-    assert device.active_record.record_type == Record.INROOM
 
 
 # --- Bulk decommissioning (dataexchange.remover) -------------------------

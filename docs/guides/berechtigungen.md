@@ -210,10 +210,7 @@ Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltu
 - Links (die Ordnungen der Ausleih-Profile), den Kleinkram-Katalog, Organisationseinheiten und Anhänge von Records,
 - Benachrichtigungen (Status, Vorschau, *Send Now*), den Upload für den Raumabgleich und die vollständige Liste der HR-Sync-Läufe.
 
-Nur Superuser dürfen, unabhängig von Berechtigungen:
-
-- Stammdaten im Admin endgültig löschen und *aktivieren/deaktivieren* (Soft-Delete, siehe [Model](../betrieb/model.md#softdelete)),
-- im Geräte-Admin die Aktion *Wiederherstellung von REMOVED auf LOST* ausführen.
+Nur Superuser dürfen, unabhängig von Berechtigungen, Stammdaten im Admin endgültig löschen und *aktivieren/deaktivieren* (Soft-Delete, siehe [Model](../betrieb/model.md#softdelete)).
 
 ## Beispiel-Gruppen
 
