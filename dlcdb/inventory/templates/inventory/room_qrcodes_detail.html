@@ -45,15 +45,8 @@
     <tbody id="devices-table-tbody">
     {% for device in devices %}
         <tr>
-            <td>
-                {% if request.user.is_staff %}
-                <a href="{% url 'admin:core_device_change' device.pk %}">  {# ?_popup=1 #}
-                    {{ device }}
-                </a>
-                {% else %}
-                    {{ device }}
-                {% endif %}
-            </td>
+            {# A printout: the device stays plain. #}
+            <td>{{ device }}</td>
             <td>
                 {% if device.manufacturer or device.series %}
                 {{ device.manufacturer|default:'' }}  {{ device.series|default:'' }}

@@ -51,12 +51,15 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 
 This list is also in `DECISIONS.md › Open follow-ups › Links`.
 
-- [ ] `theme/device_state.py`: the state button of a device links the record admin (the record list, a lending, a removal record).
-- [ ] `lending/views.py` and `licenses/views.py`: `obj_admin_url`.
-- [ ] Inventory screens (`inventorize_room_detail.html`, `room_qrcodes_detail.html`, `partials/device_search_htmx.html`): the device links open the device admin, for non-staff users too.
-- [ ] `notifications/index.html`: the device of a subscription.
+- [ ] `inventory/inventorize_room_detail.html`: the device link opens the device admin (staff only). The room scan page holds unsaved input, and DECISIONS keeps links plain where leaving drops it: decide between plain text and a new tab.
 - [ ] `rooms/index.html`: "Room reconcile" (see above).
 - [ ] `theme/context_processors.py`: the hint "assign a tenant" (see above).
+- [x] `inventory/partials/device_search_htmx.html`: the device opens its frontend page (with `core.view_device`, back to the search), no longer the admin for every inventory user (2026-11-19).
+- [x] `notifications/index.html`: a subscribed device's Edit opens its frontend page (2026-11-19).
+- [x] `inventory/room_qrcodes_detail.html`: the room's QR printout lists its devices plain (2026-11-19).
+- [x] `theme/device_state.py`: nothing to do. The frontend surfaces (device page, inventory search) link frontend pages; only the admin's own device list links the record admin.
+
+Kept on purpose while the admins exist: the staff-only "Admin view" buttons on the lending and licence pages (`obj_admin_url`), and the navbar's "Django admin" entry.
 
 ## Done
 

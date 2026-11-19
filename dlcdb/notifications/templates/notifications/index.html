@@ -104,13 +104,13 @@
                   <i class="bi bi-trash"></i> {% translate "Delete" %}
                 </button>
               </form>
-            {% else %}
+            {% elif subscription.device.is_licence or perms.core.view_device %}
               <a
                 class="text-nowrap m-1 btn btn-sm btn-outline-secondary" 
                 {% if subscription.device.is_licence %}
                   href="{% url 'licenses:edit' license_id=subscription.device_id %}"
                 {% else %}
-                  href="{% url 'admin:core_device_change' subscription.device_id %}"
+                  href="{% url 'assets:device_detail' subscription.device_id %}"
                 {% endif %}
               >
                 <i class="bi bi-pencil"></i> {% translate "Edit" %}

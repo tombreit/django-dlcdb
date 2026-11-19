@@ -289,6 +289,26 @@ def test_inventory_users_without_view_device_change_states_and_return_to_the_sea
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("may_view_device", [True, False])
+def test_the_search_links_the_device_page_with_view_device_never_the_admin(
+    client, plain_static, inventory_1, join_tenant, device_1, room_1, may_view_device
+):
+    """The device admin needs the Staff flag, which inventory users lack."""
+    user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
+    for codename in ["can_inventorize"] + (["view_device"] if may_view_device else []):
+        user.user_permissions.add(Permission.objects.get(codename=codename, content_type__app_label="core"))
+    client.force_login(join_tenant(user))
+    InRoomRecord.objects.create(device=device_1, room=room_1)
+    search_url = reverse("inventory:search-devices")
+
+    html = client.get(search_url, headers={"HX-Request": "true"}).content.decode()
+
+    device_url = with_next(reverse("assets:device_detail", args=[device_1.pk]), search_url)
+    assert (f'href="{device_url}"' in html) == may_view_device
+    assert reverse("admin:core_device_change", args=[device_1.pk]) not in html
+
+
+@pytest.mark.django_db
 def test_inventorize_uuids_names_a_missing_room(user):
     with pytest.raises(ObjectDoesNotExist, match="pk=999999"):
         inventorize_uuids_for_room(uuids="{}", room_pk=999999, user=user)
