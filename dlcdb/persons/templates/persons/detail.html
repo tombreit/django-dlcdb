@@ -4,8 +4,8 @@
 {% block title %}{{ person }}{% endblock title %}
 
 {% block detail_leading %}
-  {% if person.udb_person_image %}
-    <img src="{{ person.udb_person_image.url }}" alt="" class="rounded-circle object-fit-cover" width="56" height="56">
+  {% if person.photo %}
+    <img src="{{ person.photo.url }}" alt="" class="rounded-circle object-fit-cover" width="56" height="56">
   {% endif %}
 {% endblock detail_leading %}
 

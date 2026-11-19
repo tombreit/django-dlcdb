@@ -9,13 +9,11 @@ SPDX-License-Identifier: EUPL-1.2
 
 <div class="row alert alert-warning search-result-item">
     <div class="col-md-2">
-        {% if person.udb_person_image %}
+        {% if person.photo %}
             <img 
-                src="{{ person.udb_person_image.url }}" 
+                src="{{ person.photo.url }}" 
                 loading="lazy"
                 style="max-width: 100px;" class="m-2"
-                width="{{ udb_person_image.width }}" 
-                height="{{ udb_person_image.height }}"
                 alt="" 
             >
         {% else %}

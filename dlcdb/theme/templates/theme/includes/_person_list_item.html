@@ -34,9 +34,9 @@ Params:
   data-room-id="{{ person.room_id|default:'' }}"
 >
   <div class="card-body d-flex align-items-center gap-3 py-2">
-    {% if person.udb_person_image %}
+    {% if person.photo %}
       <img
-        src="{{ person.udb_person_image.url }}"
+        src="{{ person.photo.url }}"
         loading="lazy"
         width="56" height="56"
         class="rounded object-fit-cover flex-shrink-0"

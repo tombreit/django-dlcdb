@@ -32,7 +32,7 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
         "udb_contract_organization_unit",
         "udb_contract_contract_type",
         "udb_contract_organizational_positions",
-        "udb_person_image",
+        "photo",
         "udb_person_uuid",
         "udb_data_updated_at",
     ]
@@ -99,6 +99,6 @@ class PersonAdmin(SoftDeleteModelAdmin, CustomBaseModelAdmin):
     def udb_person_image_as_image(self, obj):
         return mark_safe(
             '<img src="{url}" style="max-width: 100px;">'.format(
-                url=obj.udb_person_image.url if obj.udb_person_image else "",
+                url=obj.photo.url if obj.photo else "",
             )
         )

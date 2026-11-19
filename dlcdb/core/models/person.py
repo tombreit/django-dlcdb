@@ -105,6 +105,8 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         related_name="persons",
         verbose_name=_("Room"),
     )
+    # The HR sync writes `{udb_person_uuid}.jpg` here; see udb_person_image_hash.
+    photo = models.ImageField(verbose_name=_("Photo"), blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/")
 
     # Additional UDB mirrored fields, all optional, updated by a cron task:
     udb_data_updated_at = models.DateTimeField(
@@ -138,12 +140,9 @@ class Person(SoftDeleteAuditBaseModel, ActiveContractObjectsBaseModel):
         blank=True,
         null=True,
     )
-    udb_person_image = models.ImageField(
-        verbose_name="HR person image", blank=True, upload_to=f"{settings.PERSON_IMAGE_UPLOAD_DIR}/"
-    )
-    # md5 of the source base64 last imported from UDB. Lets the sync skip rewriting
-    # an unchanged image and detect an actual image change (the file path alone is
-    # deterministic and never reflects a content change).
+    # md5 of the source base64 last imported from UDB into `photo`. Lets the sync
+    # skip rewriting an unchanged image and detect an actual image change (the
+    # file path alone is deterministic and never reflects a content change).
     udb_person_image_hash = models.CharField(
         verbose_name="HR person image hash", max_length=32, blank=True, editable=False
     )

@@ -143,7 +143,7 @@ class Command(BaseCommand):
                     f"udb_person_email_internal_business: {person.udb_person_email_internal_business!r} -> "
                     f"{new_udb_email_internal_business!r}"
                 )
-                print(f"udb_person_image: {person.udb_person_image!r} -> ''")
+                print(f"photo: {person.photo!r} -> ''")
 
                 if write:
                     person.first_name = new_first_name
@@ -153,7 +153,7 @@ class Command(BaseCommand):
                     person.email = new_email
                     person.udb_person_email_private = new_udb_email_private
                     person.udb_person_email_internal_business = new_udb_email_internal_business
-                    person.udb_person_image = ""
+                    person.photo = ""
                     person.save(
                         update_fields=[
                             "first_name",
@@ -163,7 +163,7 @@ class Command(BaseCommand):
                             "email",
                             "udb_person_email_private",
                             "udb_person_email_internal_business",
-                            "udb_person_image",
+                            "photo",
                         ]
                     )
 
