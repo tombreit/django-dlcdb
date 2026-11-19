@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 14:43+0100\n"
-"PO-Revision-Date: 2026-11-19 14:53+0100\n"
+"POT-Creation-Date: 2026-11-19 22:13+0100\n"
+"PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -180,7 +180,7 @@ msgstr "Alle Räume..."
 #: dlcdb/assets/navigation.py:33
 #: dlcdb/assets/templates/assets/devices/detail.html:61
 #: dlcdb/assets/templates/assets/records/detail.html:74
-#: dlcdb/assets/views/masterdata.py:89 dlcdb/core/admin/lentrecord_admin.py:181
+#: dlcdb/assets/views/masterdata.py:89 dlcdb/core/admin/lentrecord_admin.py:173
 #: dlcdb/core/models/device.py:128 dlcdb/core/models/manufacturer.py:25
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -314,7 +314,7 @@ msgstr "Alle Geräteklassen..."
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:56
 #: dlcdb/core/models/device.py:174 dlcdb/core/models/manufacturer.py:21
 #: dlcdb/core/models/note.py:47 dlcdb/core/models/record.py:148
-#: dlcdb/dataexchange/forms.py:72
+#: dlcdb/dataexchange/forms.py:73
 #: dlcdb/dataexchange/templates/dataexchange/importer_detail.html:38
 #: dlcdb/lending/templates/lending/lend.html:220
 #: dlcdb/licenses/templates/licenses/index.html:87 dlcdb/rooms/filters.py:35
@@ -354,6 +354,8 @@ msgstr "Aktuell und abgelöst..."
 #: dlcdb/assets/templates/assets/devices/detail.html:59
 #: dlcdb/assets/templates/assets/records/detail.html:72
 #: dlcdb/assets/views/masterdata.py:71 dlcdb/core/models/device.py:119
+#: dlcdb/lending/models.py:57
+#: dlcdb/lending/templates/lending/configuration.html:30
 #: dlcdb/tenants/templates/tenants/actions/assign.html:43
 msgid "Device type"
 msgstr "Geräteklasse"
@@ -373,7 +375,7 @@ msgstr "Verbleib..."
 #: dlcdb/assets/templates/assets/devices/index.html:39
 #: dlcdb/assets/templates/assets/records/detail.html:56
 #: dlcdb/assets/templates/assets/records/index.html:38
-#: dlcdb/core/admin/lentrecord_admin.py:81 dlcdb/core/models/device.py:231
+#: dlcdb/core/admin/lentrecord_admin.py:80 dlcdb/core/models/device.py:231
 #: dlcdb/core/models/record.py:75
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:50
 #: dlcdb/lending/templates/lending/index.html:32
@@ -386,7 +388,7 @@ msgstr "Gerät"
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:31
 #: dlcdb/assets/templates/assets/records/detail.html:155
 #: dlcdb/assets/templates/assets/records/index.html:40
-#: dlcdb/core/admin/record_admin.py:161
+#: dlcdb/core/admin/record_admin.py:161 dlcdb/lending/models.py:18
 msgid "Lender"
 msgstr "Ausleiher"
 
@@ -518,6 +520,8 @@ msgstr "URL"
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:80
 #: dlcdb/journal/templates/journal/cleanup.html:90
 #: dlcdb/lending/templates/lending/lend.html:284
+#: dlcdb/lending/templates/lending/profile_delete.html:23
+#: dlcdb/lending/templates/lending/profile_form.html:11
 #: dlcdb/licenses/templates/licenses/form_partial.html:78
 #: dlcdb/persons/templates/persons/form.html:9
 #: dlcdb/rooms/templates/rooms/form.html:9
@@ -532,6 +536,9 @@ msgstr "Abbrechen"
 #: dlcdb/assets/templates/assets/devices/history.html:12
 #: dlcdb/assets/templates/assets/devices/history.html:22
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:83
+#: dlcdb/lending/templates/lending/profile_detail.html:33
+#: dlcdb/lending/templates/lending/profile_history.html:11
+#: dlcdb/lending/templates/lending/profile_history.html:17
 #: dlcdb/licenses/templates/licenses/history.html:11
 #: dlcdb/licenses/templates/licenses/history.html:17
 #: dlcdb/templates/admin/change_form_object_tools.html:6
@@ -611,10 +618,10 @@ msgstr "Person"
 
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:43
 #: dlcdb/assets/templates/assets/records/detail.html:151
-#: dlcdb/core/admin/lentrecord_admin.py:90
+#: dlcdb/core/admin/lentrecord_admin.py:89
 #: dlcdb/core/models/prx_lentrecord.py:190 dlcdb/lending/apps.py:12
 #: dlcdb/lending/navigation.py:11 dlcdb/lending/templates/lending/index.html:4
-#: dlcdb/lending/templates/lending/index.html:5 dlcdb/lending/views.py:372
+#: dlcdb/lending/templates/lending/index.html:5 dlcdb/lending/views.py:374
 #: dlcdb/persons/templates/persons/includes/_lendings.html:49
 msgid "Lending"
 msgstr "Ausleihe"
@@ -688,7 +695,7 @@ msgstr "Dropdown umschalten"
 
 #: dlcdb/assets/templates/assets/devices/index.html:20
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:10
-#: dlcdb/dataexchange/views.py:119
+#: dlcdb/dataexchange/views.py:121
 msgid "Import devices"
 msgstr "Geräte importieren"
 
@@ -815,7 +822,7 @@ msgid "Lent from"
 msgstr "Verliehen von"
 
 #: dlcdb/assets/templates/assets/records/detail.html:165
-#: dlcdb/core/admin/lentrecord_admin.py:195 dlcdb/core/models/record.py:131
+#: dlcdb/core/admin/lentrecord_admin.py:187 dlcdb/core/models/record.py:131
 #: dlcdb/lending/templates/lending/lend.html:139
 #: dlcdb/lending/templates/lending/lend.html:173
 msgid "Desired return date"
@@ -1026,55 +1033,51 @@ msgstr "{model} “{obj}” geändert."
 msgid "Search IT ID, inventory ID, serial number, person, room, note..."
 msgstr "Suche nach IDs, Seriennummer, Modell, Person Name/Email..."
 
-#: dlcdb/core/admin/device_admin.py:315
+#: dlcdb/core/admin/device_admin.py:304
 msgid "Relocate selected devices"
 msgstr "Ausgewählte Geräte umziehen"
-
-#: dlcdb/core/admin/device_admin.py:326
-msgid "Restore devices from REMOVED to LOST"
-msgstr "Wiederherstellung von REMOVED auf LOST"
 
 #: dlcdb/core/admin/filters/licence_filters.py:34
 msgid "Licence type"
 msgstr "Lizenztyp"
 
-#: dlcdb/core/admin/lentrecord_admin.py:105 dlcdb/core/lifecycle.py:151
+#: dlcdb/core/admin/lentrecord_admin.py:104 dlcdb/core/lifecycle.py:151
 #: dlcdb/lending/templates/lending/index.html:74
 #: dlcdb/lending/templates/lending/lend.html:104
 msgid "Return"
 msgstr "Zurückgeben"
 
-#: dlcdb/core/admin/lentrecord_admin.py:107 dlcdb/core/models/note.py:48
+#: dlcdb/core/admin/lentrecord_admin.py:106 dlcdb/core/models/note.py:48
 #: dlcdb/core/navigation.py:31
 msgid "Notes"
 msgstr "Notizen"
 
-#: dlcdb/core/admin/lentrecord_admin.py:151
+#: dlcdb/core/admin/lentrecord_admin.py:143
 msgid "Lent device"
 msgstr "Ausleihgerät"
 
-#: dlcdb/core/admin/lentrecord_admin.py:206
+#: dlcdb/core/admin/lentrecord_admin.py:198
 #: dlcdb/rooms/templates/rooms/detail.html:35
 #: dlcdb/rooms/templates/rooms/index.html:45
 msgid "Description"
 msgstr "Beschreibung"
 
-#: dlcdb/core/admin/lentrecord_admin.py:210 dlcdb/core/lifecycle.py:91
+#: dlcdb/core/admin/lentrecord_admin.py:202 dlcdb/core/lifecycle.py:91
 #: dlcdb/lending/filters.py:22 dlcdb/lending/templates/lending/index.html:49
 msgid "Lent"
 msgstr "Verliehen"
 
-#: dlcdb/core/admin/lentrecord_admin.py:240 dlcdb/lending/views.py:239
+#: dlcdb/core/admin/lentrecord_admin.py:232 dlcdb/lending/views.py:234
 #, python-brace-format
 msgid "Return of “{device}” from “{person}” acknowledged."
 msgstr "Rückgabe von “{device}” von “{person}” bestätigt."
 
-#: dlcdb/core/admin/lentrecord_admin.py:248 dlcdb/lending/views.py:237
+#: dlcdb/core/admin/lentrecord_admin.py:240 dlcdb/lending/views.py:232
 #, python-brace-format
 msgid "Device “{device}” lent to “{person}”."
 msgstr "Gerät “{device}” verliehen an “{person}”."
 
-#: dlcdb/core/admin/lentrecord_admin.py:257 dlcdb/lending/views.py:241
+#: dlcdb/core/admin/lentrecord_admin.py:249 dlcdb/lending/views.py:236
 #, python-brace-format
 msgid "Lending of “{device}” to “{person}” saved."
 msgstr "Verleih von “{device}” an “{person}” gespeichert."
@@ -1123,7 +1126,7 @@ msgid "Locate"
 msgstr "Lokalisieren"
 
 #: dlcdb/core/lifecycle.py:141 dlcdb/lending/templates/lending/index.html:9
-#: dlcdb/lending/templates/lending/index.html:70 dlcdb/lending/views.py:372
+#: dlcdb/lending/templates/lending/index.html:70 dlcdb/lending/views.py:374
 msgid "Lend"
 msgstr "Ausleihen"
 
@@ -1624,8 +1627,10 @@ msgid "Not yet inventorized"
 msgstr "Noch nicht inventorisiert"
 
 #: dlcdb/core/templates/core/lentrecord/change_list.html:16
-msgid "Checklist & Lending configuration"
-msgstr "Checkliste & Ausleihkonfiguration"
+#: dlcdb/lending/models.py:37 dlcdb/lending/models.py:38
+#: dlcdb/lending/navigation.py:20
+msgid "Lending configuration"
+msgstr "Ausleihe Konfiguration"
 
 #: dlcdb/core/templates/core/room/change_list.html:15
 msgid "Room replication"
@@ -1801,7 +1806,7 @@ msgstr[1] "Journal, letzte %(days)d Tage"
 msgid "%(done)s of %(total)s devices"
 msgstr "%(done)s von %(total)s Gerät"
 
-#: dlcdb/dataexchange/admin.py:140 dlcdb/dataexchange/views.py:166
+#: dlcdb/dataexchange/admin.py:140 dlcdb/dataexchange/views.py:168
 #, python-format
 msgid "Import failed, nothing was written: %(error)s"
 msgstr "Import fehlgeschlagen, es wurde nichts geschrieben: %(error)s"
@@ -1871,9 +1876,18 @@ msgstr "Format"
 msgid "Any format..."
 msgstr "Alle Formate..."
 
-#: dlcdb/dataexchange/forms.py:71
+#: dlcdb/dataexchange/forms.py:72
 msgid "CSV file in the internal format (UTF-8)."
 msgstr "CSV-Datei im internen Format (UTF-8)."
+
+#: dlcdb/dataexchange/forms.py:113
+msgid "Remove token"
+msgstr "Token entfernen"
+
+#: dlcdb/dataexchange/forms.py:133
+msgid "A token is stored; leave the field empty to keep it."
+msgstr ""
+"Ein Token ist gespeichert; lassen Sie das Feld leer, um ihn zu behalten."
 
 #: dlcdb/dataexchange/importer.py:65
 #, python-format
@@ -1943,46 +1957,96 @@ msgstr ""
 "Import abgebrochen: %(count)s Zeile(n) konnten nicht importiert werden. Es "
 "wurde nichts geschrieben."
 
-#: dlcdb/dataexchange/models.py:126
+#: dlcdb/dataexchange/models.py:127
 msgid "Internal (CSV)"
 msgstr "Internal (CSV)"
 
-#: dlcdb/dataexchange/models.py:127
+#: dlcdb/dataexchange/models.py:128
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
 
-#: dlcdb/dataexchange/models.py:249
+#: dlcdb/dataexchange/models.py:229
+msgid "Enabled"
+msgstr "Aktiviert"
+
+#: dlcdb/dataexchange/models.py:230
+msgid "Off: the periodic sync and the management command exit at once."
+msgstr ""
+"Aus: Der regelmäßige Sync und das Management-Command beenden sich sofort."
+
+#: dlcdb/dataexchange/models.py:234
+msgid "HR API URL"
+msgstr "HR-API-URL"
+
+#: dlcdb/dataexchange/models.py:237
+#, python-brace-format
+msgid ""
+"The complete URL of the HR contracts endpoint or of a JSON dump, without a "
+"query string, e.g. {url}. The code appends filters and fields; a static JSON "
+"file ignores them."
+msgstr ""
+"Die vollständige URL des Endpunkts für Personalverträge oder eines JSON-"
+"Dumps ohne Abfragezeichenfolge, z. B. {url}. Der Code fügt Filter und Felder "
+"hinzu; eine statische JSON-Datei ignoriert diese."
+
+#: dlcdb/dataexchange/models.py:246
+msgid "HR API token"
+msgstr "HR-API-Token"
+
+#: dlcdb/dataexchange/models.py:247
+msgid "Sent as the X-API-KEY header; stored in plain text in the database."
+msgstr ""
+"Wird als X-API-KEY-Header gesendet und im Klartext in der Datenbank "
+"gespeichert."
+
+#: dlcdb/dataexchange/models.py:252
 msgid "Room number pattern"
 msgstr "Raum-Nummern-Schema"
 
-#: dlcdb/dataexchange/models.py:251
+#: dlcdb/dataexchange/models.py:254
 msgid ""
 "A regular expression (Python syntax) matched against the room HR names for a "
-"person, e.g. <code>^(\\w)\\w*-(\\d+)-\\d+$</code>. Leave empty if HR names "
-"the DLCDB room numbers as they are."
+"person, e.g. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leave empty if HR names the "
+"DLCDB room numbers as they are."
 msgstr ""
+"Ein regulärer Ausdruck (Python-Syntax), angewandt auf den Raum, den das HR-"
+"System für eine Person nennt, z. B. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leer "
+"lassen, wenn das HR-System die DLCDB-Raumnummern unverändert nennt."
 
-#: dlcdb/dataexchange/models.py:259
+#: dlcdb/dataexchange/models.py:261
 msgid "Room number replacement"
 msgstr "Raum-Nummer-Ersetzung"
 
-#: dlcdb/dataexchange/models.py:261
+#: dlcdb/dataexchange/models.py:263
 msgid ""
-"The DLCDB room number for a room the pattern matches; <code>\\1</code>, "
-"<code>\\2</code>, … insert the pattern's groups. With <code>\\1\\2</code> "
-"and the pattern above, Gü-235-02 from HR becomes room G235."
+"The DLCDB room number for a room the pattern matches; \\1, \\2, … insert the "
+"pattern's groups. With \\1\\2 and the pattern above, Gü-235-02 from HR "
+"becomes room G235."
 msgstr ""
+"Die DLCDB-Raumnummer für einen Raum, auf den das Muster passt; \\1, \\2, … "
+"fügen die Gruppen des Musters ein. Mit \\1\\2 und dem Muster oben wird aus "
+"Gü-235-02 im HR-System der Raum G235."
 
-#: dlcdb/dataexchange/models.py:285
+#: dlcdb/dataexchange/models.py:269 dlcdb/dataexchange/models.py:270
+#: dlcdb/dataexchange/navigation.py:34
+msgid "HR API sync configuration"
+msgstr "HR-API-Sync-Konfiguration"
+
+#: dlcdb/dataexchange/models.py:279
+msgid ""
+"Provide the URL without a query string (“?…”): the code appends the query."
+msgstr "Geben Sie die URL ohne Query-String (“?…”) an: Den hängt der Code an."
+
+#: dlcdb/dataexchange/models.py:286
 msgid "The replacement needs a pattern."
-msgstr ""
+msgstr "Die Ersetzung benötigt ein Muster."
 
-#: dlcdb/dataexchange/models.py:291 dlcdb/rooms/forms.py:82
+#: dlcdb/dataexchange/models.py:292 dlcdb/rooms/forms.py:82
 #, python-format
 msgid "Invalid regular expression: %(error)s"
 msgstr "Ungültiger regulärer Ausdruck: %(error)s"
 
-#: dlcdb/dataexchange/models.py:299 dlcdb/rooms/forms.py:89
+#: dlcdb/dataexchange/models.py:300 dlcdb/rooms/forms.py:89
 #, python-format
 msgid "Invalid replacement: %(error)s"
 msgstr "Ungültige Ersetzung: %(error)s"
@@ -1991,13 +2055,9 @@ msgstr "Ungültige Ersetzung: %(error)s"
 msgid "Bulk import"
 msgstr "Bulk Import"
 
-#: dlcdb/dataexchange/navigation.py:19
+#: dlcdb/dataexchange/navigation.py:26
 msgid "Bulk decommissioning"
 msgstr "Bulk Ausmusterung"
-
-#: dlcdb/dataexchange/navigation.py:27
-msgid "HR API sync configuration"
-msgstr "HR-API-Sync-Konfiguration"
 
 #: dlcdb/dataexchange/records.py:66
 msgid "ROOM: a room number is required to import an INROOM record."
@@ -2024,6 +2084,27 @@ msgid ""
 msgstr ""
 "RECORD_TYPE: Unbekannter Wert '%(value)s'. Erwartet wird einer von: "
 "%(expected)s (oder leer bei gesetztem ROOM)."
+
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:17
+#: dlcdb/dataexchange/views.py:262
+msgid "The HR sync is switched off."
+msgstr "Der HR-Sync ist ausgeschaltet."
+
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:18
+msgid "Sync now"
+msgstr "Jetzt synchronisieren"
+
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:30
+msgid "Latest runs"
+msgstr "Letzte Läufe"
+
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:43
+msgid "No runs yet."
+msgstr "Noch keine Läufe."
+
+#: dlcdb/dataexchange/templates/dataexchange/hr_sync.html:46
+msgid "HR sync entries in the journal"
+msgstr "HR-Sync-Einträge im Journal"
 
 #: dlcdb/dataexchange/templates/dataexchange/import.html:12
 #: dlcdb/dataexchange/templates/dataexchange/import_preview.html:12
@@ -2164,17 +2245,25 @@ msgstr ""
 "Der CSV-Datei fehlen erforderliche Spaltenüberschriften. Fehlende Spalte(n): "
 "%(missing)s. Erwartet werden: %(expected)s."
 
-#: dlcdb/dataexchange/views.py:110
+#: dlcdb/dataexchange/views.py:112
 msgid "Import preview"
 msgstr "Import-Vorschau"
 
-#: dlcdb/dataexchange/views.py:151
+#: dlcdb/dataexchange/views.py:153
 msgid "This import file has already been processed."
 msgstr "Diese Import-Datei wurde bereits verarbeitet."
 
-#: dlcdb/dataexchange/views.py:207
+#: dlcdb/dataexchange/views.py:209
 msgid "Search file name, note..."
 msgstr "Suche Dateiname, Notiz..."
+
+#: dlcdb/dataexchange/views.py:260
+msgid ""
+"The HR sync was started. Its result shows under “Latest runs” once it is "
+"done."
+msgstr ""
+"Der HR-Sync wurde gestartet. Sein Ergebnis erscheint unter “Letzte Läufe”, "
+"sobald er fertig ist."
 
 #: dlcdb/inventory/navigation.py:11 dlcdb/inventory/navigation.py:20
 msgid "Inventorize"
@@ -2188,8 +2277,8 @@ msgstr "SAP-Abgleich"
 msgid "VG bei MAs"
 msgstr "VG bei MAs"
 
-#: dlcdb/inventory/navigation.py:57 dlcdb/lending/navigation.py:37
-#: dlcdb/licenses/navigation.py:29 dlcdb/smallstuff/navigation.py:21
+#: dlcdb/inventory/navigation.py:57 dlcdb/lending/navigation.py:32
+#: dlcdb/licenses/navigation.py:31 dlcdb/smallstuff/navigation.py:21
 msgid "Docs"
 msgstr "Doku"
 
@@ -2431,6 +2520,11 @@ msgid_plural "Removed %(count)d entries older than %(date)s."
 msgstr[0] "%(count)d Eintrag älter als %(date)s entfernt."
 msgstr[1] "%(count)d Einträge älter als %(date)s entfernt."
 
+#: dlcdb/lending/admin.py:102 dlcdb/lending/views_profiles.py:33
+#, python-format
+msgid "“%(field)s” was empty and holds the starter content again."
+msgstr "“%(field)s” war leer und enthält wieder den Startinhalt."
+
 #: dlcdb/lending/filters.py:21 dlcdb/lending/templates/lending/index.html:48
 msgid "Overdue"
 msgstr "Überfällig"
@@ -2447,25 +2541,140 @@ msgstr "Geräteklasse..."
 msgid "Person..."
 msgstr "Person..."
 
-#: dlcdb/lending/forms.py:27
+#: dlcdb/lending/forms.py:30
 msgid "Available device"
 msgstr "Verfügbares Gerät"
 
-#: dlcdb/lending/forms.py:28
+#: dlcdb/lending/forms.py:31
 msgid "Search by EDV/Inv. no., manufacturer…"
 msgstr "Suche via EDV ID, Inventarnummer, Hersteller..."
 
-#: dlcdb/lending/forms.py:29 dlcdb/lending/views.py:301
+#: dlcdb/lending/forms.py:32 dlcdb/lending/views.py:296
 msgid "Please select a device to lend."
 msgstr "Bitte ein Gerät zum verleihen auswählen."
 
-#: dlcdb/lending/navigation.py:19
-msgid "Lending configuration"
-msgstr "Ausleihe Konfiguration"
+#: dlcdb/lending/models.py:17
+msgid "Nobody — no overdue mails"
+msgstr "Niemand – keine Mails zu überfälligen Ausleihen"
 
-#: dlcdb/lending/navigation.py:27
+#: dlcdb/lending/models.py:19
+msgid "Lender, IT in CC"
+msgstr "Ausleiher, IT in Kopie"
+
+#: dlcdb/lending/models.py:20
+msgid "IT only (testdrive: lender mails rerouted to IT)"
+msgstr "Nur IT (zum Testen: die Mails an Ausleiher gehen an die IT)"
+
+#: dlcdb/lending/models.py:26
+msgid "Overdue reminders to"
+msgstr "Erinnerungen an überfällige Ausleihen gehen an"
+
+#: dlcdb/lending/models.py:28
+msgid ""
+"Who receives the weekly overdue-lending reminder mails. The IT address is "
+"resolved per tenant: tenant contact email → Branding IT dept email → "
+"DEFAULT_FROM_EMAIL."
+msgstr ""
+"Wer die wöchentlichen Erinnerungen an überfällige Ausleihen erhält. Die IT-"
+"Adresse gilt je Mandant: Kontakt-Email des Mandanten → IT-Email aus dem "
+"Branding → DEFAULT_FROM_EMAIL."
+
+#: dlcdb/lending/models.py:62
+msgid "Preparation checklist"
+msgstr "Vorbereitungs-Checkliste"
+
+#: dlcdb/lending/models.py:64
+msgid ""
+"Printed with the lending slip. Basic Markdown; “[ ]” becomes a checkbox. "
+"Clear the field and save to get the starter content back."
+msgstr ""
+"Wird mit dem Ausleihzettel gedruckt. Einfaches Markdown; “[ ]” wird zum "
+"Ankreuzfeld. Leeren Sie das Feld und speichern Sie, um den Startinhalt "
+"zurückzubekommen."
+
+#: dlcdb/lending/models.py:73
+msgid "Mandatory regulations"
+msgstr "Verbindliche Ordnungen"
+
+#: dlcdb/lending/models.py:74
+msgid "On the lending slip, the borrower confirms having read them."
+msgstr ""
+"Auf dem Ausleihzettel bestätigt der Ausleiher, sie zur Kenntnis genommen zu "
+"haben."
+
+#: dlcdb/lending/models.py:79
+msgid "Lending slip template"
+msgstr "Vorlage des Ausleihzettels"
+
+#: dlcdb/lending/models.py:81
+msgid ""
+"Django template code; it should extend lending/printout_base.html. Context: "
+"record, lending_profile. The slip body and the checklist are included from "
+"lending/includes/, with sheet_for and pagebreak. Clear the field and save to "
+"get the starter content back."
+msgstr ""
+"Django-Template-Code; er sollte lending/printout_base.html erweitern. "
+"Kontext: record, lending_profile. Der Zettel und die Checkliste werden aus "
+"lending/includes/ eingebunden, mit sheet_for und pagebreak. Leeren Sie das "
+"Feld und speichern Sie, um den Startinhalt zurückzubekommen."
+
+#: dlcdb/lending/models.py:90
+#: dlcdb/lending/templates/lending/includes/_profile_fields.html:11
+#: dlcdb/lending/templates/lending/profile_detail.html:6
+#: dlcdb/lending/templates/lending/profile_detail.html:9
+#: dlcdb/lending/templates/lending/profile_history.html:18
+msgid "Lending profile"
+msgstr "Ausleih-Profil"
+
+#: dlcdb/lending/models.py:91
+#: dlcdb/lending/templates/lending/configuration.html:16
 msgid "Lending profiles"
 msgstr "Ausleih-Profile"
+
+#: dlcdb/lending/templates/lending/configuration.html:19
+#: dlcdb/lending/templates/lending/profile_form.html:6
+#: dlcdb/lending/templates/lending/profile_form.html:10
+msgid "Add lending profile"
+msgstr "Ausleih-Profil hinzufügen"
+
+#: dlcdb/lending/templates/lending/configuration.html:24
+msgid ""
+"One per device type: the lending slip template, the preparation checklist "
+"and the regulations the borrower confirms."
+msgstr ""
+"Eines je Geräteklasse: die Vorlage des Ausleihzettels, die Vorbereitungs-"
+"Checkliste und die Ordnungen, die der Ausleiher bestätigt."
+
+#: dlcdb/lending/templates/lending/configuration.html:31
+msgid "Slip template"
+msgstr "Zettel-Vorlage"
+
+#: dlcdb/lending/templates/lending/configuration.html:32
+msgid "Checklist"
+msgstr "Checkliste"
+
+#: dlcdb/lending/templates/lending/configuration.html:39
+#: dlcdb/lending/templates/lending/configuration.html:40
+#: dlcdb/notifications/templates/notifications/index.html:72
+#: dlcdb/theme/field_history.py:115
+msgid "Yes"
+msgstr "Ja"
+
+#: dlcdb/lending/templates/lending/configuration.html:39
+#: dlcdb/lending/templates/lending/configuration.html:40
+#: dlcdb/notifications/templates/notifications/index.html:74
+#: dlcdb/theme/field_history.py:115
+msgid "No"
+msgstr "Nein"
+
+#: dlcdb/lending/templates/lending/configuration.html:47
+msgid "No lending profiles yet: lending slips cannot be printed."
+msgstr ""
+"Noch keine Ausleih-Profile: Ausleihzettel können nicht gedruckt werden."
+
+#: dlcdb/lending/templates/lending/includes/_profile_fields.html:24
+msgid "Lending slip"
+msgstr "Ausleihzettel"
 
 #: dlcdb/lending/templates/lending/index.html:25
 #, python-format
@@ -2490,7 +2699,7 @@ msgstr "Aktionen"
 
 #: dlcdb/lending/templates/lending/index.html:77
 #: dlcdb/licenses/templates/licenses/history.html:22
-#: dlcdb/notifications/templates/notifications/index.html:116
+#: dlcdb/notifications/templates/notifications/index.html:117
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -2499,7 +2708,6 @@ msgid "Pick an available device and a person, choose a room, then lend."
 msgstr "Wähle Gerät und Person für den Verleih."
 
 #: dlcdb/lending/templates/lending/lend.html:32
-#: dlcdb/licenses/templates/licenses/form_partial.html:18
 msgid "Admin view"
 msgstr "Admin Ansicht"
 
@@ -2569,12 +2777,12 @@ msgstr "Zubehör, Notizen etc."
 msgid "Accessories / condition"
 msgstr "Zubehör/Zustand"
 
-#: dlcdb/lending/templates/lending/lend.html:239 dlcdb/lending/views.py:372
+#: dlcdb/lending/templates/lending/lend.html:239 dlcdb/lending/views.py:374
 msgid "Lend device"
 msgstr "Gerät verleihen"
 
 #: dlcdb/lending/templates/lending/lend.html:239
-#: dlcdb/lending/templates/lending/lend.html:279 dlcdb/lending/views.py:369
+#: dlcdb/lending/templates/lending/lend.html:279 dlcdb/lending/views.py:371
 msgid "Return device"
 msgstr "Gerät zurückgeben"
 
@@ -2595,18 +2803,72 @@ msgstr "Keine Ausleihschein-Vorlage gefunden. Hinzufügen?"
 msgid "Discard your unsaved changes and return the device?"
 msgstr "Änderungen verwerfen und zur Geräte-Seite zurückkehren?"
 
-#: dlcdb/lending/views.py:142
+#: dlcdb/lending/templates/lending/profile_delete.html:6
+#: dlcdb/lending/templates/lending/profile_delete.html:10
+msgid "Delete lending profile"
+msgstr "Ausleih-Profil löschen"
+
+#: dlcdb/lending/templates/lending/profile_delete.html:16
+#, python-format
+msgid ""
+"Delete the lending profile for “%(type)s”? Lending slips for this device "
+"type cannot be printed until it has a profile again; the deletion is kept in "
+"the profile history."
+msgstr ""
+"Das Ausleih-Profil für “%(type)s” löschen? Ausleihzettel für diese "
+"Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil "
+"hat; die Löschung bleibt in der Historie des Profils erhalten."
+
+#: dlcdb/lending/templates/lending/profile_delete.html:21
+#: dlcdb/tenants/templates/tenants/delete.html:21
+msgid "Yes, delete"
+msgstr "Ja, löschen"
+
+#: dlcdb/lending/templates/lending/profile_detail.html:16
+msgid ""
+"You may view this lending profile but do not have permission to edit it."
+msgstr "Sie dürfen dieses Ausleih-Profil ansehen, aber nicht bearbeiten."
+
+#: dlcdb/lending/templates/lending/profile_detail.html:28
+#: dlcdb/tenants/templates/tenants/detail.html:57
+msgid "Changes"
+msgstr "Änderungen"
+
+#: dlcdb/lending/templates/lending/profile_form.html:19
+msgid "Create lending profile"
+msgstr "Ausleih-Profil hinzufügen"
+
+#: dlcdb/lending/templates/lending/profile_history.html:20
+msgid "Back to lending profile"
+msgstr "Zurück zum Ausleih-Profil"
+
+#: dlcdb/lending/views.py:137
 msgid "Search device, person, note..."
 msgstr "Suche Gerät, Person, Notiz..."
 
-#: dlcdb/lending/views.py:230
+#: dlcdb/lending/views.py:225
 #, python-format
 msgid "Configuration error: %(err)s"
 msgstr "Konfigurationsfehler: %(err)s"
 
-#: dlcdb/lending/views.py:305
+#: dlcdb/lending/views.py:300
 msgid "This device is no longer available for lending."
 msgstr "Das Gerät ist nicht mehr für den Verleih verfügbar."
+
+#: dlcdb/lending/views_profiles.py:45
+#, python-format
+msgid "Lending profile for “%(type)s” was created."
+msgstr "Ausleih-Profil für “%(type)s” wurde angelegt."
+
+#: dlcdb/lending/views_profiles.py:71
+#, python-brace-format
+msgid "Lending profile for “{type}” was updated."
+msgstr "Ausleih-Profil für “{type}” wurde geändert."
+
+#: dlcdb/lending/views_profiles.py:106
+#, python-format
+msgid "Lending profile for “%(type)s” was deleted."
+msgstr "Ausleih-Profil für “%(type)s” wurde gelöscht."
 
 #: dlcdb/licenses/filters.py:28 dlcdb/licenses/templates/licenses/index.html:95
 msgid "License type"
@@ -2653,14 +2915,22 @@ msgid "Expiration Date"
 msgstr "Ablaufdatum"
 
 #: dlcdb/licenses/models.py:45
+msgid "Default subscribers"
+msgstr "Standard-Abonnenten"
+
+#: dlcdb/licenses/models.py:46
 msgid "These subscribers will be added to all new licenses by default."
 msgstr ""
 "Diese Abonnenten werden standardmäßig allen neuen Lizenzen hinzugefügt."
 
-#: dlcdb/licenses/models.py:52 dlcdb/licenses/models.py:53
-#: dlcdb/licenses/navigation.py:19
+#: dlcdb/licenses/models.py:53 dlcdb/licenses/models.py:54
+#: dlcdb/licenses/navigation.py:20
 msgid "Licenses configuration"
 msgstr "Lizenzmodul Konfiguration"
+
+#: dlcdb/licenses/templates/licenses/form_partial.html:18
+msgid "View asset"
+msgstr "Asset anzeigen"
 
 #: dlcdb/licenses/templates/licenses/form_partial.html:28
 #: dlcdb/licenses/templates/licenses/index.html:66
@@ -2686,16 +2956,16 @@ msgstr[1] "%(counter)s von %(total)s Lizenzen"
 msgid "No licenses found."
 msgstr "Keine Lizenz gefunden."
 
-#: dlcdb/licenses/views.py:65
+#: dlcdb/licenses/views.py:66
 msgid "Search title, manufacturer, supplier, inventory ID..."
 msgstr "Suche nach Titel, Hersteller, Zulieferer, Inventar-ID..."
 
-#: dlcdb/licenses/views.py:106
+#: dlcdb/licenses/views.py:107
 #, python-brace-format
 msgid "License “{license}” saved."
-msgstr ""
+msgstr "Lizenz “{license}” gespeichert."
 
-#: dlcdb/licenses/views.py:142
+#: dlcdb/licenses/views.py:143
 msgid "Edit license"
 msgstr "Lizenz bearbeiten"
 
@@ -2723,7 +2993,7 @@ msgstr ""
 #: dlcdb/licenses/views.py:201
 #, python-brace-format
 msgid "License “{license}” added."
-msgstr ""
+msgstr "Lizenz “{license}” hinzugefügt."
 
 #: dlcdb/licenses/views.py:219
 msgid "New license"
@@ -2902,16 +3172,6 @@ msgstr "Benachrichtigung auch wenn keine Änderungen stattgefunden haben?"
 msgid "Notify empty"
 msgstr "Benachrichtigungen ohne Änderung"
 
-#: dlcdb/notifications/templates/notifications/index.html:72
-#: dlcdb/theme/field_history.py:115
-msgid "Yes"
-msgstr "Ja"
-
-#: dlcdb/notifications/templates/notifications/index.html:74
-#: dlcdb/theme/field_history.py:115
-msgid "No"
-msgstr "Nein"
-
 #: dlcdb/notifications/templates/notifications/index.html:77
 msgid "Not available for device-based subscriptions."
 msgstr "Für gerätebezogene Abonnements nicht verfügbar."
@@ -2928,16 +3188,16 @@ msgstr "Deaktivieren"
 msgid "Activate"
 msgstr "Aktivieren"
 
-#: dlcdb/notifications/templates/notifications/index.html:101
+#: dlcdb/notifications/templates/notifications/index.html:100
 msgid "Delete this subscription?"
 msgstr "Abonnement löschen?"
 
-#: dlcdb/notifications/templates/notifications/index.html:104
+#: dlcdb/notifications/templates/notifications/index.html:105
 #: dlcdb/theme/templates/theme/includes/_form_action_bar.html:44
 msgid "Delete"
 msgstr "Löschen"
 
-#: dlcdb/notifications/templates/notifications/index.html:124
+#: dlcdb/notifications/templates/notifications/index.html:125
 msgid "You have no subscriptions yet."
 msgstr "Noch keine Abonnements."
 
@@ -2977,8 +3237,13 @@ msgid "Subscription deactivated."
 msgstr "Abonnement deaktiviert."
 
 #: dlcdb/organization/apps.py:12
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:11
 msgid "Organization"
 msgstr "Organisation"
+
+#: dlcdb/organization/models.py:27
+msgid "Organization name (English)"
+msgstr "Name der Organisation (Englisch)"
 
 #: dlcdb/organization/models.py:28 dlcdb/organization/models.py:35
 msgid "A Company that Makes Everything"
@@ -2988,23 +3253,54 @@ msgstr "Eine Firma, die alles herstellt"
 msgid "Company, institute, site name (english version)."
 msgstr "Name der Firma, des Instituts oder Standorts (englische Version)."
 
+#: dlcdb/organization/models.py:34
+msgid "Organization name (German)"
+msgstr "Name der Organisation (Deutsch)"
+
 #: dlcdb/organization/models.py:36
 msgid "Company, institute, site name (german version)."
 msgstr "Name der Firma, des Instituts oder Standorts (deutsche Version)."
+
+#: dlcdb/organization/models.py:41
+msgid "Abbreviation"
+msgstr "Abkürzung"
 
 #: dlcdb/organization/models.py:43
 msgid "Company, institute, site abbreviation."
 msgstr "Abkürzung der Firma, des Instituts oder Standorts."
 
-#: dlcdb/organization/models.py:60
-msgid ""
-"Logo file. SVG, white foreground, transparent background. Used in the main "
-"navigation bar/site header."
-msgstr ""
-"Logo-Datei. SVG, weißer Vordergrund, transparenter Hintergrund. Wird in der "
-"Hauptnavigation/Kopfzeile verwendet."
+#: dlcdb/organization/models.py:48
+msgid "Street"
+msgstr "Straße"
 
-#: dlcdb/organization/models.py:69
+#: dlcdb/organization/models.py:49
+msgid "Street and house number. Used in printouts."
+msgstr "Straße und Hausnummer. Erscheint in Ausdrucken."
+
+#: dlcdb/organization/models.py:52
+msgid "ZIP code"
+msgstr "Postleitzahl"
+
+#: dlcdb/organization/models.py:52 dlcdb/organization/models.py:55
+#: dlcdb/organization/models.py:57
+msgid "Used in printouts."
+msgstr "Erscheint in Ausdrucken."
+
+#: dlcdb/organization/models.py:55
+msgid "City"
+msgstr "Ort"
+
+#: dlcdb/organization/models.py:57 dlcdb/rooms/templates/rooms/detail.html:37
+#: dlcdb/rooms/templates/rooms/index.html:44
+#: dlcdb/rooms/templates/rooms/index.html:69
+msgid "Website"
+msgstr "Website"
+
+#: dlcdb/organization/models.py:63
+msgid "Logo"
+msgstr "Logo"
+
+#: dlcdb/organization/models.py:64
 msgid ""
 "Logo file. SVG, black foreground, transparent background. Used in PDF "
 "printouts."
@@ -3012,9 +3308,67 @@ msgstr ""
 "Logo-Datei. SVG, schwarzer Vordergrund, transparenter Hintergrund. Wird in "
 "PDF-Ausdrucken verwendet."
 
+#: dlcdb/organization/models.py:71
+msgid "Figurative mark"
+msgstr "Bildmarke"
+
+#: dlcdb/organization/models.py:72
+msgid "The logo without its lettering. SVG. Used in printouts."
+msgstr "Das Logo ohne Schriftzug. SVG. Erscheint in Ausdrucken."
+
+#: dlcdb/organization/models.py:78
+msgid "IT department name"
+msgstr "Name der IT-Abteilung"
+
+#: dlcdb/organization/models.py:79
+msgid "Wording for the IT department. Used in printouts."
+msgstr "Bezeichnung der IT-Abteilung. Erscheint in Ausdrucken."
+
+#: dlcdb/organization/models.py:84
+msgid "IT department phone"
+msgstr "Telefon der IT-Abteilung"
+
+#: dlcdb/organization/models.py:88
+msgid "IT department email"
+msgstr "Email der IT-Abteilung"
+
+#: dlcdb/organization/models.py:89
+msgid ""
+"Used in printouts and mails, and for overdue reminders of tenants without a "
+"contact email."
+msgstr ""
+"Erscheint in Ausdrucken und Mails und gilt für Erinnerungen an überfällige "
+"Ausleihen bei Mandanten ohne Kontakt-Email."
+
+#: dlcdb/organization/models.py:96
+msgid "Room plan"
+msgstr "Raumplan"
+
+#: dlcdb/organization/models.py:97
+msgid "A file, e.g. a PDF, linked from the room lists."
+msgstr "Eine Datei, z. B. ein PDF, verlinkt aus den Raumlisten."
+
+#: dlcdb/organization/models.py:103
+msgid "Documentation URL"
+msgstr "URL der Dokumentation"
+
+#: dlcdb/organization/models.py:104
+msgid "If you host the documentation on your own, provide the URL here."
+msgstr ""
+"Wenn Sie die Dokumentation selbst hosten, tragen Sie hier ihre URL ein."
+
+#: dlcdb/organization/models.py:111 dlcdb/organization/models.py:112
 #: dlcdb/organization/navigation.py:11
 msgid "Branding"
 msgstr "Branding"
+
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:29
+msgid "IT department"
+msgstr "IT-Abteilung"
+
+#: dlcdb/organization/templates/organization/includes/_branding_fields.html:43
+msgid "Files and links"
+msgstr "Dateien und Links"
 
 #: dlcdb/persons/filters.py:21 dlcdb/persons/templates/persons/detail.html:48
 #: dlcdb/persons/templates/persons/index.html:30
@@ -3195,45 +3549,46 @@ msgstr "Jeder externe Status..."
 
 #: dlcdb/rooms/forms.py:60
 msgid "Pattern"
-msgstr ""
+msgstr "Muster"
 
 #: dlcdb/rooms/forms.py:61
 msgid ""
 "A regular expression in Python syntax, matched against every room number."
 msgstr ""
+"Ein regulärer Ausdruck in Python-Syntax, der mit jeder Raumnummer "
+"abgeglichen wird."
 
 #: dlcdb/rooms/forms.py:65
 msgid "Replacement"
-msgstr ""
+msgstr "Ersetzung"
 
 #: dlcdb/rooms/forms.py:67
 msgid "The new room number. \\1, \\2, … insert the pattern's groups."
 msgstr ""
+"Die neue Raum-Nummer. \\1, \\2, … fügt die Ersetzungsgruppen des Musters ein."
 
 #: dlcdb/rooms/rename.py:76
 msgid "The new number is empty."
-msgstr ""
+msgstr "Die neue Nummer ist leer."
 
 #: dlcdb/rooms/rename.py:78
 #, python-format
 msgid "The new number is longer than %(max_length)d characters."
-msgstr ""
+msgstr "Die neue Nummer ist länger als %(max_length)d Zeichen."
 
 #: dlcdb/rooms/rename.py:85 dlcdb/theme/similar.py:186
-#, fuzzy, python-format
-#| msgid "%(model)s “%(obj)s” was updated."
+#, python-format
 msgid "%(model)s “%(name)s” exists, but is deactivated."
-msgstr "%(model)s “%(obj)s” geändert."
+msgstr "%(model)s “%(name)s” existiert, ist aber deaktiviert."
 
 #: dlcdb/rooms/rename.py:87 dlcdb/theme/similar.py:188
-#, fuzzy, python-format
-#| msgid "%(model)s “%(obj)s” was created."
+#, python-format
 msgid "%(model)s “%(name)s” already exists."
-msgstr "%(model)s “%(obj)s” erstellt."
+msgstr "%(model)s “%(name)s” existiert bereits."
 
 #: dlcdb/rooms/rename.py:90
 msgid "Another room gets the same number."
-msgstr ""
+msgstr "Ein anderer Raum erhält die selbe Nummer."
 
 #: dlcdb/rooms/templates/rooms/detail.html:12
 #: dlcdb/rooms/templates/rooms/index.html:80
@@ -3249,12 +3604,6 @@ msgstr ""
 #: dlcdb/rooms/templates/rooms/detail.html:31
 msgid "Number"
 msgstr "Nummer"
-
-#: dlcdb/rooms/templates/rooms/detail.html:37
-#: dlcdb/rooms/templates/rooms/index.html:44
-#: dlcdb/rooms/templates/rooms/index.html:69
-msgid "Website"
-msgstr "Website"
 
 #: dlcdb/rooms/templates/rooms/detail.html:64
 #, python-format
@@ -3380,10 +3729,16 @@ msgid ""
 "<code>G\\1</code> turn 235 into G235. Rooms whose number does not match keep "
 "it. Nothing is renamed before you confirm the preview."
 msgstr ""
+"Ein regulärer Ausdruck weist vielen Räumen eine neue Nummer zu, "
+"beispielsweise den Gebäuden, deren Nummern nur aus Ziffern bestehen: Das "
+"Muster <code>^(\\d+)$</code> und die Ersetzung <code>G\\1</code> wandeln 235 "
+"in G235 um. Räume, deren Nummer nicht übereinstimmt, behalten ihre "
+"ursprüngliche Nummer. Es wird nichts umbenannt, bevor Sie die Vorschau "
+"bestätigen."
 
 #: dlcdb/rooms/templates/rooms/rename.html:26
 msgid "Expression"
-msgstr ""
+msgstr "Ausdruck"
 
 #: dlcdb/rooms/templates/rooms/rename.html:48
 msgid "New number"
@@ -3509,34 +3864,35 @@ msgstr "Seite anzeigen"
 msgid " By %(filter_title)s "
 msgstr "Nach %(filter_title)s "
 
-#: dlcdb/templates/admin/navbar.html:34
+#: dlcdb/templates/admin/navbar.html:33
 msgid "Processes"
 msgstr "Prozesse"
 
-#: dlcdb/templates/admin/navbar.html:45
+#: dlcdb/templates/admin/navbar.html:44
 msgid "Data management"
 msgstr "Datenhaltung"
 
-#: dlcdb/templates/admin/navbar.html:75
+#: dlcdb/templates/admin/navbar.html:74
+#: dlcdb/theme/templates/theme/_settings_base.html:23
 #: dlcdb/theme/templates/theme/includes/navbar.html:80
 #: dlcdb/theme/templates/theme/includes/navbar.html:82
 #: dlcdb/theme/templates/theme/includes/navbar.html:85
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: dlcdb/templates/admin/navbar.html:91
+#: dlcdb/templates/admin/navbar.html:90
 #: dlcdb/theme/templates/theme/includes/navbar.html:103
 #: dlcdb/theme/templates/theme/includes/navbar.html:121
 msgid "All permissions, but only the devices of your tenants"
 msgstr "Alle Berechtigungen, aber nur die Geräte Ihrer Mandanten"
 
-#: dlcdb/templates/admin/navbar.html:91
+#: dlcdb/templates/admin/navbar.html:90
 #: dlcdb/theme/templates/theme/includes/navbar.html:103
 #: dlcdb/theme/templates/theme/includes/navbar.html:121
 msgid "Superuser"
 msgstr "Superuser"
 
-#: dlcdb/templates/admin/navbar.html:115
+#: dlcdb/templates/admin/navbar.html:114
 #: dlcdb/theme/templates/theme/includes/navbar.html:178
 msgid "Language"
 msgstr "Sprache"
@@ -3709,10 +4065,6 @@ msgstr ""
 "Mandant “%(tenant)s” löschen? Seine Gruppenzuordnungen werden entfernt; die "
 "Löschung bleibt in der Mandanten-Historie erhalten."
 
-#: dlcdb/tenants/templates/tenants/delete.html:21
-msgid "Yes, delete"
-msgstr "Ja, löschen"
-
 #: dlcdb/tenants/templates/tenants/detail.html:16
 msgid "You may view this tenant but do not have permission to edit it."
 msgstr ""
@@ -3726,10 +4078,6 @@ msgstr "Benutzer mit Zugriff auf diesen Mandanten"
 #: dlcdb/tenants/templates/tenants/detail.html:52
 msgid "A tenant with devices or imports cannot be deleted."
 msgstr "Ein Mandant mit Geräten oder Importen kann nicht gelöscht werden."
-
-#: dlcdb/tenants/templates/tenants/detail.html:57
-msgid "Changes"
-msgstr "Änderungen"
 
 #: dlcdb/tenants/templates/tenants/includes/_form_fields.html:14
 msgid "Which groups see this tenant is set in the tenant overview."
@@ -3812,22 +4160,19 @@ msgstr ""
 "Mandanten und Gruppen sind nötig, um festzulegen, wer welche Geräte sieht."
 
 #: dlcdb/tenants/views.py:98
-#, fuzzy, python-brace-format
-#| msgid "Tenant “%(tenant)s” was created. Tick the groups that should see it."
+#, python-brace-format
 msgid "Tenant “{tenant}” was created. Tick the groups that should see it."
 msgstr ""
-"Mandant “%(tenant)s” wurde hinzugefügt. Gruppen anhaken, die ihn sehen "
-"sollen."
+"Mandant “{tenant}” wurde hinzugefügt. Gruppen anhaken, die ihn sehen sollen."
 
 #: dlcdb/tenants/views.py:105
 msgid "Create tenant"
 msgstr "Mandant hinzufügen"
 
 #: dlcdb/tenants/views.py:124
-#, fuzzy, python-brace-format
-#| msgid "Tenant “%(tenant)s” was updated."
+#, python-brace-format
 msgid "Tenant “{tenant}” was updated."
-msgstr "Mandant “%(tenant)s” wurde geändert."
+msgstr "Mandant “{tenant}” wurde geändert."
 
 #: dlcdb/tenants/views.py:163
 #, python-format
@@ -3937,6 +4282,15 @@ msgstr "%(count)d ausgewählt"
 #: dlcdb/theme/filters.py:17
 msgid "No note"
 msgstr "Kein Notiz"
+
+#: dlcdb/theme/settings_page.py:55
+#, python-format
+msgid "%(settings)s saved."
+msgstr "%(settings)s gespeichert."
+
+#: dlcdb/theme/templates/theme/_settings_base.html:33
+msgid "You may view these settings but do not have permission to change them."
+msgstr "Sie dürfen diese Einstellungen ansehen, aber nicht ändern."
 
 #: dlcdb/theme/templates/theme/filterbar/_chip.html:14
 #, python-format
@@ -4053,10 +4407,8 @@ msgid "No matching person found."
 msgstr "Keine entsprechende Person gefunden."
 
 #: dlcdb/theme/templates/theme/includes/_similar.html:25
-#, fuzzy
-#| msgid "Already inventorized"
 msgid "Already there:"
-msgstr "Schon inventorisiert"
+msgstr "Existiert schon:"
 
 #: dlcdb/theme/templates/theme/includes/_similar.html:25
 msgid "Similar existing entries:"
@@ -4168,7 +4520,7 @@ msgstr "%(name)s bearbeiten"
 #: dlcdb/theme/templates/theme/widgets/tom_select.html:16
 #, python-format
 msgid "View %(name)s"
-msgstr ""
+msgstr "Zeige %(name)s"
 
 #: dlcdb/theme/templates/theme/widgets/tom_select.html:20
 #: dlcdb/theme/templates/theme/widgets/tom_select.html:29
@@ -4184,218 +4536,18 @@ msgstr "Hinzugefügt %(name)s"
 msgid "Type to search…"
 msgstr "Suchbegriff eingeben..."
 
-msgid "Remove token"
-msgstr "Token entfernen"
-
-msgid "A token is stored; leave the field empty to keep it."
-msgstr "Ein Token ist gespeichert; lassen Sie das Feld leer, um ihn zu behalten."
-
-msgid "Enabled"
-msgstr "Aktiviert"
-
-msgid "Off: the periodic sync and the management command exit at once."
-msgstr "Aus: Der regelmäßige Sync und das Management-Command beenden sich sofort."
-
-msgid "HR API URL"
-msgstr "HR-API-URL"
-
-msgid "The complete URL of the HR contracts endpoint or of a JSON dump, without a query string, e.g. https://hr.example.org/api/external_interface/contracts/. The code appends filters and fields; a static JSON file ignores them."
-msgstr "Die vollständige URL des HR-Endpunkts für Verträge oder einer JSON-Datei, ohne Query-String, z. B. https://hr.example.org/api/external_interface/contracts/. Filter und Felder hängt der Code an; eine statische JSON-Datei ignoriert sie."
-
-msgid "HR API token"
-msgstr "HR-API-Token"
-
-msgid "Sent as the X-API-KEY header; stored in plain text in the database."
-msgstr "Wird als X-API-KEY-Header gesendet und im Klartext in der Datenbank gespeichert."
-
-msgid "A regular expression (Python syntax) matched against the room HR names for a person, e.g. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leave empty if HR names the DLCDB room numbers as they are."
-msgstr "Ein regulärer Ausdruck (Python-Syntax), angewandt auf den Raum, den das HR-System für eine Person nennt, z. B. ^(\\w)\\w*-(\\d+[a-z]?)(?:-\\d+)?$. Leer lassen, wenn das HR-System die DLCDB-Raumnummern unverändert nennt."
-
-msgid "The DLCDB room number for a room the pattern matches; \\1, \\2, … insert the pattern's groups. With \\1\\2 and the pattern above, Gü-235-02 from HR becomes room G235."
-msgstr "Die DLCDB-Raumnummer für einen Raum, auf den das Muster passt; \\1, \\2, … fügen die Gruppen des Musters ein. Mit \\1\\2 und dem Muster oben wird aus Gü-235-02 im HR-System der Raum G235."
-
-msgid "Provide the URL without a query string (“?…”): the code appends the query."
-msgstr "Geben Sie die URL ohne Query-String (“?…”) an: Den hängt der Code an."
-
-msgid "The HR sync is switched off."
-msgstr "Der HR-Sync ist ausgeschaltet."
-
-msgid "Sync now"
-msgstr "Jetzt synchronisieren"
-
-msgid "Latest runs"
-msgstr "Letzte Läufe"
-
-msgid "No runs yet."
-msgstr "Noch keine Läufe."
-
-msgid "HR sync entries in the journal"
-msgstr "HR-Sync-Einträge im Journal"
-
-msgid "The HR sync was started. Its result shows under “Latest runs” once it is done."
-msgstr "Der HR-Sync wurde gestartet. Sein Ergebnis erscheint unter “Letzte Läufe”, sobald er fertig ist."
-
-#, python-format
-msgid "“%(field)s” was empty and holds the starter content again."
-msgstr "“%(field)s” war leer und enthält wieder den Startinhalt."
-
-msgid "Nobody — no overdue mails"
-msgstr "Niemand – keine Mails zu überfälligen Ausleihen"
-
-msgid "Lender, IT in CC"
-msgstr "Ausleiher, IT in Kopie"
-
-msgid "IT only (testdrive: lender mails rerouted to IT)"
-msgstr "Nur IT (zum Testen: die Mails an Ausleiher gehen an die IT)"
-
-msgid "Overdue reminders to"
-msgstr "Erinnerungen an überfällige Ausleihen gehen an"
-
-msgid "Who receives the weekly overdue-lending reminder mails. The IT address is resolved per tenant: tenant contact email → Branding IT dept email → DEFAULT_FROM_EMAIL."
-msgstr "Wer die wöchentlichen Erinnerungen an überfällige Ausleihen erhält. Die IT-Adresse gilt je Mandant: Kontakt-Email des Mandanten → IT-Email aus dem Branding → DEFAULT_FROM_EMAIL."
-
-msgid "Preparation checklist"
-msgstr "Vorbereitungs-Checkliste"
-
-msgid "Printed with the lending slip. Basic Markdown; “[ ]” becomes a checkbox. Clear the field and save to get the starter content back."
-msgstr "Wird mit dem Ausleihzettel gedruckt. Einfaches Markdown; “[ ]” wird zum Ankreuzfeld. Leeren Sie das Feld und speichern Sie, um den Startinhalt zurückzubekommen."
-
-msgid "Mandatory regulations"
-msgstr "Verbindliche Ordnungen"
-
-msgid "On the lending slip, the borrower confirms having read them."
-msgstr "Auf dem Ausleihzettel bestätigt der Ausleiher, sie zur Kenntnis genommen zu haben."
-
-msgid "Lending slip template"
-msgstr "Vorlage des Ausleihzettels"
-
-msgid "Django template code; it should extend lending/printout_base.html. Context: record, lending_profile. The slip body and the checklist are included from lending/includes/, with sheet_for and pagebreak. Clear the field and save to get the starter content back."
-msgstr "Django-Template-Code; er sollte lending/printout_base.html erweitern. Kontext: record, lending_profile. Der Zettel und die Checkliste werden aus lending/includes/ eingebunden, mit sheet_for und pagebreak. Leeren Sie das Feld und speichern Sie, um den Startinhalt zurückzubekommen."
-
-msgid "Lending profile"
-msgstr "Ausleih-Profil"
-
-msgid "Add lending profile"
-msgstr "Ausleih-Profil hinzufügen"
-
-msgid "One per device type: the lending slip template, the preparation checklist and the regulations the borrower confirms."
-msgstr "Eines je Geräteklasse: die Vorlage des Ausleihzettels, die Vorbereitungs-Checkliste und die Ordnungen, die der Ausleiher bestätigt."
-
-msgid "Slip template"
-msgstr "Zettel-Vorlage"
-
-msgid "Checklist"
-msgstr "Checkliste"
-
-msgid "No lending profiles yet: lending slips cannot be printed."
-msgstr "Noch keine Ausleih-Profile: Ausleihzettel können nicht gedruckt werden."
-
-msgid "Lending slip"
-msgstr "Ausleihzettel"
-
-msgid "Delete lending profile"
-msgstr "Ausleih-Profil löschen"
-
-#, python-format
-msgid "Delete the lending profile for “%(type)s”? Lending slips for this device type cannot be printed until it has a profile again; the deletion is kept in the profile history."
-msgstr "Das Ausleih-Profil für “%(type)s” löschen? Ausleihzettel für diese Geräteklasse lassen sich erst wieder drucken, wenn sie wieder ein Profil hat; die Löschung bleibt in der Historie des Profils erhalten."
-
-msgid "You may view this lending profile but do not have permission to edit it."
-msgstr "Sie dürfen dieses Ausleih-Profil ansehen, aber nicht bearbeiten."
-
-msgid "Create lending profile"
-msgstr "Ausleih-Profil hinzufügen"
-
-msgid "Back to lending profile"
-msgstr "Zurück zum Ausleih-Profil"
-
-#, python-format
-msgid "Lending profile for “%(type)s” was created."
-msgstr "Ausleih-Profil für “%(type)s” wurde angelegt."
-
-#, python-brace-format
-msgid "Lending profile for “{type}” was updated."
-msgstr "Ausleih-Profil für “{type}” wurde geändert."
-
-#, python-format
-msgid "Lending profile for “%(type)s” was deleted."
-msgstr "Ausleih-Profil für “%(type)s” wurde gelöscht."
-
-msgid "Default subscribers"
-msgstr "Standard-Abonnenten"
-
-msgid "Organization name (English)"
-msgstr "Name der Organisation (Englisch)"
-
-msgid "Organization name (German)"
-msgstr "Name der Organisation (Deutsch)"
-
-msgid "Abbreviation"
-msgstr "Abkürzung"
-
-msgid "Street"
-msgstr "Straße"
-
-msgid "Street and house number. Used in printouts."
-msgstr "Straße und Hausnummer. Erscheint in Ausdrucken."
-
-msgid "ZIP code"
-msgstr "Postleitzahl"
-
-msgid "Used in printouts."
-msgstr "Erscheint in Ausdrucken."
-
-msgid "City"
-msgstr "Ort"
-
-msgid "Logo"
-msgstr "Logo"
-
-msgid "Figurative mark"
-msgstr "Bildmarke"
-
-msgid "The logo without its lettering. SVG. Used in printouts."
-msgstr "Das Logo ohne Schriftzug. SVG. Erscheint in Ausdrucken."
-
-msgid "IT department name"
-msgstr "Name der IT-Abteilung"
-
-msgid "Wording for the IT department. Used in printouts."
-msgstr "Bezeichnung der IT-Abteilung. Erscheint in Ausdrucken."
-
-msgid "IT department phone"
-msgstr "Telefon der IT-Abteilung"
-
-msgid "IT department email"
-msgstr "Email der IT-Abteilung"
-
-msgid "Used in printouts and mails, and for overdue reminders of tenants without a contact email."
-msgstr "Erscheint in Ausdrucken und Mails und gilt für Erinnerungen an überfällige Ausleihen bei Mandanten ohne Kontakt-Email."
-
-msgid "Room plan"
-msgstr "Raumplan"
-
-msgid "A file, e.g. a PDF, linked from the room lists."
-msgstr "Eine Datei, z. B. ein PDF, verlinkt aus den Raumlisten."
-
-msgid "Documentation URL"
-msgstr "URL der Dokumentation"
-
-msgid "If you host the documentation on your own, provide the URL here."
-msgstr "Wenn Sie die Dokumentation selbst hosten, tragen Sie hier ihre URL ein."
-
-msgid "IT department"
-msgstr "IT-Abteilung"
-
-msgid "Files and links"
-msgstr "Dateien und Links"
-
-#, python-format
-msgid "%(settings)s saved."
-msgstr "%(settings)s gespeichert."
-
-msgid "You may view these settings but do not have permission to change them."
-msgstr "Sie dürfen diese Einstellungen ansehen, aber nicht ändern."
+#~ msgid "Restore devices from REMOVED to LOST"
+#~ msgstr "Wiederherstellung von REMOVED auf LOST"
+
+#~ msgid "Checklist & Lending configuration"
+#~ msgstr "Checkliste & Ausleihkonfiguration"
+
+#~ msgid ""
+#~ "Logo file. SVG, white foreground, transparent background. Used in the "
+#~ "main navigation bar/site header."
+#~ msgstr ""
+#~ "Logo-Datei. SVG, weißer Vordergrund, transparenter Hintergrund. Wird in "
+#~ "der Hauptnavigation/Kopfzeile verwendet."
 
 #~ msgid "Not locatable"
 #~ msgstr "Nicht auffindbar"
