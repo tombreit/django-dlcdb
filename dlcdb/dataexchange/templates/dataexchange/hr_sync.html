@@ -10,6 +10,14 @@ A run's notes list the changed and failed contracts and the rooms DLCDB lacks; a
 run with only missing rooms is not journaled, so this is where they show.
 {% endcomment %}
 
+{% block detail_form_fields %}
+  {% include "dataexchange/includes/_hr_sync_fields.html" %}
+{% endblock detail_form_fields %}
+
+{% block detail_readonly %}
+  {% include "dataexchange/includes/_hr_sync_fields.html" %}
+{% endblock detail_readonly %}
+
 {% block object_tools %}
   {% if perms.dataexchange.change_udbsyncconfiguration %}
     <form method="post" action="{% url 'dataexchange:hr_sync_run' %}">

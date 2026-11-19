@@ -115,8 +115,6 @@ class HrSyncConfigurationForm(forms.ModelForm):
 
     remove_api_token = forms.BooleanField(label=_("Remove token"), required=False)
 
-    field_order = ["enabled", "url", "api_token", "remove_api_token"]
-
     class Meta:
         model = UdbSyncConfiguration
         fields = ["enabled", "url", "api_token", "room_number_pattern", "room_number_replacement"]
@@ -138,6 +136,9 @@ class HrSyncConfigurationForm(forms.ModelForm):
         else:
             del self.fields["remove_api_token"]
         add_bootstrap_classes(self)
+        if "remove_api_token" in self.fields:
+            # A toggle button in the token's input group (_hr_sync_fields.html), not a checkbox.
+            self.fields["remove_api_token"].widget.attrs["class"] = "btn-check"
 
     def clean(self):
         cleaned_data = super().clean()

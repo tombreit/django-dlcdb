@@ -1,0 +1,36 @@
+{% comment %}
+The HR sync configuration form's fields (dataexchange/forms.py) in one card, on the
+editable and the read-only page: the token and "Remove token" (only with a stored
+token) form one input group, the toggle as a Bootstrap toggle button.
+Params: form, title, icon.
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi {{ icon }} text-primary"></i>
+    <h2 class="h6 mb-0">{{ title }}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-12">{% include "theme/includes/_switch_field.html" with field=form.enabled %}</div>
+      {% include "theme/includes/_field.html" with field=form.url %}
+      <div class="col-12">
+        {{ form.api_token.label_tag }}
+        <div class="input-group">
+          {{ form.api_token }}
+          {% if form.remove_api_token %}
+            {{ form.remove_api_token }}
+            <label class="btn btn-outline-danger text-nowrap" for="{{ form.remove_api_token.id_for_label }}">
+              <i class="bi bi-trash"></i> {{ form.remove_api_token.label }}
+            </label>
+          {% endif %}
+        </div>
+        {% if form.api_token.help_text %}<div class="form-text">{{ form.api_token.help_text }}</div>{% endif %}
+        {% for error in form.api_token.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      {% include "theme/includes/_field.html" with field=form.room_number_pattern %}
+      {% include "theme/includes/_field.html" with field=form.room_number_replacement %}
+    </div>
+  </div>
+</section>
