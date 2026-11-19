@@ -16,6 +16,7 @@ from django.contrib.admin.sites import site
 from django.test import RequestFactory
 from django.urls import reverse
 
+from dlcdb.dataexchange.forms import HrSyncConfigurationForm
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.journal.models import JournalEntry
 
@@ -57,6 +58,16 @@ def test_the_page_needs_the_view_permission(login, perms, status):
 @pytest.mark.parametrize("perms", [(VIEW,), (VIEW, CHANGE)])
 def test_the_stored_token_never_reaches_the_browser(login, perms):
     assert TOKEN not in login(*perms).get(URL).content.decode()
+
+
+@pytest.mark.parametrize("stored", [True, False])
+def test_a_stored_token_shows_as_dots(request, login, stored):
+    if stored:
+        request.getfixturevalue("stored_token")
+
+    content = login(VIEW, CHANGE).get(URL).content.decode()
+
+    assert (f'placeholder="{HrSyncConfigurationForm.TOKEN_MASK}"' in content) == stored
 
 
 @pytest.mark.usefixtures("stored_token")

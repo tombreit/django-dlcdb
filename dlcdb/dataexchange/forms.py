@@ -106,9 +106,12 @@ class RemoverListAdminForm(forms.ModelForm):
 class HrSyncConfigurationForm(forms.ModelForm):
     """
     Settings › HR API sync configuration. The token is never sent to the browser:
-    a typed token replaces the stored one, an empty field keeps it, and "Remove
-    token" clears it.
+    a stored token shows as a placeholder of dots, a typed token replaces it, an
+    empty field keeps it, and "Remove token" clears it.
     """
+
+    # The same length whatever the token's: the dots say only that one is stored.
+    TOKEN_MASK = "•" * 12
 
     remove_api_token = forms.BooleanField(label=_("Remove token"), required=False)
 
@@ -130,7 +133,8 @@ class HrSyncConfigurationForm(forms.ModelForm):
         self.initial["api_token"] = ""
         token = self.fields["api_token"]
         if self.instance.api_token:
-            token.help_text = f"{token.help_text} {_('A token is stored; leave the field empty to keep it.')}"
+            token.widget.attrs["placeholder"] = self.TOKEN_MASK
+            token.help_text = f"{token.help_text} {_('A token is stored; leave the field as it is to keep it.')}"
         else:
             del self.fields["remove_api_token"]
         add_bootstrap_classes(self)

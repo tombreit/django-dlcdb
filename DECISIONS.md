@@ -35,7 +35,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The lending profiles live on Settings › Lending configuration**, with no menu entry or index page of their own; the page needs `view_lendingconfiguration`, the card `view_lendingprofile`. Not "either permission opens the page" (`settings_page` would need a form-less mode).
 - **Overdue lendings are always highlighted**: the toggle was a half switch (the due date stayed red).
 - **A lending slip lists the regulations by link creation date**: the never-read `LendingProfileRegulation.order` is gone; an order of its own would need the slip to sort by it.
-- **The HR token never reaches the browser**: an empty field keeps it, "Remove token" clears it.
+- **The HR token never reaches the browser**: a stored token shows as placeholder dots, an empty field keeps it, "Remove token" clears it. Not a fake value in the field (the save would have to tell it from a typed token).
 - **Admin error mails use Django's plain handler**: a 500 while the mail server is down is accepted; a handler that swallowed mail errors was tried and removed.
 
 ## Pitfalls
