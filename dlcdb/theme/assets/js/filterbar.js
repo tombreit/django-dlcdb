@@ -142,3 +142,18 @@ document.addEventListener('input', (event) => {
         true
     );
 });
+
+// The search field sends its value on keyup and on its "search" event. Leaving
+// the field fires "change" as well, which would only send the same again: the
+// list would reload, and what the user unfolded in it (a person's lendings)
+// would close. Stop that "change" when the list's URL already carries the value.
+document.addEventListener(
+    'change',
+    (event) => {
+        const input = event.target;
+        if (!input.matches?.('form[data-filterbar] input[type="search"]')) return;
+        const shown = new URL(window.location.href).searchParams.get(input.name) ?? '';
+        if (input.value === shown) event.stopPropagation();
+    },
+    true
+);

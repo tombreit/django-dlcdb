@@ -6,13 +6,13 @@
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.db.models import F
+from django.db.models import BooleanField, Case, F, Prefetch, Value, When
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dlcdb.core.models import Person, Record
+from dlcdb.core.models import LentRecord, Person, Record
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
@@ -34,6 +34,25 @@ def _person_queryset():
     return Person.objects.select_related("organizational_unit", "room").prefetch_related("organizational_positions")
 
 
+def _current_lendings(request):
+    """
+    The devices persons have now, in the user's tenants, to prefetch as
+    ``current_lendings``: plain ``Record``, as LentRecord.objects leaves out
+    devices that are no longer lentable. ``is_overdue`` as on the lending list.
+    """
+    lendings = Record.objects.filter(record_type=Record.LENT, is_active=True).select_related(
+        "device__device_type", "device__manufacturer"
+    )
+    lendings = lendings.annotate(
+        is_overdue=Case(
+            When(LentRecord.overdue_q(), then=Value(True)), default=Value(False), output_field=BooleanField()
+        )
+    )
+    return tenant_scoped_queryset(lendings, request, tenant_field="device__tenant").order_by(
+        "device__device_type__name", "device__edv_id"
+    )
+
+
 def _person_records(request, person):
     """
     The person's device records in the user's tenants: lendings and licence
@@ -53,8 +72,14 @@ def person_index(request):
     base_queryset = _person_queryset()
 
     person_filter = bind_filterset(PersonFilter, request, base_queryset, default_ordering="name")
+    persons = person_filter.qs
+    # Each row can unfold the person's current lendings: one query for the page.
+    if request.user.has_perm("core.view_lentrecord"):
+        persons = persons.prefetch_related(
+            Prefetch("record_set", queryset=_current_lendings(request), to_attr="current_lendings")
+        )
 
-    page_obj = paginate(request, person_filter.qs, PERSONS_PER_PAGE)
+    page_obj = paginate(request, persons, PERSONS_PER_PAGE)
 
     context = {
         "filter": person_filter,
@@ -68,6 +93,8 @@ def person_index(request):
         "current_ordering": person_filter.data["ordering"],
         "filtered_count": page_obj.paginator.count,
         "total_count": base_queryset.count(),
+        # The column header unfolds all rows, if there is anything to unfold.
+        "any_lendings": any(getattr(person, "current_lendings", None) for person in page_obj),
     }
     return TemplateResponse(request, template, context)
 

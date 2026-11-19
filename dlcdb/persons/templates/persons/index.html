@@ -29,6 +29,20 @@
               {% include "theme/filterbar/_sort_th.html" with label=_("E-mail") asc="email" desc="-email" th_class="d-none d-md-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Organizational unit") asc="unit" desc="-unit" th_class="d-none d-lg-table-cell" %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Room") asc="room" desc="-room" th_class="d-none d-md-table-cell" %}
+              {% if perms.core.view_lentrecord %}
+                <th scope="col">
+                  {% if any_lendings %}
+                    {# Unfolds or folds every person's lendings below (Bootstrap collapse, one target per row). #}
+                    <button type="button" class="btn btn-link p-0 fw-semibold text-reset text-decoration-none text-nowrap"
+                            data-bs-toggle="collapse" data-bs-target="#person-list .person-lendings"
+                            title="{% translate 'Show or hide all current lendings' %}">
+                      {% translate "Lendings" %} <i class="bi bi-arrows-expand"></i>
+                    </button>
+                  {% else %}
+                    {% translate "Lendings" %}
+                  {% endif %}
+                </th>
+              {% endif %}
               {% include "theme/filterbar/_sort_th.html" with label=_("Modified") asc="modified" desc="-modified" th_class="d-none d-lg-table-cell text-end" %}
             </tr>
           </thead>
@@ -65,11 +79,51 @@
                     {{ person.room.number|default:"—" }}
                   {% endif %}
                 </td>
+                {% if perms.core.view_lentrecord %}
+                  <td>
+                    {% if person.current_lendings %}
+                      <button type="button" class="btn btn-sm btn-outline-secondary text-nowrap"
+                              data-bs-toggle="collapse" data-bs-target="#person-lendings-{{ person.pk }}"
+                              aria-expanded="false" aria-controls="person-lendings-{{ person.pk }}"
+                              title="{% translate 'Show current lendings' %}">
+                        <i class="bi bi-laptop"></i> {{ person.current_lendings|length }}
+                      </button>
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                {% endif %}
                 <td class="d-none d-lg-table-cell text-nowrap text-end text-muted">{{ person.modified_at|date:"Y-m-d" }}</td>
               </tr>
+              {% if person.current_lendings %}
+                {# The devices the person has now, in the user's tenants (views._current_lendings). #}
+                <tr class="collapse person-lendings" id="person-lendings-{{ person.pk }}">
+                  <td colspan="6" class="pt-0">
+                    <ul class="list-unstyled small mb-0 ms-5">
+                      {% for record in person.current_lendings %}
+                        <li class="d-flex flex-wrap align-items-baseline gap-2 py-1">
+                          <i class="bi {{ record.device.device_type.icon_class|default:'bi-pc-display' }} text-body-secondary"></i>
+                          <span>{{ record.device.device_type|default:"—" }}</span>
+                          <span class="text-body-secondary">{{ record.device.manufacturer|default:"" }} {{ record.device.series|default:"" }}</span>
+                          {% if perms.core.view_device %}
+                            <a class="font-monospace" href="{% url 'assets:device_detail' record.device.pk %}">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</a>
+                          {% else %}
+                            <span class="font-monospace">{{ record.device.edv_id|default:record.device.sap_id|default:"—" }}</span>
+                          {% endif %}
+                          {% if record.lent_desired_end_date %}
+                            <span class="ms-auto{% if record.is_overdue %} text-danger fw-semibold{% endif %}">
+                              {% blocktranslate with due=record.lent_desired_end_date|date:"Y-m-d" %}Due {{ due }}{% endblocktranslate %}
+                            </span>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </td>
+                </tr>
+              {% endif %}
             {% empty %}
               <tr>
-                <td colspan="5" class="text-center text-muted py-4">
+                <td colspan="{% if perms.core.view_lentrecord %}6{% else %}5{% endif %}" class="text-center text-muted py-4">
                   <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
                   {% translate "No persons match these filters." %}
                   {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}

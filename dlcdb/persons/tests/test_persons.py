@@ -595,6 +595,46 @@ class PersonAssignmentsTests(TestCase):
         self.assertContains(response, "No licences.")
         self.assertContains(response, "No smallstuff.")
 
+    def test_the_list_unfolds_current_lendings_without_a_query_per_lending(self):
+        index_url = reverse("persons:index")
+        self.client.get(index_url)  # The first request creates the Branding row.
+        with CaptureQueriesContext(connection) as one_lending:
+            response = self.client.get(index_url, headers={"HX-Request": "true"})
+        # Only the current lending in the user's tenant: not the returned one, not the other tenant's.
+        self.assertContains(response, f'id="person-lendings-{self.person.pk}"')
+        self.assertContains(response, "LENT-NOW")
+        self.assertNotContains(response, "LENT-PAST")
+        self.assertNotContains(response, "LENT-OTHER-TENANT")
+
+        other = Person.objects.create(first_name="Max", last_name="Mustermann", email="max@example.com")
+        for edv_id, due in (("LENT-MAX-1", datetime.date(2099, 1, 1)), ("LENT-MAX-2", datetime.date(2020, 1, 1))):
+            establish_state(
+                LentRecord,
+                device=Device.objects.create(edv_id=edv_id, is_lentable=True, tenant=self.tenant),
+                person=other,
+                room=self.room,
+                lent_start_date=datetime.date(2019, 1, 1),
+                lent_desired_end_date=due,
+            )
+        with CaptureQueriesContext(connection) as three_lendings:
+            response = self.client.get(index_url, headers={"HX-Request": "true"})
+
+        self.assertContains(response, "LENT-MAX-1")
+        self.assertContains(response, '<span class="ms-auto text-danger fw-semibold">Due 2020-01-01</span>', html=True)
+        self.assertEqual(len(three_lendings), len(one_lending))
+
+    def test_the_list_shows_lendings_only_with_their_view_permission(self):
+        viewer = get_user_model().objects.create_user(
+            username="person-viewer", email="viewer@example.com", password="secret"
+        )
+        viewer.user_permissions.add(Permission.objects.get(codename="view_person", content_type__app_label="core"))
+        self.client.force_login(viewer)
+
+        response = self.client.get(reverse("persons:index"))
+
+        self.assertContains(response, "Musterfrau")
+        self.assertNotContains(response, "person-lendings")
+
     def test_cards_need_their_view_permissions(self):
         viewer = get_user_model().objects.create_user(
             username="person-viewer", email="viewer@example.com", password="secret"
