@@ -58,7 +58,7 @@ SPDX-License-Identifier: EUPL-1.2
           </a>
           {% endif %}
 
-          {% if nav_items_settings %}
+          {% if request.user.is_authenticated %}
           {# The frontend's settings page (theme/settings.html), like the frontend's gear. #}
           <a class="btn btn-primary" href="{% url 'settings' %}" title="{% translate 'Settings' %}" aria-label="{% translate 'Settings' %}">
             <i class="bi bi-gear" aria-hidden="true"></i>

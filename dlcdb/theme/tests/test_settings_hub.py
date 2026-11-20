@@ -102,7 +102,7 @@ class SettingsHubTests(TestCase):
         self.assertContains(response, f'href="{reverse("lending:configuration")}"')
         self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
         self.assertContains(response, '<i class="bi bi-lock" aria-hidden="true"></i>')
-        # The gear still leads only to what the user may open.
+        # The menus' registry still holds only what the user may open.
         self.assertEqual([item["url"] for item in response.context["nav_items_settings"]], ["lending:configuration"])
 
     def test_show_all_locks_admin_entries_without_the_staff_flag(self):
@@ -116,7 +116,7 @@ class SettingsHubTests(TestCase):
 
         admin_entries = [item for item in response.context["nav_items_settings"] if item["admin"]]
         self.assertTrue(admin_entries)
-        self.assertContains(response, 'fw-normal">Django admin</span>', count=len(admin_entries))
+        self.assertContains(response, 'fw-normal">Staff</span>', count=len(admin_entries))
         self.assertContains(response, f'href="{reverse("admin:reporting_report_changelist")}"')
         # Staff also get the Django admin itself, as an entry like the others.
         self.assertContains(response, f'<a href="{reverse("admin:index")}" class="list-group-item')

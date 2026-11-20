@@ -14,7 +14,7 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 
 ## How to use this list
 
-- **When a module gets a frontend page:** tick its box, note the commit, point its entry on the settings page at the frontend page (its *Django admin* badge goes), and trim the "Django-Admin" section of `docs/guides/berechtigungen.md`.
+- **When a module gets a frontend page:** tick its box, note the commit, point its entry on the settings page at the frontend page (its *Staff* badge goes), and trim the "Django-Admin" section of `docs/guides/berechtigungen.md`.
 - **A larger move gets a plan of its own** in `PLANS/`, like `settings-pages`, which was retired into `DECISIONS.md`. Its last batch ticks the box here.
 - **Whether the admin stays registered after a move** is decided per module. The settings admins stayed, like the tenant admin.
 - **When every box is ticked,** retire this file into `DECISIONS.md` and delete it.
@@ -29,7 +29,7 @@ Noted 2026-11-20, smallest first; none started yet.
 
 ## Menu entries that open the admin
 
-Shown only with the Staff flag. Each comes from the `navigation.py` of the app named; the settings page marks its entries with a *Django admin* badge (DECISIONS: settings page).
+Shown only with the Staff flag. Each comes from the `navigation.py` of the app named; the settings page marks its entries with a *Staff* badge (DECISIONS: settings page).
 
 - [ ] **Removed records:** Datenhaltung › Entfernt-Records, `admin:core_removedrecord_changelist`, `core.view_record` (core).
 - [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note` (core). The inventory screens add, edit and delete the notes of a room or device during an inventory.
@@ -72,7 +72,7 @@ This list is also in `DECISIONS.md › Open follow-ups › Links`.
 - [x] `theme/device_state.py`: nothing to do. The frontend surfaces (device page, inventory search) link frontend pages; only the admin's own device list links the record admin.
 - [x] `licenses/form_partial.html`: the licence page's staff-only "Admin view" became "View asset", the frontend device page (with `core.view_device`) (2026-11-19).
 
-Kept on purpose while the admins exist: the staff-only "Admin view" button on the lending page (`obj_admin_url`), and the "Django admin" entries of the account menu and of Settings › More.
+Kept on purpose while the admins exist: the staff-only "Admin view" button on the lending page (`obj_admin_url`), and the "Staff area (Django admin)" entry of Settings › More.
 
 ## Done
 

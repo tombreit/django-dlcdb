@@ -17,7 +17,7 @@ Keine Gruppe des Benutzers ist einem Mandanten zugeordnet, deshalb sieht er kein
 
 `````{dropdown} Wo finde ich weitere Django-Admin Module?
 
-Unter {{ base_url }}/admin/ (Eintrag *Django Site-Verwaltung* im Benutzermenü), siehe [Django-Admin](./guides/berechtigungen.md#django-admin).
+Unter {{ base_url }}/admin/ (*Einstellungen › Mehr › Staff-Bereich (Django-Admin)*), siehe [Django-Admin](./guides/berechtigungen.md#django-admin).
 `````
 
 `````{dropdown} Wo ist die Historie eines Devices?

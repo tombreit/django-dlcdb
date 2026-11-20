@@ -72,10 +72,10 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 ## Django-Admin
 
-Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
+Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Einstellungen › Mehr › Staff-Bereich (Django-Admin)*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
 - die Flags *Staff* und *Superuser* und das endgültige Löschen eines Benutzers (löscht auch seine Einträge im Admin-Log),
-- die Einträge der Seite *Einstellungen* mit dem Abzeichen *Django-Admin*,
+- die Einträge der Seite *Einstellungen* mit dem Abzeichen *Staff*,
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen und mehrere Geräte auf einmal einem anderen Mandanten (Aktion *Ausgewählte Geräte umziehen*),
 - erzeugte Reports und den SAP-Import.
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 00:03+0100\n"
+"POT-Creation-Date: 2026-11-21 00:22+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -294,8 +294,8 @@ msgstr "Datenhaltung"
 #: dlcdb/theme/templates/theme/_settings_base.html:27
 #: dlcdb/theme/templates/theme/includes/navbar.html:81
 #: dlcdb/theme/templates/theme/includes/navbar.html:83
-#: dlcdb/theme/templates/theme/settings.html:19
-#: dlcdb/theme/templates/theme/settings.html:23
+#: dlcdb/theme/templates/theme/settings.html:20
+#: dlcdb/theme/templates/theme/settings.html:24
 msgid "Settings"
 msgstr "Einstellungen"
 
@@ -666,6 +666,7 @@ msgid "May open the Django admin"
 msgstr "Darf den Django-Admin öffnen"
 
 #: dlcdb/accounts/templates/accounts/users/includes/_badges.html:6
+#: dlcdb/theme/templates/theme/settings.html:55
 msgid "Staff"
 msgstr "Staff"
 
@@ -4923,7 +4924,7 @@ msgid "All permissions, but only the devices of your tenants"
 msgstr "Alle Berechtigungen, aber nur die Geräte Ihrer Mandanten"
 
 #: dlcdb/templates/admin/navbar.html:94
-#: dlcdb/theme/templates/theme/includes/navbar.html:170
+#: dlcdb/theme/templates/theme/includes/navbar.html:164
 msgid "Language"
 msgstr "Sprache"
 
@@ -5228,7 +5229,7 @@ msgstr ""
 msgid "Tenant “%(tenant)s” was deleted."
 msgstr "Mandant “%(tenant)s” wurde gelöscht."
 
-#: dlcdb/theme/apps.py:11 dlcdb/theme/templates/theme/includes/navbar.html:149
+#: dlcdb/theme/apps.py:11 dlcdb/theme/templates/theme/includes/navbar.html:143
 msgid "Theme"
 msgstr "Theme"
 
@@ -5517,24 +5518,18 @@ msgstr "Einstellungen"
 msgid "Subscriptions"
 msgstr "Abonnements"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:141
-#: dlcdb/theme/templates/theme/settings.html:54
-#: dlcdb/theme/templates/theme/settings.html:82
-msgid "Django admin"
-msgstr "Django Site-Verwaltung"
-
-#: dlcdb/theme/templates/theme/includes/navbar.html:151
-#: dlcdb/theme/templates/theme/includes/navbar.html:152
+#: dlcdb/theme/templates/theme/includes/navbar.html:145
+#: dlcdb/theme/templates/theme/includes/navbar.html:146
 msgid "Light"
 msgstr "Hell"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:154
-#: dlcdb/theme/templates/theme/includes/navbar.html:155
+#: dlcdb/theme/templates/theme/includes/navbar.html:148
+#: dlcdb/theme/templates/theme/includes/navbar.html:149
 msgid "Dark"
 msgstr "Dunkel"
 
-#: dlcdb/theme/templates/theme/includes/navbar.html:157
-#: dlcdb/theme/templates/theme/includes/navbar.html:158
+#: dlcdb/theme/templates/theme/includes/navbar.html:151
+#: dlcdb/theme/templates/theme/includes/navbar.html:152
 msgid "Auto"
 msgstr "Auto"
 
@@ -5543,44 +5538,48 @@ msgstr "Auto"
 msgid "Logout %(username)s"
 msgstr "%(username)s abmelden"
 
-#: dlcdb/theme/templates/theme/settings.html:24
+#: dlcdb/theme/templates/theme/settings.html:25
 msgid "Also show the settings you have no access to."
 msgstr "Auch die Einstellungen zeigen, auf die Sie keinen Zugriff haben."
 
-#: dlcdb/theme/templates/theme/settings.html:26
+#: dlcdb/theme/templates/theme/settings.html:27
 msgid "Show all"
 msgstr "Zeige alle"
 
-#: dlcdb/theme/templates/theme/settings.html:32
+#: dlcdb/theme/templates/theme/settings.html:33
 msgid "Search settings"
 msgstr "Einstellungen durchsuchen"
 
-#: dlcdb/theme/templates/theme/settings.html:36
+#: dlcdb/theme/templates/theme/settings.html:37
 msgid "No settings match your search."
 msgstr "Keine Einstellungen passen zu Ihrer Suche."
 
-#: dlcdb/theme/templates/theme/settings.html:48
+#: dlcdb/theme/templates/theme/settings.html:49
 msgid "You have no access to this page."
 msgstr "Sie haben keinen Zugriff auf diese Seite."
 
-#: dlcdb/theme/templates/theme/settings.html:62
+#: dlcdb/theme/templates/theme/settings.html:63
 msgid "No access"
 msgstr "Kein Zugriff"
 
-#: dlcdb/theme/templates/theme/settings.html:70
+#: dlcdb/theme/templates/theme/settings.html:71
 msgid "You may not view any settings."
 msgstr "Sie dürfen keine Einstellungen ansehen."
 
-#: dlcdb/theme/templates/theme/settings.html:71
+#: dlcdb/theme/templates/theme/settings.html:72
 msgid "Turn on “Show all” to see which settings exist."
 msgstr ""
 "Schalten Sie “Zeige alle” ein, um zu sehen, welche Einstellungen es gibt."
 
-#: dlcdb/theme/templates/theme/settings.html:77
+#: dlcdb/theme/templates/theme/settings.html:78
 msgid "More"
 msgstr "Mehr"
 
 #: dlcdb/theme/templates/theme/settings.html:83
+msgid "Staff area (Django admin)"
+msgstr "Staff-Bereich (Django-Admin)"
+
+#: dlcdb/theme/templates/theme/settings.html:84
 msgid "Everything this page does not list yet"
 msgstr "Alles, was diese Seite noch nicht auflistet"
 
