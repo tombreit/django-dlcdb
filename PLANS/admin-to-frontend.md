@@ -19,6 +19,15 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 - **Whether the admin stays registered after a move** is decided per module. The settings admins stayed, like the tenant admin.
 - **When every box is ticked,** retire this file into `DECISIONS.md` and delete it.
 
+## Next candidates
+
+Noted 2026-11-20, smallest first; none started yet.
+
+1. **Lending regulations (`core.Link`):** a card on Settings › Lending configuration, like the lending profiles; the profile form could then offer "add". Small, follows an existing pattern, fixes a real gap.
+2. **Room reconcile upload:** on the rooms page. The result page is already in the frontend; only the upload and the rooms list's admin link remain.
+3. **Smallstuff catalogue (`smallstuff.Thing`):** a frontend page for the things that can be handed out; today the frontend only assigns them to persons.
+4. **Users and groups:** the largest move (users, groups, permissions, the Staff flag, deactivation, LDAP); it starts as a plan of its own.
+
 ## Menu entries that open the admin
 
 Shown only with the Staff flag. Each comes from the `navigation.py` of the app named; the settings page marks its entries with a *Django admin* badge (DECISIONS: settings page).
