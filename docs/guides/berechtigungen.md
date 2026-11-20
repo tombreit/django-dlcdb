@@ -30,7 +30,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet nur die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet. Dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. Gruppen und Benutzerkonten selbst legt bis auf Weiteres der Django-Admin an (*Start › Konten*).
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet nur die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet. Dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. *Neue Gruppe* übernimmt auf Wunsch die Berechtigungen eines Gruppenprofils, das die DLCDB mitbringt, und ordnet die Gruppe gleich einem Mandanten zu. Benutzerkonten legt bis auf Weiteres der Django-Admin an (*Start › Konten › Benutzer*).
 
 ### LDAP
 
@@ -39,7 +39,7 @@ Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setu
 - **Anmelden** darf, wer Mitglied von `AUTH_LDAP_REQUIRE_GROUP`, `AUTH_LDAP_GROUP_STAFF` oder `AUTH_LDAP_GROUP_SUPERUSERS` ist. Das Benutzerkonto entsteht beim ersten Login.
 - **Flags:** Mitglieder von `AUTH_LDAP_GROUP_STAFF` erhalten das Staff-Flag, Mitglieder von `AUTH_LDAP_GROUP_SUPERUSERS` Staff- und Superuser-Flag. Alle Flags, auch *Aktiv*, werden bei jedem Login neu aus LDAP gesetzt: Ein im Django-Admin deaktivierter Benutzer ist nach dem nächsten Login wieder aktiv, solange er in der LDAP-Gruppe ist. Dauerhaft hilft nur, ihn dort zu entfernen.
 - **Gruppen:** Die in `AUTH_LDAP_MIRROR_GROUPS` genannten LDAP-Gruppen werden als DLCDB-Gruppen gespiegelt; ihnen werden Berechtigungen und Mandanten zugewiesen. Die Mitgliedschaften in diesen Gruppen werden bei jedem Login aus LDAP übernommen, von Hand vergebene gehen dabei verloren. Andere Gruppen, z.B. in der DLCDB angelegte, bleiben unberührt.
-- Eine gespiegelte Gruppe entsteht erst beim ersten Login eines ihrer Mitglieder und fehlt bis dahin in der Mandanten-Übersicht. Soll sie vorher einem Mandanten zugeordnet werden, im Django-Admin eine Gruppe mit exakt dem LDAP-Namen anlegen.
+- Eine gespiegelte Gruppe entsteht erst beim ersten Login eines ihrer Mitglieder und fehlt bis dahin in der Mandanten-Übersicht. Soll sie vorher Berechtigungen und Mandanten bekommen, unter *Neue Gruppe* eine Gruppe mit exakt dem LDAP-Namen anlegen.
 
 ## Navigation
 
@@ -143,7 +143,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
-- Benutzer und Gruppen anlegen; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
+- Benutzer anlegen und deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die Einträge der Seite *Einstellungen* mit dem Abzeichen *Django-Admin*,
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
 - erzeugte Reports und den SAP-Import,
@@ -151,14 +151,3 @@ Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltu
 - Benachrichtigungen (Status, Vorschau, *Send Now*), den Upload für den Raumabgleich und die vollständige Liste der HR-Sync-Läufe.
 
 Nur Superuser dürfen, unabhängig von Berechtigungen, Stammdaten im Admin endgültig löschen und *aktivieren/deaktivieren* (Soft-Delete, siehe [Model](../betrieb/model.md#softdelete)).
-
-## Beispiel-Gruppen
-
-Vier Gruppen als Ausgangspunkt; jede wird zusätzlich dem passenden Mandanten zugeordnet, damit ihre Mitglieder Geräte sehen.
-
-| Gruppe | Berechtigungen | Ergebnis |
-|---|---|---|
-| Helpdesk / Ausleihe | `core.view_device`, `core.view_person`, `core.view_lentrecord`, `core.transition_can_lend_device`, `core.transition_can_relocate_device` | Sieht Geräte, Personen und Ausleihen; kann Geräte ausleihen, zurücknehmen und umziehen. |
-| Inventur | `core.view_device`, `core.can_inventorize`, `core.change_inventory` | Sieht Geräte, führt die aktive Inventur durch, erreicht Inventuren und SAP-Abgleich (beides *(Admin)*, also mit Staff-Flag). |
-| Stammdaten / IT-Beschaffung | `core.view_device`, `core.add_device`, `core.change_device`, `core.view_room`, `core.add_room`, `core.change_room`, `core.view_devicetype`, `core.view_manufacturer`, `core.view_supplier`, `core.transition_can_order_device`, `core.transition_can_locate_device`, `core.transition_can_relocate_device` | Legt Geräte und Räume an, pflegt sie, setzt Geräte auf *Bestellt* bzw. *Lokalisiert* und zieht sie um. |
-| Administration | `organization.view_branding`, `organization.change_branding`, `core.view_organizationalunit`, `core.add_organizationalunit`, `core.change_organizationalunit`, `core.delete_organizationalunit`, `core.view_organizationalposition`, `core.add_organizationalposition`, `core.change_organizationalposition`, `core.delete_organizationalposition`, `lending.view_lendingconfiguration`, `lending.change_lendingconfiguration`, `lending.view_lendingprofile`, `lending.add_lendingprofile`, `lending.change_lendingprofile`, `lending.delete_lendingprofile`, `licenses.view_licensesconfiguration`, `licenses.change_licensesconfiguration`, `dataexchange.view_udbsyncconfiguration`, `dataexchange.change_udbsyncconfiguration`, `dataexchange.view_udbsyncrun`, `tenants.view_tenant`, `tenants.add_tenant`, `tenants.change_tenant`, `tenants.delete_tenant`, `journal.view_journalentry`, `journal.delete_journalentry` | Pflegt die Einstellungen, die Ausleih-Profile, Organisationseinheiten und Positionen und die Mandanten und räumt das Journal auf; wird jedem Mandanten zugeordnet. Benutzer, Gruppen und Berechtigungen bleiben Sache des Django-Admins (Staff-Flag). |

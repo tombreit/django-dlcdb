@@ -176,3 +176,69 @@ def test_the_tenants_card_ticks_through_the_tenant_matrix(client, login, helpdes
 def test_the_settings_page_links_the_groups_without_the_staff_flag(client, login):
     login("accounts.view_group")
     assert reverse("accounts:groups") in client.get(reverse("settings")).content.decode()
+
+
+def test_a_new_group_starts_from_a_profile_with_a_tenant_and_members(client, login):
+    editor = login("accounts.view_group", "accounts.add_group", *GROUP_ADMIN[2:], "tenants.change_tenant")
+    tenant = Tenant.objects.create(name="Library")
+
+    response = client.post(
+        reverse("accounts:group_add"),
+        {"name": "librarians", "profile": "daily-work", "tenant": tenant.pk, "members": [editor.pk]},
+    )
+
+    group = Group.objects.get(name="librarians")
+    assert response.url == reverse("accounts:group_detail", args=[group.pk])
+    assert {"core.view_device", "core.transition_can_lend_device"} <= _names(group)
+    assert "core.transition_can_remove_device" not in _names(group)
+    assert list(group.tenant_set.all()) == [tenant]
+    assert tenant.history.latest().history_user == editor
+    assert list(group.user_set.all()) == [editor]
+    entry = JournalEntry.objects.get(source="accounts.groups", event="created")
+    assert entry.body == f"Group profile: Daily work\nTenant: Library\nMembers: {editor}"
+
+
+def test_a_new_group_offers_a_tenant_only_with_the_tenant_permission(client, login):
+    login("accounts.view_group", "accounts.add_group")
+    form = client.get(reverse("accounts:group_add")).context["form"]
+    assert set(form.fields) == {"name", "profile"}
+
+
+def test_a_profile_adds_its_permissions_and_returns_to_the_group(client, login, helpdesk):
+    editor = login(*GROUP_ADMIN)
+    url = reverse("accounts:group_detail", args=[helpdesk.pk])
+
+    response = client.post(url, {"name": "helpdesk", "members": [editor.pk], "add_profile": "administration"})
+
+    assert response.url == url
+    assert {"tenants.change_tenant", "journal.view_journalentry", "core.add_removedrecord"} <= _names(helpdesk)
+    # Copy only: the ticks that were not sent are gone, as with Save.
+    assert "core.change_person" not in _names(helpdesk)
+
+
+def test_deleting_a_group_unticks_its_tenants(client, login, helpdesk):
+    login("accounts.view_group", "accounts.delete_group")
+    tenant = Tenant.objects.get(name="Institute")
+
+    response = client.post(reverse("accounts:group_delete", args=[helpdesk.pk]))
+
+    assert response.url == reverse("accounts:groups")
+    assert not Group.objects.filter(name="helpdesk").exists()
+    assert not tenant.groups.exists()
+    assert JournalEntry.objects.get(source="accounts.groups", event="deleted").summary == "Group helpdesk deleted"
+
+
+def test_no_one_deletes_their_only_way_to_change_groups(client, login, helpdesk):
+    editor = login("accounts.delete_group")
+    helpdesk.permissions.add(_permission("accounts.view_group"), _permission("accounts.change_group"))
+    helpdesk.user_set.add(editor)
+
+    client.post(reverse("accounts:group_delete", args=[helpdesk.pk]))
+
+    assert Group.objects.filter(pk=helpdesk.pk).exists()
+
+
+def test_the_no_tenant_hint_offers_a_new_group_to_who_is_in_none(client, login):
+    login("core.view_device", "accounts.add_group", "tenants.change_tenant")
+    response = client.get(reverse("settings"))
+    assert reverse("accounts:group_add") in response.content.decode()

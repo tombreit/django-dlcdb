@@ -21,6 +21,9 @@
   {% if ldap %}{% include "accounts/groups/includes/_ldap_badge.html" %}{% endif %}
 {% endblock detail_meta %}
 
+{# The group profiles' buttons in the sidebar submit this form (form="group-form"). #}
+{% block detail_form_class %} id="group-form"{% endblock detail_form_class %}
+
 {% block detail_form_fields %}
   {% include "accounts/groups/includes/_form_fields.html" %}
 {% endblock detail_form_fields %}
@@ -34,6 +37,26 @@
 {% endblock detail_readonly %}
 
 {% block detail_sidebar %}
+  {% if can_change %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-collection text-primary"></i>
+        <h2 class="h6 mb-0">{% translate "Group profiles" %}</h2>
+      </div>
+      <div class="card-body">
+        <p class="form-text mt-0">{% translate "Tick a profile's permissions as well, and save. The group keeps its other permissions and doesn't remember the profile." %}</p>
+        {% for profile in profiles %}
+          <div class="mb-3">
+            <button class="btn btn-sm btn-outline-primary" type="submit" form="group-form" name="add_profile" value="{{ profile.key }}">
+              <i class="bi bi-plus-lg"></i> {% blocktranslate with profile=profile.label %}Add the permissions of “{{ profile }}”{% endblocktranslate %}
+            </button>
+            <div class="form-text">{{ profile.description }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
   <section class="card card-filled mb-3">
     <div class="card-header d-flex align-items-center gap-2">
       <i class="bi bi-diagram-3 text-primary"></i>

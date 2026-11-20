@@ -24,7 +24,8 @@ from dlcdb.tenants.models import Tenant
 from dlcdb.theme.forms import disable_fields
 from dlcdb.theme.navigation import get_redirect_url
 
-from .forms import GroupForm
+from .forms import GroupForm, NewGroupForm, may_still_change_groups
+from .group_profiles import BY_KEY, GROUP_PROFILES
 from .models import is_ldap_mirrored
 from .permissions import own_permission_names, own_permissions, permission_name
 
@@ -55,6 +56,9 @@ def detail(request, pk):
     One group: its permissions among DLCDB's own, its members and its tenants.
     Saving needs ``accounts.change_group``; the tenants card saves each tick
     through the tenant matrix's own view.
+
+    A group profile's button saves the form with the profile's permissions
+    added, and returns here to show them.
     """
     group = get_object_or_404(Group, pk=pk)
     can_change = request.user.has_perm("accounts.change_group")
@@ -64,10 +68,23 @@ def detail(request, pk):
     if request.method == "POST":
         if not can_change:
             raise PermissionDenied(missing_permission_message("accounts.change_group"))
-        form = GroupForm(request.POST, instance=group, own=own, editor=request.user)
+        data, profile = request.POST, BY_KEY.get(request.POST.get("add_profile"))
+        if profile:
+            data = request.POST.copy()
+            data.setlist(
+                "permissions",
+                [*data.getlist("permissions"), *map(str, profile.permissions().values_list("pk", flat=True))],
+            )
+        form = GroupForm(data, instance=group, own=own, editor=request.user)
         if form.is_valid():
             form.save()
             _journal_changes(form, user=request.user)
+            if profile:
+                messages.success(
+                    request,
+                    _("The permissions of the group profile “%(profile)s” were added.") % {"profile": profile.label},
+                )
+                return redirect(request.get_full_path())
             messages.success(request, linked_message(_("Group “{group}” was updated."), group=group))
             return redirect(next_url)
     else:
@@ -93,9 +110,60 @@ def detail(request, pk):
             "group_tenants": group.tenant_set.order_by("name"),
             # With the permission to tick them: every tenant, ticked where the group sees it.
             "all_tenants": Tenant.objects.order_by("name") if request.user.has_perm("tenants.change_tenant") else None,
+            "profiles": GROUP_PROFILES,
             "next_url": next_url,
             "form_action": request.get_full_path(),
+            "delete_url": (
+                reverse("accounts:group_delete", args=[group.pk])
+                if request.user.has_perm("accounts.delete_group")
+                else None
+            ),
         },
+    )
+
+
+@htmx_permission_required("accounts.add_group")
+def add(request):
+    """A new group from a group profile, with a tenant and members; then its page, to adjust it."""
+    form = NewGroupForm(request.POST or None, editor=request.user)
+    if request.method == "POST" and form.is_valid():
+        group = form.save()
+        _journal_new(form, user=request.user)
+        messages.success(request, _("Group “%(group)s” was created.") % {"group": group})
+        return redirect("accounts:group_detail", pk=group.pk)
+
+    return TemplateResponse(
+        request,
+        "accounts/groups/add.html",
+        {"form": form, "profiles": GROUP_PROFILES, "next_url": get_redirect_url(request) or reverse("accounts:groups")},
+    )
+
+
+@htmx_permission_required("accounts.delete_group")
+def delete(request, pk):
+    """
+    Confirm, then delete. Its members lose what the group gave them. Not one's
+    only way to change groups: no locking oneself out.
+    """
+    group = get_object_or_404(Group, pk=pk)
+    members = group.user_set.filter(is_active=True).order_by("email")
+
+    if request.method == "POST":
+        if request.user.has_perm("accounts.change_group") and not may_still_change_groups(request.user, without=group):
+            messages.error(request, _("You cannot delete this group: it is your only way to change groups."))
+            return redirect("accounts:group_detail", pk=group.pk)
+        _journal_deleted(group, members=members, user=request.user)
+        # Removed like an untick in the tenant matrix: stamped, into the tenant's history.
+        for tenant in group.tenant_set.all():
+            tenant.groups.remove(group)
+            tenant.stamp_user(request.user)
+            tenant.save()
+        group.delete()
+        messages.success(request, _("Group “%(group)s” was deleted.") % {"group": group.name})
+        return redirect("accounts:groups")
+
+    return TemplateResponse(
+        request, "accounts/groups/delete.html", {"group": group, "members": members, "ldap": is_ldap_mirrored(group)}
     )
 
 
@@ -121,6 +189,37 @@ def _journal_changes(form, *, user):
             user=user,
             subject=group,
         )
+
+
+def _journal_new(form, *, user):
+    group, data = form.instance, form.cleaned_data
+    with translation.override(None):
+        details = [
+            f"Group profile: {BY_KEY[data['profile']].label}" if data["profile"] else "",
+            f"Tenant: {data['tenant']}" if data.get("tenant") else "",
+            f"Members: {', '.join(map(str, data['members']))}" if data.get("members") else "",
+        ]
+    JournalEntry.objects.log(
+        source="accounts.groups",
+        event="created",
+        summary=f"Group {group} created",
+        body="\n".join(filter(None, details)),
+        user=user,
+        subject=group,
+    )
+
+
+def _journal_deleted(group, *, members, user):
+    tenants = ", ".join(tenant.name for tenant in group.tenant_set.order_by("name"))
+    details = [f"Members: {', '.join(map(str, members))}" if members else "", f"Tenants: {tenants}" if tenants else ""]
+    # No subject: the group is gone; the summary keeps its name.
+    JournalEntry.objects.log(
+        source="accounts.groups",
+        event="deleted",
+        summary=f"Group {group} deleted",
+        body="\n".join(filter(None, details)),
+        user=user,
+    )
 
 
 def _added_and_removed(what, before, after, label):

@@ -3,15 +3,45 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AdminUserCreationForm, AuthenticationForm
 from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from dlcdb.tenants.models import Tenant
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.widgets import FilteredSelectMultipleWidget
 
+from .group_profiles import BY_KEY, GROUP_PROFILES
 from .models import CustomUser, is_ldap_mirrored
+
+
+def _change_group():
+    return Permission.objects.get(content_type__app_label="accounts", codename="change_group")
+
+
+def may_still_change_groups(editor, *, without):
+    """
+    Whether ``editor`` may change groups through anything but the group
+    ``without``: no locking oneself out by editing or deleting that group.
+    """
+    if editor.is_superuser:
+        return True
+    change_group = _change_group()
+    if editor.user_permissions.contains(change_group):
+        return True
+    return editor.groups.exclude(pk=without.pk).filter(permissions=change_group).exists()
+
+
+def _members_field():
+    """Only active users: deactivated members stay members, unseen."""
+    return forms.ModelMultipleChoiceField(
+        queryset=CustomUser.objects.filter(is_active=True).order_by("email"),
+        required=False,
+        label=_("Members"),
+        widget=FilteredSelectMultipleWidget(available_label=_("Users"), chosen_label=_("Members")),
+    )
 
 
 class GroupForm(forms.ModelForm):
@@ -27,12 +57,7 @@ class GroupForm(forms.ModelForm):
     """
 
     permissions = forms.ModelMultipleChoiceField(queryset=Permission.objects.none(), required=False)
-    members = forms.ModelMultipleChoiceField(
-        queryset=CustomUser.objects.filter(is_active=True).order_by("email"),
-        required=False,
-        label=_("Members"),
-        widget=FilteredSelectMultipleWidget(available_label=_("Users"), chosen_label=_("Members")),
-    )
+    members = _members_field()
 
     class Meta:
         model = Group
@@ -88,17 +113,63 @@ class GroupForm(forms.ModelForm):
         return group
 
     def _editor_keeps_change_group(self, permissions, members):
-        """No locking oneself out: after the save, the editor may still change groups."""
-        if self.editor.is_superuser:
-            return True
-        change_group = Permission.objects.get(content_type__app_label="accounts", codename="change_group")
+        """After the save, the editor may still change groups: through this group, or another way."""
         stays = self.editor in members if members is not None else self.instance.user_set.contains(self.editor)
-        if stays and change_group in permissions:
-            return True
-        # A permission of the editor's own, or another group of theirs.
-        if self.editor.user_permissions.contains(change_group):
-            return True
-        return self.editor.groups.exclude(pk=self.instance.pk).filter(permissions=change_group).exists()
+        return (stays and _change_group() in permissions) or may_still_change_groups(self.editor, without=self.instance)
+
+
+class NewGroupForm(forms.ModelForm):
+    """
+    A new group: its name, a group profile to start from, a tenant and members.
+    The tenant needs ``tenants.change_tenant``, the members
+    ``accounts.view_customuser`` and ``accounts.change_customuser``.
+    """
+
+    profile = forms.ChoiceField(
+        label=_("Group profile"),
+        choices=[("", _("None")), *((profile.key, profile.label) for profile in GROUP_PROFILES)],
+        required=False,
+        widget=forms.RadioSelect,
+    )
+    tenant = forms.ModelChoiceField(
+        label=_("Tenant"),
+        queryset=Tenant.objects.order_by("name"),
+        required=False,
+        help_text=_("Members see this tenant's devices. More tenants can be ticked on the group's page."),
+    )
+    members = _members_field()
+
+    class Meta:
+        model = Group
+        fields = ["name"]
+
+    def __init__(self, *args, editor, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.editor = editor
+        if getattr(settings, "AUTH_LDAP_MIRROR_GROUPS", None):
+            self.fields["name"].help_text = _(
+                "For an LDAP group, its exact name: LDAP then sets its members at their next login."
+            )
+        if not editor.has_perm("tenants.change_tenant"):
+            del self.fields["tenant"]
+        elif not self.fields["tenant"].queryset.exists():
+            self.fields["tenant"].help_text = _("There are no tenants yet: add one under Settings › Tenants.")
+        if not (editor.has_perm("accounts.view_customuser") and editor.has_perm("accounts.change_customuser")):
+            del self.fields["members"]
+        add_bootstrap_classes(self)
+
+    def save(self):
+        group = super().save()
+        if profile := BY_KEY.get(self.cleaned_data["profile"]):
+            group.permissions.add(*profile.permissions())
+        if tenant := self.cleaned_data.get("tenant"):
+            # Saved like a tick in the tenant matrix: stamped, into the tenant's history.
+            tenant.groups.add(group)
+            tenant.stamp_user(self.editor)
+            tenant.save()
+        if "members" in self.fields:
+            group.user_set.set(self.cleaned_data["members"])
+        return group
 
 
 class EmailAuthenticationForm(AuthenticationForm):

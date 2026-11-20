@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 3 done (editing a group, `accounts.forms.GroupForm`); next: batch 4, group profiles and *New group*. Started 2026-11-20.
+**Status:** batch 4 done (group profiles, *New group*, deleting a group); next: batch 5, users read-only and deactivating. Started 2026-11-20.
 
 ## Why
 
@@ -57,7 +57,8 @@ SPDX-License-Identifier: CC0-1.0
 
 - **What they are:** a *group profile* (Gruppenprofil) is a named list of permissions that DLCDB ships; "profile" alone is taken by lending profiles.
 - **Copy only:** applying a profile adds its permissions to the group, and the group doesn't remember it. The UI says "New group from the profile *Daily work*" or "Add the permissions of a profile", never "Profile: …" on a group. After an update, applying it again adds new permissions. No model, no migration.
-- **First profiles**, in `accounts` (a test checks every name exists):
+- **Where:** `accounts/group_profiles.py`. *New group* offers them as a choice with their descriptions; the group page's *Group profiles* card has a button per profile that submits the group form with the profile's permissions ticked too (`form="group-form"`, so Enter in the name field still saves), and stays on the page to show them.
+- **First profiles**, in `accounts` (a test checks every name is one of DLCDB's own):
   - **Daily work:**
     - `core.view/add/change_device`, `core.view_lentrecord`;
     - transitions: order, locate, relocate, lend, lose, find (no decommissioning);
@@ -140,7 +141,7 @@ SPDX-License-Identifier: CC0-1.0
   - `AUTH_LDAP_MIRROR_GROUPS` may also be `True` (all groups mirrored).
 - **Superusers see devices only through their groups** (DECISIONS: no superuser exception). *New group* suggests adding oneself.
 - **`has_perm` caches per user object:** after changing a group, fetch the user again (as `conftest.make_user` notes).
-- **Deleting a group:** members lose access; an LDAP-mirrored group returns at the next login; `Group` has no soft delete.
+- **Deleting a group:** members lose access; an LDAP-mirrored group returns at the next login; `Group` has no soft delete. The confirmation page says so; deleting unticks the group's tenants like the matrix (stamped, in the tenant's history), and refuses one's only way to change groups.
 - **The dual-pane widget:** check dark mode and phone width (its open issues #1 and #2).
 
 ## Open follow-ups
@@ -166,10 +167,10 @@ SPDX-License-Identifier: CC0-1.0
   - tenants card (reusing `tenants.views.toggle`);
   - members (dual-pane widget; LDAP read-only);
   - journal entries.
-- [ ] **4. Group profiles:**
+- [x] **4. Group profiles:**
   - *Daily work* and *Administration*;
   - *New group* (name, profile, optional tenant, members), *Add the permissions of a profile*, deleting a group;
-  - the "no tenant" hint links to *New group*.
+  - the "no tenant" hint links to *New group* for a user in no group at all (a fresh installation's superuser), else to the tenant matrix as before.
 - [ ] **5. Users, read-only and deactivating:**
   - users list (email, name, active, last login, groups, badges) and user page (groups, what the user may do, tenants seen);
   - deactivate and reactivate (not oneself); journal entries;
@@ -184,4 +185,6 @@ Each batch also trims the doc passages it makes obsolete.
 
 ## Findings on the way
 
+- **`add_group` with `change_customuser` can join a group it creates from *Administration*.** Not a new hole: with `change_customuser` anyone can join any group, in the admin too. Batch 5 extends the warning on `change_customuser` to say so.
+- **Batch 4 removed *Beispiel-Gruppen*** from `berechtigungen.md`: the group profiles replace them.
 - **Batch 3 trimmed `berechtigungen.md`** (the permission families, the notes on *Core* and view/change, the Navigation table, the settings permission paragraphs, the codename columns of *Statuswechsel*). Still naming codenames, for batch 7: `kleinkram.md` (a table), `notifications.md`, `lizenzen.md`, `betrieb/hr-sync.md`, the room rename in `erste_schritte.md`, and *Beispiel-Gruppen* (batch 4, replaced by the group profiles).

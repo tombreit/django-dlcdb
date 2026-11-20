@@ -1,0 +1,33 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Delete group" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Delete group" %}</h1>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <p>{% blocktranslate with group=group.name %}Delete group “{{ group }}”?{% endblocktranslate %}</p>
+      <ul>
+        <li>
+          {% blocktranslate count counter=members|length %}Its {{ counter }} active member loses the permissions and tenants the group gives.{% plural %}Its {{ counter }} active members lose the permissions and tenants the group gives.{% endblocktranslate %}
+        </li>
+        {% if ldap %}
+          <li>{% translate "LDAP creates the group again at the next login of one of its members, without permissions or tenants." %}</li>
+        {% endif %}
+      </ul>
+      <form method="post" class="d-flex flex-wrap gap-2">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">
+          <i class="bi bi-trash"></i> {% translate "Yes, delete" %}
+        </button>
+        <a class="btn btn-outline-secondary" href="{% url 'accounts:group_detail' group.pk %}">{% translate "Cancel" %}</a>
+      </form>
+    </div>
+  </div>
+{% endblock body %}

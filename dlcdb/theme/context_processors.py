@@ -333,7 +333,15 @@ def hints(request):
                 level=messages.WARNING,
                 msg=_("None of your groups belongs to a tenant, so you see no devices."),
             )
-            if user.has_perm("tenants.view_tenant"):
+            if (
+                not user.groups.exists()
+                and user.has_perm("accounts.add_group")
+                and user.has_perm("tenants.change_tenant")
+            ):
+                # In no group at all, as a fresh installation's superuser: a new group with a tenant.
+                no_tenant_hint.cta_link = reverse("accounts:group_add")
+                no_tenant_hint.cta_text = _("Create a group with a tenant?")
+            elif user.has_perm("tenants.view_tenant"):
                 no_tenant_hint.cta_link = reverse("tenants:index")
                 no_tenant_hint.cta_text = _("Assign groups to tenants?")
             sticky_messages.append(no_tenant_hint)

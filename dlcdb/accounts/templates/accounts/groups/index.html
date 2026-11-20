@@ -6,7 +6,16 @@
 {% block title %}{% translate "Groups" %}{% endblock title %}
 
 {% block body %}
-  <h1 class="mb-3">{% translate "Groups" %}</h1>
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{% translate "Groups" %}</h1>
+    {% if perms.accounts.add_group %}
+      <div class="ms-auto">
+        <a href="{% url 'accounts:group_add' %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> {% translate "New group" %}
+        </a>
+      </div>
+    {% endif %}
+  </div>
 
   <p class="text-secondary">
     {% translate "A group's permissions decide what its members may do; its tenants decide whose devices they see." %}
