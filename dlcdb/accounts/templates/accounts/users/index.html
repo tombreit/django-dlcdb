@@ -6,6 +6,16 @@
 {% block title %}{% translate "Users" %}{% endblock title %}
 {% block index_title %}{% translate "Users" %}{% endblock index_title %}
 
+{% block object_tools %}
+  {% if perms.accounts.add_customuser %}
+    <div class="ms-auto">
+      <a href="{% url 'accounts:user_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> {% translate "New user" %}
+      </a>
+    </div>
+  {% endif %}
+{% endblock object_tools %}
+
 {% block index_list %}
   {% partialdef user-list inline %}
     <div id="user-list" class="position-relative" hx-target="#user-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">

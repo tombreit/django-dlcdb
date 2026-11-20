@@ -202,6 +202,29 @@ class CustomUserCreationForm(AdminUserCreationForm):
         return super().save(commit)
 
 
+class NewUserForm(CustomUserCreationForm):
+    """
+    A new account in the frontend: email, name, an initial password or none
+    (LDAP), and its groups. The groups need ``accounts.change_customuser``, like
+    a group's members.
+    """
+
+    class Meta(CustomUserCreationForm.Meta):
+        fields = ("email", "first_name", "last_name", "groups")
+        widgets = {"groups": forms.CheckboxSelectMultiple}
+
+    def __init__(self, *args, editor, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["groups"].queryset = Group.objects.order_by("name")
+        self.fields["groups"].help_text = ""
+        if getattr(settings, "AUTH_LDAP_SERVER_URI", None):
+            # With LDAP, accounts usually log in with their LDAP password.
+            self.fields["usable_password"].initial = "false"
+        if not editor.has_perm("accounts.change_customuser"):
+            del self.fields["groups"]
+        add_bootstrap_classes(self)
+
+
 # from django.contrib.auth.forms import UserChangeForm
 
 # class CustomUserChangeForm(UserChangeForm):

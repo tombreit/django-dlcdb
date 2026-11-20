@@ -10,7 +10,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Benutzer und Personen
 
-*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr. *Einstellungen › Benutzer* zeigt jedes Konto mit seinen Gruppen, dem, was es darf, und den Mandanten, die es sieht; dort wird es auch deaktiviert. Angelegt werden Konten bis auf Weiteres im Django-Admin (*Start › Konten › Benutzer*); mit [LDAP](#ldap) entstehen sie beim ersten Login.
+*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr. *Einstellungen › Benutzer* zeigt jedes Konto mit seinen Gruppen, dem, was es darf, und den Mandanten, die es sieht; dort wird es auch deaktiviert und bekommt ein neues Passwort. *Neuer Benutzer* legt ein Konto an, mit einem Anfangspasswort oder ohne, für die Anmeldung über [LDAP](#ldap); mit LDAP entstehen Konten auch beim ersten Login. Eine Mail verschickt die DLCDB dabei nicht.
 
 *Personen* sind „Kunden“ der DLCDB, z.B. Menschen, denen ein Gerät ausgeliehen wird. Sie werden unter *Datenhaltung › Personen* gepflegt und haben nichts mit Benutzerkonten oder Berechtigungen zu tun.
 
@@ -30,7 +30,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet nur die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet. Dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. *Neue Gruppe* übernimmt auf Wunsch die Berechtigungen eines Gruppenprofils, das die DLCDB mitbringt, und ordnet die Gruppe gleich einem Mandanten zu. Benutzerkonten legt bis auf Weiteres der Django-Admin an (*Start › Konten › Benutzer*).
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet nur die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet. Dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. *Neue Gruppe* übernimmt auf Wunsch die Berechtigungen eines Gruppenprofils, das die DLCDB mitbringt, und ordnet die Gruppe gleich einem Mandanten zu.
 
 ### LDAP
 
@@ -143,7 +143,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
-- Benutzer anlegen, ihre Flags *Staff* und *Superuser* setzen oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
+- die Flags *Staff* und *Superuser* setzen und Benutzer einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die Einträge der Seite *Einstellungen* mit dem Abzeichen *Django-Admin*,
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
 - erzeugte Reports und den SAP-Import,

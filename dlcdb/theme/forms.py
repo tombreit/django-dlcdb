@@ -34,7 +34,9 @@ def add_bootstrap_classes(form):
             continue
         if isinstance(widget, (TomSelectWidget, TomSelectMultipleWidget)):
             continue
-        if isinstance(widget, forms.CheckboxInput):
+        # RadioSelect covers its subclass CheckboxSelectMultiple; render them with
+        # theme/includes/_choice_field.html, which keeps the class on the inputs.
+        if isinstance(widget, (forms.CheckboxInput, forms.RadioSelect)):
             bootstrap_class = "form-check-input"
         elif isinstance(widget, forms.Select):
             bootstrap_class = "form-select"

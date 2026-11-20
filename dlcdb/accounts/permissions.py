@@ -59,7 +59,8 @@ _REMOVED_IS_FINAL = _("Brings decommissioned devices back; without it, Removed i
 SENSITIVE = {
     "accounts.change_group": _("Can grant every permission listed here, also to their own groups."),
     "accounts.change_customuser": _(
-        "Can put any user, themselves included, into any group and, in the Django admin, make users superusers."
+        "Can set other users' passwords, and so log in as them, and put anyone, themselves included, into any "
+        "group. In the Django admin also make users superusers."
     ),
     "tenants.change_tenant": _("Can attach their own groups to any tenant, and so see its devices."),
     "lending.add_lendingprofile": _SLIP_TEMPLATES,

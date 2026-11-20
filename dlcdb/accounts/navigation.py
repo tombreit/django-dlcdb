@@ -10,12 +10,12 @@ nav_entries = [
         "order": 10,
         "label": _("Users"),
         "group": "access",
-        "description": _("Their groups, what they may do and which tenants they see; deactivate them"),
+        "description": _("Create users, set their passwords, see their groups and what they may do, deactivate them"),
         "search_terms": _("accounts, login, LDAP, superuser, password"),
         "icon": "bi bi-person-gear",
         "url": "accounts:users",
         # The accounts namespace has two entries: each lights up on its own pages.
-        "active_url_names": ["users", "user_detail"],
+        "active_url_names": ["users", "user_add", "user_detail", "user_set_password"],
         "required_permission": "accounts.view_customuser",
     },
     {

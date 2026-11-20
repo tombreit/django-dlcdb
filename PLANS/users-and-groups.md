@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 5 done (users list and page, deactivating, `accounts/views_users.py`); next: batch 6, new users and passwords. Started 2026-11-20.
+**Status:** batch 6 done (new users and passwords); next: batch 7, the wrap-up. Started 2026-11-20.
 
 ## Why
 
@@ -97,6 +97,9 @@ SPDX-License-Identifier: CC0-1.0
 - **Direct per-user permissions** (`user_permissions`) are ignored by the frontend.
 - **History:** one journal entry per save, naming what changed (permissions added and removed, members, deactivation), never passwords. Not simple-history.
 - **Passwords:** the administrator sets an initial one on *New user*, or none for LDAP accounts, and can set a new one on the user page. No reset mail.
+  - *New user* is Django's `AdminUserCreationForm` (through `CustomUserCreationForm`: the email is the username, unique regardless of case) with name and groups; with LDAP, *no password* is preselected. A new password is Django's `SetPasswordForm`; one's own keeps the session.
+  - A superuser's password only a superuser sets, as with deactivating. Both views keep the passwords out of error reports (`sensitive_post_parameters`).
+  - Radio and checkbox lists render through `theme/includes/_choice_field.html`: Django's markup would put `form-check-input` on the list's wrapper too.
 - **The admin's user and group screens stay registered**, like the settings and tenant admins. The menus link the frontend; Settings › More reaches the admin, for example for the flags.
 - **Permissions:**
   - group pages: `accounts.view_group`; editing: `change_group`; *New group*: `add_group`; deleting: `delete_group`;
@@ -177,7 +180,7 @@ SPDX-License-Identifier: CC0-1.0
   - users list (email, name, active, last login, groups, badges) and user page (groups, what the user may do, tenants seen);
   - deactivate and reactivate (not oneself); journal entries;
   - the menu entry *Users* opens the frontend.
-- [ ] **6. New user and passwords:** email, name, initial password or none; groups; set a new password on the user page.
+- [x] **6. New user and passwords:** email, name, initial password or none; groups; set a new password on the user page.
 - [ ] **7. Wrap-up:**
   - docs per *Docs: only what the app can't show*;
   - NEWS;

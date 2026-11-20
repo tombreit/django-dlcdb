@@ -66,7 +66,7 @@ def test_the_user_page_shows_groups_permissions_and_tenants(client, login, ada):
     assert [str(p) for p in response.context["permissions"]] == ["Person · change"]
     assert [tenant.name for tenant in response.context["tenants"]] == ["Institute"]
     assert "helpdesk" in response.content.decode()
-    assert not response.context["can_change"]
+    assert not response.context["may_manage"]
 
 
 def test_deactivating_needs_the_change_permission(client, login, ada):
@@ -124,3 +124,68 @@ def test_only_a_superuser_deactivates_a_superuser(client, login):
     assert _set_active(client, root, False).status_code == 403
     root.refresh_from_db()
     assert root.is_active
+
+
+PASSWORD = "a long and unusual passphrase"
+
+
+def _new_user(client, **data):
+    return client.post(reverse("accounts:user_add"), {"email": "new@example.com", "usable_password": "true", **data})
+
+
+def test_a_new_user_gets_an_initial_password_and_groups(client, login, ada):
+    login("accounts.add_customuser", "accounts.change_customuser")
+    helpdesk = Group.objects.get(name="helpdesk")
+
+    response = _new_user(client, password1=PASSWORD, password2=PASSWORD, groups=[helpdesk.pk])
+
+    user = CustomUser.objects.get(email="new@example.com")
+    assert response.url == reverse("accounts:user_detail", args=[user.pk])
+    assert user.username == "new@example.com"
+    assert user.check_password(PASSWORD)
+    assert list(user.groups.all()) == [helpdesk]
+    assert JournalEntry.objects.get(event="created").body == "Groups: helpdesk"
+
+
+def test_a_new_user_for_ldap_gets_no_password(client, login):
+    login("accounts.add_customuser")
+    _new_user(client, usable_password="false")
+    assert not CustomUser.objects.get(email="new@example.com").has_usable_password()
+
+
+def test_a_new_user_needs_an_unused_email_and_the_change_permission_for_groups(client, login, ada):
+    login("accounts.add_customuser")
+    response = _new_user(client, email="ADA@example.com", usable_password="false")
+    assert "email" in response.context["form"].errors
+    assert "groups" not in response.context["form"].fields
+
+
+def test_setting_a_password_is_journaled_without_it(client, login, ada):
+    login("accounts.view_customuser", "accounts.change_customuser")
+
+    response = client.post(
+        reverse("accounts:user_set_password", args=[ada.pk]), {"new_password1": PASSWORD, "new_password2": PASSWORD}
+    )
+
+    ada.refresh_from_db()
+    assert response.url == reverse("accounts:user_detail", args=[ada.pk])
+    assert ada.check_password(PASSWORD)
+    entry = JournalEntry.objects.get(event="password_set")
+    assert PASSWORD not in entry.summary + entry.body
+
+
+def test_only_a_superuser_sets_a_superusers_password(client, login):
+    login("accounts.view_customuser", "accounts.change_customuser")
+    root = CustomUser.objects.create_superuser(email="root@example.com", username="root", password="secret")
+    url = reverse("accounts:user_set_password", args=[root.pk])
+    assert client.post(url, {"new_password1": PASSWORD, "new_password2": PASSWORD}).status_code == 403
+    root.refresh_from_db()
+    assert root.check_password("secret")
+
+
+def test_setting_ones_own_password_keeps_the_session(client, login):
+    editor = login("accounts.view_customuser", "accounts.change_customuser")
+    client.post(
+        reverse("accounts:user_set_password", args=[editor.pk]), {"new_password1": PASSWORD, "new_password2": PASSWORD}
+    )
+    assert client.get(reverse("accounts:users")).status_code == 200

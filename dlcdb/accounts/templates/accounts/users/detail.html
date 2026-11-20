@@ -63,25 +63,28 @@
 {% endblock detail_main %}
 
 {% block detail_sidebar %}
-  {% if can_change %}
+  {% if may_manage %}
     <section class="card card-filled mb-3">
       <div class="card-header d-flex align-items-center gap-2">
         <i class="bi bi-toggle-on text-primary"></i>
         <h2 class="h6 mb-0">{% translate "Access" %}</h2>
       </div>
       <div class="card-body">
-        <form method="post" action="{% url 'accounts:user_set_active' account.pk %}">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.get_full_path }}">
-          {% if account.is_active %}
-            <p class="form-text mt-0">{% translate "A deactivated user can no longer log in, but keeps their history." %}</p>
-            <button class="btn btn-outline-danger" type="submit" name="active" value="0"><i class="bi bi-person-slash"></i> {% translate "Deactivate" %}</button>
-          {% else %}
-            <button class="btn btn-outline-primary" type="submit" name="active" value="1"><i class="bi bi-person-check"></i> {% translate "Reactivate" %}</button>
+        <a class="btn btn-outline-primary mb-3" href="{% url 'accounts:user_set_password' account.pk %}"><i class="bi bi-key"></i> {% translate "Set a new password" %}</a>
+        {% if account != request.user %}
+          <form method="post" action="{% url 'accounts:user_set_active' account.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            {% if account.is_active %}
+              <p class="form-text mt-0">{% translate "A deactivated user can no longer log in, but keeps their history." %}</p>
+              <button class="btn btn-outline-danger" type="submit" name="active" value="0"><i class="bi bi-person-slash"></i> {% translate "Deactivate" %}</button>
+            {% else %}
+              <button class="btn btn-outline-primary" type="submit" name="active" value="1"><i class="bi bi-person-check"></i> {% translate "Reactivate" %}</button>
+            {% endif %}
+          </form>
+          {% if ldap %}
+            <p class="form-text mb-0 mt-2">{% translate "With LDAP, the next login activates the account again while the user is in the LDAP group: remove them there for good." %}</p>
           {% endif %}
-        </form>
-        {% if ldap %}
-          <p class="form-text mb-0 mt-2">{% translate "With LDAP, the next login activates the account again while the user is in the LDAP group: remove them there for good." %}</p>
         {% endif %}
       </div>
     </section>

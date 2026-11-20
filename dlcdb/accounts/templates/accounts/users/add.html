@@ -1,0 +1,67 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "New user" %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "New user" %}</h1>
+    {% include "theme/includes/_back_link.html" with url=next_url %}
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% include "theme/includes/_non_field_errors.html" with form=form %}
+
+        <section class="card card-filled mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-person text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Account" %}</h2>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              {% include "theme/includes/_field.html" with field=form.email %}
+              {% include "theme/includes/_field.html" with field=form.first_name col="col-md-6" %}
+              {% include "theme/includes/_field.html" with field=form.last_name col="col-md-6" %}
+            </div>
+          </div>
+        </section>
+
+        <section class="card card-filled mb-3">
+          <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-key text-primary"></i>
+            <h2 class="h6 mb-0">{% translate "Password" %}</h2>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              {% include "theme/includes/_choice_field.html" with field=form.usable_password %}
+              {% include "theme/includes/_field.html" with field=form.password1 col="col-md-6" %}
+              {% include "theme/includes/_field.html" with field=form.password2 col="col-md-6" %}
+            </div>
+            <p class="form-text mb-0 mt-2">{% translate "Hand the initial password to the user; DLCDB sends no mail." %}</p>
+          </div>
+        </section>
+
+        {% if form.groups %}
+          <section class="card card-filled mb-3">
+            <div class="card-header d-flex align-items-center gap-2">
+              <i class="bi bi-people text-primary"></i>
+              <h2 class="h6 mb-0">{% translate "Groups" %}</h2>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                {% include "theme/includes/_choice_field.html" with field=form.groups hide_label=True %}
+              </div>
+            </div>
+          </section>
+        {% endif %}
+
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url submit_label=_("Create user") %}
+      </form>
+    </div>
+  </div>
+{% endblock body %}
