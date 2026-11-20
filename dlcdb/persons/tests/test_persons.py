@@ -283,6 +283,24 @@ class PersonFrontendTests(TestCase):
             self.assertEqual(stored.size, (150, 300))
             self.assertEqual(stored.getexif(), {})
 
+    def test_a_truncated_photo_is_a_form_error(self):
+        upload = BytesIO()
+        Image.new("RGB", (400, 300), "red").save(upload, "JPEG")
+        truncated = upload.getvalue()[: len(upload.getvalue()) // 2]
+
+        response = self.client.post(
+            reverse("persons:detail", args=[self.local_person.pk]),
+            {
+                "last_name": "Musterfrau",
+                "first_name": "Erika",
+                "email": "erika@example.com",
+                "photo": SimpleUploadedFile("erika.jpg", truncated, content_type="image/jpeg"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("photo", response.context["form"].errors)
+
     def test_the_add_page_takes_a_photo(self):
         upload = BytesIO()
         Image.new("RGB", (40, 30), "blue").save(upload, "PNG")

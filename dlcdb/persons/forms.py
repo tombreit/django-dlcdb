@@ -8,6 +8,8 @@ from django import forms
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
+from PIL import Image
 
 from dlcdb.core.models import Person, Room
 from dlcdb.core.utils.helpers import shrink_photo
@@ -63,7 +65,12 @@ class PersonForm(forms.ModelForm):
         # A new upload is stored shrunk, like the HR sync's photos. The stored
         # file (no upload) and False ("Clear") pass as they are.
         if isinstance(photo, UploadedFile):
-            photo = ContentFile(shrink_photo(photo), name=f"{Path(photo.name).stem}.jpg")
+            # Django's check opens the image but reads no pixels: a truncated
+            # file fails only here.
+            try:
+                photo = ContentFile(shrink_photo(photo), name=f"{Path(photo.name).stem}.jpg")
+            except (OSError, ValueError, Image.DecompressionBombError) as error:
+                raise forms.ValidationError(_("The image can't be read; it may be damaged or incomplete.")) from error
         return photo
 
     def clean(self):
