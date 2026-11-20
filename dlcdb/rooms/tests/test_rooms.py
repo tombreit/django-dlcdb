@@ -134,7 +134,7 @@ class RoomFrontendTests(BaseTest):
         opener = "/assets/devices/7/state/recover/?next=/inventory/devices/"
         url = f"{with_next(reverse('rooms:add'), opener)}&next_field=room"
 
-        self.assertContains(self.client.get(url), f'href="{escape(opener)}"', count=2)  # Cancel, twice
+        self.assertContains(self.client.get(url), f'href="{escape(opener)}"', count=2)  # Back and Cancel
         response = self.client.post(url, {"number": "F3.04"})
 
         room = Room.objects.get(number="F3.04")

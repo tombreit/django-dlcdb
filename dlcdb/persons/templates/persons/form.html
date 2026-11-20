@@ -6,7 +6,7 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
     <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
-    <a href="{{ next_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    {% include "theme/includes/_back_link.html" with url=next_url %}
   </div>
 
   <div class="row g-4">

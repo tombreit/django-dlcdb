@@ -16,7 +16,7 @@ assets.views.devices.device_transition.
     <h1 class="h3 mb-0 me-auto">
       {{ title }}: <span class="font-monospace">{{ device.edv_id|default:device.sap_id|default:device.uuid }}</span>
     </h1>
-    <a href="{{ cancel_url }}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    {% include "theme/includes/_back_link.html" with url=cancel_url label=_("Back") %}
   </div>
 
   <div class="row g-4">

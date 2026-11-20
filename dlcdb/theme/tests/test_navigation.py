@@ -2,12 +2,15 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""The ``?next=`` helpers of ``theme.navigation``."""
+"""The ``?next=`` helpers of ``theme.navigation``, and the way back from the add pages."""
+
+import re
 
 import pytest
 from django.test import RequestFactory
 from django.urls import reverse
 
+from dlcdb.accounts.models import CustomUser
 from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add, with_next
 
 LIST_URL = "/rooms/?search=F2&page=2"
@@ -91,3 +94,33 @@ def test_detail_urls_drop_an_unsafe_next():
 
     assert next_url == reverse("rooms:index")
     assert form_action == reverse("rooms:detail", args=[1])
+
+
+# Every add page: the header's back link and the action bar's Cancel, once each
+# and to the same place; the device and tenant add pages had a Cancel without URL.
+ADD_PAGES = [
+    "assets:device_add",
+    "assets:device_type_add",
+    "assets:manufacturer_add",
+    "assets:supplier_add",
+    "lending:profile_add",
+    "organization:position_add",
+    "organization:unit_add",
+    "persons:add",
+    "rooms:add",
+    "tenants:add",
+]
+
+
+@pytest.mark.parametrize("route", ADD_PAGES)
+def test_an_add_page_has_one_cancel_and_a_back_link_to_the_same_place(db, client, plain_static, route):
+    client.force_login(CustomUser.objects.create_superuser(email="admin@example.com", password="secret"))
+
+    html = client.get(reverse(route)).content.decode()
+
+    cancels = re.findall(r'<a [^>]*href="([^"]*)"[^>]*>\s*Cancel\s*</a>', html)
+    backs = re.findall(
+        r'<a href="([^"]*)" class="btn btn-outline-secondary[^"]*">\s*<i class="bi bi-arrow-left">', html
+    )
+    assert len(cancels) == 1 and cancels[0], cancels
+    assert backs == cancels

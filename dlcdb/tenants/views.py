@@ -18,6 +18,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message
+from dlcdb.theme.navigation import get_redirect_url
 
 from .forms import TenantForm
 from .models import Tenant
@@ -102,7 +103,12 @@ def add(request):
     return TemplateResponse(
         request,
         "tenants/form.html",
-        {"form": form, "title": _("Add tenant"), "submit_label": _("Create tenant")},
+        {
+            "form": form,
+            "title": _("Add tenant"),
+            "submit_label": _("Create tenant"),
+            "next_url": get_redirect_url(request) or reverse("tenants:index"),
+        },
     )
 
 

@@ -6,7 +6,8 @@
 {% block body %}
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
     <h1 class="h3 mb-0 me-auto">{% translate "Rename rooms" %}</h1>
-    <a href="{% url 'rooms:index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    {% url 'rooms:index' as rooms_url %}
+    {% include "theme/includes/_back_link.html" with url=rooms_url %}
   </div>
 
   <div class="row g-4">

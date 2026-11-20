@@ -160,7 +160,7 @@ class PersonFrontendTests(TestCase):
         opener = "/licenses/7/edit/"
         url = f"{with_next(reverse('persons:add'), opener)}&next_field=subscribers"
 
-        self.assertContains(self.client.get(url), f'href="{opener}"', count=2)  # Cancel, twice
+        self.assertContains(self.client.get(url), f'href="{opener}"', count=2)  # Back and Cancel
         response = self.client.post(url, {"last_name": "New", "first_name": "Nelly", "email": "nelly@example.com"})
 
         person = Person.objects.get(email="nelly@example.com")

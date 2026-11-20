@@ -12,7 +12,7 @@
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
     <div class="device-tile"><i class="bi bi-plus-lg"></i></div>
     <h1 class="h3 mb-0 me-auto">{{ title }}</h1>
-    <a href="{% url 'assets:device_index' %}" class="btn btn-outline-secondary">{% translate "Cancel" %}</a>
+    {% include "theme/includes/_back_link.html" with url=next_url %}
   </div>
 
   <div class="row g-4">
@@ -21,7 +21,7 @@
         {% csrf_token %}
         {% include "assets/devices/includes/_form_fields.html" with form=form %}
         {% url 'assets:device_index' as cancel_url %}
-        {% include "theme/includes/_form_action_bar.html" with cancel_url=cancel_url submit_label=submit_label %}
+        {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url submit_label=submit_label %}
       </form>
     </div>
   </div>

@@ -140,7 +140,12 @@ def device_add(request):
     return TemplateResponse(
         request,
         "assets/devices/form.html",
-        {"form": form, "title": _("Add device"), "submit_label": _("Create device")},
+        {
+            "form": form,
+            "title": _("Add device"),
+            "submit_label": _("Create device"),
+            "next_url": get_redirect_url(request) or reverse("assets:device_index"),
+        },
     )
 
 
