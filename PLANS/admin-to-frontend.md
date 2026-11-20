@@ -49,7 +49,7 @@ Found while planning:
 
 Progress:
 
-- [ ] 1. **The hub page** from the six existing settings entries: `group` and `description`, the view in `theme`, route `/settings/`; the gear links to the hub, and "Settings" on the settings pages links back. Docs (`berechtigungen.md`), NEWS.
+- [x] 1. **The hub page** (2026-11-20) from the six existing settings entries: `group` and `description`, the view in `theme`, route `/settings/`; the gear links to the hub, and "Settings" on the settings pages links back. Docs (`berechtigungen.md`), NEWS.
 - [ ] 2. **Filter box and `search_terms`:** a page-local script that hides groups left empty.
 - [ ] 3. **Admin entries:** the staff check for `admin:` URLs in `nav()`; the *(A)* entries, each from the app that owns it.
 - [ ] 4. **Data and tools:** the processes and Inventories move into the hub, the `nav_processes` slot is retired, and the admin navbar links the hub.

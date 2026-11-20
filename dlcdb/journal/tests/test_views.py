@@ -53,8 +53,8 @@ def test_index_lists_own_tenant_and_tenantless_entries_only(viewer_client, tenan
     assert response.status_code == 200
     assert set(_listed(response)) == {own, system}
     assert foreign.summary not in response.content.decode()
-    # The page links itself from the Settings menu.
-    assert f'href="{reverse(INDEX_URL)}"' in response.content.decode()
+    # The settings page lists the journal.
+    assert INDEX_URL in [item["url"] for item in response.context["nav_items_settings"]]
 
 
 def test_index_htmx_response_is_fragment_only(viewer_client):

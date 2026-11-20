@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-The settings pages of the gear menu that edit a ``SingletonBaseModel``
+The settings pages (listed on the gear's settings page) that edit a ``SingletonBaseModel``
 (``dlcdb/core/models/abstracts.py``): one form on the model's one row.
 
 The app's view checks the view permission and calls ``settings_page``; saving
@@ -18,6 +18,7 @@ from django.contrib.auth import get_permission_codename
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils import translation
 from django.utils.text import capfirst
 from django.utils.translation import gettext as _
@@ -68,8 +69,8 @@ def settings_page(request, form_class, *, icon, template="theme/_settings_base.h
             "title": title,
             "icon": icon,
             "can_change": can_change,
-            # Back, Cancel and Save of theme/_detail_base.html.
-            "next_url": redirect_to or request.path,
+            # Back and Cancel of theme/_detail_base.html; a save stays on the page.
+            "next_url": redirect_to or reverse("settings"),
             "form_action": with_next(request.path, redirect_to),
             **(context or {}),
         },

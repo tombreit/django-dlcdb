@@ -13,6 +13,7 @@ from django.views.i18n import set_language
 from dlcdb.accounts.forms import EmailAuthenticationForm
 from dlcdb.core.views import error_views, media_views
 from dlcdb.organization import views as organization_views
+from dlcdb.theme import views as theme_views
 
 admin.site.site_header = "DLCDB Admin"
 admin.site.site_title = "DLCDB Admin"
@@ -40,6 +41,7 @@ urlpatterns = [
     path("journal/", include("dlcdb.journal.urls")),
     path("organization/", include("dlcdb.organization.urls")),
     path("theme/", include("dlcdb.theme.urls")),
+    path("settings/", theme_views.settings_index, name="settings"),
     path("smallstuff/", include("dlcdb.smallstuff.urls")),
     path("api/v2/", include("dlcdb.api.urls")),
     # Public: the language switcher shows on the login page too.

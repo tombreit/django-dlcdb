@@ -14,7 +14,7 @@ from django.db.models import Count, Min, Q
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
-from django.utils.translation import ngettext
+from django.utils.translation import gettext_lazy, ngettext
 
 from dlcdb import __version__
 from dlcdb.core.models import Device, Room
@@ -24,6 +24,17 @@ from dlcdb.dataexchange.models import ImporterList
 # Kept in step with [project.urls] in pyproject.toml.
 REPOSITORY_URL = "https://github.com/tombreit/django-dlcdb"
 ISSUES_URL = "https://gitlab.gwdg.de/t.breitner/django-dlcdb/-/issues"
+
+# The groups of the settings page (theme/settings.html), in page order. Every
+# nav_settings entry names one of them as its "group".
+SETTINGS_GROUPS = {
+    "organization": gettext_lazy("Organization"),
+    "access": gettext_lazy("Users and access"),
+    "modules": gettext_lazy("Modules"),
+    "integrations": gettext_lazy("Integrations"),
+    "data": gettext_lazy("Data and tools"),
+    "logs": gettext_lazy("Logs"),
+}
 
 
 def project_meta(request):
@@ -87,6 +98,12 @@ def nav(request):
             continue
 
         for nav_entry in getattr(nav_module, "nav_entries", []):
+            group = nav_entry.get("group")
+            if nav_entry.get("slot") == "nav_settings" and group not in SETTINGS_GROUPS:
+                raise ImproperlyConfigured(
+                    f"nav_settings entry {nav_entry.get('url')!r} needs a group of {list(SETTINGS_GROUPS)}"
+                )
+
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, required_permission)
 
@@ -117,10 +134,20 @@ def nav(request):
                     "slot": nav_entry.get("slot"),
                     "order": nav_entry.get("order"),
                     "active": is_active,
+                    # The settings page's group heading and the line under the label.
+                    "group": SETTINGS_GROUPS.get(group),
+                    "description": nav_entry.get("description"),
                 }
                 nav_items.append(nav_item)
 
     nav_items = sorted(nav_items, key=itemgetter("order"))
+    # The settings page lists its entries group by group; the sort is stable,
+    # so within a group they keep their order.
+    group_labels = list(SETTINGS_GROUPS.values())
+    nav_items_settings = sorted(
+        [item for item in nav_items if item["slot"] == "nav_settings"],
+        key=lambda item: group_labels.index(item["group"]),
+    )
 
     # Focus config for the current app (its navigation.nav_focus). Deliberately
     # NOT run through the permission gate: these are per-app helper links shown
@@ -140,7 +167,7 @@ def nav(request):
         "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
         "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
         "nav_items_processes": [item for item in nav_items if item["slot"] == "nav_processes"],
-        "nav_items_settings": [item for item in nav_items if item["slot"] == "nav_settings"],
+        "nav_items_settings": nav_items_settings,
         "nav_focus": nav_focus,
     }
 

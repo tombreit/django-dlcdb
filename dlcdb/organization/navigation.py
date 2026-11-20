@@ -9,6 +9,8 @@ nav_entries = [
         "slot": "nav_settings",
         "order": 10,
         "label": _("Organization"),
+        "group": "organization",
+        "description": _("Name, address, IT contact, logos, room plan and documentation link; units and positions"),
         "icon": "bi bi-building",
         "url": "organization:branding",
         "required_permission": "organization.view_branding",

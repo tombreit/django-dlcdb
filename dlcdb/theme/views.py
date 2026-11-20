@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Shared HTMX endpoint backing the centralized device picker.
+Shared views: the settings page the gear opens, and the HTMX endpoint backing
+the centralized device picker.
 
 A single ``device_search`` view serves every picker source (lending, relocate,
 …). The POST ``source`` token selects a registered :class:`theme.pickers.PickerSource`,
@@ -25,6 +26,14 @@ from dlcdb.core.utils.htmx import missing_permission_message
 
 from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
+
+
+def settings_index(request):
+    """
+    The settings page: the gear's entries the user may see, under their groups.
+    ``theme.context_processors.nav`` provides and sorts them.
+    """
+    return TemplateResponse(request, "theme/settings.html")
 
 
 @require_POST

@@ -1,0 +1,38 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The settings page the gear opens: every nav_settings entry the user may see,
+declared in the apps' navigation.py, under the group it names.
+theme.context_processors.nav sorts them by group (SETTINGS_GROUPS), then by order.
+{% endcomment %}
+
+{% block title %}{% translate "Settings" %}{% endblock title %}
+
+{% block body %}
+  <h1 class="mb-4">{% translate "Settings" %}</h1>
+
+  {% regroup nav_items_settings by group as groups %}
+  <div class="row row-cols-1 row-cols-lg-2 g-4">
+    {% for group in groups %}
+      <section class="col">
+        <h2 class="h5">{{ group.grouper }}</h2>
+        <div class="list-group">
+          {% for item in group.list %}
+            <a href="{% url item.url %}" class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <i class="{{ item.icon }} fs-5" aria-hidden="true"></i>
+              <span>
+                <span class="d-block fw-semibold">{{ item.label }}</span>
+                <span class="d-block small text-body-secondary">{{ item.description }}</span>
+              </span>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+    {% empty %}
+      <p class="text-body-secondary">{% translate "You may not view any settings." %}</p>
+    {% endfor %}
+  </div>
+{% endblock body %}

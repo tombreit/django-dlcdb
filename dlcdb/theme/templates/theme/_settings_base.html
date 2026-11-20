@@ -22,8 +22,10 @@ object_tools (header-right actions) and detail_sidebar.
 {% block detail_title %}{{ title }}{% endblock detail_title %}
 {% block detail_meta %}{% translate "Settings" %}{% endblock detail_meta %}
 
-{# Opened from the gear menu there is nothing to go back to; with ?next= there is. #}
-{% block object_tools %}{% if request.GET.next %}{{ block.super }}{% endif %}{% endblock object_tools %}
+{# Back to the settings page, or with ?next= to the page this one was opened from. #}
+{% block object_tools %}
+  {% include "theme/includes/_back_link.html" with url=next_url label=_("Settings") %}
+{% endblock object_tools %}
 
 {% block detail_form_fields %}
   {% include "theme/includes/_settings_fields.html" %}

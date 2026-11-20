@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Thomas Breitner
+#
+# SPDX-License-Identifier: EUPL-1.2
+
+"""
+The settings page the gear opens: the nav_settings entries of the apps'
+navigation.py, under the group each names (theme.context_processors.SETTINGS_GROUPS).
+"""
+
+from unittest import mock
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.core.exceptions import ImproperlyConfigured
+from django.test import TestCase, override_settings
+from django.urls import reverse
+
+_PLAIN_STATIC_STORAGE = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class SettingsHubTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.superuser = get_user_model().objects.create_superuser(email="admin@example.com", password="secret")
+
+    def test_the_gear_opens_the_settings_page(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("dashboard:index"))
+
+        self.assertContains(response, f'href="{reverse("settings")}"')
+        self.assertNotContains(response, '<h6 class="dropdown-header">Settings</h6>')
+
+    def test_a_superuser_sees_every_group_in_order(self):
+        self.client.force_login(self.superuser)
+        content = self.client.get(reverse("settings")).content.decode()
+
+        headings = ["Organization", "Users and access", "Modules", "Integrations", "Logs"]
+        positions = [content.index(f'<h2 class="h5">{heading}</h2>') for heading in headings]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn(f'href="{reverse("tenants:index")}"', content)
+
+    def test_only_permitted_entries_are_listed(self):
+        user = get_user_model().objects.create_user(username="lender", email="lender@example.com", password="secret")
+        user.user_permissions.add(Permission.objects.get(codename="view_lendingconfiguration"))
+        self.client.force_login(user)
+        response = self.client.get(reverse("settings"))
+
+        self.assertContains(response, f'href="{reverse("lending:configuration")}"')
+        self.assertContains(response, '<h2 class="h5">Modules</h2>')
+        self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
+        self.assertNotContains(response, '<h2 class="h5">Users and access</h2>')
+
+    def test_a_settings_page_leads_back_to_the_settings_page(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("organization:branding"))
+
+        self.assertContains(response, f'<a href="{reverse("settings")}" class="btn btn-outline-secondary')
+
+    def test_an_entry_without_a_known_group_is_refused(self):
+        entry = {"slot": "nav_settings", "url": "journal:index", "required_permission": "journal.view_journalentry"}
+        self.client.force_login(self.superuser)
+
+        with mock.patch("dlcdb.journal.navigation.nav_entries", [entry]), self.assertRaises(ImproperlyConfigured):
+            self.client.get(reverse("settings"))

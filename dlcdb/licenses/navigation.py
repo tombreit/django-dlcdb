@@ -18,6 +18,8 @@ nav_entries = [
         "slot": "nav_settings",
         "order": 30,
         "label": _("Licenses configuration"),
+        "group": "modules",
+        "description": _("Default subscribers of new licenses"),
         "icon": "bi bi-bank2",
         "url": "licenses:configuration",
         "required_permission": "licenses.view_licensesconfiguration",

@@ -18,6 +18,8 @@ nav_entries = [
         "slot": "nav_settings",
         "order": 20,
         "label": _("Lending configuration"),
+        "group": "modules",
+        "description": _("Overdue reminders; the lending profiles with their slips and regulations"),
         "icon": "bi bi-arrow-left-right",
         "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",

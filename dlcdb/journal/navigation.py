@@ -9,6 +9,8 @@ nav_entries = [
         "slot": "nav_settings",
         "order": 50,
         "label": _("Journal"),
+        "group": "logs",
+        "description": _("Sent mails, syncs, imports, saved settings and errors"),
         "icon": "bi bi-journal-text",
         "url": "journal:index",
         "required_permission": "journal.view_journalentry",

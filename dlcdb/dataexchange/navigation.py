@@ -32,6 +32,8 @@ nav_entries = [
         "slot": "nav_settings",
         "order": 40,
         "label": _("HR API sync configuration"),
+        "group": "integrations",
+        "description": _("Connection to the HR system, the room name rule and the latest runs"),
         "icon": "bi bi-arrow-clockwise",
         "url": "dataexchange:hr_sync",
         "required_permission": "dataexchange.view_udbsyncconfiguration",
