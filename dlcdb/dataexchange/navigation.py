@@ -46,4 +46,15 @@ nav_entries = [
         "required_permission": "dataexchange.view_udbsyncconfiguration",
         "active_url_names": {"hr_sync"},
     },
+    {
+        "slot": "nav_settings",
+        "order": 45,
+        "label": _("HR sync runs"),
+        "group": "integrations",
+        "description": _("Every run of the HR sync with its notes; the HR sync page shows the latest five"),
+        "search_terms": _("UDB, log, errors, missing rooms"),
+        "icon": "bi bi-clock-history",
+        "url": "admin:dataexchange_udbsyncrun_changelist",
+        "required_permission": "dataexchange.view_udbsyncrun",
+    },
 ]

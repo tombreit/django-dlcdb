@@ -109,6 +109,10 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur
 | Einstellungen › Inventuren *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Raumabgleich *(Admin)* | Core \| Raum-Abgleich \| Can view Raum-Abgleich | `core.view_roomreconcile` |
+| Einstellungen › Records bearbeiten *(Admin)* | Core \| Record \| Can change Record | `core.change_record` |
+| Einstellungen › Record-Anhänge *(Admin)* | Core \| Attachment \| Can view Attachment | `core.view_attachment` |
+| Einstellungen › HR-Sync-Läufe *(Admin)* | Data Exchange \| HR API Sync Run \| Can view HR API Sync Run | `dataexchange.view_udbsyncrun` |
+| Einstellungen › Admin-Historie *(Admin)* | Administration \| log entry \| Can view log entry | `admin.view_logentry` |
 
 Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“.
 

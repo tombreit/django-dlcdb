@@ -42,15 +42,18 @@ Shown only with the Staff flag. Each comes from the `navigation.py` of the app n
 - [ ] **Inventories:** start and end an inventory. Einstellungen › Inventuren, `admin:core_inventory_changelist`, `core.change_inventory` (inventory). Inventorizing itself runs in the frontend.
 - [ ] **SAP comparison:** the upload, during an inventory. Einstellungen › SAP-Abgleich, `admin:inventory_saplist_changelist`, `core.change_inventory` (inventory). The comparison result page is in the frontend (`inventory:compare-sap-list`).
 - [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). Einstellungen › Raumabgleich, `admin:core_roomreconcile_changelist`, `core.view_roomreconcile` (rooms). The rooms list links the admin too; the result page is in the frontend (`rooms:reconcile`).
+- [ ] **Records:** edit or delete a record (`core.Record` and its proxies). Einstellungen › Records bearbeiten, `admin:core_record_changelist`, `core.change_record` (core); with only the view permission, Master data › Records (`assets:record_index`) lists them read-only. State changes run through the lifecycle in the frontend.
+- [ ] **Record attachments (`core.Attachment`):** Einstellungen › Record-Anhänge, `admin:core_attachment_changelist`, `core.view_attachment` (core).
+- [ ] **HR sync runs:** the full list of up to 50 (`dataexchange.UdbSyncRun`). Einstellungen › HR-Sync-Läufe, `admin:dataexchange_udbsyncrun_changelist`, `dataexchange.view_udbsyncrun` (dataexchange). The HR sync settings page shows the latest 5 with their notes.
+- [ ] **Admin history (`LogEntry`):** Einstellungen › Admin-Historie, `admin:admin_logentry_changelist`, `admin.view_logentry` (core).
 
 ## Admin only, without a menu entry
 
-- [ ] **Record attachments (`core.Attachment`).**
-- [ ] **HR sync runs:** the full list of up to 50 (`dataexchange.UdbSyncRun`). The HR sync settings page shows the latest 5 with their notes.
-- [ ] **Records:** edit or delete a record (`core.Record` and its proxies). The frontend lists records read-only (`assets:record_index`) and changes states through the lifecycle.
-- [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend.
-- [ ] **Tenants without devices:** the action "assign a tenant" for devices and imports without one (DECISIONS: the NOT NULL follow-up would make it unnecessary).
-- [ ] **Histories:** the admin history (`LogEntry`) and the tenant field history (DECISIONS: "field history for tenants").
+Reached where they are, and through Settings › More › Django admin.
+
+- [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend. No entry: the admin list is the same as Bulk import's.
+- [ ] **Tenants without devices:** the action "assign a tenant" for devices and imports without one (DECISIONS: the NOT NULL follow-up would make it unnecessary). No entry: an admin action, which the sticky hint links while needed.
+- [ ] **Tenant field history** (DECISIONS: "field history for tenants"). No entry: one page per tenant.
 
 ## Superuser only, in the admin
 
