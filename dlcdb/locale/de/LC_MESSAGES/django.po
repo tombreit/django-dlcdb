@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 00:22+0100\n"
+"POT-Creation-Date: 2026-11-21 00:43+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -2764,7 +2764,7 @@ msgstr ""
 "Gü-235-02 im HR-System der Raum G235."
 
 #: dlcdb/dataexchange/models.py:269 dlcdb/dataexchange/models.py:270
-#: dlcdb/dataexchange/navigation.py:40
+#: dlcdb/dataexchange/navigation.py:41
 msgid "HR API sync configuration"
 msgstr "HR-API-Sync-Konfiguration"
 
@@ -2791,7 +2791,7 @@ msgstr "Ungültige Ersetzung: %(error)s"
 msgid "HR sync run"
 msgstr "HR-Sync-Lauf"
 
-#: dlcdb/dataexchange/models.py:317 dlcdb/dataexchange/navigation.py:52
+#: dlcdb/dataexchange/models.py:317 dlcdb/dataexchange/navigation.py:53
 #: dlcdb/dataexchange/templates/admin/dataexchange/udbsyncconfiguration/change_form.html:14
 msgid "HR sync runs"
 msgstr "HR-Sync-Läufe"
@@ -2810,29 +2810,29 @@ msgstr ""
 msgid "upload, template, devices, SAP"
 msgstr "Upload, Vorlage, Geräte, SAP"
 
-#: dlcdb/dataexchange/navigation.py:29
+#: dlcdb/dataexchange/navigation.py:30
 msgid "Bulk decommissioning"
 msgstr "Bulk Ausmusterung"
 
-#: dlcdb/dataexchange/navigation.py:31
+#: dlcdb/dataexchange/navigation.py:32
 msgid "Remove many devices at once, listed in a CSV file"
 msgstr "Viele Geräte auf einmal entfernen, aufgelistet in einer CSV-Datei"
 
-#: dlcdb/dataexchange/navigation.py:32
+#: dlcdb/dataexchange/navigation.py:33
 msgid "decommission, retire, dispose, upload, removed"
 msgstr "ausmustern, aussondern, entsorgen, Upload, entfernt"
 
-#: dlcdb/dataexchange/navigation.py:42
+#: dlcdb/dataexchange/navigation.py:43
 msgid "Connection to the HR system, the room name rule and the latest runs"
 msgstr ""
 "Verbindung zum HR-System, die Regel für Raumnamen und die letzten Läufe"
 
-#: dlcdb/dataexchange/navigation.py:43
+#: dlcdb/dataexchange/navigation.py:44
 msgid "UDB, token, URL, persons, people, regular expression, sync now"
 msgstr ""
 "UDB, Token, URL, Personen, Leute, regulärer Ausdruck, jetzt synchronisieren"
 
-#: dlcdb/dataexchange/navigation.py:54
+#: dlcdb/dataexchange/navigation.py:55
 msgid ""
 "Every run of the HR sync with its notes; the HR sync page shows the latest "
 "five"
@@ -2840,7 +2840,7 @@ msgstr ""
 "Jeder Lauf des HR-Syncs mit seinen Notizen; die HR-Sync-Seite zeigt die "
 "letzten fünf"
 
-#: dlcdb/dataexchange/navigation.py:55
+#: dlcdb/dataexchange/navigation.py:56
 msgid "UDB, log, errors, missing rooms"
 msgstr "UDB, Log, Fehler, fehlende Räume"
 
@@ -4116,7 +4116,7 @@ msgstr "Abonnement deaktiviert."
 
 #: dlcdb/organization/apps.py:12 dlcdb/organization/models.py:111
 #: dlcdb/organization/models.py:112 dlcdb/organization/navigation.py:11
-#: dlcdb/theme/context_processors.py:31
+#: dlcdb/theme/context_processors.py:33
 msgid "Organization"
 msgstr "Organisation"
 
@@ -5233,96 +5233,119 @@ msgstr "Mandant “%(tenant)s” wurde gelöscht."
 msgid "Theme"
 msgstr "Theme"
 
-#: dlcdb/theme/context_processors.py:32
+#: dlcdb/theme/context_processors.py:34
 msgid "Users and access"
 msgstr "Benutzer und Zugriff"
 
-#: dlcdb/theme/context_processors.py:33
+#: dlcdb/theme/context_processors.py:35
 msgid "Modules"
 msgstr "Module"
 
-#: dlcdb/theme/context_processors.py:34
+#: dlcdb/theme/context_processors.py:36
 msgid "Integrations"
 msgstr "Integrationen"
 
-#: dlcdb/theme/context_processors.py:35
+#: dlcdb/theme/context_processors.py:37
 msgid "Data and tools"
 msgstr "Daten und Werkzeuge"
 
-#: dlcdb/theme/context_processors.py:36
+#: dlcdb/theme/context_processors.py:38
 msgid "Logs"
 msgstr "Protokolle"
 
-#: dlcdb/theme/context_processors.py:282
+#: dlcdb/theme/context_processors.py:284
 #, python-format
 msgid "%(count)d device without record!"
 msgid_plural "%(count)d devices without record!"
 msgstr[0] "%(count)d Geräte ohne aktuellen Record!"
 msgstr[1] "%(count)d Geräte ohne aktuellen Record!"
 
-#: dlcdb/theme/context_processors.py:288
+#: dlcdb/theme/context_processors.py:290
 msgid "Add record?"
 msgstr "Einen Record hinzufügen?"
 
-#: dlcdb/theme/context_processors.py:305
+#: dlcdb/theme/context_processors.py:307
 #, python-format
 msgid "%(count)d device without tenant!"
 msgid_plural "%(count)d devices without tenant!"
 msgstr[0] "%(count)d Gerät ohne Mandant!"
 msgstr[1] "%(count)d Geräte ohne Mandant!"
 
-#: dlcdb/theme/context_processors.py:313
+#: dlcdb/theme/context_processors.py:315
 #, python-format
 msgid "%(count)d import without tenant!"
 msgid_plural "%(count)d imports without tenant!"
 msgstr[0] "%(count)d Import ohne Mandant!"
 msgstr[1] "%(count)d Importe ohne Mandant!"
 
-#: dlcdb/theme/context_processors.py:325
+#: dlcdb/theme/context_processors.py:327
 msgid "Assign a tenant?"
 msgstr "Mandant zuordnen?"
 
-#: dlcdb/theme/context_processors.py:334
+#: dlcdb/theme/context_processors.py:346
+msgid "No tenants yet: nobody sees any devices."
+msgstr "Noch keine Mandanten: Niemand sieht Geräte."
+
+#: dlcdb/theme/context_processors.py:348
+msgid "Add a tenant?"
+msgstr "Mandant hinzufügen?"
+
+#: dlcdb/theme/context_processors.py:355
+msgid "No groups yet: only superusers have permissions."
+msgstr "Noch keine Gruppen: Nur Superuser haben Berechtigungen."
+
+#: dlcdb/theme/context_processors.py:357
+msgid "Create a group?"
+msgstr "Gruppe anlegen?"
+
+#: dlcdb/theme/context_processors.py:366
+#, python-format
+msgid "%(count)d tenant has no group: nobody sees its devices."
+msgid_plural "%(count)d tenants have no group: nobody sees their devices."
+msgstr[0] "%(count)d Mandant hat keine Gruppe: Niemand sieht seine Geräte."
+msgstr[1] "%(count)d Mandanten haben keine Gruppe: Niemand sieht ihre Geräte."
+
+#: dlcdb/theme/context_processors.py:372 dlcdb/theme/context_processors.py:393
+msgid "Assign groups to tenants?"
+msgstr "Gruppen Mandanten zuordnen?"
+
+#: dlcdb/theme/context_processors.py:381
 msgid "None of your groups belongs to a tenant, so you see no devices."
 msgstr ""
 "Keine Ihrer Gruppen gehört zu einem Mandanten, daher sehen Sie keine Geräte."
 
-#: dlcdb/theme/context_processors.py:343
+#: dlcdb/theme/context_processors.py:390
 msgid "Create a group with a tenant?"
 msgstr "Eine Gruppe mit Mandant anlegen?"
 
-#: dlcdb/theme/context_processors.py:346
-msgid "Assign groups to tenants?"
-msgstr "Gruppen Mandanten zuordnen?"
-
-#: dlcdb/theme/context_processors.py:360
+#: dlcdb/theme/context_processors.py:407
 msgid "No room configured as 'is_external'!"
 msgstr "Kein Raum als 'is_external' konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:362 dlcdb/theme/context_processors.py:372
+#: dlcdb/theme/context_processors.py:409 dlcdb/theme/context_processors.py:419
 msgid "Configure one?"
 msgstr "Konfigurieren?"
 
-#: dlcdb/theme/context_processors.py:370
+#: dlcdb/theme/context_processors.py:417
 msgid "No room configured as 'is_auto_return_room'!"
 msgstr "Kein \"Auto return\" Raum konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:380
+#: dlcdb/theme/context_processors.py:427
 msgid "No rooms defined yet."
 msgstr "Bisher wurden keine Räume  eingegeben."
 
-#: dlcdb/theme/context_processors.py:382
+#: dlcdb/theme/context_processors.py:429
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
-#: dlcdb/theme/context_processors.py:393
+#: dlcdb/theme/context_processors.py:440
 msgid ""
 "No IT department contact email configured under Settings › Organization!"
 msgstr ""
 "Keine Kontakt-Email der IT-Abteilung unter Einstellungen › Organisation "
 "konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:395
+#: dlcdb/theme/context_processors.py:442
 msgid "Configure it?"
 msgstr "Konfigurieren?"
 

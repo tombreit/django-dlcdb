@@ -9,6 +9,7 @@ from operator import itemgetter
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.models import Group
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count, Min, Q
 from django.urls import reverse
@@ -20,6 +21,7 @@ from dlcdb import __version__
 from dlcdb.core.models import Device, Room
 from dlcdb.core.models.inventory import get_active_inventory
 from dlcdb.dataexchange.models import ImporterList
+from dlcdb.tenants.models import Tenant
 
 # Kept in step with [project.urls] in pyproject.toml.
 REPOSITORY_URL = "https://github.com/tombreit/django-dlcdb"
@@ -326,9 +328,54 @@ def hints(request):
                         )
                     )
 
+        # Tenants and groups the instance lacks, each for whoever may fix it.
+        # No tenant or no group also explains the user's own hint below,
+        # which then stays away.
+        may_add_tenant = user.has_perm("tenants.add_tenant")
+        may_tick_tenants = user.has_perms(["tenants.view_tenant", "tenants.change_tenant"])
+        setup_hints = []
+        if may_add_tenant or may_tick_tenants:
+            tenant_counts = Tenant.objects.aggregate(
+                count=Count("pk", distinct=True),
+                without_groups=Count("pk", filter=Q(groups__isnull=True), distinct=True),
+            )
+            if may_add_tenant and not tenant_counts["count"]:
+                setup_hints.append(
+                    StickyMessage(
+                        level=messages.WARNING,
+                        msg=_("No tenants yet: nobody sees any devices."),
+                        cta_link=reverse("tenants:add"),
+                        cta_text=_("Add a tenant?"),
+                    )
+                )
+        if user.has_perm("accounts.add_group") and not Group.objects.exists():
+            setup_hints.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=_("No groups yet: only superusers have permissions."),
+                    cta_link=reverse("accounts:group_add"),
+                    cta_text=_("Create a group?"),
+                )
+            )
+        sticky_messages += setup_hints
+        if may_tick_tenants and (count := tenant_counts["without_groups"]):
+            sticky_messages.append(
+                StickyMessage(
+                    level=messages.WARNING,
+                    msg=ngettext(
+                        "%(count)d tenant has no group: nobody sees its devices.",
+                        "%(count)d tenants have no group: nobody sees their devices.",
+                        count,
+                    )
+                    % {"count": count},
+                    cta_link=reverse("tenants:index"),
+                    cta_text=_("Assign groups to tenants?"),
+                )
+            )
+
         # Only for users who work with devices at all: they would otherwise
         # just see empty lists. The link only for those who may open its page.
-        if not request.tenants and user.has_perm("core.view_device"):
+        if not request.tenants and user.has_perm("core.view_device") and not setup_hints:
             no_tenant_hint = StickyMessage(
                 level=messages.WARNING,
                 msg=_("None of your groups belongs to a tenant, so you see no devices."),

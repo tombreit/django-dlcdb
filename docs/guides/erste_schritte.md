@@ -1,6 +1,6 @@
 # Erste Schritte
 
-Die DLCDB ist [installiert](../betrieb/setup.md) und ein Superuser ist mit `./manage.py createsuperuser` angelegt. Die folgenden Schritte richten eine frisch installierte DLCDB für den Alltag ein. Wie Benutzer, Gruppen, Berechtigungen und Mandanten zusammenhängen, erklärt [Berechtigungen](berechtigungen.md).
+Die DLCDB ist [installiert](../betrieb/setup.md) und ein Superuser ist mit `./manage.py createsuperuser` angelegt. Die folgenden Schritte richten eine frisch installierte DLCDB für den Alltag ein; bis Mandanten, Gruppen, Räume und die IT-Kontakt-Email da sind, erinnert ein Hinweis auf jeder Seite daran, mit einem Link dorthin. Wie Benutzer, Gruppen, Berechtigungen und Mandanten zusammenhängen, erklärt [Berechtigungen](berechtigungen.md).
 
 ## 1. Als Superuser anmelden
 

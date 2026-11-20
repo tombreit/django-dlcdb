@@ -10,14 +10,15 @@ apps, not the legacy admin changelists.
 import re
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
-from django.test import override_settings
+from django.contrib.auth.models import Group, Permission
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device, Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.organization.models import Branding
+from dlcdb.tenants.models import Tenant
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -191,3 +192,51 @@ class StickyHintsTests(BaseTest):
         branding.save()
         response = self.client.get(self.dashboard_url)
         self.assertNotContains(response, "No IT department contact email configured under Settings › Organization!")
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class SetupHintsTests(TestCase):
+    """An instance without tenants or groups, or with a tenant no group sees, says so to whoever may fix it."""
+
+    no_tenants = "No tenants yet: nobody sees any devices."
+    no_groups = "No groups yet: only superusers have permissions."
+    user_hint = "None of your groups belongs to a tenant, so you see no devices."
+
+    def setUp(self):
+        self.client.force_login(get_user_model().objects.create_superuser(email="root@example.com", password="x"))
+        self.dashboard_url = reverse("dashboard:index")
+
+    def test_a_fresh_instance_asks_for_a_tenant_and_a_group(self):
+        response = self.client.get(self.dashboard_url)
+
+        self.assertContains(response, f"<a href='{reverse('tenants:add')}'>Add a tenant?</a>", html=True)
+        self.assertContains(response, f"<a href='{reverse('accounts:group_add')}'>Create a group?</a>", html=True)
+        # They explain why the user sees no devices: no hint of its own.
+        self.assertNotContains(response, self.user_hint)
+
+    def test_a_tenant_no_group_sees_is_named_until_a_group_sees_it(self):
+        tenant = Tenant.objects.create(name="Institute")
+        group = Group.objects.create(name="helpdesk")
+
+        response = self.client.get(self.dashboard_url)
+        self.assertNotContains(response, self.no_tenants)
+        self.assertNotContains(response, self.no_groups)
+        self.assertContains(response, "1 tenant has no group: nobody sees its devices.")
+        self.assertContains(response, f"<a href='{reverse('tenants:index')}'>Assign groups to tenants?</a>", html=True)
+
+        tenant.groups.add(group)
+        response = self.client.get(self.dashboard_url)
+        self.assertNotContains(response, "has no group")
+        # The superuser is in no group: now their own hint says so.
+        self.assertContains(response, self.user_hint)
+
+    def test_only_who_may_fix_them_gets_them(self):
+        viewer = get_user_model().objects.create_user(username="viewer", email="viewer@example.com")
+        viewer.user_permissions.add(Permission.objects.get(codename="view_device", content_type__app_label="core"))
+        self.client.force_login(viewer)
+
+        response = self.client.get(self.dashboard_url)
+
+        self.assertNotContains(response, self.no_tenants)
+        self.assertNotContains(response, self.no_groups)
+        self.assertContains(response, self.user_hint)

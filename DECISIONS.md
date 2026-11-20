@@ -62,6 +62,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Passwords are set by an administrator, without mail**: an initial one on *New user* or none (LDAP), a new one on the user page. Not reset links.
 - **User and group changes are journaled**, naming what changed (never a password), not with simple-history; the tenant ticks keep the tenant's history.
 - **The docs list no permissions**: the group pages are the reference, so nothing drifts from the code.
+- **A fresh instance says what it lacks**: no tenants, no groups and a tenant no group sees get a hint on every page, for whoever may fix them (`theme.context_processors.hints`); the first two also explain the user's own "no tenant" hint, which then stays away. Not "a group without tenant": a group that only grants permissions (*Administration*) rightly has none, its members see devices through their other groups.
 
 ## Pitfalls
 
