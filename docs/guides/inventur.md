@@ -1,6 +1,6 @@
 # Inventur
 
-Inventur-Ansicht: *Inventarisieren* (Hauptmenü bzw. *Prozesse › Inventarisieren*, nur bei aktiver Inventur)
+Inventur-Ansicht: *Inventarisieren* (Hauptmenü, nur bei aktiver Inventur)
 
 ## Screenshots
 
@@ -66,7 +66,7 @@ Wird ein Gerät mit dem Status "Nicht auffindbar" über sonstige Mechanismen der
 
 ### Nacharbeiten
 
-- [SAP-Abgleich (*Prozesse > SAP-Abgleich*)](#sap-abgleich)
+- [SAP-Abgleich (*Einstellungen › SAP-Abgleich*)](#sap-abgleich)
 
 ## Geräte-Übersicht
 

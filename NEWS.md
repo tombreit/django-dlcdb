@@ -10,6 +10,7 @@ SPDX-License-Identifier: CC0-1.0
 
 * Settings: the gear opens one page that lists all settings by group, with a search box
 * For staff, the settings page also lists what is still only in the Django admin (users, groups, lending regulations, smallstuff catalogue, notification messages, reports, room reconcile); menu entries into the admin no longer show without the Staff flag
+* Bulk import, bulk decommissioning, inventories and the SAP comparison are under *Settings › Data and tools*; the admin's *Processes* menu is gone
 * Persons get a photo, positions and an organizational unit without an HR system: set on the person page, units and positions managed under *Settings › Organization* (formerly *Branding*); the person list filters by position and room. The HR sync fills the same fields
 * Lending slip templates: `person.udb_person_image`, `person.udb_contract_organizational_positions` and `person.udb_contract_organization_unit` are gone; use `person.photo`, `person.organizational_positions.all|join:", "` and `person.organizational_unit`
 * Lending profiles (under Settings › Lending configuration) and the HR API sync configuration are edited without the Staff flag: give `lending.add_lendingprofile`, `lending.change_lendingprofile` and `dataexchange.change_udbsyncconfiguration` to administrators only; slip templates are template code, and the HR token goes to whatever URL is set

@@ -41,10 +41,18 @@ class SettingsHubTests(TestCase):
         self.client.force_login(self.superuser)
         content = self.client.get(reverse("settings")).content.decode()
 
-        headings = ["Organization", "Users and access", "Modules", "Integrations", "Logs"]
+        headings = ["Organization", "Users and access", "Modules", "Integrations", "Data and tools", "Logs", "More"]
         positions = [content.index(f'<h2 class="h5">{heading}</h2>') for heading in headings]
         self.assertEqual(positions, sorted(positions))
         self.assertIn(f'href="{reverse("tenants:index")}"', content)
+        self.assertIn(f'href="{reverse("dataexchange:importer_index")}"', content)
+
+    def test_the_admin_navbar_links_the_settings_page(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("admin:index"))
+
+        self.assertContains(response, f'<a class="btn btn-primary" href="{reverse("settings")}"')
+        self.assertNotContains(response, "Processes")
 
     def test_only_permitted_entries_are_listed(self):
         user = get_user_model().objects.create_user(username="lender", email="lender@example.com", password="secret")

@@ -172,7 +172,6 @@ def nav(request):
     return {
         "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
         "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
-        "nav_items_processes": [item for item in nav_items if item["slot"] == "nav_processes"],
         "nav_items_settings": nav_items_settings,
         "nav_focus": nav_focus,
     }

@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 # Rooms, Manufacturer, Distributor, Device types, People and Records are owned
 # by their frontend apps (dlcdb.rooms, dlcdb.assets, dlcdb.persons
 # navigation.py); core only keeps the admin-changelist entries that have no
-# frontend yet.
+# frontend yet. Inventories are under Settings (dlcdb.inventory).
 nav_entries = [
     {
         "slot": "nav_masterdata",
@@ -16,14 +16,6 @@ nav_entries = [
         "icon": "bi bi-stack",
         "url": "admin:core_removedrecord_changelist",
         "required_permission": "core.view_record",
-    },
-    {
-        "slot": "nav_masterdata",
-        "order": 80,
-        "label": _("Inventories"),
-        "icon": "bi bi-eyeglasses",
-        "url": "admin:core_inventory_changelist",
-        "required_permission": "core.change_inventory",
     },
     {
         "slot": "nav_masterdata",

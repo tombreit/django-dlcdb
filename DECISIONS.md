@@ -33,6 +33,12 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Without the change permission a settings page shows the same form, disabled**, not the label/value list of Tenants (raw values for choices, people and files).
 - **A settings save writes one journal entry naming the changed fields, never their values** (the HR token); not simple-history on the singletons.
 - **The settings admins stay registered**, like the tenant admin; the frontend links only the frontend pages.
+- **Settings is one page that lists every setting by group, with a search box; each entry opens its own page** (GitHub, Stripe, Linear, Snipe-IT). Not one page holding every field (VS Code, Odoo): the settings are forms, record lists, logs and actions, and one page would need one Save button across models.
+- **Each app declares its settings entries in its own `navigation.py`**, like its menu entries; not a central settings app. The settings page is a second rendering of the gear's registry.
+- **The search also matches hidden search terms, one translatable string per entry**: words from the entry's page that its label and description lack. Not a search over the settings forms' fields (introspection), unless the terms fall short.
+- **Modules still only in the Django admin are listed on the settings page, for staff, with a badge**, so they can be found while they move (`PLANS/admin-to-frontend.md`). Every menu entry into the admin needs the Staff flag besides its permission: without it the entry led to the admin login.
+- **Bulk import, bulk decommissioning, inventories, the SAP comparison and the room reconcile are under Settings › Data and tools**, not in a Processes menu, which only the admin navbar showed. Master data keeps its own menu: daily work, not configuration.
+- **Tenants are under Settings › Users and access**, not Organization: they grant no permissions, but their groups decide who sees which devices.
 - **The lending profiles live on Settings › Lending configuration**, with no menu entry or index page of their own; the page needs `view_lendingconfiguration`, the card `view_lendingprofile`. Not "either permission opens the page" (`settings_page` would need a form-less mode).
 - **Overdue lendings are always highlighted**: the toggle was a half switch (the due date stayed red).
 - **A lending slip lists the regulations by link creation date**: the never-read `LendingProfileRegulation.order` is gone; an order of its own would need the slip to sort by it.
@@ -42,7 +48,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Positions are master data with a many-to-many**, not HR's joined text (no filter) or a foreign key (HR delivers a list). The explicit through model `PersonPosition` exists only for `PROTECT`.
 - **A printed lending slip runs no script and loads nothing from another host** (a Content Security Policy on `print_sheet`); saving a profile refuses `<script>`, `on…=` attributes and `javascript:` with a form error. Not an HTML sanitizer (nh3, bleach): it would mangle template code, and template code can assemble a tag while rendering, which no check of the source sees. Not the Staff flag back on these pages.
 - **A unit or position that a person holds can't be deleted**, deactivated persons included: `PROTECT`, not a check in the delete view, which the admin and the shell would skip.
-- **Units and positions live on Settings › Organization** (formerly Branding) as cards, like the lending profiles: no menu entries or index pages, so the settings menu doesn't grow; every entry listed, no paging. The page's cards start closed, with a table of contents; any form error opens all of them.
+- **Units and positions live on Settings › Organization** (formerly Branding) as cards, like the lending profiles: no entries or index pages of their own, so the settings page doesn't grow; every entry listed, no paging. The page's cards start closed, with a table of contents; any form error opens all of them.
 
 ## Pitfalls
 
@@ -75,6 +81,6 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring still shows the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
 - Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, field history for tenants, ESLint for `theme.js` and `filterbar.js`.
-- Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; try the HR room rule on a sample.
+- Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; try the HR room rule on a sample; whether the account menu keeps *Django admin* now that Settings › More has it.
 - Publish on PyPI.
 - Persons: a DLCDB field for the contract end, which lending, notifications and smallstuff read from `udb_contract_planned_checkout`; the contract type as master data; a phone number; positions and photo in the bulk import and the lending CSV export, unit and positions in the API; delete the photo files of hard-deleted persons (a merged duplicate's, say); let users set what HR leaves empty on a synced person.

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Admin to frontend: what only the Django admin still offers
 
-**Status:** tracking list, started 2026-11-19 after the settings pages moved to the frontend; since 2026-11-20 also the plan for the settings hub. This is a living document.
+**Status:** tracking list, started 2026-11-19 after the settings pages moved to the frontend. This is a living document.
 
 ## Why
 
@@ -14,65 +14,25 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 
 ## How to use this list
 
-- **When a module gets a frontend page:** tick its box, note the commit, point its entry in the settings hub at the frontend page (the *Admin* badge goes), and remove its *(Admin)* marker in `docs/guides/berechtigungen.md` ("Navigation" table and "Django-Admin" section).
+- **When a module gets a frontend page:** tick its box, note the commit, point its entry on the settings page at the frontend page (its *Django admin* badge goes), and remove its *(Admin)* marker in `docs/guides/berechtigungen.md` ("Navigation" table and "Django-Admin" section).
 - **A larger move gets a plan of its own** in `PLANS/`, like `settings-pages`, which was retired into `DECISIONS.md`. Its last batch ticks the box here.
 - **Whether the admin stays registered after a move** is decided per module. The settings admins stayed, like the tenant admin.
 - **When every box is ticked,** retire this file into `DECISIONS.md` and delete it.
 
-## The settings hub
-
-One page, `/settings/`, lists every setting and every admin-only module in groups, with a filter box. The gear opens it. Each entry opens its own page, as today.
-
-Decided (2026-11-20):
-
-- **A hub, not one page with every field** (as in VS Code or Odoo): the settings are singleton forms, record lists, logs and actions; one page would need one Save button across models. GitHub, Stripe, Linear, Slack and Snipe-IT work the same way.
-- **Locality stays.** Each app adds its entries in its own `navigation.py` (slot `nav_settings`), with three new optional keys: `group`, `description` and `search_terms`. `theme` holds the ordered list of groups; an unknown group raises `ImproperlyConfigured`. Not a central settings app (`dlcdb/settings` is the Django settings package anyway).
-- **`search_terms` is a hidden field:** one translatable string per entry, never shown. The filter matches it along with the label and description, so "logo" finds Organization.
-- **The gear is a link to the hub**, not a dropdown. "Settings" on the settings pages links back to the hub.
-- **An `admin:` entry also needs the Staff flag** and carries an "Admin" badge. Moving a module to the frontend switches its entry's `url`.
-- **Unchanged:** personal preferences (theme, language, subscriptions) stay in the account menu, and master data keeps its own menu.
-
-Groups, *(A)* marking an admin link:
-
-- **Organization:** Organization (branding, units, positions)
-- **Users and access:** Users *(A)*, Groups and permissions *(A)*, Tenants (they grant no permissions, but decide through `Tenant.groups` who sees which devices)
-- **Modules:** Lending configuration, Lending regulations (`core.Link`) *(A)*, Licenses configuration, Smallstuff catalogue *(A)*, Notification messages and reports *(A)*
-- **Integrations:** HR API sync
-- **Data and tools:** Bulk import, Bulk decommissioning *(A)*, Inventories *(A)*, SAP comparison *(A, during an inventory)*, Room reconcile *(A)*
-- **Logs:** Journal
-- **More** (staff only, last): Django admin, an entry like the others
-
-Found while planning:
-
-- **The frontend navbar never renders the Processes menu.** `nav_items_processes` is used only in `templates/admin/navbar.html`. Bulk decommissioning and SAP comparison have no frontend menu entry; Bulk import has only the device list's button. Batch 4 moves them into the hub.
-- **Admin menu entries are shown to users without the Staff flag.** Batch 3 adds the staff check, which also hides the three admin links in Master data from those users.
-
-Progress:
-
-- [x] 1. **The hub page** (2026-11-20) from the six existing settings entries: `group` and `description`, the view in `theme`, route `/settings/`; the gear links to the hub, and "Settings" on the settings pages links back. Docs (`berechtigungen.md`), NEWS.
-- [x] 2. **Filter box and `search_terms`** (2026-11-20): a page-local script that hides groups left empty.
-- [x] 3. **Admin entries** (2026-11-20): the staff check for `admin:` URLs in `nav()`; the *(A)* entries, each from the app that owns it.
-- [ ] 4. **Data and tools:** the processes and Inventories move into the hub, the `nav_processes` slot is retired, and the admin navbar links the hub.
-
-Open, to decide during the batches: field-level search (by introspecting the settings forms), only if search terms fall short; whether the account menu's "Django admin" entry moves into the hub.
-
 ## Menu entries that open the admin
 
-- [ ] **Removed records:** Datenhaltung › Entfernt-Records, `admin:core_removedrecord_changelist`, `core.view_record`.
-- [ ] **Inventories:** start and end an inventory. Datenhaltung › Inventuren, `admin:core_inventory_changelist`, `core.change_inventory`. Inventorizing itself runs in the frontend.
-- [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note`. The inventory screens add, edit and delete the notes of a room or device during an inventory.
-- [ ] **Bulk decommissioning:** Prozesse › Bulk Ausmusterung, `admin:dataexchange_removerlist_changelist`, `dataexchange.view_removerlist`. Bulk import is in the frontend.
-- [ ] **SAP comparison:** the upload. Prozesse › SAP-Abgleich, `admin:inventory_saplist_changelist`, `core.change_inventory`. The comparison result page is in the frontend (`inventory:compare-sap-list`).
+Shown only with the Staff flag. Each comes from the `navigation.py` of the app named; the settings page marks its entries with a *Django admin* badge (DECISIONS: settings page).
 
-## Admin only, linked from the settings hub
-
-Since hub step 3, for staff, each from the `navigation.py` of the app named.
-
-- [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete (`accounts.CustomUser`, the `accounts.Group` proxy). Needs the Staff flag. *Users and access › Users, Groups and permissions* (accounts).
-- [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. *Modules › Lending regulations* (lending).
-- [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons. *Modules › Smallstuff catalogue* (smallstuff).
-- [ ] **Notification messages and reports (`notifications.Message`, `reporting.Report`):** status, preview, "Send now". Subscriptions have a frontend page. *Modules › Notification messages* (notifications), *Modules › Reports* (reporting).
-- [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). The rooms list links the admin; the result page is in the frontend (`rooms:reconcile`). *Data and tools › Room reconcile* (rooms).
+- [ ] **Removed records:** Datenhaltung › Entfernt-Records, `admin:core_removedrecord_changelist`, `core.view_record` (core).
+- [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note` (core). The inventory screens add, edit and delete the notes of a room or device during an inventory.
+- [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete. Einstellungen › Benutzer and › Gruppen und Berechtigungen, `admin:accounts_customuser_changelist` and `admin:accounts_group_changelist` (the `accounts.Group` proxy), `accounts.view_customuser` and `accounts.view_group` (accounts).
+- [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. Einstellungen › Ausleih-Ordnungen, `admin:core_link_changelist`, `core.view_link` (lending).
+- [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons. Einstellungen › Kleinkram-Katalog, `admin:smallstuff_thing_changelist`, `smallstuff.view_thing` (smallstuff).
+- [ ] **Notification messages and reports (`notifications.Message`, `reporting.Report`):** status, preview, "Send now". Subscriptions have a frontend page. Einstellungen › Benachrichtigungen and › Reports, `notifications.view_message` (notifications) and `reporting.view_report` (reporting).
+- [ ] **Bulk decommissioning:** Einstellungen › Bulk-Ausmusterung, `admin:dataexchange_removerlist_changelist`, `dataexchange.view_removerlist` (dataexchange). Bulk import is in the frontend.
+- [ ] **Inventories:** start and end an inventory. Einstellungen › Inventuren, `admin:core_inventory_changelist`, `core.change_inventory` (inventory). Inventorizing itself runs in the frontend.
+- [ ] **SAP comparison:** the upload, during an inventory. Einstellungen › SAP-Abgleich, `admin:inventory_saplist_changelist`, `core.change_inventory` (inventory). The comparison result page is in the frontend (`inventory:compare-sap-list`).
+- [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). Einstellungen › Raumabgleich, `admin:core_roomreconcile_changelist`, `core.view_roomreconcile` (rooms). The rooms list links the admin too; the result page is in the frontend (`rooms:reconcile`).
 
 ## Admin only, without a menu entry
 
@@ -101,7 +61,7 @@ This list is also in `DECISIONS.md › Open follow-ups › Links`.
 - [x] `theme/device_state.py`: nothing to do. The frontend surfaces (device page, inventory search) link frontend pages; only the admin's own device list links the record admin.
 - [x] `licenses/form_partial.html`: the licence page's staff-only "Admin view" became "View asset", the frontend device page (with `core.view_device`) (2026-11-19).
 
-Kept on purpose while the admins exist: the staff-only "Admin view" button on the lending page (`obj_admin_url`), and the navbar's "Django admin" entry.
+Kept on purpose while the admins exist: the staff-only "Admin view" button on the lending page (`obj_admin_url`), and the "Django admin" entries of the account menu and of Settings › More.
 
 ## Done
 

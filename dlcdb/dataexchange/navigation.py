@@ -6,10 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 nav_entries = [
     {
-        "slot": "nav_processes",
-        "order": 20,
+        "slot": "nav_settings",
+        "order": 10,
         "label": _("Bulk import"),
-        "icon": "",
+        "group": "data",
+        "description": _("Import devices from a CSV file, with a preview before anything is saved"),
+        "search_terms": _("upload, template, devices, SAP"),
+        "icon": "bi bi-file-earmark-arrow-down",
         "url": "dataexchange:importer_index",
         "required_permission": "dataexchange.view_importerlist",
         "active_url_names": {
@@ -21,10 +24,13 @@ nav_entries = [
         },
     },
     {
-        "slot": "nav_processes",
-        "order": 30,
+        "slot": "nav_settings",
+        "order": 20,
         "label": _("Bulk decommissioning"),
-        "icon": "",
+        "group": "data",
+        "description": _("Remove many devices at once, listed in a CSV file"),
+        "search_terms": _("decommission, retire, dispose, upload, removed"),
+        "icon": "bi bi-trash3",
         "url": "admin:dataexchange_removerlist_changelist",
         "required_permission": "dataexchange.view_removerlist",
     },

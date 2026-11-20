@@ -26,17 +26,6 @@ SPDX-License-Identifier: EUPL-1.2
       <div class="navbar-nav me-auto">
 
         {% include 'admin/includes/nav_item.html' with nav_items=nav_items_main only %}
-        
-        {% if nav_items_processes %}
-        <div class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarProcessesDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            {% translate "Processes" %}
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarProcessesDropdown">
-            {% include 'admin/includes/nav_item.html' with nav_items=nav_items_processes only %}
-          </div>
-        </div>
-        {% endif %}
 
         {% if nav_items_masterdata %}
         <div class="nav-item dropdown">
@@ -70,19 +59,10 @@ SPDX-License-Identifier: EUPL-1.2
           {% endif %}
 
           {% if nav_items_settings %}
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="{% translate 'Settings' %}">
-              <i class="bi bi-gear" aria-hidden="true"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-end">
-              {% for nav_item in nav_items_settings %}
-              <a class="dropdown-item" href="{% url nav_item.url %}">
-                {% if nav_item.icon %}<i class="{{ nav_item.icon }}"></i>{% endif %}
-                {{ nav_item.label }}
-              </a>
-              {% endfor %}
-            </div>
-          </div>
+          {# The frontend's settings page (theme/settings.html), like the frontend's gear. #}
+          <a class="btn btn-primary" href="{% url 'settings' %}" title="{% translate 'Settings' %}" aria-label="{% translate 'Settings' %}">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+          </a>
           {% endif %}
 
           {% include "tenants/includes/_tenant_badge.html" with css_class="btn btn-secondary" %}

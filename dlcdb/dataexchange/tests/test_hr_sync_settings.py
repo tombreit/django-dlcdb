@@ -110,11 +110,7 @@ def test_remove_token_clears_it(login):
 def test_only_the_settings_entry_of_the_menu_is_active(login):
     response = login(VIEW, "dataexchange.view_importerlist").get(URL)
 
-    active = [
-        item["url"]
-        for item in response.context["nav_items_processes"] + response.context["nav_items_settings"]
-        if item["active"]
-    ]
+    active = [item["url"] for item in response.context["nav_items_settings"] if item["active"]]
     assert active == ["dataexchange:hr_sync"]
 
 

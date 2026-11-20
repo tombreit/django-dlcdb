@@ -91,12 +91,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur
 | Datenhaltung › Personen | Core \| person \| Can view person | `core.view_person` |
 | Datenhaltung › Records | Core \| record \| Can view record | `core.view_record` |
 | Datenhaltung › Entfernt-Records *(Admin)* | Core \| record \| Can view record | `core.view_record` |
-| Datenhaltung › Inventuren *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Datenhaltung › Notizen *(Admin)* | Core \| note \| Can view note | `core.view_note` |
-| Prozesse › Bulk Import | Data Exchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
-| Prozesse › Bulk Ausmusterung *(Admin)* | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
-| Prozesse › Inventarisieren (nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
-| Prozesse › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
 | Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
 | Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
@@ -109,6 +104,10 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur
 | Einstellungen › Kleinkram-Katalog *(Admin)* | Smallstuff \| thing \| Can view thing | `smallstuff.view_thing` |
 | Einstellungen › Benachrichtigungen *(Admin)* | Notifications \| message \| Can view message | `notifications.view_message` |
 | Einstellungen › Reports *(Admin)* | Reporting \| Report \| Can view Report | `reporting.view_report` |
+| Einstellungen › Bulk-Import | Data Exchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
+| Einstellungen › Bulk-Ausmusterung *(Admin)* | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
+| Einstellungen › Inventuren *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
+| Einstellungen › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
 | Einstellungen › Raumabgleich *(Admin)* | Core \| Raum-Abgleich \| Can view Raum-Abgleich | `core.view_roomreconcile` |
 
 Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“.

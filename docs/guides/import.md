@@ -40,7 +40,7 @@ angezeigt — erst nach Bestätigung wird importiert.
 
 :::{note}
 **Import-Historie und SAP-Format.** Vergangene Importe listet
-*Prozesse › Bulk Import*. Ein experimenteller Import für SAP-CSV-Exporte
+*Einstellungen › Bulk-Import*. Ein experimenteller Import für SAP-CSV-Exporte
 steht nur im Django-Admin zur Verfügung — offiziell unterstützt ist nur
 das DLCDB-interne CSV-Format der Vorlage.
 :::

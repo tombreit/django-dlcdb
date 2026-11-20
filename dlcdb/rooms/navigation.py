@@ -15,7 +15,7 @@ nav_entries = [
     },
     {
         "slot": "nav_settings",
-        "order": 10,
+        "order": 50,
         "label": _("Room reconcile"),
         "group": "data",
         "description": _("Compare the rooms with an Archibus CSV export"),
