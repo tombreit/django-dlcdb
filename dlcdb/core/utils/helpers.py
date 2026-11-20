@@ -11,6 +11,8 @@ from contextlib import contextmanager
 from io import BytesIO
 
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.db import transaction
 from django.db.transaction import atomic
 from PIL import Image, ImageOps, UnidentifiedImageError
 
@@ -84,6 +86,25 @@ def shrink_photo(source):
         output = BytesIO()
         upright.convert("RGB").save(output, "JPEG")
     return output.getvalue()
+
+
+def delete_photo_file(name):
+    """
+    Delete the stored person photo ``name`` once the transaction commits, unless
+    a person still has it. Django deletes no files: a replaced or cleared photo
+    would stay on disk, personal data nobody sees any more. After commit, so a
+    rolled-back change keeps its file.
+    """
+    if not name:
+        return
+    # Local import, like get_contact_email's: the models import this module.
+    from dlcdb.core.models import Person
+
+    def delete():
+        if not Person.with_softdeleted_objects.filter(photo=name).exists():
+            default_storage.delete(name)
+
+    transaction.on_commit(delete)
 
 
 def save_base64img_as_fileimg(*, base64string, to_filepath):

@@ -9,6 +9,8 @@ from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.db.models import ProtectedError
@@ -282,6 +284,28 @@ class PersonFrontendTests(TestCase):
         with self.local_person.photo.open() as file, Image.open(file) as stored:
             self.assertEqual(stored.size, (150, 300))
             self.assertEqual(stored.getexif(), {})
+
+    def test_a_replaced_or_cleared_photo_leaves_no_file(self):
+        url = reverse("persons:detail", args=[self.local_person.pk])
+        fields = {"last_name": "Musterfrau", "first_name": "Erika", "email": "erika@example.com"}
+        old = default_storage.save("person_images/erika-old.jpg", ContentFile(b"jpeg"))
+        self.local_person.photo = old
+        self.local_person.save()
+        upload = BytesIO()
+        Image.new("RGB", (40, 30), "red").save(upload, "JPEG")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(url, {**fields, "photo": SimpleUploadedFile("erika.jpg", upload.getvalue())})
+        self.local_person.refresh_from_db()
+        new = self.local_person.photo.name
+        self.assertFalse(default_storage.exists(old))
+        self.assertTrue(default_storage.exists(new))
+
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(url, {**fields, "photo-clear": "on"})
+        self.local_person.refresh_from_db()
+        self.assertEqual(self.local_person.photo.name, "")
+        self.assertFalse(default_storage.exists(new))
 
     def test_a_truncated_photo_is_a_form_error(self):
         upload = BytesIO()

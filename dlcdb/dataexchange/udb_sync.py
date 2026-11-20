@@ -32,7 +32,7 @@ from django.db import IntegrityError, transaction
 from django.utils.timezone import localtime, now
 
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person, Record, Room
-from dlcdb.core.utils.helpers import save_base64img_as_fileimg
+from dlcdb.core.utils.helpers import delete_photo_file, save_base64img_as_fileimg
 from dlcdb.theme.similar import comparable_name
 
 from .models import UdbSyncConfiguration, UdbSyncRun
@@ -686,6 +686,9 @@ def _process_contract(contract, *, room, plan_url, person_images_dir, log_user_i
     ]
     if sorted(position_names) != position_names_before:
         changes.append(("organizational_positions", position_names_before, sorted(position_names)))
+    # A photo HR replaced (a hand-uploaded one, say) or no longer has.
+    if values_before["photo"] != values_after["photo"]:
+        delete_photo_file(values_before["photo"])
 
     # When the contract end date moved, push it onto the person's opted-in open
     # lendings (a brand-new person, handled above, has none). Use the post-save,

@@ -24,6 +24,8 @@ from django.contrib.admin.models import ADDITION, CHANGE, LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 from dlcdb.core.models import Device, DeviceType, LentRecord, OrganizationalPosition, Person, Room
 from dlcdb.core.tests.testingutils import establish_state
@@ -439,6 +441,20 @@ def test_name_change_keeps_single_person_matched_by_uuid():
     people = Person.with_softdeleted_objects.filter(udb_person_uuid="uuid-1")
     assert people.count() == 1
     assert people.get().first_name == "Rima Maria"
+
+
+@pytest.mark.django_db
+def test_a_photo_hr_clears_is_deleted(django_capture_on_commit_callbacks):
+    _enable_sync()
+    photo = default_storage.save("person_images/augusta.jpg", ContentFile(b"jpeg"))
+    Person.objects.create(first_name="Augusta", last_name="King", email="ada@example.org", photo=photo)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        # HR sends no image for her.
+        _run_with_payload({"results": {"contracts": [_contract("uuid-1", "Ada", "Lovelace", email="ada@example.org")]}})
+
+    assert Person.objects.get(udb_person_uuid="uuid-1").photo.name == ""
+    assert not default_storage.exists(photo)
 
 
 @pytest.mark.django_db

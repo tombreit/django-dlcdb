@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dlcdb.core.models import LentRecord, Person, Record
+from dlcdb.core.utils.helpers import delete_photo_file
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message
 from dlcdb.tenants.shortcuts import tenant_scoped_queryset
@@ -152,12 +153,15 @@ def person_detail(request, pk):
             raise PermissionDenied  # read-only here, the page offers no form
         if not can_change:
             raise PermissionDenied(missing_permission_message("core.change_person"))
+        old_photo = person.photo.name  # validating the form sets the new one
         form = PersonForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             saved_person = form.save(commit=False)
             saved_person.stamp_user(request.user)
             saved_person.save()
             form.save_m2m()
+            if saved_person.photo.name != old_photo:
+                delete_photo_file(old_photo)
             messages.success(request, linked_message(_("Person “{person}” was updated."), person=saved_person))
             return redirect(next_url)
     else:
