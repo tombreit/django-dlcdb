@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 
 SPDX-License-Identifier: EUPL-1.2
 -->
+{% load i18n %}
 
 {% if assignments %}
     {% for assignment in assignments.all %}
@@ -40,7 +41,7 @@ SPDX-License-Identifier: EUPL-1.2
 
     {% endfor %}
 {% else %}
-    <i>No things assigned yet.</i>
+    <i>{% translate "No things issued yet." %}</i>
 {% endif %}
 
 

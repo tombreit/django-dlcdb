@@ -58,6 +58,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - `capfirst()` keeps a lazy string lazy: render journal text inside `translation.override(None)`.
 - "Sync now" only queues: without the task runner nothing runs, and while a periodic run holds the lock the manual one is dropped.
 - `_field.html` escapes help texts: frontend help texts are plain text.
+- A translation used inside an HTML attribute (`placeholder="{% translate … %}"`, `_("…")` passed to an include) is not escaped: translated literals count as safe. A straight double quote in the German text ends the attribute; use „…“.
 - A link inside a stretched-link area can't be clicked; `_object_link.html` passes the current request as `next`, which is wrong for a fragment with a URL of its own.
 - The HR sync finds units and positions by name: a local rename of one it fills brings the old name back with its next run.
 - A renamed person or record field empties the DB-stored slip templates that use it, silently: NEWS has to name it.

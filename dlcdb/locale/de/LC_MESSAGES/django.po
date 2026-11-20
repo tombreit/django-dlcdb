@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 01:41+0100\n"
+"POT-Creation-Date: 2026-11-20 01:45+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -120,7 +120,9 @@ msgstr "Doppelter Nickname"
 #: dlcdb/dashboard/templates/dashboard/includes/_search_bar.html:38
 #: dlcdb/dataexchange/filters.py:19 dlcdb/journal/filters.py:22
 #: dlcdb/lending/filters.py:148 dlcdb/persons/filters.py:17
-#: dlcdb/rooms/filters.py:18 dlcdb/theme/filterbar.py:189
+#: dlcdb/rooms/filters.py:18 dlcdb/smallstuff/filters.py:13
+#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:22
+#: dlcdb/theme/filterbar.py:189
 #: dlcdb/theme/templates/theme/filterbar/filterbar.html:56
 msgid "Search"
 msgstr "Suche"
@@ -567,8 +569,9 @@ msgstr "Beschaffung"
 
 #: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:58
 #: dlcdb/lending/templates/lending/lend.html:79
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:21
 msgid "Search person by name or e-mail, or “*” for all…"
-msgstr "Suche Person via Name, Email, oder \"*\" für Alle..."
+msgstr "Suche Person via Name, Email, oder „*“ für Alle..."
 
 #: dlcdb/assets/templates/assets/devices/includes/_form_fields.html:75
 msgid "Names and network"
@@ -599,6 +602,7 @@ msgstr "Aktueller Status"
 #: dlcdb/lending/templates/lending/lend.html:79
 #: dlcdb/persons/templates/persons/detail.html:39
 #: dlcdb/persons/templates/persons/includes/_form_fields.html:7
+#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:16
 msgid "Person"
 msgstr "Person"
 
@@ -1370,8 +1374,9 @@ msgstr "Links"
 
 #: dlcdb/core/models/person.py:34 dlcdb/core/models/person.py:135
 #: dlcdb/lending/filters.py:84 dlcdb/persons/filters.py:21
-#: dlcdb/persons/templates/persons/detail.html:49
+#: dlcdb/persons/filters.py:44 dlcdb/persons/templates/persons/detail.html:49
 #: dlcdb/persons/templates/persons/index.html:30
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:82
 msgid "Organizational unit"
 msgstr "Organisationseinheit"
 
@@ -1390,6 +1395,7 @@ msgstr "Position"
 #: dlcdb/organization/templates/organization/branding.html:26
 #: dlcdb/organization/templates/organization/branding.html:44
 #: dlcdb/persons/templates/persons/detail.html:51
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:90
 msgid "Positions"
 msgstr "Positionen"
 
@@ -2000,6 +2006,10 @@ msgstr "Internal (CSV)"
 #: dlcdb/dataexchange/models.py:128
 msgid "SAP (CSV)"
 msgstr "SAP (CSV)"
+
+#: dlcdb/dataexchange/models.py:153
+msgid "Import as given tenant."
+msgstr "Importiert für den angegebenen Mandanten."
 
 #: dlcdb/dataexchange/models.py:229
 msgid "Enabled"
@@ -3551,6 +3561,7 @@ msgid "Private e-mail"
 msgstr "Private Email"
 
 #: dlcdb/persons/templates/persons/detail.html:94
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:86
 msgid "Contract type"
 msgstr "Vertragstyp"
 
@@ -3941,6 +3952,42 @@ msgstr "Der Rückgabezeitpunkt kann nicht vor dem Ausgabezeitpunkt liegen!"
 msgid "Stuff"
 msgstr "Kleinkram"
 
+#: dlcdb/smallstuff/templates/smallstuff/includes/assignements.html:44
+msgid "No things issued yet."
+msgstr "Noch nichts ausgegeben."
+
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:36
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:56
+#, python-format
+msgid "%(counter)s thing issued"
+msgid_plural "%(counter)s things issued"
+msgstr[0] "%(counter)s Gegenstand ausgegeben"
+msgstr[1] "%(counter)s Gegenstände ausgegeben"
+
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:41
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:64
+#, python-format
+msgid "%(counter)s thing returned"
+msgid_plural "%(counter)s things returned"
+msgstr[0] "%(counter)s Gegenstand zurückgegeben"
+msgstr[1] "%(counter)s Gegenstände zurückgegeben"
+
+#: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:78
+msgid "Contract ends at"
+msgstr "Vertrag endet am"
+
+#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:35
+msgid "Things"
+msgstr "Gegenstände"
+
+#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:61
+msgid ""
+"The requested person does not exist, or has neither a current contract nor "
+"smallstuff issued."
+msgstr ""
+"Die gesuchte Person gibt es nicht, oder sie hat weder einen laufenden "
+"Vertrag noch ausgegebenen Kleinkram."
+
 #: dlcdb/smallstuff/templates/smallstuff/person_search.html:11
 msgid "Smallstuff Person Search"
 msgstr "Kleinkram Personen Suche"
@@ -3949,6 +3996,10 @@ msgstr "Kleinkram Personen Suche"
 #: dlcdb/theme/templates/theme/includes/_list_loading.html:28
 msgid "Loading..."
 msgstr "Lädt..."
+
+#: dlcdb/smallstuff/templates/smallstuff/person_search.html:29
+msgid "Reset"
+msgstr "Zurücksetzen"
 
 #: dlcdb/templates/403.html:6 dlcdb/templates/403.html:11
 msgid "Access denied"

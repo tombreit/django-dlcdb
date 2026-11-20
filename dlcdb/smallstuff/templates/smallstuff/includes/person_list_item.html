@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2024 Thomas Breitner
 SPDX-License-Identifier: EUPL-1.2
 -->
 
-{% load static %}
+{% load i18n static %}
 
 
 <div class="row alert alert-warning search-result-item">
@@ -33,12 +33,12 @@ SPDX-License-Identifier: EUPL-1.2
             <span 
                 class="badge text-bg-warning"
             >
-                ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
+                ★ {% blocktranslate count counter=person.assigned_things_count %}{{ counter }} thing issued{% plural %}{{ counter }} things issued{% endblocktranslate %}
             </span>
             <span 
                 class="badge text-bg-secondary"
             >
-                ☆ {{ person.unassigned_things_count }} thing{{ person.unassigned_things_count|pluralize }} returned
+                ☆ {% blocktranslate count counter=person.unassigned_things_count %}{{ counter }} thing returned{% plural %}{{ counter }} things returned{% endblocktranslate %}
             </span>
         {% else %}
 
@@ -53,7 +53,7 @@ SPDX-License-Identifier: EUPL-1.2
                 hx-get="{% url 'smallstuff:get_assignements' person.id 'issued' %}"
                 hx-target="#assignements"
             >
-                ★ {{ person.assigned_things_count }} thing{{ person.assigned_things_count|pluralize }} issued
+                ★ {% blocktranslate count counter=person.assigned_things_count %}{{ counter }} thing issued{% plural %}{{ counter }} things issued{% endblocktranslate %}
             </a>
             <a 
                 class="badge text-bg-secondary"
@@ -61,7 +61,7 @@ SPDX-License-Identifier: EUPL-1.2
                 hx-get="{% url 'smallstuff:get_assignements' person.id 'returned' %}"
                 hx-target="#assignements"
             >
-                ☆ {{ person.unassigned_things_count }} thing{{ person.unassigned_things_count|pluralize }} returned
+                ☆ {% blocktranslate count counter=person.unassigned_things_count %}{{ counter }} thing returned{% plural %}{{ counter }} things returned{% endblocktranslate %}
             </a>
 
             {% endif %}
@@ -75,19 +75,19 @@ SPDX-License-Identifier: EUPL-1.2
                     <table class="table table-sm table-borderless">
                         <tbody>
                             <tr>
-                                <th>Contract ends at</th>
+                                <th>{% translate "Contract ends at" %}</th>
                                 <td>{{ person.udb_contract_planned_checkout }}</td>
                             </tr>
                             <tr>
-                                <th>Organizational unit</th>
+                                <th>{% translate "Organizational unit" %}</th>
                                 <td>{{ person.organizational_unit.name }}</td>        
                             </tr>
                             <tr>
-                                <th>Contract type</th>
+                                <th>{% translate "Contract type" %}</th>
                                 <td>{{ person.udb_contract_contract_type }}</td>        
                             </tr>
                             <tr>
-                                <th>Positions</th>
+                                <th>{% translate "Positions" %}</th>
                                 <td>{{ person.organizational_positions.all|join:", " }}</td>
                             </tr>
                         </tbody>

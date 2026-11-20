@@ -5,6 +5,7 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 
 {% extends 'theme/_base.html' %}
+{% load i18n %}
 
 
 {% block body %}
@@ -12,13 +13,13 @@ SPDX-License-Identifier: EUPL-1.2
 <div class="d-flex">
     <div class="me-auto p-2">
         <h1>
-            Person
+            {% translate "Person" %}
         </h1>
     </div>
     <div class="p-2">
         <a href="{% url 'smallstuff:person_search' %}" class="btn btn-info">
             <i class="bi bi-search-heart"></i>
-            Search
+            {% translate "Search" %}
         </a>
     </div>
 </div>
@@ -31,7 +32,7 @@ SPDX-License-Identifier: EUPL-1.2
         <div class="d-flex">
             <div class="me-auto p-2">
                 <h4 class="alert-heading">
-                    Things
+                    {% translate "Things" %}
                 </h4>
             </div>
             <div class="p-2">
@@ -57,8 +58,7 @@ SPDX-License-Identifier: EUPL-1.2
         ></div>
 {% else %}
     <div class="alert alert-warning">
-        The requested person does not exist or does not have a current contract
-        and current smallstuffs assigned.
+        {% translate "The requested person does not exist, or has neither a current contract nor smallstuff issued." %}
     </div>
 {% endif %}
 

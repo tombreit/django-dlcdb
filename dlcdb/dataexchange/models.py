@@ -150,7 +150,7 @@ class ImporterList(OperationLogBase):
         on_delete=models.PROTECT,
         # Nullable for legacy imports only; forms require a tenant.
         null=True,
-        help_text="Import as given tenant.",
+        help_text=_("Import as given tenant."),
     )
 
     class Meta:

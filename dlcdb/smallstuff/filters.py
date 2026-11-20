@@ -3,13 +3,14 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 import django_filters
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Person
 from dlcdb.theme.pickers import picker_filter
 
 
 class PersonFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method="custom_user_search", label="Search")
+    search = django_filters.CharFilter(method="custom_user_search", label=_("Search"))
 
     class Meta:
         model = Person

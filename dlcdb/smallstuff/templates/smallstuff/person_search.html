@@ -18,7 +18,7 @@
 
 <form hx-post="{% url 'smallstuff:person_search' %}" hx-target="#search-results">
     <div class="input-group input-group-lg mb-3">
-        <input type="search" name="search" class="form-control" placeholder="Tippe halt mal was, oder einfach *"
+        <input type="search" name="search" class="form-control" placeholder="{% translate "Search person by name or e-mail, or “*” for all…" %}"
             autocomplete="off" hx-trigger="keyup changed delay:200ms" hx-indicator=".htmx-indicator"
             hx-post="{% url 'smallstuff:person_search' %}" hx-target="#search-results">
 
@@ -26,7 +26,7 @@
             <span id="results-count">0</span>
         </span>
         {# <button class="btn btn-success" type="search">Search</button> #}
-        <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">Reset</a>
+        <a class="btn btn-secondary" href="{% url 'smallstuff:person_search' %}">{% translate "Reset" %}</a>
     </div>
 </form>
 
