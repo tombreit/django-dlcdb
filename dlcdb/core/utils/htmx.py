@@ -17,6 +17,11 @@ from django.core.exceptions import PermissionDenied
 from django.utils.translation import ngettext
 from django_htmx.http import HttpResponseClientRefresh
 
+# Every permission a view guards itself with, recorded as the views are
+# decorated: dlcdb.accounts.permissions reads it to tell DLCDB's own permissions
+# from the rest. Complete only once every view module is imported.
+guarding_permissions = set()
+
 
 def missing_permission_message(*perms):
     """
@@ -51,6 +56,7 @@ def htmx_permission_required(*perms):
     find). Django's own ``permission_required`` requires all of a list, which is
     the opposite of what those views need.
     """
+    guarding_permissions.update(perms)
 
     def decorator(view_func):
         @functools.wraps(view_func)

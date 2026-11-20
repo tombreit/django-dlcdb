@@ -60,6 +60,14 @@ def _app_navigation(app_name):
         return None
 
 
+def declared_nav_entries():
+    """Every entry the apps declare in their navigation.py, whoever may open it."""
+    for app in apps.get_app_configs():
+        nav_module = _app_navigation(app.name)
+        if nav_module is not None:
+            yield from getattr(nav_module, "nav_entries", [])
+
+
 def _has_permission(user, permission):
     if not user or not permission:
         return False
@@ -100,62 +108,57 @@ def _nav_items(request, *, all_settings=False):
     current_app_namespace, current_url_name = _current_view(request)
     nav_items = []
 
-    for app in apps.get_app_configs():
-        nav_module = _app_navigation(app.name)
-        if nav_module is None:
+    for nav_entry in declared_nav_entries():
+        slot = nav_entry.get("slot")
+        group = nav_entry.get("group")
+        if slot == "nav_settings" and group not in SETTINGS_GROUPS:
+            raise ImproperlyConfigured(
+                f"nav_settings entry {nav_entry.get('url')!r} needs a group of {list(SETTINGS_GROUPS)}"
+            )
+
+        url = nav_entry.get("url") or ""
+        # The admin opens only with the Staff flag: without it, an admin
+        # entry would lead to the admin's login page.
+        is_admin = url.startswith("admin:")
+        has_access = _has_permission(request.user, nav_entry.get("required_permission")) and (
+            request.user.is_staff or not is_admin
+        )
+        if not has_access and not (all_settings and slot == "nav_settings"):
             continue
 
-        for nav_entry in getattr(nav_module, "nav_entries", []):
-            slot = nav_entry.get("slot")
-            group = nav_entry.get("group")
-            if slot == "nav_settings" and group not in SETTINGS_GROUPS:
-                raise ImproperlyConfigured(
-                    f"nav_settings entry {nav_entry.get('url')!r} needs a group of {list(SETTINGS_GROUPS)}"
-                )
+        # Ugly hack to conditionally hide some nav_entries. Checked only
+        # for entries that are shown, so the others never trigger the
+        # underlying query.
+        if nav_entry.get("show_condition") == "active_inventory_exists" and not get_active_inventory(request):
+            continue
 
-            url = nav_entry.get("url") or ""
-            # The admin opens only with the Staff flag: without it, an admin
-            # entry would lead to the admin's login page.
-            is_admin = url.startswith("admin:")
-            has_access = _has_permission(request.user, nav_entry.get("required_permission")) and (
-                request.user.is_staff or not is_admin
-            )
-            if not has_access and not (all_settings and slot == "nav_settings"):
-                continue
+        url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
+        in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
 
-            # Ugly hack to conditionally hide some nav_entries. Checked only
-            # for entries that are shown, so the others never trigger the
-            # underlying query.
-            if nav_entry.get("show_condition") == "active_inventory_exists" and not get_active_inventory(request):
-                continue
+        # Most apps have exactly one nav entry per namespace, so any page
+        # in that namespace should highlight it. An app with more than one
+        # entry sharing a namespace (e.g. assets: "Devices" vs "Move") must
+        # list its own url_names in "active_url_names" to disambiguate.
+        active_url_names = nav_entry.get("active_url_names")
+        is_active = in_namespace and (active_url_names is None or current_url_name in active_url_names)
 
-            url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
-            in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
-
-            # Most apps have exactly one nav entry per namespace, so any page
-            # in that namespace should highlight it. An app with more than one
-            # entry sharing a namespace (e.g. assets: "Devices" vs "Move") must
-            # list its own url_names in "active_url_names" to disambiguate.
-            active_url_names = nav_entry.get("active_url_names")
-            is_active = in_namespace and (active_url_names is None or current_url_name in active_url_names)
-
-            nav_items.append(
-                {
-                    "label": nav_entry.get("label"),
-                    "icon": nav_entry.get("icon"),
-                    "url": url,
-                    "slot": slot,
-                    "order": nav_entry.get("order"),
-                    "active": is_active,
-                    "admin": is_admin,
-                    "has_access": has_access,
-                    # The settings page's group heading, the line under the label,
-                    # and the words its filter also finds the entry by (never shown).
-                    "group": SETTINGS_GROUPS.get(group),
-                    "description": nav_entry.get("description"),
-                    "search_terms": nav_entry.get("search_terms"),
-                }
-            )
+        nav_items.append(
+            {
+                "label": nav_entry.get("label"),
+                "icon": nav_entry.get("icon"),
+                "url": url,
+                "slot": slot,
+                "order": nav_entry.get("order"),
+                "active": is_active,
+                "admin": is_admin,
+                "has_access": has_access,
+                # The settings page's group heading, the line under the label,
+                # and the words its filter also finds the entry by (never shown).
+                "group": SETTINGS_GROUPS.get(group),
+                "description": nav_entry.get("description"),
+                "search_terms": nav_entry.get("search_terms"),
+            }
+        )
 
     return sorted(nav_items, key=itemgetter("order"))
 

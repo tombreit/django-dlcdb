@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 0, the plan; nothing built yet. Started 2026-11-20.
+**Status:** batch 1 done (`dlcdb/accounts/permissions.py`); next: batch 2, groups read-only. Started 2026-11-20.
 
 ## Why
 
@@ -26,23 +26,24 @@ SPDX-License-Identifier: CC0-1.0
   - a lifecycle `Transition.permission`.
 
   That is 67 permissions today, collected without a list.
-- **The gap: about 12 *change* permissions** that a page which edits in place checks inside its body. They each get one line in a short list:
+- **The gap: 12 permissions** that a page which edits in place, or the media view, checks inside its body. They each get one line in `CHECKED_IN_VIEWS`:
   - `core.change_person`;
   - the four settings pages: Branding, lending, licences, HR sync;
   - the manufacturer, supplier and device type pages;
   - units and positions;
   - `lending.change_lendingprofile`;
-  - `dataexchange.change_importerlist`.
+  - `dataexchange.change_importerlist`;
+  - `inventory.view_saplist`: the SAP exports, in core's media view.
 
-  A guard test fails, naming the permission, when the code checks one that is neither collected nor listed.
+  A guard test fails, naming the permission, when the code checks one that is neither collected nor listed: it scans the code for quoted `"app_label.codename"` and template `perms.…`, and adds what the settings pages and the related buttons derive from a model.
 - **Not a codename prefix:** Django's view/add/change/delete names are fixed. `has_perm`, the admin and DRF use them, and renaming them would need a migration of every group's grants. DLCDB's own permissions already carry one (`transition_…`).
 - **Not a hand-written list of about 80 entries** with hand-written labels: every new permission would need an entry.
 - **Labels are derived:**
   - model name and action ("Person · change");
-  - the lifecycle's labels for transitions; lend and return share one permission;
+  - the lifecycle's labels for transitions; lend and return share one permission ("Lend / Return"). They are listed under *Device*, not under *Record*, their model: the moves are made on the device page;
   - the menu entry for `can_inventorize`.
 
-  Help lines come from menu entry descriptions where there is one. Django's `Permission.name` (English, stored in the database) is never shown.
+  Help lines name the menu entries that need the permission, with their descriptions: "Menu › Lending", "Settings › Journal: Sent mails, …". Django's `Permission.name` (English, stored in the database) is never shown.
 - **Change requires view:** derived. Ticking add, change or delete also grants the model's view permission, when that is DLCDB's own.
 - **Sensitive permissions are a short explicit list in `accounts`**, each with its warning shown as its help line:
   - `accounts.change_group`, `accounts.change_customuser`;
@@ -118,7 +119,7 @@ SPDX-License-Identifier: CC0-1.0
 ## Pitfalls
 
 - **Hidden permissions:** groups hold permissions that aren't DLCDB's own (per-model CRUD nobody checks, the dead `dlcdb` app label). The form keeps them on save and lists them read-only.
-- **The decorator's record is complete only once every view is imported:** the collector loads the URLconf first (`get_resolver().url_patterns`). It lives in `core.utils.htmx`, since core imports no other app.
+- **The decorator's record is complete only once every view is imported:** the collector imports the URLconf first. The record lives in `core.utils.htmx`; the collector lives in `accounts`, since it reads every app's menu entries and core imports no other app.
 - **Look permissions up by app label and codename together:** there are proxy models (`lentrecord`, `licencerecord`, `accounts.Group` beside `auth.Group`) and the legacy `dlcdb` app label, which repeats codenames.
 - **Escalation:** whoever has `accounts.change_group` can grant themselves anything shown. Same as the admin today; the sensitive list says so.
 - **Locking oneself out:**
@@ -138,14 +139,15 @@ SPDX-License-Identifier: CC0-1.0
 
 - **The admin's user form lets anyone with `change_customuser` tick *Superuser*.** Make the flags and `user_permissions` read-only there for non-superusers.
 - **Direct per-user permissions** stay invisible in the frontend. Show or migrate them if they turn up in practice.
+- **Three models still have a German `verbose_name`** (*Import-Datei*, *Ausmusterungs-Datei*, *Raum-Abgleich*), which the permission labels show untranslated; fixing them needs a migration.
 - **Reset links by mail**, and a password change page in DLCDB's own look for the account menu: today's `accounts/password_change/` renders the admin's look.
 
 ## Progress
 
 - [x] **0.** This plan; the first attempt discarded.
-- [ ] **1. Which permissions are DLCDB's own.**
+- [x] **1. Which permissions are DLCDB's own.**
   - The decorator records its permissions.
-  - The collector: decorator, menus, lifecycle, the ~12 extra lines.
+  - The collector: decorator, menus, lifecycle, the 12 extra lines.
   - Derived labels and the view requirement; the sensitive list.
   - The guard test.
 - [ ] **2. Groups, read-only.**
