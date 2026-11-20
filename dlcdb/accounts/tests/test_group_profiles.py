@@ -11,7 +11,7 @@ from dlcdb.accounts.permissions import own_permission_names
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("profile", GROUP_PROFILES, ids=lambda profile: profile.key)
+@pytest.mark.parametrize("profile", GROUP_PROFILES, ids=lambda profile: str(profile.label))
 def test_a_profile_names_only_dlcdbs_own_permissions(profile):
     assert not set(profile.names) - own_permission_names()
     assert profile.permissions().count() == len(set(profile.names))

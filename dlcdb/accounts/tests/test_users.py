@@ -16,18 +16,6 @@ pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
 
 
 @pytest.fixture
-def login(client, make_user):
-    """Log in a user without the Staff flag: the pages need no admin access."""
-
-    def _login(*perms):
-        user = make_user(*perms, email="editor@example.com")
-        client.force_login(user)
-        return user
-
-    return _login
-
-
-@pytest.fixture
 def ada():
     """A user in a group that may change persons and sees one tenant."""
     group = Group.objects.create(name="helpdesk")

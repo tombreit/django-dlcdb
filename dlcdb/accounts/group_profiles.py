@@ -4,9 +4,10 @@
 
 """
 Group profiles: named lists of permissions that DLCDB ships, as a starting point
-for a group. Applying one adds its permissions to the group, which doesn't
-remember it; applied again after an update, it adds what is new. Every name is
-one of DLCDB's own permissions (``tests/test_group_profiles.py``).
+for a group. A profile's button ticks its permissions in the group form; the
+group doesn't remember the profile, and ticked again after an update, it adds
+what is new. Every name is one of DLCDB's own permissions
+(``tests/test_group_profiles.py``).
 
 Not users and groups: those stay with whoever the operators trust with them.
 """
@@ -22,7 +23,6 @@ from django.utils.translation import gettext_lazy as _
 
 @dataclass(frozen=True)
 class GroupProfile:
-    key: str
     label: str
     description: str
     names: tuple  # "app_label.codename"
@@ -42,7 +42,6 @@ def _crud(app_label, *models, actions=("view", "add", "change")):
 
 GROUP_PROFILES = (
     GroupProfile(
-        key="daily-work",
         label=_("Daily work"),
         description=_(
             "Devices, lending, licences, persons, rooms and master data; moving, lending, "
@@ -65,7 +64,6 @@ GROUP_PROFILES = (
         ),
     ),
     GroupProfile(
-        key="administration",
         label=_("Administration"),
         description=_(
             "The settings, the lending profiles, units and positions, the tenants and the journal. "
@@ -89,5 +87,3 @@ GROUP_PROFILES = (
         ),
     ),
 )
-
-BY_KEY = {profile.key: profile for profile in GROUP_PROFILES}

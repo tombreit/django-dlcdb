@@ -11,9 +11,8 @@ const theme = {
   ...bootstrap5Theme,
   // Below md the lists stack, with the buttons in a row between them.
   container: 'd-flex flex-column flex-md-row gap-3',
+  // Both panes get column, besides their own class.
   column: 'd-flex flex-column flex-fill',
-  availableColumn: 'd-flex flex-column flex-fill',
-  chosenColumn: 'd-flex flex-column flex-fill',
   controls: 'd-flex flex-row flex-wrap flex-md-column justify-content-center gap-2',
   button: `${bootstrap5Theme.button} text-nowrap`,
 }

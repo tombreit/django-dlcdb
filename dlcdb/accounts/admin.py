@@ -34,9 +34,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email", "usable_password", "password1", "password2")}),)
 
-    # For now we still have to deal with the legacy username field
-    # so we keep the default change form for now.
-    # form = CustomUserChangeForm
+    # The default change form: users still have the legacy username field.
 
     def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
         actions = super().get_actions(request, action_location)

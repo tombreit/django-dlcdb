@@ -26,7 +26,6 @@ Noted 2026-11-20, smallest first; none started yet.
 1. **Lending regulations (`core.Link`):** a card on Settings › Lending configuration, like the lending profiles; the profile form could then offer "add". Small, follows an existing pattern, fixes a real gap.
 2. **Room reconcile upload:** on the rooms page. The result page is already in the frontend; only the upload and the rooms list's admin link remain.
 3. **Smallstuff catalogue (`smallstuff.Thing`):** a frontend page for the things that can be handed out; today the frontend only assigns them to persons.
-4. ~~**Users and groups**~~: done, see below.
 
 ## Menu entries that open the admin
 

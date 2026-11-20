@@ -194,11 +194,3 @@ class NewUserForm(CustomUserCreationForm):
         if not editor.has_perm("accounts.change_customuser"):
             del self.fields["groups"]
         add_bootstrap_classes(self)
-
-
-# from django.contrib.auth.forms import UserChangeForm
-
-# class CustomUserChangeForm(UserChangeForm):
-#     class Meta:
-#         model = CustomUser
-#         fields = ("email",)

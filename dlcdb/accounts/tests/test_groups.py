@@ -15,6 +15,13 @@ from dlcdb.tenants.models import Tenant
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
 
 GROUP_ADMIN = ("accounts.view_group", "accounts.change_group", "accounts.view_customuser", "accounts.change_customuser")
+NEW_GROUP_ADMIN = (
+    "accounts.add_group",
+    "accounts.view_customuser",
+    "accounts.change_customuser",
+    "tenants.change_tenant",
+    "tenants.add_tenant",
+)
 
 
 def _permission(name):
@@ -24,18 +31,6 @@ def _permission(name):
 
 def _names(group):
     return {f"{p.content_type.app_label}.{p.codename}" for p in group.permissions.all()}
-
-
-@pytest.fixture
-def login(client, make_user):
-    """Log in a user without the Staff flag: the pages need no admin access."""
-
-    def _login(*perms):
-        user = make_user(*perms, email="editor@example.com")
-        client.force_login(user)
-        return user
-
-    return _login
 
 
 @pytest.fixture
@@ -205,9 +200,6 @@ def test_the_settings_page_links_the_groups_without_the_staff_flag(client, login
     assert reverse("accounts:groups") in client.get(reverse("settings")).content.decode()
 
 
-NEW_GROUP_ADMIN = ("accounts.add_group", *GROUP_ADMIN[2:], "tenants.change_tenant", "tenants.add_tenant")
-
-
 def test_a_new_group_is_the_group_page_without_a_group(client, login):
     login(*NEW_GROUP_ADMIN)
     url = reverse("accounts:group_add")
@@ -218,7 +210,7 @@ def test_a_new_group_is_the_group_page_without_a_group(client, login):
     content = response.content.decode()
     assert response.context["submit_label"] == "Create group"
     # Each profile's button carries its permissions, for accounts/js/group-profiles.js to tick.
-    daily_work = {profile.key: pks for profile, pks in response.context["profiles"]}["daily-work"]
+    daily_work = {str(profile.label): pks for profile, pks in response.context["profiles"]}["Daily work"]
     assert _permission("core.view_device").pk in daily_work
     assert f'data-profile-permissions="{",".join(map(str, daily_work))}"' in content
     # Adding a tenant leaves the form and returns; related-links.js asks first.
