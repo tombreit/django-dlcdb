@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 4 done (group profiles, *New group*, deleting a group); next: batch 5, users read-only and deactivating. Started 2026-11-20.
+**Status:** batch 5 done (users list and page, deactivating, `accounts/views_users.py`); next: batch 6, new users and passwords. Started 2026-11-20.
 
 ## Why
 
@@ -92,6 +92,8 @@ SPDX-License-Identifier: CC0-1.0
   - **The group page is one form** (name, permissions, members) with the save bar; it returns to the groups list with a linked message, like the other detail pages. Without `change_group` the same form is disabled.
   - **The tenants card** ticks through the tenant matrix's own view (`tenants.views.toggle`, `hx-swap="none"`), each tick saved at once, outside the form.
 - **Staff and Superuser flags** are not set in the frontend: only badges. They stay with the admin, LDAP and `createsuperuser`.
+- **Users list and page:** a filterbar list (search, status, group; sorted by email or last login) of every account, deactivated ones too. The user page lists what the user may do in the group page's areas and models, compactly; for a superuser and a deactivated user it says so instead. Members are changed on the group pages, not here.
+- **Deactivating** posts the wanted state (no inverting by a repeated request) and returns through `get_redirect_url`. Not one's own account, and not a superuser's unless the editor is one: a helpdesk administrator could otherwise lock out the operators (the admin allows it).
 - **Direct per-user permissions** (`user_permissions`) are ignored by the frontend.
 - **History:** one journal entry per save, naming what changed (permissions added and removed, members, deactivation), never passwords. Not simple-history.
 - **Passwords:** the administrator sets an initial one on *New user*, or none for LDAP accounts, and can set a new one on the user page. No reset mail.
@@ -171,7 +173,7 @@ SPDX-License-Identifier: CC0-1.0
   - *Daily work* and *Administration*;
   - *New group* (name, profile, optional tenant, members), *Add the permissions of a profile*, deleting a group;
   - the "no tenant" hint links to *New group* for a user in no group at all (a fresh installation's superuser), else to the tenant matrix as before.
-- [ ] **5. Users, read-only and deactivating:**
+- [x] **5. Users, read-only and deactivating:**
   - users list (email, name, active, last login, groups, badges) and user page (groups, what the user may do, tenants seen);
   - deactivate and reactivate (not oneself); journal entries;
   - the menu entry *Users* opens the frontend.
@@ -185,6 +187,8 @@ Each batch also trims the doc passages it makes obsolete.
 
 ## Findings on the way
 
-- **`add_group` with `change_customuser` can join a group it creates from *Administration*.** Not a new hole: with `change_customuser` anyone can join any group, in the admin too. Batch 5 extends the warning on `change_customuser` to say so.
+- **`add_group` with `change_customuser` can join a group it creates from *Administration*.** Not a new hole: with `change_customuser` anyone can join any group, in the admin too. The warning on `change_customuser` says so since batch 5.
+- **Django's `get_all_permissions()` is empty for a deactivated user**: the user page says "may do nothing" instead of listing what the groups would give.
+- **The settings page tests used *Users* as their admin entry**; since batch 5 they use *Reports*.
 - **Batch 4 removed *Beispiel-Gruppen*** from `berechtigungen.md`: the group profiles replace them.
 - **Batch 3 trimmed `berechtigungen.md`** (the permission families, the notes on *Core* and view/change, the Navigation table, the settings permission paragraphs, the codename columns of *Statuswechsel*). Still naming codenames, for batch 7: `kleinkram.md` (a table), `notifications.md`, `lizenzen.md`, `betrieb/hr-sync.md`, the room rename in `erste_schritte.md`, and *Beispiel-Gruppen* (batch 4, replaced by the group profiles).

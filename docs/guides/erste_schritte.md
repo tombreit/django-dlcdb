@@ -20,7 +20,7 @@ Via *Einstellungen › Mandanten › Mandant hinzufügen*: Name vergeben und spe
 
 ## 5. Benutzer anlegen
 
-Via *Start › Konten › Benutzer*: Konto anlegen und den Gruppen aus Schritt 3 zuordnen. Mit LDAP entstehen die Konten beim ersten Login.
+Via *Start › Konten › Benutzer* im Django-Admin ein Konto anlegen, dann auf der Seite jeder Gruppe aus Schritt 3 unter *Mitglieder* hinzufügen. Mit LDAP entstehen die Konten beim ersten Login.
 
 ## 6. Räume anlegen
 

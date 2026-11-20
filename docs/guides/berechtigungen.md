@@ -10,7 +10,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Benutzer und Personen
 
-*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr. Sie werden im Django-Admin unter *Start › Konten › Benutzer* verwaltet; mit [LDAP](#ldap) entstehen sie beim ersten Login.
+*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr. *Einstellungen › Benutzer* zeigt jedes Konto mit seinen Gruppen, dem, was es darf, und den Mandanten, die es sieht; dort wird es auch deaktiviert. Angelegt werden Konten bis auf Weiteres im Django-Admin (*Start › Konten › Benutzer*); mit [LDAP](#ldap) entstehen sie beim ersten Login.
 
 *Personen* sind „Kunden“ der DLCDB, z.B. Menschen, denen ein Gerät ausgeliehen wird. Sie werden unter *Datenhaltung › Personen* gepflegt und haben nichts mit Benutzerkonten oder Berechtigungen zu tun.
 
@@ -37,7 +37,7 @@ Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einste
 Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setup](../betrieb/setup.md)), steuern LDAP-Gruppen Anmeldung, Flags und Gruppen:
 
 - **Anmelden** darf, wer Mitglied von `AUTH_LDAP_REQUIRE_GROUP`, `AUTH_LDAP_GROUP_STAFF` oder `AUTH_LDAP_GROUP_SUPERUSERS` ist. Das Benutzerkonto entsteht beim ersten Login.
-- **Flags:** Mitglieder von `AUTH_LDAP_GROUP_STAFF` erhalten das Staff-Flag, Mitglieder von `AUTH_LDAP_GROUP_SUPERUSERS` Staff- und Superuser-Flag. Alle Flags, auch *Aktiv*, werden bei jedem Login neu aus LDAP gesetzt: Ein im Django-Admin deaktivierter Benutzer ist nach dem nächsten Login wieder aktiv, solange er in der LDAP-Gruppe ist. Dauerhaft hilft nur, ihn dort zu entfernen.
+- **Flags:** Mitglieder von `AUTH_LDAP_GROUP_STAFF` erhalten das Staff-Flag, Mitglieder von `AUTH_LDAP_GROUP_SUPERUSERS` Staff- und Superuser-Flag. Alle Flags, auch *Aktiv*, werden bei jedem Login neu aus LDAP gesetzt: Ein deaktivierter Benutzer ist nach dem nächsten Login wieder aktiv, solange er in der LDAP-Gruppe ist. Dauerhaft hilft nur, ihn dort zu entfernen.
 - **Gruppen:** Die in `AUTH_LDAP_MIRROR_GROUPS` genannten LDAP-Gruppen werden als DLCDB-Gruppen gespiegelt; ihnen werden Berechtigungen und Mandanten zugewiesen. Die Mitgliedschaften in diesen Gruppen werden bei jedem Login aus LDAP übernommen, von Hand vergebene gehen dabei verloren. Andere Gruppen, z.B. in der DLCDB angelegte, bleiben unberührt.
 - Eine gespiegelte Gruppe entsteht erst beim ersten Login eines ihrer Mitglieder und fehlt bis dahin in der Mandanten-Übersicht. Soll sie vorher Berechtigungen und Mandanten bekommen, unter *Neue Gruppe* eine Gruppe mit exakt dem LDAP-Namen anlegen.
 
@@ -143,7 +143,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
-- Benutzer anlegen und deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
+- Benutzer anlegen, ihre Flags *Staff* und *Superuser* setzen oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die Einträge der Seite *Einstellungen* mit dem Abzeichen *Django-Admin*,
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
 - erzeugte Reports und den SAP-Import,

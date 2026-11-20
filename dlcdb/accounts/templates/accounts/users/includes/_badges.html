@@ -1,0 +1,6 @@
+{% load i18n %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{# An account's flags, set in the Django admin, by LDAP or createsuperuser. Param: account. #}
+{% if not account.is_active %}<span class="badge text-bg-secondary">{% translate "Deactivated" %}</span>{% endif %}
+{% if account.is_superuser %}<span class="badge text-bg-danger" title="{% translate "Has every permission" %}">{% translate "Superuser" %}</span>{% elif account.is_staff %}<span class="badge text-bg-light border" title="{% translate "May open the Django admin" %}">{% translate "Staff" %}</span>{% endif %}

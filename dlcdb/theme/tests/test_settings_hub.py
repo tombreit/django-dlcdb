@@ -69,7 +69,7 @@ class SettingsHubTests(TestCase):
     def test_admin_entries_need_the_staff_flag(self):
         user = get_user_model().objects.create_user(username="clerk", email="clerk@example.com", password="secret")
         user.user_permissions.add(
-            Permission.objects.get(codename="view_customuser", content_type__app_label="accounts"),
+            Permission.objects.get(codename="view_report", content_type__app_label="reporting"),
             Permission.objects.get(codename="view_note", content_type__app_label="core"),
         )
         self.client.force_login(user)
@@ -82,7 +82,7 @@ class SettingsHubTests(TestCase):
         self.assertEqual(admin_urls(), [])
         user.is_staff = True
         user.save()
-        self.assertEqual(admin_urls(), ["admin:accounts_customuser_changelist", "admin:core_note_changelist"])
+        self.assertEqual(admin_urls(), ["admin:core_note_changelist", "admin:reporting_report_changelist"])
 
     def _show_all(self, *permissions):
         """Log in a non-staff user with ``permissions`` (app_label, codename) and open Show all."""
@@ -106,9 +106,9 @@ class SettingsHubTests(TestCase):
         self.assertEqual([item["url"] for item in response.context["nav_items_settings"]], ["lending:configuration"])
 
     def test_show_all_locks_admin_entries_without_the_staff_flag(self):
-        _response, access = self._show_all(("accounts", "view_customuser"))
+        _response, access = self._show_all(("reporting", "view_report"))
 
-        self.assertIs(access["Users"], False)
+        self.assertIs(access["Reports"], False)
 
     def test_admin_entries_carry_a_badge(self):
         self.client.force_login(self.superuser)
@@ -117,7 +117,7 @@ class SettingsHubTests(TestCase):
         admin_entries = [item for item in response.context["nav_items_settings"] if item["admin"]]
         self.assertTrue(admin_entries)
         self.assertContains(response, 'fw-normal">Django admin</span>', count=len(admin_entries))
-        self.assertContains(response, f'href="{reverse("admin:accounts_customuser_changelist")}"')
+        self.assertContains(response, f'href="{reverse("admin:reporting_report_changelist")}"')
         # Staff also get the Django admin itself, as an entry like the others.
         self.assertContains(response, f'<a href="{reverse("admin:index")}" class="list-group-item')
 

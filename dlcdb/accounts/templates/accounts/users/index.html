@@ -1,0 +1,56 @@
+{% extends "theme/_index_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Users" %}{% endblock title %}
+{% block index_title %}{% translate "Users" %}{% endblock index_title %}
+
+{% block index_list %}
+  {% partialdef user-list inline %}
+    <div id="user-list" class="position-relative" hx-target="#user-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} user{% plural %}{{ counter }} of {{ total }} users{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Email") asc="email" desc="-email" %}
+              <th scope="col" class="d-none d-md-table-cell">{% translate "Name" %}</th>
+              <th scope="col">{% translate "Groups" %}</th>
+              {% include "theme/filterbar/_sort_th.html" with label=_("Last login") asc="last_login" desc="-last_login" th_class="d-none d-lg-table-cell" %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for account in page_obj %}
+              <tr>
+                <td class="position-relative">
+                  <a href="{% url 'accounts:user_detail' account.pk %}?next={{ request.get_full_path|urlencode }}"
+                     class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">{{ account.email }}</a>
+                  {% include "accounts/users/includes/_badges.html" %}
+                </td>
+                <td class="d-none d-md-table-cell">{{ account.get_full_name|default:"—" }}</td>
+                <td class="small">
+                  {% for group in account.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-secondary">—</span>{% endfor %}
+                </td>
+                <td class="d-none d-lg-table-cell text-nowrap text-muted small">{{ account.last_login|date:"Y-m-d H:i"|default:"—" }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No users match these filters." %}
+                  {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock index_list %}

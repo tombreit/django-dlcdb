@@ -1,0 +1,125 @@
+{% extends "theme/_detail_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{{ account.email }}{% endblock title %}
+
+{% block detail_title %}{{ account.email }}{% endblock detail_title %}
+{% block detail_meta %}
+  {{ account.get_full_name|default:_("User") }}
+  {% include "accounts/users/includes/_badges.html" %}
+{% endblock detail_meta %}
+
+{% block detail_main %}
+  <section class="card card-filled mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-person text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Account" %}</h2>
+    </div>
+    <div class="card-body">
+      <dl class="fact-list mb-0">
+        <dt>{% translate "Last login" %}</dt>
+        <dd>{{ account.last_login|date:"Y-m-d H:i"|default:_("Never") }}</dd>
+        <dt>{% translate "Created" %}</dt>
+        <dd>{{ account.date_joined|date:"Y-m-d" }}</dd>
+        <dt>{% translate "Password" %}</dt>
+        <dd>
+          {% if account.has_usable_password %}{% translate "Set" %}
+          {% elif ldap %}{% translate "None: logs in through LDAP" %}
+          {% else %}{% translate "None: cannot log in" %}{% endif %}
+        </dd>
+      </dl>
+    </div>
+  </section>
+
+  <section class="card card-filled mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-shield-lock text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "What the user may do" %}</h2>
+    </div>
+    <div class="card-body">
+      {% if not account.is_active %}
+        <p class="mb-0">{% translate "Nothing: a deactivated user may do nothing until reactivated." %}</p>
+      {% elif account.is_superuser %}
+        <p class="mb-0">{% translate "Every permission: a superuser needs none. Devices, too, only through the tenants of their groups." %}</p>
+      {% else %}
+        {% regroup permissions by area as areas %}
+        {% for area in areas %}
+          <h3 class="h6 text-secondary text-uppercase small border-bottom pb-1 mb-2{% if not forloop.first %} mt-3{% endif %}">{{ area.grouper }}</h3>
+          <dl class="row mb-0">
+            {% regroup area.list by model as models %}
+            {% for model in models %}
+              <dt class="col-sm-4 fw-medium">{{ model.grouper }}</dt>
+              <dd class="col-sm-8 mb-1">{% for entry in model.list %}{{ entry.action }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+            {% endfor %}
+          </dl>
+        {% empty %}
+          <p class="text-muted mb-0">{% translate "Nothing yet: no group of the user grants a permission." %}</p>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </section>
+{% endblock detail_main %}
+
+{% block detail_sidebar %}
+  {% if can_change %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-toggle-on text-primary"></i>
+        <h2 class="h6 mb-0">{% translate "Access" %}</h2>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url 'accounts:user_set_active' account.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% if account.is_active %}
+            <p class="form-text mt-0">{% translate "A deactivated user can no longer log in, but keeps their history." %}</p>
+            <button class="btn btn-outline-danger" type="submit" name="active" value="0"><i class="bi bi-person-slash"></i> {% translate "Deactivate" %}</button>
+          {% else %}
+            <button class="btn btn-outline-primary" type="submit" name="active" value="1"><i class="bi bi-person-check"></i> {% translate "Reactivate" %}</button>
+          {% endif %}
+        </form>
+        {% if ldap %}
+          <p class="form-text mb-0 mt-2">{% translate "With LDAP, the next login activates the account again while the user is in the LDAP group: remove them there for good." %}</p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="card card-filled mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-people text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Groups" %}</h2>
+    </div>
+    <div class="card-body">
+      <ul class="list-unstyled mb-2">
+        {% for group, group_ldap in groups %}
+          <li>
+            {% if perms.accounts.view_group %}<a href="{% url 'accounts:group_detail' group.pk %}">{{ group.name }}</a>{% else %}{{ group.name }}{% endif %}
+            {% if group_ldap %}{% include "accounts/groups/includes/_ldap_badge.html" %}{% endif %}
+          </li>
+        {% empty %}
+          <li class="text-muted">{% translate "In no group." %}</li>
+        {% endfor %}
+      </ul>
+      <p class="form-text mb-0">{% translate "Members are set on each group's page." %}</p>
+    </div>
+  </section>
+
+  <section class="card card-filled mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3 text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Tenants" %}</h2>
+    </div>
+    <div class="card-body">
+      <ul class="list-unstyled mb-0">
+        {% for tenant in tenants %}
+          <li>{{ tenant.name }}</li>
+        {% empty %}
+          <li class="text-muted">{% translate "None of the user's groups belongs to a tenant: they see no devices." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </section>
+{% endblock detail_sidebar %}
