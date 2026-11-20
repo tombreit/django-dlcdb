@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 23:28+0100\n"
+"POT-Creation-Date: 2026-11-21 00:03+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -135,13 +135,17 @@ msgstr "LDAP findet diese Gruppe über ihren Namen, daher behält sie ihn."
 msgid ""
 "For an LDAP group, its exact name: LDAP then sets its members at their next "
 "login."
-msgstr "Für eine LDAP-Gruppe ihr exakter Name: LDAP setzt dann ihre Mitglieder bei deren nächstem Login."
+msgstr ""
+"Für eine LDAP-Gruppe ihr exakter Name: LDAP setzt dann ihre Mitglieder bei "
+"deren nächstem Login."
 
 #: dlcdb/accounts/forms.py:114
 msgid ""
 "You would lose the permission to change groups. Keep it in this group, or "
 "get it through another group first."
-msgstr "Sie würden die Berechtigung verlieren, Gruppen zu ändern. Behalten Sie sie in dieser Gruppe, oder erhalten Sie sie zuerst über eine andere Gruppe."
+msgstr ""
+"Sie würden die Berechtigung verlieren, Gruppen zu ändern. Behalten Sie sie "
+"in dieser Gruppe, oder erhalten Sie sie zuerst über eine andere Gruppe."
 
 #: dlcdb/accounts/group_profiles.py:45
 msgid "Daily work"
@@ -152,7 +156,10 @@ msgid ""
 "Devices, lending, licences, persons, rooms and master data; moving, lending, "
 "missing and found devices; inventorying and bulk imports. No "
 "decommissioning, no settings."
-msgstr "Geräte, Ausleihe, Lizenzen, Personen, Räume und Datenhaltung; Geräte umziehen, ausleihen, als nicht auffindbar und als gefunden melden; Inventur und Bulk Import. Keine Ausmusterung, keine Einstellungen."
+msgstr ""
+"Geräte, Ausleihe, Lizenzen, Personen, Räume und Datenhaltung; Geräte "
+"umziehen, ausleihen, als nicht auffindbar und als gefunden melden; Inventur "
+"und Bulk Import. Keine Ausmusterung, keine Einstellungen."
 
 #: dlcdb/accounts/group_profiles.py:67
 msgid "Administration"
@@ -162,7 +169,9 @@ msgstr "Verwaltung"
 msgid ""
 "The settings, the lending profiles, units and positions, the tenants and the "
 "journal. Not users and groups."
-msgstr "Die Einstellungen, die Ausleih-Profile, Organisationseinheiten und Positionen, die Mandanten und das Journal. Nicht Benutzer und Gruppen."
+msgstr ""
+"Die Einstellungen, die Ausleih-Profile, Organisationseinheiten und "
+"Positionen, die Mandanten und das Journal. Nicht Benutzer und Gruppen."
 
 #: dlcdb/accounts/models.py:45
 msgid "The Email must be set"
@@ -184,7 +193,9 @@ msgstr "Email-Adresse"
 msgid ""
 "Create users, set their passwords, see their groups and what they may do, "
 "deactivate them"
-msgstr "Benutzer anlegen, ihre Passwörter setzen, ihre Gruppen und Berechtigungen sehen, sie deaktivieren"
+msgstr ""
+"Benutzer anlegen, ihre Passwörter setzen, ihre Gruppen und Berechtigungen "
+"sehen, sie deaktivieren"
 
 #: dlcdb/accounts/navigation.py:14
 msgid "accounts, login, LDAP, superuser, password"
@@ -204,7 +215,9 @@ msgstr "Rollen, Rechte, LDAP-Gruppen"
 
 #: dlcdb/accounts/permissions.py:55
 msgid "Its slip templates can read and print everything a lending reaches."
-msgstr "Die Zettel-Vorlagen können alles lesen und drucken, was eine Ausleihe erreicht."
+msgstr ""
+"Die Zettel-Vorlagen können alles lesen und drucken, was eine Ausleihe "
+"erreicht."
 
 #: dlcdb/accounts/permissions.py:56
 msgid "Brings decommissioned devices back; without it, Removed is final."
@@ -216,26 +229,36 @@ msgstr "Kann jede hier aufgeführte Berechtigung in eine neue Gruppe aufnehmen."
 
 #: dlcdb/accounts/permissions.py:61
 msgid "Can grant every permission listed here, also to their own groups."
-msgstr "Kann jede hier aufgeführte Berechtigung vergeben, auch an die eigenen Gruppen."
+msgstr ""
+"Kann jede hier aufgeführte Berechtigung vergeben, auch an die eigenen "
+"Gruppen."
 
 #: dlcdb/accounts/permissions.py:63
 msgid ""
 "Can set other users' passwords, and so log in as them, and put anyone, "
 "themselves included, into any group. In the Django admin also make users "
 "superusers."
-msgstr "Kann die Passwörter anderer Benutzer setzen und sich so als sie anmelden, und jeden, sich selbst eingeschlossen, in jede Gruppe aufnehmen. Im Django-Admin auch Benutzer zu Superusern machen."
+msgstr ""
+"Kann die Passwörter anderer Benutzer setzen und sich so als sie anmelden, "
+"und jeden, sich selbst eingeschlossen, in jede Gruppe aufnehmen. Im Django-"
+"Admin auch Benutzer zu Superusern machen."
 
 #: dlcdb/accounts/permissions.py:67
 msgid ""
 "Can attach their own groups to any tenant, and so see its devices, and set "
 "the contact email that overdue reminders with the borrowers' names go to."
-msgstr "Kann die eigenen Gruppen jedem Mandanten zuordnen und so dessen Geräte sehen, und die Kontakt-Email setzen, an die Erinnerungen an überfällige Ausleihen mit den Namen der Ausleihenden gehen."
+msgstr ""
+"Kann die eigenen Gruppen jedem Mandanten zuordnen und so dessen Geräte "
+"sehen, und die Kontakt-Email setzen, an die Erinnerungen an überfällige "
+"Ausleihen mit den Namen der Ausleihenden gehen."
 
 #: dlcdb/accounts/permissions.py:73
 msgid ""
 "The HR sync creates, changes and deactivates persons as the system "
 "configured here says."
-msgstr "Der HR-Sync legt Personen an, ändert und deaktiviert sie, wie es das hier konfigurierte System vorgibt."
+msgstr ""
+"Der HR-Sync legt Personen an, ändert und deaktiviert sie, wie es das hier "
+"konfigurierte System vorgibt."
 
 #: dlcdb/accounts/permissions.py:81
 msgctxt "permission"
@@ -302,14 +325,20 @@ msgid ""
 msgid_plural ""
 "Its %(counter)s active members lose the permissions and tenants the group "
 "gives."
-msgstr[0] "Ihr %(counter)s aktives Mitglied verliert die Berechtigungen und Mandanten, die die Gruppe vergibt."
-msgstr[1] "Ihre %(counter)s aktiven Mitglieder verlieren die Berechtigungen und Mandanten, die die Gruppe vergibt."
+msgstr[0] ""
+"Ihr %(counter)s aktives Mitglied verliert die Berechtigungen und Mandanten, "
+"die die Gruppe vergibt."
+msgstr[1] ""
+"Ihre %(counter)s aktiven Mitglieder verlieren die Berechtigungen und "
+"Mandanten, die die Gruppe vergibt."
 
 #: dlcdb/accounts/templates/accounts/groups/delete.html:21
 msgid ""
 "LDAP creates the group again at the next login of one of its members, "
 "without permissions or tenants."
-msgstr "LDAP legt die Gruppe beim nächsten Login eines ihrer Mitglieder wieder an, ohne Berechtigungen und Mandanten."
+msgstr ""
+"LDAP legt die Gruppe beim nächsten Login eines ihrer Mitglieder wieder an, "
+"ohne Berechtigungen und Mandanten."
 
 #: dlcdb/accounts/templates/accounts/groups/delete.html:27
 #: dlcdb/lending/templates/lending/profile_delete.html:21
@@ -339,7 +368,9 @@ msgstr "Neue Gruppe"
 
 #: dlcdb/accounts/templates/accounts/groups/detail.html:32
 msgid "You may view this group but do not have permission to change it."
-msgstr "Sie können diese Gruppe ansehen, haben jedoch keine Berechtigung, sie zu ändern."
+msgstr ""
+"Sie können diese Gruppe ansehen, haben jedoch keine Berechtigung, sie zu "
+"ändern."
 
 #: dlcdb/accounts/templates/accounts/groups/detail.html:44
 msgid "Group profiles"
@@ -349,7 +380,9 @@ msgstr "Gruppenprofile"
 msgid ""
 "Each button ticks a profile's permissions as well; Save keeps them. The "
 "group doesn't remember the profile."
-msgstr "Jede Schaltfläche kreuzt die Berechtigungen eines Profils zusätzlich an; Speichern übernimmt sie. Die Gruppe merkt sich das Profil nicht."
+msgstr ""
+"Jede Schaltfläche kreuzt die Berechtigungen eines Profils zusätzlich an; "
+"Speichern übernimmt sie. Die Gruppe merkt sich das Profil nicht."
 
 #: dlcdb/accounts/templates/accounts/groups/detail.html:52
 #, python-format
@@ -363,7 +396,8 @@ msgstr "Berechtigungen"
 
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:34
 msgid "Add, change and delete include view: saving ticks it."
-msgstr "Hinzufügen, Ändern und Löschen schließen Ansehen ein: Speichern kreuzt es an."
+msgstr ""
+"Hinzufügen, Ändern und Löschen schließen Ansehen ein: Speichern kreuzt es an."
 
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:67
 #, python-format
@@ -376,7 +410,9 @@ msgstr[1] "%(counter)s weitere Berechtigungen"
 msgid ""
 "The group also has these. No page of DLCDB checks them, only the Django "
 "admin may; saving keeps them."
-msgstr "Die Gruppe hat auch diese. Keine Seite der DLCDB prüft sie, höchstens der Django-Admin; Speichern behält sie."
+msgstr ""
+"Die Gruppe hat auch diese. Keine Seite der DLCDB prüft sie, höchstens der "
+"Django-Admin; Speichern behält sie."
 
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:87
 #: dlcdb/accounts/templates/accounts/groups/includes/_ldap_badge.html:5
@@ -391,7 +427,9 @@ msgstr "Sie dürfen die Mitglieder ansehen, aber nicht ändern."
 msgid ""
 "Superusers, too, see devices only through their groups: add yourself to see "
 "the devices of its tenants."
-msgstr "Auch Superuser sehen Geräte nur über ihre Gruppen: Nehmen Sie sich auf, um die Geräte ihrer Mandanten zu sehen."
+msgstr ""
+"Auch Superuser sehen Geräte nur über ihre Gruppen: Nehmen Sie sich auf, um "
+"die Geräte ihrer Mandanten zu sehen."
 
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:95
 msgid "Active users only; deactivated members stay members."
@@ -414,7 +452,8 @@ msgstr "Neuer Benutzer"
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:110
 #: dlcdb/accounts/templates/accounts/groups/index.html:32
 #: dlcdb/accounts/templates/accounts/users/detail.html:116
-#: dlcdb/tenants/apps.py:12 dlcdb/tenants/navigation.py:11
+#: dlcdb/tenants/apps.py:12 dlcdb/tenants/models.py:59
+#: dlcdb/tenants/navigation.py:11
 #: dlcdb/tenants/templates/tenants/includes/_tenant_badge.html:11
 #: dlcdb/tenants/templates/tenants/index.html:6
 #: dlcdb/tenants/templates/tenants/index.html:19
@@ -460,7 +499,9 @@ msgstr "Gruppen"
 msgid ""
 "A group's permissions decide what its members may do; its tenants decide "
 "whose devices they see."
-msgstr "Die Berechtigungen einer Gruppe bestimmen, was ihre Mitglieder dürfen, ihre Mandanten, wessen Geräte sie sehen."
+msgstr ""
+"Die Berechtigungen einer Gruppe bestimmen, was ihre Mitglieder dürfen, ihre "
+"Mandanten, wessen Geräte sie sehen."
 
 #: dlcdb/accounts/templates/accounts/groups/index.html:31
 #: dlcdb/tenants/templates/tenants/index.html:87
@@ -494,7 +535,9 @@ msgstr "Passwort"
 
 #: dlcdb/accounts/templates/accounts/users/add.html:45
 msgid "Hand the initial password to the user; DLCDB sends no mail."
-msgstr "Geben Sie das Anfangspasswort selbst an den Benutzer weiter; die DLCDB verschickt keine Mail."
+msgstr ""
+"Geben Sie das Anfangspasswort selbst an den Benutzer weiter; die DLCDB "
+"verschickt keine Mail."
 
 #: dlcdb/accounts/templates/accounts/users/add.html:63
 msgid "Create user"
@@ -546,13 +589,16 @@ msgstr "Was der Benutzer darf"
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:43
 msgid "Nothing: a deactivated user may do nothing until reactivated."
-msgstr "Nichts: Ein deaktivierter Benutzer darf nichts, bis er reaktiviert wird."
+msgstr ""
+"Nichts: Ein deaktivierter Benutzer darf nichts, bis er reaktiviert wird."
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:45
 msgid ""
 "Every permission: a superuser needs none. Devices, too, only through the "
 "tenants of their groups."
-msgstr "Jede Berechtigung: Ein Superuser braucht keine. Geräte sieht aber auch er nur über die Mandanten seiner Gruppen."
+msgstr ""
+"Jede Berechtigung: Ein Superuser braucht keine. Geräte sieht aber auch er "
+"nur über die Mandanten seiner Gruppen."
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:58
 msgid "Nothing yet: no group of the user grants a permission."
@@ -570,7 +616,9 @@ msgstr "Neues Passwort setzen"
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:79
 msgid "A deactivated user can no longer log in, but keeps their history."
-msgstr "Ein deaktivierter Benutzer kann sich nicht mehr anmelden, behält aber seine Historie."
+msgstr ""
+"Ein deaktivierter Benutzer kann sich nicht mehr anmelden, behält aber seine "
+"Historie."
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:80
 #: dlcdb/notifications/templates/notifications/index.html:93
@@ -585,7 +633,9 @@ msgstr "Reaktivieren"
 msgid ""
 "With LDAP, the next login activates the account again while the user is in "
 "the LDAP group: remove them there for good."
-msgstr "Mit LDAP aktiviert der nächste Login das Konto wieder, solange der Benutzer in der LDAP-Gruppe ist: Dauerhaft hilft nur, ihn dort zu entfernen."
+msgstr ""
+"Mit LDAP aktiviert der nächste Login das Konto wieder, solange der Benutzer "
+"in der LDAP-Gruppe ist: Dauerhaft hilft nur, ihn dort zu entfernen."
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:106
 msgid "In no group."
@@ -597,7 +647,8 @@ msgstr "Mitglieder werden auf der Seite der jeweiligen Gruppe gesetzt."
 
 #: dlcdb/accounts/templates/accounts/users/detail.html:123
 msgid "None of the user's groups belongs to a tenant: they see no devices."
-msgstr "Keine Gruppe des Benutzers gehört zu einem Mandanten: Er sieht keine Geräte."
+msgstr ""
+"Keine Gruppe des Benutzers gehört zu einem Mandanten: Er sieht keine Geräte."
 
 #: dlcdb/accounts/templates/accounts/users/includes/_badges.html:6
 msgid "Has every permission"
@@ -656,7 +707,10 @@ msgstr "Zurück"
 msgid ""
 "Hand the new password to the user; DLCDB sends no mail. With LDAP, the user "
 "can then log in with either password."
-msgstr "Geben Sie das neue Passwort selbst an den Benutzer weiter; die DLCDB verschickt keine Mail. Mit LDAP kann sich der Benutzer dann mit beiden Passwörtern anmelden."
+msgstr ""
+"Geben Sie das neue Passwort selbst an den Benutzer weiter; die DLCDB "
+"verschickt keine Mail. Mit LDAP kann sich der Benutzer dann mit beiden "
+"Passwörtern anmelden."
 
 #: dlcdb/accounts/templates/accounts/users/password.html:31
 msgid "Set password"
@@ -678,7 +732,9 @@ msgstr "Gruppe hinzufügen"
 
 #: dlcdb/accounts/views_groups.py:126
 msgid "You cannot delete this group: it is your only way to change groups."
-msgstr "Sie können diese Gruppe nicht löschen: Nur über sie dürfen Sie Gruppen ändern."
+msgstr ""
+"Sie können diese Gruppe nicht löschen: Nur über sie dürfen Sie Gruppen "
+"ändern."
 
 #: dlcdb/accounts/views_groups.py:133
 #, python-format
@@ -692,7 +748,9 @@ msgstr "Suche Email, Name..."
 #: dlcdb/accounts/views_users.py:90
 msgid ""
 "You cannot deactivate your own account, nor a superuser unless you are one."
-msgstr "Sie können weder Ihr eigenes Konto deaktivieren noch einen Superuser, wenn Sie selbst keiner sind."
+msgstr ""
+"Sie können weder Ihr eigenes Konto deaktivieren noch einen Superuser, wenn "
+"Sie selbst keiner sind."
 
 #: dlcdb/accounts/views_users.py:103
 #, python-format
@@ -818,7 +876,8 @@ msgstr "Alle Hersteller..."
 #: dlcdb/dataexchange/templates/dataexchange/importer_index.html:29
 #: dlcdb/inventory/filters.py:76 dlcdb/journal/models.py:166
 #: dlcdb/journal/templates/journal/detail.html:57 dlcdb/lending/filters.py:90
-#: dlcdb/licenses/filters.py:58 dlcdb/tenants/templates/tenants/detail.html:9
+#: dlcdb/licenses/filters.py:58 dlcdb/tenants/models.py:58
+#: dlcdb/tenants/templates/tenants/detail.html:9
 #: dlcdb/tenants/templates/tenants/detail.html:23
 #: dlcdb/tenants/templates/tenants/history.html:18
 #: dlcdb/tenants/templates/tenants/includes/_form_fields.html:7
@@ -873,7 +932,7 @@ msgstr "Import"
 msgid "Any import status..."
 msgstr "Jeder Import-Status..."
 
-#: dlcdb/assets/filters.py:97
+#: dlcdb/assets/filters.py:97 dlcdb/dataexchange/models.py:157
 msgid "Import file"
 msgstr "Import-Datei"
 
@@ -2218,6 +2277,15 @@ msgstr "Raum oder Location wo die Lizenz aufbewahrt wird."
 msgid "Rooms"
 msgstr "Räume"
 
+#: dlcdb/core/models/room.py:158 dlcdb/rooms/navigation.py:19
+#: dlcdb/rooms/templates/rooms/index.html:16
+msgid "Room reconcile"
+msgstr "Raumabgleich"
+
+#: dlcdb/core/models/room.py:159
+msgid "Room reconciles"
+msgstr "Raumabgleiche"
+
 #: dlcdb/core/models/supplier.py:20
 msgid ""
 "Contact and support information: contact persons, hotlines, mail addresses "
@@ -2238,7 +2306,9 @@ msgstr "Records bearbeiten"
 msgid ""
 "Correct or delete a device's records; Master data › Records shows them read-"
 "only"
-msgstr "Records eines Geräts korrigieren oder löschen; Datenhaltung › Records zeigt sie nur lesend"
+msgstr ""
+"Records eines Geräts korrigieren oder löschen; Datenhaltung › Records zeigt "
+"sie nur lesend"
 
 #: dlcdb/core/navigation.py:37
 msgid "lifecycle, states, history, correct, delete"
@@ -2618,6 +2688,18 @@ msgstr "SAP (CSV)"
 msgid "Import as given tenant."
 msgstr "Importiert für den angegebenen Mandanten."
 
+#: dlcdb/dataexchange/models.py:158
+msgid "Import files"
+msgstr "Import-Dateien"
+
+#: dlcdb/dataexchange/models.py:201
+msgid "Decommissioning file"
+msgstr "Ausmusterungs-Datei"
+
+#: dlcdb/dataexchange/models.py:202
+msgid "Decommissioning files"
+msgstr "Ausmusterungs-Dateien"
+
 #: dlcdb/dataexchange/models.py:229
 msgid "Enabled"
 msgstr "Aktiviert"
@@ -2704,13 +2786,24 @@ msgstr "Ungültiger regulärer Ausdruck: %(error)s"
 msgid "Invalid replacement: %(error)s"
 msgstr "Ungültige Ersetzung: %(error)s"
 
+#: dlcdb/dataexchange/models.py:316
+msgid "HR sync run"
+msgstr "HR-Sync-Lauf"
+
+#: dlcdb/dataexchange/models.py:317 dlcdb/dataexchange/navigation.py:52
+#: dlcdb/dataexchange/templates/admin/dataexchange/udbsyncconfiguration/change_form.html:14
+msgid "HR sync runs"
+msgstr "HR-Sync-Läufe"
+
 #: dlcdb/dataexchange/navigation.py:11
 msgid "Bulk import"
 msgstr "Bulk Import"
 
 #: dlcdb/dataexchange/navigation.py:13
 msgid "Import devices from a CSV file, with a preview before anything is saved"
-msgstr "Geräte aus einer CSV-Datei importieren, mit einer Vorschau, bevor etwas gespeichert wird"
+msgstr ""
+"Geräte aus einer CSV-Datei importieren, mit einer Vorschau, bevor etwas "
+"gespeichert wird"
 
 #: dlcdb/dataexchange/navigation.py:14
 msgid "upload, template, devices, SAP"
@@ -2730,21 +2823,21 @@ msgstr "ausmustern, aussondern, entsorgen, Upload, entfernt"
 
 #: dlcdb/dataexchange/navigation.py:42
 msgid "Connection to the HR system, the room name rule and the latest runs"
-msgstr "Verbindung zum HR-System, die Regel für Raumnamen und die letzten Läufe"
+msgstr ""
+"Verbindung zum HR-System, die Regel für Raumnamen und die letzten Läufe"
 
 #: dlcdb/dataexchange/navigation.py:43
 msgid "UDB, token, URL, persons, people, regular expression, sync now"
-msgstr "UDB, Token, URL, Personen, Leute, regulärer Ausdruck, jetzt synchronisieren"
-
-#: dlcdb/dataexchange/navigation.py:52
-msgid "HR sync runs"
-msgstr "HR-Sync-Läufe"
+msgstr ""
+"UDB, Token, URL, Personen, Leute, regulärer Ausdruck, jetzt synchronisieren"
 
 #: dlcdb/dataexchange/navigation.py:54
 msgid ""
 "Every run of the HR sync with its notes; the HR sync page shows the latest "
 "five"
-msgstr "Jeder Lauf des HR-Syncs mit seinen Notizen; die HR-Sync-Seite zeigt die letzten fünf"
+msgstr ""
+"Jeder Lauf des HR-Syncs mit seinen Notizen; die HR-Sync-Seite zeigt die "
+"letzten fünf"
 
 #: dlcdb/dataexchange/navigation.py:55
 msgid "UDB, log, errors, missing rooms"
@@ -2956,6 +3049,14 @@ msgstr ""
 "Der HR-Sync wurde gestartet. Sein Ergebnis erscheint unter “Letzte Läufe”, "
 "sobald er fertig ist."
 
+#: dlcdb/inventory/models.py:18
+msgid "SAP list"
+msgstr "SAP-Liste"
+
+#: dlcdb/inventory/models.py:19
+msgid "SAP lists"
+msgstr "SAP-Listen"
+
 #: dlcdb/inventory/navigation.py:11
 msgid "Inventorize"
 msgstr "Inventarisieren"
@@ -3111,7 +3212,8 @@ msgstr "Journal-Einträge"
 
 #: dlcdb/journal/navigation.py:13
 msgid "Sent mails, syncs, imports, saved settings and errors"
-msgstr "Versendete Mails, Syncs, Importe, gespeicherte Einstellungen und Fehler"
+msgstr ""
+"Versendete Mails, Syncs, Importe, gespeicherte Einstellungen und Fehler"
 
 #: dlcdb/journal/navigation.py:14
 msgid "log, audit, history, events, cleanup"
@@ -3358,13 +3460,17 @@ msgstr ""
 #: dlcdb/lending/navigation.py:22
 msgid ""
 "Overdue reminders; the lending profiles with their slips and regulations"
-msgstr "Erinnerungen an überfällige Ausleihen; die Ausleih-Profile mit ihren Zetteln und Ordnungen"
+msgstr ""
+"Erinnerungen an überfällige Ausleihen; die Ausleih-Profile mit ihren Zetteln "
+"und Ordnungen"
 
 #: dlcdb/lending/navigation.py:23
 msgid ""
 "mails, notifications, slip template, print, preparation checklist, device "
 "types, borrower"
-msgstr "Mails, Benachrichtigungen, Zettel-Vorlage, Druck, Vorbereitungs-Checkliste, Geräteklassen, Ausleihende"
+msgstr ""
+"Mails, Benachrichtigungen, Zettel-Vorlage, Druck, Vorbereitungs-Checkliste, "
+"Geräteklassen, Ausleihende"
 
 #: dlcdb/lending/navigation.py:34
 msgid "Lending regulations"
@@ -3374,7 +3480,9 @@ msgstr "Ausleih-Ordnungen"
 msgid ""
 "The regulations the lending profiles ask borrowers to confirm, as link or "
 "file"
-msgstr "Die Ordnungen, die Ausleihende laut Ausleih-Profil bestätigen, als Link oder Datei"
+msgstr ""
+"Die Ordnungen, die Ausleihende laut Ausleih-Profil bestätigen, als Link oder "
+"Datei"
 
 #: dlcdb/lending/navigation.py:37
 msgid "links, documents, PDF, terms of use"
@@ -3880,13 +3988,22 @@ msgstr "Geräte-Abonnements benötigen ein Gerät."
 msgid "You already have a subscription for this event and device."
 msgstr "Sie haben dieses Event für dieses Gerät bereits abonniert."
 
+#: dlcdb/notifications/models.py:379
+msgid "Message"
+msgstr "Nachricht"
+
+#: dlcdb/notifications/models.py:380
+msgid "Messages"
+msgstr "Nachrichten"
+
 #: dlcdb/notifications/navigation.py:11
 msgid "Notification messages"
 msgstr "Benachrichtigungen"
 
 #: dlcdb/notifications/navigation.py:13
 msgid "Pending, sent and failed mails, with preview and Send now"
-msgstr "Wartende, versendete und fehlgeschlagene Mails, mit Vorschau und Jetzt senden"
+msgstr ""
+"Wartende, versendete und fehlgeschlagene Mails, mit Vorschau und Jetzt senden"
 
 #: dlcdb/notifications/navigation.py:14
 msgid "mails, email, outbox, queue, errors, subscriptions"
@@ -4130,13 +4247,17 @@ msgstr ""
 msgid ""
 "Name, address, IT contact, logos, room plan and documentation link; units "
 "and positions"
-msgstr "Name, Adresse, IT-Kontakt, Logos, Raumplan und Link zur Dokumentation; Organisationseinheiten und Positionen"
+msgstr ""
+"Name, Adresse, IT-Kontakt, Logos, Raumplan und Link zur Dokumentation; "
+"Organisationseinheiten und Positionen"
 
 #: dlcdb/organization/navigation.py:15
 msgid ""
 "branding, abbreviation, website, street, city, phone, email, figurative "
 "mark, docs, departments, job titles"
-msgstr "Branding, Abkürzung, Website, Straße, Ort, Telefon, Email, Bildmarke, Doku, Abteilungen, Stellen"
+msgstr ""
+"Branding, Abkürzung, Website, Straße, Ort, Telefon, Email, Bildmarke, Doku, "
+"Abteilungen, Stellen"
 
 #: dlcdb/organization/templates/organization/branding.html:23
 msgid "No organizational units yet."
@@ -4372,13 +4493,18 @@ msgstr "Person “{person}” wurde geändert."
 msgid "Reporting"
 msgstr "Reporting"
 
-#: dlcdb/reporting/navigation.py:11
+#: dlcdb/reporting/models.py:46
+msgid "Report"
+msgstr "Report"
+
+#: dlcdb/reporting/models.py:47 dlcdb/reporting/navigation.py:11
 msgid "Reports"
 msgstr "Reports"
 
 #: dlcdb/reporting/navigation.py:13
 msgid "Generated reports with their spreadsheets, sent by the notifications"
-msgstr "Erzeugte Reports mit ihren Tabellen, versendet von den Benachrichtigungen"
+msgstr ""
+"Erzeugte Reports mit ihren Tabellen, versendet von den Benachrichtigungen"
 
 #: dlcdb/reporting/navigation.py:14
 msgid "xlsx, excel, spreadsheet, mails"
@@ -4427,10 +4553,6 @@ msgstr "Ersetzung"
 msgid "The new room number. \\1, \\2, … insert the pattern's groups."
 msgstr ""
 "Die neue Raum-Nummer. \\1, \\2, … fügt die Ersetzungsgruppen des Musters ein."
-
-#: dlcdb/rooms/navigation.py:19 dlcdb/rooms/templates/rooms/index.html:16
-msgid "Room reconcile"
-msgstr "Raumabgleich"
 
 #: dlcdb/rooms/navigation.py:21
 msgid "Compare the rooms with an Archibus CSV export"
@@ -4660,15 +4782,24 @@ msgid_plural "{count} rooms kept their number: {rooms}"
 msgstr[0] "{count} Raum behielt seine Nummer: {rooms}"
 msgstr[1] "{count} Räume behielten ihre Nummer: {rooms}"
 
-#: dlcdb/smallstuff/models.py:93
+#: dlcdb/smallstuff/models.py:30
+msgid "Thing"
+msgstr "Gegenstand"
+
+#: dlcdb/smallstuff/models.py:31
+#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:35
+msgid "Things"
+msgstr "Gegenstände"
+
+#: dlcdb/smallstuff/models.py:95
 msgid "Can not be unassigned without being assigned first!"
 msgstr "Ohne vorherige Ausgabe ist keine Rückgabe möglich!"
 
-#: dlcdb/smallstuff/models.py:97
+#: dlcdb/smallstuff/models.py:99
 msgid "Unassignment timestamp could not be before assignment timestamp!"
 msgstr "Der Rückgabezeitpunkt kann nicht vor dem Ausgabezeitpunkt liegen!"
 
-#: dlcdb/smallstuff/models.py:100 dlcdb/smallstuff/models.py:101
+#: dlcdb/smallstuff/models.py:102 dlcdb/smallstuff/models.py:103
 msgid "Stuff"
 msgstr "Kleinkram"
 
@@ -4707,10 +4838,6 @@ msgstr[1] "%(counter)s Gegenstände zurückgegeben"
 #: dlcdb/smallstuff/templates/smallstuff/includes/person_list_item.html:78
 msgid "Contract ends at"
 msgstr "Vertrag endet am"
-
-#: dlcdb/smallstuff/templates/smallstuff/person_detail.html:35
-msgid "Things"
-msgstr "Gegenstände"
 
 #: dlcdb/smallstuff/templates/smallstuff/person_detail.html:61
 msgid ""
@@ -5016,13 +5143,17 @@ msgstr "Was Mandanten nicht einschränken"
 msgid ""
 "Scanning in an inventory, and the notes of the running inventory: a scan "
 "records every device in the room, whatever its tenant."
-msgstr "Das Scannen in einer Inventur und die Notizen der laufenden Inventur: Ein Scan erfasst jedes Gerät im Raum, gleich welchen Mandanten."
+msgstr ""
+"Das Scannen in einer Inventur und die Notizen der laufenden Inventur: Ein "
+"Scan erfasst jedes Gerät im Raum, gleich welchen Mandanten."
 
 #: dlcdb/tenants/templates/tenants/index.html:43
 msgid ""
 "The inventory's device overview, when the inventory's device search is not "
 "tenant-aware."
-msgstr "Die Geräteübersicht der Inventur, wenn die Gerätesuche der Inventur Mandanten nicht berücksichtigt."
+msgstr ""
+"Die Geräteübersicht der Inventur, wenn die Gerätesuche der Inventur "
+"Mandanten nicht berücksichtigt."
 
 #: dlcdb/tenants/templates/tenants/index.html:44
 msgid "The SAP comparison: it compares the whole stock."
@@ -5442,7 +5573,8 @@ msgstr "Sie dürfen keine Einstellungen ansehen."
 
 #: dlcdb/theme/templates/theme/settings.html:71
 msgid "Turn on “Show all” to see which settings exist."
-msgstr "Schalten Sie “Zeige alle” ein, um zu sehen, welche Einstellungen es gibt."
+msgstr ""
+"Schalten Sie “Zeige alle” ein, um zu sehen, welche Einstellungen es gibt."
 
 #: dlcdb/theme/templates/theme/settings.html:77
 msgid "More"

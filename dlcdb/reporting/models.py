@@ -4,6 +4,7 @@
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 def spreadsheet_directory_path(instance, filename):
@@ -42,5 +43,5 @@ class Report(models.Model):
         return f"{self.pk}: {timezone.localtime(self.created_at)} {self.title}"
 
     class Meta:
-        verbose_name = "Report"
-        verbose_name_plural = "Reports"
+        verbose_name = _("Report")
+        verbose_name_plural = _("Reports")

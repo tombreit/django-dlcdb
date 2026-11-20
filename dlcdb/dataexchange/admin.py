@@ -174,7 +174,7 @@ class UdbSyncConfigurationAdmin(admin.ModelAdmin):
         from .tasks import task_import_udb_persons
 
         task_import_udb_persons()
-        messages.info(request, "HR API sync has been enqueued. See the 'HR API Sync Runs' list for the result.")
+        messages.info(request, "HR API sync has been enqueued. See the HR sync runs list for the result.")
 
 
 @admin.register(UdbSyncRun)

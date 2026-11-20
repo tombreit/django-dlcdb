@@ -155,8 +155,8 @@ class RoomReconcile(models.Model):
 
     class Meta:
         ordering = ["created_at"]
-        verbose_name = "Raum-Abgleich"
-        verbose_name_plural = "Raum-Abgleich"
+        verbose_name = _("Room reconcile")
+        verbose_name_plural = _("Room reconciles")
 
     def __str__(self):
         return f"{Path(self.file.path).name}"

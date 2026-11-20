@@ -27,6 +27,8 @@ class Thing(AuditBaseModel):
         return f"{self.name}"
 
     class Meta:
+        verbose_name = _("Thing")
+        verbose_name_plural = _("Things")
         ordering = ["name"]
         constraints = [
             models.UniqueConstraint(

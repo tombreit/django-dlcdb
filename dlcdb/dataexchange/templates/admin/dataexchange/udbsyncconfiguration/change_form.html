@@ -5,12 +5,13 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 
 {% extends 'admin/change_form.html' %}
+{% load i18n %}
 
 
 {% block object-tools-items %}
     <li>
         <a href="{% url 'admin:dataexchange_udbsyncrun_changelist' %}">
-            &rarr; HR API Sync Runs
+            &rarr; {% translate "HR sync runs" %}
         </a>
     </li>
     {{ block.super }}

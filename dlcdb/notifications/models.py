@@ -376,6 +376,8 @@ class Message(models.Model):
         return f"{self.id} - {self.status} - {origin}"
 
     class Meta:
+        verbose_name = _("Message")
+        verbose_name_plural = _("Messages")
         ordering = ["-modified_at"]
         constraints = [
             models.CheckConstraint(

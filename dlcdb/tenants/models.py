@@ -55,4 +55,6 @@ class Tenant(AuditBaseModel):
         self.save()
 
     class Meta:
+        verbose_name = _("Tenant")
+        verbose_name_plural = _("Tenants")
         ordering = [Lower("name")]

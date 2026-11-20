@@ -6,6 +6,7 @@ import os.path
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class SapList(models.Model):
@@ -14,8 +15,8 @@ class SapList(models.Model):
     note = models.TextField(null=True, blank=True, verbose_name="Anmerkung")
 
     class Meta:
-        verbose_name = "SAP-Liste"
-        verbose_name_plural = "SAP-Listen"
+        verbose_name = _("SAP list")
+        verbose_name_plural = _("SAP lists")
 
     def get_file_name(self):
         return self.file.name.split("/")[-1]

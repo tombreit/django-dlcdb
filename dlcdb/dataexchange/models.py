@@ -154,8 +154,8 @@ class ImporterList(OperationLogBase):
     )
 
     class Meta:
-        verbose_name = "Import-Datei"
-        verbose_name_plural = "Import-Dateien"
+        verbose_name = _("Import file")
+        verbose_name_plural = _("Import files")
         ordering = ["-modified_at", "-created_at"]
 
     def __str__(self):
@@ -198,8 +198,8 @@ class RemoverList(OperationLogBase):
     )
 
     class Meta:
-        verbose_name = "Ausmusterungs-Datei"
-        verbose_name_plural = "Ausmusterungs-Dateien"
+        verbose_name = _("Decommissioning file")
+        verbose_name_plural = _("Decommissioning files")
         ordering = ["-modified_at", "-created_at"]
 
     def __str__(self):
@@ -313,8 +313,8 @@ class UdbSyncRun(OperationLogBase):
     journal_source = "dataexchange.hr_sync"
 
     class Meta:
-        verbose_name = "HR API Sync Run"
-        verbose_name_plural = "HR API Sync Runs"
+        verbose_name = _("HR sync run")
+        verbose_name_plural = _("HR sync runs")
         ordering = ["-created_at"]
 
     def __str__(self):
