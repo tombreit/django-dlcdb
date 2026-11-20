@@ -107,7 +107,9 @@ class HrSyncConfigurationForm(forms.ModelForm):
     """
     Settings › HR API sync configuration. The token is never sent to the browser:
     a stored token shows as a placeholder of dots, a typed token replaces it, an
-    empty field keeps it, and "Remove token" clears it.
+    empty field keeps it, and "Remove token" clears it. A changed URL doesn't
+    keep it: whoever changes where the sync goes has to know the token sent
+    there, or the stored one would go to any URL typed in.
     """
 
     # The same length whatever the token's: the dots say only that one is stored.
@@ -145,5 +147,8 @@ class HrSyncConfigurationForm(forms.ModelForm):
         if cleaned_data.get("remove_api_token"):
             cleaned_data["api_token"] = ""
         elif not cleaned_data.get("api_token"):
-            cleaned_data["api_token"] = self.instance.api_token
+            if self.instance.api_token and "url" in self.changed_data:
+                self.add_error("api_token", _("The URL changed: enter the token again, or remove it."))
+            else:
+                cleaned_data["api_token"] = self.instance.api_token
         return cleaned_data

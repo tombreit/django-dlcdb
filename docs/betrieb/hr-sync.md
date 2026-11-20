@@ -34,7 +34,7 @@ Die HR-Integration wird unter *Einstellungen › HR-API-Sync-Konfiguration* konf
 
 - **enabled** – aktiviert den periodischen Sync und das Management-Command.
 - **url** – die vollständige URL ohne Query-String: entweder der HR-API-Endpunkt (z.B. `https://hr.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei, etwa wenn die HR-API aus dem Netz der DLCDB nicht erreichbar ist. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
-- **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert). Die Seite zeigt ihn nie an: Ein gespeicherter Token erscheint als Punkte, ein unverändertes Feld behält ihn, *Token entfernen* löscht ihn.
+- **api_token** – wird als `X-API-KEY`-Header gesendet (im Klartext gespeichert). Die Seite zeigt ihn nie an: Ein gespeicherter Token erscheint als Punkte, ein unverändertes Feld behält ihn, *Token entfernen* löscht ihn. Wer die URL ändert, muss den Token neu eingeben: Der gespeicherte geht an keine andere URL.
 
 - **room_number_pattern**, **room_number_replacement** – die Regel, die aus dem Raum des HR-Systems eine DLCDB-Raumnummer macht (siehe [Raum](#raum)).
 

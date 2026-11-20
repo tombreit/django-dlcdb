@@ -27,6 +27,7 @@ RUN_URL = reverse("dataexchange:hr_sync_run")
 VIEW = "dataexchange.view_udbsyncconfiguration"
 CHANGE = "dataexchange.change_udbsyncconfiguration"
 TOKEN = "s3cret-token"
+HR_URL = "https://hr.example.org/contracts/"
 
 
 @pytest.fixture
@@ -41,12 +42,13 @@ def login(client, make_user):
 @pytest.fixture
 def stored_token():
     config = UdbSyncConfiguration.load()
+    config.url = HR_URL
     config.api_token = TOKEN
     config.save()
 
 
 def _post(client, **fields):
-    return client.post(URL, {"url": "https://hr.example.org/contracts/", **fields})
+    return client.post(URL, {"url": HR_URL, **fields})
 
 
 @pytest.mark.parametrize(("perms", "status"), [((), 403), ((VIEW,), 200)])
@@ -72,7 +74,7 @@ def test_a_stored_token_shows_as_dots(request, login, stored):
 
 @pytest.mark.usefixtures("stored_token")
 def test_an_empty_token_field_keeps_the_token_and_is_no_change(login):
-    _post(login(VIEW, CHANGE))
+    _post(login(VIEW, CHANGE), enabled="on")  # a change, for the journal entry
 
     assert UdbSyncConfiguration.load().api_token == TOKEN
     assert "token" not in JournalEntry.objects.get(source="dataexchange.settings").summary
@@ -83,6 +85,19 @@ def test_a_typed_token_replaces_the_stored_one(login):
     _post(login(VIEW, CHANGE), api_token="new-token")
 
     assert UdbSyncConfiguration.load().api_token == "new-token"
+
+
+@pytest.mark.usefixtures("stored_token")
+def test_a_changed_url_needs_the_token_again(login):
+    client = login(VIEW, CHANGE)
+    other_url = "https://elsewhere.example.org/contracts/"
+
+    response = _post(client, url=other_url)
+    assert "api_token" in response.context["form"].errors
+    assert UdbSyncConfiguration.load().url == HR_URL
+
+    _post(client, url=other_url, api_token=TOKEN)
+    assert (UdbSyncConfiguration.load().url, UdbSyncConfiguration.load().api_token) == (other_url, TOKEN)
 
 
 @pytest.mark.usefixtures("stored_token")
