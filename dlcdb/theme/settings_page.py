@@ -25,6 +25,7 @@ from django.utils.translation import gettext as _
 from dlcdb.core.utils.htmx import missing_permission_message
 from dlcdb.journal.models import JournalEntry
 
+from .forms import disable_fields
 from .navigation import get_redirect_url, with_next
 
 
@@ -57,8 +58,7 @@ def settings_page(request, form_class, *, icon, template="theme/_settings_base.h
     else:
         form = form_class(instance=config)
         if not can_change:
-            for field in form.fields.values():
-                field.disabled = True
+            disable_fields(form)
 
     return TemplateResponse(
         request,

@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Form styling helpers shared by the frontend apps.
+Form helpers shared by the frontend apps.
 
-Pure functions called from a form's ``__init__`` — the project deliberately has
-no form mixins or custom template tags.
+Pure functions called from a form's ``__init__`` or a view — the project
+deliberately has no form mixins or custom template tags.
 """
 
 from django import forms
@@ -50,3 +50,12 @@ def add_bootstrap_classes(form):
                 continue  # non-field ("__all__") or picker-driven field
             css = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{css} is-invalid".strip()
+
+
+def disable_fields(form):
+    """
+    Every field of ``form`` disabled: the same form, read-only, for a user who
+    may view but not change. The view still refuses a POST from that user.
+    """
+    for field in form.fields.values():
+        field.disabled = True

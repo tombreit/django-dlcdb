@@ -25,6 +25,7 @@ from django.utils.translation import gettext_lazy
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message
+from dlcdb.theme.forms import disable_fields
 from dlcdb.theme.navigation import get_redirect_url, get_redirect_url_after_add, with_next
 from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
 
@@ -152,8 +153,7 @@ def _detail(request, kind, pk):
     else:
         form = kind.form_class(instance=obj)
         if not can_change:
-            for field in form.fields.values():
-                field.disabled = True
+            disable_fields(form)
 
     return TemplateResponse(
         request,

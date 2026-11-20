@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message, obj_link
 from dlcdb.theme.field_history import build_field_history
+from dlcdb.theme.forms import disable_fields
 from dlcdb.theme.navigation import detail_urls, get_redirect_url
 
 from .forms import LendingProfileForm
@@ -75,8 +76,7 @@ def profile_detail(request, pk):
     else:
         form = LendingProfileForm(instance=profile)
         if not can_change:
-            for field in form.fields.values():
-                field.disabled = True
+            disable_fields(form)
 
     return TemplateResponse(
         request,
