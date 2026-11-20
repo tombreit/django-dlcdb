@@ -45,7 +45,7 @@ class SettingsHubTests(TestCase):
         positions = [content.index(f'<h2 class="h5">{heading}</h2>') for heading in headings]
         self.assertEqual(positions, sorted(positions))
         self.assertIn(f'href="{reverse("tenants:index")}"', content)
-        self.assertIn(f'href="{reverse("dataexchange:importer_index")}"', content)
+        self.assertIn(f'href="{reverse("dataexchange:device_import")}"', content)
 
     def test_the_admin_navbar_links_the_settings_page(self):
         self.client.force_login(self.superuser)

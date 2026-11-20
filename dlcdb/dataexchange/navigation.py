@@ -13,8 +13,9 @@ nav_entries = [
         "description": _("Import devices from a CSV file, with a preview before anything is saved"),
         "search_terms": _("upload, template, devices, SAP"),
         "icon": "bi bi-file-earmark-arrow-down",
-        "url": "dataexchange:importer_index",
-        "required_permission": "dataexchange.view_importerlist",
+        # The import itself; its page links the import history.
+        "url": "dataexchange:device_import",
+        "required_permission": "core.add_device",
         "active_url_names": {
             "importer_index",
             "importer_detail",

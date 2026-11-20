@@ -50,7 +50,7 @@ Shown only with the Staff flag. Each comes from the `navigation.py` of the app n
 
 Reached where they are, and through Settings › More › Django admin.
 
-- [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend. No entry: the admin list is the same as Bulk import's.
+- [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend. No entry: the admin list is the same as the import history, which Bulk import's page links.
 - [ ] **Tenants without devices:** the action "assign a tenant" for devices and imports without one (DECISIONS: the NOT NULL follow-up would make it unnecessary). No entry: an admin action, which the sticky hint links while needed.
 - [x] **Tenant field history:** on the tenant's frontend page, *Changes › Field history* (`tenants:history`, `tenants.view_tenant`), group ticks included (2026-11-20).
 
