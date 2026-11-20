@@ -56,6 +56,7 @@ class SettingsHubTests(TestCase):
         self.assertContains(response, '<h2 class="h5">Modules</h2>')
         self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
         self.assertNotContains(response, '<h2 class="h5">Users and access</h2>')
+        self.assertNotContains(response, f'href="{reverse("admin:index")}"')
 
     def test_admin_entries_need_the_staff_flag(self):
         user = get_user_model().objects.create_user(username="clerk", email="clerk@example.com", password="secret")
@@ -83,6 +84,8 @@ class SettingsHubTests(TestCase):
         self.assertTrue(admin_entries)
         self.assertContains(response, 'fw-normal">Django admin</span>', count=len(admin_entries))
         self.assertContains(response, f'href="{reverse("admin:accounts_customuser_changelist")}"')
+        # Staff also get the Django admin itself, as an entry like the others.
+        self.assertContains(response, f'<a href="{reverse("admin:index")}" class="list-group-item')
 
     def test_the_filter_gets_each_entrys_search_terms(self):
         self.client.force_login(self.superuser)

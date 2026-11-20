@@ -213,7 +213,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 ## Django-Admin
 
-Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und unten auf der Seite *Einstellungen*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
+Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
 - Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die mit *(Admin)* markierten [Menüpunkte](#navigation),

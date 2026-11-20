@@ -40,7 +40,7 @@ Groups, *(A)* marking an admin link:
 - **Integrations:** HR API sync
 - **Data and tools:** Bulk import, Bulk decommissioning *(A)*, Inventories *(A)*, SAP comparison *(A, during an inventory)*, Room reconcile *(A)*
 - **Logs:** Journal
-- At the bottom, for staff: Django admin
+- **More** (staff only, last): Django admin, an entry like the others
 
 Found while planning:
 

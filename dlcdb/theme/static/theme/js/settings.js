@@ -18,7 +18,7 @@ filter.addEventListener('input', () => {
   let found = 0
   for (const { section, list, entries } of groups) {
     const matching = entries.filter((entry) => {
-      const text = `${entry.textContent} ${entry.dataset.searchTerms}`.toLowerCase()
+      const text = `${entry.textContent} ${entry.dataset.searchTerms ?? ''}`.toLowerCase()
       return words.every(word => text.includes(word))
     })
     list.replaceChildren(...matching)
