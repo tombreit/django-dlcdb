@@ -62,6 +62,7 @@ urlpatterns = [
     # Public: logging out with an expired session still shows the logged-out page.
     path("accounts/logout/", login_not_required(LogoutView.as_view())),
     path("accounts/", include("django.contrib.auth.urls")),
+    path("accounts/", include("dlcdb.accounts.urls")),
     path("admin/", admin.site.urls),
     path("", RedirectView.as_view(url=reverse_lazy("dashboard:index")), name="dashboard"),
 ]

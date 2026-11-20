@@ -24,7 +24,7 @@ nav_entries = [
         "description": _("What the members of a group may do"),
         "search_terms": _("roles, rights, LDAP groups"),
         "icon": "bi bi-shield-lock",
-        "url": "admin:accounts_group_changelist",
+        "url": "accounts:groups",
         "required_permission": "accounts.view_group",
     },
 ]

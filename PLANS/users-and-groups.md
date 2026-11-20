@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 1 done (`dlcdb/accounts/permissions.py`); next: batch 2, groups read-only. Started 2026-11-20.
+**Status:** batch 2 done (groups read-only, `accounts/views_groups.py`); next: batch 3, editing a group. Started 2026-11-20.
 
 ## Why
 
@@ -81,6 +81,10 @@ SPDX-License-Identifier: CC0-1.0
 - **Order:** groups first (batches 1–4), then users (5–6).
 - **Widgets:**
   - **Permissions:** checkboxes grouped by model, each with its help line, no JS.
+    - The models follow the app's menus, under the area's heading: *Menu*, *Master data*, then *Settings › …* in the settings page's group order. A model sits where the first menu entry needing one of its permissions sits; models no menu entry needs come last, under *Other* (lending profiles, units, positions, SAP lists).
+    - Read-only, the same checkboxes are disabled; granted ones keep a readable label.
+    - The group's other permissions are folded away below, as `app_label.codename`.
+  - **Groups list:** how many of DLCDB's own permissions a group has, in warning colour at 0 (a mirrored LDAP group arrives empty), active members, tenants, an LDAP badge.
   - **Members:** the dual-pane `filtered-select-multiple-widget` (the user's npm package, bundled by esbuild; it needs no new features for this).
 - **Staff and Superuser flags** are not set in the frontend: only badges. They stay with the admin, LDAP and `createsuperuser`.
 - **Direct per-user permissions** (`user_permissions`) are ignored by the frontend.
@@ -150,7 +154,7 @@ SPDX-License-Identifier: CC0-1.0
   - The collector: decorator, menus, lifecycle, the 12 extra lines.
   - Derived labels and the view requirement; the sensitive list.
   - The guard test.
-- [ ] **2. Groups, read-only.**
+- [x] **2. Groups, read-only.**
   - Groups list (members, tenants, LDAP badge) and group page: permissions by model with labels, tenants, members, other permissions read-only.
   - The menu entry *Groups and permissions* opens the frontend.
 - [ ] **3. Editing a group:**

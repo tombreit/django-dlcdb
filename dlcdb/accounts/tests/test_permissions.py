@@ -83,3 +83,14 @@ def test_labels_come_from_the_model_the_lifecycle_and_the_menu():
     assert str(by_name["core.can_inventorize"]) == "Inventory · Inventorize"
     assert by_name["core.view_lentrecord"].help == "Menu › Lending"
     assert by_name["tenants.change_tenant"].warning
+
+
+@pytest.mark.django_db
+def test_the_models_follow_the_apps_menus():
+    by_name = {permission_name(p.permission): p for p in own_permissions()}
+    assert by_name["core.view_device"].area == "Menu"
+    assert by_name["core.view_person"].area == "Master data"
+    assert by_name["journal.view_journalentry"].area == "Settings › Logs"
+    # No menu entry needs a lending profile's permissions: listed last.
+    assert by_name["lending.view_lendingprofile"].area == "Other"
+    assert own_permissions()[-1].area == "Other"

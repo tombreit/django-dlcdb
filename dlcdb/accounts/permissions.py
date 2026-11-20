@@ -18,7 +18,7 @@ A permission is DLCDB's own if
 one that none of these finds.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from importlib import import_module
 
 from django.conf import settings
@@ -31,7 +31,7 @@ from django.utils.translation import pgettext_lazy
 from dlcdb.core import lifecycle
 from dlcdb.core.models import Device
 from dlcdb.core.utils.htmx import guarding_permissions
-from dlcdb.theme.context_processors import declared_nav_entries
+from dlcdb.theme.context_processors import SETTINGS_GROUPS, declared_nav_entries
 
 # Checked inside the body of a page that edits in place, so neither a decorator
 # nor a menu entry names them.
@@ -75,8 +75,11 @@ ACTIONS = {
     "delete": pgettext_lazy("permission", "delete"),
 }
 
-# Where a menu entry sits.
+# Where a menu entry sits, in the order a group page lists the models by.
 MENUS = {"nav_main": _("Menu"), "nav_masterdata": _("Master data"), "nav_settings": _("Settings")}
+
+# Where a model sits whose permissions no menu entry needs, last.
+_ELSEWHERE = (len(MENUS), 0, 0, _("Other"))
 
 
 @dataclass(frozen=True)
@@ -86,13 +89,19 @@ class OwnPermission:
     permission: Permission
     model: str  # the heading it is listed under: "Person"
     action: str  # "change", "Lend / Return", "Inventorize"
-    help: str  # its menu entries and what they open, or ""
+    menus: tuple  # the menu entries that need it
     warning: str  # why it reaches further than its label says, or ""
     requires: Permission | None  # the model's view permission, granted along with it
     order: tuple  # the position under its heading
+    area: str = ""  # where its model's menu entries sit: "Menu", "Settings › Logs"
 
     def __str__(self):
         return f"{self.model} · {self.action}"
+
+    @property
+    def help(self):
+        """Its menu entries and what they open: "Settings › Journal: Sent mails, …"."""
+        return " · ".join(_menu_help(entry) for entry in self.menus)
 
 
 def permission_name(permission):
@@ -112,9 +121,10 @@ def own_permission_names():
 
 def own_permissions():
     """
-    DLCDB's own permissions, by model; under a model view, add, change and
-    delete come first, then its own permissions. A name without a row in the
-    database (a typo; the guard test finds it) is left out.
+    DLCDB's own permissions, by model, in the order of the app's menus: the
+    main menu, master data, then the settings page's groups. Under a model
+    view, add, change and delete come first, then its own permissions. A name
+    without a row in the database (a typo; the guard test finds it) is left out.
     """
     names = own_permission_names()
     rows = {permission_name(p): p for p in Permission.objects.select_related("content_type")}
@@ -123,7 +133,14 @@ def own_permissions():
     for name in names & rows.keys():
         menus = [entry for entry in entries if name in _required_permissions(entry)]
         own.append(_describe(rows[name], rows=rows, names=names, menus=menus))
-    return sorted(own, key=lambda p: (str(p.model), p.order))
+
+    # A model sits where the first of its permissions' menu entries sits.
+    model_menus = {}
+    for p in own:
+        model_menus.setdefault(str(p.model), []).extend(p.menus)
+    places = {model: min(map(_place, menus), default=_ELSEWHERE) for model, menus in model_menus.items()}
+    own = [replace(p, area=places[str(p.model)][-1]) for p in own]
+    return sorted(own, key=lambda p: (places[str(p.model)], str(p.model), p.order))
 
 
 def _describe(permission, *, rows, names, menus):
@@ -153,7 +170,7 @@ def _describe(permission, *, rows, names, menus):
         permission=permission,
         model=capfirst(model),
         action=label,
-        help=" · ".join(_menu_help(entry) for entry in menus),
+        menus=tuple(menus),
         warning=SENSITIVE.get(name, ""),
         requires=requires,
         order=order,
@@ -164,6 +181,13 @@ def _required_permissions(entry):
     """A menu entry's ``required_permission``, any one of which shows it, as a set."""
     required = entry.get("required_permission") or ()
     return {required} if isinstance(required, str) else set(required)
+
+
+def _place(entry):
+    """A menu entry's position in the app's menus, and the area it is in."""
+    slot, group = entry["slot"], entry.get("group")
+    area = f"{MENUS[slot]} › {SETTINGS_GROUPS[group]}" if group else MENUS[slot]
+    return list(MENUS).index(slot), list(SETTINGS_GROUPS).index(group) if group else 0, entry["order"], area
 
 
 def _menu_help(entry):

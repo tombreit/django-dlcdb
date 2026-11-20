@@ -1,0 +1,53 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% block title %}{% translate "Groups" %}{% endblock title %}
+
+{% block body %}
+  <h1 class="mb-3">{% translate "Groups" %}</h1>
+
+  <p class="text-secondary">
+    {% translate "A group's permissions decide what its members may do; its tenants decide whose devices they see." %}
+  </p>
+
+  {% if rows %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th scope="col">{% translate "Group" %}</th>
+            <th scope="col" class="text-end">{% translate "Permissions" %}</th>
+            <th scope="col" class="text-end" title="{% translate "Active user accounts; with LDAP as of each user's last login" %}">{% translate "Members" %}</th>
+            <th scope="col">{% translate "Tenants" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td class="position-relative">
+                <a href="{% url 'accounts:group_detail' row.group.pk %}"
+                   class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">{{ row.group.name }}</a>
+                {% if row.ldap %}{% include "accounts/groups/includes/_ldap_badge.html" %}{% endif %}
+              </td>
+              <td class="text-end">
+                <span class="badge {% if row.permission_count %}text-bg-light border{% else %}text-bg-warning{% endif %}">{{ row.permission_count }}</span>
+              </td>
+              <td class="text-end"><span class="badge text-bg-light border">{{ row.group.member_count }}</span></td>
+              <td>
+                {% for tenant in row.group.tenant_set.all %}
+                  {{ tenant.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  <span class="text-secondary">—</span>
+                {% endfor %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-muted">{% translate "No groups yet." %}</p>
+  {% endif %}
+{% endblock body %}

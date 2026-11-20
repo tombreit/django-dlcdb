@@ -30,7 +30,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Start › Konten › Gruppen*. Benutzer werden unter *Start › Konten › Benutzer* den Gruppen zugeordnet.
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Start › Konten › Gruppen* im Django-Admin. Benutzer werden unter *Start › Konten › Benutzer* den Gruppen zugeordnet. Was eine Gruppe darf, welche Mandanten sie sieht und wer Mitglied ist, zeigt *Einstellungen › Gruppen und Berechtigungen*.
 
 Es gibt drei Familien von Berechtigungen:
 
@@ -99,7 +99,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 | Einstellungen › Benutzer *(Admin)* | Accounts \| user \| Can view user | `accounts.view_customuser` |
-| Einstellungen › Gruppen und Berechtigungen *(Admin)* | Accounts \| group \| Can view group | `accounts.view_group` |
+| Einstellungen › Gruppen und Berechtigungen | Accounts \| group \| Can view group | `accounts.view_group` |
 | Einstellungen › Ausleih-Ordnungen *(Admin)* | Core \| Link \| Can view Link | `core.view_link` |
 | Einstellungen › Kleinkram-Katalog *(Admin)* | Smallstuff \| thing \| Can view thing | `smallstuff.view_thing` |
 | Einstellungen › Benachrichtigungen *(Admin)* | Notifications \| message \| Can view message | `notifications.view_message` |
