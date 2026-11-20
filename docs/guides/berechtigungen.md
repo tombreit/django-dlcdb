@@ -103,7 +103,7 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
 
-Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad.
+Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“.
 
 Die Seiten unter *Einstellungen* zeigen ihre Werte mit der *view*-Berechtigung schreibgeschützt; speichern darf, wer die *change*-Berechtigung hat: `organization.change_branding`, `lending.change_lendingconfiguration`, `licenses.change_licensesconfiguration` bzw. `dataexchange.change_udbsyncconfiguration`. Die letzten HR-Sync-Läufe zeigt *HR-API-Sync-Konfiguration* mit `dataexchange.view_udbsyncrun`; *Journal › Aufräumen* braucht `journal.delete_journalentry`.
 

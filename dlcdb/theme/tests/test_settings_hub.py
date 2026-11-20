@@ -12,8 +12,11 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ImproperlyConfigured
+from django.templatetags.static import static
 from django.test import TestCase, override_settings
 from django.urls import reverse
+
+from dlcdb.organization import navigation as organization_navigation
 
 _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -53,6 +56,14 @@ class SettingsHubTests(TestCase):
         self.assertContains(response, '<h2 class="h5">Modules</h2>')
         self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
         self.assertNotContains(response, '<h2 class="h5">Users and access</h2>')
+
+    def test_the_filter_gets_each_entrys_search_terms(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("settings"))
+
+        terms = organization_navigation.nav_entries[0]["search_terms"]
+        self.assertContains(response, f'data-search-terms="{terms}"')
+        self.assertContains(response, f'src="{static("theme/js/settings.js")}"')
 
     def test_a_settings_page_leads_back_to_the_settings_page(self):
         self.client.force_login(self.superuser)

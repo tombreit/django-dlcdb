@@ -20,6 +20,7 @@ nav_entries = [
         "label": _("Licenses configuration"),
         "group": "modules",
         "description": _("Default subscribers of new licenses"),
+        "search_terms": _("notifications, mails, subscriptions, expiry"),
         "icon": "bi bi-bank2",
         "url": "licenses:configuration",
         "required_permission": "licenses.view_licensesconfiguration",

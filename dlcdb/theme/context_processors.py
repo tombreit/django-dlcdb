@@ -134,9 +134,11 @@ def nav(request):
                     "slot": nav_entry.get("slot"),
                     "order": nav_entry.get("order"),
                     "active": is_active,
-                    # The settings page's group heading and the line under the label.
+                    # The settings page's group heading, the line under the label,
+                    # and the words its filter also finds the entry by (never shown).
                     "group": SETTINGS_GROUPS.get(group),
                     "description": nav_entry.get("description"),
+                    "search_terms": nav_entry.get("search_terms"),
                 }
                 nav_items.append(nav_item)
 

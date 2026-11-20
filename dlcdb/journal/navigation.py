@@ -11,6 +11,7 @@ nav_entries = [
         "label": _("Journal"),
         "group": "logs",
         "description": _("Sent mails, syncs, imports, saved settings and errors"),
+        "search_terms": _("log, audit, history, events, cleanup"),
         "icon": "bi bi-journal-text",
         "url": "journal:index",
         "required_permission": "journal.view_journalentry",

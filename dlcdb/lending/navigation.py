@@ -20,6 +20,7 @@ nav_entries = [
         "label": _("Lending configuration"),
         "group": "modules",
         "description": _("Overdue reminders; the lending profiles with their slips and regulations"),
+        "search_terms": _("mails, notifications, slip template, print, preparation checklist, device types, borrower"),
         "icon": "bi bi-arrow-left-right",
         "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",

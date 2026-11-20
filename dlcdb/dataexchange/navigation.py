@@ -34,6 +34,7 @@ nav_entries = [
         "label": _("HR API sync configuration"),
         "group": "integrations",
         "description": _("Connection to the HR system, the room name rule and the latest runs"),
+        "search_terms": _("UDB, token, URL, persons, people, regular expression, sync now"),
         "icon": "bi bi-arrow-clockwise",
         "url": "dataexchange:hr_sync",
         "required_permission": "dataexchange.view_udbsyncconfiguration",
