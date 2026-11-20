@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-21 00:43+0100\n"
+"POT-Creation-Date: 2026-11-21 00:47+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -5282,70 +5282,70 @@ msgstr[1] "%(count)d Importe ohne Mandant!"
 msgid "Assign a tenant?"
 msgstr "Mandant zuordnen?"
 
-#: dlcdb/theme/context_processors.py:346
+#: dlcdb/theme/context_processors.py:344
 msgid "No tenants yet: nobody sees any devices."
 msgstr "Noch keine Mandanten: Niemand sieht Geräte."
 
-#: dlcdb/theme/context_processors.py:348
+#: dlcdb/theme/context_processors.py:346
 msgid "Add a tenant?"
 msgstr "Mandant hinzufügen?"
 
-#: dlcdb/theme/context_processors.py:355
+#: dlcdb/theme/context_processors.py:353
 msgid "No groups yet: only superusers have permissions."
 msgstr "Noch keine Gruppen: Nur Superuser haben Berechtigungen."
 
-#: dlcdb/theme/context_processors.py:357
+#: dlcdb/theme/context_processors.py:355
 msgid "Create a group?"
 msgstr "Gruppe anlegen?"
 
-#: dlcdb/theme/context_processors.py:366
+#: dlcdb/theme/context_processors.py:364
 #, python-format
-msgid "%(count)d tenant has no group: nobody sees its devices."
-msgid_plural "%(count)d tenants have no group: nobody sees their devices."
-msgstr[0] "%(count)d Mandant hat keine Gruppe: Niemand sieht seine Geräte."
-msgstr[1] "%(count)d Mandanten haben keine Gruppe: Niemand sieht ihre Geräte."
+msgid "Tenant %(names)s has no group: nobody sees its devices."
+msgid_plural "Tenants %(names)s have no group: nobody sees their devices."
+msgstr[0] "Mandant %(names)s hat keine Gruppe: Niemand sieht seine Geräte."
+msgstr[1] "Mandanten %(names)s haben keine Gruppe: Niemand sieht ihre Geräte."
 
-#: dlcdb/theme/context_processors.py:372 dlcdb/theme/context_processors.py:393
+#: dlcdb/theme/context_processors.py:370 dlcdb/theme/context_processors.py:391
 msgid "Assign groups to tenants?"
 msgstr "Gruppen Mandanten zuordnen?"
 
-#: dlcdb/theme/context_processors.py:381
+#: dlcdb/theme/context_processors.py:379
 msgid "None of your groups belongs to a tenant, so you see no devices."
 msgstr ""
 "Keine Ihrer Gruppen gehört zu einem Mandanten, daher sehen Sie keine Geräte."
 
-#: dlcdb/theme/context_processors.py:390
+#: dlcdb/theme/context_processors.py:388
 msgid "Create a group with a tenant?"
 msgstr "Eine Gruppe mit Mandant anlegen?"
 
-#: dlcdb/theme/context_processors.py:407
+#: dlcdb/theme/context_processors.py:405
 msgid "No room configured as 'is_external'!"
 msgstr "Kein Raum als 'is_external' konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:409 dlcdb/theme/context_processors.py:419
+#: dlcdb/theme/context_processors.py:407 dlcdb/theme/context_processors.py:417
 msgid "Configure one?"
 msgstr "Konfigurieren?"
 
-#: dlcdb/theme/context_processors.py:417
+#: dlcdb/theme/context_processors.py:415
 msgid "No room configured as 'is_auto_return_room'!"
 msgstr "Kein \"Auto return\" Raum konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:427
+#: dlcdb/theme/context_processors.py:425
 msgid "No rooms defined yet."
 msgstr "Bisher wurden keine Räume  eingegeben."
 
-#: dlcdb/theme/context_processors.py:429
+#: dlcdb/theme/context_processors.py:427
 msgid "Add some rooms?"
 msgstr "Räume hinzufügen?"
 
-#: dlcdb/theme/context_processors.py:440
+#: dlcdb/theme/context_processors.py:438
 msgid ""
 "No IT department contact email configured under Settings › Organization!"
 msgstr ""
 "Keine Kontakt-Email der IT-Abteilung unter Einstellungen › Organisation "
 "konfiguriert!"
 
-#: dlcdb/theme/context_processors.py:442
+#: dlcdb/theme/context_processors.py:440
 msgid "Configure it?"
 msgstr "Konfigurieren?"
 

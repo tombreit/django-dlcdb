@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Count, Min, Q
+from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext as _
@@ -335,11 +336,14 @@ def hints(request):
         may_tick_tenants = user.has_perms(["tenants.view_tenant", "tenants.change_tenant"])
         setup_hints = []
         if may_add_tenant or may_tick_tenants:
-            tenant_counts = Tenant.objects.aggregate(
-                count=Count("pk", distinct=True),
-                without_groups=Count("pk", filter=Q(groups__isnull=True), distinct=True),
+            # Every tenant with its number of groups: one query, and there are few.
+            # Counting drops the model's ordering: sorted by name again.
+            tenants = list(
+                Tenant.objects.annotate(group_count=Count("groups"))
+                .order_by(Lower("name"))
+                .values_list("name", "group_count")
             )
-            if may_add_tenant and not tenant_counts["count"]:
+            if may_add_tenant and not tenants:
                 setup_hints.append(
                     StickyMessage(
                         level=messages.WARNING,
@@ -358,16 +362,16 @@ def hints(request):
                 )
             )
         sticky_messages += setup_hints
-        if may_tick_tenants and (count := tenant_counts["without_groups"]):
+        if may_tick_tenants and (unseen := [name for name, group_count in tenants if not group_count]):
             sticky_messages.append(
                 StickyMessage(
                     level=messages.WARNING,
                     msg=ngettext(
-                        "%(count)d tenant has no group: nobody sees its devices.",
-                        "%(count)d tenants have no group: nobody sees their devices.",
-                        count,
+                        "Tenant %(names)s has no group: nobody sees its devices.",
+                        "Tenants %(names)s have no group: nobody sees their devices.",
+                        len(unseen),
                     )
-                    % {"count": count},
+                    % {"names": ", ".join(f"“{name}”" for name in unseen)},
                     cta_link=reverse("tenants:index"),
                     cta_text=_("Assign groups to tenants?"),
                 )

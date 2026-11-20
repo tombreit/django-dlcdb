@@ -221,9 +221,14 @@ class SetupHintsTests(TestCase):
         response = self.client.get(self.dashboard_url)
         self.assertNotContains(response, self.no_tenants)
         self.assertNotContains(response, self.no_groups)
-        self.assertContains(response, "1 tenant has no group: nobody sees its devices.")
+        self.assertContains(response, "Tenant “Institute” has no group: nobody sees its devices.")
         self.assertContains(response, f"<a href='{reverse('tenants:index')}'>Assign groups to tenants?</a>", html=True)
 
+        Tenant.objects.create(name="archive")
+        response = self.client.get(self.dashboard_url)
+        self.assertContains(response, "Tenants “archive”, “Institute” have no group: nobody sees their devices.")
+
+        Tenant.objects.get(name="archive").delete()
         tenant.groups.add(group)
         response = self.client.get(self.dashboard_url)
         self.assertNotContains(response, "has no group")
