@@ -164,9 +164,11 @@ class LendingProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # One profile per device type: the types without one, and this profile's own.
-        self.fields["device_type"].queryset = DeviceType.objects.filter(
-            Q(lending_profile__isnull=True) | Q(pk=self.instance.device_type_id)
+        # One profile per device type: the active types without one, and this
+        # profile's own, also when it was deactivated since; otherwise the select
+        # shows none, and saving fails.
+        self.fields["device_type"].queryset = DeviceType.with_softdeleted_objects.filter(
+            Q(deleted_at__isnull=True, lending_profile__isnull=True) | Q(pk=self.instance.device_type_id)
         )
         # The link text, as on the slip; Link's str() prefixes "Link: ".
         self.fields["mandatory_regulations"].label_from_instance = lambda link: link.linktext

@@ -76,6 +76,21 @@ def test_only_device_types_without_a_profile_are_offered(login, profile):
     assert set(response.context["form"].fields["device_type"].queryset) == {profile.device_type, tablet}
 
 
+def test_a_profile_keeps_its_deactivated_device_type(login, profile):
+    profile.device_type.delete()  # deactivates
+    DeviceType.objects.create(name="Pager").delete()
+    client = login(VIEW, CHANGE)
+    url = reverse("lending:profile_detail", args=[profile.pk])
+
+    choices = client.get(url).context["form"].fields["device_type"].queryset
+    response = client.post(url, _post_data(profile.device_type, lent_sheet_template="new slip"))
+
+    assert list(choices) == [profile.device_type]
+    assert response.status_code == 302
+    profile.refresh_from_db()
+    assert profile.lent_sheet_template == "new slip"
+
+
 def test_an_emptied_slip_template_gets_the_starter_content_again(login, profile):
     response = login(VIEW, CHANGE).post(
         reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="")
