@@ -25,7 +25,7 @@ Die {ref}`Abonnenten einer Lizenz <subscribers>` erhalten automatisch eine Mail,
 
 ## Erinnerungen an überfällige Ausleihen
 
-Jeden Montag erhält jede Person mit überfälligen Ausleihen eine Mail, die ihre überfälligen Geräte auflistet (eine Mail je Mandant). Wer sie bekommt, legt *Einstellungen › Ausleihe Konfiguration* fest (ändern: `lending.change_lendingconfiguration`):
+Jeden Montag erhält jede Person mit überfälligen Ausleihen eine Mail, die ihre überfälligen Geräte auflistet (eine Mail je Mandant). Wer sie bekommt, legt *Einstellungen › Ausleihe Konfiguration* fest:
 
 - *Nobody*: keine Mails
 - *Lender*: an die ausleihende Person

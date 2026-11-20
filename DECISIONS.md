@@ -14,7 +14,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The admin gets no new code paths.** Lending slips print only from the tenant-scoped lending screen, and the record admins offer no "Add": the old admin paths let a user print other tenants' slips, or recover a removed device with just `add_*record`.
 - **Tenants grant no permissions; visibility comes only from `Tenant.groups`, with no superuser exception.** Not django-guardian/rules, django-organizations or django-tenants, not a bypass permission, a super-tenant flag or a session "current tenant". Should "all tenants" be needed: one line in `get_user_tenants`.
 - **Empty tenants are hard-deleted**, not soft-deleted: an UPDATE bypasses PROTECT, so a "deleted" tenant would hide its devices.
-- **Not tenant-scoped on purpose**, besides those in `docs/guides/berechtigungen.md`: the device counts on the room pages and the notification reports, the settings pages and the lending profiles (global, like device types).
+- **Not tenant-scoped on purpose**, besides those the tenant matrix lists (`tenants/index.html`): the device counts on the room pages and the notification reports, the settings pages and the lending profiles (global, like device types).
 - **Django serves `/media/`**, not X-Sendfile (needs a server module; the files are few and small). No `max-age` (a shared PC would show cached files after logout), no CSP on PDFs (it breaks the browser's viewer).
 - **The journal is no audit-log package**: auditlog, reversion and simple-history record field changes, not events; error tracking (Sentry) is out of scope. `log()` fails loudly, only the logging handler never breaks its caller; not buffering, a second database, a queue thread or `on_commit`.
 - **Polish stays in the classic theme and Bootstrap 5.3**; the `redesign` branches are a quarry only. Colour means state, primary is for actions and links.
@@ -51,6 +51,17 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **A unit or position that a person holds can't be deleted**, deactivated persons included: `PROTECT`, not a check in the delete view, which the admin and the shell would skip.
 - **Units and positions live on Settings › Organization** (formerly Branding) as cards, like the lending profiles: no entries or index pages of their own, so the settings page doesn't grow; every entry listed, no paging. The page's cards start closed, with a table of contents; any form error opens all of them.
 
+- **Users, groups and permissions are managed in the frontend; only DLCDB's own permissions are offered**: those its code checks, collected from the view decorator (which records them), the menu entries, the lifecycle and `accounts.permissions.CHECKED_IN_VIEWS`; a guard test names any other permission the code checks. Not a codename prefix (Django's view/add/change/delete names are fixed), not a hand-written list of about 80 with labels, not all 230 with a search as in the admin.
+- **Permission labels are derived, never Django's `Permission.name`**: model and action, the lifecycle's labels for transitions (listed under *Device*, where the moves are made), a custom permission's menu entry; help lines name the menu entries. The models follow the app's menus (*Menu*, *Master data*, *Settings › …*), those no menu entry needs last, under *Other*.
+- **Add, change and delete grant the model's view permission along**, when a group is saved: Django derives no view from change.
+- **Group profiles are copied into a group, which doesn't remember them**: no model, no migration; applied again after an update, a profile adds what is new. Named "group profile": "role" is no DLCDB concept, "profile" alone means lending profiles. Not default groups by migration or `post_migrate` (Wagtail): forced onto existing installations; not a management command.
+- **Permissions are checkboxes with help lines, members the dual-pane widget** (`theme.widgets.FilteredSelectMultipleWidget`): its panes are native selects, so permissions would get their help only as tooltips.
+- **The Staff and Superuser flags and per-user permissions stay out of the frontend**: badges only; the admin, LDAP and `createsuperuser` set the flags. The admin's user and group screens stay registered.
+- **A group's members need the user permissions besides the group's**: shown with `view_customuser`, changed with `change_customuser`. Only a superuser deactivates a superuser or sets their password: no one locks out or takes over the operators.
+- **Passwords are set by an administrator, without mail**: an initial one on *New user* or none (LDAP), a new one on the user page. Not reset links.
+- **User and group changes are journaled**, naming what changed (never a password), not with simple-history; the tenant ticks keep the tenant's history.
+- **The docs list no permissions**: the group pages are the reference, so nothing drifts from the code.
+
 ## Pitfalls
 
 - Tenant choices come from `request.tenants`, never `Tenant.objects.all()` (leaks names); joins over multi-valued relations need `distinct()`.
@@ -70,6 +81,13 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - The HR sync finds units and positions by name: a local rename of one it fills brings the old name back with its next run.
 - A renamed person or record field empties the DB-stored slip templates that use it, silently: NEWS has to name it.
 
+- `htmx_permission_required` records its permissions only once the views are imported: the collector imports the URLconf first. Look permissions up by app label and codename together: proxy models (`lentrecord`, `accounts.Group` beside `auth.Group`) and the legacy `dlcdb` label repeat codenames.
+- A group's form keeps what it doesn't show: the permissions DLCDB doesn't check and the deactivated members. LDAP sets a mirrored group's members and finds it by name, so both are read-only; `AUTH_LDAP_MIRROR_GROUPS` may also be `True`.
+- No locking oneself out: no deactivating oneself, no removing `accounts.change_group` from, leaving or deleting one's only group that grants it.
+- `get_all_permissions()` is empty for a deactivated user, and `has_perm` caches per user object: fetch the user again after changing a group.
+- Django's radio and checkbox lists put the widget's class on their wrapper too: render them through `theme/includes/_choice_field.html`.
+- The group profiles' buttons submit the group form through `form="group-form"` from the sidebar, after the save bar in document order, so Enter in a field still saves.
+
 ## Open follow-ups
 
 - Tenants: `Device.tenant` and `ImporterList.tenant` NOT NULL (then drop the hints and the assign action); `created_by` on `AuditBaseModel`; create the LDAP mirror groups on `post_migrate`.
@@ -85,3 +103,4 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; try the HR room rule on a sample; whether the account menu keeps *Django admin* now that Settings › More has it.
 - Publish on PyPI.
 - Persons: a DLCDB field for the contract end, which lending, notifications and smallstuff read from `udb_contract_planned_checkout`; the contract type as master data; a phone number; positions and photo in the bulk import and the lending CSV export, unit and positions in the API; delete the photo files of hard-deleted persons (a merged duplicate's, say); let users set what HR leaves empty on a synced person.
+- Users and groups: the admin's user form lets anyone with `change_customuser` tick *Superuser* (make the flags and `user_permissions` read-only there for non-superusers); direct per-user permissions are invisible in the frontend; reset links by mail and a password change page in DLCDB's look for the account menu; the German `verbose_name` of *Import-Datei*, *Ausmusterungs-Datei* and *Raum-Abgleich* shows untranslated in the permission labels (needs a migration); hard-deleting a user is still admin-only.

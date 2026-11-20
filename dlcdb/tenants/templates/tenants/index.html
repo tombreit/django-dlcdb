@@ -36,6 +36,17 @@
     {% translate "Permissions are not per tenant: what users may do through any of their groups applies in every tenant they can access." %}
   </div>
 
+  <details class="small text-secondary mb-3">
+    <summary>{% translate "What tenants don't restrict" %}</summary>
+    <ul class="mb-0 mt-1">
+      <li>{% translate "Scanning in an inventory, and the notes of the running inventory: a scan records every device in the room, whatever its tenant." %}</li>
+      <li>{% translate "The inventory's device overview, when the inventory's device search is not tenant-aware." %}</li>
+      <li>{% translate "The SAP comparison: it compares the whole stock." %}</li>
+      <li>{% translate "The REST API: an API token returns the devices of every tenant." %}</li>
+      <li>{% translate "The notes in the Django admin." %}</li>
+    </ul>
+  </details>
+
   {% if tenants and rows %}
     <div class="table-responsive">
       <table class="table table-striped table-hover align-middle tenant-matrix">

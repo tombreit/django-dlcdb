@@ -62,7 +62,10 @@ SENSITIVE = {
         "Can set other users' passwords, and so log in as them, and put anyone, themselves included, into any "
         "group. In the Django admin also make users superusers."
     ),
-    "tenants.change_tenant": _("Can attach their own groups to any tenant, and so see its devices."),
+    "tenants.change_tenant": _(
+        "Can attach their own groups to any tenant, and so see its devices, and set the contact email "
+        "that overdue reminders with the borrowers' names go to."
+    ),
     "lending.add_lendingprofile": _SLIP_TEMPLATES,
     "lending.change_lendingprofile": _SLIP_TEMPLATES,
     "dataexchange.change_udbsyncconfiguration": _(

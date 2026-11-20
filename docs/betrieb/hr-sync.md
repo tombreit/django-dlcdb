@@ -30,7 +30,7 @@ Ist die andere Person selbst mit einem anderen HR-Datensatz verknüpft, führt d
 
 ## Konfiguration
 
-Die HR-Integration wird unter *Einstellungen › HR-API-Sync-Konfiguration* konfiguriert; ändern darf sie, wer `dataexchange.change_udbsyncconfiguration` hat.
+Die HR-Integration wird unter *Einstellungen › HR-API-Sync-Konfiguration* konfiguriert.
 
 - **enabled** – aktiviert den periodischen Sync und das Management-Command.
 - **url** – die vollständige URL ohne Query-String: entweder der HR-API-Endpunkt (z.B. `https://hr.example.org/api/external_interface/contracts/`) oder eine fertige JSON-Datei, etwa wenn die HR-API aus dem Netz der DLCDB nicht erreichbar ist. Filter und Felder hängt der Code an (eine statische JSON-Datei ignoriert sie).
@@ -54,4 +54,4 @@ Reihenfolge beim Einrichten: zuerst die Räume so benennen, wie die Regel sie er
 
 ## Scheduler
 
-Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen. Manueller Anstoß per `./manage.py udb_sync_persons` oder mit *Sync now* auf *Einstellungen › HR-API-Sync-Konfiguration* (beides braucht `dataexchange.change_udbsyncconfiguration`, auch die Admin-Aktion „Run HR API sync now“); der Lauf startet, sobald der Task Runner ihn aufnimmt. Die Seite listet die letzten Läufe mit ihren Notizen, etwa Räume, die der DLCDB fehlen; dafür braucht es `dataexchange.view_udbsyncrun`.
+Ist die Integration aktiviert, werden die Personendaten alle 10 Minuten abgeglichen. Manueller Anstoß per `./manage.py udb_sync_persons` oder mit *Sync now* auf *Einstellungen › HR-API-Sync-Konfiguration* (beides mit dem Recht, die Konfiguration zu ändern); der Lauf startet, sobald der Task Runner ihn aufnimmt. Die Seite listet die letzten Läufe mit ihren Notizen, etwa Räume, die der DLCDB fehlen.

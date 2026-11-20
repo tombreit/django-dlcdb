@@ -68,13 +68,8 @@ def detail(request, pk):
     if request.method == "POST":
         if not can_change:
             raise PermissionDenied(missing_permission_message("accounts.change_group"))
-        data, profile = request.POST, BY_KEY.get(request.POST.get("add_profile"))
-        if profile:
-            data = request.POST.copy()
-            data.setlist(
-                "permissions",
-                [*data.getlist("permissions"), *map(str, profile.permissions().values_list("pk", flat=True))],
-            )
+        profile = BY_KEY.get(request.POST.get("add_profile"))
+        data = _with_profile_ticked(request.POST, profile) if profile else request.POST
         form = GroupForm(data, instance=group, own=own, editor=request.user)
         if form.is_valid():
             form.save()
@@ -165,6 +160,14 @@ def delete(request, pk):
     return TemplateResponse(
         request, "accounts/groups/delete.html", {"group": group, "members": members, "ldap": is_ldap_mirrored(group)}
     )
+
+
+def _with_profile_ticked(data, profile):
+    """The submitted group form with the profile's permissions ticked as well."""
+    data = data.copy()
+    profile_pks = profile.permissions().values_list("pk", flat=True)
+    data.setlist("permissions", [*data.getlist("permissions"), *map(str, profile_pks)])
+    return data
 
 
 def _journal_changes(form, *, user):

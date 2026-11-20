@@ -10,17 +10,17 @@ Der Superuser dient der Einrichtung. Für die tägliche Arbeit werden Benutzerko
 
 Logo und Organisationsname unter *Einstellungen › Organisation* eintragen.
 
-## 3. Gruppen anlegen und Berechtigungen vergeben
+## 3. Mandant anlegen
 
-Via *Einstellungen › Gruppen und Berechtigungen › Neue Gruppe*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), auf Wunsch aus einem Gruppenprofil; die Seite der Gruppe zeigt dann ihre Berechtigungen zum Anpassen. Mit LDAP werden die Gruppen gespiegelt, siehe [LDAP](berechtigungen.md#ldap).
+Via *Einstellungen › Mandanten › Mandant hinzufügen*. Ohne Gruppe, die ihn sieht, sieht niemand seine Geräte: das erledigt Schritt 4 (siehe [Mandanten](berechtigungen.md#mandanten)).
 
-## 4. Mandant anlegen
+## 4. Gruppen anlegen
 
-Via *Einstellungen › Mandanten › Mandant hinzufügen*: Name vergeben und speichern, dann in der Mandanten-Übersicht in der Spalte des neuen Mandanten die Gruppe(n) aus Schritt 3 anhaken. Die Gruppe der Administratoren jedem Mandanten zuordnen, auch jedem später angelegten – ohne passende Gruppe sieht niemand Geräte (siehe [Mandanten](berechtigungen.md#mandanten)).
+Via *Einstellungen › Gruppen und Berechtigungen › Neue Gruppe*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), auf Wunsch aus einem Gruppenprofil und gleich mit dem Mandanten aus Schritt 3. Sich selbst in eine Gruppe aufnehmen, die jeden Mandanten sieht: Auch ein Superuser sieht Geräte nur über seine Gruppen. Mit LDAP siehe [LDAP](berechtigungen.md#ldap).
 
 ## 5. Benutzer anlegen
 
-Via *Einstellungen › Benutzer › Neuer Benutzer*: Konto anlegen und gleich den Gruppen aus Schritt 3 zuordnen. Mit LDAP entstehen die Konten beim ersten Login.
+Via *Einstellungen › Benutzer › Neuer Benutzer*: Konto anlegen und gleich den Gruppen aus Schritt 4 zuordnen. Mit LDAP entstehen die Konten beim ersten Login.
 
 ## 6. Räume anlegen
 
@@ -42,7 +42,7 @@ Sollen Räume mehrerer Standorte oder Gebäude verwaltet werden, oder werden kle
 
 ### Räume umbenennen
 
-Ändert sich das Bezeichnungsschema, benennt *Räume umbenennen* (Button in der Raumübersicht, Berechtigung `core.change_room`) viele Räume auf einmal um. Ein regulärer Ausdruck (Python-Syntax) wird auf jede Raumnummer angewandt; umbenannt werden nur Räume, deren Nummer das Muster trifft. Beispiel: Muster `^(\d+)$` und Ersetzung `G\1` stellen allen reinen Ziffernnummern das Gebäude voran, aus `235` wird `G235`.
+Ändert sich das Bezeichnungsschema, benennt *Räume umbenennen* (Button in der Raumübersicht) viele Räume auf einmal um. Ein regulärer Ausdruck (Python-Syntax) wird auf jede Raumnummer angewandt; umbenannt werden nur Räume, deren Nummer das Muster trifft. Beispiel: Muster `^(\d+)$` und Ersetzung `G\1` stellen allen reinen Ziffernnummern das Gebäude voran, aus `235` wird `G235`.
 
 Die Vorschau zeigt, welcher Raum welche Nummer bekommt; umbenannt wird erst nach der Bestätigung. Ein Raum behält seine Nummer, wenn die neue leer, zu lang oder schon vergeben ist, auch in anderer Schreibweise oder an einen deaktivierten Raum. Tauschen oder verketten (`1` → `G1`, während `G1` → `GG1`) geht nicht in einem Schritt. Deaktivierte Räume werden nicht umbenannt. Nach der Bestätigung geht es zurück zur Raumübersicht; Räume, die ihre Nummer behalten haben, nennt dort eine Meldung mit dem Grund. Jede Umbenennung steht im Journal.
 

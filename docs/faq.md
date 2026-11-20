@@ -2,7 +2,7 @@
 
 `````{dropdown} Warum kann ich keinen Hersteller oder Zulieferer bearbeiten oder zuordnen?
 
-Meist fehlt Ihren Gruppen die Berechtigung, hier *Can change manufacturer* bzw. *Can change supplier*. Siehe [Gruppen und Berechtigungen](./guides/berechtigungen.md#gruppen-und-berechtigungen).
+Meist fehlt Ihren Gruppen die Berechtigung, Hersteller bzw. Zulieferer zu ändern. Siehe [Gruppen und Berechtigungen](./guides/berechtigungen.md#gruppen-und-berechtigungen).
 `````
 
 `````{dropdown} Warum sehe ich einen Menüpunkt nicht?

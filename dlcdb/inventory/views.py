@@ -299,7 +299,7 @@ class SapCompareListView(DetailView):
 
 # The note views are not scoped by tenant, by design: a scan records the devices
 # found in a room whatever their tenant, and notes belong to that workflow
-# (docs/guides/berechtigungen.md, "Mandanten"). They work on the active
+# (the tenant matrix, tenants/index.html, lists it). They work on the active
 # inventory's notes only.
 
 

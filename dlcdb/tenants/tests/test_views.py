@@ -87,7 +87,7 @@ def test_matrix_lists_the_active_members_of_each_group(login, setup):
     content = login("tenants.view_tenant").get(reverse("tenants:index")).content.decode()
 
     # Only "it" has members, so only its row expands; the list is sorted.
-    assert content.count("<details") == 1
+    assert content.count('<details class="d-inline-block') == 1
     assert content.index("<li>adam@example.com</li>") < content.index("<li>zoe@example.com</li>")
     assert "gone@example.com" not in content
 
@@ -96,6 +96,7 @@ def test_matrix_notes_that_permissions_apply_in_every_tenant(login):
     content = login("tenants.view_tenant").get(reverse("tenants:index")).content.decode()
 
     assert "Permissions are not per tenant" in content
+    assert "What tenants don't restrict" in content
 
 
 def test_matrix_columns_are_ordered_by_name(login):

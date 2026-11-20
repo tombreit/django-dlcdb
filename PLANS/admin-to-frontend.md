@@ -14,7 +14,7 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 
 ## How to use this list
 
-- **When a module gets a frontend page:** tick its box, note the commit, point its entry on the settings page at the frontend page (its *Django admin* badge goes), and remove its *(Admin)* marker in `docs/guides/berechtigungen.md` ("Navigation" table and "Django-Admin" section).
+- **When a module gets a frontend page:** tick its box, note the commit, point its entry on the settings page at the frontend page (its *Django admin* badge goes), and trim the "Django-Admin" section of `docs/guides/berechtigungen.md`.
 - **A larger move gets a plan of its own** in `PLANS/`, like `settings-pages`, which was retired into `DECISIONS.md`. Its last batch ticks the box here.
 - **Whether the admin stays registered after a move** is decided per module. The settings admins stayed, like the tenant admin.
 - **When every box is ticked,** retire this file into `DECISIONS.md` and delete it.
@@ -26,7 +26,7 @@ Noted 2026-11-20, smallest first; none started yet.
 1. **Lending regulations (`core.Link`):** a card on Settings › Lending configuration, like the lending profiles; the profile form could then offer "add". Small, follows an existing pattern, fixes a real gap.
 2. **Room reconcile upload:** on the rooms page. The result page is already in the frontend; only the upload and the rooms list's admin link remain.
 3. **Smallstuff catalogue (`smallstuff.Thing`):** a frontend page for the things that can be handed out; today the frontend only assigns them to persons.
-4. **Users and groups:** the largest move (users, groups, permissions, the Staff flag, deactivation, LDAP); it starts as a plan of its own.
+4. ~~**Users and groups**~~: done, see below.
 
 ## Menu entries that open the admin
 
@@ -34,7 +34,7 @@ Shown only with the Staff flag. Each comes from the `navigation.py` of the app n
 
 - [ ] **Removed records:** Datenhaltung › Entfernt-Records, `admin:core_removedrecord_changelist`, `core.view_record` (core).
 - [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note` (core). The inventory screens add, edit and delete the notes of a room or device during an inventory.
-- [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete. Einstellungen › Benutzer and › Gruppen und Berechtigungen, `admin:accounts_customuser_changelist` and `admin:accounts_group_changelist` (the `accounts.Group` proxy), `accounts.view_customuser` and `accounts.view_group` (accounts).
+- [x] **Users and groups:** create them, give permissions, set passwords, deactivate: `accounts:users` and `accounts:groups` (2026-11-20, `PLANS/users-and-groups.md`, retired into DECISIONS.md). The Staff and Superuser flags and hard-deleting a user stay in the admin.
 - [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. Einstellungen › Ausleih-Ordnungen, `admin:core_link_changelist`, `core.view_link` (lending).
 - [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons. Einstellungen › Kleinkram-Katalog, `admin:smallstuff_thing_changelist`, `smallstuff.view_thing` (smallstuff).
 - [ ] **Notification messages and reports (`notifications.Message`, `reporting.Report`):** status, preview, "Send now". Subscriptions have a frontend page. Einstellungen › Benachrichtigungen and › Reports, `notifications.view_message` (notifications) and `reporting.view_report` (reporting).

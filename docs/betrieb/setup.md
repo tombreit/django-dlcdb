@@ -152,6 +152,8 @@ venv/bin/python -m dlcdb dlcdb_init  # writes .env (with a fresh secret key), ma
 
 Without LDAP, leave out `[ldap]`.
 
+Then log in as that superuser and follow [Erste Schritte](../guides/erste_schritte.md): tenants, groups and users are set up in DLCDB itself.
+
 ### Production
 
 **Task runner:** the [task runner unit](#task-runner-unit) of the source
