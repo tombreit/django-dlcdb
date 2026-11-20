@@ -8,7 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
-* Users and groups are managed in the frontend, under *Settings › Users* and *Settings › Groups and permissions*: a group's page lists only the permissions DLCDB checks, labelled and ordered like the menus, with its members and tenants; a new group can start from a group profile (*Daily work*, *Administration*); users are created, get a new password and are deactivated there. The Staff and Superuser flags stay in the Django admin, and the docs no longer list permissions
+* Users and groups are managed in the frontend, under *Settings › Users* and *Settings › Groups and permissions*: a group's page lists only the permissions DLCDB checks, labelled and ordered like the menus, with its members and tenants; group profiles (*Daily work*, *Administration*) tick a starting set of permissions; users are created, get a new password and are deactivated there. The Staff and Superuser flags stay in the Django admin, and the docs no longer list permissions
 * Tenants: the tenant page links a field history of name, contact email and groups, the ticks in the matrix included
 * Settings: the gear opens one page that lists all settings by group, with a search box and a *Show all* switch
 * For staff, the settings page also lists what is still only in the Django admin (users, groups, lending regulations, smallstuff catalogue, notification messages, reports, room reconcile, record editing, record attachments, HR sync runs, admin history); menu entries into the admin no longer show without the Staff flag

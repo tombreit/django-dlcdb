@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: EUPL-1.2
 
 // The buttons next to a form's select that open the selected object or add a
-// new one (see theme/related.py and theme/widgets/tom_select.html).
+// new one (see theme/related.py and theme/widgets/tom_select.html). Another
+// link that leaves a form carries data-related-link too, for the question
+// before unsaved input is lost (the group form's Add tenant).
 //
 // All listeners are delegated at document level, so forms swapped in by HTMX
 // need no setup.

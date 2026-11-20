@@ -91,6 +91,8 @@ def test_the_group_page_shows_its_permissions_tenants_and_members(client, login,
     assert "Institute" in content
     assert "active@example.com" in content
     assert "gone@example.com" not in content
+    # Every card after the name starts closed.
+    assert content.count('<details class="card card-filled mb-3">') == 3
 
 
 def test_the_members_need_the_view_permission_for_users(client, login, helpdesk):
@@ -119,6 +121,18 @@ def test_saving_grants_view_with_change_and_keeps_the_other_permissions(client, 
     assert "Permissions removed: Person · change" in entry.body
     assert "Members added: editor@example.com" in entry.body
     assert "Members removed: active@example.com" in entry.body
+
+
+@pytest.mark.parametrize(("mirrored", "shown"), [([], True), (["helpdesk"], False)])
+def test_the_members_card_links_a_new_user_unless_ldap_sets_them(client, login, helpdesk, settings, mirrored, shown):
+    settings.AUTH_LDAP_MIRROR_GROUPS = mirrored
+    login(*GROUP_ADMIN, "accounts.add_customuser")
+    url = reverse("accounts:group_detail", args=[helpdesk.pk])
+
+    content = client.get(url).content.decode()
+
+    # Leaves the form and returns; related-links.js asks first if anything is unsaved.
+    assert (f'href="{reverse("accounts:user_add")}?next={url}"' in content) == shown
 
 
 def test_saving_keeps_the_deactivated_members(client, login, helpdesk):
@@ -159,18 +173,31 @@ def test_no_one_locks_themselves_out(client, login, helpdesk, leave):
         response = _post(client, helpdesk, permissions=["accounts.view_group", "accounts.change_group"], members=[])
 
     assert response.status_code == 200
-    assert "You would lose the permission to change groups" in response.content.decode()
+    content = response.content.decode()
+    assert "You would lose the permission to change groups" in content
+    # With an error, the cards open: none hides it.
+    assert content.count('<details class="card card-filled mb-3" open>') == 3
     assert "accounts.change_group" in _names(helpdesk)
     assert helpdesk.user_set.contains(editor)
 
 
-def test_the_tenants_card_ticks_through_the_tenant_matrix(client, login, helpdesk):
-    login("accounts.view_group", "tenants.change_tenant")
-    tenant = Tenant.objects.get(name="Institute")
+def test_saving_ticks_and_unticks_tenants(client, login, helpdesk):
+    editor = login(*GROUP_ADMIN, "tenants.change_tenant")
+    institute = Tenant.objects.get(name="Institute")
+    library = Tenant.objects.create(name="Library")
 
-    content = client.get(reverse("accounts:group_detail", args=[helpdesk.pk])).content.decode()
+    client.post(
+        reverse("accounts:group_detail", args=[helpdesk.pk]),
+        {"name": "helpdesk", "members": [editor.pk], "tenants": [library.pk]},
+    )
 
-    assert reverse("tenants:toggle", args=[tenant.pk, helpdesk.pk]) in content
+    assert list(helpdesk.tenant_set.all()) == [library]
+    # Like a tick in the tenant matrix: stamped, into each tenant's history.
+    assert institute.history.latest().history_user == editor
+    assert library.history.latest().history_user == editor
+    body = JournalEntry.objects.get(source="accounts.groups").body
+    assert "Tenants added: Library" in body
+    assert "Tenants removed: Institute" in body
 
 
 def test_the_settings_page_links_the_groups_without_the_staff_flag(client, login):
@@ -178,42 +205,66 @@ def test_the_settings_page_links_the_groups_without_the_staff_flag(client, login
     assert reverse("accounts:groups") in client.get(reverse("settings")).content.decode()
 
 
-def test_a_new_group_starts_from_a_profile_with_a_tenant_and_members(client, login):
-    editor = login("accounts.view_group", "accounts.add_group", *GROUP_ADMIN[2:], "tenants.change_tenant")
-    tenant = Tenant.objects.create(name="Library")
+NEW_GROUP_ADMIN = ("accounts.add_group", *GROUP_ADMIN[2:], "tenants.change_tenant", "tenants.add_tenant")
+
+
+def test_a_new_group_is_the_group_page_without_a_group(client, login):
+    login(*NEW_GROUP_ADMIN)
+    url = reverse("accounts:group_add")
+
+    response = client.get(url)
+
+    assert set(response.context["form"].fields) == {"name", "permissions", "members", "tenants"}
+    content = response.content.decode()
+    assert response.context["submit_label"] == "Create group"
+    # Each profile's button carries its permissions, for accounts/js/group-profiles.js to tick.
+    daily_work = {profile.key: pks for profile, pks in response.context["profiles"]}["daily-work"]
+    assert _permission("core.view_device").pk in daily_work
+    assert f'data-profile-permissions="{",".join(map(str, daily_work))}"' in content
+    # Adding a tenant leaves the form and returns; related-links.js asks first.
+    assert f'href="{reverse("tenants:add")}?next={url}"' in content
+    assert "data-related-link" in content
+
+
+def test_a_new_group_saves_permissions_members_and_tenants(client, login):
+    editor = login(*NEW_GROUP_ADMIN)
+    library = Tenant.objects.create(name="Library")
 
     response = client.post(
         reverse("accounts:group_add"),
-        {"name": "librarians", "profile": "daily-work", "tenant": tenant.pk, "members": [editor.pk]},
+        {
+            "name": "librarians",
+            "permissions": [_permission("core.change_room").pk],
+            "members": [editor.pk],
+            "tenants": [library.pk],
+        },
     )
 
     group = Group.objects.get(name="librarians")
-    assert response.url == reverse("accounts:group_detail", args=[group.pk])
-    assert {"core.view_device", "core.transition_can_lend_device"} <= _names(group)
-    assert "core.transition_can_remove_device" not in _names(group)
-    assert list(group.tenant_set.all()) == [tenant]
-    assert tenant.history.latest().history_user == editor
+    assert response.url == reverse("accounts:groups")
+    assert _names(group) == {"core.change_room", "core.view_room"}
     assert list(group.user_set.all()) == [editor]
+    assert list(group.tenant_set.all()) == [library]
+    assert library.history.latest().history_user == editor
     entry = JournalEntry.objects.get(source="accounts.groups", event="created")
-    assert entry.body == f"Group profile: Daily work\nTenant: Library\nMembers: {editor}"
+    assert entry.summary == "Group librarians created"
+    assert entry.body == (
+        "Permissions added: Room · change, Room · view\nMembers added: editor@example.com\nTenants added: Library"
+    )
 
 
-def test_a_new_group_offers_a_tenant_only_with_the_tenant_permission(client, login):
-    login("accounts.view_group", "accounts.add_group")
+def test_a_new_group_offers_members_and_tenants_only_to_who_may_set_them(client, login):
+    login("accounts.add_group", "accounts.view_customuser")
     form = client.get(reverse("accounts:group_add")).context["form"]
-    assert set(form.fields) == {"name", "profile"}
+    assert set(form.fields) == {"name", "permissions"}
 
 
-def test_a_profile_adds_its_permissions_and_returns_to_the_group(client, login, helpdesk):
-    editor = login(*GROUP_ADMIN)
-    url = reverse("accounts:group_detail", args=[helpdesk.pk])
-
-    response = client.post(url, {"name": "helpdesk", "members": [editor.pk], "add_profile": "administration"})
-
-    assert response.url == url
-    assert {"tenants.change_tenant", "journal.view_journalentry", "core.add_removedrecord"} <= _names(helpdesk)
-    # Copy only: the ticks that were not sent are gone, as with Save.
-    assert "core.change_person" not in _names(helpdesk)
+def test_a_new_group_takes_any_name_with_ldap(client, login, settings):
+    settings.AUTH_LDAP_MIRROR_GROUPS = True
+    login("accounts.add_group")
+    form = client.get(reverse("accounts:group_add")).context["form"]
+    assert not form.fields["name"].disabled
+    assert "exact name" in form.fields["name"].help_text
 
 
 def test_deleting_a_group_unticks_its_tenants(client, login, helpdesk):

@@ -224,6 +224,15 @@ def test_add_creates_a_tenant_and_returns_to_the_matrix(login):
     assert created.history_user.email == "ops@example.com"
 
 
+def test_add_returns_to_the_page_that_opened_it(login):
+    client = login("tenants.add_tenant")
+    group_add = reverse("accounts:group_add")
+
+    response = client.post(f"{reverse('tenants:add')}?next={group_add}", {"name": "New", "contact_email": ""})
+
+    assert response.url == group_add
+
+
 @pytest.mark.parametrize(("perms", "status"), [((), 403), (("tenants.view_tenant",), 200)])
 def test_detail_needs_the_view_permission(login, tenant, perms, status):
     assert login(*perms).get(reverse("tenants:detail", args=[tenant.pk])).status_code == status

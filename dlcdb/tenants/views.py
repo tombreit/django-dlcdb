@@ -74,16 +74,7 @@ def toggle(request, pk, group_pk):
     """
     tenant = get_object_or_404(Tenant, pk=pk)
     group = get_object_or_404(Group, pk=group_pk)
-    sees = "sees" in request.POST
-
-    # Only a real change is written: no audit stamp or history entry for a no-op.
-    if sees != tenant.groups.filter(pk=group.pk).exists():
-        if sees:
-            tenant.groups.add(group)
-        else:
-            tenant.groups.remove(group)
-        tenant.stamp_user(request.user)
-        tenant.save()
+    tenant.set_visible_to(group, "sees" in request.POST, user=request.user)
 
     return TemplateResponse(request, "tenants/index.html#user-count", {"tenant": _tenant_queryset().get(pk=pk)})
 
@@ -95,6 +86,10 @@ def add(request):
         tenant = form.save(commit=False)
         tenant.stamp_user(request.user)
         tenant.save()
+        # The page that opened this one (a group's form, say) comes as ?next=: return there.
+        if redirect_to := get_redirect_url(request):
+            messages.success(request, linked_message(_("Tenant “{tenant}” was created."), tenant=tenant))
+            return redirect(redirect_to)
         messages.success(
             request,
             linked_message(_("Tenant “{tenant}” was created. Tick the groups that should see it."), tenant=tenant),

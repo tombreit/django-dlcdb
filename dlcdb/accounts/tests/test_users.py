@@ -147,6 +147,17 @@ def test_a_new_user_gets_an_initial_password_and_groups(client, login, ada):
     assert JournalEntry.objects.get(event="created").body == "Groups: helpdesk"
 
 
+def test_a_new_user_returns_to_the_page_that_opened_it(client, login):
+    login("accounts.add_customuser")
+    group_add = reverse("accounts:group_add")
+
+    response = client.post(
+        f"{reverse('accounts:user_add')}?next={group_add}", {"email": "new@example.com", "usable_password": "false"}
+    )
+
+    assert response.url == group_add
+
+
 def test_a_new_user_for_ldap_gets_no_password(client, login):
     login("accounts.add_customuser")
     _new_user(client, usable_password="false")

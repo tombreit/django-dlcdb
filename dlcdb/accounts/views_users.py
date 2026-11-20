@@ -4,9 +4,8 @@
 
 """
 Users in the frontend: who has an account, their groups, what they may do and
-which tenants' devices they see; new accounts, passwords and deactivating them
-(PLANS/users-and-groups.md). The Staff and Superuser flags stay with the Django
-admin, LDAP and createsuperuser.
+which tenants' devices they see; new accounts, passwords and deactivating them.
+The Staff and Superuser flags stay with the Django admin, LDAP and createsuperuser.
 """
 
 from django.conf import settings
@@ -111,7 +110,10 @@ def set_active(request, pk):
 @sensitive_post_parameters("password1", "password2")
 @htmx_permission_required("accounts.add_customuser")
 def add(request):
-    """A new account with an initial password, or none for LDAP; then its page."""
+    """
+    A new account with an initial password, or none for LDAP; then its page, or
+    the page that opened this one (a group's form, say) as ``?next=``.
+    """
     form = NewUserForm(request.POST or None, editor=request.user)
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -126,7 +128,7 @@ def add(request):
             subject=user,
         )
         messages.success(request, _("User “%(user)s” was created.") % {"user": user})
-        return redirect("accounts:user_detail", pk=user.pk)
+        return redirect(get_redirect_url(request) or reverse("accounts:user_detail", args=[user.pk]))
 
     return TemplateResponse(
         request,

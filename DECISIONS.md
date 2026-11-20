@@ -55,6 +55,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Permission labels are derived, never Django's `Permission.name`**: model and action, the lifecycle's labels for transitions (listed under *Device*, where the moves are made), a custom permission's menu entry; help lines name the menu entries. The models follow the app's menus (*Menu*, *Master data*, *Settings › …*), those no menu entry needs last, under *Other*.
 - **Add, change and delete grant the model's view permission along**, when a group is saved: Django derives no view from change.
 - **Group profiles are copied into a group, which doesn't remember them**: no model, no migration; applied again after an update, a profile adds what is new. Named "group profile": "role" is no DLCDB concept, "profile" alone means lending profiles. Not default groups by migration or `post_migrate` (Wagtail): forced onto existing installations; not a management command.
+- ***New group* is the group page without a group**: one `GroupForm`, as Django's create and update views share one form; not a second form with a profile radio. A group profile's button ticks its permissions in the browser, and Save keeps them, like any tick. The tenants are ticks saved with Save too; the tenant matrix keeps its instant toggles.
 - **Permissions are checkboxes with help lines, members the dual-pane widget** (`theme.widgets.FilteredSelectMultipleWidget`): its panes are native selects, so permissions would get their help only as tooltips.
 - **The Staff and Superuser flags and per-user permissions stay out of the frontend**: badges only; the admin, LDAP and `createsuperuser` set the flags. The admin's user and group screens stay registered.
 - **A group's members need the user permissions besides the group's**: shown with `view_customuser`, changed with `change_customuser`. Only a superuser deactivates a superuser or sets their password: no one locks out or takes over the operators.
@@ -86,7 +87,6 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - No locking oneself out: no deactivating oneself, no removing `accounts.change_group` from, leaving or deleting one's only group that grants it.
 - `get_all_permissions()` is empty for a deactivated user, and `has_perm` caches per user object: fetch the user again after changing a group.
 - Django's radio and checkbox lists put the widget's class on their wrapper too: render them through `theme/includes/_choice_field.html`.
-- The group profiles' buttons submit the group form through `form="group-form"` from the sidebar, after the save bar in document order, so Enter in a field still saves.
 
 ## Open follow-ups
 

@@ -57,6 +57,7 @@ _REMOVED_IS_FINAL = _("Brings decommissioned devices back; without it, Removed i
 
 # Permissions that reach further than their label says, with the warning shown beside them.
 SENSITIVE = {
+    "accounts.add_group": _("Can put every permission listed here into a new group."),
     "accounts.change_group": _("Can grant every permission listed here, also to their own groups."),
     "accounts.change_customuser": _(
         "Can set other users' passwords, and so log in as them, and put anyone, themselves included, into any "

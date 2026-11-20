@@ -16,7 +16,7 @@ Via *Einstellungen › Mandanten › Mandant hinzufügen*. Ohne Gruppe, die ihn 
 
 ## 4. Gruppen anlegen
 
-Via *Einstellungen › Gruppen und Berechtigungen › Neue Gruppe*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), auf Wunsch aus einem Gruppenprofil und gleich mit dem Mandanten aus Schritt 3. Sich selbst in eine Gruppe aufnehmen, die jeden Mandanten sieht: Auch ein Superuser sieht Geräte nur über seine Gruppen. Mit LDAP siehe [LDAP](berechtigungen.md#ldap).
+Via *Einstellungen › Gruppen und Berechtigungen › Neue Gruppe*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), mit dem Mandanten aus Schritt 3, ihren Berechtigungen (ein Gruppenprofil kreuzt einen Anfang an) und ihren Mitgliedern. Sich selbst in eine Gruppe aufnehmen, die jeden Mandanten sieht: Auch ein Superuser sieht Geräte nur über seine Gruppen. Mit LDAP siehe [LDAP](berechtigungen.md#ldap).
 
 ## 5. Benutzer anlegen
 

@@ -30,7 +30,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet; dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. Gruppenprofile, die die DLCDB mitbringt, sind ein Ausgangspunkt: *Neue Gruppe* übernimmt ihre Berechtigungen, die Seite einer Gruppe fügt sie hinzu.
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet; dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. Gruppenprofile, die die DLCDB mitbringt, sind ein Ausgangspunkt: Sie kreuzen ihre Berechtigungen an, auf *Neue Gruppe* wie auf der Seite einer Gruppe.
 
 ### LDAP
 

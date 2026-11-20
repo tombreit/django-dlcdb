@@ -40,5 +40,19 @@ class Tenant(AuditBaseModel):
     def __str__(self):
         return f"{self.name}"
 
+    def set_visible_to(self, group, visible, *, user):
+        """
+        Let the members of ``group`` see this tenant's devices, or not. Only a
+        real change is written: stamped by ``user``, into the history.
+        """
+        if visible == self.groups.contains(group):
+            return
+        if visible:
+            self.groups.add(group)
+        else:
+            self.groups.remove(group)
+        self.stamp_user(user)
+        self.save()
+
     class Meta:
         ordering = [Lower("name")]
