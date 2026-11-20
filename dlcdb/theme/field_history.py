@@ -57,10 +57,12 @@ def build_field_history(obj: Model, *, exclude=(), secret=()) -> list[HistoryEnt
 
     One query: the history user and every tracked foreign key are joined in, as
     ``SimpleHistoryAdmin`` does, because ``diff_against(foreign_keys_are_objs=True)``
-    would otherwise fetch each changed related object on its own.
+    would otherwise fetch each changed related object on its own. A tracked
+    many-to-many field (``HistoricalRecords(m2m_fields=…)``) adds two queries per
+    entry: simple-history compares its rows record by record.
     """
     history = obj.history
-    tracked_fields = history.model.tracked_fields
+    tracked_fields = [*history.model.tracked_fields, *history.model._history_m2m_fields]
     field_order = {field.name: index for index, field in enumerate(tracked_fields)}
     foreign_keys = [
         field.name for field in tracked_fields if isinstance(field, ForeignKey) and field.name not in exclude
@@ -101,6 +103,9 @@ def _field_change(field: Field, change: ModelChange, *, secret: bool) -> FieldCh
 
 def _display(field: Field, value, *, secret: bool) -> str:
     """One side of a change as text, formatted the way the frontend shows it."""
+    if field.many_to_many:
+        # A list of through rows, one per related object: show those by name.
+        value = ", ".join(sorted(str(row[field.m2m_reverse_field_name()]) for row in value))
     # diff_against(foreign_keys_are_objs=True) reports an empty foreign key as
     # DeletedObject(pk=None), not None.
     if isinstance(value, DeletedObject) and value.pk is None:

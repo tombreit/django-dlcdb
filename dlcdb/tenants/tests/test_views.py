@@ -160,6 +160,26 @@ def test_toggle_ticks_and_unticks_and_records_who_did_it(login, setup):
     assert helpdesk not in tenant_a.groups.all()
 
 
+@pytest.mark.parametrize(("perms", "status"), [((), 403), (("tenants.view_tenant",), 200)])
+def test_history_needs_the_view_permission(login, setup, perms, status):
+    tenant_a = setup[0]
+    assert login(*perms).get(reverse("tenants:history", args=[tenant_a.pk])).status_code == status
+
+
+def test_history_lists_a_group_tick_by_group_name(login, setup):
+    tenant_a, _tenant_b, _it, _ops_a, helpdesk = setup
+    client = login("tenants.view_tenant", "tenants.change_tenant")
+    _toggle(client, tenant_a, helpdesk, sees=True)
+
+    history_url = reverse("tenants:history", args=[tenant_a.pk])
+    response = client.get(history_url)
+
+    [change] = response.context["entries"][0].changes
+    assert (change.field, change.old, change.new) == ("Groups", "it, ops-a", "helpdesk, it, ops-a")
+    # The tenant page links it.
+    assert f'href="{history_url}"' in client.get(reverse("tenants:detail", args=[tenant_a.pk])).content.decode()
+
+
 def test_toggle_without_a_change_writes_nothing(login, setup):
     tenant_a, _tenant_b, it, _ops_a, _helpdesk = setup
     modified_at = Tenant.objects.get(pk=tenant_a.pk).modified_at

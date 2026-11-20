@@ -18,6 +18,7 @@ from django.views.decorators.http import require_POST
 
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message
+from dlcdb.theme.field_history import build_field_history
 from dlcdb.theme.navigation import get_redirect_url
 
 from .forms import TenantForm
@@ -173,3 +174,11 @@ def delete(request, pk):
         return redirect("tenants:index")
 
     return TemplateResponse(request, "tenants/delete.html", {"tenant": tenant})
+
+
+@htmx_permission_required("tenants.view_tenant")
+def history(request, pk):
+    """When who renamed the tenant, changed its contact email or its groups (django-simple-history)."""
+    tenant = get_object_or_404(Tenant, pk=pk)
+    entries = build_field_history(tenant, exclude=("user", "username"))
+    return TemplateResponse(request, "tenants/history.html", {"tenant": tenant, "entries": entries})

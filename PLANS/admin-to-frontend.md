@@ -53,7 +53,7 @@ Reached where they are, and through Settings › More › Django admin.
 
 - [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend. No entry: the admin list is the same as Bulk import's.
 - [ ] **Tenants without devices:** the action "assign a tenant" for devices and imports without one (DECISIONS: the NOT NULL follow-up would make it unnecessary). No entry: an admin action, which the sticky hint links while needed.
-- [ ] **Tenant field history** (DECISIONS: "field history for tenants"). No entry: one page per tenant.
+- [x] **Tenant field history:** on the tenant's frontend page, *Changes › Field history* (`tenants:history`, `tenants.view_tenant`), group ticks included (2026-11-20).
 
 ## Superuser only, in the admin
 

@@ -193,7 +193,7 @@ Nicht auf die eigenen Mandanten eingeschränkt sind:
 
 ### Mandanten-Übersicht
 
-*Einstellungen › Mandanten* zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Mandant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Mandanten und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder (ein Klick listet sie auf), unter jedem Mandanten die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins).
+*Einstellungen › Mandanten* zeigt eine Tabelle mit einer Zeile je Gruppe und einer Spalte je Mandant. Ein Haken gibt allen Mitgliedern der Gruppe Zugriff auf die Geräte des Mandanten und wird sofort gespeichert. Neben jeder Gruppe steht die Zahl ihrer aktiven Mitglieder (ein Klick listet sie auf), unter jedem Mandanten die Zahl der Benutzer mit Zugriff (mit LDAP jeweils Stand des letzten Logins). Die Seite eines Mandanten verlinkt seine *Feldhistorie*: wann wer Name, Kontakt-Email oder Gruppen geändert hat, die Haken in der Tabelle eingeschlossen.
 
 - `tenants.view_tenant`: die Übersicht ansehen
 - `tenants.change_tenant`: Haken setzen, Mandanten umbenennen, Kontakt-Email setzen
@@ -221,7 +221,7 @@ Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltu
 - Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die mit *(Admin)* markierten [Menüpunkte](#navigation),
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
-- die Änderungshistorie eines Mandanten, erzeugte Reports und den SAP-Import,
+- erzeugte Reports und den SAP-Import,
 - Links (die Ordnungen der Ausleih-Profile), den Kleinkram-Katalog und Anhänge von Records,
 - Benachrichtigungen (Status, Vorschau, *Send Now*), den Upload für den Raumabgleich und die vollständige Liste der HR-Sync-Läufe.
 

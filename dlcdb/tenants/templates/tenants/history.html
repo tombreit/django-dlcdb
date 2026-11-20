@@ -1,0 +1,32 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+A tenant's field history: when who changed its name, contact email or groups,
+the ticks in the tenant matrix included.
+{% endcomment %}
+
+{% block title %}{% translate "Field history" %} · {{ tenant }}{% endblock title %}
+
+{% block body %}
+{% url "tenants:detail" tenant.pk as tenant_url %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
+  <div class="me-auto">
+    <h1 class="h3 mb-1">{% translate "Field history" %}</h1>
+    <div class="text-muted">{% translate "Tenant" %}: {{ tenant.name }}</div>
+  </div>
+  {% include "theme/includes/_back_link.html" with url=tenant_url label=_("Back to tenant") %}
+</div>
+
+<div class="row">
+  <div class="col-xl-9">
+    <section class="card card-filled">
+      <div class="card-body">
+        {% include "theme/includes/_field_history.html" with entries=entries %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock body %}

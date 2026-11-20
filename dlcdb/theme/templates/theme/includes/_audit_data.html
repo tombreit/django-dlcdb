@@ -4,8 +4,9 @@ object was created, and when and by whom it was last changed. Objects with a
 UUID (rooms) show it first.
 
 Params:
-  object — an AuditBaseModel instance
-  title  — (optional) card heading; defaults to "Record data"
+  object      — an AuditBaseModel instance
+  title       — (optional) card heading; defaults to "Record data"
+  history_url — (optional) the object's field history page, linked under the facts
 {% endcomment %}
 {% load i18n %}
 <section class="card card-filled mb-3">
@@ -30,4 +31,12 @@ Params:
       </dd>
     </dl>
   </div>
+  {% if history_url %}
+    <div class="list-group list-group-flush">
+      <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{{ history_url }}">
+        <i class="bi bi-arrow-counterclockwise text-primary"></i>
+        <span class="me-auto">{% translate "Field history" %}</span>
+      </a>
+    </div>
+  {% endif %}
 </section>

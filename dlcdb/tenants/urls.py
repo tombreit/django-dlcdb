@@ -13,5 +13,6 @@ urlpatterns = [
     path("add/", views.add, name="add"),
     path("<int:pk>/", views.detail, name="detail"),
     path("<int:pk>/delete/", views.delete, name="delete"),
+    path("<int:pk>/history/", views.history, name="history"),
     path("<int:pk>/groups/<int:group_pk>/", views.toggle, name="toggle"),
 ]

@@ -54,5 +54,6 @@
     </div>
   </section>
 
-  {% include "theme/includes/_audit_data.html" with object=tenant title=_("Changes") %}
+  {% url "tenants:history" tenant.pk as history_url %}
+  {% include "theme/includes/_audit_data.html" with object=tenant title=_("Changes") history_url=history_url %}
 {% endblock detail_sidebar %}
