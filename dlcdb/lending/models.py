@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+import re
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.template import Template, TemplateSyntaxError
@@ -10,6 +12,12 @@ from simple_history.models import HistoricalRecords
 
 from ..core.models.abstracts import SingletonBaseModel
 from .starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
+
+# Script in a slip template or checklist: a script element, an on… event
+# attribute or a javascript: URL. The printed slip runs none anyway
+# (lending.views.SLIP_POLICY), also none this misses; saving refuses them so
+# the author knows.
+SCRIPT_RE = re.compile(r"<script\b|<[^>]*\son[a-z]+\s*=|javascript:", re.IGNORECASE)
 
 
 class LendingConfiguration(SingletonBaseModel):
@@ -96,6 +104,12 @@ class LendingProfile(models.Model):
 
     def clean(self):
         super().clean()
+        errors = {}
+        for field in ("lent_sheet_template", "lending_preparation_checklist"):
+            if match := SCRIPT_RE.search(getattr(self, field)):
+                errors[field] = _("Slips may not contain scripts; remove “%(script)s”.") % {"script": match.group()}
+        if errors:
+            raise ValidationError(errors)
         if self.lent_sheet_template:
             try:
                 Template(self.lent_sheet_template)

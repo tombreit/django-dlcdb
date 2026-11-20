@@ -8,8 +8,8 @@ import pytest
 from django.urls import reverse
 
 from dlcdb.core.models import DeviceType, Link
-from dlcdb.lending.models import LendingProfile
-from dlcdb.lending.starter import get_starter_lent_sheet_template
+from dlcdb.lending.models import SCRIPT_RE, LendingProfile
+from dlcdb.lending.starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
 
@@ -89,6 +89,25 @@ def test_a_profile_keeps_its_deactivated_device_type(login, profile):
     assert response.status_code == 302
     profile.refresh_from_db()
     assert profile.lent_sheet_template == "new slip"
+
+
+@pytest.mark.parametrize("field", ["lent_sheet_template", "lending_preparation_checklist"])
+@pytest.mark.parametrize(
+    "script",
+    ["<script>alert(1)</script>", '<img src="x" onerror="alert(1)">', '<a href="JavaScript:alert(1)">x</a>'],
+)
+def test_saving_refuses_scripts(login, profile, field, script):
+    response = login(VIEW, CHANGE).post(
+        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, **{field: script})
+    )
+
+    assert response.status_code == 200
+    assert field in response.context["form"].errors
+
+
+def test_the_starter_content_has_no_script():
+    assert not SCRIPT_RE.search(get_starter_lent_sheet_template())
+    assert not SCRIPT_RE.search(get_starter_lending_preparation_checklist())
 
 
 def test_an_emptied_slip_template_gets_the_starter_content_again(login, profile):

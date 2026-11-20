@@ -39,6 +39,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Admin error mails use Django's plain handler**: a 500 while the mail server is down is accepted; a handler that swallowed mail errors was tried and removed.
 - **A person's photo, organizational unit and positions are plain person fields that the HR sync fills**, not HR mirror fields with local overrides. For a synced person HR owns them and clears what it doesn't deliver: the person is read-only, so a kept local value could never be changed. Named `photo`, not `image`, and `organizational_positions`: a bare "position" reads as a place here, "title" as the academic one, "role" as a permission.
 - **Positions are master data with a many-to-many**, not HR's joined text (no filter) or a foreign key (HR delivers a list). The explicit through model `PersonPosition` exists only for `PROTECT`.
+- **A printed lending slip runs no script and loads nothing from another host** (a Content Security Policy on `print_sheet`); saving a profile refuses `<script>`, `on…=` attributes and `javascript:` with a form error. Not an HTML sanitizer (nh3, bleach): it would mangle template code, and template code can assemble a tag while rendering, which no check of the source sees. Not the Staff flag back on these pages.
 - **A unit or position that a person holds can't be deleted**, deactivated persons included: `PROTECT`, not a check in the delete view, which the admin and the shell would skip.
 - **Units and positions live on Settings › Organization** (formerly Branding) as cards, like the lending profiles: no menu entries or index pages, so the settings menu doesn't grow; every entry listed, no paging. The page's cards start closed, with a table of contents; any form error opens all of them.
 
@@ -52,7 +53,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - With warnings as errors, a leaked file or connection fails whichever test runs at garbage collection.
 - Splitting a translated sentence around a link changes its msgid: split only where the word order allows (`rooms/includes/_changes.html`).
 - A namespace with several menu entries lights up all of them: each needs `active_url_names`.
-- The settings pages need no Staff flag: `change_lendingprofile` writes template code that reaches `record.user.password`, `change_udbsyncconfiguration` sends the HR token to any URL. Administrators only, as the docs say.
+- The settings pages need no Staff flag: `change_lendingprofile` writes template code that can still read and print what the record reaches, `record.user.password` included (it runs no script), `change_udbsyncconfiguration` sends the HR token to any URL. Administrators only, as the docs say.
 - `capfirst()` keeps a lazy string lazy: render journal text inside `translation.override(None)`.
 - "Sync now" only queues: without the task runner nothing runs, and while a periodic run holds the lock the manual one is dropped.
 - `_field.html` escapes help texts: frontend help texts are plain text.

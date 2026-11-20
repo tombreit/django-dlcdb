@@ -25,6 +25,7 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingProfile
 from dlcdb.lending.starter import get_starter_lent_sheet_template
+from dlcdb.lending.views import SLIP_POLICY
 from dlcdb.theme.navigation import with_next
 
 # Use plain static storage so tests do not require a built staticfiles manifest.
@@ -798,6 +799,8 @@ class LendingPrintSheetTests(BaseTest):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Mustermann")
         self.assertContains(response, "2026-07-23")
+        # Template code from the profile: no script runs, nothing loads from elsewhere.
+        self.assertEqual(response["Content-Security-Policy"], SLIP_POLICY)
         # Printing must not persist a lending.
         self.assertEqual(LentRecord.objects.count(), lent_before)
 

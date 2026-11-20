@@ -421,6 +421,16 @@ def _build_unsaved_lentrecord(device, form):
     )
 
 
+# The printed slip comes from template code that profile editors write, and
+# needs no script: none runs, and nothing loads from another host, so a slip
+# template can neither act in the printing user's session nor send anything
+# off. Styles may be inline (the templates bring <style> blocks).
+SLIP_POLICY = (
+    "default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; "
+    "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+)
+
+
 @htmx_permission_required(lifecycle.BY_NAME["lend"].permission)
 @require_POST
 def print_sheet(request, pk):
@@ -464,11 +474,13 @@ def print_sheet(request, pk):
     except LendingProfile.DoesNotExist:
         raise Http404(f"No lending slip template configured for device type '{device_type}'.")
 
-    return TemplateResponse(
+    response = TemplateResponse(
         request,
         f"lending/db/{profile.pk}.html",
         {"record": unsaved_record, "lending_profile": profile},
     )
+    response["Content-Security-Policy"] = SLIP_POLICY
+    return response
 
 
 @htmx_permission_required("lending.view_lendingconfiguration")
