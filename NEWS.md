@@ -9,7 +9,7 @@ SPDX-License-Identifier: CC0-1.0
 *Latest news top*
 
 * Tenants: the tenant page links a field history of name, contact email and groups, the ticks in the matrix included
-* Settings: the gear opens one page that lists all settings by group, with a search box
+* Settings: the gear opens one page that lists all settings by group, with a search box and a *Show all* switch
 * For staff, the settings page also lists what is still only in the Django admin (users, groups, lending regulations, smallstuff catalogue, notification messages, reports, room reconcile, record editing, record attachments, HR sync runs, admin history); menu entries into the admin no longer show without the Staff flag
 * Bulk import, bulk decommissioning, inventories and the SAP comparison are under *Settings › Data and tools*; the admin's *Processes* menu is gone
 * Persons get a photo, positions and an organizational unit without an HR system: set on the person page, units and positions managed under *Settings › Organization* (formerly *Branding*); the person list filters by position and room. The HR sync fills the same fields

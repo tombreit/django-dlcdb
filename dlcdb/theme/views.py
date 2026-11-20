@@ -24,16 +24,22 @@ from django_htmx.http import HttpResponseClientRefresh
 from dlcdb.core.utils.device_search import search_devices
 from dlcdb.core.utils.htmx import missing_permission_message
 
+from .context_processors import settings_entries
 from .lifecycle_display import active_record_color_case
 from .pickers import get_picker_source
 
 
 def settings_index(request):
     """
-    The settings page: the gear's entries the user may see, under their groups.
-    ``theme.context_processors.nav`` provides and sorts them.
+    The settings page: the gear's entries the user may open, under their groups.
+    With ``?show=all`` also those they may not, locked: users see what exists.
     """
-    return TemplateResponse(request, "theme/settings.html")
+    show_all = request.GET.get("show") == "all"
+    return TemplateResponse(
+        request,
+        "theme/settings.html",
+        {"entries": settings_entries(request, show_all=show_all), "show_all": show_all},
+    )
 
 
 @require_POST

@@ -60,46 +60,55 @@ def _app_navigation(app_name):
         return None
 
 
-# https://github.com/apache/airavata-django-portal/blob/0e2736ba1e72d24fa47b1699a11cbda4dc3fcc4c/django_airavata/context_processors.py#L99
-def nav(request):
-    nav_items = []
-    dlcdb_apps = [app for app in apps.get_app_configs()]
+def _has_permission(user, permission):
+    if not user or not permission:
+        return False
 
-    def _get_has_permission(user, permission):
-        if not user or not permission:
-            return False
+    if isinstance(permission, (list, tuple)):
+        # Several permissions, any one of which reveals the entry. Needed for
+        # menus that front more than one lifecycle move: "Move" serves locate,
+        # relocate and find, so requiring a single permission would hide it
+        # from users who legitimately hold one of the others.
+        return any(_has_permission(user, entry) for entry in permission)
 
-        if isinstance(permission, (list, tuple)):
-            # Several permissions, any one of which reveals the entry. Needed for
-            # menus that front more than one lifecycle move: "Move" serves locate,
-            # relocate and find, so requiring a single permission would hide it
-            # from users who legitimately hold one of the others.
-            return any(_get_has_permission(user, entry) for entry in permission)
+    if "." not in permission:
+        # One authoritative scheme: a nav entry's required_permission must be
+        # the Django-canonical "app_label.codename" (what user.has_perm expects).
+        # A bare codename is ambiguous — it silently meant a different permission
+        # depending on which app's navigation.py it lived in — so reject it loudly
+        # instead of guessing an app label.
+        raise ImproperlyConfigured(f"nav required_permission {permission!r} must be 'app_label.codename'")
 
-        if "." not in permission:
-            # One authoritative scheme: a nav entry's required_permission must be
-            # the Django-canonical "app_label.codename" (what user.has_perm expects).
-            # A bare codename is ambiguous — it silently meant a different permission
-            # depending on which app's navigation.py it lived in — so reject it loudly
-            # instead of guessing an app label.
-            raise ImproperlyConfigured(f"nav required_permission {permission!r} must be 'app_label.codename'")
+    return user.has_perm(permission)
 
-        return user.has_perm(permission)
 
-    # Namespace of the currently resolved view, used to mark the matching nav
-    # entry as "active" (e.g. on /lending/* the "Lending" entry is highlighted).
+def _current_view(request):
+    """The namespace and URL name of the resolved view, for the "active" entry."""
     resolver_match = getattr(request, "resolver_match", None)
-    current_app_namespace = (resolver_match.namespace or resolver_match.app_name) if resolver_match else None
-    current_url_name = resolver_match.url_name if resolver_match else None
+    if resolver_match is None:
+        return None, None
+    return resolver_match.namespace or resolver_match.app_name, resolver_match.url_name
 
-    for app in dlcdb_apps:
+
+def _nav_items(request, *, all_settings=False):
+    """
+    The nav entries of all apps that the user may open, sorted by their order.
+
+    With ``all_settings``, the settings entries the user may not open come too,
+    with ``has_access`` False: the settings page's *Show all*.
+    """
+    current_app_namespace, current_url_name = _current_view(request)
+    nav_items = []
+
+    for app in apps.get_app_configs():
         nav_module = _app_navigation(app.name)
         if nav_module is None:
             continue
 
         for nav_entry in getattr(nav_module, "nav_entries", []):
+            slot = nav_entry.get("slot")
             group = nav_entry.get("group")
-            if nav_entry.get("slot") == "nav_settings" and group not in SETTINGS_GROUPS:
+            if slot == "nav_settings" and group not in SETTINGS_GROUPS:
                 raise ImproperlyConfigured(
                     f"nav_settings entry {nav_entry.get('url')!r} needs a group of {list(SETTINGS_GROUPS)}"
                 )
@@ -108,52 +117,73 @@ def nav(request):
             # The admin opens only with the Staff flag: without it, an admin
             # entry would lead to the admin's login page.
             is_admin = url.startswith("admin:")
-            required_permission = nav_entry.get("required_permission")
-            has_permission = _get_has_permission(request.user, required_permission)
+            has_access = _has_permission(request.user, nav_entry.get("required_permission")) and (
+                request.user.is_staff or not is_admin
+            )
+            if not has_access and not (all_settings and slot == "nav_settings"):
+                continue
 
-            if has_permission and (request.user.is_staff or not is_admin):
-                # Ugly hack to conditionally hide some nav_entries. Checked only
-                # after the permission gate so unpermitted users never trigger
-                # the underlying query.
-                show_condition = nav_entry.get("show_condition")
-                if show_condition == "active_inventory_exists":
-                    if not get_active_inventory(request):
-                        continue
+            # Ugly hack to conditionally hide some nav_entries. Checked only
+            # for entries that are shown, so the others never trigger the
+            # underlying query.
+            if nav_entry.get("show_condition") == "active_inventory_exists" and not get_active_inventory(request):
+                continue
 
-                url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
-                in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
+            url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
+            in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
 
-                # Most apps have exactly one nav entry per namespace, so any page
-                # in that namespace should highlight it. An app with more than one
-                # entry sharing a namespace (e.g. assets: "Devices" vs "Move") must
-                # list its own url_names in "active_url_names" to disambiguate.
-                active_url_names = nav_entry.get("active_url_names")
-                is_active = in_namespace and (active_url_names is None or current_url_name in active_url_names)
+            # Most apps have exactly one nav entry per namespace, so any page
+            # in that namespace should highlight it. An app with more than one
+            # entry sharing a namespace (e.g. assets: "Devices" vs "Move") must
+            # list its own url_names in "active_url_names" to disambiguate.
+            active_url_names = nav_entry.get("active_url_names")
+            is_active = in_namespace and (active_url_names is None or current_url_name in active_url_names)
 
-                nav_item = {
+            nav_items.append(
+                {
                     "label": nav_entry.get("label"),
                     "icon": nav_entry.get("icon"),
-                    "url": nav_entry.get("url"),
-                    "slot": nav_entry.get("slot"),
+                    "url": url,
+                    "slot": slot,
                     "order": nav_entry.get("order"),
                     "active": is_active,
                     "admin": is_admin,
+                    "has_access": has_access,
                     # The settings page's group heading, the line under the label,
                     # and the words its filter also finds the entry by (never shown).
                     "group": SETTINGS_GROUPS.get(group),
                     "description": nav_entry.get("description"),
                     "search_terms": nav_entry.get("search_terms"),
                 }
-                nav_items.append(nav_item)
+            )
 
-    nav_items = sorted(nav_items, key=itemgetter("order"))
-    # The settings page lists its entries group by group; the sort is stable,
-    # so within a group they keep their order.
+    return sorted(nav_items, key=itemgetter("order"))
+
+
+def _settings_items(nav_items):
+    """
+    The settings entries among ``nav_items``, group by group in the order of
+    SETTINGS_GROUPS; the sort is stable, so within a group they keep their order.
+    """
     group_labels = list(SETTINGS_GROUPS.values())
-    nav_items_settings = sorted(
+    return sorted(
         [item for item in nav_items if item["slot"] == "nav_settings"],
         key=lambda item: group_labels.index(item["group"]),
     )
+
+
+def settings_entries(request, *, show_all=False):
+    """
+    The entries of the settings page (theme/settings.html); with ``show_all``
+    also those the user may not open, with ``has_access`` False.
+    """
+    return _settings_items(_nav_items(request, all_settings=show_all))
+
+
+# https://github.com/apache/airavata-django-portal/blob/0e2736ba1e72d24fa47b1699a11cbda4dc3fcc4c/django_airavata/context_processors.py#L99
+def nav(request):
+    nav_items = _nav_items(request)
+    current_app_namespace, _current_url_name = _current_view(request)
 
     # Focus config for the current app (its navigation.nav_focus). Deliberately
     # NOT run through the permission gate: these are per-app helper links shown
@@ -172,7 +202,7 @@ def nav(request):
     return {
         "nav_items_main": [item for item in nav_items if item["slot"] == "nav_main"],
         "nav_items_masterdata": [item for item in nav_items if item["slot"] == "nav_masterdata"],
-        "nav_items_settings": nav_items_settings,
+        "nav_items_settings": _settings_items(nav_items),
         "nav_focus": nav_focus,
     }
 

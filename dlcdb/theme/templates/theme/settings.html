@@ -4,9 +4,12 @@
 {% load i18n static %}
 
 {% comment %}
-The settings page the gear opens: every nav_settings entry the user may see,
-declared in the apps' navigation.py, under the group it names.
-theme.context_processors.nav sorts them by group (SETTINGS_GROUPS), then by order.
+The settings page the gear opens: every nav_settings entry the user may open,
+declared in the apps' navigation.py, under the group it names
+(theme.context_processors.settings_entries sorts them by SETTINGS_GROUPS, then
+by order). With Show all (?show=all), the entries the user may not open come
+too, locked: a <div> with a lock instead of a link, like the tiles of the
+django-toolbox dashboard.
 The filter (theme/js/settings.js) also matches an entry's search_terms, which
 are never shown. An entry into the Django admin (admin: URL, Staff flag only)
 carries a badge; the module moves to the frontend by changing its entry's URL.
@@ -16,8 +19,14 @@ Staff get the Django admin itself as a last group, More.
 {% block title %}{% translate "Settings" %}{% endblock title %}
 
 {% block body %}
-  <h1 class="mb-3">{% translate "Settings" %}</h1>
-  {% if nav_items_settings %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <h1 class="mb-0">{% translate "Settings" %}</h1>
+    <form method="get" class="form-check form-switch mb-0" title="{% translate 'Also show the settings you have no access to.' %}">
+      <input class="form-check-input" type="checkbox" role="switch" id="settings-show-all" name="show" value="all"{% if show_all %} checked{% endif %}>
+      <label class="form-check-label" for="settings-show-all">{% translate "Show all" %}</label>
+    </form>
+  </div>
+  {% if entries %}
     <div class="input-group mb-4">
       <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
       <input type="search" id="settings-filter" class="form-control" placeholder="{% translate 'Search settings' %}" aria-label="{% translate 'Search settings' %}" autocomplete="off">
@@ -26,28 +35,41 @@ Staff get the Django admin itself as a last group, More.
 
   <p id="settings-no-match" class="text-body-secondary" hidden>{% translate "No settings match your search." %}</p>
 
-  {% regroup nav_items_settings by group as groups %}
+  {% regroup entries by group as groups %}
   <div class="d-flex flex-column gap-4">
     {% for group in groups %}
       <section data-settings-group>
         <h2 class="h5">{{ group.grouper }}</h2>
         <div class="list-group">
           {% for item in group.list %}
-            <a href="{% url item.url %}" class="list-group-item list-group-item-action d-flex gap-3 py-3" data-search-terms="{{ item.search_terms|default:'' }}">
+            {% if item.has_access %}
+              <a href="{% url item.url %}" class="list-group-item list-group-item-action d-flex gap-3 py-3" data-search-terms="{{ item.search_terms|default:'' }}">
+            {% else %}
+              <div class="list-group-item d-flex gap-3 py-3 bg-body-tertiary text-body-secondary" title="{% translate 'You have no access to this page.' %}" data-search-terms="{{ item.search_terms|default:'' }}">
+            {% endif %}
               <i class="{{ item.icon }} fs-5" aria-hidden="true"></i>
-              <span>
+              <span class="me-auto">
                 <span class="d-block fw-semibold">
                   {{ item.label }}
                   {% if item.admin %}<span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis fw-normal">{% translate "Django admin" %}</span>{% endif %}
                 </span>
                 <span class="d-block small text-body-secondary">{{ item.description }}</span>
               </span>
-            </a>
+            {% if item.has_access %}
+              </a>
+            {% else %}
+                <i class="bi bi-lock" aria-hidden="true"></i>
+                <span class="visually-hidden">{% translate "No access" %}</span>
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
       </section>
     {% empty %}
-      <p class="text-body-secondary">{% translate "You may not view any settings." %}</p>
+      <p class="text-body-secondary">
+        {% translate "You may not view any settings." %}
+        {% if not show_all %}{% translate "Turn on “Show all” to see which settings exist." %}{% endif %}
+      </p>
     {% endfor %}
 
     {% if request.user.is_staff %}
@@ -68,5 +90,5 @@ Staff get the Django admin itself as a last group, More.
 {% endblock body %}
 
 {% block extra_js %}
-  {% if nav_items_settings %}<script src="{% static 'theme/js/settings.js' %}"></script>{% endif %}
+  <script src="{% static 'theme/js/settings.js' %}"></script>
 {% endblock extra_js %}

@@ -2,10 +2,16 @@
 //
 // SPDX-License-Identifier: EUPL-1.2
 
-// The settings page's filter (theme/settings.html): it keeps the entries whose
-// label, description or hidden search terms contain every typed word, and hides
-// the groups left without one. Entries are taken out of their list rather than
-// hidden: Bootstrap's list-group draws its borders by :first-child and siblings.
+// The settings page (theme/settings.html).
+
+// The Show all switch reloads the page with or without ?show=all.
+const showAll = document.getElementById('settings-show-all')
+showAll.addEventListener('change', () => showAll.form.submit())
+
+// The filter keeps the entries whose label, description or hidden search terms
+// contain every typed word, and hides the groups left without one. Entries are
+// taken out of their list rather than hidden: Bootstrap's list-group draws its
+// borders by :first-child and siblings. A page without entries has no filter.
 const filter = document.getElementById('settings-filter')
 const noMatch = document.getElementById('settings-no-match')
 const groups = [...document.querySelectorAll('[data-settings-group]')].map((section) => {
@@ -13,7 +19,7 @@ const groups = [...document.querySelectorAll('[data-settings-group]')].map((sect
   return { section, list, entries: [...list.children] }
 })
 
-filter.addEventListener('input', () => {
+filter?.addEventListener('input', () => {
   const words = filter.value.toLowerCase().split(/\s+/).filter(Boolean)
   let found = 0
   for (const { section, list, entries } of groups) {

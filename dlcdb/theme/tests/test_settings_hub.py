@@ -84,6 +84,32 @@ class SettingsHubTests(TestCase):
         user.save()
         self.assertEqual(admin_urls(), ["admin:accounts_customuser_changelist", "admin:core_note_changelist"])
 
+    def _show_all(self, *permissions):
+        """Log in a non-staff user with ``permissions`` (app_label, codename) and open Show all."""
+        user = get_user_model().objects.create_user(username="viewer", email="viewer@example.com", password="secret")
+        user.user_permissions.add(
+            *(Permission.objects.get(content_type__app_label=app, codename=code) for app, code in permissions)
+        )
+        self.client.force_login(user)
+        response = self.client.get(reverse("settings"), {"show": "all"})
+        return response, {str(item["label"]): item["has_access"] for item in response.context["entries"]}
+
+    def test_show_all_lists_the_entries_without_access_locked(self):
+        response, access = self._show_all(("lending", "view_lendingconfiguration"))
+
+        self.assertIs(access["Lending configuration"], True)
+        self.assertIs(access["Tenants"], False)
+        self.assertContains(response, f'href="{reverse("lending:configuration")}"')
+        self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
+        self.assertContains(response, '<i class="bi bi-lock" aria-hidden="true"></i>')
+        # The gear still leads only to what the user may open.
+        self.assertEqual([item["url"] for item in response.context["nav_items_settings"]], ["lending:configuration"])
+
+    def test_show_all_locks_admin_entries_without_the_staff_flag(self):
+        _response, access = self._show_all(("accounts", "view_customuser"))
+
+        self.assertIs(access["Users"], False)
+
     def test_admin_entries_carry_a_badge(self):
         self.client.force_login(self.superuser)
         response = self.client.get(reverse("settings"))
