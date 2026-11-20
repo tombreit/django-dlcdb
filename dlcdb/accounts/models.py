@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -97,3 +98,9 @@ class CustomUser(AbstractUser):
 
     def hard_delete(self):
         super().delete()
+
+
+def is_ldap_mirrored(group):
+    """LDAP sets the members of this group at each login (``AUTH_LDAP_MIRROR_GROUPS``)."""
+    mirrored = getattr(settings, "AUTH_LDAP_MIRROR_GROUPS", None)
+    return mirrored is True or group.name in (mirrored or ())

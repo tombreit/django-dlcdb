@@ -30,27 +30,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Gruppen und Berechtigungen
 
-Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Start › Konten › Gruppen* im Django-Admin. Benutzer werden unter *Start › Konten › Benutzer* den Gruppen zugeordnet. Was eine Gruppe darf, welche Mandanten sie sieht und wer Mitglied ist, zeigt *Einstellungen › Gruppen und Berechtigungen*.
-
-Es gibt drei Familien von Berechtigungen:
-
-| Familie | Beispiel | Wofür |
-|---|---|---|
-| Standard-Berechtigungen pro Model | `core.view_device`, `core.change_room` | Django legt für jedes Model *Can add* / *Can change* / *Can delete* / *Can view* an. Sie schalten Ansichten, Formulare und Menüpunkte frei, im Frontend wie im Django-Admin. |
-| Statuswechsel | `core.transition_can_lend_device` | Eine Berechtigung je Übergang im Gerätelebenszyklus, siehe [Statuswechsel](#statuswechsel). |
-| Spezielle Berechtigungen | `core.can_inventorize` | Einzelne Prozesse, hier: Inventur durchführen. |
-
-:::{admonition} **Berechtigung unter *Core* finden**
-:class: note
-
-Einige Menüpunkte gehören technisch zur App *Core*, obwohl sie in einem anderen Menübereich erscheinen (Proxy-Modelle). Die passende Berechtigung ist dann in der Gruppen-Auswahl unter **Core** gelistet – nicht unter dem gleichnamigen Menü. Beispiel: Der Menüpunkt *Ausleihe* benötigt **Core | lent record | Can view lent record** (`core.view_lentrecord`), nicht eine Berechtigung unter „Lending“.
-:::
-
-:::{admonition} **Lesen und Bearbeiten sind getrennte Berechtigungen**
-:class: note
-
-Django leitet aus *Can change* kein *Can view* ab. Wer eine Gruppe zum Bearbeiten berechtigt, gibt ihr deshalb auch die passende *Can view*-Berechtigung. Beispiel Lizenzen: Mit `core.change_licencerecord` lässt sich eine Lizenz bearbeiten, die Schaltflächen *Verlauf* und *iCal* benötigen aber `core.view_licencerecord`.
-:::
+Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einstellungen › Gruppen und Berechtigungen*. Die Seite einer Gruppe listet nur die Berechtigungen, die die DLCDB prüft, geordnet wie ihre Menüs und jede mit dem Menüpunkt, den sie freischaltet. Dort werden auch die Mitglieder und die Mandanten der Gruppe gesetzt. Gruppen und Benutzerkonten selbst legt bis auf Weiteres der Django-Admin an (*Start › Konten*).
 
 ### LDAP
 
@@ -63,97 +43,42 @@ Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setu
 
 ## Navigation
 
-Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt erscheint nur, wenn eine Gruppe des Benutzers die genannte Berechtigung besitzt – in der Regel die *view*-Berechtigung der verlinkten Ansicht. Steht mehr als eine Berechtigung in der Zeile, genügt **eine** davon.
+Ein Menüpunkt erscheint nur, wenn eine Gruppe des Benutzers die passende Berechtigung hat; welche das ist, steht auf der Seite der Gruppe unter der Berechtigung. Menüpunkte, die in den Django-Admin führen, erscheinen nur Benutzern mit Staff-Flag, denn nur die erreichen den Admin; auf der Seite *Einstellungen* tragen sie das Abzeichen *Django-Admin*.
 
-Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur Benutzern mit Staff-Flag, denn nur die erreichen den Admin; auf der Seite *Einstellungen* tragen sie das Abzeichen *Django-Admin*.
-
-<!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
-     dlcdb/*/navigation.py-Dateien wider; *(Admin)* markiert Einträge,
-     deren "url" auf "admin:..." zeigt. Bei Änderungen an den Menüs
-     (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen.
-     Invariante: Die "required_permission" eines Menüeintrags ist immer
-     die Lese-Berechtigung der verlinkten Ansicht, ein "admin:"-Eintrag
-     verlangt zusätzlich das Staff-Flag -- ein sichtbarer Menüpunkt kann
-     so nie in einer Fehlermeldung oder am Admin-Login enden. -->
-
-| Menüpunkt (Bereich) | Berechtigung (Django-Admin-Anzeige) | codename |
-|---|---|---|
-| Ausleihe (Hauptmenü) | Core \| lent record \| Can view lent record | `core.view_lentrecord` |
-| Geräte (Hauptmenü) | Core \| device \| Can view device | `core.view_device` |
-| Umziehen (Hauptmenü) | Core \| record \| eine der drei Bewegungs-Berechtigungen | `core.transition_can_locate_device`, `core.transition_can_relocate_device` oder `core.transition_can_find_device` |
-| Inventarisieren (Hauptmenü, nur bei aktiver Inventur) | Core \| … \| Can inventorize | `core.can_inventorize` |
-| Kleinkram (Hauptmenü), weitere Berechtigungen siehe [Kleinkram](kleinkram.md) | Smallstuff \| assigned thing \| Can view assigned thing | `smallstuff.view_assignedthing` |
-| Lizenzen (Hauptmenü) | Core \| licence record \| Can view licence record | `core.view_licencerecord` |
-| Datenhaltung › Räume | Core \| room \| Can view room | `core.view_room` |
-| Datenhaltung › Hersteller | Core \| manufacturer \| Can view manufacturer | `core.view_manufacturer` |
-| Datenhaltung › Zulieferer | Core \| supplier \| Can view supplier | `core.view_supplier` |
-| Datenhaltung › Geräteklassen | Core \| device type \| Can view device type | `core.view_devicetype` |
-| Datenhaltung › Personen | Core \| person \| Can view person | `core.view_person` |
-| Datenhaltung › Records | Core \| record \| Can view record | `core.view_record` |
-| Datenhaltung › Entfernt-Records *(Admin)* | Core \| record \| Can view record | `core.view_record` |
-| Datenhaltung › Notizen *(Admin)* | Core \| note \| Can view note | `core.view_note` |
-| Einstellungen › Mandanten | Tenants \| tenant \| Can view tenant | `tenants.view_tenant` |
-| Einstellungen › Ausleihe Konfiguration | Lending \| lending configuration \| Can view lending configuration | `lending.view_lendingconfiguration` |
-| Einstellungen › Lizenzmodul Konfiguration | Licenses \| licenses configuration \| Can view licenses configuration | `licenses.view_licensesconfiguration` |
-| Einstellungen › Organisation | Organization \| Organization \| Can view Organization | `organization.view_branding` |
-| Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
-| Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
-| Einstellungen › Benutzer *(Admin)* | Accounts \| user \| Can view user | `accounts.view_customuser` |
-| Einstellungen › Gruppen und Berechtigungen | Accounts \| group \| Can view group | `accounts.view_group` |
-| Einstellungen › Ausleih-Ordnungen *(Admin)* | Core \| Link \| Can view Link | `core.view_link` |
-| Einstellungen › Kleinkram-Katalog *(Admin)* | Smallstuff \| thing \| Can view thing | `smallstuff.view_thing` |
-| Einstellungen › Benachrichtigungen *(Admin)* | Notifications \| message \| Can view message | `notifications.view_message` |
-| Einstellungen › Reports *(Admin)* | Reporting \| Report \| Can view Report | `reporting.view_report` |
-| Einstellungen › Bulk-Import | Data Exchange \| importer list \| Can view importer list | `dataexchange.view_importerlist` |
-| Einstellungen › Bulk-Ausmusterung *(Admin)* | Data Exchange \| remover list \| Can view remover list | `dataexchange.view_removerlist` |
-| Einstellungen › Inventuren *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
-| Einstellungen › SAP-Abgleich (nur bei aktiver Inventur) *(Admin)* | Core \| inventory \| Can change inventory | `core.change_inventory` |
-| Einstellungen › Raumabgleich *(Admin)* | Core \| Raum-Abgleich \| Can view Raum-Abgleich | `core.view_roomreconcile` |
-| Einstellungen › Records bearbeiten *(Admin)* | Core \| Record \| Can change Record | `core.change_record` |
-| Einstellungen › Record-Anhänge *(Admin)* | Core \| Attachment \| Can view Attachment | `core.view_attachment` |
-| Einstellungen › HR-Sync-Läufe *(Admin)* | Data Exchange \| HR API Sync Run \| Can view HR API Sync Run | `dataexchange.view_udbsyncrun` |
-| Einstellungen › Admin-Historie *(Admin)* | Administration \| log entry \| Can view log entry | `admin.view_logentry` |
-
-Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“. Der Schalter *Alle anzeigen* listet auch die Einträge, für die die Berechtigung fehlt (bei *(Admin)*-Einträgen auch das Staff-Flag): ausgegraut, mit Schloss und ohne Link.
-
-Die Seiten unter *Einstellungen* zeigen ihre Werte mit der *view*-Berechtigung schreibgeschützt; speichern darf, wer die *change*-Berechtigung hat: `organization.change_branding`, `lending.change_lendingconfiguration`, `licenses.change_licensesconfiguration` bzw. `dataexchange.change_udbsyncconfiguration`. Die letzten HR-Sync-Läufe zeigt *HR-API-Sync-Konfiguration* mit `dataexchange.view_udbsyncrun`; *Journal › Aufräumen* braucht `journal.delete_journalentry`.
-
-Die Ausleih-Profile stehen auf *Einstellungen › Ausleihe Konfiguration* und brauchen zusätzlich `lending.view_lendingprofile`, zum Anlegen, Ändern und Löschen `lending.add_lendingprofile`, `lending.change_lendingprofile` und `lending.delete_lendingprofile`. Die Vorlage des Ausleihzettels ist Django-Template-Code, der alles lesen kann, was von der Ausleihe aus erreichbar ist (Skripte führt der gedruckte Zettel nicht aus, und er lädt nichts von anderen Servern): Diese Berechtigungen gehören wie `tenants.change_tenant` zu den Administrations-Berechtigungen, ebenso `dataexchange.change_udbsyncconfiguration`: Wer die URL der HR-API ändert, muss den HR-Token neu eingeben, bestimmt aber, wohin der Sync geht.
-
-Die Organisationseinheiten und Positionen der Personen stehen auf *Einstellungen › Organisation* und brauchen zusätzlich `core.view_organizationalunit` bzw. `core.view_organizationalposition`, zum Anlegen, Ändern und Löschen die `add_`-, `change_`- und `delete_`-Berechtigung desselben Modells. Gelöscht wird nur, was keine Person hat, auch keine deaktivierte. Den Personen zuordnen darf sie, wer `core.change_person` hat.
+Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: ihre Einträge nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“. Der Schalter *Alle anzeigen* listet auch die Einträge, für die die Berechtigung fehlt (bei Einträgen in den Django-Admin auch das Staff-Flag): ausgegraut, mit Schloss und ohne Link.
 
 ## Statuswechsel
 
-Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine eigene Berechtigung. Das Menü *Neuer Zustand* auf der [Geräte-Detailseite](devices.md) bietet einen Übergang genau dann an, wenn er vom aktuellen Status aus zulässig ist **und** der Benutzer die Berechtigung besitzt. Alle neun sind in der Gruppen-Auswahl unter **Core | record** gelistet.
+Jeder Übergang im Gerätelebenszyklus (siehe [Konzept](../konzept.md)) hat eine eigene Berechtigung; die Seite einer Gruppe listet sie unter *Gerät*. Das Menü *Neuer Zustand* auf der [Geräte-Detailseite](devices.md) bietet einen Übergang genau dann an, wenn er vom aktuellen Status aus zulässig ist **und** der Benutzer die Berechtigung besitzt.
 
-| Aktion | Übergang | Berechtigung (Django-Admin-Anzeige) | codename |
-|---|---|---|---|
-| Bestellung | *(kein Record)* → Bestellt | Core \| record \| Transition: Can record a device as ordered | `core.transition_can_order_device` |
-| Lokalisieren | *(kein Record)*/Bestellt → Lokalisiert | Core \| record \| Transition: Can localise a device for the first time | `core.transition_can_locate_device` |
-| Umziehen | Lokalisiert → Lokalisiert | Core \| record \| Transition: Can move a device to another room | `core.transition_can_relocate_device` |
-| Ausleihen und Zurückgeben | Lokalisiert ↔ Verliehen | Core \| record \| Transition: Can lend a device and take it back | `core.transition_can_lend_device` |
-| Nicht auffindbar | Lokalisiert/Verliehen → Nicht auffindbar | Core \| record \| Transition: Can mark a device as missing | `core.transition_can_lose_device` |
-| Gefunden | Nicht auffindbar → Lokalisiert | Core \| record \| Transition: Can mark a missing device as found | `core.transition_can_find_device` |
-| Entfernen | *(kein Record)*/Bestellt/Lokalisiert/Verliehen/Nicht auffindbar → Entfernt | Core \| record \| Transition: Can remove (decommission) a device | `core.transition_can_remove_device` |
-| Wiederherstellen | Entfernt → Nicht auffindbar | Core \| record \| Transition: Can restore a removed device to missing | `core.transition_can_restore_device` |
-| Wiedereingliedern | Entfernt → Lokalisiert | Core \| record \| Transition: Can recover a removed device into a room | `core.transition_can_recover_device` |
+| Aktion | Übergang |
+|---|---|
+| Bestellung | *(kein Record)* → Bestellt |
+| Lokalisieren | *(kein Record)*/Bestellt → Lokalisiert |
+| Umziehen | Lokalisiert → Lokalisiert |
+| Ausleihen und Zurückgeben | Lokalisiert ↔ Verliehen |
+| Nicht auffindbar | Lokalisiert/Verliehen → Nicht auffindbar |
+| Gefunden | Nicht auffindbar → Lokalisiert |
+| Entfernen | *(kein Record)*/Bestellt/Lokalisiert/Verliehen/Nicht auffindbar → Entfernt |
+| Wiederherstellen | Entfernt → Nicht auffindbar |
+| Wiedereingliedern | Entfernt → Lokalisiert |
 
 ### Frontend oder Django-Admin?
 
 Alle Statuswechsel laufen im Frontend: auf der [Geräte-Detailseite](devices.md) und in der Gerätesuche der [Inventur](inventur.md). Dort zählen allein die Berechtigung des Übergangs und der Zugriff auf den [Mandanten](#mandanten) des Geräts; das Staff-Flag und die Standard-Berechtigungen der Record-Typen (`core.add_removedrecord`, `core.change_lentrecord`, …) spielen keine Rolle. Aus der Gerätesuche der Inventur führt ein Statuswechsel zurück in die Suche, `core.view_device` ist dafür nicht nötig.
 
-Auch die Geräteseite des Django-Admins führt für jeden Statuswechsel in diese Ansichten. Records legt der Django-Admin dafür nicht mehr selbst an: Die *Can add*-Berechtigungen `core.add_orderedrecord`, `core.add_inroomrecord`, `core.add_lostrecord` und `core.add_removedrecord` öffnen nichts mehr und können aus den Gruppen entfernt werden.
+Auch die Geräteseite des Django-Admins führt für jeden Statuswechsel in diese Ansichten. Records legt der Django-Admin dafür nicht mehr selbst an: Die *Can add*-Berechtigungen der Record-Typen öffnen nichts mehr; die Seite einer Gruppe listet sie, falls sie sie noch hat, unter den anderen Berechtigungen.
 
 :::{admonition} **Ausmusterung rückgängig machen**
 :class: note
 
-`transition_can_restore_device` und `transition_can_recover_device` sind nach der Installation **keiner Gruppe zugewiesen**; *Entfernt* ist damit standardmäßig ein Endzustand. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst einer eng gefassten Gruppe zu.
+*Wiederherstellen* und *Wiedereingliedern* sind nach der Installation **keiner Gruppe zugewiesen**; *Entfernt* ist damit standardmäßig ein Endzustand. Wer diese Wege öffnen möchte, weist die Berechtigungen bewusst einer eng gefassten Gruppe zu.
 :::
 
 :::{admonition} **Die Berechtigung gilt für die ganze Aktion**
 :class: tip
 
-Eine Berechtigung schaltet nicht nur den Eintrag auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur `core.transition_can_find_device` besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen.
+Eine Berechtigung schaltet nicht nur den Eintrag auf der Geräteseite frei, sondern auch die dahinterliegende Ansicht und deren Geräteauswahl. Wer z.B. nur *Gefunden* besitzt, findet im Menüpunkt *Umziehen* ausschließlich die als *nicht auffindbar* markierten Geräte – und kann genau diese wieder einem Raum zuordnen.
 :::
 
 ## Mandanten
@@ -218,8 +143,8 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und auf der Seite *Einstellungen* unter *Mehr*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
-- Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
-- die mit *(Admin)* markierten [Menüpunkte](#navigation),
+- Benutzer und Gruppen anlegen; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
+- die Einträge der Seite *Einstellungen* mit dem Abzeichen *Django-Admin*,
 - [Geräte und Importe ohne Mandant](#geräte-und-importe-ohne-mandant) zuordnen,
 - erzeugte Reports und den SAP-Import,
 - Links (die Ordnungen der Ausleih-Profile), den Kleinkram-Katalog und Anhänge von Records,

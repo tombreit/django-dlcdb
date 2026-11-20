@@ -21,55 +21,17 @@
   {% if ldap %}{% include "accounts/groups/includes/_ldap_badge.html" %}{% endif %}
 {% endblock detail_meta %}
 
-{% block detail_main %}
-  <section class="card card-filled mb-3">
-    <div class="card-header d-flex align-items-center gap-2">
-      <i class="bi bi-shield-lock text-primary"></i>
-      <h2 class="h6 mb-0 me-auto">{% translate "Permissions" %}</h2>
-      <span class="small text-secondary">
-        {% blocktranslate count counter=granted|length with total=permissions|length %}{{ counter }} of {{ total }} granted{% plural %}{{ counter }} of {{ total }} granted{% endblocktranslate %}
-      </span>
-    </div>
-    <div class="card-body">
-      {# Where the app shows them: the main menu, master data, the settings page's groups. #}
-      {% regroup permissions by area as areas %}
-      {% for area in areas %}
-        <h3 class="h6 text-secondary text-uppercase small border-bottom pb-1 mb-2{% if not forloop.first %} mt-3{% endif %}">{{ area.grouper }}</h3>
-        <div class="permission-sections">
-          {% regroup area.list by model as sections %}
-          {% for section in sections %}
-            <fieldset class="mb-3">
-              <legend class="fs-6 fw-semibold mb-1">{{ section.grouper }}</legend>
-              {% for entry in section.list %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="permission-{{ entry.permission.pk }}"
-                         {% if entry.permission.pk in granted %}checked{% endif %} disabled>
-                  <label class="form-check-label" for="permission-{{ entry.permission.pk }}">{{ entry.action }}</label>
-                  {% if entry.help %}<div class="form-text mt-0">{{ entry.help }}</div>{% endif %}
-                  {% if entry.warning %}
-                    <div class="form-text mt-0 text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {{ entry.warning }}</div>
-                  {% endif %}
-                </div>
-              {% endfor %}
-            </fieldset>
-          {% endfor %}
-        </div>
-      {% endfor %}
+{% block detail_form_fields %}
+  {% include "accounts/groups/includes/_form_fields.html" %}
+{% endblock detail_form_fields %}
 
-      {% if other_permissions %}
-        <details class="mt-2">
-          <summary class="small text-secondary">
-            {% blocktranslate count counter=other_permissions|length %}{{ counter }} other permission{% plural %}{{ counter }} other permissions{% endblocktranslate %}
-          </summary>
-          <p class="form-text">{% translate "The group also has these. No page of DLCDB checks them; only the Django admin may." %}</p>
-          <ul class="list-unstyled small font-monospace mb-0">
-            {% for name in other_permissions %}<li>{{ name }}</li>{% endfor %}
-          </ul>
-        </details>
-      {% endif %}
-    </div>
-  </section>
-{% endblock detail_main %}
+{% block detail_readonly_notice %}
+  {% include "theme/includes/_readonly_notice.html" with message=_("You may view this group but do not have permission to change it.") %}
+{% endblock detail_readonly_notice %}
+
+{% block detail_readonly %}
+  {% include "accounts/groups/includes/_form_fields.html" %}
+{% endblock detail_readonly %}
 
 {% block detail_sidebar %}
   <section class="card card-filled mb-3">
@@ -78,31 +40,32 @@
       <h2 class="h6 mb-0">{% translate "Tenants" %}</h2>
     </div>
     <div class="card-body">
-      {% for tenant in group.tenant_set.all %}
-        {% if forloop.first %}<p class="form-text mt-0">{% translate "Members see the devices of these tenants." %}</p><ul class="mb-2">{% endif %}
-        <li>{% if perms.tenants.view_tenant %}<a href="{% url 'tenants:detail' tenant.pk %}">{{ tenant.name }}</a>{% else %}{{ tenant.name }}{% endif %}</li>
-        {% if forloop.last %}</ul>{% endif %}
-      {% empty %}
-        <p class="mb-2">{% translate "Members see no devices through this group." %}</p>
-      {% endfor %}
+      <p class="form-text mt-0">{% translate "Members see the devices of these tenants." %}</p>
+      {% if all_tenants is not None %}
+        {# Each tick is saved by the tenant matrix's view (tenants.views.toggle). #}
+        {% for tenant in all_tenants %}
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="sees" id="tenant-{{ tenant.pk }}"
+                   {% if tenant in group_tenants %}checked{% endif %}
+                   hx-post="{% url 'tenants:toggle' tenant.pk group.pk %}" hx-swap="none" hx-sync="closest section:queue all">
+            <label class="form-check-label" for="tenant-{{ tenant.pk }}">{{ tenant.name }}</label>
+          </div>
+        {% empty %}
+          <p class="text-muted mb-2">{% translate "No tenants yet." %}</p>
+        {% endfor %}
+        <p class="form-text">{% translate "Each tick is saved immediately." %}</p>
+      {% else %}
+        <ul class="mb-2">
+          {% for tenant in group_tenants %}
+            <li>{% if perms.tenants.view_tenant %}<a href="{% url 'tenants:detail' tenant.pk %}">{{ tenant.name }}</a>{% else %}{{ tenant.name }}{% endif %}</li>
+          {% empty %}
+            <li class="text-muted">{% translate "Members see no devices through this group." %}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
       <p class="form-text mb-0">{% translate "Permissions are not per tenant: what users may do through any of their groups applies in every tenant they can access." %}</p>
     </div>
   </section>
-
-  <section class="card card-filled mb-3">
-    <div class="card-header d-flex align-items-center gap-2">
-      <i class="bi bi-people text-primary"></i>
-      <h2 class="h6 mb-0">{% translate "Members" %}</h2>
-    </div>
-    <div class="card-body">
-      {% if ldap %}<p class="form-text mt-0">{% translate "LDAP sets the members of this group at each login." %}</p>{% endif %}
-      <ul class="list-unstyled mb-0">
-        {% for member in group.user_set.all %}
-          <li>{{ member }}</li>
-        {% empty %}
-          <li class="text-muted">{% translate "No active members." %}</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </section>
 {% endblock detail_sidebar %}
+
+{% block extra_js %}{{ form.media.js }}{% endblock extra_js %}

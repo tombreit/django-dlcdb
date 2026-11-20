@@ -1,0 +1,93 @@
+{% load i18n %}
+{% comment %}
+The group form's cards (accounts.forms.GroupForm): the name, DLCDB's own
+permissions and the members. Read-only, every field is disabled.
+
+Params: form, permissions (permissions.own_permissions()), checked (pks of the
+ticked permissions), ldap.
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-people text-primary"></i>
+    <h2 class="h6 mb-0">{% translate "Group" %}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% include "theme/includes/_field.html" with field=form.name %}
+    </div>
+  </div>
+</section>
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    <i class="bi bi-shield-lock text-primary"></i>
+    <h2 class="h6 mb-0 me-auto">{% translate "Permissions" %}</h2>
+    <span class="small text-secondary">
+      {% blocktranslate count counter=checked|length with total=permissions|length %}{{ counter }} of {{ total }} granted{% plural %}{{ counter }} of {{ total }} granted{% endblocktranslate %}
+    </span>
+  </div>
+  <div class="card-body">
+    <p class="form-text mt-0">{% translate "Add, change and delete include view: saving ticks it." %}</p>
+    {% for error in form.permissions.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+
+    {# Where the app shows them: the main menu, master data, the settings page's groups. #}
+    {% regroup permissions by area as areas %}
+    {% for area in areas %}
+      <h3 class="h6 text-secondary text-uppercase small border-bottom pb-1 mb-2{% if not forloop.first %} mt-3{% endif %}">{{ area.grouper }}</h3>
+      <div class="permission-sections">
+        {% regroup area.list by model as sections %}
+        {% for section in sections %}
+          <fieldset class="mb-3">
+            <legend class="fs-6 fw-semibold mb-1">{{ section.grouper }}</legend>
+            {% for entry in section.list %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="permissions" value="{{ entry.permission.pk }}"
+                       id="permission-{{ entry.permission.pk }}"
+                       {% if entry.permission.pk in checked %}checked{% endif %}
+                       {% if form.permissions.field.disabled %}disabled{% endif %}>
+                <label class="form-check-label" for="permission-{{ entry.permission.pk }}">{{ entry.action }}</label>
+                {% if entry.help %}<div class="form-text mt-0">{{ entry.help }}</div>{% endif %}
+                {% if entry.warning %}
+                  <div class="form-text mt-0 text-warning-emphasis"><i class="bi bi-exclamation-triangle"></i> {{ entry.warning }}</div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </fieldset>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    {% if other_permissions %}
+      <details class="mt-2">
+        <summary class="small text-secondary">
+          {% blocktranslate count counter=other_permissions|length %}{{ counter }} other permission{% plural %}{{ counter }} other permissions{% endblocktranslate %}
+        </summary>
+        <p class="form-text">{% translate "The group also has these. No page of DLCDB checks them, only the Django admin may; saving keeps them." %}</p>
+        <ul class="list-unstyled small font-monospace mb-0">
+          {% for name in other_permissions %}<li>{{ name }}</li>{% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+  </div>
+</section>
+
+{% if form.members %}
+  <section class="card card-filled mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-person-check text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "Members" %}</h2>
+    </div>
+    <div class="card-body">
+      {% if ldap %}
+        <p class="form-text mt-0">{% translate "LDAP sets the members of this group at each login." %}</p>
+      {% elif form.members.field.disabled and can_change %}
+        <p class="form-text mt-0">{% translate "You may view the members but do not have permission to change them." %}</p>
+      {% endif %}
+      {{ form.members }}
+      {% for error in form.members.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      <p class="form-text mb-0">{% translate "Active users only; deactivated members stay members." %}</p>
+    </div>
+  </section>
+{% endif %}

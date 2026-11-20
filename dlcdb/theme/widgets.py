@@ -101,6 +101,38 @@ def _merge_tom_select_attrs(defaults, attrs):
     return merged
 
 
+class FilteredSelectMultipleWidget(forms.SelectMultiple):
+    """
+    A select multiple as two lists, available and chosen, each with a filter
+    (the npm package filtered-select-multiple-widget), like the admin's
+    ``filter_horizontal``. A disabled field gives read-only lists; without
+    JavaScript it stays the plain select multiple.
+    """
+
+    class Media:
+        js = ["theme/dist/js/filtered-select-multiple.js"]
+
+    def __init__(self, *, available_label, chosen_label, attrs=None):
+        super().__init__(attrs)
+        self.available_label, self.chosen_label = available_label, chosen_label
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        # Rendered per request, in the user's language; the script reads them.
+        context["widget"]["attrs"]["data-filtered-select-multiple"] = json.dumps(
+            {
+                "availableLabel": str(self.available_label),
+                "chosenLabel": str(self.chosen_label),
+                "filterPlaceholder": str(_("Filter")),
+                "addAll": str(_("Add all")),
+                "addSelected": str(_("Add selected")),
+                "removeSelected": str(_("Remove selected")),
+                "removeAll": str(_("Remove all")),
+            }
+        )
+        return context
+
+
 class IconPickerWidget(forms.TextInput):
     """
     Text input augmented with a searchable Bootstrap Icons picker.

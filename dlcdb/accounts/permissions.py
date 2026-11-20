@@ -48,6 +48,8 @@ CHECKED_IN_VIEWS = (
     "licenses.change_licensesconfiguration",
     "dataexchange.change_importerlist",
     "inventory.view_saplist",  # the SAP exports, in core's media view
+    "accounts.change_group",
+    "accounts.change_customuser",  # a group's members
 )
 
 _SLIP_TEMPLATES = _("Its slip templates can read and print everything a lending reaches.")

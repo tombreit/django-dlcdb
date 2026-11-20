@@ -12,7 +12,7 @@ Logo und Organisationsname unter *Einstellungen › Organisation* eintragen.
 
 ## 3. Gruppen anlegen und Berechtigungen vergeben
 
-Via *Start › Konten › Gruppen*: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), Vorschläge unter [Beispiel-Gruppen](berechtigungen.md#beispiel-gruppen). Welche Berechtigung was freischaltet, zeigen die Tabellen [Navigation](berechtigungen.md#navigation) und [Statuswechsel](berechtigungen.md#statuswechsel). Mit LDAP werden die Gruppen gespiegelt, siehe [LDAP](berechtigungen.md#ldap).
+Via *Start › Konten › Gruppen* anlegen: eine Gruppe je Rolle (z.B. Helpdesk, Inventur, Stammdaten), Vorschläge unter [Beispiel-Gruppen](berechtigungen.md#beispiel-gruppen). Ihre Berechtigungen dann unter *Einstellungen › Gruppen und Berechtigungen* anhaken. Mit LDAP werden die Gruppen gespiegelt, siehe [LDAP](berechtigungen.md#ldap).
 
 ## 4. Mandant anlegen
 

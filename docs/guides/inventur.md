@@ -20,7 +20,7 @@ Inventur-Ansicht: *Inventarisieren* (Hauptmenü, nur bei aktiver Inventur)
 
 ### Voraussetzungen
 
-- Berechtigung *Can inventorize* (siehe [Navigation](berechtigungen.md#navigation))
+- Berechtigung *Inventarisieren* (siehe [Gruppen und Berechtigungen](berechtigungen.md#gruppen-und-berechtigungen))
 - Endgerät (Smartphone, Tablet, Notebook) mit aktuellem Mozilla Firefox oder Google Chrome Browser
 - Aktuelle Inventur (*Datenhaltung > Inventuren*, *Aktiv*) angelegt
 

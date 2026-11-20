@@ -7,7 +7,7 @@ Meist fehlt Ihren Gruppen die Berechtigung, hier *Can change manufacturer* bzw. 
 
 `````{dropdown} Warum sehe ich einen Menüpunkt nicht?
 
-Ein Menüpunkt erscheint nur, wenn eine Ihrer Gruppen die passende Berechtigung besitzt. Welche das ist, zeigt [Navigation](./guides/berechtigungen.md#navigation).
+Ein Menüpunkt erscheint nur, wenn eine Ihrer Gruppen die passende Berechtigung besitzt. Welche das ist, steht auf der Seite der Gruppe unter *Einstellungen › Gruppen und Berechtigungen*, bei der Berechtigung.
 `````
 
 `````{dropdown} „Keine Ihrer Gruppen gehört zu einem Mandanten“?

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Users and groups in the frontend
 
-**Status:** batch 2 done (groups read-only, `accounts/views_groups.py`); next: batch 3, editing a group. Started 2026-11-20.
+**Status:** batch 3 done (editing a group, `accounts.forms.GroupForm`); next: batch 4, group profiles and *New group*. Started 2026-11-20.
 
 ## Why
 
@@ -86,6 +86,10 @@ SPDX-License-Identifier: CC0-1.0
     - The group's other permissions are folded away below, as `app_label.codename`.
   - **Groups list:** how many of DLCDB's own permissions a group has, in warning colour at 0 (a mirrored LDAP group arrives empty), active members, tenants, an LDAP badge.
   - **Members:** the dual-pane `filtered-select-multiple-widget` (the user's npm package, bundled by esbuild; it needs no new features for this).
+    - `theme.widgets.FilteredSelectMultipleWidget`, its own bundle loaded through the widget's Media. DLCDB's theme overrides stack the lists below `md`, with the buttons wrapping in a row between them (the package's issues #1 and #2).
+    - Only active users are offered; deactivated members stay members.
+  - **The group page is one form** (name, permissions, members) with the save bar; it returns to the groups list with a linked message, like the other detail pages. Without `change_group` the same form is disabled.
+  - **The tenants card** ticks through the tenant matrix's own view (`tenants.views.toggle`, `hx-swap="none"`), each tick saved at once, outside the form.
 - **Staff and Superuser flags** are not set in the frontend: only badges. They stay with the admin, LDAP and `createsuperuser`.
 - **Direct per-user permissions** (`user_permissions`) are ignored by the frontend.
 - **History:** one journal entry per save, naming what changed (permissions added and removed, members, deactivation), never passwords. Not simple-history.
@@ -93,7 +97,7 @@ SPDX-License-Identifier: CC0-1.0
 - **The admin's user and group screens stay registered**, like the settings and tenant admins. The menus link the frontend; Settings › More reaches the admin, for example for the flags.
 - **Permissions:**
   - group pages: `accounts.view_group`; editing: `change_group`; *New group*: `add_group`; deleting: `delete_group`;
-  - members and the user pages: `accounts.view/change/add_customuser`;
+  - members and the user pages: `accounts.view/change/add_customuser`. On the group page the members show with `view_customuser`; changing them needs `change_customuser` besides `change_group`;
   - the tenants card: `tenants.change_tenant`.
 
 ### Docs: only what the app can't show
@@ -131,7 +135,7 @@ SPDX-License-Identifier: CC0-1.0
   - no removing `change_group` from one's last group that has it;
   - no leaving that group.
 - **LDAP:**
-  - membership of mirrored groups and every flag are overwritten at each login;
+  - membership of mirrored groups and every flag are overwritten at each login: a mirrored group's members and name are read-only on its page;
   - users and mirrored groups appear at the first login, so *New group* must accept the exact LDAP name in advance;
   - `AUTH_LDAP_MIRROR_GROUPS` may also be `True` (all groups mirrored).
 - **Superusers see devices only through their groups** (DECISIONS: no superuser exception). *New group* suggests adding oneself.
@@ -157,7 +161,7 @@ SPDX-License-Identifier: CC0-1.0
 - [x] **2. Groups, read-only.**
   - Groups list (members, tenants, LDAP badge) and group page: permissions by model with labels, tenants, members, other permissions read-only.
   - The menu entry *Groups and permissions* opens the frontend.
-- [ ] **3. Editing a group:**
+- [x] **3. Editing a group:**
   - permissions (keeping hidden ones, view added, the lock-out guard);
   - tenants card (reusing `tenants.views.toggle`);
   - members (dual-pane widget; LDAP read-only);
@@ -177,3 +181,7 @@ SPDX-License-Identifier: CC0-1.0
   - this plan retires into DECISIONS.md, `PLANS/admin-to-frontend.md` › *Users and groups* ticked.
 
 Each batch also trims the doc passages it makes obsolete.
+
+## Findings on the way
+
+- **Batch 3 trimmed `berechtigungen.md`** (the permission families, the notes on *Core* and view/change, the Navigation table, the settings permission paragraphs, the codename columns of *Statuswechsel*). Still naming codenames, for batch 7: `kleinkram.md` (a table), `notifications.md`, `lizenzen.md`, `betrieb/hr-sync.md`, the room rename in `erste_schritte.md`, and *Beispiel-Gruppen* (batch 4, replaced by the group profiles).
