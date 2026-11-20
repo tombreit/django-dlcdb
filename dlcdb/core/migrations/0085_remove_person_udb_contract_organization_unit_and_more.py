@@ -10,6 +10,12 @@ def keep_hr_units(apps, schema_editor):
     A person with the name but without the unit gets the unit, so nothing is lost
     when the name goes. Where both are set, the unit stays: the pages show that one.
     """
+    # PostgreSQL checks foreign keys at commit by default, and a check still
+    # waiting on core_person makes the RemoveField below fail ("pending trigger
+    # events"). Checked at once, nothing waits. Not split into two migrations:
+    # databases that applied this one would then miss or repeat a step.
+    if schema_editor.connection.vendor == "postgresql":
+        schema_editor.execute("SET CONSTRAINTS ALL IMMEDIATE")
     Person = apps.get_model("core", "Person")
     OrganizationalUnit = apps.get_model("core", "OrganizationalUnit")
     persons = Person._base_manager.filter(organizational_unit__isnull=True).exclude(udb_contract_organization_unit="")
