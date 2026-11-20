@@ -8,7 +8,8 @@ The settings page the gear opens: every nav_settings entry the user may see,
 declared in the apps' navigation.py, under the group it names.
 theme.context_processors.nav sorts them by group (SETTINGS_GROUPS), then by order.
 The filter (theme/js/settings.js) also matches an entry's search_terms, which
-are never shown.
+are never shown. An entry into the Django admin (admin: URL, Staff flag only)
+carries a badge; the module moves to the frontend by changing its entry's URL.
 {% endcomment %}
 
 {% block title %}{% translate "Settings" %}{% endblock title %}
@@ -36,7 +37,10 @@ are never shown.
             <a href="{% url item.url %}" class="list-group-item list-group-item-action d-flex gap-3 py-3" data-search-terms="{{ item.search_terms|default:'' }}">
               <i class="{{ item.icon }} fs-5" aria-hidden="true"></i>
               <span>
-                <span class="d-block fw-semibold">{{ item.label }}</span>
+                <span class="d-block fw-semibold">
+                  {{ item.label }}
+                  {% if item.admin %}<span class="badge rounded-pill bg-secondary-subtle text-secondary-emphasis fw-normal">{% translate "Django admin" %}</span>{% endif %}
+                </span>
                 <span class="d-block small text-body-secondary">{{ item.description }}</span>
               </span>
             </a>
@@ -47,6 +51,12 @@ are never shown.
       <p class="text-body-secondary">{% translate "You may not view any settings." %}</p>
     {% endfor %}
   </div>
+
+  {% if request.user.is_staff %}
+    <p class="mt-4">
+      <a href="{% url 'admin:index' %}"><i class="bi bi-gear" aria-hidden="true"></i> {% translate "Django admin" %}</a>
+    </p>
+  {% endif %}
 {% endblock body %}
 
 {% block extra_js %}

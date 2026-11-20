@@ -104,10 +104,14 @@ def nav(request):
                     f"nav_settings entry {nav_entry.get('url')!r} needs a group of {list(SETTINGS_GROUPS)}"
                 )
 
+            url = nav_entry.get("url") or ""
+            # The admin opens only with the Staff flag: without it, an admin
+            # entry would lead to the admin's login page.
+            is_admin = url.startswith("admin:")
             required_permission = nav_entry.get("required_permission")
             has_permission = _get_has_permission(request.user, required_permission)
 
-            if has_permission:
+            if has_permission and (request.user.is_staff or not is_admin):
                 # Ugly hack to conditionally hide some nav_entries. Checked only
                 # after the permission gate so unpermitted users never trigger
                 # the underlying query.
@@ -116,7 +120,6 @@ def nav(request):
                     if not get_active_inventory(request):
                         continue
 
-                url = nav_entry.get("url") or ""
                 url_namespace = url.rsplit(":", 1)[0] if ":" in url else ""
                 in_namespace = bool(current_app_namespace) and url_namespace == current_app_namespace
 
@@ -134,6 +137,7 @@ def nav(request):
                     "slot": nav_entry.get("slot"),
                     "order": nav_entry.get("order"),
                     "active": is_active,
+                    "admin": is_admin,
                     # The settings page's group heading, the line under the label,
                     # and the words its filter also finds the entry by (never shown).
                     "group": SETTINGS_GROUPS.get(group),

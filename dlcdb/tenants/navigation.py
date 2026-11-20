@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 nav_entries = [
     {
         "slot": "nav_settings",
-        "order": 5,
+        "order": 30,
         "label": _("Tenants"),
         "group": "access",
         "description": _("Which groups see the devices of which tenant"),

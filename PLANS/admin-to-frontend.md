@@ -51,7 +51,7 @@ Progress:
 
 - [x] 1. **The hub page** (2026-11-20) from the six existing settings entries: `group` and `description`, the view in `theme`, route `/settings/`; the gear links to the hub, and "Settings" on the settings pages links back. Docs (`berechtigungen.md`), NEWS.
 - [x] 2. **Filter box and `search_terms`** (2026-11-20): a page-local script that hides groups left empty.
-- [ ] 3. **Admin entries:** the staff check for `admin:` URLs in `nav()`; the *(A)* entries, each from the app that owns it.
+- [x] 3. **Admin entries** (2026-11-20): the staff check for `admin:` URLs in `nav()`; the *(A)* entries, each from the app that owns it.
 - [ ] 4. **Data and tools:** the processes and Inventories move into the hub, the `nav_processes` slot is retired, and the admin navbar links the hub.
 
 Open, to decide during the batches: field-level search (by introspecting the settings forms), only if search terms fall short; whether the account menu's "Django admin" entry moves into the hub.
@@ -64,14 +64,19 @@ Open, to decide during the batches: field-level search (by introspecting the set
 - [ ] **Bulk decommissioning:** Prozesse › Bulk Ausmusterung, `admin:dataexchange_removerlist_changelist`, `dataexchange.view_removerlist`. Bulk import is in the frontend.
 - [ ] **SAP comparison:** the upload. Prozesse › SAP-Abgleich, `admin:inventory_saplist_changelist`, `core.change_inventory`. The comparison result page is in the frontend (`inventory:compare-sap-list`).
 
+## Admin only, linked from the settings hub
+
+Since hub step 3, for staff, each from the `navigation.py` of the app named.
+
+- [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete (`accounts.CustomUser`, the `accounts.Group` proxy). Needs the Staff flag. *Users and access › Users, Groups and permissions* (accounts).
+- [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. *Modules › Lending regulations* (lending).
+- [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons. *Modules › Smallstuff catalogue* (smallstuff).
+- [ ] **Notification messages and reports (`notifications.Message`, `reporting.Report`):** status, preview, "Send now". Subscriptions have a frontend page. *Modules › Notification messages* (notifications), *Modules › Reports* (reporting).
+- [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). The rooms list links the admin; the result page is in the frontend (`rooms:reconcile`). *Data and tools › Room reconcile* (rooms).
+
 ## Admin only, without a menu entry
 
-- [ ] **Users and groups:** create them, give permissions, deactivate, hard-delete (`accounts.CustomUser`, `auth.Group`). Needs the Staff flag.
-- [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button.
-- [ ] **Smallstuff catalogue (`smallstuff.Thing`):** the frontend only assigns things to persons.
 - [ ] **Record attachments (`core.Attachment`).**
-- [ ] **Notification messages and reports (`notifications.Message`, `notifications.Report`):** status, preview, "Send now". Subscriptions have a frontend page.
-- [ ] **Room reconcile:** the upload of an Archibus CSV (`core.RoomReconcile`). The rooms list links the admin; the result page is in the frontend (`rooms:reconcile`).
 - [ ] **HR sync runs:** the full list of up to 50 (`dataexchange.UdbSyncRun`). The HR sync settings page shows the latest 5 with their notes.
 - [ ] **Records:** edit or delete a record (`core.Record` and its proxies). The frontend lists records read-only (`assets:record_index`) and changes states through the lifecycle.
 - [ ] **Imports:** delete an import (`dataexchange.ImporterList`). Importing runs in the frontend.

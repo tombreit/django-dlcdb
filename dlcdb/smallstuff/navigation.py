@@ -13,6 +13,17 @@ nav_entries = [
         "url": "smallstuff:person_search",
         "required_permission": "smallstuff.view_assignedthing",
     },
+    {
+        "slot": "nav_settings",
+        "order": 40,
+        "label": _("Smallstuff catalogue"),
+        "group": "modules",
+        "description": _("The things that can be handed out to persons"),
+        "search_terms": _("things, webcams, mice, accessories"),
+        "icon": "bi bi-handbag",
+        "url": "admin:smallstuff_thing_changelist",
+        "required_permission": "smallstuff.view_thing",
+    },
 ]
 
 nav_focus = {

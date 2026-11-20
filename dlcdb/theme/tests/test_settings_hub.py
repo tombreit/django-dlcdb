@@ -57,6 +57,33 @@ class SettingsHubTests(TestCase):
         self.assertNotContains(response, f'href="{reverse("tenants:index")}"')
         self.assertNotContains(response, '<h2 class="h5">Users and access</h2>')
 
+    def test_admin_entries_need_the_staff_flag(self):
+        user = get_user_model().objects.create_user(username="clerk", email="clerk@example.com", password="secret")
+        user.user_permissions.add(
+            Permission.objects.get(codename="view_customuser", content_type__app_label="accounts"),
+            Permission.objects.get(codename="view_note", content_type__app_label="core"),
+        )
+        self.client.force_login(user)
+
+        def admin_urls():
+            response = self.client.get(reverse("settings"))
+            items = response.context["nav_items_settings"] + response.context["nav_items_masterdata"]
+            return sorted(item["url"] for item in items if item["admin"])
+
+        self.assertEqual(admin_urls(), [])
+        user.is_staff = True
+        user.save()
+        self.assertEqual(admin_urls(), ["admin:accounts_customuser_changelist", "admin:core_note_changelist"])
+
+    def test_admin_entries_carry_a_badge(self):
+        self.client.force_login(self.superuser)
+        response = self.client.get(reverse("settings"))
+
+        admin_entries = [item for item in response.context["nav_items_settings"] if item["admin"]]
+        self.assertTrue(admin_entries)
+        self.assertContains(response, 'fw-normal">Django admin</span>', count=len(admin_entries))
+        self.assertContains(response, f'href="{reverse("admin:accounts_customuser_changelist")}"')
+
     def test_the_filter_gets_each_entrys_search_terms(self):
         self.client.force_login(self.superuser)
         response = self.client.get(reverse("settings"))

@@ -65,15 +65,16 @@ Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setu
 
 Die Menüpunkte im Frontend sind an Berechtigungen gebunden: Ein Menüpunkt erscheint nur, wenn eine Gruppe des Benutzers die genannte Berechtigung besitzt – in der Regel die *view*-Berechtigung der verlinkten Ansicht. Steht mehr als eine Berechtigung in der Zeile, genügt **eine** davon.
 
-Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung fragt nur die Berechtigung ab; zum Öffnen braucht der Benutzer zusätzlich das Staff-Flag. Diese Berechtigungen deshalb nur Gruppen geben, deren Mitglieder Staff sind.
+Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Sie erscheinen nur Benutzern mit Staff-Flag, denn nur die erreichen den Admin; auf der Seite *Einstellungen* tragen sie das Abzeichen *Django-Admin*.
 
 <!-- Diese Tabelle spiegelt die "required_permission"-Werte aus den
      dlcdb/*/navigation.py-Dateien wider; *(Admin)* markiert Einträge,
      deren "url" auf "admin:..." zeigt. Bei Änderungen an den Menüs
      (Hinzufügen/Entfernen von Navigationseinträgen) hier nachziehen.
      Invariante: Die "required_permission" eines Menüeintrags ist immer
-     die Lese-Berechtigung der verlinkten Ansicht -- ein sichtbarer
-     Menüpunkt kann so nie in einer Fehlermeldung enden. -->
+     die Lese-Berechtigung der verlinkten Ansicht, ein "admin:"-Eintrag
+     verlangt zusätzlich das Staff-Flag -- ein sichtbarer Menüpunkt kann
+     so nie in einer Fehlermeldung oder am Admin-Login enden. -->
 
 | Menüpunkt (Bereich) | Berechtigung (Django-Admin-Anzeige) | codename |
 |---|---|---|
@@ -102,6 +103,13 @@ Mit *(Admin)* markierte Menüpunkte öffnen den Django-Admin. Die Menüprüfung 
 | Einstellungen › Organisation | Organization \| Organization \| Can view Organization | `organization.view_branding` |
 | Einstellungen › HR-API-Sync-Konfiguration | Data Exchange \| HR API Sync Configuration \| Can view HR API Sync Configuration | `dataexchange.view_udbsyncconfiguration` |
 | Einstellungen › Journal | Journal \| journal entry \| Can view journal entry | `journal.view_journalentry` |
+| Einstellungen › Benutzer *(Admin)* | Accounts \| user \| Can view user | `accounts.view_customuser` |
+| Einstellungen › Gruppen und Berechtigungen *(Admin)* | Accounts \| group \| Can view group | `accounts.view_group` |
+| Einstellungen › Ausleih-Ordnungen *(Admin)* | Core \| Link \| Can view Link | `core.view_link` |
+| Einstellungen › Kleinkram-Katalog *(Admin)* | Smallstuff \| thing \| Can view thing | `smallstuff.view_thing` |
+| Einstellungen › Benachrichtigungen *(Admin)* | Notifications \| message \| Can view message | `notifications.view_message` |
+| Einstellungen › Reports *(Admin)* | Reporting \| Report \| Can view Report | `reporting.view_report` |
+| Einstellungen › Raumabgleich *(Admin)* | Core \| Raum-Abgleich \| Can view Raum-Abgleich | `core.view_roomreconcile` |
 
 Das Zahnrad in der Navigationsleiste öffnet die Seite *Einstellungen*: die Einträge *Einstellungen › …* der Tabelle, nach Bereichen gruppiert, und davon nur die, für die der Benutzer die Berechtigung hat. Hat er keine davon, fehlt das Zahnrad. Das Suchfeld der Seite findet einen Eintrag auch über Begriffe, die nur auf seiner Seite stehen, etwa *Organisation* über „Branding“.
 
@@ -205,7 +213,7 @@ Reichen die Angaben auf der Bestätigungsseite nicht, alle Geräte einem **Zwisc
 
 ## Django-Admin
 
-Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
+Die tägliche Arbeit läuft im Frontend. Der Django-Admin (*Django Site-Verwaltung* im Benutzermenü und unten auf der Seite *Einstellungen*) ist nur mit Staff-Flag erreichbar, und auch dort gelten die Gruppen-Berechtigungen. Gebraucht wird er noch für:
 
 - Benutzer und Gruppen anlegen und Berechtigungen vergeben; Benutzer deaktivieren (Aktion *Ausgewählte Benutzer deaktivieren* oder Haken *Aktiv*) oder einzeln *Endgültig löschen* (löscht auch ihre Einträge im Admin-Log). Mit LDAP siehe [LDAP](#ldap).
 - die mit *(Admin)* markierten [Menüpunkte](#navigation),

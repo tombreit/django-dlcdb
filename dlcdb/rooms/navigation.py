@@ -13,4 +13,15 @@ nav_entries = [
         "url": "rooms:index",
         "required_permission": "core.view_room",
     },
+    {
+        "slot": "nav_settings",
+        "order": 10,
+        "label": _("Room reconcile"),
+        "group": "data",
+        "description": _("Compare the rooms with an Archibus CSV export"),
+        "search_terms": _("Archibus, CSV, upload, compare"),
+        "icon": "bi bi-file-earmark-arrow-up",
+        "url": "admin:core_roomreconcile_changelist",
+        "required_permission": "core.view_roomreconcile",
+    },
 ]

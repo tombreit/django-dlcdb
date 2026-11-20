@@ -27,6 +27,18 @@ nav_entries = [
         # The lending profiles are listed on the configuration page.
         "active_url_names": {"configuration", "profile_add", "profile_detail", "profile_history", "profile_delete"},
     },
+    {
+        # core.Link: the documents a lending profile asks the borrower to confirm.
+        "slot": "nav_settings",
+        "order": 25,
+        "label": _("Lending regulations"),
+        "group": "modules",
+        "description": _("The regulations the lending profiles ask borrowers to confirm, as link or file"),
+        "search_terms": _("links, documents, PDF, terms of use"),
+        "icon": "bi bi-file-earmark-text",
+        "url": "admin:core_link_changelist",
+        "required_permission": "core.view_link",
+    },
 ]
 
 nav_focus = {
