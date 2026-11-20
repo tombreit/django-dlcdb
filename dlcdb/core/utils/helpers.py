@@ -75,6 +75,10 @@ def shrink_photo(source):
     photo's EXIF data, its GPS position for one, is dropped.
     """
     with Image.open(source) as img:
+        # A JPEG then decodes at a fraction of its size, still at least as large
+        # as needed whichever way it turns; other formats ignore it.
+        side = max(PERSON_PHOTO_SIZE)
+        img.draft("RGB", (side, side))
         upright = ImageOps.exif_transpose(img)
         upright.thumbnail(PERSON_PHOTO_SIZE)
         output = BytesIO()
