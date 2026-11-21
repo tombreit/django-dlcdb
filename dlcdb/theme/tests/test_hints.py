@@ -156,15 +156,13 @@ class StickyHintsTests(BaseTest):
         """A hint holds until its cause is fixed: closing it would only last until the next page."""
         response = self.client.post(reverse("rooms:add"), {"number": "F1.01"}, follow=True)
 
-        alerts = re.findall(r'<div class="alert[^"]*">.*?</div>', response.text, re.DOTALL)
-        hint = next(alert for alert in alerts if "is_external" in alert)
-        created = next(alert for alert in alerts if "was created" in alert)
-        self.assertNotIn("alert-dismissible", hint)
+        rows = re.findall(r'<li id="message-\d+".*?</li>', response.text, re.DOTALL)
+        hint = next(row for row in rows if "is_external" in row)
+        created = next(row for row in rows if "was created" in row)
         self.assertNotIn("btn-close", hint)
-        self.assertIn("alert-warning", hint)
-        self.assertIn("alert-dismissible", created)
+        self.assertIn("bg-warning-subtle", hint)
         self.assertIn("btn-close", created)
-        self.assertIn("alert-success", created)
+        self.assertIn("bg-success-subtle", created)
 
     def test_room_hints_link_to_the_rooms_frontend(self):
         # No rooms at all: the hint offers the frontend add form.

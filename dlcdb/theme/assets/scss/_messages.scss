@@ -1,0 +1,31 @@
+/*
+ * SPDX-FileCopyrightText: Thomas Breitner
+ *
+ * SPDX-License-Identifier: EUPL-1.2
+ */
+
+// Django's messages (theme/_base.html): one list-group on the card-filled
+// surface, a row per message. A row's level shows in its icon, a small square
+// in the level's colours (`bg-<level>-subtle text-<level>-emphasis` in the
+// markup), like the icon square in a section header.
+
+.list-group-messages {
+  --#{$prefix}list-group-bg: var(--#{$prefix}tertiary-bg);
+  --#{$prefix}list-group-border-width: 0;
+  --#{$prefix}list-group-border-radius: var(--app-radius-lg);
+
+  // Rows are cut apart by a line in the page's colour.
+  > .list-group-item + .list-group-item {
+    border-top: var(--#{$prefix}border-width) solid var(--#{$prefix}body-bg);
+  }
+
+  > .list-group-item > .bi:first-child {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: .875rem;
+    border-radius: .5rem;
+  }
+}
