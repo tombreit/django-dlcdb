@@ -6,13 +6,17 @@
 The record trail: the non-admin counterpart of the Record changelist.
 
 Records are the app's event log — one row per device state change, written only
-by the lifecycle transitions. This frontend is therefore purely read-only: two
-GET views, no forms, no POST branches, no add/change/delete routes, for every
-user including superusers.
+by the lifecycle transitions. This frontend therefore never changes a record:
+no add/change/delete routes, for every user including superusers. The one write
+is attaching a file through the record page's Attachments card
+(``record_attachments``; pictures of a removed device, say): an attachment
+documents the event without changing it.
 
 Reached either as the whole trail (``/assets/records/``) or scoped to one device
 (``?device=<pk>``), which is how the device sidebar links here.
 """
+
+import mimetypes
 
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
@@ -28,8 +32,13 @@ from dlcdb.theme.navigation import get_redirect_url
 from dlcdb.theme.pagination import paginate
 
 from ..filters import RecordFilter
+from ..forms import AttachmentForm
 
 RECORDS_PER_PAGE = 25
+
+# Attachments of these types get a preview on the record page: every browser
+# shows them in an <img>. Others (PDF, HEIC photos) get a file icon.
+PREVIEW_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp", "image/avif", "image/svg+xml"}
 
 # A trail is an append-only event log, so creation time is the event time.
 # modified_at moves when a record is superseded, which would reshuffle history.
@@ -107,13 +116,21 @@ def record_index(request):
     return TemplateResponse(request, template, context)
 
 
+def _attachments(record):
+    """The record's files, oldest first so each keeps its number when more are added."""
+    attachments = [
+        attachment for attachment in record.attachments.select_related("user").order_by("created_at") if attachment.file
+    ]
+    for attachment in attachments:
+        attachment.is_image = mimetypes.guess_type(attachment.file.name)[0] in PREVIEW_TYPES
+    return attachments
+
+
 @htmx_permission_required("core.view_record")
 def record_detail(request, pk):
     """One record, read only: no form, no POST branch, nothing to save."""
     record = get_object_or_404(
-        _record_queryset(request)
-        .select_related("device__manufacturer", "assigned_device")
-        .prefetch_related("attachments"),
+        _record_queryset(request).select_related("device__manufacturer", "assigned_device"),
         pk=pk,
     )
 
@@ -126,8 +143,37 @@ def record_detail(request, pk):
         "assets/records/detail.html",
         {
             "record": record,
+            "attachments": _attachments(record),
             "next_url": next_url,
             # Closes the loop device -> trail -> one record -> that device's trail.
             "device_records_url": f"{reverse('assets:record_index')}?device={record.device_id}",
         },
+    )
+
+
+# Both permissions: one decorator lets any of its permissions pass.
+@htmx_permission_required("core.view_record")
+@htmx_permission_required("core.add_attachment")
+def record_attachments(request, pk):
+    """
+    The record page's Attachments card, swapped in by HTMX: with the upload form
+    after "Add attachment" (``?form``) and while the form has errors, without it
+    after Cancel and after a saved upload, which then shows as the last row.
+    """
+    record = get_object_or_404(_record_queryset(request), pk=pk)
+
+    attachment_form = AttachmentForm() if "form" in request.GET else None
+    if request.method == "POST":
+        attachment_form = AttachmentForm(request.POST, request.FILES)
+        if attachment_form.is_valid():
+            attachment = attachment_form.save(commit=False)
+            attachment.stamp_user(request.user)
+            attachment.save()
+            record.attachments.add(attachment)
+            attachment_form = None
+
+    return TemplateResponse(
+        request,
+        "assets/records/detail.html#attachments",
+        {"record": record, "attachments": _attachments(record), "attachment_form": attachment_form},
     )

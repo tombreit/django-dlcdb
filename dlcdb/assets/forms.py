@@ -6,7 +6,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, DeviceType, Manufacturer, Record, Room, Supplier
+from dlcdb.core.models import Attachment, Device, DeviceType, Manufacturer, Record, Room, Supplier
 from dlcdb.tenants.shortcuts import limit_tenant_field
 from dlcdb.theme.forms import add_bootstrap_classes
 from dlcdb.theme.related import add_related_links
@@ -66,7 +66,7 @@ class TransitionNoteForm(forms.Form):
 
 
 class RemoveForm(TransitionNoteForm):
-    """Decommissioning; the attachments of the admin form stay in the admin."""
+    """Decommissioning; attachments are added on the record page once it is saved."""
 
     note = None
     disposition_state = Record._meta.get_field("disposition_state").formfield()
@@ -82,6 +82,22 @@ class RecoverForm(TransitionNoteForm):
         widget=TomSelectWidget(),
     )
     field_order = ["room", "note"]
+
+
+class AttachmentForm(forms.ModelForm):
+    """One file for a stored record, added on the record page."""
+
+    class Meta:
+        model = Attachment
+        fields = ["title", "file"]
+        # The model fields have no verbose_name.
+        labels = {"title": _("Title"), "file": _("File")}
+        # The form is swapped into the record page; htmx focuses autofocus after a swap.
+        widgets = {"title": forms.TextInput(attrs={"autofocus": True})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
 
 
 class DeviceForm(forms.ModelForm):

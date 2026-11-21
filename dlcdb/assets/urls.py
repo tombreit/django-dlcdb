@@ -27,6 +27,7 @@ urlpatterns = [
     path("suppliers/<int:pk>/", views.supplier_detail, name="supplier_detail"),
     path("records/", views.record_index, name="record_index"),
     path("records/<int:pk>/", views.record_detail, name="record_detail"),
+    path("records/<int:pk>/attachments/", views.record_attachments, name="record_attachments"),
     path("person-search/", views.person_search, name="person_search"),
     path("relocate/", views.relocate, name="relocate"),
     path("room-search/", views.room_search, name="room_search"),

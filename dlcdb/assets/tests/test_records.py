@@ -15,10 +15,11 @@ cannot tell "this record has a note" from "this device has another record".
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from dlcdb.core.models import InRoomRecord, LostRecord, Person, Record, Room
+from dlcdb.core.models import Attachment, InRoomRecord, LostRecord, Person, Record, RemovedRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
 
 from ..filters import RecordFilter
@@ -27,6 +28,15 @@ _PLAIN_STATIC_STORAGE = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
+
+
+def _login_with(test, *codenames):
+    """Log the test's client in as a user of the default tenant with these core permissions."""
+    user = get_user_model().objects.create_user(username="record-viewer", email="viewer@example.com", password="secret")
+    user.user_permissions.add(*Permission.objects.filter(content_type__app_label="core", codename__in=codenames))
+    test._join_default_tenant(user)
+    test.client.force_login(user)
+    return user
 
 
 class RecordNoteFilterTests(BaseTest, TestCase):
@@ -107,16 +117,8 @@ class RecordDetailDeviceLinkTests(BaseTest, TestCase):
         cls.device_url = reverse("assets:device_detail", args=[device.pk])
         cls.record_url = reverse("assets:record_detail", args=[record.pk])
 
-    def _login_with(self, *codenames):
-        user = get_user_model().objects.create_user(
-            username="record-viewer", email="viewer@example.com", password="secret"
-        )
-        user.user_permissions.add(*Permission.objects.filter(content_type__app_label="core", codename__in=codenames))
-        self._join_default_tenant(user)
-        self.client.force_login(user)
-
     def test_the_device_ids_link_to_the_device(self):
-        self._login_with("view_record", "view_device")
+        _login_with(self, "view_record", "view_device")
 
         response = self.client.get(self.record_url)
 
@@ -124,9 +126,49 @@ class RecordDetailDeviceLinkTests(BaseTest, TestCase):
         self.assertContains(response, f'<a href="{self.device_url}">8100</a>', html=True)
 
     def test_without_view_device_no_link_leads_to_the_device(self):
-        self._login_with("view_record")
+        _login_with(self, "view_record")
 
         response = self.client.get(self.record_url)
 
         self.assertContains(response, "REC-LINK")
         self.assertNotContains(response, self.device_url)
+
+
+@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
+class RecordAttachmentTests(BaseTest, TestCase):
+    """Files are attached in the record page's Attachments card, also to a record saved long before."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.record = RemovedRecord.objects.create(device=cls()._create_device(edv_id="REC-REMOVED", sap_id="8200"))
+        cls.record_url = reverse("assets:record_detail", args=[cls.record.pk])
+        cls.card_url = reverse("assets:record_attachments", args=[cls.record.pk])
+
+    def _upload(self):
+        photo = SimpleUploadedFile("damage.png", b"\x89PNG", content_type="image/png")
+        return self.client.post(self.card_url, {"title": "Housing damage", "file": photo})
+
+    def test_add_attachment_swaps_in_the_upload_form(self):
+        _login_with(self, "view_record", "add_attachment")
+
+        self.assertContains(self.client.get(self.record_url), f'hx-get="{self.card_url}?form"')
+        self.assertContains(self.client.get(f"{self.card_url}?form"), 'type="file"')
+
+    def test_a_saved_upload_is_the_cards_new_row(self):
+        user = _login_with(self, "view_record", "add_attachment")
+
+        response = self._upload()
+
+        attachment = self.record.attachments.get()
+        self.assertEqual((attachment.title, attachment.user), ("Housing damage", user))
+        self.assertNotContains(response, "<html")  # the card only
+        self.assertNotContains(response, 'type="file"')  # the form is gone again
+        self.assertContains(response, f'<img src="{attachment.file.url}"')  # the preview
+        self.assertContains(response, str(user))  # who saved it
+
+    def test_without_add_attachment_there_is_no_upload(self):
+        _login_with(self, "view_record")
+
+        self.assertNotContains(self.client.get(self.record_url), self.card_url)
+        self.assertEqual(self._upload().status_code, 403)
+        self.assertFalse(Attachment.objects.exists())
