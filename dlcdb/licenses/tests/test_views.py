@@ -8,7 +8,6 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.contrib.messages import get_messages
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 from simple_history.utils import update_change_reason
@@ -88,7 +87,6 @@ class LicensesIndexViewTests(BaseTest):
         self.assertLess(asc.index("Alpha"), asc.index("Beta"))
         self.assertLess(desc.index("Beta"), desc.index("Alpha"))
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_and_sort_headers_render(self):
         response = self.client.get(self.url)
         content = response.content.decode()
@@ -101,7 +99,6 @@ class LicensesIndexViewTests(BaseTest):
         # Sortable column headers expose their ordering params.
         self.assertContains(response, "ordering=expiry")
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_chips_in_fragment(self):
         response = self.client.get(self.url, {"search": "Alpha"}, headers={"HX-Request": "true"})
         content = response.content.decode()
@@ -111,7 +108,6 @@ class LicensesIndexViewTests(BaseTest):
         # The fragment carries chips but not the bar's <form>.
         self.assertNotIn("<form", content)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_license_state_chip_has_readable_label(self):
         # license_state is a queryset annotation, not a model field, so the
         # filter needs an explicit label; otherwise the chip renders as

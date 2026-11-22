@@ -8,7 +8,7 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
@@ -560,7 +560,6 @@ class DeviceFrontendTests(BaseTest):
         asc = self.client.get(self.index_url, {"ordering": "created"}).content.decode()
         self.assertLess(asc.index("EDV-OLDEST"), asc.index("EDV-NEWEST"))
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_created_is_offered_in_the_sort_dropdown(self):
         response = self.client.get(self.index_url)
         self.assertContains(response, 'value="created"')

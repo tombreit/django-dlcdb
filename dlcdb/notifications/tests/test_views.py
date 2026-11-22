@@ -7,8 +7,6 @@ Tests for the user-facing "My subscriptions" page: listing, the report
 subscription add form, delete/toggle/trigger actions and the navbar entry.
 """
 
-import tempfile
-
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import override_settings
@@ -22,10 +20,7 @@ from dlcdb.notifications.models import Subscription
 
 from .test_report_flows import create_report_subscription
 
-TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="dlcdb-test-media-")
 
-
-@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class MySubscriptionsViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

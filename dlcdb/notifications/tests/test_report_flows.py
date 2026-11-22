@@ -8,12 +8,11 @@ scheduled processing, ad-hoc admin triggering, recipients, spreadsheet
 attachments and per-lender grouping.
 """
 
-import tempfile
 from datetime import date, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core import mail
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from huey.contrib import djhuey
@@ -27,8 +26,6 @@ from dlcdb.notifications.tasks import notify_overdue_lenders, queue_messages_for
 from dlcdb.organization.models import Branding
 from dlcdb.reporting.models import Report
 from dlcdb.tenants.models import Tenant
-
-TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="dlcdb-test-media-")
 
 
 def create_device(edv_id, sap_id=None):
@@ -63,7 +60,6 @@ class ImmediateHueyMixin:
         self.addCleanup(lambda: setattr(djhuey.HUEY, "immediate", False))
 
 
-@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class ScheduledReportingTests(ImmediateHueyMixin, TestCase):
     def setUp(self):
         super().setUp()
@@ -197,7 +193,6 @@ class ScheduledReportingTests(ImmediateHueyMixin, TestCase):
         self.assertEqual(Message.objects.count(), 0)
 
 
-@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class AdHocReportTriggerTests(TestCase):
     def setUp(self):
         admin_user = get_user_model().objects.create_superuser(

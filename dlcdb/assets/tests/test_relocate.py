@@ -7,7 +7,6 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import (
@@ -27,11 +26,6 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 
 
-# Pin English so the UI-string assertions below are deterministic whether or not
-# the German message catalog happens to be compiled (LANGUAGE_CODE is de-de).
-# The record-type labels are translatable, so they resolve to the English
-# msgid here.
-@override_settings(LANGUAGE_CODE="en-us")
 class RelocateViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -380,7 +374,6 @@ class RelocateViewTests(BaseTest):
         self.assertContains(response, "Please select a target room.")
 
 
-@override_settings(LANGUAGE_CODE="en-us")
 class RelocatePermissionTests(BaseTest):
     """The Move module fronts three moves with three separate permissions.
 

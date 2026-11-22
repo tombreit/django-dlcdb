@@ -7,7 +7,6 @@ from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 
@@ -183,7 +182,6 @@ class LendingIndexViewTests(BaseTest):
         self.assertContains(response, 'value="-created"')
         self.assertEqual(response.context["filter"].qs.query.order_by, ("-created_at",))
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_renders_dropdowns_and_sort(self):
         response = self.client.get(self.url)
         content = response.content.decode()
@@ -199,7 +197,6 @@ class LendingIndexViewTests(BaseTest):
         sorted_content = self.client.get(self.url, {"ordering": "-due"}).content.decode()
         self.assertRegex(sorted_content, r'value="-due"\s+checked')
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_filterbar_chips_in_fragment(self):
         response = self.client.get(
             self.url,
@@ -227,14 +224,12 @@ class LendingIndexViewTests(BaseTest):
         # its default ordering.
         self.assertEqual(bar.clear_all_href, self.url)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_custom_sort_is_a_removable_chip(self):
         response = self.client.get(self.url, {"ordering": "-due"}, headers={"HX-Request": "true"})
         content = response.content.decode()
         self.assertIn("Sort: Due", content)
         self.assertIn('data-filterbar-remove="ordering"', content)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_default_sort_is_not_a_chip(self):
         # The view injects ordering=-modified on every request, so a pristine
         # list must still show no chips at all.
@@ -242,7 +237,6 @@ class LendingIndexViewTests(BaseTest):
         self.assertNotIn('data-filterbar-remove="ordering"', content)
         self.assertNotIn("data-filterbar-clear-all", content)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_show_all_badge_removed(self):
         # The legacy "Show all" reset is gone; the filterbar "Clear filters" is the
         # single reset now.
@@ -250,7 +244,6 @@ class LendingIndexViewTests(BaseTest):
         self.assertNotContains(response, "Show all")
         self.assertNotContains(response, "text-bg-warning")
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_search_only_query_gets_chip_and_clear_all(self):
         # A search-only query used to have no reset affordance (chips are for
         # dropdown filters); the search chip now covers it.
@@ -501,7 +494,6 @@ class LendingDetailViewTests(BaseTest):
         self.assertEqual(self.available_device.active_record.record_type, Record.LENT)
         self.assertEqual(self.available_device.active_record.person, self.person)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_lend_message_links_the_device_and_the_person(self):
         # The success message names a device and a person; both are links to
         # their detail views so the message is actionable.
@@ -565,7 +557,6 @@ class LendingDetailViewTests(BaseTest):
         self.lent_record.refresh_from_db()
         self.assertIsNone(self.lent_record.lent_end_date)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_return_message_names_the_borrower(self):
         # The borrower is not submitted by the return form; the message must
         # still name them (from the record).
@@ -594,7 +585,6 @@ class LendingDetailViewTests(BaseTest):
         self.available_device.refresh_from_db()
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_soft_warning_when_no_contract_end_date(self):
         response = self.client.post(
             reverse("lending:detail", args=[self.available_record.pk]),
@@ -604,7 +594,6 @@ class LendingDetailViewTests(BaseTest):
         messages = [str(m) for m in response.context["messages"]]
         self.assertTrue(any("contract end date" in m.lower() for m in messages))
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_soft_warning_when_contract_ends_before_desired_return(self):
         self.person.udb_contract_planned_checkout = datetime.date(2026, 6, 30)
         self.person.save()
@@ -616,7 +605,6 @@ class LendingDetailViewTests(BaseTest):
         messages = [str(m) for m in response.context["messages"]]
         self.assertTrue(any("contract ends before" in m.lower() for m in messages))
 
-    @override_settings(LANGUAGE_CODE="en")
     def test_no_contract_warnings_on_return(self):
         # Acknowledging a return must not surface lending soft warnings: the
         # device is coming back, so contract-vs-desired-return checks are moot.

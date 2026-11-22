@@ -13,7 +13,6 @@ HTMX and never touched by the page-level tests.
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import InRoomRecord, Inventory, Person, Room
@@ -137,7 +136,6 @@ class InventoryThemePagerTests(BaseTest):
         self.assertIn("Show paginated view", content)
 
 
-@override_settings(LANGUAGE_CODE="en")
 class IndexFrameTests(BaseTest):
     """theme/_index_base.html + theme/includes/_list_status.html."""
 
