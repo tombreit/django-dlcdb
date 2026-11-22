@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
+from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils.html import escape
 
@@ -67,7 +68,10 @@ class DeviceTransitionTests(BaseTest):
             self._url(device, "remove"), {"disposition_state": SCRAPPED, "removed_info": "Recycling yard"}
         )
 
-        self.assertRedirects(response, detail_url)
+        # The device's page is a dead end now: the list, whose message links it.
+        self.assertRedirects(response, reverse("assets:device_index"))
+        [message] = get_messages(response.wsgi_request)
+        self.assertEqual(str(message), f'Device “<a href="{detail_url}">{device}</a>” was decommissioned.')
         device.refresh_from_db()
         record = device.active_record
         self.assertEqual(record.record_type, Record.REMOVED)
@@ -76,12 +80,25 @@ class DeviceTransitionTests(BaseTest):
         self.assertEqual(record.user, user)
 
     def test_missing_restore_and_recover_need_only_their_own_permission(self):
+        # Back on the device page, so the device in the message stays plain.
         cases = [
-            ("lose", InRoomRecord, {"note": "Not in its room"}, Record.LOST),
-            ("restore", RemovedRecord, {"note": "Removed by mistake"}, Record.LOST),
-            ("recover", RemovedRecord, {"room": self.room.pk, "note": "Found in the basement"}, Record.INROOM),
+            ("lose", InRoomRecord, {"note": "Not in its room"}, Record.LOST, "was marked as missing."),
+            (
+                "restore",
+                RemovedRecord,
+                {"note": "Removed by mistake"},
+                Record.LOST,
+                "was restored; it is missing until found.",
+            ),
+            (
+                "recover",
+                RemovedRecord,
+                {"room": self.room.pk, "note": "Found in the basement"},
+                Record.INROOM,
+                f"is back in room “{self.room}”.",
+            ),
         ]
-        for name, starting_record, data, target in cases:
+        for name, starting_record, data, target, done in cases:
             with self.subTest(name):
                 self._login(name, username=f"worker-{name}")
                 device = self._create_device()
@@ -90,6 +107,8 @@ class DeviceTransitionTests(BaseTest):
                 response = self.client.post(self._url(device, name), data)
 
                 self.assertRedirects(response, reverse("assets:device_detail", args=[device.pk]))
+                [message] = get_messages(response.wsgi_request)
+                self.assertEqual(str(message), f"Device “{device}” {done}")
                 device.refresh_from_db()
                 self.assertEqual(device.active_record.record_type, target)
                 self.assertEqual(device.active_record.note, data["note"])

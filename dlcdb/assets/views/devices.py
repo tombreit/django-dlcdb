@@ -12,6 +12,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
 from dlcdb.core import lifecycle
@@ -221,13 +222,18 @@ def device_order(request, pk):
 
 
 # The state changes the device page performs in a form of its own, each with the
-# form that collects its fields and the transition function that writes it. The
-# other transitions have their own screens: Move, Order, Lend and Return.
+# form that collects its fields, the transition function that writes it and what
+# the user is told afterwards ({device}, and the form's fields such as {room}).
+# The other transitions have their own screens: Move, Order, Lend and Return.
 TRANSITION_FORMS = {
-    "lose": (TransitionNoteForm, lifecycle.transition_lose),
-    "remove": (RemoveForm, lifecycle.transition_remove),
-    "restore": (TransitionNoteForm, lifecycle.transition_restore),
-    "recover": (RecoverForm, lifecycle.transition_recover),
+    "lose": (TransitionNoteForm, lifecycle.transition_lose, gettext_lazy("Device “{device}” was marked as missing.")),
+    "remove": (RemoveForm, lifecycle.transition_remove, gettext_lazy("Device “{device}” was decommissioned.")),
+    "restore": (
+        TransitionNoteForm,
+        lifecycle.transition_restore,
+        gettext_lazy("Device “{device}” was restored; it is missing until found."),
+    ),
+    "recover": (RecoverForm, lifecycle.transition_recover, gettext_lazy("Device “{device}” is back in room “{room}”.")),
 }
 
 
@@ -236,17 +242,17 @@ def device_transition(request, pk, name):
 
     The frontend counterpart of the admin add-forms for these records, gated on
     the transition's own permission only. Afterwards, and on Cancel, the user
-    returns to the device page or to the ``?next=`` URL of the screen that
-    offered the change.
+    returns to the ``?next=`` URL of the screen that offered the change, else to
+    the device page; after Remove to the device list.
     """
     if name not in TRANSITION_FORMS:
         raise Http404
-    form_class, transition_function = TRANSITION_FORMS[name]
+    form_class, transition_function, done_message = TRANSITION_FORMS[name]
     transition = lifecycle.BY_NAME[name]
     if not request.user.has_perm(transition.permission):
         raise PermissionDenied(missing_permission_message(transition.permission))
     device = _get_device(request, pk)
-    done_url = get_redirect_url(request) or reverse("assets:device_detail", args=[device.pk])
+    back_url = get_redirect_url(request) or reverse("assets:device_detail", args=[device.pk])
 
     form = form_class(request.POST or None)
     # The recover form's room gets buttons to open or add a room. The form posts
@@ -256,20 +262,21 @@ def device_transition(request, pk, name):
         lifecycle.check(device, name)
         if request.method == "POST" and form.is_valid():
             transition_function(device, user=request.user, **form.cleaned_data)
-            messages.success(
-                request,
-                _("“%(action)s” was recorded for device “%(device)s”.")
-                % {"action": transition.label, "device": device},
-            )
-            return redirect(done_url)
+            if name == "remove":
+                # A decommissioned device's page is a dead end: back to the
+                # device list, from where the message links the device.
+                messages.success(request, linked_message(done_message, device=device))
+                return redirect(get_redirect_url(request) or reverse("assets:device_index"))
+            messages.success(request, str(done_message).format(device=device, **form.cleaned_data))
+            return redirect(back_url)
     except lifecycle.IllegalTransition as error:
         messages.error(request, " ".join(error.messages))
-        return redirect(done_url)
+        return redirect(back_url)
 
     return TemplateResponse(
         request,
         "assets/devices/transition.html",
-        {"device": device, "form": form, "title": transition.label, "cancel_url": done_url},
+        {"device": device, "form": form, "title": transition.label, "cancel_url": back_url},
     )
 
 
