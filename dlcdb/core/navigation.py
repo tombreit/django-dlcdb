@@ -12,14 +12,6 @@ from django.utils.translation import gettext_lazy as _
 nav_entries = [
     {
         "slot": "nav_masterdata",
-        "order": 70,
-        "label": _("Removed records"),
-        "icon": "bi bi-stack",
-        "url": "admin:core_removedrecord_changelist",
-        "required_permission": "core.view_record",
-    },
-    {
-        "slot": "nav_masterdata",
         "order": 90,
         "label": _("Notes"),
         "icon": "bi bi-chat",

@@ -834,7 +834,7 @@ class RemovedDeviceWhereaboutsTests(BaseTest):
         response = self.client.get(self.index_url, {"state": Record.REMOVED}, headers={"HX-Request": "true"})
 
         self.assertContains(response, "Scrapped")
-        self.assertContains(response, f"{self.WHEREABOUTS[:59]}…")
+        self.assertContains(response, f"{self.WHEREABOUTS[:39]}…")
         self.assertContains(response, f'title="{self.WHEREABOUTS}"')
 
     def test_the_search_matches_the_whereabouts(self):

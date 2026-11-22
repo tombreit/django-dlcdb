@@ -31,7 +31,7 @@ Noted 2026-11-20, smallest first; none started yet.
 
 Shown only with the Staff flag. Each comes from the `navigation.py` of the app named; the settings page marks its entries with a *Staff* badge (DECISIONS: settings page).
 
-- [ ] **Removed records:** Datenhaltung › Entfernt-Records, `admin:core_removedrecord_changelist`, `core.view_record` (core).
+- [x] **Removed records:** the entry is gone; *Devices* with the state *Removed* lists the decommissioned devices with their whereabouts, the removal report mail links there (2026-11-22). The admin stays registered.
 - [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note` (core). The inventory screens add, edit and delete the notes of a room or device during an inventory.
 - [x] **Users and groups:** create them, give permissions, set passwords, deactivate: `accounts:users` and `accounts:groups` (2026-11-20, `PLANS/users-and-groups.md`, retired into DECISIONS.md). The Staff and Superuser flags and hard-deleting a user stay in the admin.
 - [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. Einstellungen › Ausleih-Ordnungen, `admin:core_link_changelist`, `core.view_link` (lending).

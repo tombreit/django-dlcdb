@@ -59,12 +59,14 @@ FALLBACK_WINDOW_DAYS = {
 ReportRecords = namedtuple("ReportRecords", ["records", "window_start", "window_end"])
 
 
-def get_admin_url_for_recordtype(recordtype):
+def get_listing_path(recordtype):
+    """The page a report mail links as its listing."""
     if recordtype == Record.LENT:
-        return "admin:core_lentrecord_changelist"
+        return reverse("admin:core_lentrecord_changelist")
     elif recordtype == Record.REMOVED:
-        return "admin:core_removedrecord_changelist"
-    return "admin:core_record_changelist"
+        # Decommissioned devices are the device list filtered by state.
+        return f"{reverse('assets:device_index')}?state={Record.REMOVED}"
+    return reverse("admin:core_record_changelist")
 
 
 def get_lent_overdue_records(now):
@@ -189,7 +191,7 @@ def create_report_message(subscription, *, now=None, update_window=True) -> Mess
 
 def _render_report_body(subscription, report_records, record_rows):
     domain = Site.objects.get_current().domain
-    changelist_url = f"https://{domain}{reverse(get_admin_url_for_recordtype(subscription.event))}"
+    changelist_url = f"https://{domain}{get_listing_path(subscription.event)}"
     context = {
         "subscription": subscription,
         "records_count": len(record_rows),

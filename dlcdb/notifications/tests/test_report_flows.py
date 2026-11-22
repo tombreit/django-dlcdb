@@ -171,6 +171,16 @@ class ScheduledReportingTests(ImmediateHueyMixin, TestCase):
         self.assertIn("No records affected", email.subject)
         self.assertEqual(email.attachments, [])
 
+    def test_a_removal_report_links_the_removed_devices(self):
+        create_report_subscription(
+            event=Subscription.NotificationEventChoices.REMOVED, condition="", notify_no_updates=True
+        )
+
+        queue_messages_for_interval.call_local(NotificationInterval.DAILY)
+        send_message.call_local(Message.objects.get().id)
+
+        self.assertIn(f"{reverse('assets:device_index')}?state=REMOVED>", mail.outbox[0].body)
+
     def test_no_records_without_notify_no_updates_creates_no_message(self):
         create_report_subscription(event=Subscription.NotificationEventChoices.REMOVED, condition="")
 

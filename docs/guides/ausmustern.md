@@ -27,4 +27,4 @@ Sollen viele Devices auf einmal entfernt/ausgemustert werden:
   * Gefunden werden nur Devices der eigenen [Mandanten](berechtigungen.md#mandanten); jedes andere Device gilt als nicht vorhanden.
 * Die DLCDB gibt eine Zusammenfassung der Vorgänge aus.
 
-Bereits ausgemusterte Geräte listet *Datenhaltung › Entfernt-Records*. *Entfernt* ist standardmäßig ein Endzustand, siehe [Ausmusterung rückgängig machen](berechtigungen.md#statuswechsel).
+Bereits ausgemusterte Geräte listet *Hauptmenü › Geräte* mit dem Filter *Status: Entfernt*, mit ihrem Verbleib; die Suche findet auch den Freitext, der CSV-Export enthält beides. *Entfernt* ist standardmäßig ein Endzustand, siehe [Ausmusterung rückgängig machen](berechtigungen.md#statuswechsel).
