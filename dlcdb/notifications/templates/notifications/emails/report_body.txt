@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 Report:           {{ subscription }}
 Affected Records: {{ records_count }}
-Listing:          <{{ changelist_url }}>
+Listing:          <{{ listing_url }}>
 From:             {{ window_start }}
 To:               {{ window_end }}
 -------------------------------------------------------------------------------

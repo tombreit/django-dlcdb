@@ -22,6 +22,7 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.lending.models import LendingConfiguration
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
+from dlcdb.notifications.reports import get_listing_path
 from dlcdb.notifications.tasks import notify_overdue_lenders, queue_messages_for_interval, send_message
 from dlcdb.organization.models import Branding
 from dlcdb.reporting.models import Report
@@ -180,6 +181,19 @@ class ScheduledReportingTests(ImmediateHueyMixin, TestCase):
         send_message.call_local(Message.objects.get().id)
 
         self.assertIn(f"{reverse('assets:device_index')}?state=REMOVED>", mail.outbox[0].body)
+
+    def test_a_report_links_the_frontend_list_of_its_state(self):
+        events, conditions = Subscription.NotificationEventChoices, Subscription.ConditionChoices
+        cases = [
+            (events.ORDERED, "", "/assets/devices/?state=ORDERED"),
+            (events.INROOM, "", "/assets/devices/?state=INROOM"),
+            (events.LOST, "", "/assets/devices/?state=LOST"),
+            (events.LENT, "", "/lending/?state=lent"),
+            (events.LENT, conditions.LENT_IS_OVERDUE, "/lending/?state=overdue"),
+        ]
+        for event, condition, path in cases:
+            with self.subTest(event=event, condition=condition):
+                self.assertEqual(get_listing_path(Subscription(event=event, condition=condition)), path)
 
     def test_no_records_without_notify_no_updates_creates_no_message(self):
         create_report_subscription(event=Subscription.NotificationEventChoices.REMOVED, condition="")

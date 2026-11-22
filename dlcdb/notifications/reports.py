@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dlcdb.core.models import LentRecord, Record
+from dlcdb.lending.filters import STATE_LENT, STATE_OVERDUE
 from dlcdb.reporting.services import create_report
 from dlcdb.reporting.utils.representations import get_records_as_text
 
@@ -59,14 +60,13 @@ FALLBACK_WINDOW_DAYS = {
 ReportRecords = namedtuple("ReportRecords", ["records", "window_start", "window_end"])
 
 
-def get_listing_path(recordtype):
-    """The page a report mail links as its listing."""
-    if recordtype == Record.LENT:
-        return reverse("admin:core_lentrecord_changelist")
-    elif recordtype == Record.REMOVED:
-        # Decommissioned devices are the device list filtered by state.
-        return f"{reverse('assets:device_index')}?state={Record.REMOVED}"
-    return reverse("admin:core_record_changelist")
+def get_listing_path(subscription):
+    """The frontend list a report mail links: the devices in the reported state."""
+    if subscription.event == Record.LENT:
+        overdue = subscription.condition == Subscription.ConditionChoices.LENT_IS_OVERDUE
+        return f"{reverse('lending:index')}?state={STATE_OVERDUE if overdue else STATE_LENT}"
+    # The report events are the lifecycle's state keys, as the device list's state filter.
+    return f"{reverse('assets:device_index')}?state={subscription.event}"
 
 
 def get_lent_overdue_records(now):
@@ -191,12 +191,12 @@ def create_report_message(subscription, *, now=None, update_window=True) -> Mess
 
 def _render_report_body(subscription, report_records, record_rows):
     domain = Site.objects.get_current().domain
-    changelist_url = f"https://{domain}{get_listing_path(subscription.event)}"
+    listing_url = f"https://{domain}{get_listing_path(subscription)}"
     context = {
         "subscription": subscription,
         "records_count": len(record_rows),
         "record_rows": record_rows,
-        "changelist_url": changelist_url,
+        "listing_url": listing_url,
         "window_start": report_records.window_start,
         "window_end": report_records.window_end,
         **email_footer_context(),
