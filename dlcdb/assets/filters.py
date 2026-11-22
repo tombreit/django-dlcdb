@@ -155,6 +155,8 @@ class DeviceFilter(django_filters.FilterSet):
             | Q(order_number__icontains=value)
             | Q(note__icontains=value)
             | Person.search_q(value, prefix="active_record__person__")
+            # Where a removed device went ("recycler", "securely erased").
+            | Q(active_record__removed_info__icontains=value)
         )
 
     def state_filter(self, queryset, name, value):

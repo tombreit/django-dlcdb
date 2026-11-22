@@ -4,7 +4,9 @@
 
 """Integration tests for the standalone Device frontend."""
 
+import csv
 import datetime
+import io
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
@@ -14,9 +16,21 @@ from django.utils import timezone
 from django.utils.html import escape
 
 from dlcdb.assets.forms import DeviceForm
-from dlcdb.core.models import Device, InRoomRecord, LentRecord, Manufacturer, Person, Record, Room, Supplier
+from dlcdb.core.models import (
+    Device,
+    InRoomRecord,
+    LentRecord,
+    Manufacturer,
+    Person,
+    Record,
+    RemovedRecord,
+    Room,
+    Supplier,
+)
+from dlcdb.core.models.record import SCRAPPED
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
+from dlcdb.dataexchange.csv_export import EXPORT_DIALECT, EXPORT_ENCODING
 from dlcdb.tenants.models import Tenant
 from dlcdb.tenants.shortcuts import get_user_tenants
 from dlcdb.theme.navigation import with_next
@@ -789,3 +803,58 @@ class DeviceHistoryTests(BaseTest):
         response = self.client.get(reverse("assets:device_detail", args=[self.device.pk]))
 
         self.assertContains(response, f'href="{reverse("assets:device_history", args=[self.device.pk])}"')
+
+
+class RemovedDeviceWhereaboutsTests(BaseTest):
+    """A removed device's whereabouts on the device list and page, in the search and the CSV export."""
+
+    WHEREABOUTS = "SSD securely erased, handed to Example Recycling at the loading dock on the north side"
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser(email="helpdesk@example.com", password="secret")
+        cls()._join_default_tenant(cls.user)
+        cls.removed_date = datetime.datetime(2021, 6, 15, 12, 0, tzinfo=datetime.UTC)
+        cls.removed = cls()._create_device(edv_id="EDV-REMOVED", sap_id="1-1")
+        establish_state(
+            RemovedRecord,
+            device=cls.removed,
+            disposition_state=SCRAPPED,
+            removed_info=cls.WHEREABOUTS,
+            removed_date=cls.removed_date,
+        )
+        cls.kept = cls()._create_device(edv_id="EDV-KEPT", sap_id="2-2")
+        InRoomRecord.objects.create(device=cls.kept, room=Room.objects.create(number="A1.01"))
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.index_url = reverse("assets:device_index")
+
+    def test_the_list_shows_the_whereabouts_trimmed(self):
+        response = self.client.get(self.index_url, {"state": Record.REMOVED}, headers={"HX-Request": "true"})
+
+        self.assertContains(response, "Scrapped")
+        self.assertContains(response, f"{self.WHEREABOUTS[:59]}…")
+        self.assertContains(response, f'title="{self.WHEREABOUTS}"')
+
+    def test_the_search_matches_the_whereabouts(self):
+        response = self.client.get(self.index_url, {"search": "example recycling"}, headers={"HX-Request": "true"})
+
+        self.assertContains(response, "EDV-REMOVED")
+        self.assertNotContains(response, "EDV-KEPT")
+
+    def test_the_device_page_shows_the_whereabouts_and_the_removal_date(self):
+        response = self.client.get(reverse("assets:device_detail", args=[self.removed.pk]))
+
+        self.assertContains(response, "Scrapped")
+        self.assertContains(response, self.WHEREABOUTS)
+        self.assertContains(response, timezone.localdate(self.removed_date).isoformat())
+
+    def test_the_csv_export_has_the_whereabouts(self):
+        response = self.client.get(reverse("assets:device_export_csv"), {"state": Record.REMOVED})
+
+        content = response.content.decode(EXPORT_ENCODING)
+        (row,) = csv.DictReader(io.StringIO(content), dialect=EXPORT_DIALECT)
+        self.assertEqual(row["record_disposition_state"], SCRAPPED)
+        self.assertEqual(row["record_removed_info"], self.WHEREABOUTS)
+        self.assertEqual(row["record_removed_date"], f"{timezone.localtime(self.removed_date):%Y-%m-%d %H:%M}")

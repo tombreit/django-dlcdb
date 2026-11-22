@@ -127,6 +127,11 @@ DEVICE_EXPORT_COLUMNS = [
     Column("record_lent_end_date", "active_record.lent_end_date"),
     Column("record_note", "active_record.note"),
     Column("record_created_at", "active_record.created_at"),
+    # A removed device's whereabouts. The key, like record_type: the bulk
+    # decommissioning CSV reads the same keys.
+    Column("record_disposition_state", "active_record.disposition_state"),
+    Column("record_removed_info", "active_record.removed_info"),
+    Column("record_removed_date", "active_record.removed_date"),
     # Audit
     Column("is_imported", "is_imported", _yes_no),
     Column("username", "username"),

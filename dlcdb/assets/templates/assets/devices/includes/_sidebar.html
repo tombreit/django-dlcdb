@@ -48,7 +48,18 @@ lending_url is set only for a viewer who may open the lending.
           {% else %}
             <div>
               <dt>{% translate "Since" %}</dt>
-              <dd>{{ record.created_at|date:"SHORT_DATE_FORMAT" }}</dd>
+              {# Imports and bulk decommissioning stamp a removal date older than the record. #}
+              <dd>{{ record.removed_date|default:record.created_at|date:"SHORT_DATE_FORMAT" }}</dd>
+            </div>
+          {% endif %}
+          {% if record.disposition_state or record.removed_info %}
+            {# One row: "Disposition" and "Whereabouts" read the same in German. #}
+            <div>
+              <dt>{% translate "Whereabouts" %}</dt>
+              <dd>
+                {{ record.get_disposition_state_display }}
+                {% if record.removed_info %}<div style="white-space: pre-line;">{{ record.removed_info }}</div>{% endif %}
+              </dd>
             </div>
           {% endif %}
           {% if record.note %}
