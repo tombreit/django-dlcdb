@@ -28,6 +28,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The LOST state is labelled "Missing"**; the key stays `LOST`. Not "Not locatable" (a back-translation of "Nicht auffindbar" that clashes with the "locate" transition), not "Lost" (sounds final, while a device an inventory misses is often found again).
 - **HR room names map through a configurable regex**, not per-institute code. HR owns `Room.website`; the sync never creates rooms (typos, "Homeoffice").
 - **A pure-Python wheel on GitHub Releases**, with the built docs and the collected static files; no sdist (it can't rebuild the frontend). PyPI later, via trusted publishing.
+- **Tests use the plain static storage**, not the manifest storage with a `collectstatic` before the run: that needs a fresh `npm run build`, and a stale manifest fails tests that changed nothing. `theme/tests/test_static_references.py` checks the templates' `{% static %}` paths instead (`dist/` only once built); paths in a form's `Media` stay unchecked.
 - **The raw `static/**` stays in the wheel**: the favicon view and the icon picker read it, and without it a stray `collectstatic` would break every page.
 - **The version lives in `dlcdb.__version__`**, not in git tags via setuptools-scm (a checkout would lose it). The release logic is two shell scripts, not nox, invoke or a bump tool.
 - **`dlcdb_init` writes the instance's `wsgi.py`**: Apache's `SetEnv` doesn't reach `os.environ`.

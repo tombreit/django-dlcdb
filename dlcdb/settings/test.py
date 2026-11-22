@@ -27,6 +27,7 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 WHITENOISE_AUTOREFRESH = True
 
 # Rendering needs no built static files: the manifest storage needs collectstatic.
+# theme/tests/test_static_references.py checks the templates' static paths instead.
 STORAGES = {**STORAGES, "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}
 
 # Tasks enqueued by tests stay in memory instead of the instance's queue file.
