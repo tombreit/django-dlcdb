@@ -11,7 +11,7 @@ from dlcdb.core.models import DeviceType, Link
 from dlcdb.lending.models import SCRIPT_RE, LendingProfile
 from dlcdb.lending.starter import get_starter_lending_preparation_checklist, get_starter_lent_sheet_template
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 CONFIG = "lending.view_lendingconfiguration"
 VIEW = "lending.view_lendingprofile"

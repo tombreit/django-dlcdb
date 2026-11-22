@@ -26,19 +26,12 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 
-# Plain static storage so tests do not require a built staticfiles manifest
-# (mirrors dlcdb.lending.tests.test_views).
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
-
 
 # Pin English so the UI-string assertions below are deterministic whether or not
 # the German message catalog happens to be compiled (LANGUAGE_CODE is de-de).
 # The record-type labels are translatable, so they resolve to the English
 # msgid here.
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en-us")
+@override_settings(LANGUAGE_CODE="en-us")
 class RelocateViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -387,7 +380,7 @@ class RelocateViewTests(BaseTest):
         self.assertContains(response, "Please select a target room.")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en-us")
+@override_settings(LANGUAGE_CODE="en-us")
 class RelocatePermissionTests(BaseTest):
     """The Move module fronts three moves with three separate permissions.
 

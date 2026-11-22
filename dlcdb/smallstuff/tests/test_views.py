@@ -41,19 +41,19 @@ def assignment(db, person):
 
 
 @pytest.mark.django_db
-def test_view_permission_opens_the_index_the_nav_links_to(client, plain_static):
+def test_view_permission_opens_the_index_the_nav_links_to(client):
     client.force_login(_make_user("view_assignedthing"))
     assert client.get(reverse("smallstuff:person_search")).status_code == 200
 
 
 @pytest.mark.django_db
-def test_without_any_permission_the_index_is_refused(client, plain_static):
+def test_without_any_permission_the_index_is_refused(client):
     client.force_login(_make_user())
     assert client.get(reverse("smallstuff:person_search")).status_code == 403
 
 
 @pytest.mark.django_db
-def test_the_search_finds_a_person_by_name(client, plain_static, assignment):
+def test_the_search_finds_a_person_by_name(client, assignment):
     client.force_login(_make_user("view_assignedthing"))
 
     def search(term):
@@ -64,7 +64,7 @@ def test_the_search_finds_a_person_by_name(client, plain_static, assignment):
 
 
 @pytest.mark.django_db
-def test_an_empty_search_finds_nobody_and_star_finds_everyone(client, plain_static, assignment):
+def test_an_empty_search_finds_nobody_and_star_finds_everyone(client, assignment):
     client.force_login(_make_user("view_assignedthing"))
 
     def search(term):
@@ -75,26 +75,26 @@ def test_an_empty_search_finds_nobody_and_star_finds_everyone(client, plain_stat
 
 
 @pytest.mark.django_db
-def test_view_permission_opens_the_person_detail(client, plain_static, person):
+def test_view_permission_opens_the_person_detail(client, person):
     client.force_login(_make_user("view_assignedthing"))
     assert client.get(reverse("smallstuff:person_detail", args=[person.pk])).status_code == 200
 
 
 @pytest.mark.django_db
-def test_reading_does_not_allow_assigning(client, plain_static, person):
+def test_reading_does_not_allow_assigning(client, person):
     client.force_login(_make_user("view_assignedthing"))
     url = reverse("smallstuff:add_assignement", args=[person.pk])
     assert client.get(url).status_code == 403
 
 
 @pytest.mark.django_db
-def test_assigning_needs_the_add_permission(client, plain_static, person):
+def test_assigning_needs_the_add_permission(client, person):
     client.force_login(_make_user("add_assignedthing"))
     assert client.get(reverse("smallstuff:add_assignement", args=[person.pk])).status_code == 200
 
 
 @pytest.mark.django_db
-def test_returning_a_thing_needs_the_change_permission(client, plain_static, assignment):
+def test_returning_a_thing_needs_the_change_permission(client, assignment):
     url = reverse("smallstuff:remove_assignement", args=[assignment.pk])
 
     client.force_login(_make_user("view_assignedthing"))
@@ -105,7 +105,7 @@ def test_returning_a_thing_needs_the_change_permission(client, plain_static, ass
 
 
 @pytest.mark.django_db
-def test_the_assign_button_is_hidden_from_a_read_only_user(client, plain_static, assignment):
+def test_the_assign_button_is_hidden_from_a_read_only_user(client, assignment):
     # Person.smallstuff_person_objects only yields people with an active
     # contract or an outstanding thing, so go through the assigned one.
     url = reverse("smallstuff:person_detail", args=[assignment.person.pk])

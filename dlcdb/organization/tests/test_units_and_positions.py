@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 PAGE = reverse("organization:branding")
 

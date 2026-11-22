@@ -19,13 +19,7 @@ from django.urls import reverse
 from dlcdb.core.models import InRoomRecord, Inventory, Person, Room
 from dlcdb.core.tests.basetest import BaseTest
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class SharedPersonPickerTests(BaseTest):
     """theme/includes/_person_search_results.html + _person_list_item.html."""
 
@@ -62,7 +56,6 @@ class SharedPersonPickerTests(BaseTest):
                 self.assertNotContains(blank, "No matching person found.")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class SharedFormChromeTests(BaseTest):
     """_form_action_bar.html, _readonly_notice.html and _back_link.html."""
 
@@ -101,7 +94,6 @@ class SharedFormChromeTests(BaseTest):
         self.assertNotContains(response, "Save changes")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class InventoryThemePagerTests(BaseTest):
     """The inventory device search now uses theme/includes/_pagination.html."""
 
@@ -145,7 +137,7 @@ class InventoryThemePagerTests(BaseTest):
         self.assertIn("Show paginated view", content)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, LANGUAGE_CODE="en")
+@override_settings(LANGUAGE_CODE="en")
 class IndexFrameTests(BaseTest):
     """theme/_index_base.html + theme/includes/_list_status.html."""
 

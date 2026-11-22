@@ -217,7 +217,7 @@ def test_inventorize_uuids_unknown(device_1, room_1, external_room, inventory_1,
 
 
 @pytest.mark.django_db
-def test_device_search_offers_own_tenants_unless_tenant_unaware(client, plain_static, inventory_1, tenant, join_tenant):
+def test_device_search_offers_own_tenants_unless_tenant_unaware(client, inventory_1, tenant, join_tenant):
     foreign = Tenant.objects.create(name="Foreign tenant")
     user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
     user.user_permissions.add(Permission.objects.get(codename="can_inventorize", content_type__app_label="core"))
@@ -237,7 +237,7 @@ def test_device_search_offers_own_tenants_unless_tenant_unaware(client, plain_st
 
 @pytest.mark.django_db
 def test_device_search_offers_frontend_state_changes_to_non_staff_users(
-    client, plain_static, inventory_1, join_tenant, device_1, device_2, room_1
+    client, inventory_1, join_tenant, device_1, device_2, room_1
 ):
     """Without the Staff flag: the state buttons open frontend screens, not the admin."""
     user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")
@@ -260,7 +260,7 @@ def test_device_search_offers_frontend_state_changes_to_non_staff_users(
 
 @pytest.mark.django_db
 def test_inventory_users_without_view_device_change_states_and_return_to_the_search(
-    client, plain_static, inventory_1, join_tenant, device_1, device_2, room_1
+    client, inventory_1, join_tenant, device_1, device_2, room_1
 ):
     """
     The state changes return to the search, so they work without core.view_device,
@@ -291,7 +291,7 @@ def test_inventory_users_without_view_device_change_states_and_return_to_the_sea
 @pytest.mark.django_db
 @pytest.mark.parametrize("may_view_device", [True, False])
 def test_the_search_links_the_device_page_with_view_device_never_the_admin(
-    client, plain_static, inventory_1, join_tenant, device_1, room_1, may_view_device
+    client, inventory_1, join_tenant, device_1, room_1, may_view_device
 ):
     """The device admin needs the Staff flag, which inventory users lack."""
     user = CustomUser.objects.create_user(email="inventor@example.com", password="secret", username="inventor")

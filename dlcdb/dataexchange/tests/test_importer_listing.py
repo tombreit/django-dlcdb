@@ -14,7 +14,7 @@ from dlcdb.core.models import Device
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
-from .test_frontend_import import _PLAIN_STATICFILES, _upload_file
+from .test_frontend_import import _upload_file
 
 INDEX_URL = "dataexchange:importer_index"
 DETAIL_URL = "dataexchange:importer_detail"
@@ -53,7 +53,6 @@ def _viewer_client(client, tenant, *, codenames=("view_importerlist",)):
     return client
 
 
-@_PLAIN_STATICFILES
 def test_index_lists_imports_with_status_and_device_count(superuser_client, confirmed_import):
     unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv", tenant=confirmed_import.tenant)
 
@@ -70,7 +69,6 @@ def test_index_lists_imports_with_status_and_device_count(superuser_client, conf
     assert page_rows[confirmed_import.pk].devices_count > 0
 
 
-@_PLAIN_STATICFILES
 def test_an_import_is_named_by_its_file_without_the_upload_folder(superuser_client, tenant):
     named = ImporterList.objects.create(file="imported_csv/spring.csv", tenant=tenant)
     fileless = ImporterList.objects.create(file="", tenant=tenant)
@@ -88,7 +86,6 @@ def test_an_import_is_named_by_its_file_without_the_upload_folder(superuser_clie
     assert '<h1 class="h3 mb-1">Import without file</h1>' in fileless_detail
 
 
-@_PLAIN_STATICFILES
 def test_index_htmx_response_is_fragment_only(superuser_client, confirmed_import):
     response = superuser_client.get(reverse(INDEX_URL), headers={"HX-Request": "true"})
 
@@ -96,7 +93,6 @@ def test_index_htmx_response_is_fragment_only(superuser_client, confirmed_import
     assert "<html" not in response.content.decode()
 
 
-@_PLAIN_STATICFILES
 def test_status_filter_and_search(superuser_client, confirmed_import):
     unconfirmed = ImporterList.objects.create(file="imported_csv/abandoned.csv", tenant=confirmed_import.tenant)
     url = reverse(INDEX_URL)
@@ -115,7 +111,6 @@ def test_index_requires_view_permission(client, tenant):
     assert client.get(reverse(INDEX_URL)).status_code == 403
 
 
-@_PLAIN_STATICFILES
 def test_tenant_user_sees_only_own_tenant_imports(client, tenant):
     own = ImporterList.objects.create(file="imported_csv/own.csv", tenant=tenant)
     other = ImporterList.objects.create(file="imported_csv/other.csv", tenant=Tenant.objects.create(name="OtherTenant"))
@@ -128,7 +123,6 @@ def test_tenant_user_sees_only_own_tenant_imports(client, tenant):
     assert client.get(reverse(DETAIL_URL, args=[other.pk])).status_code == 404
 
 
-@_PLAIN_STATICFILES
 def test_detail_shows_log_and_is_read_only(superuser_client, confirmed_import):
     url = reverse(DETAIL_URL, args=[confirmed_import.pk])
 
@@ -142,7 +136,6 @@ def test_detail_shows_log_and_is_read_only(superuser_client, confirmed_import):
     assert superuser_client.post(url).status_code == 405
 
 
-@_PLAIN_STATICFILES
 def test_device_list_filters_by_import(superuser_client, confirmed_import):
     manual_device = Device.objects.create(edv_id="MANUAL-1", tenant=confirmed_import.tenant)
 
@@ -153,7 +146,6 @@ def test_device_list_filters_by_import(superuser_client, confirmed_import):
     assert manual_device.pk not in listed
 
 
-@_PLAIN_STATICFILES
 def test_import_pages_and_device_sidebar_link_to_the_frontend(superuser_client, confirmed_import, tenant):
     response = superuser_client.get(reverse("dataexchange:device_import"))
     assert f'href="{reverse(INDEX_URL)}"' in response.content.decode()
@@ -169,7 +161,6 @@ def test_import_pages_and_device_sidebar_link_to_the_frontend(superuser_client, 
     assert reverse(DETAIL_URL, args=[confirmed_import.pk]) in response.content.decode()
 
 
-@_PLAIN_STATICFILES
 def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_client, tenant, join_tenant):
     superuser_client.post(
         reverse("dataexchange:device_import"), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk}
@@ -192,7 +183,6 @@ def test_uploader_is_recorded_and_not_overwritten_on_confirm(client, superuser_c
     assert uploader.email in response.content.decode()
 
 
-@_PLAIN_STATICFILES
 def test_admin_import_records_the_uploader(superuser_client, tenant):
     superuser_client.post(
         reverse("admin:dataexchange_importerlist_add"),

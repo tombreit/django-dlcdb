@@ -21,15 +21,6 @@ from dlcdb.tenants.models import Tenant
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 
-@pytest.fixture(autouse=True)
-def plain_static(settings):
-    """Plain static storage so tests do not require a built staticfiles manifest."""
-    settings.STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
-
-
 @pytest.fixture
 def url():
     return reverse("core:core_devices_relocate")

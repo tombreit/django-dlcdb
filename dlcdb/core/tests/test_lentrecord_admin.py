@@ -89,9 +89,7 @@ def test_interleaved_lends_each_redirect_to_their_own_lending(helpdesk, tenant, 
 
 
 @pytest.mark.django_db
-def test_lend_redirects_to_the_new_lending_and_an_edit_stays_on_it(
-    client, plain_static, helpdesk, tenant, lending_rooms, person
-):
+def test_lend_redirects_to_the_new_lending_and_an_edit_stays_on_it(client, helpdesk, tenant, lending_rooms, person):
     device = _available_device("EDV-LEND", tenant, lending_rooms["desk"])
     payload = {
         "person": person.pk,
@@ -144,14 +142,14 @@ def _changelist(client, **params):
 
 
 @pytest.mark.django_db
-def test_overdue_filter_lists_only_the_overdue_lendings(client, plain_static, helpdesk, lendings):
+def test_overdue_filter_lists_only_the_overdue_lendings(client, helpdesk, lendings):
     client.force_login(helpdesk)
 
     assert set(_changelist(client, record_type="overdue")) == {"EDV-OVERDUE"}
 
 
 @pytest.mark.django_db
-def test_only_the_overdue_lendings_are_highlighted(client, plain_static, helpdesk, lendings):
+def test_only_the_overdue_lendings_are_highlighted(client, helpdesk, lendings):
     client.force_login(helpdesk)
 
     states = {edv_id: record.lent_state for edv_id, record in _changelist(client).items()}
@@ -165,7 +163,7 @@ def test_only_the_overdue_lendings_are_highlighted(client, plain_static, helpdes
 
 
 @pytest.mark.django_db
-def test_the_change_form_has_no_print_button(client, plain_static, helpdesk, tenant, lending_rooms, person):
+def test_the_change_form_has_no_print_button(client, helpdesk, tenant, lending_rooms, person):
     # Slips print from the lending screen, which applies the tenant filter.
     device = Device.objects.create(edv_id="EDV-PRINT", is_lentable=True, tenant=tenant)
     establish_state(

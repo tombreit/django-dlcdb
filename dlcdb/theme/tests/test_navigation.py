@@ -113,7 +113,7 @@ ADD_PAGES = [
 
 
 @pytest.mark.parametrize("route", ADD_PAGES)
-def test_an_add_page_has_one_cancel_and_a_back_link_to_the_same_place(db, client, plain_static, route):
+def test_an_add_page_has_one_cancel_and_a_back_link_to_the_same_place(db, client, route):
     client.force_login(CustomUser.objects.create_superuser(email="admin@example.com", password="secret"))
 
     html = client.get(reverse(route)).content.decode()

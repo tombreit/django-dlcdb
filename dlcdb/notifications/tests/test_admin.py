@@ -20,14 +20,7 @@ from dlcdb.core.models import Device, DeviceType, Person
 from dlcdb.notifications.intervals import NotificationInterval
 from dlcdb.notifications.models import Message, Subscription
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MessagePreviewAdminTests(TestCase):
     def setUp(self):
         admin_user = get_user_model().objects.create_superuser(

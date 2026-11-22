@@ -6,21 +6,14 @@ from django.contrib import admin
 from django.contrib.admin.utils import lookup_field
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory
 from django.urls import reverse
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Room
 from dlcdb.core.tests import basetest
 from dlcdb.tenants.models import Tenant
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class NonSuperuserDeviceAdminTests(basetest.BaseTest):
     """
     Regression tests for the admin change form of a lent device edited by a
@@ -98,7 +91,6 @@ class NonSuperuserDeviceAdminTests(basetest.BaseTest):
         self.assertTrue(self.device.is_lentable)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceAdminTenantTests(basetest.BaseTest):
     """The device admin offers and lists only the user's tenants."""
 
@@ -153,7 +145,6 @@ class DeviceAdminTenantTests(basetest.BaseTest):
         self.assertNotIn(("tenant", admin.RelatedOnlyFieldListFilter), changelist.list_filter)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceAdminActionsColumnTests(basetest.BaseTest):
     """The state buttons on the changelist are built for the user of the request."""
 
@@ -190,7 +181,6 @@ class DeviceAdminActionsColumnTests(basetest.BaseTest):
         self.assertNotIn(locate, self._buttons(columns_of_viewer, device))
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceAdminRecordNotesBadgeTests(basetest.BaseTest):
     """The "Records history" link carries a note badge when a record of the device has a note."""
 

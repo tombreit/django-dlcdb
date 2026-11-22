@@ -16,17 +16,6 @@ from dlcdb.accounts.models import CustomUser
 
 from ..models import SapList
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
-
-
-@pytest.fixture(autouse=True)
-def plain_static_storage(settings):
-    settings.STORAGES = _PLAIN_STATIC_STORAGE
-
 
 @pytest.fixture
 def superuser(db):

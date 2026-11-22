@@ -26,5 +26,8 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # all static files every time. Autorefresh looks a file up per request instead.
 WHITENOISE_AUTOREFRESH = True
 
+# Rendering needs no built static files: the manifest storage needs collectstatic.
+STORAGES = {**STORAGES, "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}}
+
 # Tasks enqueued by tests stay in memory instead of the instance's queue file.
 HUEY = MemoryHuey(name="dlcdb_huey", results=False)

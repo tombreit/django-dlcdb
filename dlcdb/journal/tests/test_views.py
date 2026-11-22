@@ -16,7 +16,7 @@ from dlcdb.tenants.models import Tenant
 INDEX_URL = "journal:index"
 DETAIL_URL = "journal:detail"
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 Level = JournalEntry.Level
 

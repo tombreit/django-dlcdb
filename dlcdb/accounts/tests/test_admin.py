@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from dlcdb.accounts.models import CustomUser
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 CHANGELIST_URL = reverse("admin:accounts_customuser_changelist")
 

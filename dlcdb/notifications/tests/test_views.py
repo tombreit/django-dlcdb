@@ -24,14 +24,8 @@ from .test_report_flows import create_report_subscription
 
 TEST_MEDIA_ROOT = tempfile.mkdtemp(prefix="dlcdb-test-media-")
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE, MEDIA_ROOT=TEST_MEDIA_ROOT)
+@override_settings(MEDIA_ROOT=TEST_MEDIA_ROOT)
 class MySubscriptionsViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

@@ -12,7 +12,6 @@ from pathlib import Path
 import pytest
 from django.contrib.auth.models import Group, Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 from django.urls import reverse
 from django.utils import translation
 
@@ -28,16 +27,6 @@ CONFIRM_URL = "dataexchange:device_import_confirm"
 TEMPLATE_URL = "dataexchange:device_import_template"
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
-
-# The production-like settings use a hashed/manifest static files storage, which
-# requires a built manifest (collectstatic). For rendering tests we swap in the
-# plain storage so static URL resolution doesn't depend on that build step.
-_PLAIN_STATICFILES = override_settings(
-    STORAGES={
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
-)
 
 
 @pytest.fixture
@@ -70,7 +59,6 @@ def _upload_file(csv_name):
     return SimpleUploadedFile(csv_name, (TEST_DATA_DIR / csv_name).read_bytes(), content_type="text/csv")
 
 
-@_PLAIN_STATICFILES
 def test_import_page_renders_upload_form(superuser_client):
     response = superuser_client.get(reverse(IMPORT_URL))
 
@@ -79,7 +67,6 @@ def test_import_page_renders_upload_form(superuser_client):
     assert "EDV_ID" in response.content.decode()  # column list for the user
 
 
-@_PLAIN_STATICFILES
 def test_upload_dry_run_shows_preview_and_writes_nothing(superuser_client, tenant):
     with translation.override("en"):
         response = superuser_client.post(
@@ -103,7 +90,6 @@ def test_upload_dry_run_shows_preview_and_writes_nothing(superuser_client, tenan
     assert Device.objects.count() == 0
 
 
-@_PLAIN_STATICFILES
 def test_superuser_cannot_import_without_tenant(superuser_client):
     response = superuser_client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv")})
 
@@ -112,7 +98,6 @@ def test_superuser_cannot_import_without_tenant(superuser_client):
     assert not ImporterList.objects.exists()
 
 
-@_PLAIN_STATICFILES
 def test_confirm_writes_devices_and_persists_report(superuser_client, tenant):
     superuser_client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk})
     importer_list = ImporterList.objects.get()
@@ -133,7 +118,6 @@ def test_confirm_writes_devices_and_persists_report(superuser_client, tenant):
     assert importer_list.messages
 
 
-@_PLAIN_STATICFILES
 def test_double_confirm_is_rejected(superuser_client, tenant):
     superuser_client.post(reverse(IMPORT_URL), {"file": _upload_file("devices.correct.csv"), "tenant": tenant.pk})
     importer_list = ImporterList.objects.get()
@@ -148,7 +132,6 @@ def test_double_confirm_is_rejected(superuser_client, tenant):
     assert "already been processed" in response.content.decode()
 
 
-@_PLAIN_STATICFILES
 def test_missing_columns_show_form_error_and_record_failed_attempt(superuser_client, tenant):
     with translation.override("en"):
         response = superuser_client.post(
@@ -166,7 +149,6 @@ def test_missing_columns_show_form_error_and_record_failed_attempt(superuser_cli
     assert "Missing column(s):" in importer_list.messages
 
 
-@_PLAIN_STATICFILES
 def test_wrong_date_format_is_shown_as_a_named_row_error(superuser_client, tenant):
     """The preview names the line, the column and the offending value.
 
@@ -210,7 +192,6 @@ def test_template_download(superuser_client):
     assert len(lines) == 3
 
 
-@_PLAIN_STATICFILES  # the 403 page renders {% static %} too
 def test_views_require_add_device_permission(client):
     user = CustomUser.objects.create_user(email="noperm@example.com", password="secret", username="pytestnoperm")
     client.force_login(user)
@@ -220,7 +201,6 @@ def test_views_require_add_device_permission(client):
     assert client.get(reverse(TEMPLATE_URL)).status_code == 403
 
 
-@_PLAIN_STATICFILES
 def test_non_superuser_cannot_spoof_tenant(client, tenant, tenant_user):
     other_tenant = Tenant.objects.create(name="OtherTenant")
     client.force_login(tenant_user)
@@ -236,7 +216,6 @@ def test_non_superuser_cannot_spoof_tenant(client, tenant, tenant_user):
     assert not ImporterList.objects.exists()
 
 
-@_PLAIN_STATICFILES
 def test_confirm_without_history_permission_redirects_to_device_list(client, tenant, tenant_user):
     """Importing needs only core.add_device; the import history would be a 403."""
     client.force_login(tenant_user)
@@ -250,7 +229,6 @@ def test_confirm_without_history_permission_redirects_to_device_list(client, ten
     assert Device.objects.exists()
 
 
-@_PLAIN_STATICFILES
 def test_non_superuser_cannot_confirm_foreign_tenant_row(client, tenant_user):
     other_tenant = Tenant.objects.create(name="OtherTenant")
     importer_list = ImporterList.objects.create(file="imported_csv/foreign.csv", tenant=other_tenant)
@@ -274,7 +252,6 @@ def test_user_without_tenant_cannot_confirm_an_import_without_tenant(client):
     assert response.status_code == 404
 
 
-@_PLAIN_STATICFILES
 def test_preview_lists_every_bad_row_and_blocks_confirm(superuser_client, tenant):
     """The whole point of the dry run: see all the problems in one pass.
 
@@ -307,7 +284,6 @@ def test_preview_lists_every_bad_row_and_blocks_confirm(superuser_client, tenant
     assert Device.objects.count() == 0
 
 
-@_PLAIN_STATICFILES
 def test_confirming_a_file_with_bad_rows_writes_nothing(superuser_client, tenant):
     """The button is disabled, but a hand-posted confirm must be refused too."""
     with translation.override("en"):
@@ -331,7 +307,6 @@ def test_confirming_a_file_with_bad_rows_writes_nothing(superuser_client, tenant
 ADMIN_ADD_URL = "admin:dataexchange_importerlist_add"
 
 
-@_PLAIN_STATICFILES
 def test_admin_import_with_bad_rows_reports_and_writes_nothing(superuser_client, tenant):
     """The admin surfaces the same failure as the frontend, as a message.
 

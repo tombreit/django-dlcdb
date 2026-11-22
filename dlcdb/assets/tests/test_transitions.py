@@ -7,7 +7,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 
@@ -21,11 +20,6 @@ from dlcdb.tenants.models import Tenant
 from dlcdb.theme.device_state import RELOCATE_TRANSITIONS
 from dlcdb.theme.navigation import with_next
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
-
 
 def test_every_transition_has_a_frontend_screen():
     """The forms here serve exactly the transitions without a screen of their own."""
@@ -33,7 +27,6 @@ def test_every_transition_has_a_frontend_screen():
     assert set(TRANSITION_FORMS) == set(lifecycle.BY_NAME) - own_screens
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceTransitionTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

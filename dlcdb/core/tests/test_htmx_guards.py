@@ -21,7 +21,7 @@ def _name(app_label, codename):
     return str(Permission.objects.get(content_type__app_label=app_label, codename=codename))
 
 
-def test_the_403_page_names_the_missing_permission(client, make_user, plain_static):
+def test_the_403_page_names_the_missing_permission(client, make_user):
     client.force_login(make_user())
 
     response = client.get(reverse("journal:index"))
@@ -40,7 +40,7 @@ def test_over_htmx_the_flash_message_names_it(client, make_user):
     assert _name("journal", "view_journalentry") in str(message)
 
 
-def test_an_inline_check_names_it(client, make_user, plain_static):
+def test_an_inline_check_names_it(client, make_user):
     # The transition's permission is checked before the device is looked up.
     client.force_login(make_user())
 

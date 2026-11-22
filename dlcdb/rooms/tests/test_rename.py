@@ -6,18 +6,12 @@
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Room
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.journal.models import JournalEntry
 from dlcdb.rooms.rename import plan_renames
-
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
 ADD_BUILDING = {"pattern": r"^(\d+)$", "replacement": r"G\1"}
 
@@ -89,7 +83,6 @@ class PlanRenamesTests(BaseTest):
         )
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class RoomRenameViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

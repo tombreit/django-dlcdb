@@ -11,7 +11,6 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device, InRoomRecord, LentRecord, Person, Room
@@ -19,13 +18,7 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MultiTenantUserTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

@@ -14,7 +14,7 @@ from dlcdb.journal import cleanup
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 Level = JournalEntry.Level
 CLEANUP_URL = reverse("journal:cleanup")

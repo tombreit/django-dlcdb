@@ -16,18 +16,13 @@ cannot tell "this record has a note" from "this device has another record".
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.core.models import Attachment, InRoomRecord, LostRecord, Person, Record, RemovedRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
 
 from ..filters import RecordFilter
-
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
 
 def _login_with(test, *codenames):
@@ -106,7 +101,6 @@ class RecordSearchTests(BaseTest, TestCase):
         self.assertEqual(list(found), [with_person])
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class RecordDetailDeviceLinkTests(BaseTest, TestCase):
     """The record page links its device like its room and lender: only for a user who may open it."""
 
@@ -134,7 +128,6 @@ class RecordDetailDeviceLinkTests(BaseTest, TestCase):
         self.assertNotContains(response, self.device_url)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class RecordAttachmentTests(BaseTest, TestCase):
     """Files are attached in the record page's Attachments card, also to a record saved long before."""
 

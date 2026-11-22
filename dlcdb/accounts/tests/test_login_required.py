@@ -73,7 +73,7 @@ def test_the_admin_keeps_next_through_its_login_redirect(client):
     assert response.url == f"{reverse('login')}?next=/admin/"
 
 
-def test_logging_out_with_an_expired_session_shows_the_logged_out_page(client, db, plain_static):
+def test_logging_out_with_an_expired_session_shows_the_logged_out_page(client, db):
     # Not the login page with next=/accounts/logout/, which would end on a 405
     # after logging in: the logout view accepts only POST.
     response = client.post("/accounts/logout/")

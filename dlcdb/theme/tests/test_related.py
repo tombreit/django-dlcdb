@@ -180,7 +180,7 @@ def test_every_registered_model_has_an_object_here(db):
 
 
 @pytest.mark.parametrize("label", sorted(OBJECTS))
-def test_the_registered_pages_need_exactly_the_permissions_the_buttons_check(client, plain_static, make_user, label):
+def test_the_registered_pages_need_exactly_the_permissions_the_buttons_check(client, make_user, label):
     """
     The view permission opens the detail page (👁), the change permission saves
     it (✎), the add permission opens and saves the add page (+). Without them

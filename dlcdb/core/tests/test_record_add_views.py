@@ -18,7 +18,7 @@ from dlcdb.core.models import RemovedRecord
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("model_name", ["orderedrecord", "inroomrecord", "lostrecord", "removedrecord"])
-def test_the_add_permission_opens_no_add_form(client, plain_static, make_user, join_tenant, plain_device, model_name):
+def test_the_add_permission_opens_no_add_form(client, make_user, join_tenant, plain_device, model_name):
     RemovedRecord.objects.create(device=plain_device)
     user = make_user(f"core.add_{model_name}", f"core.view_{model_name}", is_staff=True)
     client.force_login(join_tenant(user))

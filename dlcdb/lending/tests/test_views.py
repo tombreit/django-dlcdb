@@ -28,14 +28,7 @@ from dlcdb.lending.starter import get_starter_lent_sheet_template
 from dlcdb.lending.views import SLIP_POLICY
 from dlcdb.theme.navigation import with_next
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingIndexViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -295,7 +288,6 @@ class LendingIndexViewTests(BaseTest):
         self.assertEqual(self.client.get(self.url).status_code, 200)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingDetailViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -715,7 +707,6 @@ class LendingDetailViewTests(BaseTest):
         self.assertEqual(self.available_device.active_record.record_type, Record.INROOM)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingPersonSearchTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -753,7 +744,6 @@ class LendingPersonSearchTests(BaseTest):
         self.assertContains(response, 'data-room-id=""')  # Erika has no room
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingPrintSheetTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -834,7 +824,6 @@ class LendingPrintSheetTests(BaseTest):
         self.assertEqual(response.status_code, 404)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingDeviceSearchTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -891,7 +880,6 @@ class LendingDeviceSearchTests(BaseTest):
         self.assertContains(response, "EDV-AVAIL")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendingPickerModeViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

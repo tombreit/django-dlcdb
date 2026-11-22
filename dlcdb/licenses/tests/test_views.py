@@ -21,14 +21,7 @@ from dlcdb.notifications.models import Subscription
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.navigation import with_next
 
-# Use plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LicensesIndexViewTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -134,7 +127,6 @@ class LicensesIndexViewTests(BaseTest):
         self.assertRedirects(response, f"{reverse('login')}?next={self.url}", fetch_redirect_response=False)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LicensesPermissionTests(BaseTest):
     """Reading the licence list and writing to it are separate grants.
 
@@ -187,7 +179,6 @@ class LicensesPermissionTests(BaseTest):
         self.assertNotIn(reverse("licenses:new"), content)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LicensesTenantScopingTests(BaseTest):
     """Licences are scoped to the user's tenants like devices."""
 
@@ -288,7 +279,6 @@ class LicensesTenantScopingTests(BaseTest):
         self.assertFalse(Device.objects.filter(series="Broken Suite").exists())
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LicenseFormRelatedLinksTests(BaseTest):
     """Manufacturer, supplier, type and subscribers have buttons to open or add an entry."""
 

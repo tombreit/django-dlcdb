@@ -85,14 +85,9 @@ def test_note_endpoints_require_login(client, room_note):
 
 
 @pytest.mark.django_db
-def test_note_endpoint_without_htmx_returns_403(client, plain_user, room_note, settings):
+def test_note_endpoint_without_htmx_returns_403(client, plain_user, room_note):
     # Not an HTMX request: the guard must produce a real 403 instead of the
     # client-refresh response, whose empty body renders as a blank page.
-    # Plain static storage so rendering 403.html needs no staticfiles manifest.
-    settings.STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
     client.force_login(plain_user)
     response = client.post(reverse("inventory:note-delete", kwargs={"pk": room_note.pk}))
 
@@ -101,7 +96,7 @@ def test_note_endpoint_without_htmx_returns_403(client, plain_user, room_note, s
 
 
 @pytest.fixture
-def inventorizing_client(client, inventorizing_user, plain_static):
+def inventorizing_client(client, inventorizing_user):
     client.force_login(inventorizing_user)
     return client
 

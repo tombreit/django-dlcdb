@@ -25,7 +25,7 @@ def _remover_csv(*, edv_id):
 
 
 @pytest.mark.django_db
-def test_admin_decommissioning_adds_one_entry(client, tenant, join_tenant, plain_static, media_root):
+def test_admin_decommissioning_adds_one_entry(client, tenant, join_tenant, media_root):
     admin = join_tenant(
         CustomUser.objects.create_superuser(email="admin@example.com", password="secret", username="admin")
     )

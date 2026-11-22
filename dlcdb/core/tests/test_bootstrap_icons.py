@@ -3,18 +3,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.core.models import DeviceType
 from dlcdb.theme.bootstrap_icons import get_bootstrap_icons
-
-# Plain static storage so tests do not require a built staticfiles manifest
-# (mirrors dlcdb.lending.tests.test_views).
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
 
 class BootstrapIconsUtilTests(TestCase):
@@ -30,7 +23,6 @@ class BootstrapIconsUtilTests(TestCase):
             self.assertEqual(len(by_name[name]), 1)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceTypeIconPickerAdminTests(TestCase):
     @classmethod
     def setUpTestData(cls):

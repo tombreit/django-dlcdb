@@ -13,18 +13,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ImproperlyConfigured
 from django.templatetags.static import static
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.organization import navigation as organization_navigation
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class SettingsHubTests(TestCase):
     @classmethod
     def setUpTestData(cls):

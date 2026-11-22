@@ -97,7 +97,7 @@ def test_the_registered_sources_use_lifecycle_permissions():
 # --- the endpoint's answer to an unauthorized request ----------------------
 
 
-def test_a_plain_unauthorized_request_gets_a_403(client, plain_static, make_user):
+def test_a_plain_unauthorized_request_gets_a_403(client, make_user):
     """Not a blank 200.
 
     ``device_search`` answers an unauthorized HTMX request with a client

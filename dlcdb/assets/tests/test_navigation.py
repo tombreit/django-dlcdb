@@ -10,18 +10,11 @@ namespace only). Guards the active_url_names disambiguation added to fix that.
 """
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.tests.basetest import BaseTest
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceMoveNavActiveStateTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

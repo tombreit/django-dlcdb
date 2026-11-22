@@ -20,7 +20,6 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.messages import WARNING, get_messages
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core import lifecycle
@@ -39,12 +38,6 @@ from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.core.utils.relocate import relocate_device
 from dlcdb.lending.models import LendingProfile
-
-# Plain static storage so tests do not require a built staticfiles manifest.
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
 LEND_START = "2026-06-23"
 LEND_DESIRED_END = "2026-07-23"
@@ -69,7 +62,6 @@ def snapshot(device):
     }
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LendReturnParityTests(BaseTest):
     """The admin and the frontend must produce identical state changes."""
 
@@ -323,7 +315,6 @@ LOST_REFUSAL = "“Lend” is not allowed for a device in state “Missing”."
 ORDERED_REFUSAL = "“Lend” is not allowed for a device in state “Ordered”."
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class LostDeviceCannotBeLentTests(BaseTest):
     """
     The lending screens can act on a lending and on a device that can be lent now;

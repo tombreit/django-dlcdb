@@ -28,12 +28,6 @@ def login_url():
 @pytest.fixture
 def create_user(db, django_user_model, test_password, settings):
     settings.AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
-    # The login template references collected static assets (theme.css) via the
-    # manifest storage; use the plain storage so it renders without collectstatic.
-    settings.STORAGES = {
-        **settings.STORAGES,
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
 
     def make_user(**kwargs):
         kwargs["password"] = test_password

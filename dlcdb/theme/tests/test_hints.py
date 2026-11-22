@@ -11,7 +11,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.core.models import Device, Room
@@ -20,13 +20,7 @@ from dlcdb.dataexchange.models import ImporterList
 from dlcdb.organization.models import Branding
 from dlcdb.tenants.models import Tenant
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class StickyHintsTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -192,7 +186,6 @@ class StickyHintsTests(BaseTest):
         self.assertNotContains(response, "No IT department contact email configured under Settings › Organization!")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class SetupHintsTests(TestCase):
     """An instance without tenants or groups, or with a tenant no group sees, says so to whoever may fix it."""
 

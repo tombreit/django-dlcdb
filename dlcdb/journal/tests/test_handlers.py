@@ -139,7 +139,7 @@ def test_logging_while_writing_does_not_recurse(monkeypatch):
 
 
 @pytest.mark.urls("dlcdb.journal.tests.test_handlers")
-def test_unhandled_view_exception_is_journaled_with_user(make_user, plain_static):
+def test_unhandled_view_exception_is_journaled_with_user(make_user):
     user = make_user()
     client = Client(raise_request_exception=False)
     client.force_login(user)

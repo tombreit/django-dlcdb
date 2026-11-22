@@ -8,7 +8,7 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.core.models import (
@@ -26,11 +26,6 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.dashboard import stats
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
-
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
 
 def _tiles(response):
@@ -51,7 +46,6 @@ def _tenant_of(user, name):
     return tenant
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DashboardTileTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -212,7 +206,6 @@ class DashboardTileTests(TestCase):
         self.assertContains(response, "dashboard-tile-progress")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DashboardTileTargetTests(TestCase):
     """Where the tiles point.
 

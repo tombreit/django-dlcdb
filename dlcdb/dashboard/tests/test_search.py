@@ -8,7 +8,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.core.models import Device, DeviceType, InRoomRecord, Manufacturer, Person, Room
@@ -16,13 +16,7 @@ from dlcdb.dashboard.search import SEARCH_SOURCES
 from dlcdb.smallstuff.models import AssignedThing, Thing
 from dlcdb.tenants.models import Tenant
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class GlobalSearchTests(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -7,7 +7,7 @@
 import pytest
 from django.urls import reverse
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 URL = reverse("lending:configuration")
 VIEW = "lending.view_lendingconfiguration"

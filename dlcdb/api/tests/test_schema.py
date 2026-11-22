@@ -41,7 +41,7 @@ def test_anonymous_is_sent_from_the_swagger_ui_to_the_login(client):
     assert response.url == f"{reverse('login')}?next={url}"
 
 
-def test_a_logged_in_user_gets_the_swagger_ui_and_the_schema(client, user, plain_static):
+def test_a_logged_in_user_gets_the_swagger_ui_and_the_schema(client, user):
     client.force_login(user)
 
     assert client.get(reverse("swagger-ui")).status_code == 200

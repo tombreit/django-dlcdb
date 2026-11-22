@@ -247,7 +247,7 @@ def editor_client(client, db):
 
 
 @pytest.mark.parametrize("page", EDIT_PAGES, ids=lambda page: page.label)
-def test_edit_page_renders_and_round_trips_every_field(page, editor_client, plain_static):
+def test_edit_page_renders_and_round_trips_every_field(page, editor_client):
     url, obj = page.build()
     before = _snapshot(obj, AUDIT_FIELDS)
 

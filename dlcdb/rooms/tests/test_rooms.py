@@ -8,7 +8,6 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 
@@ -18,13 +17,7 @@ from dlcdb.core.tests.testingutils import establish_state
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.navigation import with_next
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class RoomFrontendTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -262,7 +255,6 @@ class RoomFrontendTests(BaseTest):
         self.assertEqual(reverse("rooms:reconcile", args=[1]), "/rooms/reconcile/1/")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class RoomChangesTests(BaseTest):
     """The stock changes card on the room detail page: devices that arrived or left."""
 

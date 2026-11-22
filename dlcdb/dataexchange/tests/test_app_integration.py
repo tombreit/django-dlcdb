@@ -14,21 +14,10 @@ app label.
 
 import pytest
 from django.contrib.admin.sites import site
-from django.test import override_settings
 from django.urls import reverse
 
 from dlcdb.core.models import Device
 from dlcdb.dataexchange.models import ImporterList, RemoverList
-
-# The production-like settings use a hashed/manifest static files storage, which
-# requires a built manifest (collectstatic). For rendering tests we swap in the
-# plain storage so static URL resolution doesn't depend on that build step.
-_PLAIN_STATICFILES = override_settings(
-    STORAGES={
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
-)
 
 
 def test_models_use_renamed_tables():
@@ -82,7 +71,6 @@ def test_device_admin_imported_by_link_resolves():
 
 
 @pytest.mark.django_db
-@_PLAIN_STATICFILES
 def test_device_change_page_renders_with_imported_by(admin_client, admin_user, test_site, tenant, join_tenant):
     """
     End-to-end smoke test: render the actual Device admin change page for an

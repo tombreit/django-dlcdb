@@ -5,7 +5,6 @@
 """Integration tests for the device master-data frontends (types, manufacturers, suppliers)."""
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 from django.utils.html import escape
 
@@ -13,13 +12,7 @@ from dlcdb.core.models import DeviceType, Manufacturer, Supplier
 from dlcdb.core.tests.basetest import BaseTest
 from dlcdb.theme.navigation import with_next
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MasterdataFrontendTests(BaseTest):
     @classmethod
     def setUpTestData(cls):

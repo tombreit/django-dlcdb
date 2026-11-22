@@ -151,7 +151,7 @@ def test_each_guarded_directory_needs_one_of_its_permissions(client, make_user, 
         assert _content(response) == b"content"
 
 
-def test_the_refusal_names_the_permissions(client, make_user, files, plain_static):
+def test_the_refusal_names_the_permissions(client, make_user, files):
     client.force_login(make_user())
 
     response = client.get("/media/qrcode/DLCDB-1.svg")
@@ -201,7 +201,7 @@ def _attachment(media_root):
     return Attachment.objects.create(title="Invoice", file="attachments/invoice.pdf")
 
 
-def test_a_device_qr_code_follows_the_device_tenant(client, make_user, media_root, tenants, plain_static):
+def test_a_device_qr_code_follows_the_device_tenant(client, make_user, media_root, tenants):
     tenant_a, tenant_b = tenants
     url = f"/media/{Device.objects.create(sap_id='1', tenant=tenant_a).qrcode.name}"
 
@@ -209,7 +209,7 @@ def test_a_device_qr_code_follows_the_device_tenant(client, make_user, media_roo
     assert _status(client, make_user("core.view_device", tenants=[tenant_b], email="b@example.com"), url) == 404
 
 
-def test_the_qr_code_of_a_device_without_tenant_is_not_served(client, make_user, media_root, tenants, plain_static):
+def test_the_qr_code_of_a_device_without_tenant_is_not_served(client, make_user, media_root, tenants):
     url = f"/media/{Device.objects.create(sap_id='1', tenant=None).qrcode.name}"
 
     assert _status(client, make_user("core.view_device", tenants=tenants), url) == 404
@@ -221,7 +221,7 @@ def test_a_room_qr_code_needs_only_the_permission(client, make_user, media_root)
     assert _status(client, make_user("core.view_room"), url) == 200
 
 
-def test_an_attachment_follows_the_tenant_of_its_records(client, make_user, media_root, tenants, plain_static):
+def test_an_attachment_follows_the_tenant_of_its_records(client, make_user, media_root, tenants):
     tenant_a, tenant_b = tenants
     record = establish_state(
         InRoomRecord, device=Device.objects.create(sap_id="1", tenant=tenant_a), room=Room.objects.create(number="1")
@@ -240,7 +240,7 @@ def test_an_attachment_on_no_record_needs_only_the_permission(client, make_user,
     assert _status(client, make_user("core.view_attachment"), "/media/attachments/invoice.pdf") == 200
 
 
-def test_an_import_file_follows_the_import_tenant(client, make_user, media_root, tenants, plain_static):
+def test_an_import_file_follows_the_import_tenant(client, make_user, media_root, tenants):
     tenant_a, tenant_b = tenants
     (media_root / "imported_csv").mkdir()
     (media_root / "imported_csv" / "devices.csv").write_text("edv_id")

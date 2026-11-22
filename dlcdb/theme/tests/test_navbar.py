@@ -11,18 +11,12 @@ via their navigation.py files.
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 
 from dlcdb.tenants.models import Tenant
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MasterdataNavbarTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -71,7 +65,6 @@ class MasterdataNavbarTests(TestCase):
         self.assertContains(response, f'class="dropdown-item active" href="{reverse("rooms:index")}"')
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class HeaderThemeTests(TestCase):
     """The header follows the light/dark theme set on <html> instead of forcing its own."""
 
@@ -84,7 +77,6 @@ class HeaderThemeTests(TestCase):
         self.assertNotContains(response, 'data-bs-theme="dark"')
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class MainNavPermissionTests(TestCase):
     """Every nav entry names a real permission -- there is no login-only entry.
 
@@ -116,7 +108,6 @@ class MainNavPermissionTests(TestCase):
         self.assertIn("licenses:index", [item["url"] for item in response.context["nav_items_main"]])
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class AdminLinkNavbarTests(TestCase):
     """
     Every user gets the gear, permissions or not: the settings page lists what
@@ -140,7 +131,6 @@ class AdminLinkNavbarTests(TestCase):
         self.assertContains(self.client.get(reverse("settings")), admin_link)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class TenantBadgeNavbarTests(TestCase):
     """The user menu names the user's tenant or counts several; no tenant is a sticky hint (see test_hints)."""
 
@@ -176,7 +166,6 @@ class TenantBadgeNavbarTests(TestCase):
         self.assertNotContains(response, "No tenant set!")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class AccountMenuTests(TestCase):
     """The account menu names the user and holds the theme and language preferences, logged out too."""
 

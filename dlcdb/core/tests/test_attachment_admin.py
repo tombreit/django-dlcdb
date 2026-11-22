@@ -5,20 +5,13 @@
 """The attachment admin lists the records an attachment belongs to, with their date."""
 
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from dlcdb.core.models import Attachment, InRoomRecord, Room
 from dlcdb.core.tests.basetest import BaseTest
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class AttachmentAdminTests(BaseTest):
     def setUp(self):
         user = get_user_model().objects.create_superuser(email="admin@example.org", password="secret")

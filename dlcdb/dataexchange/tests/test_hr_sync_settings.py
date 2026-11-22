@@ -20,7 +20,7 @@ from dlcdb.dataexchange.forms import HrSyncConfigurationForm
 from dlcdb.dataexchange.models import UdbSyncConfiguration, UdbSyncRun
 from dlcdb.journal.models import JournalEntry
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 URL = reverse("dataexchange:hr_sync")
 RUN_URL = reverse("dataexchange:hr_sync_run")

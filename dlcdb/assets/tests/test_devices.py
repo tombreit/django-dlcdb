@@ -21,13 +21,7 @@ from dlcdb.tenants.models import Tenant
 from dlcdb.tenants.shortcuts import get_user_tenants
 from dlcdb.theme.navigation import with_next
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceFrontendTests(BaseTest):
     @classmethod
     def setUpTestData(cls):
@@ -643,7 +637,6 @@ class DeviceFrontendTests(BaseTest):
         self.assertContains(response, "collapse show")
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceDetailLendingLinkTests(BaseTest):
     """The "Current state" card links a lent device to the lending it is out on,
     and the room and person to their pages.
@@ -745,7 +738,6 @@ class DeviceDetailLendingLinkTests(BaseTest):
         self.assertNotContains(response, reverse("rooms:detail", args=[self.room.pk]))
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class DeviceHistoryTests(BaseTest):
     """The field history page: open to every viewer of the device, tenant-scoped like the detail page."""
 

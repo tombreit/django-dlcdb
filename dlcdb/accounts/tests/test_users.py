@@ -12,7 +12,7 @@ from dlcdb.accounts.models import CustomUser
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture

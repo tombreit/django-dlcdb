@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from dlcdb.organization.models import Branding
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static", "media_root")]
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 URL = reverse("organization:branding")
 VIEW = "organization.view_branding"

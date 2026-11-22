@@ -12,7 +12,7 @@ from django.urls import reverse
 from dlcdb.journal.models import JournalEntry
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 GROUP_ADMIN = ("accounts.view_group", "accounts.change_group", "accounts.view_customuser", "accounts.change_customuser")
 NEW_GROUP_ADMIN = (

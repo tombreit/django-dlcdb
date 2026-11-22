@@ -14,7 +14,7 @@ from dlcdb.core.models import Device, InRoomRecord, Room
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static", "media_root")]
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 CHANGELIST_URL = "admin:tenants_tenant_changelist"
 ASSIGN_URL = "admin:tenants_tenant_assign"

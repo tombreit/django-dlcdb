@@ -19,8 +19,6 @@ from dlcdb.accounts.models import CustomUser
 from dlcdb.core.models import Device, InRoomRecord, LicenceRecord, Room
 from dlcdb.journal.models import JournalEntry
 
-pytestmark = pytest.mark.usefixtures("plain_static")
-
 
 @pytest.fixture
 def admin_user(join_tenant):

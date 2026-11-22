@@ -108,7 +108,7 @@ def test_import_without_log_row_adds_nothing(tenant, importer):
 
 
 @pytest.mark.django_db
-def test_confirm_is_journaled_as_the_confirming_user(client, tenant, plain_static, media_root):
+def test_confirm_is_journaled_as_the_confirming_user(client, tenant, media_root):
     group = Group.objects.create(name="Importers")
     tenant.groups.add(group)
     uploader, confirmer = (

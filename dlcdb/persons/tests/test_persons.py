@@ -14,7 +14,7 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
 from django.db.models import ProtectedError
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils.html import escape
@@ -38,13 +38,7 @@ from dlcdb.smallstuff.models import AssignedThing, Thing
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.navigation import with_next
 
-_PLAIN_STATIC_STORAGE = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-}
 
-
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class PersonFrontendTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -432,7 +426,6 @@ class PersonFrontendTests(TestCase):
         self.assertEqual(self.client.get(self.index_url).status_code, 403)
 
 
-@override_settings(STORAGES=_PLAIN_STATIC_STORAGE)
 class PersonAssignmentsTests(TestCase):
     """The lendings, licences and smallstuff cards on the person detail page."""
 

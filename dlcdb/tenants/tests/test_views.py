@@ -13,7 +13,7 @@ from dlcdb.core.models import Device
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.models import Tenant
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static", "media_root")]
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 
 @pytest.fixture

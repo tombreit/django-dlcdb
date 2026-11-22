@@ -11,7 +11,7 @@ from dlcdb.core.models import Person
 from dlcdb.journal.models import JournalEntry
 from dlcdb.licenses.models import LicensesConfiguration
 
-pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("plain_static")]
+pytestmark = pytest.mark.django_db
 
 URL = reverse("licenses:configuration")
 VIEW = "licenses.view_licensesconfiguration"
