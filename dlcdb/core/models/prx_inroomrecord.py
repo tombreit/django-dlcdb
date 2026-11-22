@@ -22,8 +22,8 @@ class InRoomRecordManager(models.Manager):
 class InRoomRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = _("Room assignment")
-        verbose_name_plural = _("Room assignments")
+        verbose_name = _("Record: In room")
+        verbose_name_plural = _("Records: In room")
 
     objects = InRoomRecordManager()
 

@@ -187,5 +187,5 @@ class LentRecord(Record):
 
     class Meta:
         proxy = True
-        verbose_name = _("Lending")
-        verbose_name_plural = _("Lendings")
+        verbose_name = _("Record: Lent")
+        verbose_name_plural = _("Records: Lent")

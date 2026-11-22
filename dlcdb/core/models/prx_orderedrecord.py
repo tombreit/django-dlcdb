@@ -21,8 +21,8 @@ class OrderedRecordManager(models.Manager):
 class OrderedRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = _("Order")
-        verbose_name_plural = _("Orders")
+        verbose_name = _("Record: Ordered")
+        verbose_name_plural = _("Records: Ordered")
 
     objects = OrderedRecordManager()
 

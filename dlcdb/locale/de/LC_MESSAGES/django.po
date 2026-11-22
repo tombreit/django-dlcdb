@@ -2120,6 +2120,54 @@ msgstr "Raumzuordnung"
 msgid "Room assignments"
 msgstr "Raumzurodnungen"
 
+#: dlcdb/core/models/prx_inroomrecord.py:25
+msgid "Record: In room"
+msgstr "Record: Lokalisiert"
+
+#: dlcdb/core/models/prx_inroomrecord.py:26
+msgid "Records: In room"
+msgstr "Records: Lokalisiert"
+
+#: dlcdb/core/models/prx_lentrecord.py:190
+msgid "Record: Lent"
+msgstr "Record: Verliehen"
+
+#: dlcdb/core/models/prx_lentrecord.py:191
+msgid "Records: Lent"
+msgstr "Records: Verliehen"
+
+#: dlcdb/core/models/prx_licencerecord.py:103
+msgid "Record: License"
+msgstr "Record: Lizenz"
+
+#: dlcdb/core/models/prx_licencerecord.py:104
+msgid "Records: License"
+msgstr "Records: Lizenz"
+
+#: dlcdb/core/models/prx_lostrecord.py:31
+msgid "Record: Missing"
+msgstr "Record: Nicht auffindbar"
+
+#: dlcdb/core/models/prx_lostrecord.py:32
+msgid "Records: Missing"
+msgstr "Records: Nicht auffindbar"
+
+#: dlcdb/core/models/prx_orderedrecord.py:24
+msgid "Record: Ordered"
+msgstr "Record: Bestellt"
+
+#: dlcdb/core/models/prx_orderedrecord.py:25
+msgid "Records: Ordered"
+msgstr "Records: Bestellt"
+
+#: dlcdb/core/models/prx_removedrecord.py:25
+msgid "Record: Removed"
+msgstr "Record: Entfernt"
+
+#: dlcdb/core/models/prx_removedrecord.py:26
+msgid "Records: Removed"
+msgstr "Records: Entfernt"
+
 #: dlcdb/core/models/prx_inroomrecord.py:32
 msgid "A room must be set!"
 msgstr "Ein Raum muss angegeben werden!"

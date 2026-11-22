@@ -22,8 +22,8 @@ class RemovedRecordManager(models.Manager):
 class RemovedRecord(Record):
     class Meta:
         proxy = True
-        verbose_name = _("Removed")
-        verbose_name_plural = _("Removed")
+        verbose_name = _("Record: Removed")
+        verbose_name_plural = _("Records: Removed")
 
     objects = RemovedRecordManager()
 

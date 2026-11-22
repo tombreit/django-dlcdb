@@ -28,5 +28,5 @@ class LostRecord(Record):
 
     class Meta:
         proxy = True
-        verbose_name = _("Missing")
-        verbose_name_plural = _("Missing")
+        verbose_name = _("Record: Missing")
+        verbose_name_plural = _("Records: Missing")

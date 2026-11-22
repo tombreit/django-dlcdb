@@ -100,5 +100,5 @@ class LicenceRecord(Record):
 
     class Meta:
         proxy = True
-        verbose_name = _("License")
-        verbose_name_plural = _("Licenses")
+        verbose_name = _("Record: License")
+        verbose_name_plural = _("Records: License")

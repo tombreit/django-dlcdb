@@ -17,7 +17,6 @@ from dlcdb.core.models import (
     InRoomRecord,
     Inventory,
     LentRecord,
-    LicenceRecord,
     LostRecord,
     Record,
     Room,
@@ -136,7 +135,7 @@ class DashboardTileTests(TestCase):
         response = self.client.get(reverse("dashboard:index"))
 
         self.assertEqual(_tile(response, "licenses:index")["value"], 0)
-        self.assertEqual(_tile(response, "licenses:index")["label"], LicenceRecord._meta.verbose_name_plural)
+        self.assertEqual(_tile(response, "licenses:index")["label"], "Licenses")
         self.assertEqual(_tile(response, "assets:device_index")["label"], Device._meta.verbose_name)
 
     def test_the_model_tiles_are_labelled_in_the_users_language(self):

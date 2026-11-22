@@ -82,13 +82,15 @@ def _tile(*, label, value, icon, url, query_params="", **extra):
     }
 
 
-def _build_tile(*, model_name, url, request, filters=None, base_params=None):
+def _build_tile(*, model_name, url, request, filters=None, base_params=None, names=None):
     """Build the context dict for a single model-count tile.
 
     ``filters`` narrow the counted set; ``base_params`` are the GET parameters
     the tile's target needs to show that same set (e.g. the Missing tile scoping
     the record list to the current LOST records). The notes caption is
     information only: the tile opens its list without a note filter.
+    ``names``: the (singular, plural) label, for a model whose verbose names
+    don't suit a tile.
     """
     ModelClass = apps.get_model(model_name)
     qs = _get_tenant_queryset(model_name, ModelClass, request).filter(**(filters or {}))
@@ -112,7 +114,8 @@ def _build_tile(*, model_name, url, request, filters=None, base_params=None):
         # Lent devices, out of all lendable ones.
         value = counts["lent"]
         caption = _("of %(total)s lendable") % {"total": total}
-    label = ModelClass._meta.verbose_name if value == 1 else ModelClass._meta.verbose_name_plural
+    singular, plural = names or (ModelClass._meta.verbose_name, ModelClass._meta.verbose_name_plural)
+    label = singular if value == 1 else plural
 
     show_notes = bool(note_count) and model_name not in NO_NOTES_MODELS
     if show_notes:
@@ -181,6 +184,7 @@ def index(request):
             request=request,
             filters={"is_active": True},
             base_params={"record_type": Record.LOST, "is_active": "true"},
+            names=(_("Missing"), _("Missing")),
         ),
         # One count per problem level instead of a single value. It links to the
         # whole journal; the period only applies to the counts.
@@ -210,14 +214,16 @@ def index(request):
         )
 
     stock_specs = [
-        ("core.device", "assets:device_index"),
-        ("core.lentrecord", "lending:index"),
-        ("core.room", "rooms:index"),
-        ("core.devicetype", "assets:device_type_index"),
-        ("core.licencerecord", "licenses:index"),
-        ("smallstuff.assignedthing", "smallstuff:person_search"),
+        ("core.device", "assets:device_index", None),
+        ("core.lentrecord", "lending:index", (_("Lending"), _("Lendings"))),
+        ("core.room", "rooms:index", None),
+        ("core.devicetype", "assets:device_type_index", None),
+        ("core.licencerecord", "licenses:index", (_("License"), _("Licenses"))),
+        ("smallstuff.assignedthing", "smallstuff:person_search", None),
     ]
-    stock_tiles = [_build_tile(model_name=name, url=url, request=request) for name, url in stock_specs]
+    stock_tiles = [
+        _build_tile(model_name=name, url=url, request=request, names=names) for name, url, names in stock_specs
+    ]
 
     device_type_ranking, device_type_total = stats.device_type_ranking(tenants=request.tenants)
 
