@@ -23,11 +23,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  pages:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -48,5 +45,14 @@ jobs:
         with:
           path: run/docs/html
 
+  # A separate job, as in GitHub's Pages starter workflow: deploying in the
+  # upload's own job once failed because the fresh artifact was not yet listed.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
