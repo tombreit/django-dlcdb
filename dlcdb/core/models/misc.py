@@ -37,16 +37,21 @@ class Attachment(AuditBaseModel):
 
 
 class Link(AuditBaseModel):
+    """A lending regulation: the borrower confirms it on the lending slip, which prints its address."""
+
     linktext = models.CharField(
         max_length=255,
         blank=False,
+        verbose_name=_("Link text"),
     )
     url = models.URLField(
         blank=True,
+        verbose_name=_("URL"),
     )
     file = models.FileField(
         blank=True,
         upload_to="links/",
+        verbose_name=_("File"),
     )
 
     @property
@@ -64,14 +69,13 @@ class Link(AuditBaseModel):
         return display_url
 
     def clean(self):
-        # Check if both fields are empty
         if not self.url and not self.file:
-            raise ValidationError('At least one of the fields "url" or "file" must be filled.')
+            raise ValidationError(_("Give a URL or upload a file."))
 
     def __str__(self):
-        return f"Link: '{self.linktext}'"
+        return self.linktext
 
     class Meta:
-        verbose_name = _("Link")
-        verbose_name_plural = _("Links")
+        verbose_name = _("Lending regulation")
+        verbose_name_plural = _("Lending regulations")
         ordering = ["-created_at"]

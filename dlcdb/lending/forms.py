@@ -7,8 +7,9 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from dlcdb.core.models import Device, DeviceType, LentRecord, Person, Room
+from dlcdb.core.models import Device, DeviceType, LentRecord, Link, Person, Room
 from dlcdb.theme.forms import add_bootstrap_classes
+from dlcdb.theme.similar import SimilarNames, check_similar_names
 from dlcdb.theme.widgets import DevicePickerField, TomSelectMultipleWidget, TomSelectWidget
 
 from .models import LendingConfiguration, LendingProfile
@@ -170,6 +171,23 @@ class LendingProfileForm(forms.ModelForm):
         self.fields["device_type"].queryset = DeviceType.with_softdeleted_objects.filter(
             Q(deleted_at__isnull=True, lending_profile__isnull=True) | Q(pk=self.instance.device_type_id)
         )
-        # The link text, as on the slip; Link's str() prefixes "Link: ".
-        self.fields["mandatory_regulations"].label_from_instance = lambda link: link.linktext
         add_bootstrap_classes(self)
+
+
+class LinkForm(forms.ModelForm):
+    """A lending regulation: its link text, compared with the existing ones on add, and a URL or a file."""
+
+    similar_names = SimilarNames(fields=("linktext",))
+
+    class Meta:
+        model = Link
+        fields = ["linktext", "url", "file"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data

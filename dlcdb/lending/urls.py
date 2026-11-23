@@ -15,6 +15,7 @@ urlpatterns = [
     path("person-search/", views.person_search, name="person_search"),
     path("configuration/", views.configuration, name="configuration"),
     path("profiles/", include(views_profiles.LendingProfileViewSet().urls)),
+    path("regulations/", include(views_profiles.RegulationViewSet().urls)),
     path("<int:pk>/", views.lend, name="detail"),
     path("<int:pk>/print/", views.print_sheet, name="print_sheet"),
 ]

@@ -23,8 +23,7 @@ The Django admin is being phased out (AGENTS.md): new UI goes into the frontend 
 
 Noted 2026-11-20, smallest first; none started yet.
 
-1. **Lending regulations (`core.Link`):** a card on Settings › Lending configuration, like the lending profiles; the profile form could then offer "add". Small, follows an existing pattern, fixes a real gap.
-2. **Room reconcile upload:** on the rooms page. The result page is already in the frontend; only the upload and the rooms list's admin link remain.
+1. **Room reconcile upload:** on the rooms page. The result page is already in the frontend; only the upload and the rooms list's admin link remain.
 
 ## Menu entries that open the admin
 
@@ -33,7 +32,7 @@ Shown only with the Staff flag. Each comes from the `navigation.py` of the app n
 - [x] **Removed records:** the entry is gone; *Devices* with the state *Removed* lists the decommissioned devices with their whereabouts, the removal report mail links there (2026-11-22). The admin stays registered.
 - [ ] **Notes:** Datenhaltung › Notizen, `admin:core_note_changelist`, `core.view_note` (core). The inventory screens add, edit and delete the notes of a room or device during an inventory.
 - [x] **Users and groups:** create them, give permissions, set passwords, deactivate: `accounts:users` and `accounts:groups` (2026-11-20, `PLANS/users-and-groups.md`, retired into DECISIONS.md). The Staff and Superuser flags and hard-deleting a user stay in the admin.
-- [ ] **Links (`core.Link`):** the regulation documents of the lending profiles. The profile form selects them but has no add button. Einstellungen › Ausleih-Ordnungen, `admin:core_link_changelist`, `core.view_link` (lending).
+- [x] **Links (`core.Link`):** Einstellungen › Ausleih-Ordnungen opens `lending:regulation:index`, a `ModelViewSet`; the lending profile form adds one with its + (2026-11-23). The admin stays registered.
 - [x] **Smallstuff catalogue (`smallstuff.Thing`):** Einstellungen › Kleinkram-Katalog opens `smallstuff:thing:index`, the first `theme.viewsets.ModelViewSet` (2026-11-23). The admin stays registered.
 - [ ] **Notification messages and reports (`notifications.Message`, `reporting.Report`):** status, preview, "Send now". Subscriptions have a frontend page. Einstellungen › Benachrichtigungen and › Reports, `notifications.view_message` (notifications) and `reporting.view_report` (reporting).
 - [ ] **Bulk decommissioning:** Einstellungen › Bulk-Ausmusterung, `admin:dataexchange_removerlist_changelist`, `dataexchange.view_removerlist` (dataexchange). Bulk import is in the frontend.

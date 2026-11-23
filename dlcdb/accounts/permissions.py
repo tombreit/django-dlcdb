@@ -46,6 +46,7 @@ CHECKED_IN_VIEWS = (
     "lending.change_lendingconfiguration",
     "lending.change_lendingprofile",
     "smallstuff.change_thing",
+    "core.change_link",
     "licenses.change_licensesconfiguration",
     "dataexchange.change_importerlist",
     "inventory.view_saplist",  # the SAP exports, in core's media view
@@ -54,6 +55,7 @@ CHECKED_IN_VIEWS = (
 )
 
 _SLIP_TEMPLATES = _("Its slip templates can read and print everything a lending reaches.")
+_PUBLIC_FILES = _("Uploads files anyone can download without logging in: the lending slips print their address.")
 _REMOVED_IS_FINAL = _("Brings decommissioned devices back; without it, Removed is final.")
 
 # Permissions that reach further than their label says, with the warning shown beside them.
@@ -70,6 +72,8 @@ SENSITIVE = {
     ),
     "lending.add_lendingprofile": _SLIP_TEMPLATES,
     "lending.change_lendingprofile": _SLIP_TEMPLATES,
+    "core.add_link": _PUBLIC_FILES,
+    "core.change_link": _PUBLIC_FILES,
     "dataexchange.change_udbsyncconfiguration": _(
         "The HR sync creates, changes and deactivates persons as the system configured here says."
     ),

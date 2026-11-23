@@ -58,6 +58,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **An add page takes initial values from the query string, as the admin's does** (form fields only): "Add one?" links preset the device type without code of their own.
 - **A delete that a `PROTECT` relation refuses lists what still uses the entry** (Django's `Collector`): by model, with the count and the first ten, linked where the user may view them, deactivated ones marked; a link-table row stands for its other side (a position lists persons). Not a bare "in use", not wording per model.
 - **Units and positions have their own settings entries and lists** (`theme.viewsets.ModelViewSet`, like the smallstuff catalogue): one list, form and delete page users know. Not cards on Settings › Organization (they were, 2026-11-20 to 2026-11-23), not a list embedded in a card via HTMX (it would need a mode without the filterbar and URL push, and links back to the host page). Settings › Organization keeps its form; its cards start closed, with a table of contents; any form error opens all of them.
+- **Lending regulations are a `ModelViewSet` under Settings › Lending regulations**; one a lending profile requires can't be deleted (`PROTECT`: it would drop off the slips unnoticed), the delete page names the profiles. Adding and changing are permissions marked sensitive on the group pages (their files are public), not the admin's superuser-only rule.
 - **A smallstuff thing that was ever handed out can't be deleted, only renamed** (`PROTECT`): deleting took its hand-out history along. Not "protected only while issued". The slug follows the name, nothing reads it; smallstuff has no settings model, its catalogue is the only configuration.
 
 - **Users, groups and permissions are managed in the frontend; only DLCDB's own permissions are offered**: those its code checks, collected from the view decorator (which records them), the menu entries, the lifecycle and `accounts.permissions.CHECKED_IN_VIEWS`; a guard test names any other permission the code checks. Not a codename prefix (Django's view/add/change/delete names are fixed), not a hand-written list of about 80 with labels, not all 230 with a search as in the admin.
@@ -100,6 +101,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - A viewset's namespace nests in its app's (`smallstuff:thing`): code that takes a namespace for an app label uses its first part.
 - A soft-deleted model's `delete()` sets `deleted_at` and never asks the `Collector`: the generic delete page would deactivate what is still in use. Leave it out (device types), or check first.
 - `protected_objects` isn't tenant-aware: a delete page for a model that devices use would list other tenants' devices.
+- A deleted lending regulation's file stays under the public `/media/links/`: printed slips still link to it.
 
 ## Open follow-ups
 

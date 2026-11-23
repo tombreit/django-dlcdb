@@ -50,6 +50,7 @@ from .filterbar import bind_filterset, build_filterbar
 from .forms import disable_fields
 from .navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
 from .pagination import paginate
+from .related import add_related_links
 from .similar import add_similar_suggestions, similar_context, similar_suggestions
 
 
@@ -270,6 +271,8 @@ class CreateView(ModelViewMixin, SuccessMessageMixin, generic.CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        # The buttons next to the selects of models with pages of their own.
+        add_related_links(form, self.request)
         if hasattr(form, "similar_names"):
             add_similar_suggestions(form, self.request)
         return form
@@ -316,6 +319,7 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        add_related_links(form, self.request)
         if not self.has_permission("change"):
             disable_fields(form)
         return form

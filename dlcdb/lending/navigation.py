@@ -48,7 +48,7 @@ nav_entries = [
         "description": _("The regulations the lending profiles ask borrowers to confirm, as link or file"),
         "search_terms": _("links, documents, PDF, terms of use"),
         "icon": "bi bi-file-earmark-text",
-        "url": "admin:core_link_changelist",
+        "url": "lending:regulation:index",
         "required_permission": "core.view_link",
     },
 ]

@@ -46,4 +46,6 @@ Ein zurückgegebenes Gerät kommt automatisch in den [„Auto return“-Raum](er
 
 :::{note}
 Als Erweiterung des Ausleihzettels können weitere Seiten ausgegeben/generiert werden. Der Inhalt dieser weiteren Seiten ist frei editierbar (Markdown wird unterstützt). Diese Erweiterung wird im Ausleih-Profil des Gerätetyps gepflegt: *Einstellungen › Ausleih-Profile*, Feld *Checkliste*.
+
+Die Ordnungen, deren Kenntnis der Ausleihzettel bestätigen lässt, stehen unter *Einstellungen › Ausleih-Ordnungen*, als Link oder als Datei; das Ausleih-Profil wählt sie aus. Hochgeladene Dateien sind ohne Login abrufbar, denn der Zettel druckt ihre Adresse.
 :::

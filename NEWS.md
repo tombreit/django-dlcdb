@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Lending regulations are managed under *Settings › Lending regulations*, without the Staff flag, and the lending profile form can add one; a regulation a profile requires can't be deleted. `core.add_link` and `core.change_link` upload files anyone can download: give them to administrators only
 * Lending profiles have their own list under *Settings › Lending profiles*, with search and their field history; *Settings › Lending configuration* keeps the overdue reminders
 * Units and positions have their own lists, with search and sorting, under *Settings › Organizational units* and *› Positions*; a delete page that refuses names what still uses the entry
 * Smallstuff catalogue: the things that can be handed out are managed under *Settings › Smallstuff catalogue*, without the Staff flag; a thing that was ever handed out can't be deleted, only renamed

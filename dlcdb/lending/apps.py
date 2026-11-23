@@ -16,3 +16,9 @@ class LendingConfig(AppConfig):
         from . import pickers
 
         pickers.register()
+
+        # The regulation pages, for the buttons next to the lending profile form's select.
+        from dlcdb.core.models import Link
+        from dlcdb.theme.related import RelatedPages, register_related_pages
+
+        register_related_pages(RelatedPages(Link, "lending:regulation:edit", "lending:regulation:add"))

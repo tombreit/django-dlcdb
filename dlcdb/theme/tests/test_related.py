@@ -12,6 +12,7 @@ from django.urls import reverse
 
 from dlcdb.core.models import (
     DeviceType,
+    Link,
     Manufacturer,
     OrganizationalPosition,
     OrganizationalUnit,
@@ -174,6 +175,7 @@ OBJECTS = {
     "core.organizationalunit": lambda: OrganizationalUnit.objects.create(name="Physics"),
     "core.organizationalposition": lambda: OrganizationalPosition.objects.create(name="Researcher"),
     "smallstuff.thing": lambda: Thing.objects.create(name="Webcam", slug="webcam"),
+    "core.link": lambda: Link.objects.create(linktext="IT rules", url="https://example.org/rules"),
 }
 
 

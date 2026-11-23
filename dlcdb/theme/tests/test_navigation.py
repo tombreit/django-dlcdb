@@ -104,6 +104,7 @@ ADD_PAGES = [
     "assets:manufacturer:add",
     "assets:supplier:add",
     "lending:profile:add",
+    "lending:regulation:add",
     "organization:position:add",
     "organization:unit:add",
     "persons:add",

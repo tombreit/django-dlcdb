@@ -49,7 +49,8 @@ class LendingConfiguration(SingletonBaseModel):
 
 class LendingProfileRegulation(models.Model):
     lending_profile = models.ForeignKey("lending.LendingProfile", on_delete=models.CASCADE)
-    regulation = models.ForeignKey("core.Link", on_delete=models.CASCADE)
+    # PROTECT: a regulation a profile requires can't silently drop off its slips.
+    regulation = models.ForeignKey("core.Link", on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ("lending_profile", "regulation")
