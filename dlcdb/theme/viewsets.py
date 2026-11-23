@@ -26,13 +26,14 @@ HistoryView`` adds a field history page for a model with django-simple-history.
 
 from collections import defaultdict
 from dataclasses import dataclass
+from operator import attrgetter
 
 import django_filters
 from django.contrib.auth import get_permission_codename
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db import router
-from django.db.models import Q
+from django.db.models import Q, prefetch_related_objects
 from django.db.models.deletion import Collector, ProtectedError, RestrictedError
 from django.urls import path, reverse
 from django.utils.functional import cached_property
@@ -94,7 +95,11 @@ def protected_objects(obj, user):
     groups = []
     for model, rows in rows_by_model.items():
         link = _link_table_field(model)
-        shown = [getattr(row, link.name) if link else row for row in sorted(rows, key=lambda row: row.pk)]
+        listed = sorted(rows, key=attrgetter("pk"))[:MAX_PROTECTED_LISTED]
+        if link:
+            # One query for the other side of the listed rows.
+            prefetch_related_objects(listed, link.name)
+            listed = [getattr(row, link.name) for row in listed]
         shown_model = link.related_model if link else model
         may_view = user.has_perm(permission(shown_model, "view"))
         groups.append(
@@ -108,7 +113,7 @@ def protected_objects(obj, user):
                         "url": detail_url(item) if may_view else None,
                         "deactivated": getattr(item, "deleted_at", None) is not None,
                     }
-                    for item in shown[:MAX_PROTECTED_LISTED]
+                    for item in listed
                 ],
             }
         )
@@ -223,7 +228,9 @@ class IndexView(ModelViewMixin, generic.ListView):
         self.filterset = bind_filterset(
             self.get_filterset_class(), self.request, queryset, default_ordering=self.ordering or ""
         )
-        return self.filterset.qs
+        queryset = self.filterset.qs
+        # The pk last, as in the admin's ChangeList: rows that sort alike keep their place across pages.
+        return queryset.order_by(*(queryset.query.order_by or self.model._meta.ordering), "pk")
 
     def get_template_names(self):
         # Searching, sorting and paging swap only the list.

@@ -8,6 +8,7 @@ import pytest
 from django.urls import reverse
 
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person
+from dlcdb.theme.viewsets import MAX_PROTECTED_LISTED, protected_objects
 
 pytestmark = pytest.mark.django_db
 
@@ -85,3 +86,19 @@ def test_only_an_entry_nobody_holds_is_deleted(client, make_user, unit_and_posit
     [persons] = response.context["protected"]
     assert persons["entries"] == [{"label": "Turing, Alan", "url": None, "deactivated": True}]
     assert OrganizationalPosition.objects.filter(pk=position.pk).exists()
+
+
+def test_the_delete_page_loads_only_the_persons_it_lists(make_user, django_assert_max_num_queries):
+    position = OrganizationalPosition.objects.create(name="Researcher")
+    for number in range(MAX_PROTECTED_LISTED + 2):
+        person = Person.objects.create(
+            first_name="Ada", last_name=f"Lovelace {number}", email=f"ada{number}@example.org"
+        )
+        person.organizational_positions.add(position)
+    user = make_user("core.view_person")
+
+    # Fewer queries than it lists: not one per person.
+    with django_assert_max_num_queries(MAX_PROTECTED_LISTED):
+        [persons] = protected_objects(position, user)
+
+    assert (persons["count"], len(persons["entries"]), persons["more"]) == (12, 10, 2)
