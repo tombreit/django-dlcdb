@@ -4,8 +4,8 @@
 
 // Settings › Organization (organization/branding.html): its cards start closed.
 // A link of the table of contents opens the card it points to before the
-// browser scrolls there, and so does the page's own #card, where saving a unit
-// or a position returns to. Loaded as the media of BrandingForm.
+// browser scrolls there, and so does the page's own #card. Loaded as the media
+// of BrandingForm.
 const openCard = (id) => {
   const card = document.getElementById(id)
   if (card instanceof HTMLDetailsElement) {

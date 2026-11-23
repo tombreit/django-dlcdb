@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Units and positions have their own lists, with search and sorting, under *Settings › Organizational units* and *› Positions*; a delete page that refuses names what still uses the entry
 * Smallstuff catalogue: the things that can be handed out are managed under *Settings › Smallstuff catalogue*, without the Staff flag; a thing that was ever handed out can't be deleted, only renamed
 * Decommissioned devices: the device list and the device page show where a removed device went, the search and the CSV export include it; *Master data › Removed records* is gone, use *Devices* with the state *Removed*
 * Records: attachments (pictures, documents) are added on the record page, also to records saved long before; needs `core.add_attachment`

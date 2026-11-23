@@ -104,10 +104,11 @@ ADD_PAGES = [
     "assets:manufacturer_add",
     "assets:supplier_add",
     "lending:profile_add",
-    "organization:position_add",
-    "organization:unit_add",
+    "organization:position:add",
+    "organization:unit:add",
     "persons:add",
     "rooms:add",
+    "smallstuff:thing:add",
     "tenants:add",
 ]
 

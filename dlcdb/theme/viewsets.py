@@ -14,13 +14,15 @@ An app subclasses ``ModelViewSet`` and includes its URLs in its ``urls.py``::
 
 which gives ``smallstuff:thing:index``, ``…:add``, ``…:edit`` and ``…:delete``. The
 menu entry stays in the app's ``navigation.py``. A page changes through its view
-class and its template (``edit_view_class``, ``edit_template_name``).
+class, its template or what its view gets (``edit_view_class``,
+``edit_template_name``, ``get_edit_view_kwargs``).
 
 Each page needs the model's view, add or delete permission. Without the change
 permission the edit page shows the form disabled and refuses its POST. An object
-that a PROTECT relation keeps can't be deleted: the delete page says so.
+that a PROTECT relation keeps can't be deleted: the delete page lists what keeps it.
 """
 
+from collections import defaultdict
 from dataclasses import dataclass
 
 import django_filters
@@ -39,7 +41,7 @@ from django.views import generic
 
 from dlcdb.core.models.abstracts import AuditBaseModel
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
-from dlcdb.core.utils.links import linked_message
+from dlcdb.core.utils.links import detail_url, linked_message
 
 from .filterbar import bind_filterset, build_filterbar
 from .forms import disable_fields
@@ -57,6 +59,66 @@ def permission(model, action):
 def _stamp_user(obj, user):
     if isinstance(obj, AuditBaseModel):
         obj.stamp_user(user)
+
+
+# The most objects the delete page lists per model; it counts them all.
+MAX_PROTECTED_LISTED = 10
+
+
+def protected_objects(obj, user):
+    """
+    What keeps ``obj`` from being deleted, by model, for the delete page: Django's
+    own deletion check (PROTECT, RESTRICT), as in the admin, without deleting.
+    Each group counts its objects and lists the first ones, linked to their pages
+    where ``user`` may view them. A row of a link table (a many-to-many's
+    ``through``) stands for the object on its other side: a position is held by
+    persons, not by PersonPosition rows.
+    """
+    try:
+        Collector(using=router.db_for_write(type(obj))).collect([obj])
+    except ProtectedError as error:
+        blocking = error.protected_objects
+    except RestrictedError as error:
+        blocking = error.restricted_objects
+    else:
+        return []
+
+    rows_by_model = defaultdict(list)
+    for row in blocking:
+        rows_by_model[type(row)].append(row)
+
+    groups = []
+    for model, rows in rows_by_model.items():
+        link = _link_table_field(model)
+        shown = [getattr(row, link.name) if link else row for row in sorted(rows, key=lambda row: row.pk)]
+        shown_model = link.related_model if link else model
+        may_view = user.has_perm(permission(shown_model, "view"))
+        groups.append(
+            {
+                "label": capfirst(shown_model._meta.verbose_name_plural),
+                "count": len(rows),
+                "more": max(len(rows) - MAX_PROTECTED_LISTED, 0),
+                "entries": [
+                    {
+                        "label": str(item),
+                        "url": detail_url(item) if may_view else None,
+                        "deactivated": getattr(item, "deleted_at", None) is not None,
+                    }
+                    for item in shown[:MAX_PROTECTED_LISTED]
+                ],
+            }
+        )
+    return groups
+
+
+def _link_table_field(model):
+    """The foreign key of a link table to the model whose many-to-many runs through it, or None."""
+    for field in model._meta.fields:
+        if field.many_to_one and any(
+            m2m.remote_field.through is model for m2m in field.related_model._meta.many_to_many
+        ):
+            return field
+    return None
 
 
 @dataclass(frozen=True)
@@ -238,18 +300,10 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
 
 
 class DeleteView(ModelViewMixin, SuccessMessageMixin, generic.DeleteView):
-    """Confirm, then delete; an object a PROTECT relation keeps gets the reason instead."""
+    """Confirm, then delete; an object a PROTECT relation keeps lists what keeps it instead."""
 
     template_name = "theme/viewsets/confirm_delete.html"
     success_message = gettext_lazy("%(model)s “%(obj)s” was deleted.")
-
-    def is_protected(self):
-        """Would deleting hit a PROTECT or RESTRICT relation? Django's own check, without deleting."""
-        try:
-            Collector(using=router.db_for_write(self.model)).collect([self.object])
-        except (ProtectedError, RestrictedError):
-            return True
-        return False
 
     def form_valid(self, form):
         try:
@@ -266,7 +320,9 @@ class DeleteView(ModelViewMixin, SuccessMessageMixin, generic.DeleteView):
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
-            protected=self.is_protected(), edit_url=reverse(self.url_name("edit"), args=[self.object.pk]), **kwargs
+            protected=protected_objects(self.object, self.request.user),
+            edit_url=reverse(self.url_name("edit"), args=[self.object.pk]),
+            **kwargs,
         )
 
 
@@ -306,32 +362,42 @@ class ModelViewSet:
         kwargs = {"model": self.model, "queryset": self.get_queryset(), "header_icon": self.icon, **kwargs}
         return view_class.as_view(**{key: value for key, value in kwargs.items() if value is not None})
 
+    # What each view gets besides what all get, as in Wagtail: a subclass adds to
+    # them, e.g. ``extra_context`` for its template.
+    def get_index_view_kwargs(self, **kwargs):
+        return {
+            "template_name": self.index_template_name,
+            "list_display": self.list_display,
+            "search_fields": self.search_fields,
+            "ordering": self.ordering,
+            "list_per_page": self.list_per_page,
+            **kwargs,
+        }
+
+    def get_add_view_kwargs(self, **kwargs):
+        return {"template_name": self.create_template_name, "form_class": self.get_form_class(), **kwargs}
+
+    def get_edit_view_kwargs(self, **kwargs):
+        return {"template_name": self.edit_template_name, "form_class": self.get_form_class(for_update=True), **kwargs}
+
+    def get_delete_view_kwargs(self, **kwargs):
+        return {"template_name": self.delete_template_name, **kwargs}
+
     @property
     def index_view(self):
-        return self.construct_view(
-            self.index_view_class,
-            template_name=self.index_template_name,
-            list_display=self.list_display,
-            search_fields=self.search_fields,
-            ordering=self.ordering,
-            list_per_page=self.list_per_page,
-        )
+        return self.construct_view(self.index_view_class, **self.get_index_view_kwargs())
 
     @property
     def add_view(self):
-        return self.construct_view(
-            self.add_view_class, template_name=self.create_template_name, form_class=self.get_form_class()
-        )
+        return self.construct_view(self.add_view_class, **self.get_add_view_kwargs())
 
     @property
     def edit_view(self):
-        return self.construct_view(
-            self.edit_view_class, template_name=self.edit_template_name, form_class=self.get_form_class(for_update=True)
-        )
+        return self.construct_view(self.edit_view_class, **self.get_edit_view_kwargs())
 
     @property
     def delete_view(self):
-        return self.construct_view(self.delete_view_class, template_name=self.delete_template_name)
+        return self.construct_view(self.delete_view_class, **self.get_delete_view_kwargs())
 
     def get_urlpatterns(self):
         """

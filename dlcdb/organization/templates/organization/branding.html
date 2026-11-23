@@ -17,16 +17,6 @@ under the cards). A link opens its card: organization/js/contents.js.
   {% include "organization/includes/_branding_fields.html" %}
 {% endblock detail_readonly %}
 
-{# The units and positions persons hold: views_masterdata.py, each card with its view permission. #}
-{% block detail_related %}
-  {% if perms.core.view_organizationalunit %}
-    {% include "organization/includes/_names_card.html" with kind=unit_kind rows=units title=_("Organizational units") empty_text=_("No organizational units yet.") can_add=perms.core.add_organizationalunit %}
-  {% endif %}
-  {% if perms.core.view_organizationalposition %}
-    {% include "organization/includes/_names_card.html" with kind=position_kind rows=positions title=_("Positions") empty_text=_("No positions yet.") can_add=perms.core.add_organizationalposition %}
-  {% endif %}
-{% endblock detail_related %}
-
 {% block detail_sidebar %}
   <nav class="card card-filled d-none d-lg-block sticky-lg-top" style="top: 4.5rem" aria-labelledby="contents-title" data-contents>
     <div class="card-header d-flex align-items-center gap-2">
@@ -37,12 +27,6 @@ under the cards). A link opens its card: organization/js/contents.js.
       <a class="list-group-item list-group-item-action" href="#name-and-address">{% translate "Name and address" %}</a>
       <a class="list-group-item list-group-item-action" href="#it-department">{% translate "IT department" %}</a>
       <a class="list-group-item list-group-item-action" href="#files-and-links">{% translate "Files and links" %}</a>
-      {% if perms.core.view_organizationalunit %}
-        <a class="list-group-item list-group-item-action" href="#units">{% translate "Organizational units" %}</a>
-      {% endif %}
-      {% if perms.core.view_organizationalposition %}
-        <a class="list-group-item list-group-item-action" href="#positions">{% translate "Positions" %}</a>
-      {% endif %}
     </div>
   </nav>
 {% endblock detail_sidebar %}

@@ -5,7 +5,8 @@
 
 {% comment %}
 The delete page of a ModelViewSet (theme/viewsets.py). An object that a PROTECT
-relation keeps can't be deleted: the page says so instead.
+relation keeps can't be deleted: the page lists what keeps it instead
+(viewsets.protected_objects), a card per model.
 {% endcomment %}
 
 {% block title %}{% translate "Delete" %}: {{ object }}{% endblock title %}
@@ -23,6 +24,31 @@ relation keeps can't be deleted: the page says so instead.
             {{ model }} “{{ object }}” is in use and can't be deleted.
           {% endblocktranslate %}
         </p>
+        {% for group in protected %}
+          <section class="card card-filled mb-3">
+            <div class="card-header d-flex align-items-center gap-2">
+              <h2 class="h6 mb-0">{{ group.label }}</h2>
+              <span class="badge text-bg-light border">{{ group.count }}</span>
+            </div>
+            <ul class="list-group list-group-flush">
+              {% for entry in group.entries %}
+                <li class="list-group-item">
+                  {% if entry.url %}<a href="{{ entry.url }}">{{ entry.label }}</a>{% else %}{{ entry.label }}{% endif %}
+                  {% if entry.deactivated %}<span class="badge text-bg-secondary ms-1">{% translate "deactivated" %}</span>{% endif %}
+                </li>
+              {% endfor %}
+              {% if group.more %}
+                <li class="list-group-item text-muted">
+                  {% blocktranslate count counter=group.more trimmed %}
+                    and {{ counter }} more
+                  {% plural %}
+                    and {{ counter }} more
+                  {% endblocktranslate %}
+                </li>
+              {% endif %}
+            </ul>
+          </section>
+        {% endfor %}
         <a class="btn btn-outline-secondary" href="{{ edit_url }}">{% translate "Back" %}</a>
       {% else %}
         <p>

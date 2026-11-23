@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""Settings › Organization: the units and positions persons hold (views_masterdata.py)."""
+"""The units and positions persons hold (views.UnitViewSet, views.PositionViewSet)."""
 
 import pytest
 from django.urls import reverse
@@ -10,8 +10,6 @@ from django.urls import reverse
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit, Person
 
 pytestmark = pytest.mark.django_db
-
-PAGE = reverse("organization:branding")
 
 
 @pytest.fixture
@@ -26,57 +24,64 @@ def unit_and_position():
     return unit, position
 
 
-def test_each_card_lists_its_entries_with_their_active_persons(client, make_user, unit_and_position):
+def test_each_has_its_settings_entry_and_list_with_the_active_persons(client, make_user, unit_and_position):
     client.force_login(make_user("organization.view_branding", "core.view_organizationalunit"))
     OrganizationalUnit.objects.create(name="Biology")
 
-    response = client.get(PAGE)
+    settings_page = client.get(reverse("settings")).content.decode()
+    assert f'href="{reverse("organization:unit:index")}"' in settings_page
+    assert f'href="{reverse("organization:position:index")}"' not in settings_page
+    assert 'id="units"' not in client.get(reverse("organization:branding")).content.decode()
 
-    html = response.content.decode()
-    assert 'id="units"' in html and 'href="#units"' in html
-    assert 'id="positions"' not in html and 'href="#positions"' not in html
-    assert [(unit.name, unit.persons_count) for unit in response.context["units"]] == [("Biology", 0), ("Physics", 1)]
-    assert {position.name: position.persons_count for position in response.context["positions"]} == {"Researcher": 0}
+    units = client.get(reverse("organization:unit:index")).context["rows"]
+    assert [(unit.name, unit.persons_count) for unit, _cells in units] == [("Biology", 0), ("Physics", 1)]
 
 
-def test_adding_and_saving_return_to_its_card(client, make_user):
-    user = make_user(
-        "core.add_organizationalposition", "core.view_organizationalposition", "core.change_organizationalposition"
-    )
+def test_the_person_forms_plus_adds_one_and_returns_with_it(client, make_user):
+    user = make_user("core.add_person", "core.add_organizationalposition")
     client.force_login(user)
+    person_form = reverse("persons:add")
+    add_url = reverse("organization:position:add")
+    assert add_url in client.get(person_form).content.decode()
 
-    response = client.post(reverse("organization:position_add"), {"name": "Head of IT"})
-    assert response.url == f"{PAGE}#positions"
+    response = client.post(
+        add_url, {"name": "Head of IT", "next": person_form, "next_field": "organizational_positions"}
+    )
+
     position = OrganizationalPosition.objects.get(name="Head of IT")
     assert position.user == user
+    assert response.url == f"{person_form}?organizational_positions={position.pk}"
 
-    detail_url = reverse("organization:position_detail", args=[position.pk])
-    response = client.post(detail_url, {"name": "Head of IT services"}, follow=True)
-    assert response.redirect_chain == [(f"{PAGE}#positions", 302)]
-    link = f'<a href="{detail_url}">Head of IT services</a>'
-    assert any(link in str(message) for message in response.context["messages"])
+
+def test_the_edit_page_links_its_persons(client, make_user, unit_and_position):
+    unit, _position = unit_and_position
+    client.force_login(make_user("core.view_organizationalunit", "core.view_person"))
+
+    html = client.get(reverse("organization:unit:edit", args=[unit.pk])).content.decode()
+
+    assert f'href="{reverse("persons:index")}?organizational_unit={unit.pk}"' in html
 
 
 def test_only_an_entry_nobody_holds_is_deleted(client, make_user, unit_and_position):
-    _unit, position = unit_and_position
+    unit, position = unit_and_position
     unused = OrganizationalUnit.objects.create(name="Chemistry")
-    client.force_login(make_user("core.delete_organizationalunit", "core.delete_organizationalposition"))
+    client.force_login(
+        make_user("core.delete_organizationalunit", "core.delete_organizationalposition", "core.view_person")
+    )
 
-    response = client.post(reverse("organization:unit_delete", args=[unused.pk]))
-    assert response.url == f"{PAGE}#units"
+    response = client.post(reverse("organization:unit:delete", args=[unused.pk]))
+    assert response.url == reverse("organization:unit:index")
     assert not OrganizationalUnit.objects.filter(pk=unused.pk).exists()
 
-    # Held by a deactivated person only: still protected, and the page says by whom.
-    response = client.post(reverse("organization:position_delete", args=[position.pk]))
-    assert response.status_code == 200
-    assert (response.context["persons_count"], response.context["deactivated_count"]) == (0, 1)
+    # Held by Ada: the page lists her, linked to her page.
+    response = client.post(reverse("organization:unit:delete", args=[unit.pk]))
+    [persons] = response.context["protected"]
+    assert (persons["label"], persons["count"]) == ("Persons", 1)
+    assert persons["entries"][0]["url"] == reverse("persons:detail", args=[Person.objects.get(last_name="Lovelace").pk])
+
+    # Held only by deactivated Alan, through the link table: still protected, and
+    # the page names him rather than the link table's row.
+    response = client.post(reverse("organization:position:delete", args=[position.pk]))
+    [persons] = response.context["protected"]
+    assert persons["entries"] == [{"label": "Turing, Alan", "url": None, "deactivated": True}]
     assert OrganizationalPosition.objects.filter(pk=position.pk).exists()
-
-
-def test_the_person_form_can_add_a_unit_and_a_position(client, make_user):
-    client.force_login(make_user("core.add_person", "core.add_organizationalunit", "core.add_organizationalposition"))
-
-    html = client.get(reverse("persons:add")).content.decode()
-
-    assert reverse("organization:unit_add") in html
-    assert reverse("organization:position_add") in html

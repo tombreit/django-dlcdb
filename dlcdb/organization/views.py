@@ -4,15 +4,18 @@
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_not_required
+from django.db.models import Count, Q
 from django.http import FileResponse, HttpRequest
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 
+from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit
 from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.settings_page import settings_page
+from dlcdb.theme.viewsets import Column, ModelViewSet
 
-from .forms import BrandingForm
-from .views_masterdata import POSITION, UNIT
+from .forms import BrandingForm, OrganizationalPositionForm, OrganizationalUnitForm
 
 
 @login_not_required  # the login page shows it too
@@ -26,14 +29,46 @@ def favicon(request: HttpRequest) -> FileResponse:
 
 @htmx_permission_required("organization.view_branding")
 def branding(request):
+    """Settings › Organization: the organisation's names, address, IT contact, logos and room plan."""
+    return settings_page(request, BrandingForm, icon="bi-building", template="organization/branding.html")
+
+
+class NameViewSet(ModelViewSet):
     """
-    Settings › Organization: the organisation's names, address, IT contact, logos
-    and room plan, and below them its units and positions (views_masterdata.py).
+    Units and positions: a name that persons hold. Global, like device types: no
+    tenant scoping. The lists count the active persons, as the persons list does.
     """
-    return settings_page(
-        request,
-        BrandingForm,
-        icon="bi-building",
-        template="organization/branding.html",
-        context={"unit_kind": UNIT, "units": UNIT.rows(), "position_kind": POSITION, "positions": POSITION.rows()},
-    )
+
+    list_display = ["name", Column("persons_count", _("Persons"), sort_key="persons_count", classname="text-end")]
+    search_fields = ["name"]
+    ordering = "name"
+    edit_template_name = "organization/name_edit.html"
+    # From the model to its persons, and the persons list's filter by it.
+    persons_lookup = ""
+    persons_filter = ""
+
+    def get_queryset(self):
+        active = Q(**{f"{self.persons_lookup}__deleted_at__isnull": True})
+        return self.model.objects.annotate(persons_count=Count(self.persons_lookup, filter=active))
+
+    def get_edit_view_kwargs(self, **kwargs):
+        return super().get_edit_view_kwargs(extra_context={"persons_filter": self.persons_filter}, **kwargs)
+
+
+class UnitViewSet(NameViewSet):
+    model = OrganizationalUnit
+    form_class = OrganizationalUnitForm
+    icon = "bi-diagram-3"
+    url_namespace = "unit"
+    # Person.organizational_unit has no related_name.
+    persons_lookup = "person"
+    persons_filter = "organizational_unit"
+
+
+class PositionViewSet(NameViewSet):
+    model = OrganizationalPosition
+    form_class = OrganizationalPositionForm
+    icon = "bi-person-badge"
+    url_namespace = "position"
+    persons_lookup = "persons"
+    persons_filter = "organizational_positions"

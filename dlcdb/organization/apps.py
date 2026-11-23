@@ -16,7 +16,7 @@ class OrganizationConfig(AppConfig):
         from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit
         from dlcdb.theme.related import RelatedPages, register_related_pages
 
-        register_related_pages(RelatedPages(OrganizationalUnit, "organization:unit_detail", "organization:unit_add"))
+        register_related_pages(RelatedPages(OrganizationalUnit, "organization:unit:edit", "organization:unit:add"))
         register_related_pages(
-            RelatedPages(OrganizationalPosition, "organization:position_detail", "organization:position_add")
+            RelatedPages(OrganizationalPosition, "organization:position:edit", "organization:position:add")
         )

@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # ModelViewSet: reusable list, add, edit and delete pages
 
-**Status:** batch 1 done (the viewset and the smallstuff catalogue); next: batch 2, units and positions. Started 2026-11-23.
+**Status:** batch 2 done (units and positions); next: batch 3, the wrap-up. Started 2026-11-23.
 
 ## Why
 
@@ -23,8 +23,8 @@ SPDX-License-Identifier: CC0-1.0
   - `get_urlpatterns()` and `urls`: the URL names `index`, `add`, `edit`, `delete` in the viewset's own namespace, nested in the app's (`smallstuff:thing:edit`); the app's `urls.py` includes them.
   - Each view is wrapped in `htmx_permission_required` with the model's view, add or delete permission, so the group pages collect them; the edit page checks the change permission itself (`CHECKED_IN_VIEWS`).
   - What the project already has stays: the filterbar, pagination, the similar-names check, `?next=`, `linked_message` and the existing message wording.
-- **Every viewset has its own index page**, units and positions too: one interface users already know.
-- **A protected object can't be deleted:** the delete page asks Django's deletion `Collector` whether a `PROTECT` relation keeps it, and then says so instead of offering to delete.
+- **Every viewset has its own index page**, units and positions too: one interface users already know. *Decided in batch 2:* no list embedded in a card via HTMX: it would need a mode without the filterbar and URL push, and links back to the host page; Settings › Organization keeps only its form.
+- **A protected object can't be deleted:** the delete page asks Django's deletion `Collector` what a `PROTECT` or `RESTRICT` relation keeps it with, and lists that instead of offering to delete: a card per model with the count and the first ten, linked where the user may view them, deactivated ones marked (`theme.viewsets.protected_objects`). A row of a link table (a many-to-many's `through`) stands for the object on its other side: a position lists its persons, not `PersonPosition` rows. *Decided in batch 2*, replacing the bare "in use" and the units' own "N active, M deactivated persons".
 - **Things:** `AssignedThing.thing` is `PROTECT`, so a thing that was ever handed out can't be deleted, only renamed; deleting would have taken its history along (`CASCADE`). The slug stays and `Thing.clean()` fills it from the name. The thing's page lists who holds it now.
 - **smallstuff has no settings model:** the catalogue is its only configuration, under *Settings › Smallstuff catalogue*.
 
@@ -42,10 +42,6 @@ SPDX-License-Identifier: CC0-1.0
 - `PROTECT` also blocks deleting a thing in the admin, which then shows its "protected" page.
 - The nested namespace (`smallstuff:thing`) is no app label: `nav_focus` looks up the app by its first part.
 
-## Open questions
-
-- **Batch 2: a list embedded in a card via HTMX?** The list is already a partial, but a card needs it without `hx-push-url` and the filterbar, and its links need an explicit `next` (`request.htmx.current_url_abs_path` is None behind the proxy). Proposal: own pages now, embed only when a page needs a list inline.
-
 ## Open follow-ups
 
 - A usage view and a history view per viewset, as in Wagtail.
@@ -61,7 +57,7 @@ SPDX-License-Identifier: CC0-1.0
   - *Settings › Smallstuff catalogue* opens it, without the Staff flag; the *Administration* group profile gets the thing permissions;
   - `docs/guides/kleinkram.md`, NEWS; `PLANS/admin-to-frontend.md` › *Smallstuff catalogue* ticked.
 - [x] **1.1. Smallstuff fixes:** handing out without a valid thing answers with the form and its errors (was a server error); taking a thing back is a POST, and one already returned stays as it was (was a server error).
-- [ ] **2. Units and positions as viewsets:**
+- [x] **2. Units and positions as viewsets:**
   - their own index pages and settings entries; `organization/views_masterdata.py` and `organization/name_*.html` go;
   - the DECISIONS bullet "Units and positions live on Settings › Organization as cards" is replaced; the embedding question settled.
 - [ ] **3. Wrap-up:** this plan retires into DECISIONS.md.
