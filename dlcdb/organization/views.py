@@ -13,7 +13,7 @@ from django.views.decorators.http import require_GET
 from dlcdb.core.models import OrganizationalPosition, OrganizationalUnit
 from dlcdb.core.utils.htmx import htmx_permission_required
 from dlcdb.theme.settings_page import settings_page
-from dlcdb.theme.viewsets import Column, ModelViewSet
+from dlcdb.theme.viewsets import Column, ModelViewSet, Usage
 
 from .forms import BrandingForm, OrganizationalPositionForm, OrganizationalUnitForm
 
@@ -39,20 +39,29 @@ class NameViewSet(ModelViewSet):
     tenant scoping. The lists count the active persons, as the persons list does.
     """
 
-    list_display = ["name", Column("persons_count", _("Persons"), sort_key="persons_count", classname="text-end")]
+    list_display = [
+        "name",
+        Column(
+            "persons_count",
+            _("Persons"),
+            sort_key="persons_count",
+            classname="text-end",
+            cell_template_name="theme/viewsets/cells/_count.html",
+        ),
+    ]
     search_fields = ["name"]
     ordering = "name"
-    edit_template_name = "organization/name_edit.html"
-    # From the model to its persons, and the persons list's filter by it.
+    # From the model to its persons.
     persons_lookup = ""
-    persons_filter = ""
 
     def get_queryset(self):
         active = Q(**{f"{self.persons_lookup}__deleted_at__isnull": True})
         return self.model.objects.annotate(persons_count=Count(self.persons_lookup, filter=active))
 
-    def get_edit_view_kwargs(self, **kwargs):
-        return super().get_edit_view_kwargs(extra_context={"persons_filter": self.persons_filter}, **kwargs)
+
+def _persons_usage(persons_filter):
+    """The edit page's card: the active persons, linked to the persons list filtered by the entry."""
+    return Usage(_("Persons"), "persons_count", "persons:index", persons_filter, "core.view_person", icon="bi-people")
 
 
 class UnitViewSet(NameViewSet):
@@ -62,7 +71,7 @@ class UnitViewSet(NameViewSet):
     url_namespace = "unit"
     # Person.organizational_unit has no related_name.
     persons_lookup = "person"
-    persons_filter = "organizational_unit"
+    usage = _persons_usage("organizational_unit")
 
 
 class PositionViewSet(NameViewSet):
@@ -71,4 +80,4 @@ class PositionViewSet(NameViewSet):
     icon = "bi-person-badge"
     url_namespace = "position"
     persons_lookup = "persons"
-    persons_filter = "organizational_positions"
+    usage = _persons_usage("organizational_positions")

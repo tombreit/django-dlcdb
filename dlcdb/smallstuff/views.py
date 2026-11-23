@@ -115,7 +115,16 @@ class ThingViewSet(ModelViewSet):
     model = Thing
     form_class = ThingForm
     icon = "bi-handbag"
-    list_display = ["name", Column("issued", _("Issued"), sort_key="issued", classname="text-end")]
+    list_display = [
+        "name",
+        Column(
+            "issued",
+            _("Issued"),
+            sort_key="issued",
+            classname="text-end",
+            cell_template_name="theme/viewsets/cells/_count.html",
+        ),
+    ]
     search_fields = ["name"]
     ordering = "name"
     edit_view_class = ThingEditView

@@ -20,6 +20,7 @@ class, its template or what its view gets (``edit_view_class``,
 Each page needs the model's view, add or delete permission. Without the change
 permission the edit page shows the form disabled and refuses its POST. An object
 that a PROTECT relation keeps can't be deleted: the delete page lists what keeps it.
+``delete_view_class = None`` leaves the delete page out.
 """
 
 from collections import defaultdict
@@ -123,12 +124,33 @@ def _link_table_field(model):
 
 @dataclass(frozen=True)
 class Column:
-    """An index column: an attribute of the rows, its heading, its sort key, its CSS classes."""
+    """
+    An index column: an attribute of the rows, its heading, its sort key, its CSS
+    classes, and the template of its cells (with ``object`` and ``value``), as in
+    Wagtail; without one a cell shows the value.
+    """
 
     name: str
     label: str
     sort_key: str = ""
     classname: str = ""
+    cell_template_name: str = ""
+
+
+@dataclass(frozen=True)
+class Usage:
+    """
+    The edit page's usage card: how many use the object (an annotation of the
+    viewset's queryset), linked to the list that ``filter`` narrows to them, for
+    users with that list's view ``permission``.
+    """
+
+    label: str
+    count: str
+    list_url_name: str
+    filter: str
+    permission: str
+    icon: str = ""
 
 
 class SearchFilterSet(django_filters.FilterSet):
@@ -157,13 +179,22 @@ class ModelViewMixin:
         return self.request.user.has_perm(permission(self.model, action))
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(opts=self.model._meta, header_icon=self.header_icon, **kwargs)
+        return super().get_context_data(
+            opts=self.model._meta,
+            header_icon=self.header_icon,
+            # Only an AuditBaseModel has the data of the audit card.
+            audited=issubclass(self.model, AuditBaseModel),
+            **kwargs,
+        )
 
 
 class IndexView(ModelViewMixin, generic.ListView):
     template_name = "theme/viewsets/index.html"
     list_display = ()
+    # A subclass of SearchFilterSet adds the model's own filters, as in Wagtail.
+    filterset_class = SearchFilterSet
     search_fields = ()
+    search_placeholder = ""
     list_per_page = 25
 
     @cached_property
@@ -176,10 +207,12 @@ class IndexView(ModelViewMixin, generic.ListView):
         return Column(name, capfirst(self.model._meta.get_field(name).verbose_name), sort_key=name)
 
     def get_filterset_class(self):
-        """The search box, and the sort keys of the columns with their headings."""
+        """``filterset_class``, with the search fields and the sort keys of the columns and their headings."""
         sort_keys = {column.sort_key: column.label for column in self.columns if column.sort_key}
         ordering = django_filters.OrderingFilter(fields=[(key, key) for key in sort_keys], field_labels=sort_keys)
-        return type("IndexFilterSet", (SearchFilterSet,), {"search_fields": self.search_fields, "ordering": ordering})
+        return type(
+            "IndexFilterSet", (self.filterset_class,), {"search_fields": self.search_fields, "ordering": ordering}
+        )
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -205,7 +238,9 @@ class IndexView(ModelViewMixin, generic.ListView):
             page_obj=page_obj,
             columns=self.columns,
             rows=[(obj, self.cells(obj)) for obj in page_obj],
-            filterbar=build_filterbar(self.filterset, self.request, target="#object-list"),
+            filterbar=build_filterbar(
+                self.filterset, self.request, target="#object-list", search_placeholder=self.search_placeholder
+            ),
             current_ordering=self.filterset.data["ordering"],
             filtered_count=page_obj.paginator.count,
             total_count=self.total_count,
@@ -258,6 +293,9 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
     """Read and edit one object; without the change permission the form is disabled."""
 
     template_name = "theme/viewsets/edit.html"
+    usage = None
+    # False when the viewset leaves the delete page out.
+    delete_enabled = True
 
     def post(self, request, *args, **kwargs):
         if not self.has_permission("change"):
@@ -284,6 +322,15 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
     def get_success_url(self):
         return self.detail_urls()[0]
 
+    def usage_card(self):
+        if self.usage is None:
+            return None
+        count = getattr(self.object, self.usage.count)
+        url = None
+        if count and self.request.user.has_perm(self.usage.permission):
+            url = f"{reverse(self.usage.list_url_name)}?{self.usage.filter}={self.object.pk}"
+        return {"label": self.usage.label, "icon": self.usage.icon, "count": count, "url": url}
+
     def get_context_data(self, **kwargs):
         next_url, form_action = self.detail_urls()
         return super().get_context_data(
@@ -293,8 +340,9 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
             form_action=form_action,
             # The Delete link of theme/_form_action_bar.html.
             delete_url=reverse(self.url_name("delete"), args=[self.object.pk])
-            if self.has_permission("delete")
+            if self.delete_enabled and self.has_permission("delete")
             else None,
+            usage=self.usage_card(),
             **kwargs,
         )
 
@@ -332,16 +380,20 @@ class ModelViewSet:
     model = None
     form_class = None
     list_display = ("__str__",)
+    filterset_class = None
     search_fields = ()
+    search_placeholder = ""
     ordering = None
     list_per_page = 25
     icon = ""
+    usage = None
     # Defaults to the model name.
     url_namespace = None
 
     index_view_class = IndexView
     add_view_class = CreateView
     edit_view_class = EditView
+    # None leaves the delete page out.
     delete_view_class = DeleteView
 
     # None keeps the view class's template_name.
@@ -368,7 +420,9 @@ class ModelViewSet:
         return {
             "template_name": self.index_template_name,
             "list_display": self.list_display,
+            "filterset_class": self.filterset_class,
             "search_fields": self.search_fields,
+            "search_placeholder": self.search_placeholder,
             "ordering": self.ordering,
             "list_per_page": self.list_per_page,
             **kwargs,
@@ -378,7 +432,13 @@ class ModelViewSet:
         return {"template_name": self.create_template_name, "form_class": self.get_form_class(), **kwargs}
 
     def get_edit_view_kwargs(self, **kwargs):
-        return {"template_name": self.edit_template_name, "form_class": self.get_form_class(for_update=True), **kwargs}
+        return {
+            "template_name": self.edit_template_name,
+            "form_class": self.get_form_class(for_update=True),
+            "usage": self.usage,
+            "delete_enabled": self.delete_view_class is not None,
+            **kwargs,
+        }
 
     def get_delete_view_kwargs(self, **kwargs):
         return {"template_name": self.delete_template_name, **kwargs}
@@ -401,19 +461,21 @@ class ModelViewSet:
 
     def get_urlpatterns(self):
         """
-        The four pages, each behind the model's permission; the guard records it
-        for the group pages. The edit page checks the change permission itself.
+        The pages, each behind the model's permission; the guard records it for
+        the group pages. The edit page checks the change permission itself.
         """
 
         def guarded(action, view):
             return htmx_permission_required(permission(self.model, action))(view)
 
-        return [
+        patterns = [
             path("", guarded("view", self.index_view), name="index"),
             path("new/", guarded("add", self.add_view), name="add"),
             path("edit/<int:pk>/", guarded("view", self.edit_view), name="edit"),
-            path("delete/<int:pk>/", guarded("delete", self.delete_view), name="delete"),
         ]
+        if self.delete_view_class is not None:
+            patterns.append(path("delete/<int:pk>/", guarded("delete", self.delete_view), name="delete"))
+        return patterns
 
     @property
     def urls(self):

@@ -5,8 +5,10 @@
 
 {% comment %}
 The edit page of a ModelViewSet (theme/viewsets.py); without the change
-permission the same form, disabled. A model adds its own cards in
-detail_sidebar, keeping the audit card with block.super.
+permission the same form, disabled. The sidebar shows the viewset's usage card
+(how many use the object, linked to that list) and, for an AuditBaseModel, the
+audit card. A model adds its own cards in detail_sidebar, keeping these with
+block.super.
 {% endcomment %}
 
 {% block title %}{{ object }}{% endblock title %}
@@ -25,7 +27,18 @@ detail_sidebar, keeping the audit card with block.super.
 {% endblock detail_readonly %}
 
 {% block detail_sidebar %}
-  {% include "theme/includes/_audit_data.html" with object=object %}
+  {% if usage %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        {% if usage.icon %}<i class="bi {{ usage.icon }} text-primary"></i>{% endif %}
+        <h2 class="h6 mb-0">{% if usage.url %}<a href="{{ usage.url }}">{{ usage.label }}</a>{% else %}{{ usage.label }}{% endif %}</h2>
+        <span class="badge text-bg-light border">{{ usage.count }}</span>
+      </div>
+    </section>
+  {% endif %}
+  {% if audited %}
+    {% include "theme/includes/_audit_data.html" with object=object %}
+  {% endif %}
 {% endblock detail_sidebar %}
 
 {% block extra_js %}{{ form.media.js }}{% endblock extra_js %}

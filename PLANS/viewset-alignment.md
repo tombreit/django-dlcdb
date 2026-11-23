@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Viewset alignment: one component for a model's list, add, edit and delete pages
 
-**Status:** batch 0 done (this plan); next: batch 1, the viewset features the master data need. Started 2026-11-23.
+**Status:** batch 1 done (the viewset features); next: batch 2, device types, manufacturers, suppliers. Started 2026-11-23.
 
 ## Why
 
@@ -64,13 +64,13 @@ SPDX-License-Identifier: CC0-1.0
 ## Progress
 
 - [x] **0.** This plan.
-- [ ] **1. Viewset features**, adopted by the existing viewsets:
+- [x] **1. Viewset features**, adopted by the existing viewsets:
   - `filterset_class`;
   - `search_placeholder`;
-  - `Column.cell_template_name` with shared count and note cells;
+  - `Column.cell_template_name` with the shared count cell; the note cell comes with its first user in batch 2;
   - the audit card only for audit models;
   - `Usage`, replacing `organization/name_edit.html`;
-  - a left-out page.
+  - a left-out page; `filterset_class`, the placeholder and the left-out page are tested through their first user in batch 2.
 - [ ] **2. Device types, manufacturers, suppliers** on `ModelViewSet`:
   - `MasterdataSpec`, its six templates and two filters go;
   - URL names `assets:device_type:edit` etc.;

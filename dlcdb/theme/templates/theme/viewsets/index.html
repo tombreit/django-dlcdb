@@ -5,8 +5,10 @@
 
 {% comment %}
 The list page of a ModelViewSet (theme/viewsets.py): the columns of its
-list_display, the first one linking the edit page. A page that overrides this
-template declares the object-list partial again (see theme/_index_base.html).
+list_display, the first one linking the edit page. A column's cell_template_name
+renders its cells (with object and value; shared ones in viewsets/cells/), so a
+model rarely needs its own list template. One that overrides this template
+declares the object-list partial again (see theme/_index_base.html).
 {% endcomment %}
 
 {% block title %}{{ opts.verbose_name_plural|capfirst }}{% endblock title %}
@@ -50,11 +52,13 @@ template declares the object-list partial again (see theme/_index_base.html).
                     <td class="position-relative {{ column.classname }}">
                       <a href="{% url edit_url_name object.pk %}?next={{ request.get_full_path|urlencode }}"
                          class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
-                        {{ value|default:"—" }}
+                        {% if column.cell_template_name %}{% include column.cell_template_name %}{% else %}{{ value|default:"—" }}{% endif %}
                       </a>
                     </td>
                   {% else %}
-                    <td{% if column.classname %} class="{{ column.classname }}"{% endif %}>{{ value }}</td>
+                    <td{% if column.classname %} class="{{ column.classname }}"{% endif %}>
+                      {% if column.cell_template_name %}{% include column.cell_template_name %}{% else %}{{ value }}{% endif %}
+                    </td>
                   {% endif %}
                 {% endfor %}
               </tr>
