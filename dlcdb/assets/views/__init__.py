@@ -20,21 +20,14 @@ from .devices import (
     device_transition,
     person_search,
 )
-from .masterdata import (
-    device_type_add,
-    device_type_detail,
-    device_type_index,
-    manufacturer_add,
-    manufacturer_detail,
-    manufacturer_index,
-    supplier_add,
-    supplier_detail,
-    supplier_index,
-)
+from .masterdata import DeviceTypeViewSet, ManufacturerViewSet, SupplierViewSet
 from .records import record_attachments, record_detail, record_index
 from .relocate import relocate, room_search
 
 __all__ = [
+    "DeviceTypeViewSet",
+    "ManufacturerViewSet",
+    "SupplierViewSet",
     "device_add",
     "device_detail",
     "device_export_csv",
@@ -42,19 +35,10 @@ __all__ = [
     "device_index",
     "device_order",
     "device_transition",
-    "device_type_add",
-    "device_type_detail",
-    "device_type_index",
-    "manufacturer_add",
-    "manufacturer_detail",
-    "manufacturer_index",
     "person_search",
     "record_attachments",
     "record_detail",
     "record_index",
     "relocate",
     "room_search",
-    "supplier_add",
-    "supplier_detail",
-    "supplier_index",
 ]

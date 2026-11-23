@@ -30,9 +30,9 @@ class MasterdataNavbarTests(TestCase):
         for url_name in [
             "rooms:index",
             "persons:index",
-            "assets:manufacturer_index",
-            "assets:supplier_index",
-            "assets:device_type_index",
+            "assets:manufacturer:index",
+            "assets:supplier:index",
+            "assets:device_type:index",
         ]:
             self.assertContains(response, f'href="{reverse(url_name)}"')
 

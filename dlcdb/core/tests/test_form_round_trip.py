@@ -135,17 +135,17 @@ def _device_page():
 
 def _device_type_page():
     device_type = DeviceType.objects.create(name="Monitor", prefix="MON", icon="bi-display", note="A note")
-    return reverse("assets:device_type_detail", args=[device_type.pk]), device_type
+    return reverse("assets:device_type:edit", args=[device_type.pk]), device_type
 
 
 def _manufacturer_page():
     manufacturer = Manufacturer.objects.create(name="Example Inc.", note="A note")
-    return reverse("assets:manufacturer_detail", args=[manufacturer.pk]), manufacturer
+    return reverse("assets:manufacturer:edit", args=[manufacturer.pk]), manufacturer
 
 
 def _supplier_page():
     supplier = Supplier.objects.create(name="IT Supplies Ltd.", contact="sales@example.com", note="A note")
-    return reverse("assets:supplier_detail", args=[supplier.pk]), supplier
+    return reverse("assets:supplier:edit", args=[supplier.pk]), supplier
 
 
 def _lent_record():

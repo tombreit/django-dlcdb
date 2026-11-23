@@ -217,7 +217,7 @@ def index(request):
         ("core.device", "assets:device_index", None),
         ("core.lentrecord", "lending:index", (_("Lending"), _("Lendings"))),
         ("core.room", "rooms:index", None),
-        ("core.devicetype", "assets:device_type_index", None),
+        ("core.devicetype", "assets:device_type:index", None),
         ("core.licencerecord", "licenses:index", (_("License"), _("Licenses"))),
         ("smallstuff.assignedthing", "smallstuff:person_search", None),
     ]

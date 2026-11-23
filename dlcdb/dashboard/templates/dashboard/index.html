@@ -125,7 +125,7 @@ there are, and each row opens that type's devices.
           {% endfor %}
         </ol>
         {% if device_type_total > device_type_ranking|length %}
-          <a class="d-inline-block mt-3" href="{% url 'assets:device_type_index' %}?ordering=-assets">
+          <a class="d-inline-block mt-3" href="{% url 'assets:device_type:index' %}?ordering=-assets">
             {% blocktranslate count counter=device_type_total %}All {{ counter }} device type{% plural %}All {{ counter }} device types{% endblocktranslate %}
           </a>
         {% endif %}

@@ -100,9 +100,9 @@ def test_detail_urls_drop_an_unsafe_next():
 # and to the same place; the device and tenant add pages had a Cancel without URL.
 ADD_PAGES = [
     "assets:device_add",
-    "assets:device_type_add",
-    "assets:manufacturer_add",
-    "assets:supplier_add",
+    "assets:device_type:add",
+    "assets:manufacturer:add",
+    "assets:supplier:add",
     "lending:profile_add",
     "organization:position:add",
     "organization:unit:add",

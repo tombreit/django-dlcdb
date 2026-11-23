@@ -87,7 +87,7 @@ class DashboardTileTests(TestCase):
         """Rendered only for a model with notes, hence the device type seeded above."""
         response = self.client.get(reverse("dashboard:index"))
 
-        self.assertEqual(_tile(response, "assets:device_type_index")["caption"], "1 with note")
+        self.assertEqual(_tile(response, "assets:device_type:index")["caption"], "1 with note")
         self.assertContains(response, '<div class="dashboard-tile-caption">1 with note</div>', html=True)
 
     def test_the_journal_tile_counts_problems_and_links_to_the_journal(self):
@@ -122,7 +122,7 @@ class DashboardTileTests(TestCase):
                 "assets:device_index",
                 "lending:index",
                 "rooms:index",
-                "assets:device_type_index",
+                "assets:device_type:index",
                 "licenses:index",
                 "smallstuff:person_search",
             ],
@@ -181,7 +181,7 @@ class DashboardTileTests(TestCase):
 
         self.assertContains(response, f'href="{reverse("assets:device_index")}?device_type={self.device_type.pk}"')
         # One type, all of it shown: no link to the full list.
-        self.assertNotContains(response, f"{reverse('assets:device_type_index')}?ordering=-assets")
+        self.assertNotContains(response, f"{reverse('assets:device_type:index')}?ordering=-assets")
 
     def test_the_cut_device_type_ranking_links_to_all_types(self):
         for number in range(stats.DEVICE_TYPE_RANKING_SIZE):
@@ -191,7 +191,7 @@ class DashboardTileTests(TestCase):
         response = self.client.get(reverse("dashboard:index"))
 
         self.assertEqual(len(response.context["device_type_ranking"]), stats.DEVICE_TYPE_RANKING_SIZE)
-        self.assertContains(response, f"{reverse('assets:device_type_index')}?ordering=-assets")
+        self.assertContains(response, f"{reverse('assets:device_type:index')}?ordering=-assets")
         self.assertContains(response, f"All {stats.DEVICE_TYPE_RANKING_SIZE + 1} device types")
 
     def test_an_active_inventory_adds_a_progress_tile(self):
@@ -239,7 +239,7 @@ class DashboardTileTargetTests(TestCase):
         urls = [tile["url"] for tile in self._tiles()]
 
         self.assertIn("rooms:index", urls)
-        self.assertIn("assets:device_type_index", urls)
+        self.assertIn("assets:device_type:index", urls)
 
     def test_the_lost_tile_scopes_the_record_list_to_current_lost_records(self):
         lost = next(tile for tile in self._tiles() if tile["url"] == "assets:record_index")

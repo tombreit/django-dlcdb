@@ -1,0 +1,3 @@
+{% load i18n %}
+{# A name in a ModelViewSet list (Column.cell_template_name), marked when its object has a note. #}
+{{ value|default:"—" }}{% if object.note %}<i class="bi bi-chat-fill text-warning-emphasis ms-1" title="{% translate 'Has note' %}"></i>{% endif %}

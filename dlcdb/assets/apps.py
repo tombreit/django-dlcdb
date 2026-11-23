@@ -21,6 +21,6 @@ class AssetsConfig(AppConfig):
         from dlcdb.core.models import DeviceType, Manufacturer, Supplier
         from dlcdb.theme.related import RelatedPages, register_related_pages
 
-        register_related_pages(RelatedPages(DeviceType, "assets:device_type_detail", "assets:device_type_add"))
-        register_related_pages(RelatedPages(Manufacturer, "assets:manufacturer_detail", "assets:manufacturer_add"))
-        register_related_pages(RelatedPages(Supplier, "assets:supplier_detail", "assets:supplier_add"))
+        register_related_pages(RelatedPages(DeviceType, "assets:device_type:edit", "assets:device_type:add"))
+        register_related_pages(RelatedPages(Manufacturer, "assets:manufacturer:edit", "assets:manufacturer:add"))
+        register_related_pages(RelatedPages(Supplier, "assets:supplier:edit", "assets:supplier:add"))

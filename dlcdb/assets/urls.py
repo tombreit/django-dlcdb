@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
@@ -16,15 +16,9 @@ urlpatterns = [
     path("devices/<int:pk>/history/", views.device_history, name="device_history"),
     path("devices/<int:pk>/order/", views.device_order, name="device_order"),
     path("devices/<int:pk>/state/<slug:name>/", views.device_transition, name="device_transition"),
-    path("device-types/", views.device_type_index, name="device_type_index"),
-    path("device-types/add/", views.device_type_add, name="device_type_add"),
-    path("device-types/<int:pk>/", views.device_type_detail, name="device_type_detail"),
-    path("manufacturers/", views.manufacturer_index, name="manufacturer_index"),
-    path("manufacturers/add/", views.manufacturer_add, name="manufacturer_add"),
-    path("manufacturers/<int:pk>/", views.manufacturer_detail, name="manufacturer_detail"),
-    path("suppliers/", views.supplier_index, name="supplier_index"),
-    path("suppliers/add/", views.supplier_add, name="supplier_add"),
-    path("suppliers/<int:pk>/", views.supplier_detail, name="supplier_detail"),
+    path("device-types/", include(views.DeviceTypeViewSet().urls)),
+    path("manufacturers/", include(views.ManufacturerViewSet().urls)),
+    path("suppliers/", include(views.SupplierViewSet().urls)),
     path("records/", views.record_index, name="record_index"),
     path("records/<int:pk>/", views.record_detail, name="record_detail"),
     path("records/<int:pk>/attachments/", views.record_attachments, name="record_attachments"),

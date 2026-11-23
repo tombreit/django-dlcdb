@@ -36,7 +36,7 @@ class RelatedPages:
     """The frontend pages of a model a select can point to."""
 
     model: type[Model]
-    detail_url: str  # URL name taking the pk, e.g. "assets:manufacturer_detail"
+    detail_url: str  # URL name taking the pk, e.g. "assets:manufacturer:edit"
     add_url: str  # URL name of the add page
 
     def permission(self, action) -> str:

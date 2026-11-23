@@ -12,13 +12,12 @@ re-implement any of them: every source below binds the *owning app's own*
 FilterSet with nothing but the term, so "what counts as a match" can never drift
 between the global search and the list it links to.
 
-Shape follows ``dlcdb.assets.views.masterdata``: a frozen spec per surface plus
-one generic implementation. Deliberately *not* a registry like
-``dlcdb.theme.pickers`` -- that one exists to break an import cycle, because
-``theme`` sits below the feature apps and must not import their models. The
-dashboard sits on top (it already imports core models and reverses assets/
-lending/licenses/smallstuff URL names), so a plain module-level tuple costs
-nothing and hides nothing.
+Shape: a frozen spec per surface plus one generic implementation. Deliberately
+*not* a registry like ``dlcdb.theme.pickers`` -- that one exists to break an
+import cycle, because ``theme`` sits below the feature apps and must not import
+their models. The dashboard sits on top (it already imports core models and
+reverses assets/lending/licenses/smallstuff URL names), so a plain module-level
+tuple costs nothing and hides nothing.
 """
 
 from collections.abc import Callable

@@ -3,267 +3,94 @@
 # SPDX-License-Identifier: EUPL-1.2
 
 """
-Frontends for the simple device master data: device types, manufacturers and
-suppliers. Three near-identical list/add/edit surfaces sharing one
-implementation, parameterized by a small spec per model.
+The device master data: device types, manufacturers and suppliers, each a
+ModelViewSet (theme/viewsets.py). Global, like the lending profiles: no tenant
+scoping. No delete page: deleting and deactivating master data stays with the
+superusers in the admin (DeviceType is soft-deleted, its delete() would bypass
+PROTECT).
 """
 
-from dataclasses import dataclass
-
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from django.forms import ModelForm
-from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
-from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import DeviceType, Manufacturer, Supplier
-from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
-from dlcdb.core.utils.links import linked_message
-from dlcdb.theme.filterbar import bind_filterset, build_filterbar
-from dlcdb.theme.navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
-from dlcdb.theme.pagination import paginate
-from dlcdb.theme.similar import add_similar_suggestions, similar_context, similar_suggestions
+from dlcdb.theme.viewsets import Column, ModelViewSet, Usage
 
-from ..filters import DeviceTypeFilter, ManufacturerFilter, SupplierFilter
+from ..filters import DeviceTypeFilter
 from ..forms import DeviceTypeForm, ManufacturerForm, SupplierForm
 
-MASTERDATA_PER_PAGE = 25
+NAME_WITH_NOTE = "theme/viewsets/cells/_name_with_note.html"
 
-
-@dataclass(frozen=True)
-class MasterdataSpec:
-    """Everything that differs between the three master-data surfaces."""
-
-    model: type
-    form_class: type[ModelForm]
-    filter_class: type
-    index_template: str
-    list_id: str
-    index_url: str
-    detail_url: str
-    change_permission: str
-    heading: str
-    icon: str
-    add_title: str
-    submit_label: str
-    search_placeholder: str
-    # DeviceFilter param that filters the device index by this model, so the
-    # detail page's device count can link to the actual devices.
-    device_filter_param: str
-    # DeviceType is an audit model (user/username/timestamps); Manufacturer and
-    # Supplier are plain models without those fields.
-    has_audit_fields: bool
-
-
-DEVICE_TYPE_SPEC = MasterdataSpec(
-    model=DeviceType,
-    form_class=DeviceTypeForm,
-    filter_class=DeviceTypeFilter,
-    index_template="assets/device_types/index.html",
-    list_id="device-type-list",
-    index_url="assets:device_type_index",
-    detail_url="assets:device_type_detail",
-    change_permission="core.change_devicetype",
-    heading=gettext_lazy("Device type"),
-    icon="bi-palette",
-    add_title=gettext_lazy("Add device type"),
-    submit_label=gettext_lazy("Create device type"),
-    search_placeholder=gettext_lazy("Search name, prefix..."),
-    device_filter_param="device_type",
-    has_audit_fields=True,
-)
-
-MANUFACTURER_SPEC = MasterdataSpec(
-    model=Manufacturer,
-    form_class=ManufacturerForm,
-    filter_class=ManufacturerFilter,
-    index_template="assets/manufacturers/index.html",
-    list_id="manufacturer-list",
-    index_url="assets:manufacturer_index",
-    detail_url="assets:manufacturer_detail",
-    change_permission="core.change_manufacturer",
-    heading=gettext_lazy("Manufacturer"),
-    icon="bi-building",
-    add_title=gettext_lazy("Add manufacturer"),
-    submit_label=gettext_lazy("Create manufacturer"),
-    search_placeholder=gettext_lazy("Search name, note..."),
-    device_filter_param="manufacturer",
-    has_audit_fields=False,
-)
-
-SUPPLIER_SPEC = MasterdataSpec(
-    model=Supplier,
-    form_class=SupplierForm,
-    filter_class=SupplierFilter,
-    index_template="assets/suppliers/index.html",
-    list_id="supplier-list",
-    index_url="assets:supplier_index",
-    detail_url="assets:supplier_detail",
-    change_permission="core.change_supplier",
-    heading=gettext_lazy("Supplier"),
-    icon="bi-truck",
-    add_title=gettext_lazy("Add supplier"),
-    submit_label=gettext_lazy("Create supplier"),
-    search_placeholder=gettext_lazy("Search name, note..."),
-    device_filter_param="supplier",
-    has_audit_fields=False,
+# Named "assets": the dashboard links the device types sorted by it.
+ASSETS_COLUMN = Column(
+    "assets",
+    _("Assets"),
+    sort_key="assets",
+    classname="text-end",
+    cell_template_name="theme/viewsets/cells/_count.html",
 )
 
 
-def _masterdata_queryset(spec):
-    """
-    All objects (the soft-delete default managers already exclude deleted
-    rows), each annotated with the count of devices referencing it — the same
-    count the admin's DeviceCountMixin shows.
-    """
-    return spec.model.objects.annotate(assets_count=Count("device", distinct=True))
+def _devices_usage(device_filter):
+    """The edit page's card: the devices, linked to the device list filtered by the entry."""
+    return Usage(_("Devices"), "assets", "assets:device_index", device_filter, "core.view_device", icon="bi-pc-display")
 
 
-def _masterdata_index(request, spec):
-    template = f"{spec.index_template}#{spec.list_id}" if request.htmx else spec.index_template
-    base_queryset = _masterdata_queryset(spec)
+class MasterdataViewSet(ModelViewSet):
+    """What the three share: the devices count and no delete page."""
 
-    filterset = bind_filterset(spec.filter_class, request, base_queryset, default_ordering="name")
+    ordering = "name"
+    delete_view_class = None
 
-    page_obj = paginate(request, filterset.qs, MASTERDATA_PER_PAGE)
+    def get_queryset(self):
+        return self.model.objects.annotate(assets=Count("device", distinct=True))
 
-    context = {
-        "filter": filterset,
-        "page_obj": page_obj,
-        "filterbar": build_filterbar(
-            filterset,
-            request,
-            target=f"#{spec.list_id}",
-            search_placeholder=spec.search_placeholder,
+
+class DeviceTypeViewSet(MasterdataViewSet):
+    model = DeviceType
+    form_class = DeviceTypeForm
+    icon = "bi-palette"
+    url_namespace = "device_type"
+    usage = _devices_usage("device_type")
+    list_display = [
+        Column("name", _("Name"), sort_key="name", cell_template_name="assets/cells/_device_type_name.html"),
+        Column(
+            "prefix",
+            _("Prefix"),
+            sort_key="prefix",
+            classname="d-none d-md-table-cell",
+            cell_template_name="assets/cells/_code.html",
         ),
-        "current_ordering": filterset.data["ordering"],
-        "filtered_count": page_obj.paginator.count,
-        "total_count": base_queryset.count(),
-    }
-    return TemplateResponse(request, template, context)
+        ASSETS_COLUMN,
+    ]
+    filterset_class = DeviceTypeFilter
+    search_fields = ["name", "prefix"]
+    search_placeholder = _("Search name, prefix...")
 
 
-def _masterdata_add(request, spec):
-    if request.htmx:
-        # The name being typed: list the similar existing entries.
-        return similar_suggestions(request, spec.form_class)
-    form = spec.form_class(request.POST or None)
-    add_similar_suggestions(form, request)
-    if request.method == "POST" and form.is_valid():
-        obj = form.save(commit=False)
-        if spec.has_audit_fields:
-            obj.stamp_user(request.user)
-        obj.save()
-        messages.success(
-            request,
-            _("%(model)s “%(obj)s” was created.") % {"model": spec.model._meta.verbose_name, "obj": obj},
-        )
-        # The page that opened this one (a form's + button, say) comes as ?next=:
-        # return there with the new object. Cancel leads there without it.
-        return redirect(get_redirect_url_after_add(request, obj.pk) or reverse(spec.detail_url, args=[obj.pk]))
-
-    return TemplateResponse(
-        request,
-        "assets/masterdata/form.html",
-        {
-            "form": form,
-            "title": spec.add_title,
-            "submit_label": spec.submit_label,
-            "heading": spec.heading,
-            "icon": spec.icon,
-            "next_url": get_redirect_url(request) or reverse(spec.index_url),
-            # Existing entries the new one may duplicate, after a refused save.
-            "similar": similar_context(request, getattr(form, "similar_matches", None)),
-        },
-    )
+class ManufacturerViewSet(MasterdataViewSet):
+    model = Manufacturer
+    form_class = ManufacturerForm
+    icon = "bi-building"
+    url_namespace = "manufacturer"
+    usage = _devices_usage("manufacturer")
+    list_display = [Column("name", _("Name"), sort_key="name", cell_template_name=NAME_WITH_NOTE), ASSETS_COLUMN]
+    search_fields = ["name", "note"]
+    search_placeholder = _("Search name, note...")
 
 
-def _masterdata_detail(request, spec, pk):
-    obj = get_object_or_404(_masterdata_queryset(spec), pk=pk)
-    can_change = request.user.has_perm(spec.change_permission)
-
-    # The page that opened this one (the filtered list, say) comes as ?next=, so
-    # Save, Back and Cancel return there; form_action carries it through the POST.
-    next_url, form_action = detail_urls(request, spec.index_url, spec.detail_url, obj.pk)
-
-    if request.method == "POST":
-        if not can_change:
-            raise PermissionDenied(missing_permission_message(spec.change_permission))
-        form = spec.form_class(request.POST, instance=obj)
-        if form.is_valid():
-            saved_obj = form.save(commit=False)
-            if spec.has_audit_fields:
-                saved_obj.stamp_user(request.user)
-            saved_obj.save()
-            messages.success(
-                request,
-                linked_message(_("{model} “{obj}” was updated."), model=spec.model._meta.verbose_name, obj=saved_obj),
-            )
-            return redirect(next_url)
-    else:
-        form = spec.form_class(instance=obj)
-
-    return TemplateResponse(
-        request,
-        "assets/masterdata/detail.html",
-        {
-            "object": obj,
-            "form": form,
-            "can_change": can_change,
-            "heading": spec.heading,
-            "icon": spec.icon,
-            "has_audit_fields": spec.has_audit_fields,
-            "next_url": next_url,
-            "form_action": form_action,
-            "devices_url": f"{reverse('assets:device_index')}?{spec.device_filter_param}={obj.pk}",
-        },
-    )
-
-
-@htmx_permission_required("core.view_devicetype")
-def device_type_index(request):
-    return _masterdata_index(request, DEVICE_TYPE_SPEC)
-
-
-@htmx_permission_required("core.add_devicetype")
-def device_type_add(request):
-    return _masterdata_add(request, DEVICE_TYPE_SPEC)
-
-
-@htmx_permission_required("core.view_devicetype")
-def device_type_detail(request, pk):
-    return _masterdata_detail(request, DEVICE_TYPE_SPEC, pk)
-
-
-@htmx_permission_required("core.view_manufacturer")
-def manufacturer_index(request):
-    return _masterdata_index(request, MANUFACTURER_SPEC)
-
-
-@htmx_permission_required("core.add_manufacturer")
-def manufacturer_add(request):
-    return _masterdata_add(request, MANUFACTURER_SPEC)
-
-
-@htmx_permission_required("core.view_manufacturer")
-def manufacturer_detail(request, pk):
-    return _masterdata_detail(request, MANUFACTURER_SPEC, pk)
-
-
-@htmx_permission_required("core.view_supplier")
-def supplier_index(request):
-    return _masterdata_index(request, SUPPLIER_SPEC)
-
-
-@htmx_permission_required("core.add_supplier")
-def supplier_add(request):
-    return _masterdata_add(request, SUPPLIER_SPEC)
-
-
-@htmx_permission_required("core.view_supplier")
-def supplier_detail(request, pk):
-    return _masterdata_detail(request, SUPPLIER_SPEC, pk)
+class SupplierViewSet(MasterdataViewSet):
+    model = Supplier
+    form_class = SupplierForm
+    icon = "bi-truck"
+    url_namespace = "supplier"
+    usage = _devices_usage("supplier")
+    list_display = [
+        Column("name", _("Name"), sort_key="name", cell_template_name=NAME_WITH_NOTE),
+        Column(
+            "contact", _("Contact"), classname="d-none d-md-table-cell", cell_template_name="assets/cells/_contact.html"
+        ),
+        ASSETS_COLUMN,
+    ]
+    search_fields = ["name", "note"]
+    search_placeholder = _("Search name, note...")

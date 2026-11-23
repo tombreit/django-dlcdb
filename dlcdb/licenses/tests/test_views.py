@@ -309,7 +309,7 @@ class LicenseFormRelatedLinksTests(BaseTest):
 
     def test_a_manufacturer_added_from_the_new_licence_form_comes_back_preselected(self):
         form_url = reverse("licenses:new")
-        add_url = with_next(f"{reverse('assets:manufacturer_add')}?next_field=manufacturer", form_url)
+        add_url = with_next(f"{reverse('assets:manufacturer:add')}?next_field=manufacturer", form_url)
         self.assertContains(self.client.get(form_url), f'href="{escape(add_url)}"')
 
         response = self.client.post(add_url, {"name": "Adobe"})

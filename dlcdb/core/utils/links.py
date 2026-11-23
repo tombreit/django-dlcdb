@@ -25,9 +25,9 @@ from django.utils.safestring import SafeString
 DETAIL_URLS = {
     "core.room": "rooms:detail",
     "core.person": "persons:detail",
-    "core.devicetype": "assets:device_type_detail",
-    "core.manufacturer": "assets:manufacturer_detail",
-    "core.supplier": "assets:supplier_detail",
+    "core.devicetype": "assets:device_type:edit",
+    "core.manufacturer": "assets:manufacturer:edit",
+    "core.supplier": "assets:supplier:edit",
     "core.organizationalunit": "organization:unit:edit",
     "core.organizationalposition": "organization:position:edit",
     "tenants.tenant": "tenants:detail",

@@ -18,6 +18,7 @@ from dlcdb.core.models.record import DEVICE_DISPOSITION_CHOICES
 from dlcdb.dataexchange.models import ImporterList
 from dlcdb.tenants.shortcuts import filterable_tenants, tenant_scoped_queryset
 from dlcdb.theme.filters import HAS_NOTE_CHOICES, filter_boolean_choice, filter_has_note
+from dlcdb.theme.viewsets import SearchFilterSet
 
 STATE_NO_RECORD = "no-record"
 STATE_CHOICES = [(STATE_NO_RECORD, _("No active record")), *Record.RECORD_TYPE_CHOICES]
@@ -290,10 +291,8 @@ class RecordFilter(django_filters.FilterSet):
         )
 
 
-class DeviceTypeFilter(django_filters.FilterSet):
-    """Search and the has-note filter from the previous DeviceType changelist."""
-
-    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
+class DeviceTypeFilter(SearchFilterSet):
+    """The device type list's own filter (DeviceTypeViewSet): has a note or not."""
 
     has_note = django_filters.ChoiceFilter(
         choices=HAS_NOTE_CHOICES,
@@ -301,55 +300,3 @@ class DeviceTypeFilter(django_filters.FilterSet):
         label=_("Note"),
         empty_label=_("Any note status..."),
     )
-    ordering = django_filters.OrderingFilter(
-        fields=(
-            ("name", "name"),
-            ("prefix", "prefix"),
-            ("assets_count", "assets"),
-            ("created_at", "created"),
-        ),
-        field_labels={"created_at": _("Created")},
-    )
-
-    class Meta:
-        model = DeviceType
-        fields = ["search", "has_note", "ordering"]
-
-    def search_filter(self, queryset, name, value):
-        return queryset.filter(Q(name__icontains=value) | Q(prefix__icontains=value))
-
-
-class ManufacturerFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
-
-    ordering = django_filters.OrderingFilter(
-        fields=(
-            ("name", "name"),
-            ("assets_count", "assets"),
-        ),
-    )
-
-    class Meta:
-        model = Manufacturer
-        fields = ["search", "ordering"]
-
-    def search_filter(self, queryset, name, value):
-        return queryset.filter(Q(name__icontains=value) | Q(note__icontains=value))
-
-
-class SupplierFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method="search_filter", label=_("Search"))
-
-    ordering = django_filters.OrderingFilter(
-        fields=(
-            ("name", "name"),
-            ("assets_count", "assets"),
-        ),
-    )
-
-    class Meta:
-        model = Supplier
-        fields = ["search", "ordering"]
-
-    def search_filter(self, queryset, name, value):
-        return queryset.filter(Q(name__icontains=value) | Q(note__icontains=value))

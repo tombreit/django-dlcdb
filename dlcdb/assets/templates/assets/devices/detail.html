@@ -57,9 +57,9 @@
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Inventory ID" %}</dt>
         <dd class="col-sm-8 font-monospace">{{ device.sap_id|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Device type" %}</dt>
-        <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=device.device_type url_name="assets:device_type_detail" perm="core.view_devicetype" %}</dd>
+        <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=device.device_type url_name="assets:device_type:edit" perm="core.view_devicetype" %}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Manufacturer" %}</dt>
-        <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=device.manufacturer url_name="assets:manufacturer_detail" perm="core.view_manufacturer" %}</dd>
+        <dd class="col-sm-8">{% include "theme/includes/_object_link.html" with obj=device.manufacturer url_name="assets:manufacturer:edit" perm="core.view_manufacturer" %}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Model name" %}</dt>
         <dd class="col-sm-8">{{ device.series|default:"—" }}</dd>
         <dt class="col-sm-4 text-secondary fw-medium">{% translate "Serial number" %}</dt>

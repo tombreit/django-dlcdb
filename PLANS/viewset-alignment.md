@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Viewset alignment: one component for a model's list, add, edit and delete pages
 
-**Status:** batch 1 done (the viewset features); next: batch 2, device types, manufacturers, suppliers. Started 2026-11-23.
+**Status:** batch 2 done (device types, manufacturers, suppliers); next: batch 3, lending profiles. Started 2026-11-23.
 
 ## Why
 
@@ -71,11 +71,12 @@ SPDX-License-Identifier: CC0-1.0
   - the audit card only for audit models;
   - `Usage`, replacing `organization/name_edit.html`;
   - a left-out page; `filterset_class`, the placeholder and the left-out page are tested through their first user in batch 2.
-- [ ] **2. Device types, manufacturers, suppliers** on `ModelViewSet`:
+- [x] **2. Device types, manufacturers, suppliers** on `ModelViewSet`:
   - `MasterdataSpec`, its six templates and two filters go;
   - URL names `assets:device_type:edit` etc.;
   - no delete page;
-  - DeviceType's verbose names in sentence case (migration).
+  - DeviceType's verbose names in sentence case (migration);
+  - the device type list's "created" sort is gone (no column).
 - [ ] **3. Lending profiles** on `ModelViewSet`:
   - a generic `HistoryView`;
   - initial values from GET;

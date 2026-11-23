@@ -41,9 +41,9 @@ def test_obj_link_room_and_person():
 @pytest.mark.parametrize(
     ("model", "url_name"),
     [
-        (DeviceType, "assets:device_type_detail"),
-        (Manufacturer, "assets:manufacturer_detail"),
-        (Supplier, "assets:supplier_detail"),
+        (DeviceType, "assets:device_type:edit"),
+        (Manufacturer, "assets:manufacturer:edit"),
+        (Supplier, "assets:supplier:edit"),
         (Tenant, "tenants:detail"),
     ],
 )

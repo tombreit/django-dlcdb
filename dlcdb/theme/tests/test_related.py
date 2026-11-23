@@ -89,8 +89,8 @@ def test_without_any_permission_there_are_no_buttons(make_user, dell):
 def test_the_links_return_to_the_form(superuser, dell):
     html = str(_form(superuser, initial={"manufacturer": dell.pk})["manufacturer"])
 
-    detail_url = with_next(reverse("assets:manufacturer_detail", args=[dell.pk]), FORM_URL)
-    add_url = with_next(reverse("assets:manufacturer_add") + "?next_field=manufacturer", FORM_URL)
+    detail_url = with_next(reverse("assets:manufacturer:edit", args=[dell.pk]), FORM_URL)
+    add_url = with_next(reverse("assets:manufacturer:add") + "?next_field=manufacturer", FORM_URL)
     assert f'href="{detail_url}"' in html
     assert f'href="{add_url.replace("&", "&amp;")}"' in html
 
@@ -98,7 +98,7 @@ def test_the_links_return_to_the_form(superuser, dell):
 def test_the_detail_button_is_disabled_while_nothing_is_selected(superuser, dell):
     html = str(_form(superuser)["manufacturer"])
 
-    template = with_next(reverse("assets:manufacturer_detail", args=[0]), FORM_URL)
+    template = with_next(reverse("assets:manufacturer:edit", args=[0]), FORM_URL)
     assert f'data-href-template="{template}"' in html
     assert 'aria-disabled="true"' in html
 
@@ -109,7 +109,7 @@ def test_the_detail_button_ignores_a_value_the_select_does_not_offer(superuser, 
     html = str(_form(superuser, data={"manufacturer": "999999"})["manufacturer"])
 
     assert 'aria-disabled="true"' in html
-    assert "/manufacturers/999999/" not in html
+    assert reverse("assets:manufacturer:edit", args=[999999]) not in html
 
 
 def test_a_multi_select_gets_only_the_add_button(superuser):

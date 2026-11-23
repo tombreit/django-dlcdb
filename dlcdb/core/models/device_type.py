@@ -39,8 +39,8 @@ class DeviceType(SoftDeleteAuditBaseModel):
 
     class Meta:
         ordering = ("name",)
-        verbose_name = _("Device Type")
-        verbose_name_plural = _("Device Types")
+        verbose_name = _("Device type")
+        verbose_name_plural = _("Device types")
         indexes = [
             models.Index(fields=["name"]),
         ]
