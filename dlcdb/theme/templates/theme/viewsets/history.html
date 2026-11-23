@@ -4,20 +4,19 @@
 {% load i18n %}
 
 {% comment %}
-A lending profile's field history: when who changed which field, a changed slip
-template or checklist in full. The regulations are not tracked.
+The field history page of a ModelViewSet (theme/viewsets.py, HistoryView): when
+who changed which field, a changed text in full.
 {% endcomment %}
 
-{% block title %}{% translate "Field history" %} · {{ profile.device_type }}{% endblock title %}
+{% block title %}{% translate "Field history" %} · {{ object }}{% endblock title %}
 
 {% block body %}
-{% url "lending:profile_detail" profile.pk as profile_url %}
 <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3">
   <div class="me-auto">
     <h1 class="h3 mb-1">{% translate "Field history" %}</h1>
-    <div class="text-muted">{% translate "Lending profile" %}: {{ profile.device_type }}</div>
+    <div class="text-muted">{{ opts.verbose_name|capfirst }}: {{ object }}</div>
   </div>
-  {% include "theme/includes/_back_link.html" with url=profile_url label=_("Back to lending profile") %}
+  {% include "theme/includes/_back_link.html" with url=edit_url label=_("Back") %}
 </div>
 
 <div class="row">

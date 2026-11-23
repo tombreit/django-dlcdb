@@ -476,12 +476,12 @@ class LendingDetailViewTests(BaseTest):
         url = reverse("lending:detail", args=[self.available_record.pk])
         response = self.client.get(url)
         self.assertNotContains(response, 'id="lend-form-print"')
-        self.assertContains(response, escape(with_next(reverse("lending:profile_detail", args=[profile.pk]), url)))
+        self.assertContains(response, escape(with_next(reverse("lending:profile:edit", args=[profile.pk]), url)))
 
     def test_lend_flow_without_profile_offers_to_add_one_for_the_device_type(self):
         url = reverse("lending:detail", args=[self.available_record.pk])
         response = self.client.get(url)
-        add_url = f"{reverse('lending:profile_add')}?device_type={self.available_device.device_type_id}"
+        add_url = f"{reverse('lending:profile:add')}?device_type={self.available_device.device_type_id}"
         self.assertContains(response, escape(with_next(add_url, url)))
 
     def test_lend_creates_new_lent_record(self):

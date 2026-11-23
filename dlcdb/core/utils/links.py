@@ -31,7 +31,7 @@ DETAIL_URLS = {
     "core.organizationalunit": "organization:unit:edit",
     "core.organizationalposition": "organization:position:edit",
     "tenants.tenant": "tenants:detail",
-    "lending.lendingprofile": "lending:profile_detail",
+    "lending.lendingprofile": "lending:profile:edit",
     "smallstuff.thing": "smallstuff:thing:edit",
     "auth.group": "accounts:group_detail",
 }

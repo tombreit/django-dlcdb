@@ -103,7 +103,7 @@ ADD_PAGES = [
     "assets:device_type:add",
     "assets:manufacturer:add",
     "assets:supplier:add",
-    "lending:profile_add",
+    "lending:profile:add",
     "organization:position:add",
     "organization:unit:add",
     "persons:add",

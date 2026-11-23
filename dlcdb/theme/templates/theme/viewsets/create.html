@@ -19,7 +19,7 @@
     <div class="col-lg-9 col-xl-8">
       <form method="post" novalidate>
         {% csrf_token %}
-        {% include "theme/viewsets/_form_fields.html" %}
+        {% include form_fields_template %}
         <div id="similar-names">{% include "theme/includes/_similar.html" %}</div>
         {% include "theme/includes/_form_action_bar.html" with cancel_url=next_url submit_label=_("Save") %}
       </form>

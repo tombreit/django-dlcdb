@@ -2,7 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-"""The lending profiles: listed on Settings › Lending configuration, added and edited on pages of their own."""
+"""
+The lending profiles (views_profiles.LendingProfileViewSet): what differs from
+any ModelViewSet. smallstuff/tests/test_things.py covers the rest.
+"""
 
 import pytest
 from django.urls import reverse
@@ -44,25 +47,25 @@ def _post_data(device_type, **fields):
 
 
 @pytest.mark.parametrize(("perms", "listed"), [((CONFIG,), False), ((CONFIG, VIEW), True)])
-def test_the_configuration_page_lists_the_profiles_with_their_view_permission(login, profile, perms, listed):
-    response = login(*perms).get(reverse("lending:configuration"))
+def test_settings_lists_the_profiles_with_their_view_permission(login, profile, perms, listed):
+    response = login(*perms).get(reverse("settings"))
 
-    assert (reverse("lending:profile_detail", args=[profile.pk]) in response.content.decode()) == listed
+    assert (f'href="{reverse("lending:profile:index")}"' in response.content.decode()) == listed
 
 
 def test_a_profile_is_added_for_the_preselected_device_type(login, laptop):
     client = login(ADD)
     rules = Link.objects.create(linktext="IT rules", url="https://example.org/rules")
 
-    form = client.get(reverse("lending:profile_add"), {"device_type": laptop.pk}).context["form"]
+    form = client.get(reverse("lending:profile:add"), {"device_type": laptop.pk}).context["form"]
     response = client.post(
-        f"{reverse('lending:profile_add')}?device_type={laptop.pk}",
+        f"{reverse('lending:profile:add')}?device_type={laptop.pk}",
         _post_data(laptop, mandatory_regulations=[rules.pk]),
     )
 
     assert form["device_type"].value() == str(laptop.pk)
     profile = LendingProfile.objects.get(device_type=laptop)
-    assert response.url == reverse("lending:profile_detail", args=[profile.pk])
+    assert response.url == reverse("lending:profile:edit", args=[profile.pk])
     assert list(profile.mandatory_regulations.all()) == [rules]
 
 
@@ -71,7 +74,7 @@ def test_only_device_types_without_a_profile_are_offered(login, profile):
     DeviceType.objects.create(name="Phone")
     LendingProfile.objects.create(device_type=DeviceType.objects.get(name="Phone"))
 
-    response = login(VIEW, CHANGE).get(reverse("lending:profile_detail", args=[profile.pk]))
+    response = login(VIEW, CHANGE).get(reverse("lending:profile:edit", args=[profile.pk]))
 
     assert set(response.context["form"].fields["device_type"].queryset) == {profile.device_type, tablet}
 
@@ -80,7 +83,7 @@ def test_a_profile_keeps_its_deactivated_device_type(login, profile):
     profile.device_type.delete()  # deactivates
     DeviceType.objects.create(name="Pager").delete()
     client = login(VIEW, CHANGE)
-    url = reverse("lending:profile_detail", args=[profile.pk])
+    url = reverse("lending:profile:edit", args=[profile.pk])
 
     choices = client.get(url).context["form"].fields["device_type"].queryset
     response = client.post(url, _post_data(profile.device_type, lent_sheet_template="new slip"))
@@ -98,7 +101,7 @@ def test_a_profile_keeps_its_deactivated_device_type(login, profile):
 )
 def test_saving_refuses_scripts(login, profile, field, script):
     response = login(VIEW, CHANGE).post(
-        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, **{field: script})
+        reverse("lending:profile:edit", args=[profile.pk]), _post_data(profile.device_type, **{field: script})
     )
 
     assert response.status_code == 200
@@ -112,40 +115,34 @@ def test_the_starter_content_has_no_script():
 
 def test_an_emptied_slip_template_gets_the_starter_content_again(login, profile):
     response = login(VIEW, CHANGE).post(
-        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="")
+        reverse("lending:profile:edit", args=[profile.pk]),
+        _post_data(profile.device_type, lent_sheet_template=""),
+        follow=True,
     )
 
-    assert response.status_code == 302
     profile.refresh_from_db()
     assert profile.lent_sheet_template == get_starter_lent_sheet_template()
+    assert any("starter content" in str(message) for message in response.context["messages"])
 
 
-def test_without_the_change_permission_the_profile_is_read_only(login, profile):
-    client = login(VIEW)
-    url = reverse("lending:profile_detail", args=[profile.pk])
-
-    assert all(field.disabled for field in client.get(url).context["form"].fields.values())
-    assert client.post(url, _post_data(profile.device_type, lent_sheet_template="changed")).status_code == 403
-
-
-def test_on_a_profile_page_the_lending_configuration_entry_is_active(login, profile):
-    response = login(CONFIG, VIEW, "core.view_lentrecord").get(reverse("lending:profile_detail", args=[profile.pk]))
+def test_on_a_profile_page_its_settings_entry_is_active(login, profile):
+    response = login(CONFIG, VIEW, "core.view_lentrecord").get(reverse("lending:profile:edit", args=[profile.pk]))
 
     active = [
         item["url"]
         for item in response.context["nav_items_main"] + response.context["nav_items_settings"]
         if item["active"]
     ]
-    assert active == ["lending:configuration"]
+    assert active == ["lending:profile:index"]
 
 
 def test_the_field_history_shows_who_changed_the_slip_template(login, profile):
     client = login(VIEW, CHANGE)
     client.post(
-        reverse("lending:profile_detail", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="v2")
+        reverse("lending:profile:edit", args=[profile.pk]), _post_data(profile.device_type, lent_sheet_template="v2")
     )
 
-    entries = client.get(reverse("lending:profile_history", args=[profile.pk])).context["entries"]
+    entries = client.get(reverse("lending:profile:history", args=[profile.pk])).context["entries"]
 
     latest = entries[0]
     assert latest.user.email == "user@example.com"
@@ -155,23 +152,11 @@ def test_the_field_history_shows_who_changed_the_slip_template(login, profile):
 
 
 def test_the_field_history_needs_the_view_permission(login, profile):
-    assert login(CONFIG).get(reverse("lending:profile_history", args=[profile.pk])).status_code == 403
+    assert login(CONFIG).get(reverse("lending:profile:history", args=[profile.pk])).status_code == 403
 
 
-@pytest.mark.parametrize(("perms", "status"), [((VIEW, CHANGE), 403), ((DELETE,), 200)])
-def test_deleting_needs_the_delete_permission(login, profile, perms, status):
-    assert login(*perms).get(reverse("lending:profile_delete", args=[profile.pk])).status_code == status
+def test_a_deleted_profile_is_gone_and_the_page_returns_to_the_list(login, profile):
+    response = login(DELETE).post(reverse("lending:profile:delete", args=[profile.pk]))
 
-
-@pytest.mark.parametrize(("perms", "shown"), [((VIEW, CHANGE), False), ((VIEW, CHANGE, DELETE), True)])
-def test_the_delete_link_shows_with_the_delete_permission(login, profile, perms, shown):
-    content = login(*perms).get(reverse("lending:profile_detail", args=[profile.pk])).content.decode()
-
-    assert (reverse("lending:profile_delete", args=[profile.pk]) in content) == shown
-
-
-def test_a_deleted_profile_is_gone_and_the_page_returns_to_the_configuration(login, profile):
-    response = login(DELETE).post(reverse("lending:profile_delete", args=[profile.pk]))
-
-    assert response.url == reverse("lending:configuration")
+    assert response.url == reverse("lending:profile:index")
     assert not LendingProfile.objects.exists()

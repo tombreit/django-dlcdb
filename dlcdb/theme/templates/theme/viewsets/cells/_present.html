@@ -1,0 +1,3 @@
+{% load i18n %}
+{# Whether a field of a ModelViewSet list row is filled (Column.cell_template_name): a tick or a dash. #}
+{% if value %}<i class="bi bi-check-lg text-success" aria-label="{% translate "Yes" %}"></i>{% else %}<span class="text-muted" aria-label="{% translate "No" %}">—</span>{% endif %}

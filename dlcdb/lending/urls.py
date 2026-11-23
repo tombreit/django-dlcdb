@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import path
+from django.urls import include, path
 
 from . import views, views_profiles
 
@@ -14,10 +14,7 @@ urlpatterns = [
     path("lend/", views.lend, name="lend"),
     path("person-search/", views.person_search, name="person_search"),
     path("configuration/", views.configuration, name="configuration"),
-    path("profiles/add/", views_profiles.profile_add, name="profile_add"),
-    path("profiles/<int:pk>/", views_profiles.profile_detail, name="profile_detail"),
-    path("profiles/<int:pk>/history/", views_profiles.profile_history, name="profile_history"),
-    path("profiles/<int:pk>/delete/", views_profiles.profile_delete, name="profile_delete"),
+    path("profiles/", include(views_profiles.LendingProfileViewSet().urls)),
     path("<int:pk>/", views.lend, name="detail"),
     path("<int:pk>/print/", views.print_sheet, name="print_sheet"),
 ]

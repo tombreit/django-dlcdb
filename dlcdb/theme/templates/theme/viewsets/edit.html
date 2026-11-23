@@ -19,11 +19,11 @@ block.super.
 {% block detail_meta %}{{ opts.verbose_name|capfirst }}{% endblock detail_meta %}
 
 {% block detail_form_fields %}
-  {% include "theme/viewsets/_form_fields.html" %}
+  {% include form_fields_template %}
 {% endblock detail_form_fields %}
 
 {% block detail_readonly %}
-  {% include "theme/viewsets/_form_fields.html" %}
+  {% include form_fields_template %}
 {% endblock detail_readonly %}
 
 {% block detail_sidebar %}
@@ -37,7 +37,20 @@ block.super.
     </section>
   {% endif %}
   {% if audited %}
-    {% include "theme/includes/_audit_data.html" with object=object %}
+    {% include "theme/includes/_audit_data.html" with object=object history_url=history_url %}
+  {% elif history_url %}
+    <section class="card card-filled mb-3">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-clock-history text-primary"></i>
+        <h2 class="h6 mb-0">{% translate "Changes" %}</h2>
+      </div>
+      <div class="list-group list-group-flush">
+        <a class="list-group-item list-group-item-action d-flex align-items-center gap-2" href="{{ history_url }}">
+          <i class="bi bi-arrow-counterclockwise text-primary"></i>
+          <span class="me-auto">{% translate "Field history" %}</span>
+        </a>
+      </div>
+    </section>
   {% endif %}
 {% endblock detail_sidebar %}
 

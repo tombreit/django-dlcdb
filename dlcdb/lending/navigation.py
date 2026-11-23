@@ -19,13 +19,25 @@ nav_entries = [
         "order": 20,
         "label": _("Lending configuration"),
         "group": "modules",
-        "description": _("Overdue reminders; the lending profiles with their slips and regulations"),
-        "search_terms": _("mails, notifications, slip template, print, preparation checklist, device types, borrower"),
+        "description": _("Who receives the overdue reminders"),
+        "search_terms": _("mails, notifications, overdue"),
         "icon": "bi bi-arrow-left-right",
         "url": "lending:configuration",
         "required_permission": "lending.view_lendingconfiguration",
-        # The lending profiles are listed on the configuration page.
-        "active_url_names": {"configuration", "profile_add", "profile_detail", "profile_history", "profile_delete"},
+        "active_url_names": {"configuration"},
+    },
+    {
+        "slot": "nav_settings",
+        "order": 21,
+        "label": _("Lending profiles"),
+        "group": "modules",
+        "description": _(
+            "One per device type: the lending slip template, the preparation checklist and the regulations"
+        ),
+        "search_terms": _("slip template, print, preparation checklist, device types, borrower"),
+        "icon": "bi bi-card-checklist",
+        "url": "lending:profile:index",
+        "required_permission": "lending.view_lendingprofile",
     },
     {
         # core.Link: the documents a lending profile asks the borrower to confirm.

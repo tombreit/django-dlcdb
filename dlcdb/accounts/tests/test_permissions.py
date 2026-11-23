@@ -91,6 +91,5 @@ def test_the_models_follow_the_apps_menus():
     assert by_name["core.view_device"].area == "Menu"
     assert by_name["core.view_person"].area == "Master data"
     assert by_name["journal.view_journalentry"].area == "Settings › Logs"
-    # No menu entry needs a lending profile's permissions: listed last.
-    assert by_name["lending.view_lendingprofile"].area == "Other"
-    assert own_permissions()[-1].area == "Other"
+    # Lending profiles have their own Settings entry.
+    assert by_name["lending.view_lendingprofile"].area == "Settings › Modules"

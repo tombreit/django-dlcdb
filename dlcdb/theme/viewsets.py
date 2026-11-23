@@ -20,7 +20,8 @@ class, its template or what its view gets (``edit_view_class``,
 Each page needs the model's view, add or delete permission. Without the change
 permission the edit page shows the form disabled and refuses its POST. An object
 that a PROTECT relation keeps can't be deleted: the delete page lists what keeps it.
-``delete_view_class = None`` leaves the delete page out.
+``delete_view_class = None`` leaves the delete page out; ``history_view_class =
+HistoryView`` adds a field history page for a model with django-simple-history.
 """
 
 from collections import defaultdict
@@ -44,6 +45,7 @@ from dlcdb.core.models.abstracts import AuditBaseModel
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import detail_url, linked_message
 
+from .field_history import build_field_history
 from .filterbar import bind_filterset, build_filterbar
 from .forms import disable_fields
 from .navigation import detail_urls, get_redirect_url, get_redirect_url_after_add
@@ -252,6 +254,7 @@ class IndexView(ModelViewMixin, generic.ListView):
 
 class CreateView(ModelViewMixin, SuccessMessageMixin, generic.CreateView):
     template_name = "theme/viewsets/create.html"
+    form_fields_template = "theme/viewsets/_form_fields.html"
     success_message = gettext_lazy("%(model)s “%(obj)s” was created.")
 
     def get(self, request, *args, **kwargs):
@@ -259,6 +262,11 @@ class CreateView(ModelViewMixin, SuccessMessageMixin, generic.CreateView):
             # The name being typed: list the similar existing entries.
             return similar_suggestions(request, self.form_class)
         return super().get(request, *args, **kwargs)
+
+    def get_initial(self):
+        """Form fields preset from the query string, as on the admin's add page: ``?device_type=3``."""
+        fields = self.get_form_class().base_fields
+        return {**super().get_initial(), **{name: value for name, value in self.request.GET.items() if name in fields}}
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -282,7 +290,9 @@ class CreateView(ModelViewMixin, SuccessMessageMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
-            next_url=get_redirect_url(self.request) or reverse(self.url_name("index")), **kwargs
+            next_url=get_redirect_url(self.request) or reverse(self.url_name("index")),
+            form_fields_template=self.form_fields_template,
+            **kwargs,
         )
         # Existing entries the new one may duplicate, after a refused save.
         context["similar"] = similar_context(self.request, getattr(context["form"], "similar_matches", None))
@@ -293,9 +303,11 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
     """Read and edit one object; without the change permission the form is disabled."""
 
     template_name = "theme/viewsets/edit.html"
+    form_fields_template = "theme/viewsets/_form_fields.html"
     usage = None
     # False when the viewset leaves the delete page out.
     delete_enabled = True
+    history_enabled = False
 
     def post(self, request, *args, **kwargs):
         if not self.has_permission("change"):
@@ -343,6 +355,8 @@ class EditView(ModelViewMixin, SuccessMessageMixin, generic.UpdateView):
             if self.delete_enabled and self.has_permission("delete")
             else None,
             usage=self.usage_card(),
+            history_url=reverse(self.url_name("history"), args=[self.object.pk]) if self.history_enabled else None,
+            form_fields_template=self.form_fields_template,
             **kwargs,
         )
 
@@ -374,6 +388,19 @@ class DeleteView(ModelViewMixin, SuccessMessageMixin, generic.DeleteView):
         )
 
 
+class HistoryView(ModelViewMixin, generic.DetailView):
+    """When who changed which field (django-simple-history), as Wagtail's history page."""
+
+    template_name = "theme/viewsets/history.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            entries=build_field_history(self.object),
+            edit_url=reverse(self.url_name("edit"), args=[self.object.pk]),
+            **kwargs,
+        )
+
+
 class ModelViewSet:
     """The pages of one model; a subclass sets the model and what differs (see the module docstring)."""
 
@@ -395,12 +422,17 @@ class ModelViewSet:
     edit_view_class = EditView
     # None leaves the delete page out.
     delete_view_class = DeleteView
+    # HistoryView adds the field history page.
+    history_view_class = None
 
     # None keeps the view class's template_name.
     index_template_name = None
     create_template_name = None
     edit_template_name = None
     delete_template_name = None
+    history_template_name = None
+    # The form's fields on the add and edit page, e.g. in cards of their own.
+    form_fields_template = None
 
     def get_queryset(self):
         """What the pages list and load; a subclass annotates its counts here."""
@@ -429,19 +461,29 @@ class ModelViewSet:
         }
 
     def get_add_view_kwargs(self, **kwargs):
-        return {"template_name": self.create_template_name, "form_class": self.get_form_class(), **kwargs}
+        return {
+            "template_name": self.create_template_name,
+            "form_class": self.get_form_class(),
+            "form_fields_template": self.form_fields_template,
+            **kwargs,
+        }
 
     def get_edit_view_kwargs(self, **kwargs):
         return {
             "template_name": self.edit_template_name,
             "form_class": self.get_form_class(for_update=True),
+            "form_fields_template": self.form_fields_template,
             "usage": self.usage,
             "delete_enabled": self.delete_view_class is not None,
+            "history_enabled": self.history_view_class is not None,
             **kwargs,
         }
 
     def get_delete_view_kwargs(self, **kwargs):
         return {"template_name": self.delete_template_name, **kwargs}
+
+    def get_history_view_kwargs(self, **kwargs):
+        return {"template_name": self.history_template_name, **kwargs}
 
     @property
     def index_view(self):
@@ -459,6 +501,10 @@ class ModelViewSet:
     def delete_view(self):
         return self.construct_view(self.delete_view_class, **self.get_delete_view_kwargs())
 
+    @property
+    def history_view(self):
+        return self.construct_view(self.history_view_class, **self.get_history_view_kwargs())
+
     def get_urlpatterns(self):
         """
         The pages, each behind the model's permission; the guard records it for
@@ -475,6 +521,8 @@ class ModelViewSet:
         ]
         if self.delete_view_class is not None:
             patterns.append(path("delete/<int:pk>/", guarded("delete", self.delete_view), name="delete"))
+        if self.history_view_class is not None:
+            patterns.append(path("history/<int:pk>/", guarded("view", self.history_view), name="history"))
         return patterns
 
     @property

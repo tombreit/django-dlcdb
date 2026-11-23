@@ -100,7 +100,7 @@ class LendingProfile(models.Model):
         verbose_name_plural = _("Lending profiles")
 
     def __str__(self):
-        return f"Lending Profile: {self.device_type}"
+        return str(self.device_type)
 
     def clean(self):
         super().clean()

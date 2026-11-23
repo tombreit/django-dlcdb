@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # Viewset alignment: one component for a model's list, add, edit and delete pages
 
-**Status:** batch 2 done (device types, manufacturers, suppliers); next: batch 3, lending profiles. Started 2026-11-23.
+**Status:** batch 3 done (lending profiles); next: batch 4, the wrap-up. Started 2026-11-23.
 
 ## Why
 
@@ -77,10 +77,11 @@ SPDX-License-Identifier: CC0-1.0
   - no delete page;
   - DeviceType's verbose names in sentence case (migration);
   - the device type list's "created" sort is gone (no column).
-- [ ] **3. Lending profiles** on `ModelViewSet`:
+- [x] **3. Lending profiles** on `ModelViewSet`:
   - a generic `HistoryView`;
   - initial values from GET;
   - `form_fields_template`;
   - their own Settings entry;
-  - `LendingProfile.__str__` names the device type.
+  - `LendingProfile.__str__` names the device type;
+  - no permission is listed under *Other* on the group pages any more: lending profiles were the last without a menu entry.
 - [ ] **4. Wrap-up:** this plan retires into DECISIONS.md.

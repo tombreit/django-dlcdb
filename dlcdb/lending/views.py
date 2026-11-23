@@ -334,9 +334,9 @@ def lend(request, pk=None):
     slip_profile_url = None
     if not can_print_slip:
         if profile and request.user.has_perm("lending.view_lendingprofile"):
-            slip_profile_url = with_next(reverse("lending:profile_detail", args=[profile.pk]), request.get_full_path())
+            slip_profile_url = with_next(reverse("lending:profile:edit", args=[profile.pk]), request.get_full_path())
         elif not profile and request.user.has_perm("lending.add_lendingprofile"):
-            add_url = f"{reverse('lending:profile_add')}?device_type={device.device_type_id or ''}"
+            add_url = f"{reverse('lending:profile:add')}?device_type={device.device_type_id or ''}"
             slip_profile_url = with_next(add_url, request.get_full_path())
 
     # Carry the flow and the way back through the POST (and any failed-POST
@@ -485,15 +485,5 @@ def print_sheet(request, pk):
 
 @htmx_permission_required("lending.view_lendingconfiguration")
 def configuration(request):
-    """
-    Settings › Lending configuration: who receives the overdue reminder mails,
-    and the list of lending profiles (lending/views_profiles.py).
-    """
-    profiles = LendingProfile.objects.select_related("device_type").order_by("device_type__name")
-    return settings_page(
-        request,
-        LendingConfigurationForm,
-        icon="bi-arrow-left-right",
-        template="lending/configuration.html",
-        context={"profiles": profiles},
-    )
+    """Settings › Lending configuration: who receives the overdue reminder mails."""
+    return settings_page(request, LendingConfigurationForm, icon="bi-arrow-left-right")
