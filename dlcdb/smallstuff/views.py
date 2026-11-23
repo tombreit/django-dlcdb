@@ -6,9 +6,10 @@
 
 from django.db.models import Count, Q
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from dlcdb.core.models import Person
 from dlcdb.core.utils.htmx import htmx_permission_required
@@ -66,13 +67,15 @@ def get_assignements(request, person_id, state):
     return render(request, template, context)
 
 
+@require_POST
 @htmx_permission_required("smallstuff.change_assignedthing")
 def remove_assignement(request, assignment_id):
-    to_unassign_assignment = AssignedThing.currently_assigned_objects.get(id=assignment_id)
-    to_unassign_assignment.unassigned_at = timezone.localtime(timezone.now())  # datetime.now()
-    to_unassign_assignment.unassigned_by = request.user
-
-    to_unassign_assignment.save()  # update_fields=['unassigned_at', 'unassigned_by']
+    """Take a thing back. One returned meanwhile (in another tab, say) stays as it was; the list reloads."""
+    assignment = get_object_or_404(AssignedThing, id=assignment_id)
+    if assignment.unassigned_at is None:
+        assignment.unassigned_at = timezone.now()
+        assignment.unassigned_by = request.user
+        assignment.save(update_fields=["unassigned_at", "unassigned_by"])
 
     response = HttpResponse(status=204)
     response["HX-Trigger"] = "newAssignment"
@@ -81,31 +84,21 @@ def remove_assignement(request, assignment_id):
 
 @htmx_permission_required("smallstuff.add_assignedthing")
 def add_assignement(request, person_id):
-    if request.method == "POST":
-        form = AssignedThingsForm(request.POST)
-        if form.is_valid():
-            form.instance.assigned_at = timezone.localtime(timezone.now())
-            form.instance.assigned_by = request.user
-            form.save()
+    """The form to hand out a thing; a refused POST comes back with its errors."""
+    person = get_object_or_404(Person, id=person_id)
+    form = AssignedThingsForm(request.POST or None, initial={"person": person})
+    template = "smallstuff/includes/add_assignement.html"
 
-            # Reload the form for the next assignment
-            person = Person.objects.get(id=person_id)
-            context = {
-                "person": person,
-                "form": AssignedThingsForm(initial={"person": person}),
-            }
-            response = render(request, "smallstuff/includes/add_assignement.html", context)
-            response["HX-Trigger"] = "newAssignment"
+    if request.method == "POST" and form.is_valid():
+        form.instance.assigned_at = timezone.now()
+        form.instance.assigned_by = request.user
+        form.save()
+        # A fresh form for the next thing; the list reloads.
+        response = render(request, template, {"person": person, "form": AssignedThingsForm(initial={"person": person})})
+        response["HX-Trigger"] = "newAssignment"
+        return response
 
-            return response
-
-    else:
-        person = Person.objects.get(id=person_id)
-        form = AssignedThingsForm(initial={"person": person})
-
-        template = "smallstuff/includes/add_assignement.html"
-        context = {"person": person, "form": form}
-        return render(request, template, context)
+    return render(request, template, {"person": person, "form": form})
 
 
 class ThingEditView(EditView):

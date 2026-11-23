@@ -60,6 +60,7 @@ SPDX-License-Identifier: CC0-1.0
   - `ThingViewSet`: index with the number issued, add, edit with the current holders, delete; `PROTECT` and the slug from the name (migration);
   - *Settings › Smallstuff catalogue* opens it, without the Staff flag; the *Administration* group profile gets the thing permissions;
   - `docs/guides/kleinkram.md`, NEWS; `PLANS/admin-to-frontend.md` › *Smallstuff catalogue* ticked.
+- [x] **1.1. Smallstuff fixes:** handing out without a valid thing answers with the form and its errors (was a server error); taking a thing back is a POST, and one already returned stays as it was (was a server error).
 - [ ] **2. Units and positions as viewsets:**
   - their own index pages and settings entries; `organization/views_masterdata.py` and `organization/name_*.html` go;
   - the DECISIONS bullet "Units and positions live on Settings › Organization as cards" is replaced; the embedding question settled.

@@ -94,14 +94,34 @@ def test_assigning_needs_the_add_permission(client, person):
 
 
 @pytest.mark.django_db
+def test_an_invalid_assignment_comes_back_with_its_errors(client, person):
+    client.force_login(_make_user("add_assignedthing"))
+
+    response = client.post(reverse("smallstuff:add_assignement", args=[person.pk]), {"person": person.pk})
+
+    assert response.status_code == 200
+    assert response.context["form"].errors["thing"]
+    assert not AssignedThing.objects.exists()
+
+
+@pytest.mark.django_db
 def test_returning_a_thing_needs_the_change_permission(client, assignment):
     url = reverse("smallstuff:remove_assignement", args=[assignment.pk])
 
     client.force_login(_make_user("view_assignedthing"))
-    assert client.get(url).status_code == 403
+    assert client.post(url).status_code == 403
 
     client.force_login(_make_user("change_assignedthing"))
-    assert client.get(url).status_code == 204
+    assert client.get(url).status_code == 405
+    assert client.post(url).status_code == 204
+    assignment.refresh_from_db()
+    returned_at = assignment.unassigned_at
+    assert returned_at is not None
+
+    # Returned again, from a page loaded before: nothing changes.
+    assert client.post(url).status_code == 204
+    assignment.refresh_from_db()
+    assert assignment.unassigned_at == returned_at
 
 
 @pytest.mark.django_db
