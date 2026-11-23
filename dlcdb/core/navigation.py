@@ -19,19 +19,6 @@ nav_entries = [
         "required_permission": "core.view_note",
     },
     {
-        # The change permission: with just the view permission, Master data ›
-        # Records lists the same records read-only.
-        "slot": "nav_settings",
-        "order": 60,
-        "label": _("Edit records"),
-        "group": "data",
-        "description": _("Correct or delete a device's records; Master data › Records shows them read-only"),
-        "search_terms": _("lifecycle, states, history, correct, delete"),
-        "icon": "bi bi-pencil-square",
-        "url": "admin:core_record_changelist",
-        "required_permission": "core.change_record",
-    },
-    {
         "slot": "nav_settings",
         "order": 70,
         "label": _("Record attachments"),
