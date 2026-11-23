@@ -27,3 +27,11 @@ repos:
         language: system
         files: ^dlcdb/locale/de/LC_MESSAGES/django\.po$
         pass_filenames: false
+      # Runs the project's own ESLint (`npm install` first), so the hook and
+      # `npm run lint` cannot disagree on rules or files.
+      - id: eslint
+        name: eslint (JS bugs and style)
+        entry: npm run lint --silent
+        language: system
+        files: \.(js|mjs)$
+        pass_filenames: false
