@@ -19,7 +19,6 @@
     "D3 IS ONLY USED AS A MERMAID DEPENDENCY FOR DOCS, NOT IN THE APP"
   ],
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@popperjs/core": "^2.11.8",
@@ -49,7 +48,7 @@
     "build:inventory:js": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js",
     "build:inventory": "npm run build:inventory:scss && npm run build:inventory:js",
     "watch:js:inventory": "esbuild $npm_package_config_inventorySrcDir/js/inventory.js --bundle --sourcemap --outfile=$npm_package_config_inventoryDistDir/inventory.js --watch",
-    "lint:inventory": "eslint $npm_package_config_inventorySrcDir/js/**/*.js",
+    "lint": "eslint dlcdb frontend eslint.config.mjs",
     "build:theme:scss": "sass --load-path=node_modules --quiet-deps --silence-deprecation=import --stop-on-error --style compressed $npm_package_config_themeSrcDir/scss:$npm_package_config_themeDistDir/css",
     "build:theme:js": "esbuild $npm_package_config_themeSrcDir/js/theme.js $npm_package_config_themeSrcDir/js/filtered-select-multiple.js --bundle --sourcemap --outdir=$npm_package_config_themeDistDir/js",
     "build:theme:bs-icons": "mkdir -p $npm_package_config_themeDistDir/fonts && cp node_modules/bootstrap-icons/font/fonts/* $npm_package_config_themeDistDir/fonts/",

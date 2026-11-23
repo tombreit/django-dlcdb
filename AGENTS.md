@@ -18,9 +18,10 @@ Device Lifecycle Database
 
 - Django managements commands: `./manage.py`
 - Bundle static assets: `npm run build`
+- Lint JavaScript: `npm run lint`
 - Python test suite: pytest `pytest .`
 - Generate updated requirements from pyroject.toml: `make requirements`
-- Checks: `ruff check . && ruff format --check .`; `./manage.py check`; `./manage.py makemigrations --check --dry-run`; `pytest .`
+- Checks: `ruff check . && ruff format --check .`; `./manage.py check`; `./manage.py makemigrations --check --dry-run`; `pytest .`; `npm run lint`
 
 ## Notes
 

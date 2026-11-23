@@ -18,6 +18,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Django serves `/media/`**, not X-Sendfile (needs a server module; the files are few and small). No `max-age` (a shared PC would show cached files after logout), no CSP on PDFs (it breaks the browser's viewer).
 - **The journal is no audit-log package**: auditlog, reversion and simple-history record field changes, not events; error tracking (Sentry) is out of scope. `log()` fails loudly, only the logging handler never breaks its caller; not buffering, a second database, a queue thread or `on_commit`.
 - **Polish stays in the classic theme and Bootstrap 5.3**; the `redesign` branches are a quarry only. Colour means state, primary is for actions and links.
+- **ESLint checks style only** (`@stylistic`'s recommended config), on the bundle sources and the directly served static JS (`npm run lint`). Not `@eslint/js`'s recommended rules: on our ~1000 lines they found nothing real (2026-11-23).
 - **Related objects open in the same tab**, back via `?next=`; no popup or modal (fragment views plus JS).
 - **A form page's header band leaves through the back link, its action bar through Cancel**, on add pages as on detail pages (`theme/includes/_back_link.html`): not "Cancel" twice. Both lead to the same place.
 - **A named object links to its page where a reader would go next**: templates through `theme/includes/_object_link.html`, messages through `core/utils/links.py`. Plain inside another link or a stretched row, in print and slips, where leaving drops unsaved input (the lending return flow), and for master data in list columns (it classifies the row; the filterbar filters by it). Not a template tag, not `get_absolute_url` on more core models, not `theme.related` for messages (core may not import theme).
@@ -118,7 +119,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - UI: HTMX fragments still compute the hints; charts have no table view; German plurals ("Gerät nach Status", "Geräten").
 - Re-check the `_cards.scss` Sass 1.77 workaround with the current sass; the `map_room_number` docstring still shows the narrow CSL regex.
 - Data: should a re-scan in the same room write nothing; delete `rename_lifecycle_permissions` once migration 0073 has run; check production for open LENT records on non-lentable devices; the main building's Archibus `bl_id` → "G".
-- Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker, ESLint for `theme.js` and `filterbar.js`.
+- Smaller: `/` focuses the search, a count badge on "More", "Add '<text>'" in TomSelect, + in the person picker.
 - Settings: a Bootstrap template for `ClearableFileInput` (Branding's file fields); a run page that retires the `UdbSyncRun` admin; unregister the settings admins; try the HR room rule on a sample.
 - Publish on PyPI.
 - Persons: a DLCDB field for the contract end, which lending, notifications and smallstuff read from `udb_contract_planned_checkout`; the contract type as master data; a phone number; positions and photo in the bulk import and the lending CSV export, unit and positions in the API; delete the photo files of hard-deleted persons (a merged duplicate's, say); let users set what HR leaves empty on a synced person.
