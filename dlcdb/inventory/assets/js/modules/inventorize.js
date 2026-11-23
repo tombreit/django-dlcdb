@@ -26,7 +26,6 @@ const uuids_states_map = new Map()
 
 const getRowUuidSelector = uuid => `${ROW_UUID_PREFIX}${uuid}`
 
-
 // The API is same-origin, so fetch sends the session cookie and the API
 // authenticates the logged-in user; no token needed.
 async function getDeviceByUuid(uuid) {
