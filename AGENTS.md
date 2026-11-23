@@ -46,6 +46,7 @@ Device Lifecycle Database
 - Locality of behaviour: code lives in the app whose screens or workflows use it; `core` keeps only what several apps share (models, lifecycle, shared rules)
   - a workflow is a module named after the action (`dataexchange/importer.py`, `inventory/inventorize.py`); no `services.py` layer
   - an app plugs into shared UI from its own code: `navigation.py` for the navbar, `theme.pickers.register_picker_source` in `AppConfig.ready()` for device pickers, `theme.related.register_related_pages` there for the buttons next to form selects
+  - a model's list, add, edit and delete pages are a `theme.viewsets.ModelViewSet` subclass in the app, included in its `urls.py` (the module docstring shows how; DECISIONS.md says why)
 - The Django admin is being phased out: new UI goes into the frontend apps, not the admin
 - Presentation (CSS classes, labels, per-screen URLs) lives in templates or `theme`, not in core models; models return data
 - Shared UI helpers live in `theme` (filterbar, pagination, pickers, device state buttons); reuse them
