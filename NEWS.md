@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* Smallstuff catalogue: the things that can be handed out are managed under *Settings › Smallstuff catalogue*, without the Staff flag; a thing that was ever handed out can't be deleted, only renamed
 * Decommissioned devices: the device list and the device page show where a removed device went, the search and the CSV export include it; *Master data › Removed records* is gone, use *Devices* with the state *Removed*
 * Records: attachments (pictures, documents) are added on the record page, also to records saved long before; needs `core.add_attachment`
 * Users and groups are managed in the frontend, under *Settings › Users* and *Settings › Groups and permissions*: a group's page lists only the permissions DLCDB checks, labelled and ordered like the menus, with its members and tenants; group profiles (*Daily work*, *Administration*) tick a starting set of permissions; users are created, get a new password and are deactivated there. The Staff and Superuser flags stay in the Django admin, and the docs no longer list permissions

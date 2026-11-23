@@ -1,0 +1,77 @@
+{% extends "theme/_index_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The list page of a ModelViewSet (theme/viewsets.py): the columns of its
+list_display, the first one linking the edit page. A page that overrides this
+template declares the object-list partial again (see theme/_index_base.html).
+{% endcomment %}
+
+{% block title %}{{ opts.verbose_name_plural|capfirst }}{% endblock title %}
+{% block index_title %}{{ opts.verbose_name_plural|capfirst }}{% endblock index_title %}
+
+{% block object_tools %}
+  {% if add_url %}
+    <div class="ms-auto">
+      <a href="{{ add_url }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> {% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}
+      </a>
+    </div>
+  {% endif %}
+{% endblock object_tools %}
+
+{% block index_list %}
+  {% partialdef object-list inline %}
+    <div id="object-list" class="position-relative" hx-target="#object-list" hx-swap="outerHTML" hx-push-url="true" hx-indicator=".htmx-indicator">
+      {% include "theme/includes/_list_loading.html" %}
+      {% blocktranslate count counter=filtered_count with total=total_count asvar count_label %}{{ counter }} of {{ total }} entry{% plural %}{{ counter }} of {{ total }} entries{% endblocktranslate %}
+      {% include "theme/includes/_list_status.html" with bar=filterbar count_label=count_label %}
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              {% for column in columns %}
+                {% if column.sort_key %}
+                  {% include "theme/filterbar/_sort_th.html" with label=column.label asc=column.sort_key desc="-"|add:column.sort_key th_class=column.classname %}
+                {% else %}
+                  <th scope="col"{% if column.classname %} class="{{ column.classname }}"{% endif %}>{{ column.label }}</th>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for object, cells in rows %}
+              <tr>
+                {% for column, value in cells %}
+                  {% if forloop.first %}
+                    <td class="position-relative {{ column.classname }}">
+                      <a href="{% url edit_url_name object.pk %}?next={{ request.get_full_path|urlencode }}"
+                         class="stretched-link text-reset link-underline link-underline-opacity-0 link-underline-opacity-100-hover fw-semibold">
+                        {{ value|default:"—" }}
+                      </a>
+                    </td>
+                  {% else %}
+                    <td{% if column.classname %} class="{{ column.classname }}"{% endif %}>{{ value }}</td>
+                  {% endif %}
+                {% endfor %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{{ columns|length }}" class="text-center text-muted py-4">
+                  <i class="bi bi-search d-block fs-4 mb-2 opacity-50"></i>
+                  {% translate "No entries match these filters." %}
+                  {% include "theme/filterbar/_clear_all.html" with bar=filterbar %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% include "theme/includes/_pagination.html" with page_obj=page_obj %}
+    </div>
+  {% endpartialdef %}
+{% endblock index_list %}

@@ -1,0 +1,43 @@
+{% extends "theme/_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The delete page of a ModelViewSet (theme/viewsets.py). An object that a PROTECT
+relation keeps can't be deleted: the page says so instead.
+{% endcomment %}
+
+{% block title %}{% translate "Delete" %}: {{ object }}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Delete" %}: {{ object }}</h1>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-9 col-xl-8">
+      {% if protected %}
+        <p>
+          {% blocktranslate with model=opts.verbose_name trimmed %}
+            {{ model }} “{{ object }}” is in use and can't be deleted.
+          {% endblocktranslate %}
+        </p>
+        <a class="btn btn-outline-secondary" href="{{ edit_url }}">{% translate "Back" %}</a>
+      {% else %}
+        <p>
+          {% blocktranslate with model=opts.verbose_name trimmed %}
+            Delete {{ model }} “{{ object }}”?
+          {% endblocktranslate %}
+        </p>
+        <form method="post" class="d-flex flex-wrap gap-2">
+          {% csrf_token %}
+          <button class="btn btn-danger" type="submit">
+            <i class="bi bi-trash"></i> {% translate "Yes, delete" %}
+          </button>
+          <a class="btn btn-outline-secondary" href="{{ edit_url }}">{% translate "Cancel" %}</a>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endblock body %}

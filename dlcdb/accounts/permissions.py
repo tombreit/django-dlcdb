@@ -45,6 +45,7 @@ CHECKED_IN_VIEWS = (
     "organization.change_branding",
     "lending.change_lendingconfiguration",
     "lending.change_lendingprofile",
+    "smallstuff.change_thing",
     "licenses.change_licensesconfiguration",
     "dataexchange.change_importerlist",
     "inventory.view_saplist",  # the SAP exports, in core's media view

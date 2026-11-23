@@ -41,10 +41,11 @@ class ThingAdmin(admin.ModelAdmin):
         "slug",
     ]
 
+    # Thing.clean() fills the slug from the name.
     readonly_fields = [
+        "slug",
         "user",
         "username",
     ]
-    prepopulated_fields = {"slug": ("name",)}
 
     fieldsets = ((None, {"fields": ("name", "slug")}),)

@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: EUPL-1.2
 
-from django.urls import path
+from django.urls import include, path
 
 from .views import (
+    ThingViewSet,
     add_assignement,
     get_assignements,
     person_detail,
@@ -20,4 +21,5 @@ urlpatterns = [
     path("assignements/person/<int:person_id>/add", add_assignement, name="add_assignement"),
     path("assignements/person/<int:person_id>/<str:state>", get_assignements, name="get_assignements"),
     path("assignements/remove/<int:assignment_id>", remove_assignement, name="remove_assignement"),
+    path("things/", include(ThingViewSet().urls)),
 ]

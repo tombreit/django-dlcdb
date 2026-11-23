@@ -19,6 +19,7 @@ from dlcdb.core.models import (
     Room,
     Supplier,
 )
+from dlcdb.smallstuff.models import Thing
 from dlcdb.tenants.models import Tenant
 from dlcdb.theme.navigation import with_next
 from dlcdb.theme.related import _REGISTRY, add_related_links
@@ -172,6 +173,7 @@ OBJECTS = {
     "core.person": lambda: Person.objects.create(first_name="Ada", last_name="Lovelace"),
     "core.organizationalunit": lambda: OrganizationalUnit.objects.create(name="Physics"),
     "core.organizationalposition": lambda: OrganizationalPosition.objects.create(name="Researcher"),
+    "smallstuff.thing": lambda: Thing.objects.create(name="Webcam", slug="webcam"),
 }
 
 

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from ..core.models.abstracts import AuditBaseModel
@@ -25,6 +26,13 @@ class Thing(AuditBaseModel):
 
     def __str__(self):
         return f"{self.name}"
+
+    def clean(self):
+        # The slug follows the name. Forms that don't show it skip its unique
+        # check, and two names can give one slug ("Maus!", "Maus?").
+        self.slug = slugify(self.name)
+        if Thing.objects.filter(slug__iexact=self.slug).exclude(pk=self.pk).exists():
+            raise ValidationError({"name": _("A thing with a name like this already exists.")})
 
     class Meta:
         verbose_name = _("Thing")
@@ -52,9 +60,10 @@ class AssignedThing(models.Model):
         "core.Person",
         on_delete=models.CASCADE,
     )
+    # PROTECT: deleting a thing would take its hand-out history along.
     thing = models.ForeignKey(
         "smallstuff.Thing",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     assigned_at = models.DateTimeField(
         blank=True,

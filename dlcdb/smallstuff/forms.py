@@ -6,7 +6,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML, Layout
 from django import forms
 
-from .models import AssignedThing
+from dlcdb.theme.forms import add_bootstrap_classes
+from dlcdb.theme.similar import SimilarNames, check_similar_names
+
+from .models import AssignedThing, Thing
 
 
 class AssignedThingsForm(forms.ModelForm):
@@ -34,3 +37,22 @@ class AssignedThingsForm(forms.ModelForm):
         widgets = {
             "person": forms.HiddenInput(),
         }
+
+
+class ThingForm(forms.ModelForm):
+    """A thing of the catalogue: its name, compared with the existing ones on add (theme.similar)."""
+
+    similar_names = SimilarNames(fields=("name",))
+
+    class Meta:
+        model = Thing
+        fields = ["name"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        add_bootstrap_classes(self)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        check_similar_names(self)
+        return cleaned_data

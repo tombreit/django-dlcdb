@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # ModelViewSet: reusable list, add, edit and delete pages
 
-**Status:** batch 0 done (this plan); next: batch 1, the viewset and the smallstuff catalogue. Started 2026-11-23.
+**Status:** batch 1 done (the viewset and the smallstuff catalogue); next: batch 2, units and positions. Started 2026-11-23.
 
 ## Why
 
@@ -18,7 +18,8 @@ SPDX-License-Identifier: CC0-1.0
 
 - **`theme.viewsets.ModelViewSet`, after Wagtail's `ModelViewSet`** (https://docs.wagtail.org/en/stable/reference/viewsets.html#modelviewset): its names and structure, so Django developers recognise them.
   - One view class per page, set on the viewset: `index_view_class`, `add_view_class`, `edit_view_class`, `delete_view_class`. They subclass Django's `ListView`, `CreateView`, `UpdateView` and `DeleteView`; a model changes a page by subclassing its view (`get_context_data`) and setting `*_template_name`.
-  - The viewset's attributes: `model`, `form_class` or `form_fields` (`get_form_class()`), `list_display`, `search_fields`, `ordering`, `list_per_page`, `icon`, `url_namespace` (defaults to the model name).
+  - The viewset's attributes: `model`, `form_class` (`get_form_class()`), `list_display` (field names or `Column`), `search_fields`, `ordering`, `list_per_page`, `icon`, `url_namespace` (defaults to the model name).
+  - *Decided in batch 1:* no `form_fields` yet: every form so far has its own rules (similar names, help texts). No `get_url_name()` on the viewset: it doesn't know the app namespace it is included in, so the views build their sibling URL names from `request.resolver_match.namespace`.
   - `get_urlpatterns()` and `urls`: the URL names `index`, `add`, `edit`, `delete` in the viewset's own namespace, nested in the app's (`smallstuff:thing:edit`); the app's `urls.py` includes them.
   - Each view is wrapped in `htmx_permission_required` with the model's view, add or delete permission, so the group pages collect them; the edit page checks the change permission itself (`CHECKED_IN_VIEWS`).
   - What the project already has stays: the filterbar, pagination, the similar-names check, `?next=`, `linked_message` and the existing message wording.
@@ -54,7 +55,7 @@ SPDX-License-Identifier: CC0-1.0
 ## Progress
 
 - [x] **0.** This plan.
-- [ ] **1. The viewset and the smallstuff catalogue:**
+- [x] **1. The viewset and the smallstuff catalogue:**
   - `theme/viewsets.py` and `theme/templates/theme/viewsets/`;
   - `ThingViewSet`: index with the number issued, add, edit with the current holders, delete; `PROTECT` and the slug from the name (migration);
   - *Settings › Smallstuff catalogue* opens it, without the Staff flag; the *Administration* group profile gets the thing permissions;

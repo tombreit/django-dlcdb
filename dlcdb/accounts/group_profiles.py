@@ -66,8 +66,8 @@ GROUP_PROFILES = (
     GroupProfile(
         label=_("Administration"),
         description=_(
-            "The settings, the lending profiles, units and positions, the tenants and the journal. "
-            "Not users and groups."
+            "The settings, the lending profiles, units and positions, the smallstuff catalogue, "
+            "the tenants and the journal. Not users and groups."
         ),
         names=(
             "organization.view_branding",
@@ -76,6 +76,7 @@ GROUP_PROFILES = (
             "lending.view_lendingconfiguration",
             "lending.change_lendingconfiguration",
             *_crud("lending", "lendingprofile", actions=("view", "add", "change", "delete")),
+            *_crud("smallstuff", "thing", actions=("view", "add", "change", "delete")),
             "licenses.view_licensesconfiguration",
             "licenses.change_licensesconfiguration",
             "dataexchange.view_udbsyncconfiguration",

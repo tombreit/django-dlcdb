@@ -1,0 +1,21 @@
+{% load i18n %}
+{% comment %}
+The form of a ModelViewSet page (theme/viewsets.py), on its add, edit and
+read-only page: non-field errors, then every visible field in one card.
+Params: form, opts, header_icon.
+{% endcomment %}
+{% include "theme/includes/_non_field_errors.html" with form=form %}
+
+<section class="card card-filled mb-3">
+  <div class="card-header d-flex align-items-center gap-2">
+    {% if header_icon %}<i class="bi {{ header_icon }} text-primary"></i>{% endif %}
+    <h2 class="h6 mb-0">{{ opts.verbose_name|capfirst }}</h2>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      {% for field in form.visible_fields %}
+        {% include "theme/includes/_field.html" with field=field col="col-12" %}
+      {% endfor %}
+    </div>
+  </div>
+</section>

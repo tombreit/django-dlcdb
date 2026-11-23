@@ -197,7 +197,8 @@ def nav(request):
     nav_focus = {}
     if current_app_namespace:
         try:
-            current_app = apps.get_app_config(current_app_namespace)
+            # A viewset's namespace nests in its app's: "smallstuff:thing".
+            current_app = apps.get_app_config(current_app_namespace.split(":")[0])
         except LookupError:
             current_app = None
         if current_app is not None:

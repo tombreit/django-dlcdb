@@ -21,7 +21,7 @@ nav_entries = [
         "description": _("The things that can be handed out to persons"),
         "search_terms": _("things, webcams, mice, accessories"),
         "icon": "bi bi-handbag",
-        "url": "admin:smallstuff_thing_changelist",
+        "url": "smallstuff:thing:index",
         "required_permission": "smallstuff.view_thing",
     },
 ]

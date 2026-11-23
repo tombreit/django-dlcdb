@@ -4,16 +4,19 @@
 
 # from datetime import datetime
 
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from dlcdb.core.models import Person
 from dlcdb.core.utils.htmx import htmx_permission_required
+from dlcdb.theme.viewsets import Column, EditView, ModelViewSet
 
 from .filters import PersonFilter
-from .forms import AssignedThingsForm
-from .models import AssignedThing
+from .forms import AssignedThingsForm, ThingForm
+from .models import AssignedThing, Thing
 
 
 @htmx_permission_required("smallstuff.view_assignedthing")
@@ -103,3 +106,30 @@ def add_assignement(request, person_id):
         template = "smallstuff/includes/add_assignement.html"
         context = {"person": person, "form": form}
         return render(request, template, context)
+
+
+class ThingEditView(EditView):
+    """A thing's page also lists who holds it now."""
+
+    def get_context_data(self, **kwargs):
+        holders = AssignedThing.currently_assigned_objects.filter(thing=self.object).select_related("person")
+        return super().get_context_data(holders=holders, **kwargs)
+
+
+class ThingViewSet(ModelViewSet):
+    """The catalogue of things that can be handed out (Settings › Smallstuff catalogue)."""
+
+    model = Thing
+    form_class = ThingForm
+    icon = "bi-handbag"
+    list_display = ["name", Column("issued", _("Issued"), sort_key="issued", classname="text-end")]
+    search_fields = ["name"]
+    ordering = "name"
+    edit_view_class = ThingEditView
+    edit_template_name = "smallstuff/thing_edit.html"
+
+    def get_queryset(self):
+        # Ordered by the index: a counting query ignores Meta.ordering.
+        return Thing.objects.annotate(
+            issued=Count("assignedthing", filter=Q(assignedthing__unassigned_at__isnull=True))
+        )

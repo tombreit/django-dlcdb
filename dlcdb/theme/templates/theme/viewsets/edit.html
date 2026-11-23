@@ -1,0 +1,31 @@
+{% extends "theme/_detail_base.html" %}
+{# SPDX-FileCopyrightText: Thomas Breitner #}
+{# SPDX-License-Identifier: EUPL-1.2 #}
+{% load i18n %}
+
+{% comment %}
+The edit page of a ModelViewSet (theme/viewsets.py); without the change
+permission the same form, disabled. A model adds its own cards in
+detail_sidebar, keeping the audit card with block.super.
+{% endcomment %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block extra_css %}{{ form.media.css }}{% endblock extra_css %}
+
+{% block detail_title %}{{ object }}{% endblock detail_title %}
+{% block detail_meta %}{{ opts.verbose_name|capfirst }}{% endblock detail_meta %}
+
+{% block detail_form_fields %}
+  {% include "theme/viewsets/_form_fields.html" %}
+{% endblock detail_form_fields %}
+
+{% block detail_readonly %}
+  {% include "theme/viewsets/_form_fields.html" %}
+{% endblock detail_readonly %}
+
+{% block detail_sidebar %}
+  {% include "theme/includes/_audit_data.html" with object=object %}
+{% endblock detail_sidebar %}
+
+{% block extra_js %}{{ form.media.js }}{% endblock extra_js %}
