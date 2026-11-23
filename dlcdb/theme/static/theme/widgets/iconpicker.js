@@ -24,7 +24,7 @@
     try {
       icons = JSON.parse((dataEl && dataEl.textContent) || '[]')
     }
-    catch (e) {
+    catch {
       icons = []
     }
 

@@ -4,7 +4,7 @@
 
 'use strict'
 
-document.addEventListener('DOMContentLoaded', function (event) {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('[defaultsorting.js] Setting the initial sort options...')
 
   const initialUrlParam = ['is_active__exact', '1']
