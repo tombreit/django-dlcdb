@@ -1,0 +1,64 @@
+{% extends "theme/_base.html" %}
+{% load i18n %}
+
+{% block title %}{% blocktranslate with room=room.number %}QR codes of room {{ room }}{% endblocktranslate %}{% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
+    <h1 class="h3 mb-0 me-auto">{% translate "Room" %} <span class="font-monospace">{{ room.number }}</span></h1>
+    {% url 'rooms:detail' room.pk as room_url %}
+    {% include "theme/includes/_back_link.html" with url=room_url label=_("Back to room") %}
+  </div>
+
+  <div class="row">
+    <div class="col-8">
+      {% if room.nickname %}<p>{{ room.nickname }}</p>{% endif %}
+      <p>
+        {% translate "Room QR code" %}
+        <br>
+        <code>{{ room.uuid }}</code>
+      </p>
+    </div>
+    <div class="col-4">
+      <img src="{% url 'core:qrcode' 'room' room.uuid %}"
+           alt="{% blocktranslate with room=room.number %}QR code for room {{ room }}{% endblocktranslate %}"
+           width="200" height="200">
+    </div>
+  </div>
+
+  <hr>
+
+  <h2 class="h4">
+    {% blocktranslate count counter=devices|length %}{{ counter }} device in this room{% plural %}{{ counter }} devices in this room{% endblocktranslate %}
+  </h2>
+
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>{% translate "Device" %}</th>
+        <th>{% translate "Description" %}</th>
+        <th>{% translate "QR code" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for device in devices %}
+        <tr>
+          {# A printout: the device stays plain. #}
+          <td>{{ device }}</td>
+          <td>
+            {% if device.manufacturer or device.series %}
+              {{ device.manufacturer|default:'' }} {{ device.series|default:'' }}
+              <br>
+            {% endif %}
+            {% translate "Inventory ID" %}: {{ device.sap_id|default:"—" }}
+            <br>
+            <code>{{ device.uuid }}</code>
+          </td>
+          <td>
+            <img src="{% url 'core:qrcode' 'device' device.uuid %}" alt="{% translate 'Device QR code' %}" width="200" height="200">
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock body %}

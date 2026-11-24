@@ -13,5 +13,6 @@ urlpatterns = [
     path("add/", views.room_add, name="add"),
     path("rename/", views.room_rename, name="rename"),
     path("<int:pk>/", views.room_detail, name="detail"),
+    path("<int:pk>/qr-codes/", views.room_qr_codes, name="qr_codes"),
     path("reconcile/<int:reconcile_id>/", views.ReconcileRoomsView.as_view(), name="reconcile"),
 ]

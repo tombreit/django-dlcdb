@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col">
         {% if room %}
-        <a href="{% url 'inventory:qr-room-printout' room.pk %}">
+        <a href="{% url 'rooms:qr_codes' room.pk %}">
             <img 
                 src="{% url 'core:qrcode' 'room' room.uuid %}" 
                 style="width: 60px; height: 60px"

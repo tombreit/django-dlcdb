@@ -112,12 +112,6 @@ def test_scanner_api_calls_need_only_the_session(su_client, device_1, room_1):
 
 
 @pytest.mark.django_db
-def test_room_qrcodes_renders(su_client, inventory_1, room_1):
-    response = su_client.get(reverse("inventory:qr-room-printout", kwargs={"pk": room_1.pk}))
-    assert response.status_code == 200
-
-
-@pytest.mark.django_db
 def test_no_active_inventory_alert(su_client, room_1):
     response = su_client.get(reverse("inventory:inventorize-room-list"))
     assert response.status_code == 200
@@ -173,7 +167,6 @@ def test_lending_report_is_not_public(client, plain_user, room_1):
 def test_inventorize_surfaces_require_can_inventorize(client, plain_user, room_1):
     client.force_login(plain_user)
 
-    assert client.get(reverse("inventory:qr-room-printout", kwargs={"pk": room_1.pk})).status_code == 403
     assert (
         client.post(
             reverse("inventory:update-qrtoggle"),

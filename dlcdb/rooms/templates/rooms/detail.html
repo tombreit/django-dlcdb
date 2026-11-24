@@ -104,8 +104,8 @@
       <img src="{% url 'core:qrcode' 'room' room.uuid %}"
            alt="{% blocktranslate with room=room.number %}QR code for room {{ room }}{% endblocktranslate %}"
            class="w-100 h-auto" style="max-width: 260px;" width="260" height="260">
-      {% if perms.core.can_inventorize %}
-        <a href="{% url 'inventory:qr-room-printout' room.pk %}" class="d-block mt-2">
+      {% if perms.core.view_device or perms.core.can_inventorize %}
+        <a href="{% url 'rooms:qr_codes' room.pk %}" class="d-block mt-2">
           <i class="bi bi-printer"></i> {% translate "QR codes of the room and its devices" %}
         </a>
       {% endif %}

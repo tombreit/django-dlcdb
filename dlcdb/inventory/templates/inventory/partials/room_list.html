@@ -8,12 +8,6 @@
             {% endif %}
         </a>
 
-        {% comment %}
-        <a href="{% url 'inventory:qr-room-printout' room.pk %}">
-            <i class="bi bi-qr-code"></i> QR codes
-        </a>
-        {% endcomment %}
-
     </td>
     <td>
         {% include 'inventory/includes/note_btn.html' with obj_type="room" obj=room %}

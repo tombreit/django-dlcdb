@@ -249,19 +249,6 @@ def search_devices(request):
     return TemplateResponse(request, template, context)
 
 
-@method_decorator(htmx_permission_required("core.can_inventorize"), name="dispatch")
-class QrCodesForRoomDetailView(DetailView):
-    model = Room
-    context_object_name = "room"
-    template_name = "inventory/room_qrcodes_detail.html"
-
-    def get_context_data(self, **kwargs):
-        devices = Inventory.objects.tenant_aware_device_objects_for_room(self.object.pk, tenants=self.request.tenants)
-        context = super().get_context_data(**kwargs)
-        context["devices"] = devices
-        return context
-
-
 @method_decorator(
     htmx_permission_required("core.can_inventorize"),
     name="dispatch",

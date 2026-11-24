@@ -122,6 +122,26 @@ class RoomFrontendTests(BaseTest):
         self.assertRedirects(response, reverse("rooms:detail", args=[room.pk]))
         self.assertEqual(room.user, self.user)
 
+    def test_qr_codes_list_the_devices_of_the_users_tenants(self):
+        self._join_default_tenant(self.user)
+        visible = self._create_device(sap_id="SAP-VISIBLE")
+        hidden = self._create_device(sap_id="SAP-HIDDEN", tenant=Tenant.objects.create(name="Other tenant"))
+        for device in (visible, hidden):
+            establish_state(InRoomRecord, device=device, room=self.server_room)
+
+        response = self.client.get(reverse("rooms:qr_codes", args=[self.server_room.pk]))
+
+        self.assertContains(response, reverse("core:qrcode", args=["room", self.server_room.uuid]))
+        self.assertContains(response, reverse("core:qrcode", args=["device", visible.uuid]))
+        self.assertNotContains(response, str(hidden.uuid))
+
+    def test_qr_codes_need_a_device_or_inventory_permission(self):
+        url = reverse("rooms:qr_codes", args=[self.server_room.pk])
+        self.client.force_login(self._core_perm_user("view_room"))
+
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertNotContains(self.client.get(reverse("rooms:detail", args=[self.server_room.pk])), url)
+
     def test_add_room_returns_to_the_form_that_opened_it_with_the_new_room(self):
         opener = "/assets/devices/7/state/recover/?next=/inventory/devices/"
         url = f"{with_next(reverse('rooms:add'), opener)}&next_field=room"

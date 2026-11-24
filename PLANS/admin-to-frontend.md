@@ -65,7 +65,7 @@ This list is also in `DECISIONS.md › Open follow-ups › Links`.
 - [ ] `theme/context_processors.py`: the hint "assign a tenant" (see above).
 - [x] `inventory/partials/device_search_htmx.html`: the device opens its frontend page (with `core.view_device`, back to the search), no longer the admin for every inventory user (2026-11-19).
 - [x] `notifications/index.html`: a subscribed device's Edit opens its frontend page (2026-11-19).
-- [x] `inventory/room_qrcodes_detail.html`: the room's QR printout lists its devices plain (2026-11-19).
+- [x] `rooms/qr_codes.html` (formerly `inventory/room_qrcodes_detail.html`): the room's QR printout lists its devices plain (2026-11-19).
 - [x] `theme/device_state.py`: nothing to do. The frontend surfaces (device page, inventory search) link frontend pages; only the admin's own device list links the record admin.
 - [x] `licenses/form_partial.html`: the licence page's staff-only "Admin view" became "View asset", the frontend device page (with `core.view_device`) (2026-11-19).
 

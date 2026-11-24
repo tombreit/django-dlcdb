@@ -20,7 +20,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.generic import TemplateView
 
-from dlcdb.core.models import Person, Record, Room
+from dlcdb.core.models import Device, Person, Record, Room
 from dlcdb.core.models.room import RoomReconcile
 from dlcdb.core.utils.htmx import htmx_permission_required, missing_permission_message
 from dlcdb.core.utils.links import linked_message, obj_link
@@ -210,6 +210,17 @@ def room_detail(request, pk):
             "persons": persons,
         },
     )
+
+
+# Whoever sees the room's devices elsewhere: the device list or the room scan page.
+@htmx_permission_required("core.view_device", "core.can_inventorize")
+def room_qr_codes(request, pk):
+    """A printout of the room's QR code and those of its devices, for labels."""
+    room = get_object_or_404(Room, pk=pk)
+    devices = Device.objects.filter(
+        active_record__room=room, deleted_at__isnull=True, tenant__in=request.tenants
+    ).select_related("manufacturer")
+    return TemplateResponse(request, "rooms/qr_codes.html", {"room": room, "devices": devices})
 
 
 @htmx_permission_required("core.change_room")
