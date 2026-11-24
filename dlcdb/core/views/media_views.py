@@ -45,18 +45,16 @@ MEDIA_PERMISSIONS = {
         lifecycle.BY_NAME["lend"].permission,
         "smallstuff.view_assignedthing",
     ),
-    settings.QRCODE_DIR: ("core.view_device", "core.view_room", "core.can_inventorize"),
     settings.SAP_LIST_COMPARISON_RESULT_FOLDER: ("core.change_inventory",),
 }
 
 # Directories whose files belong to tenant-owned objects, with their owners as
 # (model, file lookup, tenant lookup). Such a file is served only when the
 # user sees one of its owners' tenants, otherwise it is a 404 like the owner's
-# own pages. A file no such object references (a room's QR code, an attachment
-# on no record) needs only the permission; an owner without tenant still owns
-# its file, as tenant scoping never includes objects without tenant.
+# own pages. A file no such object references (an attachment on no record)
+# needs only the permission; an owner without tenant still owns its file, as
+# tenant scoping never includes objects without tenant.
 MEDIA_TENANT_OWNERS = {
-    settings.QRCODE_DIR: [("core.Device", "qrcode", "tenant")],
     "attachments": [("core.Record", "attachments__file", "device__tenant")],
     "imported_csv": [("dataexchange.ImporterList", "file", "tenant")],
 }
@@ -67,8 +65,8 @@ PUBLIC_MEDIA_DIRECTORY = "links"
 
 # Content a browser runs when the file is opened directly. An uploaded HTML or
 # SVG file must not act in the app's origin: sandbox gives it an opaque origin
-# without scripts, forms or navigation. Showing an SVG in an <img> (the QR
-# codes) is not affected.
+# without scripts, forms or navigation. Showing an SVG in an <img> is not
+# affected.
 ACTIVE_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "image/svg+xml", "text/xml", "application/xml"}
 ACTIVE_CONTENT_POLICY = "default-src 'none'; style-src 'unsafe-inline'; sandbox"
 
@@ -122,8 +120,8 @@ def _file_response(request, name):
         raise Http404 from error
 
     response = FileResponse(file)
-    # Browsers may keep it, but revalidate: QR codes and person images are
-    # overwritten in place. Last-Modified makes that a cheap 304.
+    # Browsers may keep it, but revalidate: person images are overwritten in
+    # place. Last-Modified makes that a cheap 304.
     response["Cache-Control"] = "private, no-cache"
     if response["Content-Type"].split(";")[0] in ACTIVE_CONTENT_TYPES:
         response["Content-Security-Policy"] = ACTIVE_CONTENT_POLICY

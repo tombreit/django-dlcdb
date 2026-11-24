@@ -30,7 +30,7 @@ SVG = '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg
 @pytest.fixture
 def files(media_root):
     for name, content in [
-        ("qrcode/DLCDB-1.svg", SVG),
+        ("person_images/1.svg", SVG),
         ("links/policy.pdf", "%PDF-1.4"),
         ("secret/notes.txt", "not served"),
     ]:
@@ -50,10 +50,10 @@ def _content(response):
 
 
 def test_anonymous_is_sent_to_the_login(client, files):
-    response = client.get("/media/qrcode/DLCDB-1.svg")
+    response = client.get("/media/person_images/1.svg")
 
     assert response.status_code == 302
-    assert response.url == f"{reverse('login')}?next=/media/qrcode/DLCDB-1.svg"
+    assert response.url == f"{reverse('login')}?next=/media/person_images/1.svg"
 
 
 def test_anonymous_gets_a_regulation(client, files):
@@ -66,7 +66,7 @@ def test_anonymous_gets_a_regulation(client, files):
 
 
 def test_a_logged_in_user_gets_the_file(logged_in, files):
-    response = logged_in.get("/media/qrcode/DLCDB-1.svg")
+    response = logged_in.get("/media/person_images/1.svg")
 
     assert response.status_code == 200
     assert response["Content-Type"] == "image/svg+xml"
@@ -78,11 +78,11 @@ def test_a_logged_in_user_gets_the_file(logged_in, files):
 
 
 def test_an_unchanged_file_answers_304(logged_in, files):
-    first = logged_in.get("/media/qrcode/DLCDB-1.svg")
+    first = logged_in.get("/media/person_images/1.svg")
     _content(first)
     last_modified = first["Last-Modified"]
 
-    response = logged_in.get("/media/qrcode/DLCDB-1.svg", headers={"If-Modified-Since": last_modified})
+    response = logged_in.get("/media/person_images/1.svg", headers={"If-Modified-Since": last_modified})
 
     assert response.status_code == 304
 
@@ -91,12 +91,12 @@ def test_an_unchanged_file_answers_304(logged_in, files):
     "path",
     [
         "/media/secret/notes.txt",  # not an upload directory
-        "/media/qrcode/missing.svg",
-        "/media/qrcode",
-        "/media/qrcode/",
-        "/media/qrcode/../secret/notes.txt",
-        "/media/qrcode/../../manage.py",
-        "/media/qrcode/a%00b.svg",  # the file system calls would raise ValueError
+        "/media/person_images/missing.svg",
+        "/media/person_images",
+        "/media/person_images/",
+        "/media/person_images/../secret/notes.txt",
+        "/media/person_images/../../manage.py",
+        "/media/person_images/a%00b.svg",  # the file system calls would raise ValueError
     ],
 )
 def test_anything_else_is_not_found(logged_in, files, path):
@@ -104,7 +104,7 @@ def test_anything_else_is_not_found(logged_in, files, path):
 
 
 def test_the_public_directory_cannot_be_left(client, files):
-    assert client.get("/media/links/../qrcode/DLCDB-1.svg").status_code == 404
+    assert client.get("/media/links/../person_images/1.svg").status_code == 404
 
 
 def test_a_nul_byte_in_a_public_path_is_not_found(client, files):
@@ -154,7 +154,7 @@ def test_each_guarded_directory_needs_one_of_its_permissions(client, make_user, 
 def test_the_refusal_names_the_permissions(client, make_user, files):
     client.force_login(make_user())
 
-    response = client.get("/media/qrcode/DLCDB-1.svg")
+    response = client.get("/media/person_images/1.svg")
 
     assert response.status_code == 403
     assert "You need one of these permissions:" in response.content.decode()
@@ -163,7 +163,7 @@ def test_the_refusal_names_the_permissions(client, make_user, files):
 def test_a_refused_user_gets_no_304(client, make_user, files):
     client.force_login(make_user())
 
-    response = client.get("/media/qrcode/DLCDB-1.svg", headers={"If-Modified-Since": "Fri, 01 Jan 2100 00:00:00 GMT"})
+    response = client.get("/media/person_images/1.svg", headers={"If-Modified-Since": "Fri, 01 Jan 2100 00:00:00 GMT"})
 
     assert response.status_code == 403
 
@@ -201,26 +201,6 @@ def _attachment(media_root):
     return Attachment.objects.create(title="Invoice", file="attachments/invoice.pdf")
 
 
-def test_a_device_qr_code_follows_the_device_tenant(client, make_user, media_root, tenants):
-    tenant_a, tenant_b = tenants
-    url = f"/media/{Device.objects.create(sap_id='1', tenant=tenant_a).qrcode.name}"
-
-    assert _status(client, make_user("core.view_device", tenants=[tenant_a], email="a@example.com"), url) == 200
-    assert _status(client, make_user("core.view_device", tenants=[tenant_b], email="b@example.com"), url) == 404
-
-
-def test_the_qr_code_of_a_device_without_tenant_is_not_served(client, make_user, media_root, tenants):
-    url = f"/media/{Device.objects.create(sap_id='1', tenant=None).qrcode.name}"
-
-    assert _status(client, make_user("core.view_device", tenants=tenants), url) == 404
-
-
-def test_a_room_qr_code_needs_only_the_permission(client, make_user, media_root):
-    url = f"/media/{Room.objects.create(number='1').qrcode.name}"
-
-    assert _status(client, make_user("core.view_room"), url) == 200
-
-
 def test_an_attachment_follows_the_tenant_of_its_records(client, make_user, media_root, tenants):
     tenant_a, tenant_b = tenants
     record = establish_state(
@@ -251,6 +231,15 @@ def test_an_import_file_follows_the_import_tenant(client, make_user, media_root,
     b_user = make_user("dataexchange.view_importerlist", tenants=[tenant_b], email="b@example.com")
     assert _status(client, a_user, url) == 404
     assert _status(client, b_user, url) == 200
+
+
+def test_an_import_file_without_tenant_is_not_served(client, make_user, media_root, tenants):
+    (media_root / "imported_csv").mkdir()
+    (media_root / "imported_csv" / "devices.csv").write_text("edv_id")
+    ImporterList.objects.create(file="imported_csv/devices.csv", tenant=None)
+
+    user = make_user("dataexchange.view_importerlist", tenants=tenants)
+    assert _status(client, user, "/media/imported_csv/devices.csv") == 404
 
 
 def test_every_tenant_owner_lookup_resolves():

@@ -5,7 +5,6 @@
 import uuid
 from dataclasses import dataclass
 
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import RegexValidator
 from django.db import models
@@ -16,8 +15,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
-from ..storage import OverwriteStorage
-from ..utils.qrcode import uuid2qrcode
 from .abstracts import SoftDeleteAuditBaseModel, TenantAwareModel
 from .supplier import Supplier
 
@@ -198,12 +195,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
         verbose_name="Importiert via",
         on_delete=models.SET_NULL,
     )
-    qrcode = models.FileField(
-        upload_to=f"{settings.QRCODE_DIR}/",
-        blank=True,
-        null=True,
-        storage=OverwriteStorage(),
-    )
     order_number = models.CharField(
         max_length=255,
         blank=True,
@@ -245,12 +236,6 @@ class Device(TenantAwareModel, SoftDeleteAuditBaseModel):
 
     def __str__(self):
         return self.edv_id or self.sap_id or str(self.uuid)
-
-    def save(self, *args, **kwargs):
-        if not self.qrcode:
-            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get("device"))
-            self.qrcode.save(qrcode.filename, qrcode.fileobj, save=False)
-        super().save(*args, **kwargs)
 
     @property
     def get_human_repr(self):

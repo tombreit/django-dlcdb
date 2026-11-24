@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0
 
 *Latest news top*
 
+* QR codes are drawn when a page shows them, no longer stored: delete `data/media/qrcode/` on every instance; `generate_qrcodes` is gone. The room page links the room's QR code printout, and the inventory scanner ignores foreign QR codes instead of raising an alert
 * Lending regulations are managed under *Settings › Lending regulations*, without the Staff flag, and the lending profile form can add one; a regulation a profile requires can't be deleted. `core.add_link` and `core.change_link` upload files anyone can download: give them to administrators only
 * Lending profiles have their own list under *Settings › Lending profiles*, with search and their field history; *Settings › Lending configuration* keeps the overdue reminders
 * Units and positions have their own lists, with search and sorting, under *Settings › Organizational units* and *› Positions*; a delete page that refuses names what still uses the entry

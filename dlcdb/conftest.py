@@ -31,8 +31,8 @@ from dlcdb.tenants.models import Tenant
 @pytest.fixture(autouse=True, scope="session")
 def isolated_media_root(tmp_path_factory):
     """
-    Saving a device or room writes its QR code to MEDIA_ROOT. Keep those files,
-    also the ones of objects from setUpTestData, out of the instance's data/media.
+    Keep the files tests save (uploads, imports, reports), also those of objects
+    from setUpTestData, out of the instance's data/media.
     """
     with override_settings(MEDIA_ROOT=tmp_path_factory.mktemp("media")):
         yield

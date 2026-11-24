@@ -41,11 +41,9 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
         # 'uuid',
     ]
 
-    # exclude = ['qrcode']
     readonly_fields = [
         "uuid",
         "qrcode_display",
-        # 'qrcode',
     ]
 
     fieldsets = (
@@ -75,7 +73,6 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
                     "username",
                     "uuid",
                     "qrcode_display",
-                    # 'qrcode',
                     (
                         "deleted_at",
                         "deleted_by",

@@ -115,13 +115,12 @@ class RoomFrontendTests(BaseTest):
         sorted_by_persons = self.client.get(self.index_url, {"ordering": "-persons"}, headers={"HX-Request": "true"})
         self.assertEqual(sorted_by_persons.status_code, 200)
 
-    def test_create_room_sets_audit_user_and_qrcode(self):
+    def test_create_room_sets_audit_user(self):
         response = self.client.post(reverse("rooms:add"), {"number": "F3.03", "nickname": "New room"})
 
         room = Room.objects.get(number="F3.03")
         self.assertRedirects(response, reverse("rooms:detail", args=[room.pk]))
         self.assertEqual(room.user, self.user)
-        self.assertTrue(room.qrcode)
 
     def test_add_room_returns_to_the_form_that_opened_it_with_the_new_room(self):
         opener = "/assets/devices/7/state/recover/?next=/inventory/devices/"

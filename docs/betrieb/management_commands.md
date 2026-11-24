@@ -25,7 +25,6 @@ Get help for a specific command:
 | `fix_record_modified_at_timestamps` | Repair `effective_until` of records (when each was superseded); `--repair-overstamped` also fixes values stamped after their successor |
 | `populate_devicetype_icons` | Pre-populate `DeviceType.icon` with a fitting Bootstrap Icons class |
 | `udb_sync_persons` | Run the HR API sync once (see [HR-Sync](hr-sync.md)) |
-| `generate_qrcodes` | (Re-)generate the QR codes of every device and room |
 | `mark_not_handled_assets_in_csv` | Take a CSV file and mark every row that exists in this DLCDB; reports how many rows matched; `-v 2` lists each matched row |
 | `verify_lendings` | Email lenders about lent devices without a current inventory stamp, or write a report (see [Inventur](../guides/inventur.md)) |
 | `fix_inventory_lost_lendings` | Repair `LENT` records that were erroneously turned into `LOST` records |

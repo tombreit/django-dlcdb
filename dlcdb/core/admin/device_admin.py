@@ -90,7 +90,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
         "is_legacy",
         "uuid",
         "qrcode_display",
-        # 'qrcode',
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -176,7 +175,6 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
                     "get_imported_by_link",
                     "uuid",
                     "qrcode_display",
-                    # 'qrcode',
                     (
                         "deleted_at",
                         "deleted_by",

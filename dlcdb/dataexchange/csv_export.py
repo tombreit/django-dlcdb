@@ -143,7 +143,6 @@ DEVICE_EXPORT_COLUMNS = [
 #   machine_encryption_key, backup_encryption_key -- secrets. The frontend hides
 #       them from users who may only view a device, so a view_device-gated
 #       download must not hand them over either.
-#   qrcode -- a storage path, useless off-server; uuid is the real identity.
 #   imported_by, user, deleted_by -- FK pks, and not select_related: one query
 #       per row each. The denormalized `username` and the `is_imported` flag
 #       carry the same information.

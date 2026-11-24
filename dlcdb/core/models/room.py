@@ -6,14 +6,11 @@ import uuid
 from collections import namedtuple
 from pathlib import Path
 
-from django.conf import settings
 from django.db import models
 from django.utils import dateformat, timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from ..storage import OverwriteStorage
-from ..utils.qrcode import uuid2qrcode
 from .abstracts import SoftDeleteAuditBaseModel
 
 
@@ -62,12 +59,6 @@ class Room(SoftDeleteAuditBaseModel):
         verbose_name=_("Default license room"),
         help_text=_("Room or location where the license information is stored."),
     )
-    qrcode = models.FileField(
-        upload_to=f"{settings.QRCODE_DIR}/",
-        blank=True,
-        null=True,
-        storage=OverwriteStorage(),
-    )
 
     class Meta:
         verbose_name = _("Room")
@@ -81,12 +72,8 @@ class Room(SoftDeleteAuditBaseModel):
 
     def save(self, *args, **kwargs):
         """
-        Custom save method additionally ensuring the is_auto_return_room=True unique integrity
-        and for generating a qrcode.
+        Custom save method additionally ensuring the is_auto_return_room=True unique integrity.
         """
-        if not self.qrcode:
-            qrcode = uuid2qrcode(self.uuid, infix=settings.QRCODE_INFIXES.get("room"))
-            self.qrcode.save(qrcode.filename, qrcode.fileobj, save=False)
         super().save(*args, **kwargs)
         if self.is_auto_return_room:
             # In case this room is flagged a auto return room, unflag all others.
