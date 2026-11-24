@@ -40,7 +40,8 @@ SPDX-License-Identifier: EUPL-1.2
     <div class="container pt-3">
 
         {% if messages %}
-        <ul class="list-group list-group-messages my-1">
+        {# Not on paper: printouts (the room's QR codes) are handed out or stuck on devices. #}
+        <ul class="list-group list-group-messages my-1 d-print-none">
             {% for message in messages %}
               <li id="message-{{ forloop.counter }}" class="list-group-item d-flex align-items-center gap-3 fade show">
                 <i class="bi {% if message.level_tag == 'success' %}bi-check-circle-fill{% elif message.level_tag == 'warning' %}bi-exclamation-triangle-fill{% elif message.level_tag == 'danger' %}bi-x-circle-fill{% else %}bi-info-circle-fill{% endif %} bg-{{ message.level_tag }}-subtle text-{{ message.level_tag }}-emphasis" aria-hidden="true"></i>

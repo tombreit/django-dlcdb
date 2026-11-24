@@ -7,7 +7,7 @@
   <div class="d-flex flex-wrap align-items-center gap-3 mb-4 pb-3 border-bottom">
     <h1 class="h3 mb-0 me-auto">{% translate "Room" %} <span class="font-monospace">{{ room.number }}</span></h1>
     {% url 'rooms:detail' room.pk as room_url %}
-    {% include "theme/includes/_back_link.html" with url=room_url label=_("Back to room") %}
+    {% include "theme/includes/_back_link.html" with url=room_url label=_("Back to room") extra_class="d-print-none" %}
   </div>
 
   <div class="row">
