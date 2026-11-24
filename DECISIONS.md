@@ -71,6 +71,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **Permissions are checkboxes with help lines, members the dual-pane widget** (`theme.widgets.FilteredSelectMultipleWidget`): its panes are native selects, so permissions would get their help only as tooltips.
 - **The Staff and Superuser flags and per-user permissions stay out of the frontend**: badges only; the admin, LDAP and `createsuperuser` set the flags. The admin's user and group screens stay registered.
 - **A group's members need the user permissions besides the group's**: shown with `view_customuser`, changed with `change_customuser`. Only a superuser deactivates a superuser or sets their password: no one locks out or takes over the operators.
+- **Users log in with their email address or their username**: Django's user forms ask for both; LDAP sets the username to the account name (`sAMAccountName`, `uid`) at each login. The email stays the identity (`USERNAME_FIELD`; LDAP finds the Django user by `mail`, case-insensitively). Not the username kept equal to the email, as until 2026-11: that ruled out the username login.
 - **Passwords are set by an administrator, without mail**: an initial one on *New user* or none (LDAP), a new one on the user page. Not reset links.
 - **User and group changes are journaled**, naming what changed (never a password), not with simple-history; the tenant ticks keep the tenant's history.
 - **The docs list no permissions**: the group pages are the reference, so nothing drifts from the code.
@@ -97,6 +98,7 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 
 - `htmx_permission_required` records its permissions only once the views are imported: the collector imports the URLconf first. Look permissions up by app label and codename together: proxy models (`lentrecord`, `accounts.Group` beside `auth.Group`) and the legacy `dlcdb` label repeat codenames.
 - A group's form keeps what it doesn't show: the permissions DLCDB doesn't check and the deactivated members. LDAP sets a mirrored group's members and finds it by name, so both are read-only; `AUTH_LDAP_MIRROR_GROUPS` may also be `True`.
+- A local username that is another person's LDAP account name fails that person's LDAP login (unique username). Sessions store the auth backend's path: renaming `EmailModelBackend` or `EmailLDAPBackend` logs everyone out.
 - No locking oneself out: no deactivating oneself, no removing `accounts.change_group` from, leaving or deleting one's only group that grants it.
 - `get_all_permissions()` is empty for a deactivated user, and `has_perm` caches per user object: fetch the user again after changing a group.
 - Django's radio and checkbox lists put the widget's class on their wrapper too: render them through `theme/includes/_choice_field.html`.

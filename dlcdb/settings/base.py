@@ -561,14 +561,17 @@ if env("AUTH_LDAP"):
     AUTH_LDAP_BIND_PASSWORD = env.str("AUTH_LDAP_BIND_PASSWORD")
     AUTH_LDAP_MIRROR_GROUPS = env.list("AUTH_LDAP_MIRROR_GROUPS")
 
-    # The email login first, then LDAP.
+    # Local accounts first, then LDAP.
     AUTHENTICATION_BACKENDS += ["dlcdb.accounts.ldap_backends.EmailLDAPBackend"]
 
+    # The variant also names the attribute that holds the account name.
     LDAP_VARIANT = env.str("LDAP_VARIANT", default="msad").lower()
     if LDAP_VARIANT == "msad":
         AUTH_LDAP_GROUP_TYPE = ActiveDirectoryGroupType()
+        account_name = "sAMAccountName"
     elif LDAP_VARIANT == "openldap":
         AUTH_LDAP_GROUP_TYPE = PosixGroupType()
+        account_name = "uid"
     else:
         raise ImproperlyConfigured(f"Unsupported LDAP_VARIANT={LDAP_VARIANT!r}. Expected one of: ['msad', 'openldap']")
 
@@ -576,15 +579,17 @@ if env("AUTH_LDAP"):
     AUTH_LDAP_ALWAYS_UPDATE_USER = True
     AUTH_LDAP_CACHE_TIMEOUT = 0
 
-    # Users log in with their email address, not their sAMAccountName.
-    AUTH_LDAP_USER_SEARCH = LDAPSearch(env.str("AUTH_LDAP_USERS_DN"), ldap.SCOPE_SUBTREE, "(mail=%(user)s)")
+    # Users log in with their email address or their account name.
+    AUTH_LDAP_USER_SEARCH = LDAPSearch(
+        env.str("AUTH_LDAP_USERS_DN"), ldap.SCOPE_SUBTREE, f"(|(mail=%(user)s)({account_name}=%(user)s))"
+    )
     AUTH_LDAP_GROUP_SEARCH = LDAPSearch(env.str("AUTH_LDAP_USERS_DN"), ldap.SCOPE_SUBTREE, "(objectClass=group)")
 
     AUTH_LDAP_USER_ATTR_MAP = {
         "first_name": "givenName",
         "last_name": "sn",
         "email": "mail",
-        "username": "mail",
+        "username": account_name,
     }
 
     # https://django-auth-ldap.readthedocs.io/en/latest/groups.html#limiting-access

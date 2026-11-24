@@ -41,6 +41,7 @@ print(json.dumps({
     "server_uri": getattr(base, "AUTH_LDAP_SERVER_URI", None),
     "group_type": type(getattr(base, "AUTH_LDAP_GROUP_TYPE", None)).__name__,
     "user_search": [search.base_dn, search.filterstr] if search else None,
+    "username_attr": getattr(base, "AUTH_LDAP_USER_ATTR_MAP", {}).get("username"),
     "flags": sorted(getattr(base, "AUTH_LDAP_USER_FLAGS_BY_GROUP", {})),
 }))
 """
@@ -63,7 +64,7 @@ def _settings(**env):
     return json.loads(result.stdout)
 
 
-def test_ldap_adds_its_backend_after_the_email_login():
+def test_ldap_adds_its_backend_after_the_local_login():
     loaded = _settings()
 
     assert loaded["backends"] == [
@@ -71,13 +72,18 @@ def test_ldap_adds_its_backend_after_the_email_login():
         "dlcdb.accounts.ldap_backends.EmailLDAPBackend",
     ]
     assert loaded["server_uri"] == "ldaps://dc.example.org"
-    assert loaded["user_search"] == ["cn=Users,dc=example,dc=org", "(mail=%(user)s)"]
+    assert loaded["user_search"] == ["cn=Users,dc=example,dc=org", "(|(mail=%(user)s)(sAMAccountName=%(user)s))"]
+    assert loaded["username_attr"] == "sAMAccountName"
     assert loaded["flags"] == ["is_active", "is_staff", "is_superuser"]
 
 
-def test_the_ldap_variant_picks_the_group_type():
+def test_the_ldap_variant_picks_the_group_type_and_the_account_name():
     assert _settings()["group_type"] == "ActiveDirectoryGroupType"
-    assert _settings(LDAP_VARIANT="openldap")["group_type"] == "PosixGroupType"
+
+    openldap = _settings(LDAP_VARIANT="openldap")
+    assert openldap["group_type"] == "PosixGroupType"
+    assert openldap["user_search"][1] == "(|(mail=%(user)s)(uid=%(user)s))"
+    assert openldap["username_attr"] == "uid"
 
 
 def test_an_unknown_ldap_variant_stops_the_start():
@@ -87,7 +93,7 @@ def test_an_unknown_ldap_variant_stops_the_start():
     assert "Unsupported LDAP_VARIANT='novell'" in result.stderr
 
 
-def test_without_ldap_only_the_email_login_is_configured():
+def test_without_ldap_only_the_local_login_is_configured():
     loaded = _settings(AUTH_LDAP="false")
 
     assert loaded["backends"] == ["dlcdb.accounts.auth_backends.EmailModelBackend"]

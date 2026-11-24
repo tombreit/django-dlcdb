@@ -10,7 +10,7 @@ Die Einrichtung Schritt für Schritt beschreibt [Erste Schritte](erste_schritte.
 
 ## Benutzer und Personen
 
-*Benutzer* melden sich an der DLCDB an und arbeiten mit ihr: *Einstellungen › Benutzer*. Die DLCDB verschickt dabei keine Mail; ein Anfangspasswort gibt, wer das Konto anlegt, selbst weiter. Mit [LDAP](#ldap) entstehen Konten auch beim ersten Login.
+*Benutzer* melden sich an der DLCDB an, mit E-Mail-Adresse oder Benutzername, und arbeiten mit ihr: *Einstellungen › Benutzer*. Die DLCDB verschickt dabei keine Mail; ein Anfangspasswort gibt, wer das Konto anlegt, selbst weiter. Mit [LDAP](#ldap) entstehen Konten auch beim ersten Login.
 
 *Personen* sind „Kunden“ der DLCDB, z.B. Menschen, denen ein Gerät ausgeliehen wird. Sie werden unter *Datenhaltung › Personen* gepflegt und haben nichts mit Benutzerkonten oder Berechtigungen zu tun.
 
@@ -36,6 +36,7 @@ Berechtigungen werden **Gruppen** zugewiesen, nicht einzelnen Benutzern: *Einste
 
 Ist die Anmeldung via LDAP eingeschaltet (`AUTH_LDAP` in der `.env`, siehe [Setup](../betrieb/setup.md)), steuern LDAP-Gruppen Anmeldung, Flags und Gruppen:
 
+- **Benutzername** ist der Kontoname aus LDAP: `sAMAccountName` im Active Directory, `uid` bei OpenLDAP (Univention). Angemeldet wird mit ihm oder mit der E-Mail-Adresse (`mail`).
 - **Anmelden** darf, wer Mitglied von `AUTH_LDAP_REQUIRE_GROUP`, `AUTH_LDAP_GROUP_STAFF` oder `AUTH_LDAP_GROUP_SUPERUSERS` ist.
 - **Flags:** Mitglieder von `AUTH_LDAP_GROUP_STAFF` erhalten das Staff-Flag, Mitglieder von `AUTH_LDAP_GROUP_SUPERUSERS` Staff- und Superuser-Flag. Alle Flags, auch *Aktiv*, werden bei jedem Login neu aus LDAP gesetzt: Ein deaktivierter Benutzer ist nach dem nächsten Login wieder aktiv, solange er in der LDAP-Gruppe ist.
 - **Gruppen:** Die in `AUTH_LDAP_MIRROR_GROUPS` genannten LDAP-Gruppen werden als DLCDB-Gruppen gespiegelt; ihre Mitglieder setzt LDAP bei jedem Login. Eine gespiegelte Gruppe entsteht beim ersten Login eines Mitglieds; soll sie vorher Berechtigungen und Mandanten bekommen, unter *Neue Gruppe* eine Gruppe mit exakt dem LDAP-Namen anlegen.
