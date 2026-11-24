@@ -27,6 +27,7 @@ def _get_js_vars(request):
     """
     return {
         "qrCodePrefix": settings.QRCODE_PREFIX,
+        "qrCodeInfixes": settings.QRCODE_INFIXES,
         "djangoDebug": settings.DEBUG,
         "apiBaseUrl": reverse("api-v2-root"),
         "qrToggleUrl": reverse("inventory:update-qrtoggle"),

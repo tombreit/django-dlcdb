@@ -50,6 +50,7 @@ def test_room_list_uses_theme_base(su_client, inventory_1, room_1, device_in_roo
 
     # Inventory quirks preserved
     assert 'id="js_vars"' in html and "qrToggleUrl" in html
+    assert "qrCodeInfixes" in html  # the scanner parses labels with it
     assert 'id="qr-toggle"' in html  # QR toggle in user dropdown
     assert "inventory_1" in html  # active inventory badge
     assert 'data-page="inventorize-room-list"' in html

@@ -11,42 +11,30 @@ import { getJsVars, getPage } from './ui.js'
 
 const jsVars = getJsVars()
 const djangoDebug = jsVars.djangoDebug
-const qrCodePrefix = jsVars.qrCodePrefix
 
 const videoElem = document.getElementById('qr-video')
 const camHasCamera = document.getElementById('cam-has-camera')
 const camQrResult = document.getElementById('cam-qr-result')
 const camQrResultTimestamp = document.getElementById('cam-qr-result-timestamp')
 
-function isDlcdbQrCode(qrstring) {
-  // Check if QrCode is a valid DLCDB QR code
-  // console.log("Test for isDlcdbQrCode")
-  let re = new RegExp('^DLCDB[RD][0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')
-  return re.test(qrstring)
-}
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-class QrCode {
-  constructor(qrstring) {
-    console.info('qrstring: ', qrstring)
-    if (!isDlcdbQrCode(qrstring)) return false
-
-    this.uuid = getUnprefixedUuid(qrstring)
-    this.infix = getInfix(qrstring)
-    this.raw = qrstring
-    return this
-  }
-}
-
-function getUnprefixedUuid(uuid) {
-  let re = new RegExp('^' + qrCodePrefix + '[RD]')
-  let result = uuid.replace(re, '')
-  return result
-}
-
-function getInfix(qrstring) {
-  let len_prefix = qrCodePrefix.length
-  let infix = qrstring.substring(len_prefix, len_prefix + 1)
-  return infix
+// {modelName, uuid} of a DLCDB label, null for any other QR code.
+// A label encodes QRCODE_PREFIX, the infix of its model (QRCODE_INFIXES) and
+// the object's uuid, e.g. "DLCDBD3f2c…". Any UUID version; label software may
+// print the hex digits in upper case.
+function parseQrCode(text) {
+  const modelNameByInfix = Object.fromEntries(
+    Object.entries(jsVars.qrCodeInfixes).map(([modelName, infix]) => [infix, modelName]),
+  )
+  const pattern = new RegExp(
+    '^' + escapeRegExp(jsVars.qrCodePrefix)
+    + '(' + Object.keys(modelNameByInfix).map(escapeRegExp).join('|') + ')'
+    + '([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$',
+  )
+  const match = pattern.exec(text)
+  if (!match) return null
+  return { modelName: modelNameByInfix[match[1]], uuid: match[2].toLowerCase() }
 }
 
 function setResult(label, result) {
@@ -56,22 +44,13 @@ function setResult(label, result) {
   clearTimeout(label.highlightTimeout)
   label.highlightTimeout = setTimeout(() => label.style.color = 'inherit', 100)
 
-  let QrObj = new QrCode(result.data)
-  console.log('QrObj: ', QrObj)
-  if (!QrObj) return
-
-  if (QrObj.infix === 'D') {
-    console.info('Trigger DEVICE related tasks...')
-    // manageUuid({uuid: QrObj.uuid, state: DEVICE_STATE_FOUND});
-    handleDeviceScan(QrObj.uuid)
+  // Other QR codes (a vendor's, a URL) only show in the result line above.
+  const qrCode = parseQrCode(result.data)
+  if (qrCode?.modelName === 'device') {
+    handleDeviceScan(qrCode.uuid)
   }
-  else if (QrObj.infix === 'R') {
-    console.info('Trigger ROOM related tasks...')
-    handleRoomScan(QrObj.uuid)
-  }
-  else {
-    alert(`INFIX "${QrObj.infix}" NOT GIVEN OR NOT KNOWN! Ignoring this QrCode!`)
-    return
+  else if (qrCode?.modelName === 'room') {
+    handleRoomScan(qrCode.uuid)
   }
 }
 

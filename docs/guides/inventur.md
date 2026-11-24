@@ -127,13 +127,13 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
 
 ### QR-Codes
 
-- Jedes Device hat automatisch eine eindeutige UUID
-- Für jedes Gerät wird ein QR-Code generiert, der sich aus einem Prefix, einem (optionalen) Infix und einem Suffix zusammensetzt:
+- Jedes Device und jeder Raum hat automatisch eine eindeutige UUID
+- Der QR-Code eines Devices oder Raums setzt sich aus Prefix, Infix und UUID zusammen, z.B. `DLCDBD3f2c…`:
 
-    - Prefix: `QRCODE_PREFIX` in den Settings (z.B. `DLCDB`), unterscheidet eigene von fremden QR-Codes.
-    - Suffix: UUID eines Items, in der Regel eines Devices
-    - Infix: Optionaler Identifier (String), der zwischen Prefix und Suffix steht und spezielle Items kennzeichnet, z.B. Räume.
+    - Prefix: `QRCODE_PREFIX` in den Settings (`DLCDB`), unterscheidet eigene von fremden QR-Codes. Fremde QR-Codes ignoriert der Scanner.
+    - Infix: `QRCODE_INFIXES` in den Settings, `D` für Devices, `R` für Räume
+    - UUID des Devices bzw. Raums
 
 :::{warning}
-Den Prefix im laufenden Betrieb nicht ändern: Bereits gedruckte QR-Codes erkennt der Scanner sonst nicht mehr.
+Prefix und Infixe im laufenden Betrieb nicht ändern: Bereits gedruckte QR-Codes erkennt der Scanner sonst nicht mehr.
 :::

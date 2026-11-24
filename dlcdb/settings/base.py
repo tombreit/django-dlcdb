@@ -525,11 +525,11 @@ DLCDB_BASE_URL = env("DLCDB_BASE_URL", default="http://127.0.0.1:8000")
 
 # Inventory/Scanner
 
-# QRCODE_PREFIX (string) is used to prefix all generated uuids in qr codes
-# in order to let the scanner deceide if a scanned qr code should be handled by
-# this application.
-# DO NOT CHANGE THIS PREFIX MID-PROJECT AS IT WILL BREAK THE SCANNER RECOGNIZING
-# ALREADY PRINTED QR CODES.
+# A QR code encodes QRCODE_PREFIX, the infix of its model and the object's uuid
+# (dlcdb/core/utils/qrcode.py). The scanner reads both settings (js_vars) and
+# ignores QR codes without the prefix.
+# DO NOT CHANGE THE PREFIX OR THE INFIXES MID-PROJECT: THE SCANNER WOULD NO
+# LONGER RECOGNIZE THE QR CODES ALREADY PRINTED.
 QRCODE_DIR = "qrcode"
 QRCODE_PREFIX = "DLCDB"
 QRCODE_INFIXES = {

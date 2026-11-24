@@ -6,7 +6,7 @@ SPDX-License-Identifier: CC0-1.0
 
 # QR codes: generated on request, not stored
 
-**Status:** planned 2026-11-24, no step done yet. This is a living document.
+**Status:** step 1 done (2026-11-24). This is a living document.
 
 ## Why
 
@@ -91,18 +91,19 @@ scanner (`qr_inventorize.js`) reads printed labels.
 
 ## Progress
 
-- [ ] **Step 1: the scanner honors the settings.**
-  - `core/utils/qrcode.py`: `payload(model_name, uuid)` and `svg(payload)` using
-    `make_qr(error="m")`. `uuid2qrcode` stays until step 3.
+- [x] **Step 1: the scanner honors the settings.**
   - `inventory/context_processors.py`: `qrCodeInfixes` in `js_vars`.
   - `qr_inventorize.js`:
     - a regex built from the prefix (escaped) and the infixes, any UUID
-      version, case-insensitive
+      version, hex digits in either case
     - `parseQrCode()` returns `{modelName, uuid}` or `null`
     - dispatch on `modelName`
     - ignore foreign codes, with no `alert()`
   - Update the QR section of `docs/guides/inventur.md`.
 - [ ] **Step 2: the view renders the codes, the pages use it.**
+  - `core/utils/qrcode.py`: `payload(model_name, uuid)` and `svg(payload)`
+    (`make_qr(error="m")`), used by the view and by `uuid2qrcode`, which stays
+    until step 3. Moved here from step 1, which is the scanner only.
   - `core/views/qrcode_views.py` and its route in `core/urls.py`.
   - Point every `….qrcode.url` at the view, in `_sidebar.html`,
     `rooms/detail.html`, `room_qrcodes_detail.html`, `qrvideo.html` and the
