@@ -217,8 +217,8 @@ def room_detail(request, pk):
 def room_qr_codes(request, pk):
     """A printout of the room's QR code and those of its devices, for labels."""
     room = get_object_or_404(Room, pk=pk)
-    devices = Device.objects.filter(
-        active_record__room=room, deleted_at__isnull=True, tenant__in=request.tenants
+    devices = tenant_scoped_queryset(
+        Device.objects.filter(active_record__room=room, deleted_at__isnull=True), request
     ).select_related("manufacturer")
     return TemplateResponse(request, "rooms/qr_codes.html", {"room": room, "devices": devices})
 

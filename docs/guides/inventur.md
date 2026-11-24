@@ -134,6 +134,8 @@ Die Inventur kann über einen eingebauten QR-Code-Scanner erfolgen:
     - Infix: `QRCODE_INFIXES` in den Settings, `D` für Devices, `R` für Räume
     - UUID des Devices bzw. Raums
 
+- Etiketten drucken: Raum öffnen › Karte *QR-Code* › *QR codes of the room and its devices* (Raum-Code und die Codes seiner Geräte)
+
 :::{warning}
 Prefix und Infixe im laufenden Betrieb nicht ändern: Bereits gedruckte QR-Codes erkennt der Scanner sonst nicht mehr.
 :::
