@@ -11,7 +11,7 @@ Params:
   col    — grid column class for the wrapper (default "col-12")
 {% endcomment %}
 <div class="{{ col|default:'col-12' }}">
-  {{ field.label_tag }}
+  <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
   {{ field }}
   {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
   {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}

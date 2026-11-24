@@ -16,7 +16,7 @@ Params: form, title, icon.
       <div class="col-12">{% include "theme/includes/_switch_field.html" with field=form.enabled %}</div>
       {% include "theme/includes/_field.html" with field=form.url %}
       <div class="col-12">
-        {{ form.api_token.label_tag }}
+        <label class="form-label" for="{{ form.api_token.id_for_label }}">{{ form.api_token.label }}</label>
         <div class="input-group">
           {{ form.api_token }}
           {% if form.remove_api_token %}
