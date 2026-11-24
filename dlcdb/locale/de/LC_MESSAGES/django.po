@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-24 10:43+0100\n"
+"POT-Creation-Date: 2026-11-24 18:48+0100\n"
 "PO-Revision-Date: 2026-11-19 22:23+0100\n"
 "Last-Translator: Thomas Breitner <t.breitner@mpicc.de>\n"
 "Language-Team: \n"
@@ -110,7 +110,7 @@ msgid "Email"
 msgstr "Email"
 
 #: dlcdb/accounts/filters.py:31
-#: dlcdb/accounts/templates/accounts/users/detail.html:22
+#: dlcdb/accounts/templates/accounts/users/detail.html:24
 #: dlcdb/accounts/templates/accounts/users/index.html:33
 msgid "Last login"
 msgstr "Letzter Login"
@@ -146,6 +146,18 @@ msgid ""
 msgstr ""
 "Sie würden die Berechtigung verlieren, Gruppen zu ändern. Behalten Sie sie "
 "in dieser Gruppe, oder erhalten Sie sie zuerst über eine andere Gruppe."
+
+#: dlcdb/accounts/forms.py:149
+msgid "Email or username"
+msgstr "Email oder Benutzername"
+
+#: dlcdb/accounts/forms.py:154
+msgid ""
+"Please enter a correct email address or username and password. Note that "
+"both fields may be case-sensitive."
+msgstr ""
+"Bitte Email-Adresse oder Benutzername und Passwort eingeben. Beide Felder "
+"berücksichtigen die Groß-/Kleinschreibung."
 
 #: dlcdb/accounts/group_profiles.py:45
 msgid "Daily work"
@@ -459,7 +471,7 @@ msgstr "Neuer Benutzer"
 
 #: dlcdb/accounts/templates/accounts/groups/includes/_form_fields.html:110
 #: dlcdb/accounts/templates/accounts/groups/index.html:32
-#: dlcdb/accounts/templates/accounts/users/detail.html:116
+#: dlcdb/accounts/templates/accounts/users/detail.html:118
 #: dlcdb/tenants/apps.py:12 dlcdb/tenants/models.py:59
 #: dlcdb/tenants/navigation.py:11
 #: dlcdb/tenants/templates/tenants/includes/_tenant_badge.html:11
@@ -496,8 +508,8 @@ msgstr ""
 
 #: dlcdb/accounts/templates/accounts/groups/index.html:6
 #: dlcdb/accounts/templates/accounts/groups/index.html:10
-#: dlcdb/accounts/templates/accounts/users/add.html:53
-#: dlcdb/accounts/templates/accounts/users/detail.html:96
+#: dlcdb/accounts/templates/accounts/users/add.html:54
+#: dlcdb/accounts/templates/accounts/users/detail.html:98
 #: dlcdb/accounts/templates/accounts/users/index.html:32
 #: dlcdb/tenants/admin.py:68
 msgid "Groups"
@@ -536,18 +548,18 @@ msgstr "Erneut anmelden"
 msgid "Account"
 msgstr "Konto"
 
-#: dlcdb/accounts/templates/accounts/users/add.html:37
-#: dlcdb/accounts/templates/accounts/users/detail.html:26
+#: dlcdb/accounts/templates/accounts/users/add.html:38
+#: dlcdb/accounts/templates/accounts/users/detail.html:28
 msgid "Password"
 msgstr "Passwort"
 
-#: dlcdb/accounts/templates/accounts/users/add.html:45
+#: dlcdb/accounts/templates/accounts/users/add.html:46
 msgid "Hand the initial password to the user; DLCDB sends no mail."
 msgstr ""
 "Geben Sie das Anfangspasswort selbst an den Benutzer weiter; die DLCDB "
 "verschickt keine Mail."
 
-#: dlcdb/accounts/templates/accounts/users/add.html:63
+#: dlcdb/accounts/templates/accounts/users/add.html:64
 msgid "Create user"
 msgstr "Benutzer hinzufügen"
 
@@ -557,11 +569,15 @@ msgstr "Benutzer hinzufügen"
 msgid "User"
 msgstr "Benutzer"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:23
+#: dlcdb/accounts/templates/accounts/users/detail.html:22
+msgid "Username"
+msgstr "Benutzername"
+
+#: dlcdb/accounts/templates/accounts/users/detail.html:25
 msgid "Never"
 msgstr "Nie"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:24
+#: dlcdb/accounts/templates/accounts/users/detail.html:26
 #: dlcdb/assets/filters.py:125 dlcdb/assets/filters.py:255
 #: dlcdb/assets/templates/assets/devices/includes/_sidebar.html:107
 #: dlcdb/assets/templates/assets/devices/index.html:42
@@ -578,28 +594,28 @@ msgstr "Nie"
 msgid "Created"
 msgstr "Erstellt"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:28
+#: dlcdb/accounts/templates/accounts/users/detail.html:30
 msgid "Set"
 msgstr "Gesetzt"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:29
+#: dlcdb/accounts/templates/accounts/users/detail.html:31
 msgid "None: logs in through LDAP"
 msgstr "Keines: meldet sich über LDAP an"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:30
+#: dlcdb/accounts/templates/accounts/users/detail.html:32
 msgid "None: cannot log in"
 msgstr "Keines: kann sich nicht anmelden"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:39
+#: dlcdb/accounts/templates/accounts/users/detail.html:41
 msgid "What the user may do"
 msgstr "Was der Benutzer darf"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:43
+#: dlcdb/accounts/templates/accounts/users/detail.html:45
 msgid "Nothing: a deactivated user may do nothing until reactivated."
 msgstr ""
 "Nichts: Ein deaktivierter Benutzer darf nichts, bis er reaktiviert wird."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:45
+#: dlcdb/accounts/templates/accounts/users/detail.html:47
 msgid ""
 "Every permission: a superuser needs none. Devices, too, only through the "
 "tenants of their groups."
@@ -607,36 +623,36 @@ msgstr ""
 "Jede Berechtigung: Ein Superuser braucht keine. Geräte sieht aber auch er "
 "nur über die Mandanten seiner Gruppen."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:58
+#: dlcdb/accounts/templates/accounts/users/detail.html:60
 msgid "Nothing yet: no group of the user grants a permission."
 msgstr "Noch nichts: Keine Gruppe des Benutzers vergibt eine Berechtigung."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:70
+#: dlcdb/accounts/templates/accounts/users/detail.html:72
 msgid "Access"
 msgstr "Zugang"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:73
+#: dlcdb/accounts/templates/accounts/users/detail.html:75
 #: dlcdb/accounts/templates/accounts/users/password.html:6
 #: dlcdb/accounts/templates/accounts/users/password.html:11
 msgid "Set a new password"
 msgstr "Neues Passwort setzen"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:79
+#: dlcdb/accounts/templates/accounts/users/detail.html:81
 msgid "A deactivated user can no longer log in, but keeps their history."
 msgstr ""
 "Ein deaktivierter Benutzer kann sich nicht mehr anmelden, behält aber seine "
 "Historie."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:80
+#: dlcdb/accounts/templates/accounts/users/detail.html:82
 #: dlcdb/notifications/templates/notifications/index.html:93
 msgid "Deactivate"
 msgstr "Deaktivieren"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:82
+#: dlcdb/accounts/templates/accounts/users/detail.html:84
 msgid "Reactivate"
 msgstr "Reaktivieren"
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:86
+#: dlcdb/accounts/templates/accounts/users/detail.html:88
 msgid ""
 "With LDAP, the next login activates the account again while the user is in "
 "the LDAP group: remove them there for good."
@@ -644,15 +660,15 @@ msgstr ""
 "Mit LDAP aktiviert der nächste Login das Konto wieder, solange der Benutzer "
 "in der LDAP-Gruppe ist: Dauerhaft hilft nur, ihn dort zu entfernen."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:106
+#: dlcdb/accounts/templates/accounts/users/detail.html:108
 msgid "In no group."
 msgstr "In keiner Gruppe."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:109
+#: dlcdb/accounts/templates/accounts/users/detail.html:111
 msgid "Members are set on each group's page."
 msgstr "Mitglieder werden auf der Seite der jeweiligen Gruppe gesetzt."
 
-#: dlcdb/accounts/templates/accounts/users/detail.html:123
+#: dlcdb/accounts/templates/accounts/users/detail.html:125
 msgid "None of the user's groups belongs to a tenant: they see no devices."
 msgstr ""
 "Keine Gruppe des Benutzers gehört zu einem Mandanten: Er sieht keine Geräte."
