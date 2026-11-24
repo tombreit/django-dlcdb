@@ -93,19 +93,22 @@
 
   {% include "theme/includes/_audit_data.html" with object=room %}
 
-  {% if room.qrcode %}
-    {# Collapsed by default — same native <details> mechanism as the device QR card. #}
-    <details class="card card-filled mb-3">
-      <summary class="card-header d-flex align-items-center gap-2">
-        <i class="bi bi-qr-code text-primary"></i>
-        <h2 class="h6 mb-0">{% translate "QR code" %}</h2>
-        <i class="bi bi-chevron-down card-caret"></i>
-      </summary>
-      <div class="card-body text-center">
-        <img src="{{ room.qrcode.url }}"
-             alt="{% blocktranslate with room=room.number %}QR code for room {{ room }}{% endblocktranslate %}"
-             class="w-100 h-auto" style="max-width: 260px;" width="260" height="260">
-      </div>
-    </details>
-  {% endif %}
+  {# Collapsed by default — same native <details> mechanism as the device QR card. #}
+  <details class="card card-filled mb-3">
+    <summary class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-qr-code text-primary"></i>
+      <h2 class="h6 mb-0">{% translate "QR code" %}</h2>
+      <i class="bi bi-chevron-down card-caret"></i>
+    </summary>
+    <div class="card-body text-center">
+      <img src="{% url 'core:qrcode' 'room' room.uuid %}"
+           alt="{% blocktranslate with room=room.number %}QR code for room {{ room }}{% endblocktranslate %}"
+           class="w-100 h-auto" style="max-width: 260px;" width="260" height="260">
+      {% if perms.core.can_inventorize %}
+        <a href="{% url 'inventory:qr-room-printout' room.pk %}" class="d-block mt-2">
+          <i class="bi bi-printer"></i> {% translate "QR codes of the room and its devices" %}
+        </a>
+      {% endif %}
+    </div>
+  </details>
 {% endblock detail_sidebar %}

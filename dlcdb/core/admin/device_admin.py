@@ -277,7 +277,7 @@ class DeviceAdmin(TenantScopedAdmin, SoftDeleteModelAdmin, SimpleHistoryAdmin, E
     def qrcode_display(self, obj):
         return format_html(
             '<img src="{url}" width="{width}" height="{height}">',
-            url=obj.qrcode.url,
+            url=reverse("core:qrcode", args=["device", obj.uuid]),
             width=200,
             height=200,
         )

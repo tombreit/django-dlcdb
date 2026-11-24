@@ -6,7 +6,7 @@
         {% if room %}
         <a href="{% url 'inventory:qr-room-printout' room.pk %}">
             <img 
-                src="{{ room.qrcode.url }}" 
+                src="{% url 'core:qrcode' 'room' room.uuid %}" 
                 style="width: 60px; height: 60px"
             >
         </a>

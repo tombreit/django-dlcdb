@@ -87,7 +87,7 @@ class RoomAdmin(DeviceCountMixin, SoftDeleteModelAdmin, CustomBaseModelAdmin):
 
     @admin.display(description="QR Code")
     def qrcode_display(self, obj):
-        return mark_safe(f'<img src="{obj.qrcode.url}" width="{200}" height="{200}">')
+        return format_html('<img src="{}" width="200" height="200">', reverse("core:qrcode", args=["room", obj.uuid]))
 
     @admin.display(description="Has Note?")
     def has_note(self, obj):

@@ -17,14 +17,10 @@
         </p>
     </div>
     <div class="col-4">
-        {% if room.qrcode %}
         <img 
-            src="{{ room.qrcode.url }}" 
+            src="{% url 'core:qrcode' 'room' room.uuid %}" 
             style="width: 200px; height: 200px"
         >
-        {% else %}
-            <i>Currenty no qr code set!</i>
-        {% endif %}
     </div>
 </div>
 
@@ -57,14 +53,10 @@
                 <code>{{ device.uuid }}</code>
             </td>
             <td>
-                {% if device.qrcode %}
                 <img 
-                    src="{{ device.qrcode.url }}" 
+                    src="{% url 'core:qrcode' 'device' device.uuid %}" 
                     style="width: 200px; height: 200px"
                 >
-                {% else %}
-                    <i>Currenty no qr code set!</i>
-                {% endif %}
             </td>
         </tr>
     {% endfor %}

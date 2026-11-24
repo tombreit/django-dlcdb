@@ -157,16 +157,14 @@ lending_url is set only for a viewer who may open the lending.
   </div>
 </section>
 
-{% if device.qrcode %}
-  {# Collapsed by default (no `open`); native <details> — same mechanism as the Sensitive-credentials card, no id/JS needed. #}
-  <details class="card card-filled mb-3 device-qr">
-    <summary class="card-header">
-      <i class="bi bi-qr-code"></i>
-      <h2>{% translate "QR code" %}</h2>
-      <i class="bi bi-chevron-down card-caret"></i>
-    </summary>
-    <div class="card-body text-center">
-      <img src="{{ device.qrcode.url }}" alt="{% translate 'Device QR code' %}" width="220" height="220">
-    </div>
-  </details>
-{% endif %}
+{# Collapsed by default (no `open`); native <details> — same mechanism as the Sensitive-credentials card, no id/JS needed. #}
+<details class="card card-filled mb-3 device-qr">
+  <summary class="card-header">
+    <i class="bi bi-qr-code"></i>
+    <h2>{% translate "QR code" %}</h2>
+    <i class="bi bi-chevron-down card-caret"></i>
+  </summary>
+  <div class="card-body text-center">
+    <img src="{% url 'core:qrcode' 'device' device.uuid %}" alt="{% translate 'Device QR code' %}" width="220" height="220">
+  </div>
+</details>

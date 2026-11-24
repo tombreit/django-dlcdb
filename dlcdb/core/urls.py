@@ -4,10 +4,11 @@
 
 from django.urls import path
 
-from .views import relocate_views
+from .views import qrcode_views, relocate_views
 
 app_name = "core"
 
 urlpatterns = [
     path("devices/relocate/", relocate_views.DevicesRelocateView.as_view(), name="core_devices_relocate"),
+    path("qrcode/<str:model_name>/<uuid:uuid>.svg", qrcode_views.qrcode_svg, name="qrcode"),
 ]
