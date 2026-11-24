@@ -32,9 +32,9 @@ class CustomUserAdmin(UserAdmin):
     actions = ["deactivate"]
 
     add_form = CustomUserCreationForm
-    add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email", "usable_password", "password1", "password2")}),)
-
-    # The default change form: users still have the legacy username field.
+    add_fieldsets = (
+        (None, {"classes": ("wide",), "fields": ("email", "username", "usable_password", "password1", "password2")}),
+    )
 
     def get_actions(self, request, action_location=ActionLocation.CHANGE_LIST):
         actions = super().get_actions(request, action_location)

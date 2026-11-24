@@ -19,6 +19,8 @@
     </div>
     <div class="card-body">
       <dl class="fact-list mb-0">
+        <dt>{% translate "Username" %}</dt>
+        <dd>{{ account.username }}</dd>
         <dt>{% translate "Last login" %}</dt>
         <dd>{{ account.last_login|date:"Y-m-d H:i"|default:_("Never") }}</dd>
         <dt>{% translate "Created" %}</dt>

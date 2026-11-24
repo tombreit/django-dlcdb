@@ -10,7 +10,7 @@ from django.urls import include, path, reverse_lazy
 from django.views.generic.base import RedirectView
 from django.views.i18n import set_language
 
-from dlcdb.accounts.forms import EmailAuthenticationForm
+from dlcdb.accounts.forms import LoginForm
 from dlcdb.core.views import error_views, media_views
 from dlcdb.organization import views as organization_views
 from dlcdb.theme import views as theme_views
@@ -19,7 +19,7 @@ admin.site.site_header = "DLCDB Admin"
 admin.site.site_title = "DLCDB Admin"
 admin.site.index_title = "DLCDB Administration"
 admin.site.enable_nav_sidebar = False
-admin.site.login_form = EmailAuthenticationForm
+admin.site.login_form = LoginForm
 admin.site.logout_template = "accounts/logout.html"
 
 media_prefix = settings.MEDIA_URL.lstrip("/")
@@ -57,8 +57,8 @@ urlpatterns = [
         name="login",
     ),
     path("admin/logout/", RedirectView.as_view(url=reverse_lazy("logout")), name="logout"),
-    # Ahead of the auth URLs: their login view, but with the email login form.
-    path("accounts/login/", LoginView.as_view(authentication_form=EmailAuthenticationForm)),
+    # Ahead of the auth URLs: their login view, but with the email-or-username login form.
+    path("accounts/login/", LoginView.as_view(authentication_form=LoginForm)),
     # Public: logging out with an expired session still shows the logged-out page.
     path("accounts/logout/", login_not_required(LogoutView.as_view())),
     path("accounts/", include("django.contrib.auth.urls")),

@@ -118,7 +118,9 @@ PASSWORD = "a long and unusual passphrase"
 
 
 def _new_user(client, **data):
-    return client.post(reverse("accounts:user_add"), {"email": "new@example.com", "usable_password": "true", **data})
+    return client.post(
+        reverse("accounts:user_add"), {"email": "new@example.com", "username": "new", "usable_password": "true", **data}
+    )
 
 
 def test_a_new_user_gets_an_initial_password_and_groups(client, login, ada):
@@ -129,7 +131,7 @@ def test_a_new_user_gets_an_initial_password_and_groups(client, login, ada):
 
     user = CustomUser.objects.get(email="new@example.com")
     assert response.url == reverse("accounts:user_detail", args=[user.pk])
-    assert user.username == "new@example.com"
+    assert user.username == "new"
     assert user.check_password(PASSWORD)
     assert list(user.groups.all()) == [helpdesk]
     assert JournalEntry.objects.get(event="created").body == "Groups: helpdesk"
@@ -140,7 +142,8 @@ def test_a_new_user_returns_to_the_page_that_opened_it(client, login):
     group_add = reverse("accounts:group_add")
 
     response = client.post(
-        f"{reverse('accounts:user_add')}?next={group_add}", {"email": "new@example.com", "usable_password": "false"}
+        f"{reverse('accounts:user_add')}?next={group_add}",
+        {"email": "new@example.com", "username": "new", "usable_password": "false"},
     )
 
     assert response.url == group_add

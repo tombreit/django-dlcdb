@@ -76,9 +76,8 @@ class CustomUser(AbstractUser):
     # https://docs.djangoproject.com/en/5.1/topics/auth/customizing/#django.contrib.auth.models.CustomUser.EMAIL_FIELD
     # REQUIRED_FIELDS must contain all required fields on your user model, but
     # should not contain the USERNAME_FIELD or password as these fields will
-    # always be prompted for.
-    # Add 'username' if we still want to collect it
-    REQUIRED_FIELDS = []
+    # always be prompted for. Users log in with the email or the username.
+    REQUIRED_FIELDS = ["username"]
 
     objects = CustomUserManager.from_queryset(CustomUserQuerySet)()
 

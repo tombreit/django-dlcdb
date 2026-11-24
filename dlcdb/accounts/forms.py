@@ -4,7 +4,7 @@
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import AdminUserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AdminUserCreationForm, AuthenticationForm, UsernameField
 from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -143,22 +143,29 @@ class GroupForm(forms.ModelForm):
         return (stays and _change_group() in permissions) or may_still_change_groups(self.editor, without=self.instance)
 
 
-class EmailAuthenticationForm(AuthenticationForm):
-    username = forms.EmailField(widget=forms.EmailInput(attrs={"autofocus": True, "autocomplete": "username"}))
+class LoginForm(AuthenticationForm):
+    """Users log in with their email address or their username (EmailModelBackend)."""
+
+    username = UsernameField(label=_("Email or username"), widget=forms.TextInput(attrs={"autofocus": True}))
+
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        "invalid_login": _(
+            "Please enter a correct email address or username and password. "
+            "Note that both fields may be case-sensitive."
+        ),
+    }
 
     class Media:
         js = ["accounts/js/password-toggle.js"]
 
 
 class CustomUserCreationForm(AdminUserCreationForm):
-    """
-    Users log in with their email address, so the admin asks for it instead of a
-    username. The username follows the email, as with LDAP and EmailModelBackend.
-    """
+    """Django's user creation form, with the email address users also log in with."""
 
     class Meta:
         model = CustomUser
-        fields = ("email",)
+        fields = ("email", "username")
 
     def clean_email(self):
         # Like Django's UserCreationForm.clean_username: the LDAP backend looks
@@ -168,20 +175,16 @@ class CustomUserCreationForm(AdminUserCreationForm):
             raise self.instance.unique_error_message(CustomUser, ["email"])
         return email
 
-    def save(self, commit=True):
-        self.instance.username = self.instance.email
-        return super().save(commit)
-
 
 class NewUserForm(CustomUserCreationForm):
     """
-    A new account in the frontend: email, name, an initial password or none
+    A new account in the frontend: email, username, name, an initial password or none
     (LDAP), and its groups. The groups need ``accounts.change_customuser``, like
     a group's members.
     """
 
     class Meta(CustomUserCreationForm.Meta):
-        fields = ("email", "first_name", "last_name", "groups")
+        fields = ("email", "username", "first_name", "last_name", "groups")
         widgets = {"groups": forms.CheckboxSelectMultiple}
 
     def __init__(self, *args, editor, **kwargs):

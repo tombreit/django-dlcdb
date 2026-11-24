@@ -57,17 +57,36 @@ def test_staff_login_to_admin_with_email(client, create_user, test_password, log
 
 
 @pytest.mark.django_db
-def test_staff_login_to_admin_with_username(client, create_user, test_password, login_url):
-    """Test that a staff user cannot login with their (legacy) username instead of email"""
-    user = create_user(is_staff=True, username="testuser")
+def test_login_with_username(client, test_password, login_url):
+    user = get_user_model().objects.create_user(email="ada@example.com", username="ada", password=test_password)
 
-    response = client.post(login_url, {"username": user.username, "password": test_password}, follow=False)
+    response = client.post(login_url, {"username": "ada", "password": test_password})
 
-    # Login should fail - we stay on the login page (status 200). The login form
-    # takes an email address, so a username is rejected at the field.
-    assert response.status_code == 200
-    assert "username" in response.context["form"].errors
-    assert "_auth_user_id" not in client.session
+    assert response.status_code == 302
+    assert client.session["_auth_user_id"] == str(user.pk)
+
+
+@pytest.mark.django_db
+def test_login_with_email_keeps_the_username(client, test_password, login_url):
+    user = get_user_model().objects.create_user(email="ada@example.com", username="ada", password=test_password)
+
+    client.post(login_url, {"username": "ada@example.com", "password": test_password})
+
+    user.refresh_from_db()
+    assert client.session["_auth_user_id"] == str(user.pk)
+    assert user.username == "ada"
+
+
+@pytest.mark.django_db
+def test_the_email_wins_over_a_username_that_looks_like_it(client, test_password, login_url):
+    User = get_user_model()
+    # Usernames used to follow the email: this one is Ada's former address.
+    User.objects.create_user(email="ada@example.net", username="ada@example.com", password="another-password")
+    owner = User.objects.create_user(email="ada@example.com", username="ada", password=test_password)
+
+    client.post(login_url, {"username": "ada@example.com", "password": test_password})
+
+    assert client.session["_auth_user_id"] == str(owner.pk)
 
 
 @pytest.mark.django_db
@@ -91,42 +110,6 @@ def test_login_page_offers_a_show_password_button(client, create_user, login_url
     assert "data-password-toggle" in content
     assert 'aria-controls="id_password"' in content
     assert "accounts/js/password-toggle.js" in content
-
-
-@pytest.mark.django_db
-def test_legacy_user_login_with_email_and_username_migration(client, test_password, login_url):
-    """
-    Test that a legacy user with username can login with email and username is migrated.
-    This basically also tests our custom accounts.auth_backends.EmailModelBackend.
-    """
-
-    # 1. Create a "legacy" user with different username and email
-    User = get_user_model()
-    username = "legacy_username"
-    email = "legacy_user@example.com"
-
-    # Create user the traditional way with separate username/email
-    user = User.objects.create_user(username=username, email=email, password=test_password, is_staff=True)
-    print(f"{user.username=}, {user.email=}")
-
-    # 2. Attempt login with email
-    response = client.post(login_url, {"username": email, "password": test_password}, follow=False)
-
-    # 3. Verify login succeeds
-    assert response.status_code == 302
-    assert response.url == reverse("dashboard")
-    assert "_auth_user_id" in client.session
-
-    # 4. Verify username field has been updated to email
-    # Refresh user from database
-    user.refresh_from_db()
-
-    assert user.username == email  # Username should be updated to email after login
-
-    # Additional verification - can still login with updated username
-    client.logout()
-    response = client.post(login_url, {"username": user.username, "password": test_password})
-    assert response.status_code == 302
 
 
 def test_auth_backends_import_without_django_auth_ldap(monkeypatch):
