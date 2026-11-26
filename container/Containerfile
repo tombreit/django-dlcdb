@@ -51,8 +51,11 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 # Production requirements plus gunicorn, not the dev requirements: pytest,
-# ruff, pre-commit and friends have no business in a shipped image.
-COPY requirements/container.txt /stagepython/requirements.txt
+# ruff, pre-commit and friends have no business in a shipped image. A
+# development image takes them (debug toolbar, django-extensions) with
+# `--build-arg REQUIREMENTS=dev` (docs/betrieb/setup.md).
+ARG REQUIREMENTS=container
+COPY requirements/${REQUIREMENTS}.txt /stagepython/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /stagepython

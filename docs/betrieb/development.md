@@ -2,7 +2,8 @@
 
 How the dependencies are pinned, and how a release is checked, tried and made.
 Setting up a development environment is described in [Setup › Development
-setup](setup.md#development-setup).
+setup](setup.md#development-setup), with podman only in [Setup › Container ›
+Try it and develop](setup.md#try-it-and-develop).
 
 ## Dependencies and lock files
 
@@ -18,7 +19,7 @@ every package, including the indirect ones, for one combination of extras:
 |---|---|---|
 | `prod.txt` | `docs` | source installations without LDAP, GitHub Pages, the release workflow |
 | `prod-ldap.txt` | `docs`, `ldap` | source installations with LDAP (`requirements.txt` links here) |
-| `dev.txt` | `docs`, `dev` | development |
+| `dev.txt` | `docs`, `dev` | development, also in a container (`--build-arg REQUIREMENTS=dev`) |
 | `container.txt` | `docs`, `ldap`, `container` | the container image |
 
 `make requirements` compiles all four and **upgrades every pin**. To add or

@@ -20,21 +20,49 @@ runner](#task-runner).
   ~~~~    ~~~|   U      |~~
 ```
 
-### Try it
+### Try it and develop
+
+From a checkout, with rootless podman:
 
 ```bash
 podman build \
-    --tag dlcdb  \
+    --build-arg REQUIREMENTS=dev \
+    --tag dlcdb-dev \
     --file container/Containerfile .
 
+# The anonymous volumes keep the image's frontend assets and handbook,
+# which the mounted checkout would hide.
 podman run \
-    --name podman-dlcdb \
-    --tty --interactive \
+    --name dlcdb-dev \
+    --rm --tty --interactive \
     --publish 8000:8000 \
-    --volume ./data:/app/data \
-    --rm \
-    dlcdb dev
+    --env DJANGO_DEBUG=true \
+    --volume .:/app \
+    --volume /app/dlcdb/static/dist \
+    --volume /app/dlcdb/theme/static/theme/dist \
+    --volume /app/dlcdb/inventory/static/inventory/dist \
+    --volume /app/run/docs/html \
+    dlcdb-dev dev
+
+# In a second terminal: the task runner and a first user
+podman run \
+    --name dlcdb-dev-huey \
+    --rm --detach \
+    --volume .:/app \
+    dlcdb-dev huey
+podman exec -it dlcdb-dev python3 manage.py createsuperuser
 ```
+
+Then open <http://127.0.0.1:8000>. The image carries the development
+requirements (debug toolbar, django-extensions, pytest). The checkout is mounted
+at `/app`: the development server reloads on every code change, the data lives
+in the checkout's `data/`, and an `.env` there is read (`--env` wins). Rootless
+podman maps the container's root to your user, so whatever the containers write
+into the checkout stays yours.
+
+* The task runner does not reload: `podman restart dlcdb-dev-huey` after changing
+  a task; its log: `podman logs --follow dlcdb-dev-huey`.
+* After changing SCSS, JavaScript or the requirements, build the image again.
 
 The image builds the frontend assets, ships the compiled message catalog and
 bundles the rendered handbook, so **running it needs neither npm nor gettext
@@ -47,16 +75,21 @@ The same image serves production (see `container/Containerfile` and
 |---|---|
 | `dev` | `migrate`, `collectstatic`, then Django's development server |
 | `serve` | `migrate`, `collectstatic`, then gunicorn (the default `CMD`) |
-| `huey` | the background task runner, nothing else; waits until `serve` has applied all migrations |
+| `huey` | the background task runner, nothing else; waits until `serve` or `dev` has applied all migrations |
 
 Anything else is executed verbatim, e.g. `podman run --rm dlcdb python3 manage.py createsuperuser`.
 
 ### Production
 
-Mount an `.env` and the data directory, and run the task runner as a second
-container against the same volume:
+Build the image without the development requirements, mount an `.env` and the
+data directory, and run the task runner as a second container against the same
+volume:
 
 ```bash
+podman build \
+    --tag dlcdb \
+    --file container/Containerfile .
+
 podman run \
     --name dlcdb \
     --detach \
@@ -79,6 +112,10 @@ honoured as environment variables.
 
 Put a TLS-terminating reverse proxy in front of gunicorn; it is not meant to
 face the internet directly.
+
+For a rootless pod run by systemd, with backups and the Apache vhost, see
+[depp](https://github.com/tombreit/depp): it deploys a container image with a
+kube file.
 
 ### Update
 

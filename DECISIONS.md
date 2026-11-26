@@ -35,6 +35,8 @@ Decisions someone might otherwise revisit, with the alternatives turned down; pi
 - **The raw `static/**` stays in the wheel**: the favicon view and the icon picker read it, and without it a stray `collectstatic` would break every page.
 - **The version lives in `dlcdb.__version__`**, not in git tags via setuptools-scm (a checkout would lose it). The release logic is two shell scripts, not nox, invoke or a bump tool.
 - **`dlcdb_init` writes the instance's `wsgi.py`**: Apache's `SetEnv` doesn't reach `os.environ`.
+- **Development in a container is two `podman run` commands on the mounted checkout** (`dev`, `huey`), from the image built with `--build-arg REQUIREMENTS=dev`: anonymous volumes keep the image's assets and handbook, which the checkout hides, and `--env DJANGO_DEBUG=true` replaces an `.env`. No kube or compose file, no npm on the host. A rootless production pod is depp's job: its `deploy/kube.yaml` runs the code baked into the image, not a mounted checkout.
+- **The debug toolbar shows whenever DEBUG is on** (`SHOW_TOOLBAR_CALLBACK`): podman forwards a published port from the host's address, which is not in `INTERNAL_IPS`. Not `--network host`.
 - **The singleton settings pages share one view function, `theme.settings_page`, and `theme/_settings_base.html`**: the title is the model's `verbose_name`, saving needs the model's change permission. Not a spec dataclass like master data (only the form differs), not django-solo.
 - **Without the change permission a settings page shows the same form, disabled**, not the label/value list of Tenants (raw values for choices, people and files).
 - **A settings save writes one journal entry naming the changed fields, never their values** (the HR token); not simple-history on the singletons.

@@ -22,7 +22,8 @@ prepare_app() {
 development_server() {
     echo "Prepare django app and start development server on port ${INTERNAL_SERVER_PORT}..."
     prepare_app
-    python3 manage.py runserver 0.0.0.0:"${1}"
+    # exec: runserver, not this shell, is PID 1 and stops on `podman stop`.
+    exec python3 manage.py runserver 0.0.0.0:"${1}"
 }
 
 production_server() {

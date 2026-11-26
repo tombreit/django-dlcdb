@@ -501,7 +501,12 @@ HUEY = {
 }
 
 if DEBUG:
-    DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
+    DEBUG_TOOLBAR_CONFIG = {
+        "ROOT_TAG_EXTRA_ATTRS": "hx-preserve",
+        # Whenever DEBUG is on: rootless podman forwards requests from the host's
+        # address, which is not in INTERNAL_IPS.
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
     MIGRATION_MODULES = {"debug_toolbar": None}
     SHELL_PLUS = "ipython"
 
